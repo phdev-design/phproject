@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-HK" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>透視KeeTa罷工風波：互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a thematic, top-down narrative dashboard. It starts with a hero section to set the context, followed by a sticky navigation for quick access to four distinct thematic sections: 1) Core Conflict (presenting driver vs. platform views interactively), 2) Pay Deconstructed (visualizing wage comparisons), 3) Market Battle (showing market share shifts and competitive strategy), and 4) Systemic Dilemma (explaining the "fake self-employment" issue). This structure transforms the linear report into an exploratory experience, allowing users to dive into specific facets of the issue, which is more engaging and user-friendly for dissecting a multi-faceted problem. -->
+    <!-- Visualization & Content Choices: 
+        - Driver Grievances (Table 1): Report Info -> Goal: Organize/Compare opposing views -> Viz: Interactive Cards (HTML/CSS/JS) instead of a static table. Interaction: Click to reveal details for each side. Justification: Enhances engagement and focus.
+        - Pay Comparison (Table 3): Report Info -> Goal: Compare quantitative data -> Viz: Bar Chart (Chart.js). Interaction: Tooltips on hover. Justification: Clear, direct comparison of numeric values.
+        - Market Share (Table 4): Report Info -> Goal: Show change over time -> Viz: Two Donut Charts (Chart.js). Interaction: Button to toggle data view on the second chart (GMV vs. Order Volume). Justification: Effectively shows proportional shifts in the market.
+        - KeeTa Strategy: Report Info -> Goal: Explain a process -> Viz: HTML/CSS Flow Diagram. Justification: Simple, responsive, and avoids external libraries for a clear process visualization.
+        - Systemic Issues: Report Info -> Goal: Inform on a complex topic -> Viz: Styled text blocks with icons (HTML/CSS). Justification: Improves readability for text-heavy content.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #D97706; 
+            border-bottom-color: #D97706;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .details-content.open {
+            max-height: 500px; /* Adjust as needed */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-[#F8F7F4] text-gray-800">
+
+    <!-- Header -->
+    <header class="text-center py-12 md:py-16 bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl md:text-5xl font-bold text-gray-800 mb-2">透視KeeTa罷工風波</h1>
+            <p class="text-lg md:text-xl text-amber-700">低薪困局下的外賣員之聲：互動式分析報告</p>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="sticky top-0 bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center items-center h-16">
+                <div class="flex space-x-6 md:space-x-10 text-sm md:text-base">
+                    <a href="#conflict" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">風暴核心</a>
+                    <a href="#pay" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">薪酬解構</a>
+                    <a href="#market" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">市場角力</a>
+                    <a href="#dilemma" class="nav-link font-medium text-gray-600 border-b-2 border-transparent pb-1">制度困境</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <!-- Section 1: The Core Conflict -->
+        <section id="conflict" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">風暴核心：訴求與回應</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-10">
+                這次勞資糾紛的核心，源於外賣員對工作條件和薪酬的深層不滿，與平台方基於營運效率的考量形成了鮮明對比。本部分將互動地展示雙方在關鍵議題上的主要立場，讓您清晰地看到矛盾的焦點所在。點擊各項爭議，即可深入了解雙方的具體說法。
+            </p>
+            <div id="grievances-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Grievance cards will be injected here by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Section 2: Pay Deconstructed -->
+        <section id="pay" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">薪酬解構：數字背後的真相</h2>
+             <p class="text-center max-w-3xl mx-auto text-gray-600 mb-10">
+                薪酬是本次風波的導火線。雖然平台的平均時薪看似高於法定最低工資，但複雜的獎金制度和浮動的單價，使得外賣員的實際收入充滿不確定性。本圖表比較了各平台每張訂單的平均收入與外賣員的期望，揭示了看似合理的數字背後可能隱藏的「獎金陷阱」與收入差距。
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <div class="chart-container mx-auto h-80 md:h-96">
+                    <canvas id="payComparisonChart"></canvas>
+                </div>
+                 <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <p class="text-sm text-amber-800">KeeTa平均訂單價值</p>
+                        <p class="text-2xl font-bold text-amber-900">~HK$102</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <p class="text-sm text-red-800">其他平台平均訂單價值</p>
+                        <p class="text-2xl font-bold text-red-900">~HK$175</p>
+                    </div>
+                     <div class="bg-gray-100 p-4 rounded-lg">
+                        <p class="text-sm text-gray-600">香港法定最低工資</p>
+                        <p class="text-2xl font-bold text-gray-800">HK$40/小時</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Market Battle -->
+        <section id="market" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">市場角力：低價策略的代價</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-10">
+                KeeTa以極具侵略性的低價策略迅速攻佔香港市場，引發了行業巨變。這種策略在為消費者帶來短期優惠的同時，也對整個外賣生態系統——包括競爭對手、餐廳甚至其自身的外賣員——構成了巨大壓力。這裡我們將可視化市場份額的劇烈轉變，並拆解其商業策略的傳導路徑。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="font-bold text-xl text-center mb-4">香港外賣市場份額變化</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div class="chart-container h-64 md:h-72">
+                            <canvas id="marketShareBeforeChart"></canvas>
+                             <p class="text-center text-sm mt-2 text-gray-500">KeeTa進場前 (2023年初)</p>
+                        </div>
+                        <div class="chart-container h-64 md:h-72">
+                            <canvas id="marketShareAfterChart"></canvas>
+                            <p id="marketShareAfterLabel" class="text-center text-sm mt-2 text-gray-500">KeeTa進場後 (2023年12月, GMV)</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button id="toggleMarketShare" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition">
+                            切換至「訂單量」視角
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="font-bold text-xl text-center mb-4">KeeTa的市場擴張策略路徑</h3>
+                    <div class="space-y-4">
+                         <div class="flex items-center">
+                            <div class="bg-amber-100 text-amber-800 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">1</div>
+                            <p><strong>巨額補貼吸客：</strong>以「10億激賞」及低價「一人飯堂」吸引用戶。</p>
+                        </div>
+                         <div class="flex justify-center h-8">
+                            <div class="w-px bg-gray-300"></div>
+                        </div>
+                         <div class="flex items-center">
+                            <div class="bg-red-100 text-red-800 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">2</div>
+                            <p><strong>擠壓競爭對手：</strong>激烈的價格競爭加速了Deliveroo退出香港市場。</p>
+                        </div>
+                         <div class="flex justify-center h-8">
+                            <div class="w-px bg-gray-300"></div>
+                        </div>
+                         <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-800 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">3</div>
+                            <p><strong>鞏固市場力量：</strong>在對手退出後，向合作餐廳提高佣金抽成。</p>
+                        </div>
+                        <div class="flex justify-center h-8">
+                            <div class="w-px bg-gray-300"></div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="bg-gray-200 text-gray-800 rounded-full h-10 w-10 flex items-center justify-center font-bold mr-4">4</div>
+                            <p><strong>成本壓力傳導：</strong>為維持盈利及價格優勢，將成本壓力轉嫁至外賣員。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Systemic Dilemma -->
+        <section id="dilemma" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4">制度困境：「假自僱」的枷鎖</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-600 mb-10">
+                罷工訴求的深層次根源，指向了香港零工經濟中普遍存在的「假自僱」問題。在現行法律框架下，外賣員被定義為「獨立承包商」，而非「僱員」，這使他們失去了多項基本的勞工權益保障。這種模式是平台降低成本、轉嫁風險的關鍵，也是外賣員陷入困境的結構性原因。
+            </p>
+            <div class="bg-white p-8 rounded-xl shadow-lg max-w-4xl mx-auto">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="font-bold text-xl mb-4">外賣員失去的法定保障</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">●</span><div><strong>最低工資保障：</strong>按單計酬模式可能導致有效時薪低於法定標準。</div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">●</span><div><strong>有薪假期與休息日：</strong>沒有帶薪年假、法定假日薪酬。</div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">●</span><div><strong>強積金 (MPF)：</strong>平台無需為外賣員作強制性公積金供款。</div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">●</span><div><strong>工傷保障與疾病津貼：</strong>缺乏完善的工傷賠償和有薪病假。</div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">●</span><div><strong>僱傭合約保護：</strong>缺乏解僱補償（如遣散費、長期服務金）。</div></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-4">政府與法律的模糊地帶</h3>
+                        <p class="text-gray-700 mb-4">香港法院對零工工人的僱傭身份判決不一，造成法律上的不確定性。勞工及福利局承認問題存在，但認為「一刀切」立法未必合適，憂慮會削弱行業的「彈性」。</p>
+                        <p class="text-gray-700">當局目前仍在進行研究，預計短期內不會修例。這種政策上的滯後，使得外賣員在法律保障缺失的灰色地帶中，持續處於弱勢地位。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16 py-8">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>本互動報告根據公開資料製作，旨在促進對零工經濟議題的理解與討論。</p>
+            <p class="mt-2 text-gray-400">資料來源：香港KeeTa外賣員風波綜合報告</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const grievancesData = [
+        {
+            title: '薪酬過低',
+            icon: '💰',
+            courier: '指控平台降低單價，要求恢復每單最少HK$50，實際收入有時「低過最低工資」。',
+            keeta: '稱單價未能全面反映收入，總收入包含補貼、獎賞及貼士，並否認存在極低價訂單。'
+        },
+        {
+            title: '「搶單」制度',
+            icon: '🏃',
+            courier: '要求取消，指其製造不必要競爭，引致超速等危險駕駛行為，且部分地區佔多數訂單。',
+            keeta: '稱「搶單」僅為輔助，佔整體訂單比例小，承諾會改善設計確保安全。'
+        },
+        {
+            title: '「K GO」優先派單',
+            icon: '👑',
+            courier: '批評此機制形同「變相減薪」，對未能達標或不願參與的外賣員不公。',
+            keeta: '稱旨在提高投入時間長的「合作夥伴」收入，指其整體收入能增加逾2成。'
+        },
+        {
+            title: '不合理「孖單」',
+            icon: '🔄',
+            courier: '抱怨平台常派發不順路的「孖單」，導致送餐延誤，因而失去「準時獎金」。',
+            keeta: '承諾會持續優化路線規劃演算法，並檢視異常情況。'
+        },
+        {
+            title: '安全問題',
+            icon: '⚠️',
+            courier: '感到「冇晒安全」，送餐時限壓力巨大，迫使他們冒險趕時間。',
+            keeta: '強調將安全放首位，已增加安全教學並會逐步改善產品設計。'
+        },
+        {
+            title: '假自僱問題',
+            icon: '📄',
+            courier: '要求訂立書面僱傭合約，以杜絕「假自僱」，獲取應有的勞工保障。',
+            keeta: '迴避直接回應僱傭關係，僅強調外賣員為重要的「合作夥伴」，並設有溝通渠道。'
+        }
+    ];
+
+    const grievancesContainer = document.getElementById('grievances-container');
+    grievancesData.forEach(item => {
+        const cardHTML = `
+            <div class="card bg-white rounded-xl shadow-md overflow-hidden cursor-pointer">
+                <div class="p-5 grievance-header">
+                    <h3 class="font-bold text-lg flex items-center">
+                        <span class="text-2xl mr-3">${item.icon}</span>
+                        ${item.title}
+                    </h3>
+                </div>
+                <div class="details-content bg-gray-50 px-5">
+                    <div class="py-4 border-t border-gray-200">
+                        <strong class="text-blue-600">外賣員訴求：</strong>
+                        <p class="text-sm mt-1">${item.courier}</p>
+                    </div>
+                    <div class="py-4 border-t border-gray-200">
+                        <strong class="text-green-600">Keeta回應：</strong>
+                         <p class="text-sm mt-1">${item.keeta}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        grievancesContainer.innerHTML += cardHTML;
+    });
+
+    document.querySelectorAll('.grievance-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            content.classList.toggle('open');
+        });
+    });
+
+    const payCtx = document.getElementById('payComparisonChart').getContext('2d');
+    new Chart(payCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Foodpanda (實測)', 'KeeTa (實測)', 'Deliveroo (實測)', '外賣員訴求'],
+            datasets: [{
+                label: '平均每單收入 (HK$)',
+                data: [25.92, 33.00, 36.20, 50.00],
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.6)',
+                    'rgba(245, 158, 11, 0.6)',
+                    'rgba(16, 185, 129, 0.6)',
+                    'rgba(59, 130, 246, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(59, 130, 246, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: '港元 (HK$)' }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: '各平台每單平均收入與外賣員訴求比較' }
+            }
+        }
+    });
+
+    const marketShareBeforeCtx = document.getElementById('marketShareBeforeChart').getContext('2d');
+    new Chart(marketShareBeforeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Foodpanda', 'Deliveroo'],
+            datasets: [{
+                data: [70, 30],
+                backgroundColor: ['#EF4444', '#10B981'],
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: false }
+            }
+        }
+    });
+
+    const marketShareAfterData = {
+        gmv: {
+            labels: ['Foodpanda', 'Deliveroo', 'KeeTa'],
+            data: [54, 25, 21],
+            colors: ['#EF4444', '#10B981', '#F59E0B']
+        },
+        orders: {
+            labels: ['其他平台合計', 'KeeTa'],
+            data: [63, 37],
+            colors: ['#6B7280', '#F59E0B']
+        }
+    };
+
+    let currentMarketShareView = 'gmv';
+    const marketShareAfterCtx = document.getElementById('marketShareAfterChart').getContext('2d');
+    const marketShareAfterChart = new Chart(marketShareAfterCtx, {
+        type: 'doughnut',
+        data: {
+            labels: marketShareAfterData.gmv.labels,
+            datasets: [{
+                data: marketShareAfterData.gmv.data,
+                backgroundColor: marketShareAfterData.gmv.colors,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: { display: false }
+            }
+        }
+    });
+    
+    const toggleButton = document.getElementById('toggleMarketShare');
+    const afterLabel = document.getElementById('marketShareAfterLabel');
+
+    toggleButton.addEventListener('click', () => {
+        if (currentMarketShareView === 'gmv') {
+            currentMarketShareView = 'orders';
+            marketShareAfterChart.data.labels = marketShareAfterData.orders.labels;
+            marketShareAfterChart.data.datasets[0].data = marketShareAfterData.orders.data;
+            marketShareAfterChart.data.datasets[0].backgroundColor = marketShareAfterData.orders.colors;
+            toggleButton.textContent = '切換至「GMV」視角';
+            afterLabel.textContent = 'KeeTa進場後 (2023年12月, 外賣訂單量)';
+        } else {
+            currentMarketShareView = 'gmv';
+            marketShareAfterChart.data.labels = marketShareAfterData.gmv.labels;
+            marketShareAfterChart.data.datasets[0].data = marketShareAfterData.gmv.data;
+            marketShareAfterChart.data.datasets[0].backgroundColor = marketShareAfterData.gmv.colors;
+            toggleButton.textContent = '切換至「訂單量」視角';
+            afterLabel.textContent = 'KeeTa進場後 (2023年12月, GMV)';
+        }
+        marketShareAfterChart.update();
+    });
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.onscroll = () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === current) {
+                link.classList.add('active');
+            }
+        });
+    };
+});
+</script>
+
+</body>
+</html>
