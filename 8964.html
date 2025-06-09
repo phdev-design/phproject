@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：「八九六四」的記憶與傳承</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .flow-line::after {
+            content: '→';
+            font-size: 2rem;
+            line-height: 2.5rem;
+            color: #FF5A5F;
+            margin: 0 1rem;
+        }
+        .flow-line:last-child::after {
+            content: '';
+        }
+    </style>
+</head>
+<body class="bg-[#0B3954] text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="relative text-center mb-12 text-white">
+            <div class="absolute top-0 right-0">
+                <button id="lang-switcher" class="bg-[#FF5A5F] text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300"></button>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black mb-2 text-[#BFD7EA]" data-lang-key="mainTitle"></h1>
+            <p class="text-xl md:text-2xl text-[#BFD7EA]" data-lang-key="subtitle"></p>
+            <p class="text-sm mt-4 text-gray-400" data-lang-key="headerNote"></p>
+        </header>
+
+        <main class="space-y-8">
+
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section1Title"></h2>
+                <p class="mb-6 text-gray-600" data-lang-key="section1Intro"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-lg text-center">
+                        <div class="text-6xl font-black text-[#C81D25]" data-lang-key="inflationRate"></div>
+                        <div class="mt-2 text-lg font-bold text-[#0B3954]" data-lang-key="inflationTitle"></div>
+                        <p class="text-sm text-gray-500 mt-1" data-lang-key="inflationDesc"></p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-lg text-center">
+                         <div class="text-6xl font-black text-[#C81D25]" data-lang-key="corruptionTerm"></div>
+                        <div class="mt-2 text-lg font-bold text-[#0B3954]" data-lang-key="corruptionTitle"></div>
+                        <p class="text-sm text-gray-500 mt-1" data-lang-key="corruptionDesc"></p>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-xl font-bold mb-4 text-[#0B3954]" data-lang-key="catalystTitle"></h3>
+                    <p class="text-gray-600" data-lang-key="catalystDesc"></p>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section2Title"></h2>
+                <p class="mb-6 text-gray-600" data-lang-key="section2Intro"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-bold mb-4 text-[#0B3954]" data-lang-key="demandsTitle"></h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" id="student-demands">
+                        </ul>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold mb-4 text-[#0B3954]" data-lang-key="goddessTitle"></h3>
+                        <div class="text-8xl text-[#087E8B]">🏛️</div>
+                        <p class="mt-4 text-gray-600" data-lang-key="goddessDesc"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section3Title"></h2>
+                <p class="mb-6 text-gray-600" data-lang-key="section3Intro"></p>
+                <div class="chart-container">
+                    <canvas id="deathTollChart"></canvas>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="chartCaption"></p>
+            </section>
+            
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section4Title"></h2>
+                 <p class="mb-6 text-gray-600" data-lang-key="section4Intro"></p>
+                <div class="bg-[#0B3954] text-white rounded-lg p-8 text-center my-6 shadow-lg">
+                    <div class="text-6xl mb-4">🧍</div>
+                    <p class="text-xl font-bold" data-lang-key="tankManQuote"></p>
+                </div>
+                <p class="text-gray-600" data-lang-key="tankManDesc"></p>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section5Title"></h2>
+                <p class="mb-6 text-gray-600" data-lang-key="section5Intro"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                    <div class="border-4 border-red-200 rounded-lg p-4 bg-red-50">
+                        <h3 class="text-2xl font-bold text-center text-[#C81D25] mb-4" data-lang-key="amnesiaTitle"></h3>
+                        <ul class="space-y-3" id="amnesia-points">
+                        </ul>
+                    </div>
+                    <div class="border-4 border-blue-200 rounded-lg p-4 bg-blue-50">
+                        <h3 class="text-2xl font-bold text-center text-[#087E8B] mb-4" data-lang-key="mothersTitle"></h3>
+                        <p class="mb-4 text-gray-700" data-lang-key="mothersIntro"></p>
+                        <ul class="space-y-3 font-bold text-[#0B3954]" id="mothers-demands">
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="text-3xl font-bold mb-4 text-[#087E8B] border-b-4 border-[#FF5A5F] pb-2" data-lang-key="section6Title"></h2>
+                <p class="mb-6 text-gray-600" data-lang-key="section6Intro"></p>
+                <div class="my-8">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#0B3954]" data-lang-key="memorialShiftTitle"></h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center text-center">
+                        <div class="flow-line p-4">
+                            <div class="text-5xl">🇨🇳</div>
+                            <div class="font-bold mt-2" data-lang-key="beijingTitle"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="beijingDesc"></div>
+                        </div>
+                        <div class="flow-line p-4">
+                            <div class="text-5xl">🇭🇰</div>
+                            <div class="font-bold mt-2" data-lang-key="hkTitle"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="hkDesc"></div>
+                        </div>
+                        <div class="flow-line p-4">
+                            <div class="text-5xl">🇹🇼🌏</div>
+                            <div class="font-bold mt-2" data-lang-key="globalTitle"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="globalDesc"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 text-center bg-blue-50 p-6 rounded-lg">
+                    <p class="text-lg text-gray-700" data-lang-key="memorialStats"></p>
+                    <p class="text-sm text-gray-500 mt-2" data-lang-key="memorialSource"></p>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center mt-12 text-gray-400 text-xs">
+            <p data-lang-key="footerNote1"></p>
+            <p data-lang-key="footerNote2"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- Language Data Store ---
+        const translations = {
+            "zh-Hant": {
+                langButton: "Switch to English",
+                mainTitle: "「八九六四」",
+                subtitle: "中國歷史的傷痕與全球華人的記憶傳承",
+                headerNote: "這份資訊圖表基於一份關於1989年天安門事件的深入研究報告，旨在視覺化呈現該事件的背景、過程、後果以及至今仍在持續的記憶之戰。",
+                section1Title: "I. 不滿的種子：1989年前夕的中國",
+                section1Intro: "1989年的抗議並非憑空而起，而是十年改革開放所累積的社會經濟矛盾與政治改革停滯共同作用的結果。普遍的民怨為一場大規模運動埋下了伏筆。",
+                inflationRate: "近30%",
+                inflationTitle: "惡性通貨膨脹",
+                inflationDesc: "1988年官方公佈的通膨率為18.5%，但民間感受遠超於此，部分城市物價上漲超過30%，引發全國性搶購潮。",
+                corruptionTerm: "官倒",
+                corruptionTitle: "腐敗橫行",
+                corruptionDesc: "官員利用雙軌制價格差異倒賣物資牟取暴利，成為民怨最集中的焦點。「反腐敗、反官倒」是運動的核心口號之一。",
+                catalystTitle: "催化劑：胡耀邦逝世",
+                catalystDesc: "1989年4月15日，被視為黨內開明派的前總書記胡耀邦逝世，成為點燃民眾情緒的導火線。最初的悼念活動迅速演變為一場要求政治改革的大規模民主運動。",
+                section2Title: "II. 民主的吶喊：運動的興起",
+                section2Intro: "從悼念到請願，從罷課到絕食，學生們的行動獲得了社會各界的廣泛支持，匯聚成一場遍及全國的民主浪潮。其訴求清晰地指向一個更開放、更公正的中國。",
+                demandsTitle: "學生的七項核心要求",
+                studentDemands: [
+                    "公正評價胡耀邦功過",
+                    "為86年學運平反",
+                    "開放報禁，實現新聞自由",
+                    "增加教育經費，改善知識份子待遇",
+                    "公佈「四二零慘案」真相",
+                    "反對腐敗，懲治官倒",
+                    "如實報導學生愛國民主運動"
+                ],
+                goddessTitle: "運動的象徵：民主女神",
+                goddessDesc: "5月30日，由中央美術學院等校學生創作的「民主女神」像在天安門廣場豎立，與天安門城樓上的毛澤東像遙遙相對，成為運動追求自由與民主的鮮明標誌。",
+                section3Title: "III. 悲劇的發生：鎮壓與傷亡",
+                section3Intro: "在長達數週的對峙後，政府的態度趨於強硬。5月20日宣布戒嚴，最終在6月3日晚至4日凌晨，動用軍隊進行武力清場，導致了震驚中外的流血事件。關於死亡人數，至今沒有一個統一、可信的官方說法，各方估計數字差異巨大，這本身就反映了事件的敏感性與資訊封鎖的嚴重程度。",
+                chartCaption: "不同來源對「六四事件」平民死亡人數的估計存在巨大差異",
+                section4Title: "IV. 抵抗的象徵：「坦克人」",
+                section4Intro: "6月5日，在軍隊清場後的北京長安街上，一名身分不明的男子隻身阻擋整列坦克前進。這一幕被攝影師記錄下來，成為20世紀最經典的影像之一，象徵著個人勇氣在國家暴力面前的非凡抵抗。",
+                tankManQuote: "「我們不知道他的名字，我們不知道他的命運，但我們永遠記得他以血肉之軀對抗國家機器的勇氣。」",
+                tankManDesc: "「坦克人」的真實身分與下落至今成謎，中國政府對此諱莫如深，相關影像在中國大陸被嚴格審查，但在世界範圍內，他已成為反抗暴政的不朽象徵。",
+                section5Title: "V. 記憶的戰爭：遺忘 vs. 銘記",
+                section5Intro: "事件之後，一場無聲的戰爭打響了。一方是國家機器的強力審查與系統性遺忘工程，另一方則是海內外公民社會鍥而不捨的真相追尋與記憶保存。",
+                amnesiaTitle: "國家級失憶工程",
+                amnesiaPoints: [
+                    "<li><span class='flex items-start'><span class='text-2xl mr-3'>🔒</span> <div><span class='font-bold'>防火長城：</span>嚴密封鎖「64」、「8964」、「天安門屠殺」等數百個敏感詞及相關圖像。</div></span></li>",
+                    "<li><span class='flex items-start'><span class='text-2xl mr-3'>🚫</span> <div><span class='font-bold'>禁止紀念：</span>任何在中國大陸的公開紀念活動均被嚴厲禁止，相關人士會被警告、拘留甚至判刑。</div></span></li>",
+                    "<li><span class='flex items-start'><span class='text-2xl mr-3'>🤫</span> <div><span class='font-bold'>官方敘事：</span>將事件定性為「反革命暴亂」或「政治風波」，並壓制一切不同聲音。</div></span></li>"
+                ],
+                mothersTitle: "公民的堅持：「天安門母親」",
+                mothersIntro: "由遇難者家屬組成的「天安門母親」群體，數十年如一日，在巨大的政治壓力下堅持記錄遇難者名單，並每年發表公開信，提出三項訴求：",
+                mothersDemands: [
+                    "<li class='flex items-center'><span class='text-2xl mr-3'>真相</span> (Truth)</li>",
+                    "<li class='flex items-center'><span class='text-2xl mr-3'>賠償</span> (Compensation)</li>",
+                    "<li class='flex items-center'><span class='text-2xl mr-3'>問責</span> (Accountability)</li>"
+                ],
+                section6Title: "VI. 火種的傳遞：全球紀念浪潮",
+                section6Intro: "當記憶在中國大陸被禁絕，保存歷史的責任便落在了全球華人及國際社會的肩上。紀念的火種從香港維多利亞公園，傳遞到台灣，再到世界各地，形成了一場對抗遺忘的全球接力。",
+                memorialShiftTitle: "紀念活動地理重心的變遷",
+                beijingTitle: "北京 (1989)",
+                beijingDesc: "運動發源地",
+                hkTitle: "香港 (1990-2019)",
+                hkDesc: "維園燭光，良心燈塔",
+                globalTitle: "台灣及全球 (2020-)",
+                globalDesc: "承擔記憶，捍衛價值",
+                memorialStats: "近年來，全球有超過<span class='font-bold text-2xl text-[#FF5A5F]'> 10 </span>個國家、<span class='font-bold text-2xl text-[#FF5A5F]'>40 </span>個城市舉辦了<span class='font-bold text-2xl text-[#FF5A5F]'> 77 </span>場相關紀念活動。這些數字證明，記憶從未熄滅。",
+                memorialSource: "（資料來源：綜合人權組織報告）",
+                footerNote1: "此資訊圖表根據公開研究報告製作，旨在促進對歷史事件的了解。所有資料和內容均來自所引用的源報告。",
+                footerNote2: "視覺化設計與開發遵循「無 SVG」、「無 Mermaid JS」原則，使用 Chart.js (Canvas) 與 Tailwind CSS 建構。",
+                chartTitle: "各方對「六四」平民死亡人數的估計",
+                chartLabel: "估計平民死亡人數",
+                chartXAxis: "人數 (對數座標)",
+                chartSources: [
+                    '中國官方 (袁木, 6月6日)', '中國官方 (陳希同報告)', '天安門母親 (已確認)', '中國紅十字會 (傳聞)', '英國解密檔案 (2017)', '美國解密檔案 (2014)'
+                ]
+            },
+            "en": {
+                langButton: "切換為繁體中文",
+                mainTitle: "June 4th, 1989",
+                subtitle: "A Scar in Chinese History and the Legacy of Memory for Global Chinese Communities",
+                headerNote: "This infographic, based on an in-depth research report on the 1989 Tiananmen Square incident, aims to visualize the event's background, process, consequences, and the ongoing war over memory.",
+                section1Title: "I. Seeds of Discontent: China on the Eve of 1989",
+                section1Intro: "The 1989 protests did not arise from a vacuum. They were the result of accumulated socioeconomic contradictions from a decade of reform and opening-up, combined with stagnant political reform. Widespread public grievances set the stage for a large-scale movement.",
+                inflationRate: "Nearly 30%",
+                inflationTitle: "Hyperinflation",
+                inflationDesc: "The official inflation rate in 1988 was 18.5%, but public perception was much higher. Prices in some cities rose by over 30%, triggering nationwide panic buying.",
+                corruptionTerm: "Guan Dao",
+                corruptionTitle: "Rampant Corruption",
+                corruptionDesc: "Officials exploited the dual-track price system to resell goods for huge profits, becoming the primary focus of public anger. 'Anti-corruption, anti-Guandao' was a core slogan of the movement.",
+                catalystTitle: "The Catalyst: Death of Hu Yaobang",
+                catalystDesc: "On April 15, 1989, the death of former General Secretary Hu Yaobang, seen as a liberal figure within the Party, became the spark that ignited public sentiment. Initial mourning activities quickly evolved into a large-scale pro-democracy movement demanding political reform.",
+                section2Title: "II. The Cry for Democracy: The Rise of the Movement",
+                section2Intro: "From mourning to petitions, from class boycotts to hunger strikes, the students' actions gained broad support from all sectors of society, converging into a nationwide democratic wave. Their demands clearly pointed towards a more open and just China.",
+                demandsTitle: "The Students' Seven Core Demands",
+                studentDemands: [
+                    "Re-evaluate the merits and demerits of Hu Yaobang.",
+                    "Rehabilitate the 1986 student movement.",
+                    "Allow press freedom.",
+                    "Increase funding for education and improve intellectuals' salaries.",
+                    "Disclose the truth of the April 20th incident.",
+                    "Oppose corruption and punish 'Guandao'.",
+                    "Provide truthful coverage of the patriotic and democratic student movement."
+                ],
+                goddessTitle: "Symbol of the Movement: Goddess of Democracy",
+                goddessDesc: "On May 30, the 'Goddess of Democracy' statue, created by students from the Central Academy of Fine Arts and other schools, was erected in Tiananmen Square, facing the portrait of Mao Zedong. It became a powerful symbol of the movement's pursuit of freedom and democracy.",
+                section3Title: "III. The Tragedy: Crackdown and Casualties",
+                section3Intro: "After weeks of standoff, the government's stance hardened. Martial law was declared on May 20. Finally, on the night of June 3rd to the morning of June 4th, the army was deployed to clear the square by force, leading to a bloody incident that shocked the world. To this day, there is no single, credible official figure for the death toll, and estimates from various sources vary widely, reflecting the event's sensitivity and the severity of the information blockade.",
+                chartCaption: "Estimates of civilian deaths in the June 4th Incident vary greatly by source",
+                section4Title: "IV. Symbol of Resistance: 'Tank Man'",
+                section4Intro: "On June 5, on Beijing's Chang'an Avenue after the military crackdown, an unidentified man single-handedly blocked a column of tanks. This moment, captured by photographers, became one of the most iconic images of the 20th century, symbolizing extraordinary individual courage against state violence.",
+                tankManQuote: "\"We don't know his name, we don't know his fate, but we will forever remember his courage in confronting the state machine with his own flesh and blood.\"",
+                tankManDesc: "The true identity and fate of 'Tank Man' remain a mystery. The Chinese government remains silent on the matter, and related images are strictly censored in mainland China. Globally, however, he has become an immortal symbol of resistance against tyranny.",
+                section5Title: "V. The War of Memory: Forgetting vs. Remembering",
+                section5Intro: "In the aftermath, a silent war began. On one side, the state apparatus enforced powerful censorship and a systematic project of forgetting. On the other, civil society at home and abroad relentlessly pursued the truth and preserved the memory.",
+                amnesiaTitle: "State-Engineered Amnesia",
+                amnesiaPoints: [
+                     "<li><span class='flex items-start'><span class='text-2xl mr-3'>🔒</span> <div><span class='font-bold'>Great Firewall:</span> Strictly blocks hundreds of sensitive terms like '64', '8964', 'Tiananmen Massacre' and related images.</div></span></li>",
+                     "<li><span class='flex items-start'><span class='text-2xl mr-3'>🚫</span> <div><span class='font-bold'>Ban on Commemoration:</span> Any public commemoration in mainland China is strictly prohibited. Individuals involved are warned, detained, or even sentenced.</div></span></li>",
+                     "<li><span class='flex items-start'><span class='text-2xl mr-3'>🤫</span> <div><span class='font-bold'>Official Narrative:</span> The event is officially termed a 'counter-revolutionary riot' or 'political turmoil', suppressing all dissenting voices.</div></span></li>"
+                ],
+                mothersTitle: "Citizens' Perseverance: 'Tiananmen Mothers'",
+                mothersIntro: "The 'Tiananmen Mothers', a group of victims' families, have persisted for decades under immense political pressure, documenting a list of the deceased and issuing an annual open letter with three demands:",
+                mothersDemands: [
+                   "<li class='flex items-center'><span class='text-2xl mr-3'>Truth</span></li>",
+                   "<li class='flex items-center'><span class='text-2xl mr-3'>Compensation</span></li>",
+                   "<li class='flex items-center'><span class='text-2xl mr-3'>Accountability</span></li>"
+                ],
+                section6Title: "VI. Passing the Torch: The Global Commemoration Wave",
+                section6Intro: "As memory is suppressed in mainland China, the responsibility of preserving history falls to the global Chinese diaspora and the international community. The torch of commemoration has been passed from Victoria Park in Hong Kong to Taiwan and around the world, forming a global relay against forgetting.",
+                memorialShiftTitle: "The Shifting Geographical Center of Commemoration",
+                beijingTitle: "Beijing (1989)",
+                beijingDesc: "Origin of the movement",
+                hkTitle: "Hong Kong (1990-2019)",
+                hkDesc: "Victoria Park candlelight, a beacon of conscience",
+                globalTitle: "Taiwan & Global (2020-)",
+                globalDesc: "Upholding memory, defending values",
+                memorialStats: "In recent years, over <span class='font-bold text-2xl text-[#FF5A5F]'>77</span> related commemorative events have been held in more than <span class='font-bold text-2xl text-[#FF5A5F]'>40</span> cities across <span class='font-bold text-2xl text-[#FF5A5F]'>10</span> countries. These numbers prove that the memory has never been extinguished.",
+                memorialSource: "(Source: Compiled from human rights organization reports)",
+                footerNote1: "This infographic was created based on public research reports to promote understanding of the historical event. All data and content are from the cited source reports.",
+                footerNote2: "Visualization design and development were done using Chart.js (Canvas) and Tailwind CSS, following 'No SVG' and 'No Mermaid JS' principles.",
+                chartTitle: "Estimates of Civilian Deaths in the June 4th Incident by Various Sources",
+                chartLabel: "Estimated Civilian Deaths",
+                chartXAxis: "Number of People (Logarithmic Scale)",
+                chartSources: [
+                    'Chinese Official (Yuan Mu, June 6)', 'Chinese Official (Chen Xitong Report)', 'Tiananmen Mothers (Confirmed)', 'Chinese Red Cross (Rumored)', 'Declassified UK Files (2017)', 'Declassified US Files (2014)'
+                ]
+            }
+        };
+
+        // --- Core Logic ---
+        let currentLang = 'zh-Hant';
+        let deathTollChart = null; // To hold the chart instance
+
+        const langSwitcher = document.getElementById('lang-switcher');
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            
+            // Update all elements with data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Handle lists
+            const demandsList = document.getElementById('student-demands');
+            demandsList.innerHTML = '';
+            translations[lang].studentDemands.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                demandsList.appendChild(li);
+            });
+
+            const amnesiaList = document.getElementById('amnesia-points');
+            amnesiaList.innerHTML = translations[lang].amnesiaPoints.join('');
+
+            const mothersList = document.getElementById('mothers-demands');
+            mothersList.innerHTML = translations[lang].mothersDemands.join('');
+            
+            // Update lang switcher button text
+            langSwitcher.textContent = translations[lang].langButton;
+            
+            // Re-render the chart with the new language
+            renderChart(lang);
+        }
+
+        langSwitcher.addEventListener('click', () => {
+            const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+            changeLanguage(newLang);
+        });
+        
+        // --- Chart Logic ---
+        function wrapLabel(label, maxLength) {
+            if (label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        function renderChart(lang) {
+            if (deathTollChart) {
+                deathTollChart.destroy();
+            }
+
+            const ctx = document.getElementById('deathTollChart').getContext('2d');
+            const chartData = {
+                labels: translations[lang].chartSources.map(label => wrapLabel(label, 16)),
+                datasets: [{
+                    label: translations[lang].chartLabel,
+                    data: [277, 200, 202, 2600, 10000, 10454],
+                    backgroundColor: ['#BFD7EA', '#087E8B', '#0B3954', '#FF5A5F', '#C81D25', '#a1141a'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            };
+
+            deathTollChart = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: { display: true, text: translations[lang].chartXAxis, color: '#333' },
+                            ticks: { color: '#333' }
+                        },
+                        y: { ticks: { color: '#333' } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: translations[lang].chartTitle,
+                            font: { size: 18, weight: 'bold' },
+                            color: '#0B3954',
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                title: (tooltipItems) => {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initial Load
+        changeLanguage('zh-Hant');
+
+    </script>
+</body>
+</html>
