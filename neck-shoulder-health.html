@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">肩頸健康全解析：告別痠痛，重拾活力</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+            transition: background-color 0.3s;
+        }
+        .lang-en {
+             font-family: 'Poppins', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 45vh;
+            }
+        }
+        .pyramid-layer {
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+            margin-bottom: -1px;
+        }
+        .text-shadow-custom {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+        /* Language switcher styles */
+        .lang-switcher button.active {
+            background-color: #003f5c;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Language Switcher -->
+    <div class="lang-switcher fixed top-4 right-4 z-50 flex space-x-1 rounded-lg bg-white/50 backdrop-blur-sm p-1 shadow-md">
+        <button id="lang-zh" class="px-3 py-1 text-sm rounded-md transition-colors duration-300">繁體中文</button>
+        <button id="lang-en" class="px-3 py-1 text-sm rounded-md transition-colors duration-300">English</button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12 mt-12 md:mt-0">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003f5c] mb-4 text-shadow-custom" data-lang-key="mainTitle">解鎖肩頸健康</h1>
+            <p class="text-xl text-[#374c80]" data-lang-key="mainSubtitle">告別惱人痠痛，重拾無負擔的活力生活</p>
+        </header>
+
+        <main>
+            <!-- Prevalence Section -->
+            <section id="prevalence" class="mb-16">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center md:text-left">
+                        <h2 class="text-3xl font-bold text-[#bc5090] mb-4" data-lang-key="prevalenceTitle">這不是少數人的困擾</h2>
+                        <p class="text-lg mb-4" data-lang-key="prevalenceDesc">肩頸疼痛是現代極為普遍的「文明病」。根據統計，台灣民眾的肩頸痠痛盛行率驚人，這意味著超過一半的人都可能正承受著這種不適，它嚴重影響著我們的日常活動、工作效率與睡眠品質。</p>
+                        <div class="text-center">
+                            <span class="text-7xl font-bold text-[#ef5675]">55%</span>
+                            <p class="text-xl text-[#7a5195] font-semibold" data-lang-key="prevalenceRate">的驚人盛行率</p>
+                        </div>
+                    </div>
+                    <div class="chart-container h-64 md:h-auto">
+                        <canvas id="prevalenceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Causes Section -->
+            <section id="causes" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-lang-key="causesTitle">為何是我？肩頸痛的頭號公敵</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+                        <div class="text-5xl mb-4">📱</div>
+                        <h3 class="text-2xl font-bold text-[#7a5195] mb-2" data-lang-key="cause1Title">日常的磨損</h3>
+                        <p class="flex-grow" data-lang-key="cause1Desc">長時間低頭滑手機、使用電腦姿勢不良的「科技頸」，以及不合適的枕頭與睡姿，都是日積月累傷害肩頸的元兇。這些看似無害的習慣，正悄悄地為肩頸帶來沉重負擔。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+                        <div class="text-5xl mb-4">🩺</div>
+                        <h3 class="text-2xl font-bold text-[#7a5195] mb-2" data-lang-key="cause2Title">潛在的病理</h3>
+                        <p class="flex-grow" data-lang-key="cause2Desc">有時疼痛不只是肌肉疲勞。頸椎間盤突出、關節退化長骨刺，或是肌筋膜疼痛症候群等，都可能是造成頑固疼痛的結構性問題，需要專業的診斷與治療。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center text-center">
+                        <div class="text-5xl mb-4">🤯</div>
+                        <h3 class="text-2xl font-bold text-[#7a5195] mb-2" data-lang-key="cause3Title">無形的壓力</h3>
+                        <p class="flex-grow" data-lang-key="cause3Desc">心理壓力、焦慮和憂鬱會讓我們的身體不自覺地緊繃，尤其是肩頸肌肉。這種身心連結的反應，會加劇疼痛，形成「壓力大、肩頸更痛」的惡性循環。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8 grid grid-cols-1 md:grid-cols-5 gap-6 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-2xl font-bold text-[#003f5c] mb-3" data-lang-key="techNeckTitle">「科技頸」的代價</h3>
+                        <p data-lang-key="techNeckDesc">頭部是我們身體的「保齡球」，姿勢只要稍微不對，頸椎承受的壓力就會倍增。當我們低頭看手機時，頸椎承受的重量可能高達27公斤，相當於一個8歲孩童的體重！長期下來，會加速頸椎退化。</p>
+                    </div>
+                    <div class="md:col-span-3 flex justify-center items-end space-x-2 md:space-x-4 text-center">
+                         <!-- Static illustrations, text content is not translated -->
+                        <div class="flex flex-col items-center"> <div class="relative w-16 h-32 border-2 border-[#7a5195] rounded-t-full bg-[#e0e7ff]"> <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#7a5195]"></div> </div> <p class="font-bold mt-2 text-[#7a5195]">0°</p> <p class="font-semibold text-sm">5 kg</p> </div>
+                        <div class="flex flex-col items-center"> <div class="relative w-16 h-32 border-2 border-[#bc5090] rounded-t-full bg-[#fce7f3] transform -rotate-[15deg] origin-bottom-left"> <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#bc5090]"></div> </div> <p class="font-bold mt-2 text-[#bc5090]">15°</p> <p class="font-semibold text-sm">12 kg</p> </div>
+                        <div class="flex flex-col items-center"> <div class="relative w-16 h-32 border-2 border-[#ef5675] rounded-t-full bg-[#fee2e2] transform -rotate-[30deg] origin-bottom-left"> <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#ef5675]"></div> </div> <p class="font-bold mt-2 text-[#ef5675]">30°</p> <p class="font-semibold text-sm">18 kg</p> </div>
+                        <div class="flex flex-col items-center"> <div class="relative w-16 h-32 border-2 border-[#ff764a] rounded-t-full bg-[#fff7ed] transform -rotate-[45deg] origin-bottom-left"> <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#ff764a]"></div> </div> <p class="font-bold mt-2 text-[#ff764a]">45°</p> <p class="font-semibold text-sm">22 kg</p> </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Symptoms Section -->
+            <section id="symptoms" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-lang-key="symptomsTitle">身體的求救信號：讀懂疼痛警訊</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-[#374c80] mb-4" data-lang-key="symptomsCommonTitle">常見症狀</h3>
+                        <p class="mb-6" data-lang-key="symptomsCommonDesc">您的肩頸是否正透過以下方式向您求救？這些是問題初期的普遍表徵。</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-3xl mr-4">💥</span><div><strong class="text-lg" data-lang-key="symptom1Title">疼痛</strong><p data-lang-key="symptom1Desc">從持續的鈍痛、痠脹到陣發性的刺痛或燒灼感。</p></div></li>
+                            <li class="flex items-start"><span class="text-3xl mr-4">🧱</span><div><strong class="text-lg" data-lang-key="symptom2Title">僵硬</strong><p data-lang-key="symptom2Desc">感覺肌肉「發緊」，轉頭、低頭或仰頭時活動受限。</p></div></li>
+                            <li class="flex items-start"><span class="text-3xl mr-4">⚡️</span><div><strong class="text-lg" data-lang-key="symptom3Title">放射痛或麻木感</strong><p data-lang-key="symptom3Desc">疼痛或麻刺感從頸部延伸至手臂、甚至手指，這是神經受壓的典型信號。</p></div></li>
+                            <li class="flex items-start"><span class="text-3xl mr-4">🤕</span><div><strong class="text-lg" data-lang-key="symptom4Title">頭痛頭暈</strong><p data-lang-key="symptom4Desc">頸源性頭痛、頭暈，甚至耳鳴、視力模糊，都可能與頸椎問題有關。</p></div></li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-[#ef5675] text-white rounded-2xl shadow-lg p-6">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">🚨</span> <span data-lang-key="redFlagTitle">紅旗警訊！</span></h3>
+                        <p class="mb-6" data-lang-key="redFlagDesc">若出現以下任何症狀，請勿延誤，應立即尋求專業醫療協助！</p>
+                        <ul class="space-y-3 font-semibold">
+                            <li class="flex items-center"><span class="text-2xl mr-3">🚗</span> <span data-lang-key="redFlag1">嚴重外傷後（如車禍）的劇烈頸痛。</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">💪</span> <span data-lang-key="redFlag2">手臂或腿部持續加重的無力感、行走困難。</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">🚻</span> <span data-lang-key="redFlag3">出現大小便失禁或排尿困難。</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">🤒</span> <span data-lang-key="redFlag4">頸痛伴隨高燒、不明原因體重下降。</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3">💥</span> <span data-lang-key="redFlag5">疼痛劇烈且持續不減，甚至影響睡眠。</span></li>
+                            <li class="flex items-center"><span class="text-2xl mr-3"> Lump </span> <span data-lang-key="redFlag6">頸部出現不明腫塊。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Treatment Section -->
+            <section id="treatment" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-lang-key="treatmentTitle">緩解之道：您的個人化止痛工具箱</h2>
+                <p class="text-center max-w-3xl mx-auto mb-10" data-lang-key="treatmentDesc">面對肩頸疼痛，我們可以採取階梯式的管理策略。從簡單的自我護理開始，若效果不彰，再逐步尋求專業協助。關鍵是找到最適合自己狀況的方法。</p>
+                <div class="w-full max-w-2xl mx-auto flex flex-col items-center">
+                    <div class="pyramid-layer w-full md:w-11/12 h-24 bg-[#ff764a] text-white flex items-center justify-center text-center p-2 shadow-md">
+                        <div>
+                            <h4 class="font-bold text-xl" data-lang-key="pyramid4Title">手術治療</h4>
+                            <p class="text-sm hidden md:block" data-lang-key="pyramid4Desc">最後選擇，針對嚴重神經壓迫或結構不穩等問題。</p>
+                        </div>
+                    </div>
+                    <div class="pyramid-layer w-full md:w-10/12 h-24 bg-[#ef5675] text-white flex items-center justify-center text-center p-2 shadow-md">
+                        <div>
+                            <h4 class="font-bold text-xl" data-lang-key="pyramid3Title">專業醫療處置</h4>
+                            <p class="text-sm hidden md:block" data-lang-key="pyramid3Desc">物理治療、藥物、注射治療、整脊、針灸等。</p>
+                        </div>
+                    </div>
+                    <div class="pyramid-layer w-full md:w-9/12 h-24 bg-[#bc5090] text-white flex items-center justify-center text-center p-2 shadow-md">
+                         <div>
+                            <h4 class="font-bold text-xl" data-lang-key="pyramid2Title">居家積極管理</h4>
+                            <p class="text-sm hidden md:block" data-lang-key="pyramid2Desc">溫和伸展、調整工作環境、選擇合適枕頭。</p>
+                        </div>
+                    </div>
+                    <div class="pyramid-layer w-full md:w-8/12 h-24 bg-[#7a5195] text-white flex items-center justify-center text-center p-2 shadow-md">
+                        <div>
+                            <h4 class="font-bold text-xl" data-lang-key="pyramid1Title">初期自我護理</h4>
+                            <p class="text-sm hidden md:block" data-lang-key="pyramid1Desc">適度休息、急性期冰敷、慢性期熱敷、非處方止痛藥。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Prevention Section -->
+            <section id="prevention" class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-lang-key="preventionTitle">建立終身防護網：預防勝於治療</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col">
+                        <div class="text-5xl mb-4">🚶‍♀️</div>
+                        <h3 class="text-xl font-bold text-[#374c80] mb-2" data-lang-key="prevent1Title">維持良好姿勢</h3>
+                        <p class="flex-grow" data-lang-key="prevent1Desc">時刻提醒自己「耳朵對齊肩膀」，避免烏龜頸與駝背。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col">
+                        <div class="text-5xl mb-4">🖥️</div>
+                        <h3 class="text-xl font-bold text-[#374c80] mb-2" data-lang-key="prevent2Title">優化工作環境</h3>
+                        <p class="flex-grow" data-lang-key="prevent2Desc">調整螢幕與座椅高度，確保手肘、膝蓋呈90度，肩頸放鬆。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col">
+                        <div class="text-5xl mb-4">💪</div>
+                        <h3 class="text-xl font-bold text-[#374c80] mb-2" data-lang-key="prevent3Title">規律強化與伸展</h3>
+                        <p class="flex-grow" data-lang-key="prevent3Desc">多做縮下巴、夾背、擴胸運動，強化背肌、伸展胸肌。</p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-lg p-6 text-center flex flex-col">
+                        <div class="text-5xl mb-4">🧘</div>
+                        <h3 class="text-xl font-bold text-[#374c80] mb-2" data-lang-key="prevent4Title">管理身心壓力</h3>
+                        <p class="flex-grow" data-lang-key="prevent4Desc">透過運動、冥想、深呼吸等方式為心靈減負，放鬆肌肉。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="text-center mt-12 pt-8 border-t border-gray-300">
+            <p class="text-gray-600" data-lang-key="footerDisclaimer">本資訊圖表內容僅供參考，不能取代專業醫療建議。若有持續性或嚴重症狀，請諮詢醫師或物理治療師。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footerCopyright">© 2025 肩頸健康資訊站. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Store all translations in an object.
+        const translations = {
+            'zh': {
+                pageTitle: '肩頸健康全解析：告別痠痛，重拾活力',
+                mainTitle: '解鎖肩頸健康',
+                mainSubtitle: '告別惱人痠痛，重拾無負擔的活力生活',
+                prevalenceTitle: '這不是少數人的困擾',
+                prevalenceDesc: '肩頸疼痛是現代極為普遍的「文明病」。根據統計，台灣民眾的肩頸痠痛盛行率驚人，這意味著超過一半的人都可能正承受著這種不適，它嚴重影響著我們的日常活動、工作效率與睡眠品質。',
+                prevalenceRate: '的驚人盛行率',
+                causesTitle: '為何是我？肩頸痛的頭號公敵',
+                cause1Title: '日常的磨損',
+                cause1Desc: '長時間低頭滑手機、使用電腦姿勢不良的「科技頸」，以及不合適的枕頭與睡姿，都是日積月累傷害肩頸的元兇。這些看似無害的習慣，正悄悄地為肩頸帶來沉重負擔。',
+                cause2Title: '潛在的病理',
+                cause2Desc: '有時疼痛不只是肌肉疲勞。頸椎間盤突出、關節退化長骨刺，或是肌筋膜疼痛症候群等，都可能是造成頑固疼痛的結構性問題，需要專業的診斷與治療。',
+                cause3Title: '無形的壓力',
+                cause3Desc: '心理壓力、焦慮和憂鬱會讓我們的身體不自覺地緊繃，尤其是肩頸肌肉。這種身心連結的反應，會加劇疼痛，形成「壓力大、肩頸更痛」的惡性循環。',
+                techNeckTitle: '「科技頸」的代價',
+                techNeckDesc: '頭部是我們身體的「保齡球」，姿勢只要稍微不對，頸椎承受的壓力就會倍增。當我們低頭看手機時，頸椎承受的重量可能高達27公斤，相當於一個8歲孩童的體重！長期下來，會加速頸椎退化。',
+                symptomsTitle: '身體的求救信號：讀懂疼痛警訊',
+                symptomsCommonTitle: '常見症狀',
+                symptomsCommonDesc: '您的肩頸是否正透過以下方式向您求救？這些是問題初期的普遍表徵。',
+                symptom1Title: '疼痛',
+                symptom1Desc: '從持續的鈍痛、痠脹到陣發性的刺痛或燒灼感。',
+                symptom2Title: '僵硬',
+                symptom2Desc: '感覺肌肉「發緊」，轉頭、低頭或仰頭時活動受限。',
+                symptom3Title: '放射痛或麻木感',
+                symptom3Desc: '疼痛或麻刺感從頸部延伸至手臂、甚至手指，這是神經受壓的典型信號。',
+                symptom4Title: '頭痛頭暈',
+                symptom4Desc: '頸源性頭痛、頭暈，甚至耳鳴、視力模糊，都可能與頸椎問題有關。',
+                redFlagTitle: '紅旗警訊！',
+                redFlagDesc: '若出現以下任何症狀，請勿延誤，應立即尋求專業醫療協助！',
+                redFlag1: '嚴重外傷後（如車禍）的劇烈頸痛。',
+                redFlag2: '手臂或腿部持續加重的無力感、行走困難。',
+                redFlag3: '出現大小便失禁或排尿困難。',
+                redFlag4: '頸痛伴隨高燒、不明原因體重下降。',
+                redFlag5: '疼痛劇烈且持續不減，甚至影響睡眠。',
+                redFlag6: '頸部出現不明腫塊。',
+                treatmentTitle: '緩解之道：您的個人化止痛工具箱',
+                treatmentDesc: '面對肩頸疼痛，我們可以採取階梯式的管理策略。從簡單的自我護理開始，若效果不彰，再逐步尋求專業協助。關鍵是找到最適合自己狀況的方法。',
+                pyramid1Title: '初期自我護理',
+                pyramid1Desc: '適度休息、急性期冰敷、慢性期熱敷、非處方止痛藥。',
+                pyramid2Title: '居家積極管理',
+                pyramid2Desc: '溫和伸展、調整工作環境、選擇合適枕頭。',
+                pyramid3Title: '專業醫療處置',
+                pyramid3Desc: '物理治療、藥物、注射治療、整脊、針灸等。',
+                pyramid4Title: '手術治療',
+                pyramid4Desc: '最後選擇，針對嚴重神經壓迫或結構不穩等問題。',
+                preventionTitle: '建立終身防護網：預防勝於治療',
+                prevent1Title: '維持良好姿勢',
+                prevent1Desc: '時刻提醒自己「耳朵對齊肩膀」，避免烏龜頸與駝背。',
+                prevent2Title: '優化工作環境',
+                prevent2Desc: '調整螢幕與座椅高度，確保手肘、膝蓋呈90度，肩頸放鬆。',
+                prevent3Title: '規律強化與伸展',
+                prevent3Desc: '多做縮下巴、夾背、擴胸運動，強化背肌、伸展胸肌。',
+                prevent4Title: '管理身心壓力',
+                prevent4Desc: '透過運動、冥想、深呼吸等方式為心靈減負，放鬆肌肉。',
+                footerDisclaimer: '本資訊圖表內容僅供參考，不能取代專業醫療建議。若有持續性或嚴重症狀，請諮詢醫師或物理治療師。',
+                footerCopyright: '© 2025 肩頸健康資訊站. All Rights Reserved.',
+                chartLabelAffected: '受肩頸痛困擾者',
+                chartLabelUnaffected: '未受影響者',
+                chartDatasetLabel: '盛行率',
+            },
+            'en': {
+                pageTitle: 'Neck & Shoulder Health: Say Goodbye to Pain, Regain Vitality',
+                mainTitle: 'Unlock Neck & Shoulder Health',
+                mainSubtitle: 'Say Goodbye to Nagging Aches and Regain a Burden-Free, Vibrant Life',
+                prevalenceTitle: 'This Isn\'t a Niche Problem',
+                prevalenceDesc: 'Neck and shoulder pain is an extremely common modern "lifestyle disease." According to statistics, the prevalence of neck and shoulder pain among the Taiwanese population is surprisingly high, meaning more than half of the people may be suffering from this discomfort, which severely affects our daily activities, work efficiency, and sleep quality.',
+                prevalenceRate: 'Astonishing Prevalence Rate',
+                causesTitle: 'Why Me? The Main Culprits of Neck & Shoulder Pain',
+                cause1Title: 'Daily Wear and Tear',
+                cause1Desc: '"Tech neck" from prolonged phone use and poor computer posture, along with unsuitable pillows and sleeping positions, are the culprits that damage the neck and shoulders over time. These seemingly harmless habits are quietly placing a heavy burden on your neck and shoulders.',
+                cause2Title: 'Underlying Pathologies',
+                cause2Desc: 'Sometimes, the pain is more than just muscle fatigue. Herniated cervical discs, degenerative joint disease (bone spurs), or myofascial pain syndrome could be the structural issues causing persistent pain, requiring professional diagnosis and treatment.',
+                cause3Title: 'Invisible Stress',
+                cause3Desc: 'Psychological stress, anxiety, and depression can cause our bodies to tense up unconsciously, especially the shoulder and neck muscles. This mind-body connection can exacerbate pain, creating a vicious cycle of "more stress, more pain."',
+                techNeckTitle: 'The Cost of "Tech Neck"',
+                techNeckDesc: 'Our head is like a bowling ball for our body. Even a slight misalignment in posture can exponentially increase the pressure on the cervical spine. When we look down at our phones, the weight on our cervical spine can reach up to 27 kg (60 lbs), equivalent to the weight of an 8-year-old child! Over time, this accelerates cervical spine degeneration.',
+                symptomsTitle: 'The Body\'s Distress Signals: Reading the Pain Warnings',
+                symptomsCommonTitle: 'Common Symptoms',
+                symptomsCommonDesc: 'Is your neck and shoulder trying to tell you something through these signs? These are common early indicators of a problem.',
+                symptom1Title: 'Pain',
+                symptom1Desc: 'Ranging from a constant dull ache to sharp, stabbing, or burning sensations.',
+                symptom2Title: 'Stiffness',
+                symptom2Desc: 'Feeling that muscles are "tight," with limited range of motion when turning, lowering, or tilting your head.',
+                symptom3Title: 'Radiating Pain or Numbness',
+                symptom3Desc: 'Pain or tingling that extends from the neck down to the arm or even fingers—a classic sign of nerve compression.',
+                symptom4Title: 'Headaches and Dizziness',
+                symptom4Desc: 'Cervicogenic headaches, dizziness, and even tinnitus or blurred vision can be related to cervical spine issues.',
+                redFlagTitle: 'Red Flag Warnings!',
+                redFlagDesc: 'If you experience any of the following symptoms, do not delay. Seek immediate professional medical help!',
+                redFlag1: 'Severe neck pain after major trauma (e.g., a car accident).',
+                redFlag2: 'Progressive weakness in arms or legs, difficulty walking.',
+                redFlag3: 'Loss of bladder or bowel control.',
+                redFlag4: 'Neck pain accompanied by high fever or unexplained weight loss.',
+                redFlag5: 'Severe and persistent pain that doesn\'t subside, even affecting sleep.',
+                redFlag6: 'An unexplained lump in the neck.',
+                treatmentTitle: 'The Path to Relief: Your Personalized Pain-Relief Toolkit',
+                treatmentDesc: 'We can adopt a stepped-care approach to manage neck and shoulder pain. Start with simple self-care, and if that\'s not effective, gradually seek professional help. The key is to find the method that best suits your condition.',
+                pyramid1Title: 'Initial Self-Care',
+                pyramid1Desc: 'Adequate rest, ice packs for acute phases, heat for chronic phases, over-the-counter pain relievers.',
+                pyramid2Title: 'Active Home Management',
+                pyramid2Desc: 'Gentle stretching, ergonomic adjustments to your workspace, choosing a suitable pillow.',
+                pyramid3Title: 'Professional Medical Treatment',
+                pyramid3Desc: 'Physical therapy, medication, injections, chiropractic care, acupuncture, etc.',
+                pyramid4Title: 'Surgical Treatment',
+                pyramid4Desc: 'A last resort, for issues like severe nerve compression or structural instability.',
+                preventionTitle: 'Build a Lifelong Shield: Prevention is Better Than Cure',
+                prevent1Title: 'Maintain Good Posture',
+                prevent1Desc: 'Constantly remind yourself to align your "ears with your shoulders" to avoid a forward head posture and hunching.',
+                prevent2Title: 'Optimize Your Workspace',
+                prevent2Desc: 'Adjust your monitor and chair height to ensure your elbows and knees are at a 90-degree angle, with relaxed shoulders.',
+                prevent3Title: 'Regular Strengthening & Stretching',
+                prevent3Desc: 'Perform chin tucks, scapular retractions, and chest stretches to strengthen back muscles and stretch chest muscles.',
+                prevent4Title: 'Manage Mental & Physical Stress',
+                prevent4Desc: 'De-stress your mind and relax your muscles through exercise, meditation, deep breathing, etc.',
+                footerDisclaimer: 'This infographic is for informational purposes only and cannot replace professional medical advice. If you have persistent or severe symptoms, please consult a doctor or physical therapist.',
+                footerCopyright: '© 2025 Neck & Shoulder Health Info Hub. All Rights Reserved.',
+                chartLabelAffected: 'Affected by Pain',
+                chartLabelUnaffected: 'Unaffected',
+                chartDatasetLabel: 'Prevalence Rate',
+            }
+        };
+
+        let prevalenceChart; // To hold the chart instance globally
+
+        // Function to set the language
+        const setLanguage = (lang) => {
+            // Set language attribute on the html tag
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            
+            // Add/remove class on body for font switching
+            if (lang === 'en') {
+                document.body.classList.add('lang-en');
+            } else {
+                document.body.classList.remove('lang-en');
+            }
+
+            // Translate all elements with data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Update active state on buttons
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            // Update chart with translated labels
+            if (prevalenceChart) {
+                prevalenceChart.data.labels = [
+                    translations[lang].chartLabelAffected,
+                    translations[lang].chartLabelUnaffected
+                ];
+                prevalenceChart.data.datasets[0].label = translations[lang].chartDatasetLabel;
+                prevalenceChart.update();
+            }
+            
+            // Save preference to localStorage
+            localStorage.setItem('preferredLanguage', lang);
+        };
+
+        // Event listeners for language buttons
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+        // Chart.js setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const prevalenceCtx = document.getElementById('prevalenceChart').getContext('2d');
+            
+            const tooltipTitleCallback = (tooltipItems) => {
+                return tooltipItems[0].label;
+            };
+            
+            const commonPlugins = {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            family: "'Noto Sans TC', 'Poppins', sans-serif",
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    },
+                    titleFont: {
+                        family: "'Noto Sans TC', 'Poppins', sans-serif"
+                    },
+                    bodyFont: {
+                        family: "'Noto Sans TC', 'Poppins', sans-serif"
+                    }
+                }
+            };
+
+            prevalenceChart = new Chart(prevalenceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [], // Labels will be set by setLanguage function
+                    datasets: [{
+                        label: '', // Label will be set by setLanguage function
+                        data: [55, 45],
+                        backgroundColor: ['#ef5675', '#e0e7ff'],
+                        borderColor: ['#ffffff', '#ffffff'],
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: commonPlugins
+                }
+            });
+
+            // Set initial language based on localStorage or default to Chinese
+            const preferredLanguage = localStorage.getItem('preferredLanguage') || 'zh';
+            setLanguage(preferredLanguage);
+        });
+
+    </script>
+</body>
+</html>
