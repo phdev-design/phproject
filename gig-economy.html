@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：深入解析零工經濟</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Color Palette: Brilliant Blues -->
+    <!-- Narrative & Visualization Plan Summary:
+    1. Introduction: Define the Gig Economy with a key stat (Donut Chart). Goal: Inform.
+    2. Driving Forces: Explain the rise with a Tech, Economy, Social flowchart (HTML/CSS Diagram). Goal: Organize.
+    3. Worker Experience: Show pros and cons using two side-by-side Bar Charts. Goal: Compare.
+    4. Regulatory Landscape: Compare global approaches (US, UK, EU) using a responsive Table. Goal: Organize.
+    5. Future Outlook: Project market growth (Line Chart) and outline policy recommendations. Goal: Change/Organize.
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            transition: all 0.3s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 300px;
+            width: 100%;
+            max-width: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #0a9396, #ee9b00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card-icon {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #005f73;
+        }
+        .flow-arrow::after {
+            content: '→';
+            font-size: 2rem;
+            color: #94d2bd;
+            margin: 0 1rem;
+        }
+        .pro-con-card {
+            border-left: 5px solid;
+        }
+        .pro-card {
+            border-color: #0a9396;
+        }
+        .con-card {
+            border-color: #ca6702;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="fixed top-4 right-4 z-50">
+        <button id="lang-toggle" class="bg-white/70 backdrop-blur-sm shadow-md px-4 py-2 rounded-full font-semibold text-[#005f73] hover:bg-white transition-colors">
+            English
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4">
+                <span class="text-gradient" data-lang-key="header_title">零工經濟</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="header_subtitle">一份關於新興勞動模式的深度視覺化解析：從定義、崛起、影響到全球治理的完整透視</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="definition">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-[#005f73]" data-lang-key="def_title">什麼是零工經濟？</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <p class="text-lg mb-4" data-lang-key="def_p1">零工經濟 (Gig Economy) 是一種以<strong class="text-[#0a9396]" data-lang-key="def_p1_strong1">短期合約</strong>或<strong class="text-[#0a9396]" data-lang-key="def_p1_strong2">自由職業者</strong>為主要勞動力，並透過<strong class="text-[#0a9396]" data-lang-key="def_p1_strong3">數位平台</strong>進行撮合的新興經濟模式。它顛覆了傳統的長期全職僱傭關係，強調工作的<strong class="text-[#ee9b00]" data-lang-key="def_p1_strong4">臨時性</strong>與<strong class="text-[#ee9b00]" data-lang-key="def_p1_strong5">按需性</strong>。</p>
+                            <p class="text-gray-600" data-lang-key="def_p2">勞動者不再僅為單一雇主服務，而是作為獨立承包商，彈性地執行各類短期任務或專案，涵蓋從外送、共享乘車到專業設計、程式開發等廣泛領域。</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                             <div class="chart-container">
+                                <canvas id="workforceChart"></canvas>
+                            </div>
+                            <p class="mt-4 text-center text-gray-700 font-semibold" data-lang-key="def_chart_title">英國零工經濟勞動力佔比 (2019)</p>
+                            <p class="text-sm text-center text-gray-500" data-lang-key="def_chart_subtitle">數據顯示，零工經濟已成為勞動力市場中不可忽視的一部分，其規模與影響力正持續擴大。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="drivers">
+                 <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-8 text-[#005f73]" data-lang-key="drivers_title">零工經濟的崛起：三大驅動力</h2>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-10" data-lang-key="drivers_subtitle">零工經濟的興起並非偶然，而是技術賦能、經濟轉型與社會價值觀變遷三股力量交織作用的結果。</p>
+                    <div class="flex flex-col md:flex-row justify-around items-center space-y-8 md:space-y-0 md:space-x-4">
+                        <div class="text-center flex-1">
+                            <div class="stat-card-icon">📱</div>
+                            <h3 class="text-xl font-bold mt-2 text-[#0a9396]" data-lang-key="drivers_card1_title">科技賦能</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="drivers_card1_p">數位平台、行動App與AI演算法，極大簡化了供需匹配，實現了「按需服務」。</p>
+                        </div>
+                        <div class="flow-arrow hidden md:block"></div>
+                        <div class="text-center flex-1">
+                            <div class="stat-card-icon">💼</div>
+                            <h3 class="text-xl font-bold mt-2 text-[#ee9b00]" data-lang-key="drivers_card2_title">經濟轉型</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="drivers_card2_p">後金融危機時代，企業追求成本效益與彈性，勞動者尋求多元收入來源。</p>
+                        </div>
+                         <div class="flow-arrow hidden md:block"></div>
+                        <div class="text-center flex-1">
+                            <div class="stat-card-icon">👥</div>
+                            <h3 class="text-xl font-bold mt-2 text-[#ca6702]" data-lang-key="drivers_card3_title">社會變遷</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="drivers_card3_p">新世代勞動者更重視工作與生活的平衡，強烈追求工作的彈性與自主權。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="worker-experience">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold mb-4 text-[#005f73]" data-lang-key="exp_title">勞動者的雙面刃：彈性自主 vs. 權益困境</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto mb-10" data-lang-key="exp_subtitle">對勞動者而言，零工經濟既是充滿機遇的自由舞台，也可能是缺乏保障的風險之地。其優點與缺點如影隨形，形成了強烈的對比。</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-md p-6 pro-con-card pro-card">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-[#0a9396]" data-lang-key="exp_pro_title">正面影響：為何選擇零工？</h3>
+                        <p class="text-sm text-center text-gray-500 mb-6" data-lang-key="exp_pro_subtitle">許多人被零工模式的靈活性和自主性所吸引，將其視為實現理想生活方式的途徑。</p>
+                        <div class="chart-container">
+                            <canvas id="prosChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 pro-con-card con-card">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-[#ca6702]" data-lang-key="exp_con_title">負面影響：隱藏的代價</h3>
+                        <p class="text-sm text-center text-gray-500 mb-6" data-lang-key="exp_con_subtitle">光鮮的自由背後，是收入不穩、福利缺失、缺乏保障等嚴峻挑戰。</p>
+                        <div class="chart-container">
+                            <canvas id="consChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="regulation">
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-4 text-[#005f73]" data-lang-key="reg_title">全球監管迷宮：各國政府如何應對？</h2>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10" data-lang-key="reg_subtitle">勞工身份認定是全球性辯論的核心。各國正試圖在促進創新與保障勞工權益之間尋找平衡，但路徑各異，尚未形成共識。</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-[#005f73] text-white">
+                                    <th class="p-3 font-bold uppercase" data-lang-key="reg_table_h1">地區</th>
+                                    <th class="p-3 font-bold uppercase" data-lang-key="reg_table_h2">核心路徑</th>
+                                    <th class="p-3 font-bold uppercase" data-lang-key="reg_table_h3">關鍵舉措/判決</th>
+                                    <th class="p-3 font-bold uppercase" data-lang-key="reg_table_h4">演算法規管</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-semibold text-[#0a9396]" data-lang-key="reg_table_r1_c1">美國 (加州)</td>
+                                    <td class="p-3" data-lang-key="reg_table_r1_c2">立法與公投的激烈博弈</td>
+                                    <td class="p-3" data-lang-key="reg_table_r1_c3">AB5法案採嚴格「ABC測試」；22號提案為平台創設「獨立承包商」例外</td>
+                                    <td class="p-3" data-lang-key="reg_table_r1_c4">相對較少，規管重心在勞工分類</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-semibold text-[#0a9396]" data-lang-key="reg_table_r2_c1">英國</td>
+                                    <td class="p-3" data-lang-key="reg_table_r2_c2">司法判例引領變革</td>
+                                    <td class="p-3" data-lang-key="reg_table_r2_c3">最高法院裁定Uber司機為「勞工」(worker)，享有最低工資和帶薪假</td>
+                                    <td class="p-3" data-lang-key="reg_table_r2_c4">依賴現有數據保護法規，社會對「黑箱」演算法擔憂日增</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-semibold text-[#0a9396]" data-lang-key="reg_table_r3_c1">歐盟</td>
+                                    <td class="p-3" data-lang-key="reg_table_r3_c2">框架指令尋求統一標準</td>
+                                    <td class="p-3" data-lang-key="reg_table_r3_c3">《平台工作指令》確立「雇傭關係推定」原則，舉證責任轉移至平台</td>
+                                    <td class="p-3" data-lang-key="reg_table_r3_c4">強制透明化，賦予勞工對自動化決策的解釋權與人工審查權</td>
+                                </tr>
+                                 <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-semibold text-[#0a9396]" data-lang-key="reg_table_r4_c1">西班牙</td>
+                                    <td class="p-3" data-lang-key="reg_table_r4_c2">專門立法先行</td>
+                                    <td class="p-3" data-lang-key="reg_table_r4_c3">「騎士法」為外送員設立「雇傭關係法律推定」</td>
+                                    <td class="p-3" data-lang-key="reg_table_r4_c4">要求平台向勞工代表通報演算法如何影響工作條件</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="future">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold mb-4 text-[#005f73]" data-lang-key="future_title">工作的未來：趨勢、挑戰與政策建言</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto mb-10" data-lang-key="future_subtitle">人工智慧將深度融合，監管框架持續演進，社會正努力探索一種能適應未來工作模式的新型「社會契約」。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-[#0a9396]" data-lang-key="future_chart_title">全球平台經濟市場規模預測</h3>
+                        <p class="text-sm text-center text-gray-500 mb-6" data-lang-key="future_chart_subtitle">零工經濟的市場規模預計將持續高速增長，顯示其在全球經濟中的重要性日益提升。</p>
+                        <div class="chart-container">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-[#ca6702]" data-lang-key="future_policy_title">邁向公平永續的政策之路</h3>
+                        <p class="text-sm text-center text-gray-500 mb-6" data-lang-key="future_policy_subtitle">為引導零工經濟健康發展，需要在保障勞工權益與維持市場活力間取得平衡。</p>
+                        <ul class="space-y-4 mt-8">
+                            <li class="flex items-start">
+                                <span class="text-xl text-[#ee9b00] mr-3">✔</span>
+                                <div data-lang-key="future_policy_1"><strong class="text-[#005f73]" data-lang-key="future_policy_1_strong">建立可攜式福利系統：</strong>讓醫療、退休金等福利與個人綁定，而非雇主。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-xl text-[#ee9b00] mr-3">✔</span>
+                                <div data-lang-key="future_policy_2"><strong class="text-[#005f73]" data-lang-key="future_policy_2_strong">確保演算法公平透明：</strong>賦予勞工知情權與申訴權，要求人工審查機制。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-xl text-[#ee9b00] mr-3">✔</span>
+                                <div data-lang-key="future_policy_3"><strong class="text-[#005f73]" data-lang-key="future_policy_3_strong">支持終身學習與技能發展：</strong>提供培訓資源，幫助零工適應AI時代的市場需求。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-xl text-[#ee9b00] mr-3">✔</span>
+                                <div data-lang-key="future_policy_4"><strong class="text-[#005f73]" data-lang-key="future_policy_4_strong">保障集體談判權利：</strong>創建有效的工人發聲機制，平衡勞資議價能力。</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p class="text-gray-500 text-sm" data-lang-key="footer_text">&copy; 2025 零工經濟視覺化報告. 所有資訊均基於提供的深度研究報告進行匯總與呈現。</p>
+        </footer>
+
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- TRANSLATION DATA ---
+        const translations = {
+            zh: {
+                html_lang: 'zh-Hant',
+                page_title: '資訊圖表：深入解析零工經濟',
+                toggle_button: 'English',
+                font_family: "'Noto Sans TC', sans-serif",
+                header_title: '零工經濟',
+                header_subtitle: '一份關於新興勞動模式的深度視覺化解析：從定義、崛起、影響到全球治理的完整透視',
+                def_title: '什麼是零工經濟？',
+                def_p1: '零工經濟 (Gig Economy) 是一種以<strong class="text-[#0a9396]" data-lang-key="def_p1_strong1">短期合約</strong>或<strong class="text-[#0a9396]" data-lang-key="def_p1_strong2">自由職業者</strong>為主要勞動力，並透過<strong class="text-[#0a9396]" data-lang-key="def_p1_strong3">數位平台</strong>進行撮合的新興經濟模式。它顛覆了傳統的長期全職僱傭關係，強調工作的<strong class="text-[#ee9b00]" data-lang-key="def_p1_strong4">臨時性</strong>與<strong class="text-[#ee9b00]" data-lang-key="def_p1_strong5">按需性</strong>。',
+                def_p2: '勞動者不再僅為單一雇主服務，而是作為獨立承包商，彈性地執行各類短期任務或專案，涵蓋從外送、共享乘車到專業設計、程式開發等廣泛領域。',
+                def_chart_title: '英國零工經濟勞動力佔比 (2019)',
+                def_chart_subtitle: '數據顯示，零工經濟已成為勞動力市場中不可忽視的一部分，其規模與影響力正持續擴大。',
+                drivers_title: '零工經濟的崛起：三大驅動力',
+                drivers_subtitle: '零工經濟的興起並非偶然，而是技術賦能、經濟轉型與社會價值觀變遷三股力量交織作用的結果。',
+                drivers_card1_title: '科技賦能',
+                drivers_card1_p: '數位平台、行動App與AI演算法，極大簡化了供需匹配，實現了「按需服務」。',
+                drivers_card2_title: '經濟轉型',
+                drivers_card2_p: '後金融危機時代，企業追求成本效益與彈性，勞動者尋求多元收入來源。',
+                drivers_card3_title: '社會變遷',
+                drivers_card3_p: '新世代勞動者更重視工作與生活的平衡，強烈追求工作的彈性與自主權。',
+                exp_title: '勞動者的雙面刃：彈性自主 vs. 權益困境',
+                exp_subtitle: '對勞動者而言，零工經濟既是充滿機遇的自由舞台，也可能是缺乏保障的風險之地。其優點與缺點如影隨形，形成了強烈的對比。',
+                exp_pro_title: '正面影響：為何選擇零工？',
+                exp_pro_subtitle: '許多人被零工模式的靈活性和自主性所吸引，將其視為實現理想生活方式的途徑。',
+                exp_con_title: '負面影響：隱藏的代價',
+                exp_con_subtitle: '光鮮的自由背後，是收入不穩、福利缺失、缺乏保障等嚴峻挑戰。',
+                reg_title: '全球監管迷宮：各國政府如何應對？',
+                reg_subtitle: '勞工身份認定是全球性辯論的核心。各國正試圖在促進創新與保障勞工權益之間尋找平衡，但路徑各異，尚未形成共識。',
+                reg_table_h1: '地區',
+                reg_table_h2: '核心路徑',
+                reg_table_h3: '關鍵舉措/判決',
+                reg_table_h4: '演算法規管',
+                reg_table_r1_c1: '美國 (加州)',
+                reg_table_r1_c2: '立法與公投的激烈博弈',
+                reg_table_r1_c3: 'AB5法案採嚴格「ABC測試」；22號提案為平台創設「獨立承包商」例外',
+                reg_table_r1_c4: '相對較少，規管重心在勞工分類',
+                reg_table_r2_c1: '英國',
+                reg_table_r2_c2: '司法判例引領變革',
+                reg_table_r2_c3: '最高法院裁定Uber司機為「勞工」(worker)，享有最低工資和帶薪假',
+                reg_table_r2_c4: '依賴現有數據保護法規，社會對「黑箱」演算法擔憂日增',
+                reg_table_r3_c1: '歐盟',
+                reg_table_r3_c2: '框架指令尋求統一標準',
+                reg_table_r3_c3: '《平台工作指令》確立「雇傭關係推定」原則，舉證責任轉移至平台',
+                reg_table_r3_c4: '強制透明化，賦予勞工對自動化決策的解釋權與人工審查權',
+                reg_table_r4_c1: '西班牙',
+                reg_table_r4_c2: '專門立法先行',
+                reg_table_r4_c3: '「騎士法」為外送員設立「雇傭關係法律推定」',
+                reg_table_r4_c4: '要求平台向勞工代表通報演算法如何影響工作條件',
+                future_title: '工作的未來：趨勢、挑戰與政策建言',
+                future_subtitle: '人工智慧將深度融合，監管框架持續演進，社會正努力探索一種能適應未來工作模式的新型「社會契約」。',
+                future_chart_title: '全球平台經濟市場規模預測',
+                future_chart_subtitle: '零工經濟的市場規模預計將持續高速增長，顯示其在全球經濟中的重要性日益提升。',
+                future_policy_title: '邁向公平永續的政策之路',
+                future_policy_subtitle: '為引導零工經濟健康發展，需要在保障勞工權益與維持市場活力間取得平衡。',
+                future_policy_1: '<strong class="text-[#005f73]" data-lang-key="future_policy_1_strong">建立可攜式福利系統：</strong>讓醫療、退休金等福利與個人綁定，而非雇主。',
+                future_policy_2: '<strong class="text-[#005f73]" data-lang-key="future_policy_2_strong">確保演算法公平透明：</strong>賦予勞工知情權與申訴權，要求人工審查機制。',
+                future_policy_3: '<strong class="text-[#005f73]" data-lang-key="future_policy_3_strong">支持終身學習與技能發展：</strong>提供培訓資源，幫助零工適應AI時代的市場需求。',
+                future_policy_4: '<strong class="text-[#005f73]" data-lang-key="future_policy_4_strong">保障集體談判權利：</strong>創建有效的工人發聲機制，平衡勞資議價能力。',
+                footer_text: '© 2025 零工經濟視覺化報告. 所有資訊均基於提供的深度研究報告進行匯總與呈現。',
+                charts: {
+                    workforce: { labels: ['零工經濟勞動力', '其他勞動力'], datasetLabel: '勞動力佔比' },
+                    pros: { labels: ['彈性與自主', '收入來源多樣化', '工作與生活平衡潛力', '技能發展機會'], datasetLabel: '吸引力指數' },
+                    cons: { labels: ['收入不穩定/偏低', '缺乏福利保障', '工作不安全感', '勞工權益有限'], datasetLabel: '挑戰指數' },
+                    growth: { labels: ['2019', '2022 (預測)', '2025 (模擬)', '2028 (模擬)', '2033 (預測)'], datasetLabel: '市場規模 (兆美元)' }
+                }
+            },
+            en: {
+                html_lang: 'en',
+                page_title: 'Infographic: A Deep Dive into the Gig Economy',
+                toggle_button: '中文',
+                font_family: "'Inter', sans-serif",
+                header_title: 'The Gig Economy',
+                header_subtitle: 'A deep visual analysis of the emerging labor model: From definition, rise, and impact to global governance.',
+                def_title: 'What is the Gig Economy?',
+                def_p1: 'The Gig Economy is a new economic model primarily based on <strong class="text-[#0a9396]" data-lang-key="def_p1_strong1">short-term contracts</strong> or <strong class="text-[#0a9396]" data-lang-key="def_p1_strong2">freelancers</strong>, matched through <strong class="text-[#0a9396]" data-lang-key="def_p1_strong3">digital platforms</strong>. It disrupts traditional long-term employment relationships, emphasizing the <strong class="text-[#ee9b00]" data-lang-key="def_p1_strong4">temporary</strong> and <strong class="text-[#ee9b00]" data-lang-key="def_p1_strong5">on-demand</strong> nature of work.',
+                def_p2: 'Workers no longer serve a single employer but act as independent contractors, flexibly performing various short-term tasks or projects, from food delivery and ride-sharing to professional design and programming.',
+                def_chart_title: 'UK Gig Economy Workforce Share (2019)',
+                def_chart_subtitle: 'Data shows the gig economy has become a significant part of the labor market, with its scale and influence continually expanding.',
+                drivers_title: 'The Rise of the Gig Economy: Three Main Drivers',
+                drivers_subtitle: 'The rise of the gig economy is no accident but the result of the interplay between technological empowerment, economic transformation, and changing social values.',
+                drivers_card1_title: 'Technological Empowerment',
+                drivers_card1_p: 'Digital platforms, mobile apps, and AI algorithms have greatly simplified supply-demand matching, enabling "on-demand services."',
+                drivers_card2_title: 'Economic Transformation',
+                drivers_card2_p: 'In the post-financial crisis era, companies seek cost-effectiveness and flexibility, while workers look for diverse income streams.',
+                drivers_card3_title: 'Social Change',
+                drivers_card3_p: 'The new generation of workers values work-life balance more, strongly pursuing flexibility and autonomy in their work.',
+                exp_title: "A Worker's Double-Edged Sword: Flexibility vs. Precarity",
+                exp_subtitle: 'For workers, the gig economy is both a stage full of opportunities and a risky ground lacking protection. Its pros and cons are two sides of the same coin.',
+                exp_pro_title: 'The Upside: Why Go Gig?',
+                exp_pro_subtitle: 'Many are drawn to the flexibility and autonomy of the gig model, seeing it as a way to achieve their desired lifestyle.',
+                exp_con_title: 'The Downside: The Hidden Costs',
+                exp_con_subtitle: 'Behind the shiny veneer of freedom lie severe challenges like unstable income, lack of benefits, and inadequate protection.',
+                reg_title: 'The Global Regulatory Maze: How Are Governments Responding?',
+                reg_subtitle: 'The classification of workers is at the core of the global debate. Countries are trying to balance promoting innovation and protecting labor rights, but their paths vary, and no consensus has been reached.',
+                reg_table_h1: 'Region',
+                reg_table_h2: 'Core Approach',
+                reg_table_h3: 'Key Actions/Rulings',
+                reg_table_h4: 'Algorithmic Regulation',
+                reg_table_r1_c1: 'USA (California)',
+                reg_table_r1_c2: 'Intense battle of legislation vs. ballot initiatives',
+                reg_table_r1_c3: 'AB5 law uses strict "ABC test"; Prop 22 creates an "independent contractor" exception for platforms.',
+                reg_table_r1_c4: 'Relatively minimal; focus is on worker classification.',
+                reg_table_r2_c1: 'United Kingdom',
+                reg_table_r2_c2: 'Judicial precedent leads the change',
+                reg_table_r2_c3: 'Supreme Court rules Uber drivers are "workers," entitled to minimum wage and paid holidays.',
+                reg_table_r2_c4: 'Relies on existing data protection laws; growing social concern over "black box" algorithms.',
+                reg_table_r3_c1: 'European Union',
+                reg_table_r3_c2: 'Seeking unified standards via framework directive',
+                reg_table_r3_c3: 'Platform Work Directive establishes a "presumption of employment," shifting burden of proof to platforms.',
+                reg_table_r3_c4: 'Mandates transparency, giving workers rights to explanation and human review of automated decisions.',
+                reg_table_r4_c1: 'Spain',
+                reg_table_r4_c2: 'Pioneering with dedicated legislation',
+                reg_table_r4_c3: '"Rider\'s Law" establishes a legal presumption of employment for delivery couriers.',
+                reg_table_r4_c4: 'Requires platforms to inform worker reps how algorithms affect working conditions.',
+                future_title: 'The Future of Work: Trends, Challenges & Policy Advice',
+                future_subtitle: 'AI will become deeply integrated, regulatory frameworks will continue to evolve, and society is striving to find a new "social contract" for future work models.',
+                future_chart_title: 'Global Platform Economy Market Size Forecast',
+                future_chart_subtitle: 'The market size of the gig economy is projected to continue its rapid growth, highlighting its increasing importance in the global economy.',
+                future_policy_title: 'The Path to a Fair & Sustainable Policy',
+                future_policy_subtitle: 'To guide the healthy development of the gig economy, a balance must be struck between protecting worker rights and maintaining market dynamism.',
+                future_policy_1: '<strong class="text-[#005f73]" data-lang-key="future_policy_1_strong">Build portable benefit systems:</strong> Link benefits like healthcare and pensions to individuals, not employers.',
+                future_policy_2: '<strong class="text-[#005f73]" data-lang-key="future_policy_2_strong">Ensure algorithmic fairness & transparency:</strong> Grant workers the right to information and appeal, requiring human review mechanisms.',
+                future_policy_3: '<strong class="text-[#005f73]" data-lang-key="future_policy_3_strong">Support lifelong learning & skill development:</strong> Provide training resources to help gig workers adapt to the market demands of the AI era.',
+                future_policy_4: '<strong class="text-[#005f73]" data-lang-key="future_policy_4_strong">Protect collective bargaining rights:</strong> Create effective mechanisms for worker voice to balance bargaining power between labor and capital.',
+                footer_text: '© 2025 Gig Economy Visualization Report. All information is summarized and presented based on the provided in-depth research report.',
+                charts: {
+                    workforce: { labels: ['Gig Workforce', 'Other Workforce'], datasetLabel: 'Workforce Share' },
+                    pros: { labels: ['Flexibility & Autonomy', 'Diverse Income Streams', 'Work-Life Balance Potential', 'Skill Development Opportunities'], datasetLabel: 'Attraction Index' },
+                    cons: { labels: ['Unstable / Low Income', 'Lack of Benefits', 'Job Insecurity', 'Limited Worker Rights'], datasetLabel: 'Challenge Index' },
+                    growth: { labels: ['2019', '2022 (Est.)', '2025 (Sim.)', '2028 (Sim.)', '2033 (Proj.)'], datasetLabel: 'Market Size ($T)' }
+                }
+            }
+        };
+
+        // --- CHART & APP STATE ---
+        let currentLang = 'zh';
+        const myCharts = {};
+        const brilliantBlues = {
+            darkBlue: '#005f73',
+            teal: '#0a9396',
+            lightTeal: '#94d2bd',
+            orange: '#ca6702',
+        };
+
+        // --- FUNCTIONS ---
+        function wrapLabel(str, maxWidth = 16) {
+            // This function is kept for wrapping long labels in bar charts, especially useful for English text.
+            if (typeof str !== 'string' || str.length <= maxWidth) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine.length > 0) lines.push(currentLine);
+            return lines;
+        }
+        
+        const universalTooltipCallback = {
+             plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        font: {
+                            family: translations[currentLang].font_family
+                        }
+                    }
+                }
+            }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const langData = translations[lang];
+
+            // Update document language and title
+            document.documentElement.lang = langData.html_lang;
+            document.title = langData.page_title;
+            
+            // Update main body font
+            document.body.style.fontFamily = langData.font_family;
+
+            // Update all text elements with data-lang-key
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[key]) {
+                    el.innerHTML = langData[key];
+                }
+            });
+            
+            // Update language toggle button text
+            document.getElementById('lang-toggle').textContent = langData.toggle_button;
+
+            // Update charts
+            updateAllCharts(lang);
+        }
+
+        function updateAllCharts(lang) {
+            const chartLangData = translations[lang].charts;
+            const fontFamily = translations[lang].font_family;
+
+            // Workforce Chart
+            if (myCharts.workforce) {
+                myCharts.workforce.data.labels = chartLangData.workforce.labels;
+                myCharts.workforce.data.datasets[0].label = chartLangData.workforce.datasetLabel;
+                if (myCharts.workforce.options.plugins.legend.labels.font) {
+                    myCharts.workforce.options.plugins.legend.labels.font.family = fontFamily;
+                }
+                myCharts.workforce.update();
+            }
+
+            // Pros Chart
+            if (myCharts.pros) {
+                myCharts.pros.data.labels = chartLangData.pros.labels.map(l => wrapLabel(l));
+                myCharts.pros.data.datasets[0].label = chartLangData.pros.datasetLabel;
+                if (myCharts.pros.options.plugins.legend.labels.font) {
+                   myCharts.pros.options.plugins.legend.labels.font.family = fontFamily;
+                }
+                myCharts.pros.update();
+            }
+
+            // Cons Chart
+            if (myCharts.cons) {
+                myCharts.cons.data.labels = chartLangData.cons.labels.map(l => wrapLabel(l));
+                myCharts.cons.data.datasets[0].label = chartLangData.cons.datasetLabel;
+                if (myCharts.cons.options.plugins.legend.labels.font) {
+                    myCharts.cons.options.plugins.legend.labels.font.family = fontFamily;
+                }
+                myCharts.cons.update();
+            }
+
+            // Growth Chart
+            if (myCharts.growth) {
+                myCharts.growth.data.labels = chartLangData.growth.labels;
+                myCharts.growth.data.datasets[0].label = chartLangData.growth.datasetLabel;
+                if (myCharts.growth.options.plugins.legend.labels.font) {
+                    myCharts.growth.options.plugins.legend.labels.font.family = fontFamily;
+                }
+                myCharts.growth.update();
+            }
+        }
+        
+        function initializeCharts() {
+            const initialLang = 'zh';
+            const chartLangData = translations[initialLang].charts;
+
+            const workforceCtx = document.getElementById('workforceChart').getContext('2d');
+            myCharts.workforce = new Chart(workforceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: chartLangData.workforce.labels,
+                    datasets: [{
+                        label: chartLangData.workforce.datasetLabel,
+                        data: [4.4, 95.6],
+                        backgroundColor: [brilliantBlues.teal, brilliantBlues.lightTeal],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: universalTooltipCallback.plugins }
+            });
+
+            const prosCtx = document.getElementById('prosChart').getContext('2d');
+            myCharts.pros = new Chart(prosCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLangData.pros.labels.map(l => wrapLabel(l)),
+                    datasets: [{
+                        label: chartLangData.pros.datasetLabel,
+                        data: [90, 75, 85, 65],
+                        backgroundColor: brilliantBlues.teal,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true, max: 100 } },
+                    plugins: { ...universalTooltipCallback.plugins, legend: { display: false } }
+                }
+            });
+            
+            const consCtx = document.getElementById('consChart').getContext('2d');
+            myCharts.cons = new Chart(consCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLangData.cons.labels.map(l => wrapLabel(l)),
+                    datasets: [{
+                        label: chartLangData.cons.datasetLabel,
+                        data: [88, 92, 80, 78],
+                        backgroundColor: brilliantBlues.orange,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { beginAtZero: true, max: 100 } },
+                    plugins: { ...universalTooltipCallback.plugins, legend: { display: false } }
+                }
+            });
+
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            myCharts.growth = new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: chartLangData.growth.labels,
+                    datasets: [{
+                        label: chartLangData.growth.datasetLabel,
+                        data: [0.3, 0.45, 0.7, 1.2, 2.145],
+                        fill: true, borderColor: brilliantBlues.darkBlue, backgroundColor: 'rgba(10, 147, 150, 0.2)',
+                        tension: 0.3, pointBackgroundColor: brilliantBlues.darkBlue, pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { ...universalTooltipCallback.plugins, legend: { display: true } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: (value) => '$' + value + 'T' } } }
+                }
+            });
+        }
+
+        // --- INITIALIZATION ---
+        initializeCharts();
+        setLanguage('zh'); // Set initial language
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            setLanguage(newLang);
+        });
+    });
+    </script>
+</body>
+</html>
