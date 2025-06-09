@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="zh-HK" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：透視Keeta罷工風波</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: A narrative-driven, single-page scrolling infographic telling the story of the Keeta strike. It's structured into thematic sections: 1. Introduction with a key stat, 2. Core Grievances (visualized as cards), 3. Pay Analysis (bar chart & big numbers), 4. Market Strategy (donut charts & flowchart), and 5. Systemic Issues. This logical flow guides the user from the immediate conflict to the deeper structural problems, making complex information digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Grievances (Table 1): Goal: Organize. Viz: HTML/CSS cards. Justification: More engaging than a table for comparing opposing views.
+        - Timeline (Table 2): Goal: Change. Viz: HTML/CSS vertical timeline. Justification: Visually represents the sequence of events better than a table.
+        - Pay Comparison (Table 3): Goal: Compare. Viz: Chart.js Bar Chart. Justification: Ideal for direct numerical comparison.
+        - Market Share (Table 4): Goal: Change. Viz: Chart.js Donut Charts. Justification: Best for showing proportional shifts in market composition.
+        - Keeta's Strategy: Goal: Organize (Process). Viz: HTML/CSS Flowchart. Justification: Clearly illustrates a multi-step process without extra libraries.
+        - "Fake Self-Employment" Issues: Goal: Inform. Viz: HTML/CSS list with icons. Justification: Improves readability of key legal points.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans HK', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <p class="text-lg font-semibold text-orange-500">香港零工經濟的沸點</p>
+            <h1 class="text-4xl md:text-6xl font-bold text-slate-900 mt-2">Keeta外賣員風波</h1>
+            <p class="max-w-3xl mx-auto mt-4 text-slate-600">一場圍繞薪酬、工作條件與「假自僱」困境的勞資衝突，揭示了在侵略性市場策略下，前線外賣員所面臨的巨大壓力與系統性困境。</p>
+        </header>
+
+        <!-- Section 1: Core Grievances -->
+        <section id="grievances" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">風暴核心：六大訴求</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-10">外賣員的行動並非無的放矢，而是源於對具體工作條件的深層不滿。以下是他們提出的核心訴求與平台的官方回應，揭示了雙方在認知上的巨大鴻溝。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Grievance Cards -->
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">① 薪酬過低</h3>
+                    <p class="text-sm font-semibold text-slate-700">外賣員指控平台降低單價，要求恢復每單最少HK$50，並指收入有時低於最低工資。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>單價未能全面反映收入，總收入包含獎賞與補貼。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">②「搶單」制度</h3>
+                    <p class="text-sm font-semibold text-slate-700">要求取消，指其製造不必要競爭，引致危險駕駛，且有外賣員因此受傷入院。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>僅為輔助，佔整體訂單比例小，會改善設計確保安全。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">③「K GO」機制</h3>
+                    <p class="text-sm font-semibold text-slate-700">批評此優先派單機制形同「變相減薪」，對未能達標的外賣員不公。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>旨在提高投入時間長者收入，整體收入可增逾2成。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">④ 不合理「孖單」</h3>
+                    <p class="text-sm font-semibold text-slate-700">抱怨常派發不順路的疊單，導致送餐延誤，從而失去「準時獎金」。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>承諾會持續優化路線規劃演算法，檢視異常情況。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">⑤ 安全問題</h3>
+                    <p class="text-sm font-semibold text-slate-700">感到「冇晒安全」，平台對送餐時間的嚴苛要求是導致安全問題的主要原因。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>將安全放首位，已增加安全教學及提示。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-orange-600 mb-2">⑥ 假自僱問題</h3>
+                    <p class="text-sm font-semibold text-slate-700">要求訂立書面僱傭合約，杜絕假自僱，以獲取基本的勞工保障。</p>
+                    <hr class="my-3 border-slate-200">
+                    <p class="text-sm text-slate-500"><strong class="text-slate-600">Keeta回應：</strong>迴避僱傭關係，僅強調外賣員為「重要合作夥伴」。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 2: Pay Analysis -->
+        <section id="pay" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">送餐的代價：薪酬結構解構</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-10">Keeta聲稱總收入包含多項補貼，但外賣員的感受卻是收入「低過最低工資」。下圖根據實測數據，比較了各平台步兵的每單平均收入，揭示了數字背後的差異。</p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="chart-container">
+                    <canvas id="payComparisonChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Market Strategy & Impact -->
+        <section id="market" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">市場震盪：Keeta的突圍策略</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-10">Keeta以巨額補貼和低價策略強勢登陸香港，迅速改變了市場格局。這一策略不僅加速了競爭對手Deliveroo的退出，也為後續向餐廳提高佣金，並將成本壓力傳導至外賣員埋下了伏筆。</p>
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-center mb-4">香港外賣市場份額劇變 (GMV)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="chart-container h-64">
+                                <canvas id="marketShareBeforeChart"></canvas>
+                            </div>
+                            <p class="text-center text-sm mt-2 text-slate-500">2023年初 (Keeta進場前)</p>
+                        </div>
+                        <div>
+                            <div class="chart-container h-64">
+                                <canvas id="marketShareAfterChart"></canvas>
+                            </div>
+                            <p class="text-center text-sm mt-2 text-slate-500">2023年12月 (Keeta進場後)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl text-center mb-4">成本壓力傳導路徑</h3>
+                    <div class="relative pl-8 py-4">
+                        <!-- Vertical line -->
+                        <div class="absolute top-0 left-4 h-full w-0.5 bg-slate-200"></div>
+                        <!-- Steps -->
+                        <div class="relative mb-8">
+                            <div class="absolute -left-12 top-0.5 h-8 w-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">1</div>
+                            <h4 class="font-semibold">巨額補貼吸客</h4>
+                            <p class="text-sm text-slate-600">以「10億激賞」及低價「一人飯堂」搶佔市場。</p>
+                        </div>
+                        <div class="relative mb-8">
+                            <div class="absolute -left-12 top-0.5 h-8 w-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">2</div>
+                            <h4 class="font-semibold">擠壓競爭對手</h4>
+                            <p class="text-sm text-slate-600">激烈的價格戰加速Deliveroo退出香港市場。</p>
+                        </div>
+                        <div class="relative mb-8">
+                            <div class="absolute -left-12 top-0.5 h-8 w-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">3</div>
+                            <h4 class="font-semibold">鞏固市場力量</h4>
+                            <p class="text-sm text-slate-600">向合作餐廳的佣金抽成由25%提升至35%。</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute -left-12 top-0.5 h-8 w-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold">4</div>
+                            <h4 class="font-semibold">壓力傳導至前線</h4>
+                            <p class="text-sm text-slate-600">為維持盈利及價格優勢，嚴格控制外賣員薪酬成本。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Systemic Issue -->
+        <section id="system" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8">制度困境：「假自僱」的枷鎖</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-10">罷工的核心訴求之一，觸及了零工經濟的根本問題。在「假自僱」模式下，外賣員被視為「獨立承包商」，失去了《僱傭條例》下的基本勞工權益保障。</p>
+            <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="font-bold text-xl text-center mb-6">外賣員失去的法定權益</h3>
+                <div class="grid grid-cols-2 gap-x-6 gap-y-4 text-slate-700">
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 最低工資保障</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 有薪年假</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 疾病津貼</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 法定假日薪酬</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 強積金供款</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 工傷保障</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 解僱補償</p>
+                    <p class="flex items-center"><span class="text-red-500 mr-2">✗</span> 長期服務金</p>
+                </div>
+                <div class="mt-6 pt-6 border-t border-slate-200">
+                    <p class="text-sm text-slate-600">香港政府承認問題存在，但認為「一刀切」立法未必合適，憂慮會削弱行業「彈性」。這種政策滯後，使外賣員在法律保障缺失的灰色地帶中，持續處於弱勢地位。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center pt-8 border-t border-slate-200">
+            <p class="text-sm text-slate-500">此資訊圖表根據公開報告製作，旨在促進對零工經濟議題的理解與討論。</p>
+        </footer>
+
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    
+    const tooltipCallback = {
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                          return label.join(' ');
+                        }
+                        return label;
+                    }
+                }
+            }
+        }
+    };
+
+    const processLabel = (label) => {
+        const maxLength = 16;
+        if (typeof label === 'string' && label.length > maxLength) {
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        }
+        return label;
+    };
+    
+    const payLabels = ['Deliveroo (撤出前)', 'Keeta (實測)', 'Foodpanda (實測)', '外賣員訴求'].map(processLabel);
+    new Chart(document.getElementById('payComparisonChart'), {
+        type: 'bar',
+        data: {
+            labels: payLabels,
+            datasets: [{
+                label: '平均每單收入 (HK$)',
+                data: [36.2, 33.0, 25.92, 50.0],
+                backgroundColor: ['#6EE7B7', '#FBBF24', '#F87171', '#60A5FA'],
+                borderColor: ['#34D399', '#F59E0B', '#EF4444', '#3B82F6'],
+                borderWidth: 1.5,
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            ...tooltipCallback,
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: '港元 (HK$)' }
+                }
+            },
+            plugins: {
+                ...tooltipCallback.plugins,
+                legend: { display: false },
+                title: { display: true, text: '各平台步兵每單平均收入與罷工訴求比較 (實測數據)', font: { size: 14 } }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('marketShareBeforeChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Foodpanda', 'Deliveroo'],
+            datasets: [{
+                data: [70, 30],
+                backgroundColor: ['#F87171', '#6EE7B7'],
+                borderColor: '#fff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12 } },
+                title: { display: false }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('marketShareAfterChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Foodpanda', 'Deliveroo', 'Keeta'],
+            datasets: [{
+                data: [54, 25, 21],
+                backgroundColor: ['#F87171', '#6EE7B7', '#FBBF24'],
+                borderColor: '#fff',
+                borderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12 } },
+                title: { display: false }
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
