@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoPort 互動式教學</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: A tab-based single-page application (SPA) is chosen to transform the static tutorial into an interactive guide. This structure allows users to navigate between logical sections (Intro, Setup, Usage, Features) in a non-linear way, improving usability. A language switcher has been added to support both Chinese and English users. -->
+    <!-- Visualization & Content Choices: Report Info: Checklist -> Goal: Inform/Action -> Viz/Method: Interactive HTML checklist with CSS styling. Report Info: Step-by-Step Guide -> Goal: Organize/Instruct -> Viz/Method: Numbered, icon-enhanced visual cards. Report Info: Special Features -> Goal: Inform/Compare -> Viz/Method: Side-by-side cards. All interactions and language switching are handled by vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .tab-btn.active {
+            border-color: #4338ca;
+            background-color: #eef2ff;
+            color: #4338ca;
+            font-weight: 700;
+        }
+        .tab-panel {
+            display: none;
+        }
+        .tab-panel.active {
+            display: block;
+        }
+        .checklist-item input:checked + label {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        .step-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .lang-switcher button.active {
+            background-color: #4338ca;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto max-w-4xl p-4 sm:p-6 md:p-8">
+        
+        <header class="relative text-center mb-8">
+            <div class="absolute top-0 right-0 lang-switcher bg-white rounded-lg shadow-sm p-1 flex space-x-1">
+                <button data-lang="zh-Hant" class="lang-btn active px-3 py-1 text-sm rounded-md transition-colors">中</button>
+                <button data-lang="en" class="lang-btn px-3 py-1 text-sm rounded-md transition-colors">EN</button>
+            </div>
+            <h1 class="text-4xl sm:text-5xl font-bold text-indigo-800 mb-2">GeoPort</h1>
+            <p class="text-lg text-slate-600" data-lang-key="headerSubtitle">您的全球定位嚮導</p>
+        </header>
+
+        <main class="bg-white rounded-xl shadow-lg p-4 sm:p-8">
+            <nav id="tab-nav" class="flex flex-wrap border-b border-slate-200 mb-6 -mt-2">
+                <button data-tab="intro" class="tab-btn flex-grow sm:flex-initial text-center py-3 px-4 border-b-2 border-transparent text-slate-600 hover:bg-slate-50 transition-colors duration-200 active" data-lang-key="navIntro">
+                    🚀 應用介紹
+                </button>
+                <button data-tab="setup" class="tab-btn flex-grow sm:flex-initial text-center py-3 px-4 border-b-2 border-transparent text-slate-600 hover:bg-slate-50 transition-colors duration-200" data-lang-key="navSetup">
+                    ✅ 事前準備
+                </button>
+                <button data-tab="usage" class="tab-btn flex-grow sm:flex-initial text-center py-3 px-4 border-b-2 border-transparent text-slate-600 hover:bg-slate-50 transition-colors duration-200" data-lang-key="navUsage">
+                    🗺️ 開始使用
+                </button>
+                <button data-tab="features" class="tab-btn flex-grow sm:flex-initial text-center py-3 px-4 border-b-2 border-transparent text-slate-600 hover:bg-slate-50 transition-colors duration-200" data-lang-key="navFeatures">
+                    ⚙️ 進階功能
+                </button>
+            </nav>
+
+            <div id="tab-content">
+                <section id="intro" class="tab-panel active">
+                    <div class="prose max-w-none prose-indigo">
+                        <h2 class="text-2xl font-bold mb-4" data-lang-key="introTitle">歡迎來到 GeoPort 的世界！</h2>
+                        <p data-lang-key="introP1">想讓您的 iPhone 出現在世界任何一個角落嗎？無論是想在社群媒體上開個小玩笑、探索不同國家的 Pokémon GO 熱點，或是測試您開發的 App，<strong>GeoPort</strong> 都是您的最佳選擇。</p>
+                        <p data-lang-key="introP2">它是一款功能強大且操作簡單的桌面應用程式，讓您在電腦上就能輕鬆修改 iOS 裝置的 GPS 定位。這份互動教學將帶您一步一步完成所有設定，即使是電腦新手也能輕鬆上手！</p>
+                        <div class="mt-6 p-4 bg-indigo-50 rounded-lg">
+                           <p class="text-indigo-800 font-semibold" data-lang-key="introTip">點擊上方的頁籤，開始您的虛擬環球之旅吧！</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="setup" class="tab-panel">
+                     <div class="prose max-w-none prose-indigo">
+                        <h2 class="text-2xl font-bold mb-4" data-lang-key="setupTitle">開始前的準備清單</h2>
+                        <p data-lang-key="setupP1">在開始之前，請確認您已經準備好以下幾樣東西。完成一項就在前方框格中打勾吧！</p>
+                        <ul class="space-y-4 mt-6 list-none p-0">
+                            <li class="checklist-item flex items-center bg-slate-100 p-4 rounded-lg">
+                                <input id="item1" type="checkbox" class="h-6 w-6 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="item1" class="ml-3 block text-slate-900 text-lg" data-lang-key="setupCheck1">一部 iOS 裝置 (iPhone / iPad)</label>
+                            </li>
+                            <li class="checklist-item flex items-center bg-slate-100 p-4 rounded-lg">
+                                <input id="item2" type="checkbox" class="h-6 w-6 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="item2" class="ml-3 block text-slate-900 text-lg" data-lang-key="setupCheck2">一部電腦 (Windows / Mac)</label>
+                            </li>
+                            <li class="checklist-item flex items-center bg-slate-100 p-4 rounded-lg">
+                                <input id="item3" type="checkbox" class="h-6 w-6 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="item3" class="ml-3 block text-slate-900 text-lg" data-lang-key="setupCheck3">一條 USB 傳輸線</label>
+                            </li>
+                        </ul>
+                        <div class="mt-6 border-l-4 border-amber-400 bg-amber-50 p-4 rounded-r-lg">
+                            <h3 class="font-bold text-amber-800" data-lang-key="setupWinTitle">Windows 使用者請注意！</h3>
+                            <p class="text-amber-700 mt-2" data-lang-key="setupWinP1">您必須先從 <a href="https://www.apple.com/itunes/" target="_blank" class="font-semibold underline">Apple 官網</a>下載並安裝 iTunes。我們需要的是它附帶的驅動程式，這樣您的電腦才能辨識到 iPhone。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="usage" class="tab-panel">
+                    <div class="prose max-w-none prose-indigo">
+                        <h2 class="text-2xl font-bold mb-4" data-lang-key="usageTitle">開始模擬定位 (Step-by-Step)</h2>
+                        <p data-lang-key="usageP1">準備工作都完成了，現在讓我們跟著以下五個簡單的步驟，開始進行定位模擬吧！</p>
+                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div class="step-card bg-slate-50 rounded-lg p-5 border border-slate-200">
+                                <h3 class="text-lg font-semibold" data-lang-key="usageStep1Title">1. 連接您的裝置 🔌</h3>
+                                <p class="mt-2 text-slate-600" data-lang-key="usageStep1Desc">用 USB 線連接 iPhone/iPad 到電腦，並在手機上點選「信任」。</p>
+                            </div>
+                            <div class="step-card bg-slate-50 rounded-lg p-5 border border-slate-200">
+                                <h3 class="text-lg font-semibold" data-lang-key="usageStep2Title">2. 啟動 GeoPort 🖥️</h3>
+                                <p class="mt-2 text-slate-600" data-lang-key="usageStep2Desc">打開安裝好的 GeoPort 應用程式，它會自動偵測您的裝置。</p>
+                            </div>
+                            <div class="step-card bg-slate-50 rounded-lg p-5 border border-slate-200">
+                                <h3 class="text-lg font-semibold" data-lang-key="usageStep3Title">3. 選擇虛擬位置 📍</h3>
+                                <p class="mt-2 text-slate-600" data-lang-key="usageStep3Desc">在地圖上點擊，或用搜尋框找到您想「前往」的地點。</p>
+                            </div>
+                            <div class="step-card bg-slate-50 rounded-lg p-5 border border-slate-200">
+                                <h3 class="text-lg font-semibold" data-lang-key="usageStep4Title">4. 開始模擬 🚀</h3>
+                                <p class="mt-2 text-slate-600" data-lang-key="usageStep4Desc">點擊 "Simulate Location" 按鈕，您的定位就修改成功了！</p>
+                            </div>
+                            <div class="step-card bg-slate-50 rounded-lg p-5 border border-slate-200">
+                                <h3 class="text-lg font-semibold" data-lang-key="usageStep5Title">5. 停止模擬 ⏹️</h3>
+                                <p class="mt-2 text-slate-600" data-lang-key="usageStep5Desc">想恢復真實位置時，只需點擊 "Stop Location" 按鈕即可。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="features" class="tab-panel">
+                    <div class="prose max-w-none prose-indigo">
+                        <h2 class="text-2xl font-bold mb-4" data-lang-key="featuresTitle">探索進階功能</h2>
+                        <p data-lang-key="featuresP1">除了基本的定位模擬，GeoPort 還提供了一些非常實用的進階功能，讓它成為開發者與特定使用者的好幫手。</p>
+                        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-indigo-50 rounded-lg p-6">
+                                <h3 class="text-xl font-bold text-indigo-800 mb-2" data-lang-key="featuresDevTitle">開發者模式 (Developer Mode)</h3>
+                                <p class="text-indigo-900" data-lang-key="featuresDevDesc">對於 App 開發者來說，這是一個超棒的功能。GeoPort 可以一鍵為您的 iOS 裝置啟用「開發者模式」，讓您能更方便地進行各種基於地理位置的測試。</p>
+                                <p class="mt-3 text-sm text-slate-600" data-lang-key="featuresDevNote">注意：啟用時可能需要暫時移除裝置密碼。</p>
+                            </div>
+                             <div class="bg-emerald-50 rounded-lg p-6">
+                                <h3 class="text-xl font-bold text-emerald-800 mb-2" data-lang-key="featuresFuelTitle">燃油模式 (Fuel Mode) - 澳洲限定 🇦🇺</h3>
+                                <p class="text-emerald-900" data-lang-key="featuresFuelDesc">這是一個專為澳洲使用者設計的貼心功能，可以幫您在地圖上快速找到澳洲各地的最優燃油價格，省下您的荷包！</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <footer class="text-center mt-8">
+            <p class="text-sm text-slate-500" data-lang-key="footer">此互動教學基於 GeoPort 官方文件製作。</p>
+        </footer>
+    </div>
+
+    <script>
+        const translations = {
+            'zh-Hant': {
+                pageTitle: 'GeoPort 互動式教學',
+                headerSubtitle: '您的全球定位嚮導',
+                navIntro: '🚀 應用介紹',
+                navSetup: '✅ 事前準備',
+                navUsage: '🗺️ 開始使用',
+                navFeatures: '⚙️ 進階功能',
+                introTitle: '歡迎來到 GeoPort 的世界！',
+                introP1: '想讓您的 iPhone 出現在世界任何一個角落嗎？無論是想在社群媒體上開個小玩笑、探索不同國家的 Pokémon GO 熱點，或是測試您開發的 App，<strong>GeoPort</strong> 都是您的最佳選擇。',
+                introP2: '它是一款功能強大且操作簡單的桌面應用程式，讓您在電腦上就能輕鬆修改 iOS 裝置的 GPS 定位。這份互動教學將帶您一步一步完成所有設定，即使是電腦新手也能輕鬆上手！',
+                introTip: '點擊上方的頁籤，開始您的虛擬環球之旅吧！',
+                setupTitle: '開始前的準備清單',
+                setupP1: '在開始之前，請確認您已經準備好以下幾樣東西。完成一項就在前方框格中打勾吧！',
+                setupCheck1: '一部 iOS 裝置 (iPhone / iPad)',
+                setupCheck2: '一部電腦 (Windows / Mac)',
+                setupCheck3: '一條 USB 傳輸線',
+                setupWinTitle: 'Windows 使用者請注意！',
+                setupWinP1: '您必須先從 <a href="https://www.apple.com/itunes/" target="_blank" class="font-semibold underline">Apple 官網</a>下載並安裝 iTunes。我們需要的是它附帶的驅動程式，這樣您的電腦才能辨識到 iPhone。',
+                usageTitle: '開始模擬定位 (Step-by-Step)',
+                usageP1: '準備工作都完成了，現在讓我們跟著以下五個簡單的步驟，開始進行定位模擬吧！',
+                usageStep1Title: '1. 連接您的裝置 🔌',
+                usageStep1Desc: '用 USB 線連接 iPhone/iPad 到電腦，並在手機上點選「信任」。',
+                usageStep2Title: '2. 啟動 GeoPort 🖥️',
+                usageStep2Desc: '打開安裝好的 GeoPort 應用程式，它會自動偵測您的裝置。',
+                usageStep3Title: '3. 選擇虛擬位置 📍',
+                usageStep3Desc: '在地圖上點擊，或用搜尋框找到您想「前往」的地點。',
+                usageStep4Title: '4. 開始模擬 🚀',
+                usageStep4Desc: '點擊 "Simulate Location" 按鈕，您的定位就修改成功了！',
+                usageStep5Title: '5. 停止模擬 ⏹️',
+                usageStep5Desc: '想恢復真實位置時，只需點擊 "Stop Location" 按鈕即可。',
+                featuresTitle: '探索進階功能',
+                featuresP1: '除了基本的定位模擬，GeoPort 還提供了一些非常實用的進階功能，讓它成為開發者與特定使用者的好幫手。',
+                featuresDevTitle: '開發者模式 (Developer Mode)',
+                featuresDevDesc: '對於 App 開發者來說，這是一個超棒的功能。GeoPort 可以一鍵為您的 iOS 裝置啟用「開發者模式」，讓您能更方便地進行各種基於地理位置的測試。',
+                featuresDevNote: '注意：啟用時可能需要暫時移除裝置密碼。',
+                featuresFuelTitle: '燃油模式 (Fuel Mode) - 澳洲限定 🇦🇺',
+                featuresFuelDesc: '這是一個專為澳洲使用者設計的貼心功能，可以幫您在地圖上快速找到澳洲各地的最優燃油價格，省下您的荷包！',
+                footer: '此互動教學基於 GeoPort 官方文件製作。',
+            },
+            'en': {
+                pageTitle: 'GeoPort Interactive Tutorial',
+                headerSubtitle: 'Your Global Location Guide',
+                navIntro: '🚀 Introduction',
+                navSetup: '✅ Setup',
+                navUsage: '🗺️ Getting Started',
+                navFeatures: '⚙️ Advanced Features',
+                introTitle: 'Welcome to the World of GeoPort!',
+                introP1: 'Want to make your iPhone appear anywhere in the world? Whether you want to play a little joke on social media, explore Pokémon GO hotspots in different countries, or test your app, <strong>GeoPort</strong> is your best choice.',
+                introP2: 'It\'s a powerful and easy-to-use desktop application that lets you easily modify your iOS device\'s GPS location from your computer. This interactive tutorial will guide you through all the settings step-by-step, making it easy even for computer novices!',
+                introTip: 'Click the tabs above to start your virtual world tour!',
+                setupTitle: 'Pre-flight Checklist',
+                setupP1: 'Before you begin, please make sure you have the following items ready. Check them off as you go!',
+                setupCheck1: 'An iOS Device (iPhone / iPad)',
+                setupCheck2: 'A Computer (Windows / Mac)',
+                setupCheck3: 'A USB Cable',
+                setupWinTitle: 'Attention Windows Users!',
+                setupWinP1: 'You must first download and install iTunes from the <a href="https://www.apple.com/itunes/" target="_blank" class="font-semibold underline">official Apple website</a>. We need the drivers it includes for your computer to recognize your iPhone.',
+                usageTitle: 'Getting Started (Step-by-Step)',
+                usageP1: 'With preparations complete, let\'s follow these five simple steps to start spoofing your location!',
+                usageStep1Title: '1. Connect Your Device 🔌',
+                usageStep1Desc: 'Connect your iPhone/iPad to the computer with a USB cable and tap "Trust" on your device.',
+                usageStep2Title: '2. Launch GeoPort 🖥️',
+                usageStep2Desc: 'Open the installed GeoPort application; it will automatically detect your device.',
+                usageStep3Title: '3. Choose a Virtual Location 📍',
+                usageStep3Desc: 'Click on the map or use the search box to find the location you want to "teleport" to.',
+                usageStep4Title: '4. Start Simulating 🚀',
+                usageStep4Desc: 'Click the "Simulate Location" button, and your location will be successfully changed!',
+                usageStep5Title: '5. Stop Simulating ⏹️',
+                usageStep5Desc: 'When you want to return to your real location, just click the "Stop Location" button.',
+                featuresTitle: 'Explore Advanced Features',
+                featuresP1: 'Beyond basic location spoofing, GeoPort offers some very useful advanced features, making it a great helper for developers and specific users.',
+                featuresDevTitle: 'Developer Mode',
+                featuresDevDesc: 'This is a fantastic feature for app developers. GeoPort can enable "Developer Mode" on your iOS device with one click, making it easier to conduct various location-based tests.',
+                featuresDevNote: 'Note: You may need to temporarily remove your device passcode to enable it.',
+                featuresFuelTitle: 'Fuel Mode - Australia Only 🇦🇺',
+                featuresFuelDesc: 'This is a thoughtful feature designed for Australian users, helping you quickly find the best fuel prices across the country, saving you money!',
+                footer: 'This interactive tutorial is based on the official GeoPort documentation.',
+            }
+        };
+
+        let currentLang = 'zh-Hant';
+
+        const switchLanguage = (lang) => {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.title = translations[lang].pageTitle;
+            
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+        };
+
+        document.querySelector('.lang-switcher').addEventListener('click', (e) => {
+            if (e.target.matches('.lang-btn')) {
+                const lang = e.target.dataset.lang;
+                if (lang !== currentLang) {
+                    switchLanguage(lang);
+                }
+            }
+        });
+
+        const tabNav = document.getElementById('tab-nav');
+        const tabContent = document.getElementById('tab-content');
+        const tabs = tabNav.querySelectorAll('.tab-btn');
+        const panels = tabContent.querySelectorAll('.tab-panel');
+
+        tabNav.addEventListener('click', (e) => {
+            if (e.target.matches('.tab-btn')) {
+                const tabId = e.target.dataset.tab;
+
+                tabs.forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                panels.forEach(panel => {
+                    panel.classList.remove('active');
+                });
+
+                e.target.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            }
+        });
+
+        // Initial language setup
+        switchLanguage('zh-Hant');
+    </script>
+</body>
+</html>
