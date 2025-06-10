@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：人工智慧浪潮下的未來 | Interactive Report: The Future in the Age of AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A0522D;
+            border-bottom-color: #A0522D;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #A0522D;
+            color: white;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+</head>
+<body x-data="{ currentLang: 'zh', activeSection: 'home' }" 
+      @scroll.window="
+        const sections = document.querySelectorAll('section');
+        let current = 'home';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (window.scrollY >= sectionTop - 100) {
+                current = section.id;
+            }
+        });
+        activeSection = current;
+      "
+      x-init="updatePageForLanguage(currentLang)">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="text-2xl font-bold text-sienna-800" style="color:#A0522D;" data-lang-key="nav_title">AI與未來工作</a>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" :class="{ 'active': activeSection === 'overview' }" data-lang-key="nav_overview">概覽</a>
+                            <a href="#impact" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" :class="{ 'active': activeSection === 'impact' }" data-lang-key="nav_impact">影響版圖</a>
+                            <a href="#adaptation" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" :class="{ 'active': activeSection === 'adaptation' }" data-lang-key="nav_adaptation">個人應對</a>
+                            <a href="#society" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" :class="{ 'active': activeSection === 'society' }" data-lang-key="nav_society">社會對策</a>
+                            <a href="#meaning" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" :class="{ 'active': activeSection === 'meaning' }" data-lang-key="nav_meaning">未來意義</a>
+                        </div>
+                    </div>
+                    <button id="lang-switcher" @click="currentLang = (currentLang === 'en' ? 'zh' : 'en'); updatePageForLanguage(currentLang)" class="ml-4 px-3 py-1.5 text-sm font-medium text-gray-700 border rounded-md hover:bg-gray-100 transition-colors">
+                        <span x-text="currentLang === 'en' ? '中文' : 'English'"></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="home" class="min-h-[calc(100vh-4rem)] flex items-center">
+            <div class="w-full text-center">
+                <h1 class="text-4xl md:text-6xl font-bold tracking-tight" style="color: #3D2B1F;" data-lang-key="home_title">
+                    AI會搶走我們的工作嗎？
+                </h1>
+                <p class="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="home_subtitle">
+                    之後我們人類會怎樣？這份互動報告將帶您深入剖析人工智慧對就業、社會及個人的全面影響，並一同探索在AI時代下，人類如何找到新的定位與意義。
+                </p>
+                <div class="mt-10">
+                    <a href="#overview" class="inline-block text-white font-bold py-3 px-8 rounded-full text-lg transition-colors" style="background-color: #A0522D; hover:background-color: #8B4513;" data-lang-key="home_cta">
+                        開始探索
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="overview" class="py-16 md:py-24">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold" style="color: #3D2B1F;" data-lang-key="overview_title">概覽：挑戰與機遇並存</h2>
+                <p class="mt-4 text-lg text-gray-600" data-lang-key="overview_subtitle">AI對就業市場的影響並非單純的「取代」，而是一場複雜的轉型。數據揭示了其雙重性：一方面淘汰舊有崗位，另一方面也催生了更多新的工作機會。這是一場「先破壞後創造」的結構性調整。</p>
+            </div>
+            <div class="mt-12 grid md:grid-cols-3 gap-8 text-center">
+                <div class="card p-8">
+                    <h3 class="text-5xl font-bold" style="color:#CD5C5C;" id="jobs-lost">0</h3>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="overview_jobs_lost_unit">萬個工作崗位</p>
+                    <p class="mt-1 text-gray-500" data-lang-key="overview_jobs_lost_desc">預計到2025年可能被淘汰</p>
+                </div>
+                <div class="card p-8">
+                    <h3 class="text-5xl font-bold" style="color:#3CB371;" id="jobs-created">0</h3>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="overview_jobs_created_unit">萬個新就業機會</p>
+                    <p class="mt-1 text-gray-500" data-lang-key="overview_jobs_created_desc">預計到2030年可能被創造</p>
+                </div>
+                <div class="card p-8">
+                    <h3 class="text-5xl font-bold" style="color:#A0522D;" id="net-growth">0</h3>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="overview_net_growth_unit">萬個淨增長崗位</p>
+                    <p class="mt-1 text-gray-500" data-lang-key="overview_net_growth_desc">工作機會的總體趨勢</p>
+                </div>
+            </div>
+            <div class="mt-12">
+                <div class="card p-4 sm:p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="overview_chart_title">就業變動趨勢圖</h3>
+                     <div class="chart-container">
+                        <canvas id="jobChangeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16 md:py-24 bg-stone-50 rounded-2xl">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold" style="color: #3D2B1F;" data-lang-key="impact_title">影響版圖：誰的未來受到衝擊？</h2>
+                <p class="mt-4 text-lg text-gray-600" data-lang-key="impact_subtitle">AI的衝擊並非均等，它加劇了勞動市場的兩極化。重複性、規律性的工作面臨高風險，而依賴人類獨特能力的職業則相對穩固。低薪與低學歷者是這波浪潮中受影響最嚴重的群體。</p>
+            </div>
+
+            <div class="mt-12" x-data="{ activeTab: 'high' }">
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-center mb-6" data-lang-key="impact_risk_title">各類職業的自動化風險</h3>
+                    <div class="flex flex-wrap justify-center gap-2 mb-6">
+                        <button @click="activeTab = 'high'" :class="{ 'active': activeTab === 'high' }" class="tab-button px-4 py-2 rounded-full font-semibold bg-gray-200 text-gray-700" data-lang-key="impact_tab_high">高度風險</button>
+                        <button @click="activeTab = 'medium'" :class="{ 'active': activeTab === 'medium' }" class="tab-button px-4 py-2 rounded-full font-semibold bg-gray-200 text-gray-700" data-lang-key="impact_tab_medium">中度風險/需轉型</button>
+                        <button @click="activeTab = 'low'" :class="{ 'active': activeTab === 'low' }" class="tab-button px-4 py-2 rounded-full font-semibold bg-gray-200 text-gray-700" data-lang-key="impact_tab_low">較低風險/AI輔助</button>
+                        <button @click="activeTab = 'new'" :class="{ 'active': activeTab === 'new' }" class="tab-button px-4 py-2 rounded-full font-semibold bg-gray-200 text-gray-700" data-lang-key="impact_tab_new">新興職業</button>
+                    </div>
+
+                    <div x-show="activeTab === 'high'" x-cloak>
+                        <h4 class="font-bold text-lg mb-2 text-red-600" data-lang-key="impact_high_risk_title">高度自動化風險</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="impact_high_risk_desc">任務重複性高、流程標準化、依賴規則導向的決策。</p>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_admin">文書行政</span>
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_data_entry">資料登錄員</span>
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_assembly">生產線組裝員</span>
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_warehouse">倉庫工人</span>
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_cashier">收銀員</span>
+                            <span class="bg-red-100 text-red-800 p-2 rounded" data-lang-key="job_customer_service">基礎客服</span>
+                        </div>
+                    </div>
+
+                    <div x-show="activeTab === 'medium'" x-cloak>
+                        <h4 class="font-bold text-lg mb-2 text-yellow-600" data-lang-key="impact_medium_risk_title">中度風險/面臨轉型</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="impact_medium_risk_desc">部分任務可被自動化，但仍需人類判斷、溝通或處理複雜情境。</p>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+                           <span class="bg-yellow-100 text-yellow-800 p-2 rounded" data-lang-key="job_accountant">會計師(基礎記帳)</span>
+                           <span class="bg-yellow-100 text-yellow-800 p-2 rounded" data-lang-key="job_reporter">新聞記者(快訊)</span>
+                           <span class="bg-yellow-100 text-yellow-800 p-2 rounded" data-lang-key="job_bank_teller">銀行櫃員</span>
+                           <span class="bg-yellow-100 text-yellow-800 p-2 rounded" data-lang-key="job_truck_driver">卡車司機</span>
+                        </div>
+                    </div>
+
+                    <div x-show="activeTab === 'low'" x-cloak>
+                         <h4 class="font-bold text-lg mb-2 text-green-600" data-lang-key="impact_low_risk_title">較低風險/AI輔助為主</h4>
+                         <p class="text-gray-600 mb-4" data-lang-key="impact_low_risk_desc">依賴複雜問題解決、創造力、同理心、人際溝通等AI難以複製的人類特質。</p>
+                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+                            <span class="bg-green-100 text-green-800 p-2 rounded" data-lang-key="job_teacher">教師</span>
+                            <span class="bg-green-100 text-green-800 p-2 rounded" data-lang-key="job_doctor_nurse">醫生/護士</span>
+                            <span class="bg-green-100 text-green-800 p-2 rounded" data-lang-key="job_counselor">心理諮詢師</span>
+                            <span class="bg-green-100 text-green-800 p-2 rounded" data-lang-key="job_lawyer">律師(策略辯護)</span>
+                            <span class="bg-green-100 text-green-800 p-2 rounded" data-lang-key="job_manager">高階管理人</span>
+                        </div>
+                    </div>
+
+                    <div x-show="activeTab === 'new'" x-cloak>
+                        <h4 class="font-bold text-lg mb-2 text-blue-600" data-lang-key="impact_new_jobs_title">新興職業角色</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="impact_new_jobs_desc">圍繞AI技術的設計、開發、部署、管理、應用和倫理規範而產生。</p>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 text-sm">
+                           <span class="bg-blue-100 text-blue-800 p-2 rounded" data-lang-key="job_ai_ethicist">AI倫理師</span>
+                           <span class="bg-blue-100 text-blue-800 p-2 rounded" data-lang-key="job_ai_trainer">AI訓練師</span>
+                           <span class="bg-blue-100 text-blue-800 p-2 rounded" data-lang-key="job_data_scientist">資料科學家</span>
+                           <span class="bg-blue-100 text-blue-800 p-2 rounded" data-lang-key="job_hci_designer">人機協作設計師</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 grid lg:grid-cols-2 gap-8">
+                <div class="card p-4 sm:p-6 md:p-8">
+                     <h3 class="text-xl font-bold text-center mb-4" data-lang-key="impact_edu_chart_title">自動化風險 vs 教育程度 (OECD)</h3>
+                     <div class="chart-container">
+                        <canvas id="educationRiskChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-4 sm:p-6 md:p-8">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="impact_wage_chart_title">自動化風險 vs 薪資水平 (OECD)</h3>
+                    <div class="chart-container">
+                        <canvas id="wageRiskChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="adaptation" class="py-16 md:py-24">
+             <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold" style="color: #3D2B1F;" data-lang-key="adaptation_title">個人應對：打造我們的AI時代生存工具箱</h2>
+                <p class="mt-4 text-lg text-gray-600" data-lang-key="adaptation_subtitle">面對變革，人類的應對之道在於培養AI難以複製的「元技能」。這些核心素養超越了特定技術，是我們在動態未來中保持價值與競爭力的關鍵。終身學習不再是口號，而是生存的根本要求。</p>
+            </div>
+            <div class="mt-12" x-data="skills()">
+                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <template x-for="(skill, index) in skillData" :key="index">
+                        <div class="card p-6 cursor-pointer text-center" @click="toggle(index)">
+                             <p class="text-5xl mb-3" x-text="skill.icon"></p>
+                            <h3 class="text-xl font-bold" x-text="skill.title[currentLang]" style="color: #A0522D;"></h3>
+                            <p class="mt-2 text-gray-600 text-sm" x-text="skill.description[currentLang]"></p>
+                            <div x-show="skill.open" x-cloak x-transition class="mt-4 border-t pt-4 text-left">
+                                <h4 class="font-semibold mb-2" data-lang-key="adaptation_key_abilities">關鍵能力：</h4>
+                                <ul class="list-disc list-inside text-gray-600 space-y-1 text-sm">
+                                    <template x-for="item in skill.items[currentLang]" :key="item">
+                                        <li x-text="item"></li>
+                                    </template>
+                                </ul>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <section id="society" class="py-16 md:py-24 bg-stone-50 rounded-2xl">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold" style="color: #3D2B1F;" data-lang-key="society_title">社會對策：探索新的安全網與治理</h2>
+                <p class="mt-4 text-lg text-gray-600" data-lang-key="society_subtitle">AI革命不僅挑戰個人，也衝擊著社會結構。我們需要探索新的政策框架以保障公民福祉、促進公平。這是一場需要政府、企業與公民社會共同參與的系統性工程。</p>
+            </div>
+            <div class="mt-12 max-w-5xl mx-auto">
+                 <h3 class="text-2xl font-bold text-center mb-8" data-lang-key="society_ubi_title">全民基本收入 (UBI) 的正反探討</h3>
+                 <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card p-6">
+                        <h4 class="text-lg font-bold text-green-700 flex items-center mb-3">
+                            <span class="text-2xl mr-2">✔️</span>
+                            <span data-lang-key="society_ubi_pros_title">潛在益處</span>
+                        </h4>
+                        <ul class="space-y-3 text-gray-700">
+                            <li data-lang-key="society_ubi_pro_1"><strong>減少貧困與不平等：</strong> 提供基本生活保障，縮小貧富差距。</li>
+                            <li data-lang-key="society_ubi_pro_2"><strong>提升經濟安全感：</strong> 為失業者或非典型工作者提供緩衝。</li>
+                            <li data-lang-key="society_ubi_pro_3"><strong>支持創業與再培訓：</strong> 使人們有能力承擔轉型風險。</li>
+                            <li data-lang-key="society_ubi_pro_4"><strong>改善身心健康與福祉：</strong> 部分實驗顯示有積極影響。</li>
+                        </ul>
+                    </div>
+                     <div class="card p-6">
+                        <h4 class="text-lg font-bold text-red-700 flex items-center mb-3">
+                           <span class="text-2xl mr-2">❌</span>
+                           <span data-lang-key="society_ubi_cons_title">潛在挑戰</span>
+                        </h4>
+                        <ul class="space-y-3 text-gray-700">
+                            <li data-lang-key="society_ubi_con_1"><strong>成本過高，財政難以負擔：</strong> 可能導致稅負大幅增加。</li>
+                            <li data-lang-key="society_ubi_con_2"><strong>降低工作意願：</strong> 可能影響整體勞動力供給和職業道德。</li>
+                            <li data-lang-key="society_ubi_con_3"><strong>引發通貨膨脹：</strong> 大規模現金注入可能推高物價。</li>
+                            <li data-lang-key="society_ubi_con_4"><strong>政治可行性低：</strong> 作為激進政策，難以達成社會共識。</li>
+                        </ul>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="meaning" class="py-16 md:py-24">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold" style="color: #3D2B1F;" data-lang-key="meaning_title">未來意義：在後工作時代尋找目標</h2>
+                <p class="mt-4 text-lg text-gray-600" data-lang-key="meaning_subtitle">AI的影響觸及我們對目標、身份和價值的根本叩問。當「工作」不再是生活的唯一核心，我們將如何定義自我，又從何處尋找生命的意義？這是一場深刻的文化再造工程。</p>
+            </div>
+
+            <div class="mt-12 grid md:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3" style="color: #A0522D;" data-lang-key="meaning_card_1_title">身份危機</h3>
+                    <p class="text-gray-600" data-lang-key="meaning_card_1_desc">工作不僅是謀生，更是身份認同與社會連結的來源。大規模失業可能動搖個體的心理支柱，引發「失範」(Anomie) 風險，即因社會規範崩潰而失去方向感。</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3" style="color: #A0522D;" data-lang-key="meaning_card_2_title">尋找新意義</h3>
+                    <p class="text-gray-600" data-lang-key="meaning_card_2_desc">擺脫枯燥工作，可能意味著有更多機會追求有意義的生活。人們可在藝術、學術、志願服務、家庭社群中培養技能、做出貢獻，體驗生命的充實。</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-3" style="color: #A0522D;" data-lang-key="meaning_card_3_title">人際連結</h3>
+                    <p class="text-gray-600" data-lang-key="meaning_card_3_desc">過度依賴AI社交可能削弱現實世界的溝通能力。在工作場所的社交功能減弱後，我們需更有意識地開闢和維護真實的社會連結，以鞏固社會凝聚力。</p>
+                </div>
+            </div>
+             <div class="mt-12 card p-8 bg-amber-50 border border-amber-200">
+                <h3 class="text-xl font-bold text-center mb-4" style="color: #8B4513;" data-lang-key="meaning_quotes_title">思想家洞察</h3>
+                <div class="grid md:grid-cols-2 gap-6 text-center">
+                    <div>
+                        <p class="font-semibold text-lg">Yuval Noah Harari</p>
+                        <blockquote class="mt-2 text-gray-700 italic" data-lang-key="meaning_quote_1">"我們應該在演算法為我們做出所有決定之前，盡快了解自己的心靈。"</blockquote>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-lg">Kevin Kelly</p>
+                         <blockquote class="mt-2 text-gray-700 italic" data-lang-key="meaning_quote_2">"未來的工作是人類與AI協作，而非對抗。我們的工作將是管理和運用各種專業化的AI。"</blockquote>
+                    </div>
+                </div>
+             </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p data-lang-key="footer_line_1">這是一份基於《AI 與人類未來工作》報告創建的互動式網頁應用。</p>
+            <p class="mt-1" data-lang-key="footer_line_2">所有內容僅供學術探討與教育目的使用。</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- START: TRANSLATION & GLOBAL STATE ---
+        const translations = {
+            zh: {
+                title: "互動式報告：人工智慧浪潮下的未來",
+                nav_title: "AI與未來工作",
+                nav_overview: "概覽",
+                nav_impact: "影響版圖",
+                nav_adaptation: "個人應對",
+                nav_society: "社會對策",
+                nav_meaning: "未來意義",
+                home_title: "AI會搶走我們的工作嗎？",
+                home_subtitle: "之後我們人類會怎樣？這份互動報告將帶您深入剖析人工智慧對就業、社會及個人的全面影響，並一同探索在AI時代下，人類如何找到新的定位與意義。",
+                home_cta: "開始探索",
+                overview_title: "概覽：挑戰與機遇並存",
+                overview_subtitle: "AI對就業市場的影響並非單純的「取代」，而是一場複雜的轉型。數據揭示了其雙重性：一方面淘汰舊有崗位，另一方面也催生了更多新的工作機會。這是一場「先破壞後創造」的結構性調整。",
+                overview_jobs_lost_unit: "萬個工作崗位",
+                overview_jobs_lost_desc: "預計到2025年可能被淘汰",
+                overview_jobs_created_unit: "萬個新就業機會",
+                overview_jobs_created_desc: "預計到2030年可能被創造",
+                overview_net_growth_unit: "萬個淨增長崗位",
+                overview_net_growth_desc: "工作機會的總體趨勢",
+                overview_chart_title: "就業變動趨勢圖",
+                chart_jobChange_labels: ['淘汰崗位', '新增崗位', '淨增長'],
+                chart_jobChange_datasetLabel: "數量 (萬)",
+                impact_title: "影響版圖：誰的未來受到衝擊？",
+                impact_subtitle: "AI的衝擊並非均等，它加劇了勞動市場的兩極化。重複性、規律性的工作面臨高風險，而依賴人類獨特能力的職業則相對穩固。低薪與低學歷者是這波浪潮中受影響最嚴重的群體。",
+                impact_risk_title: "各類職業的自動化風險",
+                impact_tab_high: "高度風險",
+                impact_tab_medium: "中度風險/需轉型",
+                impact_tab_low: "較低風險/AI輔助",
+                impact_tab_new: "新興職業",
+                impact_high_risk_title: "高度自動化風險",
+                impact_high_risk_desc: "任務重複性高、流程標準化、依賴規則導向的決策。",
+                job_admin: "文書行政",
+                job_data_entry: "資料登錄員",
+                job_assembly: "生產線組裝員",
+                job_warehouse: "倉庫工人",
+                job_cashier: "收銀員",
+                job_customer_service: "基礎客服",
+                impact_medium_risk_title: "中度風險/面臨轉型",
+                impact_medium_risk_desc: "部分任務可被自動化，但仍需人類判斷、溝通或處理複雜情境。",
+                job_accountant: "會計師(基礎記帳)",
+                job_reporter: "新聞記者(快訊)",
+                job_bank_teller: "銀行櫃員",
+                job_truck_driver: "卡車司機",
+                impact_low_risk_title: "較低風險/AI輔助為主",
+                impact_low_risk_desc: "依賴複雜問題解決、創造力、同理心、人際溝通等AI難以複製的人類特質。",
+                job_teacher: "教師",
+                job_doctor_nurse: "醫生/護士",
+                job_counselor: "心理諮詢師",
+                job_lawyer: "律師(策略辯護)",
+                job_manager: "高階管理人",
+                impact_new_jobs_title: "新興職業角色",
+                impact_new_jobs_desc: "圍繞AI技術的設計、開發、部署、管理、應用和倫理規範而產生。",
+                job_ai_ethicist: "AI倫理師",
+                job_ai_trainer: "AI訓練師",
+                job_data_scientist: "資料科學家",
+                job_hci_designer: "人機協作設計師",
+                impact_edu_chart_title: "自動化風險 vs 教育程度 (OECD)",
+                chart_edu_risk_labels: ['未達高中', '高中', '大學'],
+                chart_risk_datasetLabel: "被取代機率 (%)",
+                impact_wage_chart_title: "自動化風險 vs 薪資水平 (OECD)",
+                chart_wage_risk_labels: ['時薪 < $20', '時薪 > $40'],
+                adaptation_title: "個人應對：打造我們的AI時代生存工具箱",
+                adaptation_subtitle: "面對變革，人類的應對之道在於培養AI難以複製的「元技能」。這些核心素養超越了特定技術，是我們在動態未來中保持價值與競爭力的關鍵。終身學習不再是口號，而是生存的根本要求。",
+                adaptation_key_abilities: "關鍵能力：",
+                society_title: "社會對策：探索新的安全網與治理",
+                society_subtitle: "AI革命不僅挑戰個人，也衝擊著社會結構。我們需要探索新的政策框架以保障公民福祉、促進公平。這是一場需要政府、企業與公民社會共同參與的系統性工程。",
+                society_ubi_title: "全民基本收入 (UBI) 的正反探討",
+                society_ubi_pros_title: "潛在益處",
+                society_ubi_pro_1: "<strong>減少貧困與不平等：</strong> 提供基本生活保障，縮小貧富差距。",
+                society_ubi_pro_2: "<strong>提升經濟安全感：</strong> 為失業者或非典型工作者提供緩衝。",
+                society_ubi_pro_3: "<strong>支持創業與再培訓：</strong> 使人們有能力承擔轉型風險。",
+                society_ubi_pro_4: "<strong>改善身心健康與福祉：</strong> 部分實驗顯示有積極影響。",
+                society_ubi_cons_title: "潛在挑戰",
+                society_ubi_con_1: "<strong>成本過高，財政難以負擔：</strong> 可能導致稅負大幅增加。",
+                society_ubi_con_2: "<strong>降低工作意願：</strong> 可能影響整體勞動力供給和職業道德。",
+                society_ubi_con_3: "<strong>引發通貨膨脹：</strong> 大規模現金注入可能推高物價。",
+                society_ubi_con_4: "<strong>政治可行性低：</strong> 作為激進政策，難以達成社會共識。",
+                meaning_title: "未來意義：在後工作時代尋找目標",
+                meaning_subtitle: "AI的影響觸及我們對目標、身份和價值的根本叩問。當「工作」不再是生活的唯一核心，我們將如何定義自我，又從何處尋找生命的意義？這是一場深刻的文化再造工程。",
+                meaning_card_1_title: "身份危機",
+                meaning_card_1_desc: "工作不僅是謀生，更是身份認同與社會連結的來源。大規模失業可能動搖個體的心理支柱，引發「失範」(Anomie) 風險，即因社會規範崩潰而失去方向感。",
+                meaning_card_2_title: "尋找新意義",
+                meaning_card_2_desc: "擺脫枯燥工作，可能意味著有更多機會追求有意義的生活。人們可在藝術、學術、志願服務、家庭社群中培養技能、做出貢獻，體驗生命的充實。",
+                meaning_card_3_title: "人際連結",
+                meaning_card_3_desc: "過度依賴AI社交可能削弱現實世界的溝通能力。在工作場所的社交功能減弱後，我們需更有意識地開闢和維護真實的社會連結，以鞏固社會凝聚力。",
+                meaning_quotes_title: "思想家洞察",
+                meaning_quote_1: "\"我們應該在演算法為我們做出所有決定之前，盡快了解自己的心靈。\"",
+                meaning_quote_2: "\"未來的工作是人類與AI協作，而非對抗。我們的工作將是管理和運用各種專業化的AI。\"",
+                footer_line_1: "這是一份基於《AI 與人類未來工作》報告創建的互動式網頁應用。",
+                footer_line_2: "所有內容僅供學術探討與教育目的使用。",
+            },
+            en: {
+                title: "Interactive Report: The Future in the Age of AI",
+                nav_title: "AI & Future Work",
+                nav_overview: "Overview",
+                nav_impact: "Impact Map",
+                nav_adaptation: "Adaptation",
+                nav_society: "Society",
+                nav_meaning: "Meaning",
+                home_title: "Will AI Take Our Jobs?",
+                home_subtitle: "What will happen to us humans? This interactive report will guide you through the comprehensive impact of AI on employment, society, and individuals, and explore how humanity can find its new place and meaning in the AI era.",
+                home_cta: "Start Exploring",
+                overview_title: "Overview: Challenges and Opportunities",
+                overview_subtitle: "The impact of AI on the job market is not a simple 'replacement' but a complex transformation. Data reveals its dual nature: eliminating old positions while creating more new job opportunities. This is a structural adjustment of 'creative destruction'.",
+                overview_jobs_lost_unit: "Million Jobs",
+                overview_jobs_lost_desc: "Projected to be displaced by 2025",
+                overview_jobs_created_unit: "Million New Roles",
+                overview_jobs_created_desc: "Projected to be created by 2030",
+                overview_net_growth_unit: "Million Net Growth",
+                overview_net_growth_desc: "The overall trend in job opportunities",
+                overview_chart_title: "Job Change Trends",
+                chart_jobChange_labels: ['Displaced', 'Created', 'Net Growth'],
+                chart_jobChange_datasetLabel: "Jobs (in Ten Thousands)",
+                impact_title: "Impact Map: Whose Future Is at Stake?",
+                impact_subtitle: "The impact of AI is not uniform; it exacerbates labor market polarization. Repetitive, routine jobs face high risks, while occupations relying on unique human abilities are relatively stable. Low-wage and less-educated workers are the most affected groups.",
+                impact_risk_title: "Automation Risk by Occupation",
+                impact_tab_high: "High Risk",
+                impact_tab_medium: "Medium Risk / Transformation",
+                impact_tab_low: "Lower Risk / AI-Assisted",
+                impact_tab_new: "Emerging Roles",
+                impact_high_risk_title: "High Automation Risk",
+                impact_high_risk_desc: "Tasks are highly repetitive, standardized, and rely on rule-based decisions.",
+                job_admin: "Administrative Work",
+                job_data_entry: "Data Entry Clerks",
+                job_assembly: "Assembly Line Workers",
+                job_warehouse: "Warehouse Workers",
+                job_cashier: "Cashiers",
+                job_customer_service: "Basic Customer Service",
+                impact_medium_risk_title: "Medium Risk / Facing Transformation",
+                impact_medium_risk_desc: "Some tasks can be automated, but still require human judgment, communication, or handling of complex situations.",
+                job_accountant: "Accountants (basic bookkeeping)",
+                job_reporter: "Journalists (breaking news)",
+                job_bank_teller: "Bank Tellers",
+                job_truck_driver: "Truck Drivers",
+                impact_low_risk_title: "Lower Risk / Primarily AI-Assisted",
+                impact_low_risk_desc: "Relies on complex problem-solving, creativity, empathy, and interpersonal skills that AI struggles to replicate.",
+                job_teacher: "Teachers",
+                job_doctor_nurse: "Doctors/Nurses",
+                job_counselor: "Psychological Counselors",
+                job_lawyer: "Lawyers (strategic defense)",
+                job_manager: "Senior Managers",
+                impact_new_jobs_title: "Emerging Job Roles",
+                impact_new_jobs_desc: "Arising from the design, development, deployment, management, application, and ethical governance of AI technology.",
+                job_ai_ethicist: "AI Ethicist",
+                job_ai_trainer: "AI Trainer",
+                job_data_scientist: "Data Scientist",
+                job_hci_designer: "Human-AI Collaboration Designer",
+                impact_edu_chart_title: "Automation Risk vs. Education (OECD)",
+                chart_edu_risk_labels: ['Less than High School', 'High School', 'University'],
+                chart_risk_datasetLabel: "Probability of displacement (%)",
+                impact_wage_chart_title: "Automation Risk vs. Wage Level (OECD)",
+                chart_wage_risk_labels: ['Hourly Wage < $20', 'Hourly Wage > $40'],
+                adaptation_title: "Individual Adaptation: Building Our AI Survival Toolkit",
+                adaptation_subtitle: "To face the changes, the human response lies in cultivating 'meta-skills' that are difficult for AI to replicate. These core competencies transcend specific technologies and are key to maintaining our value and competitiveness in a dynamic future.",
+                adaptation_key_abilities: "Key Abilities:",
+                society_title: "Societal Solutions: Exploring New Safety Nets and Governance",
+                society_subtitle: "The AI revolution challenges not only individuals but also social structures. We need to explore new policy frameworks to ensure citizen welfare and promote fairness. This requires a systemic effort involving governments, businesses, and civil society.",
+                society_ubi_title: "The Debate on Universal Basic Income (UBI)",
+                society_ubi_pros_title: "Potential Benefits",
+                society_ubi_pro_1: "<strong>Reduce Poverty & Inequality:</strong> Provides a basic living standard, narrowing the wealth gap.",
+                society_ubi_pro_2: "<strong>Enhance Economic Security:</strong> Offers a buffer for the unemployed or gig workers.",
+                society_ubi_pro_3: "<strong>Support Entrepreneurship & Retraining:</strong> Enables people to take risks in career transitions.",
+                society_ubi_pro_4: "<strong>Improve Health & Well-being:</strong> Some trials show positive effects on physical and mental health.",
+                society_ubi_cons_title: "Potential Challenges",
+                society_ubi_con_1: "<strong>Prohibitive Cost & Fiscal Burden:</strong> May lead to significant tax increases.",
+                society_ubi_con_2: "<strong>Reduce Incentive to Work:</strong> Could affect labor supply and work ethic.",
+                society_ubi_con_3: "<strong>Risk of Inflation:</strong> Large-scale cash injections could drive up prices.",
+                society_ubi_con_4: "<strong>Low Political Feasibility:</strong> Difficult to achieve social consensus as a radical policy.",
+                meaning_title: "Future of Meaning: Finding Purpose in a Post-Work Era",
+                meaning_subtitle: "AI's impact touches upon fundamental questions about our purpose, identity, and values. When 'work' is no longer the sole core of life, how will we define ourselves, and where will we find the meaning of life? This is a profound cultural reinvention.",
+                meaning_card_1_title: "Identity Crisis",
+                meaning_card_1_desc: "Work is not just for a living; it's a source of identity and social connection. Mass unemployment could shake the psychological foundations of individuals, leading to a risk of 'anomie'—a sense of normlessness.",
+                meaning_card_2_title: "Finding New Meaning",
+                meaning_card_2_desc: "Freedom from tedious work could mean more opportunities to pursue a meaningful life. People can develop skills and contribute in arts, academics, volunteer services, and community, experiencing a fuller life.",
+                meaning_card_3_title: "Human Connection",
+                meaning_card_3_desc: "Over-reliance on AI for social interaction may weaken real-world communication skills. As the social function of the workplace diminishes, we must consciously create and maintain genuine social connections to strengthen social cohesion.",
+                meaning_quotes_title: "Insights from Thinkers",
+                meaning_quote_1: "\"We had better understand our own minds before the algorithms make our minds up for us.\"",
+                meaning_quote_2: "\"The future of work is a partnership with AIs, not a battle against them. Our job will be to manage and wield a team of specialized AIs.\"",
+                footer_line_1: "This is an interactive web application based on the 'AI and the Future of Human Work' report.",
+                footer_line_2: "All content is for academic discussion and educational purposes only.",
+            }
+        };
+
+        let chartInstances = {};
+
+        function updatePageForLanguage(lang) {
+            document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+            document.title = translations[lang].title;
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang][key]) {
+                    // Use innerHTML for keys that contain HTML tags (like strong)
+                    if (key.includes('ubi_pro') || key.includes('ubi_con')) {
+                       el.innerHTML = translations[lang][key];
+                    } else {
+                       el.innerText = translations[lang][key];
+                    }
+                }
+            });
+
+            destroyAllCharts();
+            createAllCharts(lang);
+        }
+        // --- END: TRANSLATION & GLOBAL STATE ---
+
+
+        function destroyAllCharts() {
+            Object.values(chartInstances).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            chartInstances = {};
+        }
+
+        function createAllCharts(lang = 'zh') {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.dataset.label}: ${context.raw.toLocaleString()}`,
+                        }
+                    }
+                },
+                 scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: { color: '#6b7280' },
+                        grid: { color: '#e5e7eb' }
+                    },
+                    x: {
+                        ticks: { color: '#6b7280' },
+                        grid: { display: false }
+                    }
+                }
+            };
+            
+            const jobChangeData = [9000, 17000, 7800];
+            const jobChangeLabels = translations[lang].chart_jobChange_labels;
+            const jobChangeDatasetLabel = lang === 'en' ? "Jobs (10k)" : "數量 (萬)";
+
+            const jobChangeCtx = document.getElementById('jobChangeChart').getContext('2d');
+            chartInstances.jobChange = new Chart(jobChangeCtx, {
+                type: 'bar',
+                data: {
+                    labels: jobChangeLabels,
+                    datasets: [{
+                        label: jobChangeDatasetLabel,
+                        data: jobChangeData,
+                        backgroundColor: [
+                            'rgba(205, 92, 92, 0.6)',
+                            'rgba(60, 179, 113, 0.6)',
+                            'rgba(160, 82, 45, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgb(205, 92, 92)',
+                            'rgb(60, 179, 113)',
+                            'rgb(160, 82, 45)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: { y: { ...chartOptions.scales.y, ticks: { callback: value => value / 1000 + 'k' } } }
+                }
+            });
+
+            const educationRiskCtx = document.getElementById('educationRiskChart').getContext('2d');
+            chartInstances.educationRisk = new Chart(educationRiskCtx, {
+                type: 'bar',
+                data: {
+                    labels: translations[lang].chart_edu_risk_labels,
+                    datasets: [{
+                        label: translations[lang].chart_risk_datasetLabel,
+                        data: [44, 19, 1],
+                        backgroundColor: 'rgba(139, 69, 19, 0.6)',
+                        borderColor: 'rgb(139, 69, 19)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    indexAxis: 'y', // Better for category comparison
+                    scales: { x: { ...chartOptions.scales.y, max: 100, ticks: { callback: value => value + '%' } } }
+                }
+            });
+
+            const wageRiskCtx = document.getElementById('wageRiskChart').getContext('2d');
+            chartInstances.wageRisk = new Chart(wageRiskCtx, {
+                type: 'bar',
+                data: {
+                    labels: translations[lang].chart_wage_risk_labels,
+                    datasets: [{
+                        label: translations[lang].chart_risk_datasetLabel,
+                        data: [83, 4],
+                        backgroundColor: 'rgba(210, 180, 140, 0.7)',
+                        borderColor: 'rgb(210, 180, 140)',
+                        borderWidth: 1
+                    }]
+                },
+                 options: {
+                    ...chartOptions,
+                    scales: { y: { ...chartOptions.scales.y, max: 100, ticks: { callback: value => value + '%' } } }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Animate numbers on scroll ---
+            function animateValue(obj, start, end, duration) {
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    const currentVal = Math.floor(progress * (end - start) + start);
+                    obj.innerHTML = currentVal.toLocaleString();
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+            
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const targetId = entry.target.id;
+                        if (targetId === 'jobs-lost') animateValue(entry.target, 0, 9000, 2000);
+                        if (targetId === 'jobs-created') animateValue(entry.target, 0, 17000, 2000);
+                        if (targetId === 'net-growth') animateValue(entry.target, 0, 7800, 2000);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, { threshold: 0.5 });
+            
+            observer.observe(document.getElementById('jobs-lost'));
+            observer.observe(document.getElementById('jobs-created'));
+            observer.observe(document.getElementById('net-growth'));
+        });
+        
+        // AlpineJS data for skills section
+        function skills() {
+            return {
+                // currentLang is now inherited from the body's x-data
+                skillData: [
+                    {
+                        icon: '🧭',
+                        title: { zh: '自主性', en: 'Autonomy' },
+                        description: { zh: '自我管理、動機與主動性。', en: 'Self-management, motivation, and initiative.' },
+                        open: false,
+                        items: { 
+                            zh: ['自我管理', '動機與自我覺察', '主動性'],
+                            en: ['Self-Management', 'Motivation & Self-Awareness', 'Initiative']
+                        }
+                    },
+                    {
+                        icon: '❤️',
+                        title: { zh: '感受性', en: 'Sensing' },
+                        description: { zh: '同理心與情緒智商。', en: 'Empathy and emotional intelligence.' },
+                        open: false,
+                        items: { 
+                            zh: ['自我認知', '直覺', '同理心', '情緒智商'],
+                            en: ['Self-Awareness', 'Intuition', 'Empathy', 'Emotional Intelligence']
+                        }
+                    },
+                    {
+                        icon: '🤝',
+                        title: { zh: '協同性', en: 'Synergy' },
+                        description: { zh: '溝通、合作與影響力。', en: 'Communication, collaboration, and influence.' },
+                        open: false,
+                        items: { 
+                            zh: ['複雜社交', '溝通協調', '積極傾聽', '領導力'],
+                            en: ['Complex Socializing', 'Communication', 'Active Listening', 'Leadership']
+                        }
+                    },
+                     {
+                        icon: '🚀',
+                        title: { zh: '學習性', en: 'Learnability' },
+                        description: { zh: '好奇心、終身學習與適應力。', en: 'Curiosity, lifelong learning, and adaptability.' },
+                        open: false,
+                        items: {
+                            zh: ['好奇心', '終身學習', '科技素養', '韌性與適應力'],
+                            en: ['Curiosity', 'Lifelong Learning', 'Tech Literacy', 'Resilience & Adaptability']
+                        }
+                    },
+                    {
+                        icon: '🧠',
+                        title: { zh: '創新性', en: 'Inventiveness' },
+                        description: { zh: '創造與批判性思維。', en: 'Creativity and critical thinking.' },
+                        open: false,
+                        items: { 
+                            zh: ['創造力', '分析思考', '批判思考', '意義建構'],
+                            en: ['Creativity', 'Analytical Thinking', 'Critical Thinking', 'Meaning Making']
+                        }
+                    }
+                ],
+                toggle(index) {
+                    this.skillData.forEach((skill, i) => {
+                        if (i === index) {
+                            skill.open = !skill.open;
+                        } else {
+                            skill.open = false;
+                        }
+                    });
+                }
+            }
+        }
+    </script>
+
+</body>
+</html>
