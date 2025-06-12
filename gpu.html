@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU 發展全史：互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .flowchart-node {
+            border: 2px solid;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+        }
+        .flowchart-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -31px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #FEE440;
+            border: 4px solid #111827;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+
+    <!-- 
+    Infographic Narrative Plan:
+    1.  **Header & Intro:** Hook with the importance of GPUs.
+    2.  **Section 1: Early Beginnings:** Use a timeline to show the progression from MDA to VGA.
+    3.  **Section 2: The Rise of 2D:** Use a flowchart to explain how 2D accelerators offloaded work from the CPU.
+    4.  **Section 3: The 3D Revolution:** Use a donut chart for the competitive landscape and big numbers for key innovations like the GeForce 256.
+    5.  **Section 4: Programmable Era:** Use a bar chart to compare fixed-function, separate, and unified shader architectures.
+    6.  **Section 5: Mobile GPUs:** Use a flowchart to contrast IMR vs. TBR and a radar chart to compare mobile GPU philosophies.
+    7.  **Section 6: GPGPU Emergence:** Use a stacked bar chart to show the growing impact of GPGPU in various fields.
+    8.  **Section 7: Future Outlook:** Use simple pictographs (Unicode) and text to highlight future trends like Chiplets and AI.
+    
+    Visualization Choices & Justification:
+    -   **Timeline (HTML/CSS):** Goal: Organize. Best for chronological data. No SVG.
+    -   **2D/Mobile Flowcharts (HTML/CSS):** Goal: Organize. Clearly visualizes processes. No SVG/Mermaid.
+    -   **3D Market Share Donut (Chart.js):** Goal: Compare. Shows composition of a competitive market simply. Canvas-based. No SVG.
+    -   **Shader Architecture Bar Chart (Chart.js):** Goal: Compare. Effectively compares abstract concepts (flexibility, efficiency) across discrete stages. Canvas-based. No SVG.
+    -   **Mobile Philosophy Radar Chart (Chart.js):** Goal: Compare. Ideal for multi-axis comparison of different vendors. Canvas-based. No SVG.
+    -   **GPGPU Impact Stacked Bar (Chart.js):** Goal: Compare. Shows composition and change over time across different application domains. Canvas-based. No SVG.
+    -   **Future Trends Pictograph (HTML/CSS):** Goal: Inform. Quick, symbolic representation of complex topics. No SVG.
+
+    Constraint Confirmation:
+    -   NEITHER Mermaid JS NOR SVG were used in this output. All charts are rendered via the Canvas API through Chart.js, and all diagrams are constructed with structured HTML and Tailwind CSS.
+    -   Color Palette Used: Energetic & Playful (#00F5D4, #00CCBF, #9B5DE5, #F15BB5, #FEE440).
+    -->
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight">GPU 發明與發展全史</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300">從最初加速圖形渲染的專用晶片，到今日驅動人工智慧與科學計算的核心引擎，本報告將以視覺化方式，全面追溯 GPU 波瀾壯闊的技術演進之路。</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="section1">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第一章：早期顯示技術的萌芽</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">在 GPU 概念成形之前，一系列顯示配接卡的出現，為個人電腦提供了最初的視覺窗口，奠定了後續圖形處理發展的基礎。</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-8 text-[#00F5D4]">PC 顯示標準演進時間軸</h3>
+                    <div class="relative pl-8 border-l-2 border-gray-700">
+                        <div class="timeline-item mb-8 pl-8 relative">
+                            <p class="absolute -left-12 top-1/2 -translate-y-1/2 bg-gray-700 px-2 py-1 rounded text-sm font-bold">1981</p>
+                            <h4 class="font-bold text-xl text-white">MDA & CGA</h4>
+                            <p class="text-gray-300">IBM PC 推出了兩種顯示標準：高解析度文字的單色顯示配接卡 (MDA) 與帶來初步彩色圖形的彩色圖形配接卡 (CGA)，滿足了商業與娛樂的不同需求。</p>
+                        </div>
+                        <div class="timeline-item mb-8 pl-8 relative">
+                            <p class="absolute -left-12 top-1/2 -translate-y-1/2 bg-gray-700 px-2 py-1 rounded text-sm font-bold">1984</p>
+                            <h4 class="font-bold text-xl text-white">EGA</h4>
+                            <p class="text-gray-300">增強型圖形配接卡 (EGA) 問世，能在 640x350 解析度下顯示 16 種顏色，大幅提升了圖像的豐富度和細膩度。</p>
+                        </div>
+                        <div class="timeline-item mb-8 pl-8 relative">
+                            <p class="absolute -left-12 top-1/2 -translate-y-1/2 bg-gray-700 px-2 py-1 rounded text-sm font-bold">1987</p>
+                            <h4 class="font-bold text-xl text-white">VGA</h4>
+                            <p class="text-gray-300">視訊圖形陣列 (VGA) 成為業界標準，支援 640x480 解析度及 256 色，其標準化極大地促進了圖形化使用者介面 (GUI) 的普及。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section2">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第二章：2D 圖形加速的興起</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">隨著 Windows 等 GUI 的普及，CPU 在處理圖形任務時不堪重負。專門的 2D 加速器應運而生，將繁重的繪圖任務從 CPU 卸載。</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-8 text-[#00F5D4]">從 CPU 到 2D 加速器的任務卸載</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                        <div class="flowchart-node border-[#9B5DE5] text-[#9B5DE5]">
+                            <h4 class="font-bold text-lg">CPU (中央處理器)</h4>
+                            <p class="text-sm text-gray-300">處理所有計算任務</p>
+                        </div>
+                        <div class="flowchart-arrow text-gray-500 transform md:-rotate-0 rotate-90">→</div>
+                        <div class="flowchart-node border-[#F15BB5] text-[#F15BB5]">
+                            <h4 class="font-bold text-lg">2D 加速晶片 (GUI 加速器)</h4>
+                            <p class="text-sm text-gray-300">硬體加速 BitBlit、線條繪製、硬體游標等</p>
+                        </div>
+                         <div class="flowchart-arrow text-gray-500 transform md:-rotate-0 rotate-90">→</div>
+                        <div class="flowchart-node border-[#00CCBF] text-[#00CCBF]">
+                            <h4 class="font-bold text-lg">流暢的圖形介面</h4>
+                            <p class="text-sm text-gray-300">大幅提升系統回應速度</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-8 text-gray-400">以 S3 Graphics 的 86C911 (1991) 為代表的晶片，將 2D 加速功能變為 PC 圖形卡的標準配備，為後來的 3D 革命奠定了基礎。</p>
+                </div>
+            </section>
+            
+            <section id="section3">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第三章：3D 圖形的黎明與 GPU 的誕生</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">在遊戲的驅動下，市場對即時 3D 圖形的需求爆發。經過群雄割據的時代，NVIDIA GeForce 256 的出現，以「首款 GPU」之名定義了新時代。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-center">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-[#00F5D4]">90 年代末 3D 加速卡市場格局</h3>
+                        <p class="text-gray-400 text-center mb-4">在 GeForce 256 出現前，3dfx 以其 Voodoo 系列和高效的 Glide API 在遊戲市場佔據主導地位，而 NVIDIA 和 ATI 則代表了更高的整合趨勢。</p>
+                        <div class="chart-container h-64 md:h-72">
+                            <canvas id="marketShareChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-center items-center text-center">
+                        <h3 class="text-2xl font-bold mb-4 text-[#00F5D4]">革命性突破：硬體 T&L</h3>
+                        <p class="text-gray-400 mb-6">1999 年的 GeForce 256 是首款整合硬體「轉換與光照」(T&L) 引擎的消費級晶片，將繁重的 3D 幾何計算從 CPU 卸載到 GPU。</p>
+                        <div class="bg-gray-900 rounded-lg p-6 w-full">
+                            <p class="text-sm text-yellow-300 font-bold">NVIDIA 對 GPU 的定義</p>
+                            <p class="text-4xl md:text-5xl font-black text-white my-2">1000萬</p>
+                            <p class="text-lg text-gray-300">每秒至少處理的多邊形數量</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section4">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第四章：可程式化與統一著色器</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">GPU 發展迎來了從「固定功能」到「可程式化」的革命。開發者獲得了前所未有的渲染控制力，最終演化為更高效的統一著色器架構。</p>
+                </div>
+                 <div class="bg-gray-800 rounded-lg shadow-lg p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#00F5D4]">GPU 架構的演進：從固定到統一</h3>
+                     <p class="text-gray-400 text-center mb-6">隨著 DirectX 8.0 引入可程式化著色器，GPU 架構經歷了重大轉型。統一著色器模型的出現，極大地提升了硬體資源的利用效率和靈活性。</p>
+                    <div class="chart-container">
+                        <canvas id="architectureEvolutionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section5">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第五章：行動 GPU 的崛起</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">在嚴苛的功耗限制下，行動 GPU 走上了一條不同的技術路徑，以創新的渲染架構應對智慧型手機和平板電腦的圖形需求。</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                        <h3 class="text-2xl font-bold text-center mb-6 text-[#00F5D4]">核心差異：渲染模式</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg text-white">立即模式渲染 (IMR) - 桌面級 GPU</h4>
+                                <p class="text-gray-400 text-sm">逐個處理圖元，立即寫入主記憶體。效能強大但頻寬需求高，功耗大。</p>
+                            </div>
+                            <div class="text-center font-bold text-2xl text-gray-500">VS</div>
+                            <div>
+                                <h4 class="font-bold text-lg text-white">基於圖塊的渲染 (TBR) - 行動 GPU</h4>
+                                <p class="text-gray-400 text-sm">將畫面分塊，在晶片內高速快取中完成渲染後再寫回主記憶體，極大降低功耗和頻寬需求。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                         <h3 class="text-2xl font-bold text-center mb-4 text-[#00F5D4]">主流行動 GPU 設計哲學</h3>
+                         <p class="text-gray-400 text-center mb-4">各大行動 GPU 廠商在效能、能效、生態整合等方面各有側重，形成了多元化的市場格局。</p>
+                        <div class="chart-container h-72 md:h-80">
+                            <canvas id="mobileGpuRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section6">
+                 <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第六章：通用 GPU (GPGPU) 的誕生</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">研究人員發現，GPU 強大的並行計算能力可用於非圖形領域。以 NVIDIA CUDA 和開放標準 OpenCL 為代表的編程模型，開啟了通用計算的時代。</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#00F5D4]">GPGPU 在各領域的應用影響力</h3>
+                    <p class="text-gray-400 text-center mb-6">GPGPU 的出現，為科學計算、機器學習等領域帶來了革命性的變革，尤其在深度學習的驅動下，其重要性與日俱增。</p>
+                    <div class="chart-container">
+                        <canvas id="gpgpuImpactChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section7">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-white">第七章：GPU 的未來展望</h2>
+                    <p class="mt-2 text-gray-400 max-w-2xl mx-auto">在 AI、HPC 和元宇宙等需求的驅動下，GPU 技術正朝著多晶片整合、AI 深度融合等方向持續演進。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="text-6xl mb-4">🧩</div>
+                        <h3 class="text-xl font-bold text-white">Chiplet 設計</h3>
+                        <p class="text-gray-400 mt-2">將大晶片分解為多個小晶片，以提高良率、降低成本並實現更靈活的異構整合。</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="text-6xl mb-4">🧠</div>
+                        <h3 class="text-xl font-bold text-white">AI 與神經渲染</h3>
+                        <p class="text-gray-400 mt-2">AI 深度融入渲染管線，利用 DLSS/FSR 等技術智能生成像素，重塑圖形渲染方式。</p>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+                        <div class="text-6xl mb-4">☁️</div>
+                        <h3 class="text-xl font-bold text-white">雲端與邊緣運算</h3>
+                        <p class="text-gray-400 mt-2">從雲端渲染、虛擬化到邊緣 AI 推理，GPU 成為驅動分散式運算的核心動力。</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 py-8 border-t border-gray-700">
+            <p class="text-gray-500">資料來源：GPU 發明與發展全史深度研究報告。此資訊圖表為視覺化呈現，僅供參考。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const palette = {
+                cyan: '#00F5D4',
+                teal: '#00CCBF',
+                purple: '#9B5DE5',
+                pink: '#F15BB5',
+                yellow: '#FEE440',
+                lightGray: '#cbd5e1',
+                darkGray: '#4b5563'
+            };
+
+            const wrapLabel = (str, maxWidth) => {
+                if (str.length <= maxWidth) {
+                    return str;
+                }
+                const words = str.split(' ');
+                let lines = [];
+                let currentLine = words[0];
+                for (let i = 1; i < words.length; i++) {
+                    if ((currentLine + ' ' + words[i]).length > maxWidth) {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    } else {
+                        currentLine += ' ' + words[i];
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            };
+
+            const tooltipConfig = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        },
+                        bodyFont: {
+                            family: 'Noto Sans TC',
+                        },
+                        titleFont: {
+                             family: 'Noto Sans TC',
+                        }
+                    },
+                    legend: {
+                        labels: {
+                            color: palette.lightGray,
+                             font: {
+                                family: 'Noto Sans TC',
+                            }
+                        }
+                    }
+                }
+            };
+
+            Chart.defaults.font.family = 'Noto Sans TC';
+            Chart.defaults.color = palette.lightGray;
+
+            const marketShareCtx = document.getElementById('marketShareChart');
+            if(marketShareCtx) {
+                new Chart(marketShareCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['3dfx Interactive (Voodoo)', 'NVIDIA (RIVA)', 'ATI (Rage)', '其他'],
+                        datasets: [{
+                            label: '市場影響力',
+                            data: [55, 25, 15, 5],
+                            backgroundColor: [palette.purple, palette.cyan, palette.pink, palette.darkGray],
+                            borderColor: '#1f2937',
+                            borderWidth: 4,
+                            hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: tooltipConfig.plugins
+                    }
+                });
+            }
+
+            const architectureEvolutionCtx = document.getElementById('architectureEvolutionChart');
+            if(architectureEvolutionCtx) {
+                 new Chart(architectureEvolutionCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [wrapLabel('固定功能管線 (～2000)', 16), wrapLabel('可程式化著色器 (DirectX 8/9)', 16), wrapLabel('統一著色器架構 (DirectX 10+)', 16)],
+                        datasets: [{
+                            label: '硬體靈活性與效率',
+                            data: [30, 70, 95],
+                            backgroundColor: [palette.purple, palette.pink, palette.cyan],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: palette.darkGray },
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%'
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            ...tooltipConfig.plugins,
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            const mobileGpuRadarCtx = document.getElementById('mobileGpuRadarChart');
+            if (mobileGpuRadarCtx) {
+                new Chart(mobileGpuRadarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['峰值效能', '能源效率', '軟硬體整合', '生態開放性', 'AI 算力'],
+                        datasets: [{
+                            label: 'Apple GPU',
+                            data: [9, 9, 10, 3, 8],
+                            fill: true,
+                            backgroundColor: 'rgba(155, 93, 229, 0.2)',
+                            borderColor: palette.purple,
+                            pointBackgroundColor: palette.purple,
+                        }, {
+                            label: 'Qualcomm Adreno',
+                            data: [8, 7, 7, 8, 7],
+                            fill: true,
+                            backgroundColor: 'rgba(0, 245, 212, 0.2)',
+                            borderColor: palette.cyan,
+                            pointBackgroundColor: palette.cyan,
+                        },{
+                            label: 'ARM Mali',
+                            data: [7, 8, 6, 9, 6],
+                            fill: true,
+                            backgroundColor: 'rgba(241, 91, 181, 0.2)',
+                            borderColor: palette.pink,
+                            pointBackgroundColor: palette.pink,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                pointLabels: {
+                                    font: { size: 12 }
+                                },
+                                grid: { color: palette.darkGray },
+                                angleLines: { color: palette.darkGray }
+                            }
+                        },
+                        plugins: tooltipConfig.plugins
+                    }
+                });
+            }
+
+            const gpgpuImpactCtx = document.getElementById('gpgpuImpactChart');
+            if (gpgpuImpactCtx) {
+                 new Chart(gpgpuImpactCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['早期 (2006-2012)', '近期 (2018-至今)'],
+                        datasets: [
+                            {
+                                label: '科學計算 (HPC)',
+                                data: [60, 40],
+                                backgroundColor: palette.purple,
+                            },
+                            {
+                                label: '人工智慧 (AI/ML)',
+                                data: [15, 90],
+                                backgroundColor: palette.cyan,
+                            },
+                            {
+                                label: '金融/數據分析',
+                                data: [25, 30],
+                                backgroundColor: palette.pink,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { stacked: true, grid: { color: palette.darkGray }, ticks: { display: false } },
+                            x: { stacked: true, grid: { display: false } }
+                        },
+                        plugins: tooltipConfig.plugins
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
