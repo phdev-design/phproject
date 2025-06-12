@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>競跑起跑指令互動解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral & Athletic Gold -->
+    <!-- Application Structure Plan: The application uses a side-navigation layout to allow non-linear exploration of the report's key themes. This structure breaks down the dense information into manageable, thematically-linked sections (Anatomy, History, Science, Rules), which is more user-friendly than a simple linear document. The core interactive element is the 'Anatomy of the Start' component, where users can click on each command to reveal associated visuals and text, transforming static descriptions into an exploratory experience. This design promotes user engagement and improves comprehension by allowing users to focus on the aspects that interest them most. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Three-stage start command -> Goal: Organize & Inform -> Viz/Presentation: Interactive tabbed component -> Interaction: Click tabs ('各就位', '預備', '鳴槍') to update main content with text and a simple CSS-based visual -> Justification: More engaging than a list, allows direct comparison -> Library/Method: Vanilla JS, Tailwind.
+        - Report Info: History of starting -> Goal: Show Change -> Viz/Presentation: Vertical timeline -> Interaction: None (visual layout tells the story) -> Justification: Intuitive for chronological data -> Library/Method: HTML/Tailwind.
+        - Report Info: Biomechanics & Psychology -> Goal: Inform -> Viz/Presentation: Structured text, highlighted keywords, and a simple horizontal bar chart for reaction times -> Interaction: Chart tooltips on hover -> Justification: The chart makes the abstract concept of milliseconds tangible and highlights the fine margins in sprinting -> Library/Method: Chart.js (Canvas).
+        - Report Info: Rules/False Starts -> Goal: Inform -> Viz/Presentation: Key points in callout boxes with Unicode icons -> Interaction: None -> Justification: Draws attention to critical rules -> Library/Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .active-nav {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 700;
+        }
+        .content-section {
+            scroll-margin-top: 80px;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+         @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-2">競跑的藝術與科學</h1>
+            <p class="text-lg text-gray-600">深入解析「各就位、預備、鳴槍！」背後的秘密</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            
+            <nav id="side-nav" class="md:w-1/4 md:sticky top-8 h-full">
+                <ul class="space-y-2">
+                    <li><a href="#prologue" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">序言</a></li>
+                    <li><a href="#anatomy" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">指令解剖</a></li>
+                    <li><a href="#history" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">歷史足跡</a></li>
+                    <li><a href="#science" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">科學視角</a></li>
+                    <li><a href="#rules" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">公平競賽</a></li>
+                    <li><a href="#conclusion" class="block py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors duration-200">總結</a></li>
+                </ul>
+            </nav>
+
+            <main class="md:w-3/4 space-y-16">
+
+                <section id="prologue" class="content-section">
+                    <h2 class="text-3xl font-bold mb-4 border-l-4 border-blue-500 pl-4">序言：普世的行動號召</h2>
+                    <div class="space-y-4 text-gray-700 leading-relaxed">
+                        <p>在任何田徑賽場上，尤其是在分秒必爭的短跑項目中，「各就位、預備、鳴槍！」這套指令是全球運動員共同遵循的起跑信號。它不僅是賽事的術語，更滲透到日常生活中，成為任何行動開始的代名詞。這個互動頁面旨在深入分析這套指令背後的歷史淵源、科學原理及規則要求，揭示其為何成為確保公平與優化表現的基石。</p>
+                         <p>這套指令的全球標準化並非偶然，它反映了國際社會對公平起跑方式的共識。它就像一種通用語言，讓來自世界各地的運動員在同一個框架下競技，而這個框架的設計，正是為了平衡人類體能的極致發揮與競賽的絕對公平。</p>
+                    </div>
+                </section>
+
+                <section id="anatomy" class="content-section">
+                    <h2 class="text-3xl font-bold mb-6 border-l-4 border-blue-500 pl-4">指令解剖：起跑三部曲</h2>
+                    <p class="mb-6 text-gray-600">這套指令是一個精心設計的程序，引導運動員從靜止狀態過渡到最具爆發力的起跑動作。點擊下方的指令按鈕，探索每個階段的具體動作、目的和規則考量。</p>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="w-full md:w-1/3">
+                            <div class="flex md:flex-col gap-2">
+                                <button id="btn-marks" class="command-btn w-full text-left p-4 rounded-lg border-2 border-blue-500 bg-blue-500 text-white shadow-md transition-all">
+                                    <span class="font-bold text-lg">1. 各就位 (On your marks)</span>
+                                    <span class="text-sm block">穩定與標準化的初始位置</span>
+                                </button>
+                                <button id="btn-set" class="command-btn w-full text-left p-4 rounded-lg border-2 border-gray-300 bg-white shadow-sm hover:bg-gray-100 transition-all">
+                                    <span class="font-bold text-lg">2. 預備 (Set)</span>
+                                    <span class="text-sm block">儲備能量的最佳發力姿態</span>
+                                </button>
+                                <button id="btn-go" class="command-btn w-full text-left p-4 rounded-lg border-2 border-gray-300 bg-white shadow-sm hover:bg-gray-100 transition-all">
+                                    <span class="font-bold text-lg">3. 鳴槍! (Go!)</span>
+                                    <span class="text-sm block">能量釋放與比賽開始</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-2/3">
+                            <div id="anatomy-content" class="bg-white p-6 rounded-lg shadow-inner min-h-[300px]">
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="history" class="content-section">
+                    <h2 class="text-3xl font-bold mb-6 border-l-4 border-blue-500 pl-4">歷史足跡：從挖掘土坑到全球標準</h2>
+                    <p class="mb-8 text-gray-600">現代標準化的起跑程序並非與生俱來。它經歷了漫長的演變，從早期運動員在跑道上親手挖掘起跑坑，到起跑器的發明與普及，每一步都是為了追求更公平、更高效的競賽環境。</p>
+                    <div class="relative border-l-2 border-blue-300 ml-4">
+                        <div class="mb-8 pl-8 relative">
+                            <div class="absolute -left-[11px] top-1 w-5 h-5 bg-blue-500 rounded-full border-4 border-white"></div>
+                            <p class="font-bold text-lg">19世紀末 - 20世紀初</p>
+                            <p class="text-gray-700">運動員用小鏟子在煤渣跑道上挖掘起跑坑，以獲得更好的抓地力。這種方式缺乏統一標準，公平性備受質疑。</p>
+                        </div>
+                        <div class="mb-8 pl-8 relative">
+                             <div class="absolute -left-[11px] top-1 w-5 h-5 bg-blue-500 rounded-full border-4 border-white"></div>
+                            <p class="font-bold text-lg">1920年代末</p>
+                            <p class="text-gray-700">起跑器（Starting Blocks）被發明，為運動員提供了堅固且一致的蹬踏平面，徹底改變了短跑的起跑方式。</p>
+                        </div>
+                        <div class="mb-8 pl-8 relative">
+                             <div class="absolute -left-[11px] top-1 w-5 h-5 bg-blue-500 rounded-full border-4 border-white"></div>
+                            <p class="font-bold text-lg">1937年</p>
+                            <p class="text-gray-700">國際田聯（IAAF，現為世界田徑總會）規定起跑器為強制使用設備，以確保所有跑手都有一個「公平的起跑」。</p>
+                        </div>
+                        <div class="pl-8 relative">
+                             <div class="absolute -left-[11px] top-1 w-5 h-5 bg-blue-500 rounded-full border-4 border-white"></div>
+                            <p class="font-bold text-lg">至今</p>
+                            <p class="text-gray-700">「各就位、預備、鳴槍！」與電子起跑系統結合，成為全球統一的標準，最大限度地確保了起跑的精確性與公平性。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="science" class="content-section">
+                    <h2 class="text-3xl font-bold mb-4 border-l-4 border-blue-500 pl-4">科學視角：優化表現的奧秘</h2>
+                    <p class="mb-8 text-gray-600">這套指令不僅是規則，更是基於人體運動力學和心理學的科學實踐。它旨在引導運動員的身體和心靈達到最佳的起跑狀態。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-2xl font-bold mb-3 text-blue-600">生物力學優勢</h3>
+                            <p class="mb-4">「預備」姿勢是起跑的關鍵。運動員抬高臀部，使重心前移，讓髖、膝、踝關節形成最佳發力角度。這個姿態就像一個<span class="font-bold text-blue-700">被壓縮的彈簧</span>，有效地利用了肌肉的「牽張-縮短週期」(SSC)機制，在肌肉預先拉伸後瞬間收縮，從而產生巨大的爆發力。</p>
+                            <ul class="list-disc list-inside space-y-2 text-sm">
+                                <li><span class="font-semibold">最佳關節角度：</span>有利於蹬離時產生最大推進力。</li>
+                                <li><span class="font-semibold">肌肉預張力：</span>儲存彈性勢能，準備瞬間釋放。</li>
+                                <li><span class="font-semibold">重心前移：</span>為前向爆發創造有利條件。</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-2xl font-bold mb-3 text-blue-600">心理與神經因素</h3>
+                            <p class="mb-4">起跑指令序列是一個重要的心理儀式。它幫助運動員<span class="font-bold text-blue-700">收窄注意力</span>，進入極度專注的狀態，並對槍聲信號高度敏感。聽覺提示（槍聲）比視覺提示能更快地被大腦處理並轉化為動作。</p>
+                             <div class="chart-container">
+                                <canvas id="reactionTimeChart"></canvas>
+                            </div>
+                            <p class="text-center text-xs text-gray-500 mt-2">起跑反應時間對於短跑成績至關重要。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="rules" class="content-section">
+                    <h2 class="text-3xl font-bold mb-6 border-l-4 border-blue-500 pl-4">公平競賽：規則的強制性</h2>
+                    <p class="mb-8 text-gray-600">標準化指令的核心目的，是為所有參賽者創造一個絕對公平的競爭平台。圍繞這套指令，建立了一系列嚴格的規則，其中最關鍵的就是對「搶跑」的管理。</p>
+                    <div class="space-y-4">
+                        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg" role="alert">
+                            <p class="font-bold">標準化的重要性</p>
+                            <p>確保所有運動員在完全相同的條件下起跑，防止任何人透過非標準動作獲取不公平優勢。</p>
+                        </div>
+                        <div class="bg-red-100 border-l-4 border-red-500 text-red-800 p-4 rounded-r-lg" role="alert">
+                            <p class="font-bold">搶跑 (False Start)</p>
+                            <p>在起跑信號發出<span class="font-semibold">之前</span>開始起跑動作。在大多數高級別賽事中，一次搶跑即會被取消資格。指令中對「預備」姿態下「絕對靜止」的嚴格要求，是判斷搶跑的基礎。</p>
+                        </div>
+                        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-r-lg" role="alert">
+                            <p class="font-bold">反應時間限制</p>
+                            <p>現代電子系統能檢測運動員的反應時間。任何快於100毫秒（0.1秒）的反應通常被視為搶跑，因為這被認為是人類生理上對聲音作出反應的極限，快於此時間意味著運動員是預判而非反應。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="conclusion" class="content-section">
+                    <h2 class="text-3xl font-bold mb-4 border-l-4 border-blue-500 pl-4">總結：超越語言的基石</h2>
+                    <div class="space-y-4 text-gray-700 leading-relaxed">
+                        <p>「各就位、預備、鳴槍！」這套指令遠不止是一句口號。它是一套經過歷史演進、基於科學原理、並由嚴格規則所保障的全球通用程序。它在追求人類極限與維護公平競賽之間取得了精妙的平衡，是現代競技短跑運動不可或缺的基石。</p>
+                        <p>這個看似簡單的三段式結構，實則濃縮了歷史、生物力學、心理學以及對體育精神不懈追求的複雜互動。它的持久性和全球通用性，正是其內在有效性的最佳證明。</p>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const anatomyContent = {
+                marks: {
+                    title: '各就位 (On your marks)',
+                    content: `
+                        <h3 class="text-2xl font-bold mb-3 text-blue-700">階段一：穩定與標準化</h3>
+                        <p class="mb-4">此指令標誌著起跑程序的開始。運動員進入指定的起跑器，雙手置於起跑線後，通常一膝跪地，形成穩固的支撐。身體必須保持靜止。</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>目的：</strong>讓所有運動員在一個公平、受控的初始位置做好準備。</li>
+                            <li><strong>規則：</strong>雙手雙腳不得觸碰起跑線或線前地面。</li>
+                            <li><strong>狀態：</strong>靜態、穩定、集中精神的開始。</li>
+                        </ul>
+                    `
+                },
+                set: {
+                    title: '預備 (Set)',
+                    content: `
+                        <h3 class="text-2xl font-bold mb-3 text-blue-700">階段二：儲備能量</h3>
+                        <p class="mb-4">這是從靜態到動態潛能的關鍵過渡。運動員抬起膝蓋，抬高臀部（通常略高於肩），使重心前移，肌肉產生預張力，如同上滿弦的弓。</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>目的：</strong>達到生物力學上最佳的發力姿態，為爆發性起跑儲備能量。</li>
+                            <li><strong>規則：</strong>在槍響前必須保持<span class="font-bold">絕對靜止</span>。任何動作都可能被判為搶跑。</li>
+                            <li><strong>狀態：</strong>高度戒備、勢能積蓄、極度專注。</li>
+                        </ul>
+                    `
+                },
+                go: {
+                    title: '鳴槍! (Go!)',
+                    content: `
+                        <h3 class="text-2xl font-bold mb-3 text-blue-700">階段三：能量釋放</h3>
+                        <p class="mb-4">通常以槍聲作為信號，指令運動員開始比賽。現代系統會將聲音信號同步傳送到每個起跑器的揚聲器，以確保所有運動員能同時接收到信號。</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>目的：</strong>給予所有參賽者一個清晰、同步的開賽信號。</li>
+                            <li><strong>反應：</strong>運動員對信號作出反應，瞬間從起跑器爆發而出，釋放所有儲備的能量。</li>
+                            <li><strong>科學：</strong>槍聲的尖銳特點能觸發快速的神經反應。</li>
+                        </ul>
+                    `
+                }
+            };
+
+            const contentContainer = document.getElementById('anatomy-content');
+            const commandButtons = document.querySelectorAll('.command-btn');
+            
+            function updateContent(key) {
+                contentContainer.innerHTML = anatomyContent[key].content;
+                commandButtons.forEach(btn => {
+                    btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-500');
+                    btn.classList.add('bg-white', 'text-gray-800', 'border-gray-300', 'hover:bg-gray-100');
+                });
+                const activeBtn = document.getElementById(`btn-${key}`);
+                activeBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                activeBtn.classList.remove('bg-white', 'text-gray-800', 'border-gray-300', 'hover:bg-gray-100');
+            }
+
+            commandButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const key = button.id.split('-')[1];
+                    updateContent(key);
+                });
+            });
+
+            updateContent('marks');
+
+            const ctx = document.getElementById('reactionTimeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['搶跑判定線', '精英運動員平均反應', '普通人平均反應'],
+                    datasets: [{
+                        label: '反應時間 (毫秒)',
+                        data: [100, 140, 250],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.6)',
+                            'rgba(59, 130, 246, 0.6)',
+                            'rgba(255, 193, 7, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(255, 193, 7, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                             title: {
+                                display: true,
+                                text: '時間 (毫秒)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw} ms`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('#side-nav a');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active-nav');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active-nav');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
