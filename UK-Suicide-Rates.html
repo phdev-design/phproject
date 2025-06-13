@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">英國自殺率互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Lato', 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4;
+            color: #3d3d3d;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-button.active {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
+        .chart-container {
+            position: relative;
+            height: 350px;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-button.active {
+            background-color: #0d9488;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .help-card a {
+            transition: background-color 0.3s;
+        }
+        .help-card a:hover {
+            background-color: #0f766e;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-teal-800" data-lang-key="headerTitle">英國自殺議題深度剖析</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" class="nav-button text-gray-600 hover:text-teal-600 pb-1" data-lang-key="navOverview">總覽</a>
+                    <a href="#demographics" class="nav-button text-gray-600 hover:text-teal-600 pb-1" data-lang-key="navDemographics">群體分析</a>
+                    <a href="#causes" class="nav-button text-gray-600 hover:text-teal-600 pb-1" data-lang-key="navCauses">成因探討</a>
+                    <a href="#international" class="nav-button text-gray-600 hover:text-teal-600 pb-1" data-lang-key="navInternational">國際比較</a>
+                    <a href="#prevention" class="nav-button text-gray-600 hover:text-teal-600 pb-1" data-lang-key="navPrevention">預防與協助</a>
+                </div>
+                <button id="lang-switcher" class="text-sm font-semibold text-teal-600 border border-teal-600 rounded-full px-3 py-1 hover:bg-teal-50 transition-colors">Switch to English</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="overview" class="mb-16 text-center">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4" data-lang-key="overviewTitle">現況總覽：一個嚴峻的警訊</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-10" data-lang-key="overviewDesc">
+                根據最新數據，英國的自殺率正呈現令人擔憂的上升趨勢。2023年部分群體的自殺率達到了數十年來的最高點，這不僅是一個統計數字，更是對整個社會公共衛生體系的嚴峻挑戰。本節將呈現最核心的數據，讓您快速了解問題的嚴重性。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-red-500">
+                    <p class="text-5xl font-bold text-red-600">11.4</p>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="stat1Title">每十萬人自殺率 (英格蘭和威爾斯, 2023)</p>
+                    <p class="mt-1 text-sm text-gray-500" data-lang-key="stat1Desc">自1999年以來最高水平</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                    <p class="text-5xl font-bold text-blue-600" data-lang-key="stat2Value">3 倍</p>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="stat2Title">男性自殺率高於女性</p>
+                    <p class="mt-1 text-sm text-gray-500" data-lang-key="stat2Desc">自殺是50歲以下男性的最大死因</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-amber-500">
+                    <p class="text-5xl font-bold text-amber-600" data-lang-key="stat3Value">2.5 倍</p>
+                    <p class="mt-2 text-gray-700 font-semibold" data-lang-key="stat3Title">最貧困地區的自殺風險</p>
+                    <p class="mt-1 text-sm text-gray-500" data-lang-key="stat3Desc">相比最富裕地区 (蘇格蘭數據)</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="demographics" class="mb-16">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4 text-center" data-lang-key="demographicsTitle">深入探索：哪些群體受影響最大？</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-10 text-center" data-lang-key="demographicsDesc">
+                自殺風險並非平均分佈。性別、年齡、居住地區和社會經濟狀況等因素都扮演著關鍵角色。此區塊提供互動式圖表，您可以點擊下方按鈕，切換不同維度的分析，深入了解各群體的具體情況與趨勢。
+            </p>
+            <div class="flex justify-center space-x-2 md:space-x-4 mb-8 flex-wrap gap-2">
+                <button class="tab-button px-4 py-2 rounded-md bg-white shadow-sm text-gray-700 font-medium active" data-target="genderAge" data-lang-key="tabGenderAge">按性別與年齡</button>
+                <button class="tab-button px-4 py-2 rounded-md bg-white shadow-sm text-gray-700 font-medium" data-target="region" data-lang-key="tabRegion">按地區</button>
+                <button class="tab-button px-4 py-2 rounded-md bg-white shadow-sm text-gray-700 font-medium" data-target="socioeconomic" data-lang-key="tabSocioeconomic">按社經狀況</button>
+                <button class="tab-button px-4 py-2 rounded-md bg-white shadow-sm text-gray-700 font-medium" data-target="trend" data-lang-key="tabTrend">歷史趨勢</button>
+            </div>
+
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                <div id="genderAge-content" class="tab-content">
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="genderAgeTitle">性別與年齡差異：中年危機的警訊</h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="genderAgeDesc">在英格蘭和威爾斯，中年男性（特別是45-64歲）的自殺率持續最高。此圖表展示了不同年齡組別的自殺率，揭示了生命週期中的脆弱階段，以及男性不成比例的高風險。</p>
+                    <div class="chart-container">
+                        <canvas id="ageChart"></canvas>
+                    </div>
+                </div>
+                <div id="region-content" class="tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="regionTitle">地區差異：地理上的不平等</h3>
+                     <p class="text-sm text-gray-600 mb-4" data-lang-key="regionDesc">英國各地的自殺率存在顯著差異。英格蘭西北部、威爾斯、蘇格蘭和北愛爾蘭的自殺率持續高於倫敦和東南部，這反映了地區性社會經濟因素和醫療資源可及性的影響。</p>
+                    <div class="chart-container">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+                <div id="socioeconomic-content" class="tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="socioeconomicTitle">社經狀況：貧困的沉重代價</h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="socioeconomicDesc">社會經濟剝奪程度與自殺率之間存在強烈的正相關。居住在最貧困地區的人群，其自殺風險遠高於最富裕地區，這揭示了貧窮和財務壓力是自殺風險的根本驅動因素之一。</p>
+                     <div class="chart-container">
+                        <canvas id="socioeconomicChart"></canvas>
+                    </div>
+                </div>
+                 <div id="trend-content" class="tab-content hidden">
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="trendTitle">歷史趨勢：一道不斷擴大的性別鴻溝</h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="trendDesc">儘管長期來看整體自殺率有所下降，但近年數據呈現令人警惕的回升。尤其值得關注的是，自1981年以來，男性自殺率的下降幅度遠小於女性，導致性別差距持續擴大。</p>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="causes" class="mb-16">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4 text-center" data-lang-key="causesTitle">理解背後成因：一個複雜的風險網絡</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-10 text-center" data-lang-key="causesDesc">
+                自殺從來不是由單一原因造成，而是多種因素相互作用的悲劇性結果。從社會經濟壓力到個人心理健康，再到特定群體面臨的獨特挑戰，這些因素共同構成了一個複雜的風險網絡。
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <span class="text-5xl">🏦</span>
+                    <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800" data-lang-key="cause1Title">社會經濟因素</h3>
+                    <p class="text-gray-600" data-lang-key="cause1Desc">貧困、債務、失業和不穩定的住房狀況是強大的壓力源。經濟衰退和緊縮政策被證實與自殺率上升有關，尤其對男性影響更甚。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <span class="text-5xl">🧠</span>
+                    <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800" data-lang-key="cause2Title">心理健康與個人狀況</h3>
+                    <p class="text-gray-600" data-lang-key="cause2Desc">抑鬱症、物質濫用、社會孤立、關係破裂及慢性病痛等都是重要風險因素。然而，精神健康服務輪候時間過長，使許多人無法及時獲得幫助。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <span class="text-5xl">❤️‍🩹</span>
+                    <h3 class="text-xl font-bold mt-4 mb-2 text-gray-800" data-lang-key="cause3Title">特定脆弱群體</h3>
+                    <p class="text-gray-600" data-lang-key="cause3Desc">LGBTQ+社群、自閉症譜系人士、少數族裔和曾接觸司法系統者，因面臨歧視、污名化和額外壓力，自殺風險顯著更高。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="international" class="mb-16">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4 text-center" data-lang-key="internationalTitle">國際比較：英國在世界上的位置</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-10 text-center" data-lang-key="internationalDesc">
+                將英國的數據與其他國家進行比較，有助於我們更客觀地評估其自殺問題的嚴重程度。總體而言，英國的自殺率高於全球平均水平，在G7和OECD等已開發國家中處於中等水平。
+            </p>
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-2 text-gray-800" data-lang-key="internationalChartTitle">部分OECD國家男性自殺率比較 (2021)</h3>
+                <p class="text-sm text-gray-600 mb-4" data-lang-key="internationalChartDesc">此圖表展示了部分已開發國家的男性自殺率。可以看出，儘管英國的數據令人擔憂，但仍低於美國、日本和韓國等國家。這表明在相似發展水平的國家中，實現更低的自殺率是可能的。</p>
+                <div class="chart-container">
+                    <canvas id="internationalChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="prevention">
+            <h2 class="text-3xl font-bold text-teal-700 mb-4 text-center" data-lang-key="preventionTitle">預防與協助：希望之路</h2>
+             <p class="max-w-3xl mx-auto text-gray-600 mb-10 text-center" data-lang-key="preventionDesc">
+                面對嚴峻挑戰，英國政府、國民保健署(NHS)及眾多非政府組織正共同努力，推行全面的預防策略。從改善精神健康服務到支援脆弱群體，再到提升公眾意識，每一份努力都是點亮希望的燭光。
+            </p>
+             <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg text-teal-700 mb-2" data-lang-key="strategy1Title">🏛️ 政府策略</h3>
+                    <p class="text-gray-600 text-sm" data-lang-key="strategy1Desc">推行五年跨部門自殺預防策略，針對高風險群體提供支援，並從財務困難、網絡安全等多方面著手，強調「自殺預防，人人有責」。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg text-teal-700 mb-2" data-lang-key="strategy2Title">🏥 NHS 服務</h3>
+                    <p class="text-gray-600 text-sm" data-lang-key="strategy2Desc">增加精神健康服務投資，推廣「NHS Talking Therapies」等心理治療服務，並改善危機支援，如設立24小時精神健康緊急熱線。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="font-bold text-lg text-teal-700 mb-2" data-lang-key="strategy3Title">🤝 非政府組織</h3>
+                    <p class="text-gray-600 text-sm" data-lang-key="strategy3Desc">撒瑪利亞會(Samaritans)、Mind、CALM等慈善機構提供至關重要的前線支援，包括24小時熱線、線上諮詢和公眾倡議。</p>
+                </div>
+            </div>
+            
+            <div class="bg-teal-50 border-l-4 border-teal-500 text-teal-800 p-6 rounded-r-lg" role="alert">
+                <h3 class="text-2xl font-bold mb-4" data-lang-key="helpTitle">尋求協助，你並不孤單</h3>
+                <p class="mb-6" data-lang-key="helpDesc">如果你或你認識的人正在經歷困難時期，請記住，尋求幫助是一種堅強的表現。以下是一些可以提供即時、保密支援的機構。</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 help-card">
+                    <a href="https://www.samaritans.org/" target="_blank" rel="noopener noreferrer" class="block bg-teal-600 text-white p-4 rounded-lg text-center font-bold hover:bg-teal-700">
+                        Samaritans<br>
+                        <span class="font-normal text-sm" data-lang-key="helpOrg1">24/7 電話支援</span>
+                    </a>
+                    <a href="https://www.thecalmzone.net/" target="_blank" rel="noopener noreferrer" class="block bg-teal-600 text-white p-4 rounded-lg text-center font-bold hover:bg-teal-700">
+                        CALM<br>
+                        <span class="font-normal text-sm" data-lang-key="helpOrg2">專為男性提供支援</span>
+                    </a>
+                     <a href="https://www.papyrus-uk.org/" target="_blank" rel="noopener noreferrer" class="block bg-teal-600 text-white p-4 rounded-lg text-center font-bold hover:bg-teal-700">
+                        Papyrus HOPELINEUK<br>
+                        <span class="font-normal text-sm" data-lang-key="helpOrg3">為35歲以下年輕人服務</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p data-lang-key="footer1">本互動式報告根據《英國自殺率現況及成因分析》報告製作。</p>
+            <p data-lang-key="footer2">數據和分析僅供參考，不應取代專業醫療建議。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- TRANSLATION DATA ---
+    const translations = {
+        'en': {
+            pageTitle: "Interactive Analysis of UK Suicide Rates",
+            headerTitle: "In-depth Analysis of Suicide in the UK",
+            navOverview: "Overview",
+            navDemographics: "Demographics",
+            navCauses: "Causes",
+            navInternational: "International",
+            navPrevention: "Prevention & Help",
+            overviewTitle: "Current Situation: A Stark Warning",
+            overviewDesc: "According to the latest data, suicide rates in the UK are showing a worrying upward trend. In 2023, rates for some groups reached their highest point in decades. This is not just a statistic, but a severe challenge to the entire public health system. This section presents the core data to help you quickly understand the severity of the issue.",
+            stat1Title: "Suicide Rate per 100,000 (England & Wales, 2023)",
+            stat1Desc: "Highest level since 1999",
+            stat2Value: "3x",
+            stat2Title: "Male suicide rate is higher than female's",
+            stat2Desc: "Suicide is the leading cause of death for men under 50",
+            stat3Value: "2.5x",
+            stat3Title: "Suicide risk in the most deprived areas",
+            stat3Desc: "Compared to the most affluent areas (Scotland data)",
+            demographicsTitle: "Deeper Dive: Which Groups Are Most Affected?",
+            demographicsDesc: "Suicide risk is not evenly distributed. Factors like gender, age, region, and socioeconomic status play crucial roles. This section provides interactive charts. You can click the buttons below to switch between different dimensions of analysis and gain a deeper understanding of the specific situations and trends for various groups.",
+            tabGenderAge: "By Gender & Age",
+            tabRegion: "By Region",
+            tabSocioeconomic: "By Socioeconomic Status",
+            tabTrend: "Historical Trends",
+            genderAgeTitle: "Gender & Age Differences: A Middle-Age Crisis Alert",
+            genderAgeDesc: "In England and Wales, middle-aged men (especially 45-64) consistently have the highest suicide rates. This chart shows the suicide rates for different age groups, revealing vulnerable stages in the life cycle and the disproportionately high risk for men.",
+            regionTitle: "Regional Differences: Geographical Inequality",
+            regionDesc: "There are significant variations in suicide rates across the UK. The North West of England, Wales, Scotland, and Northern Ireland consistently have higher rates than London and the South East, reflecting the impact of regional socioeconomic factors and access to healthcare.",
+            socioeconomicTitle: "Socioeconomic Status: The Heavy Price of Poverty",
+            socioeconomicDesc: "There is a strong positive correlation between socioeconomic deprivation and suicide rates. People living in the most deprived areas have a much higher risk of suicide than those in the wealthiest areas, revealing that poverty and financial stress are key drivers of suicide risk.",
+            trendTitle: "Historical Trend: A Widening Gender Gap",
+            trendDesc: "Although the overall suicide rate has declined in the long term, recent data shows an alarming rebound. It is particularly noteworthy that since 1981, the decline in the male suicide rate has been much smaller than that for females, leading to a continuously widening gender gap.",
+            causesTitle: "Understanding the Causes: A Complex Web of Risks",
+            causesDesc: "Suicide is never caused by a single reason but is the tragic outcome of multiple interacting factors. From socioeconomic pressures to personal mental health and the unique challenges faced by specific groups, these factors together form a complex network of risk.",
+            cause1Title: "Socioeconomic Factors",
+            cause1Desc: "Poverty, debt, unemployment, and housing instability are powerful stressors. Economic recessions and austerity policies have been proven to be linked to rising suicide rates, with a greater impact on men.",
+            cause2Title: "Mental Health & Personal Circumstances",
+            cause2Desc: "Depression, substance abuse, social isolation, relationship breakdowns, and chronic pain are all significant risk factors. However, long waiting times for mental health services prevent many from getting timely help.",
+            cause3Title: "Specific Vulnerable Groups",
+            cause3Desc: "LGBTQ+ communities, autistic individuals, ethnic minorities, and those who have been in contact with the justice system face significantly higher suicide risks due to discrimination, stigma, and additional pressures.",
+            internationalTitle: "International Comparison: The UK's Position in the World",
+            internationalDesc: "Comparing the UK's data with other countries helps us to objectively assess the severity of its suicide problem. Overall, the UK's suicide rate is higher than the global average and is at a mid-range level among developed countries like the G7 and OECD.",
+            internationalChartTitle: "Male Suicide Rate Comparison in Selected OECD Countries (2021)",
+            internationalChartDesc: "This chart shows the male suicide rates in selected developed countries. It can be seen that although the UK's data is concerning, it is still lower than countries like the US, Japan, and South Korea. This suggests that achieving lower suicide rates is possible among countries at similar development levels.",
+            preventionTitle: "Prevention and Help: The Path of Hope",
+            preventionDesc: "Facing this severe challenge, the UK government, the NHS, and numerous non-governmental organisations are working together to implement comprehensive prevention strategies. From improving mental health services to supporting vulnerable groups and raising public awareness, every effort is a candle lighting the way to hope.",
+            strategy1Title: "🏛️ Government Strategy",
+            strategy1Desc: "Implementing a five-year cross-departmental suicide prevention strategy, targeting high-risk groups, and addressing issues like financial difficulty and online safety, emphasizing 'suicide prevention is everyone's business'.",
+            strategy2Title: "🏥 NHS Services",
+            strategy2Desc: "Increasing investment in mental health services, promoting services like 'NHS Talking Therapies', and improving crisis support, such as setting up 24-hour mental health emergency hotlines.",
+            strategy3Title: "🤝 Non-Governmental Organisations",
+            strategy3Desc: "Charities like Samaritans, Mind, and CALM provide crucial frontline support, including 24-hour hotlines, online counselling, and public advocacy.",
+            helpTitle: "Seek Help, You Are Not Alone",
+            helpDesc: "If you or someone you know is going through a difficult time, remember that seeking help is a sign of strength. Here are some organisations that can provide immediate, confidential support.",
+            helpOrg1: "24/7 phone support",
+            helpOrg2: "Support specifically for men",
+            helpOrg3: "For young people under 35",
+            footer1: "This interactive report is based on the 'Analysis of UK Suicide Rates and Causes' report.",
+            footer2: "Data and analysis are for reference only and should not replace professional medical advice.",
+            langSwitchToChinese: "切換為中文"
+        },
+        'zh-Hant': {
+            pageTitle: "英國自殺率互動式分析報告",
+            headerTitle: "英國自殺議題深度剖析",
+            navOverview: "總覽",
+            navDemographics: "群體分析",
+            navCauses: "成因探討",
+            navInternational: "國際比較",
+            navPrevention: "預防與協助",
+            overviewTitle: "現況總覽：一個嚴峻的警訊",
+            overviewDesc: "根據最新數據，英國的自殺率正呈現令人擔憂的上升趨勢。2023年部分群體的自殺率達到了數十年來的最高點，這不僅是一個統計數字，更是對整個社會公共衛生體系的嚴峻挑戰。本節將呈現最核心的數據，讓您快速了解問題的嚴重性。",
+            stat1Title: "每十萬人自殺率 (英格蘭和威爾斯, 2023)",
+            stat1Desc: "自1999年以來最高水平",
+            stat2Value: "3 倍",
+            stat2Title: "男性自殺率高於女性",
+            stat2Desc: "自殺是50歲以下男性的最大死因",
+            stat3Value: "2.5 倍",
+            stat3Title: "最貧困地區的自殺風險",
+            stat3Desc: "相比最富裕地区 (蘇格蘭數據)",
+            demographicsTitle: "深入探索：哪些群體受影響最大？",
+            demographicsDesc: "自殺風險並非平均分佈。性別、年齡、居住地區和社會經濟狀況等因素都扮演著關鍵角色。此區塊提供互動式圖表，您可以點擊下方按鈕，切換不同維度的分析，深入了解各群體的具體情況與趨勢。",
+            tabGenderAge: "按性別與年齡",
+            tabRegion: "按地區",
+            tabSocioeconomic: "按社經狀況",
+            tabTrend: "歷史趨勢",
+            genderAgeTitle: "性別與年齡差異：中年危機的警訊",
+            genderAgeDesc: "在英格蘭和威爾斯，中年男性（特別是45-64歲）的自殺率持續最高。此圖表展示了不同年齡組別的自殺率，揭示了生命週期中的脆弱階段，以及男性不成比例的高風險。",
+            regionTitle: "地區差異：地理上的不平等",
+            regionDesc: "英國各地的自殺率存在顯著差異。英格蘭西北部、威爾斯、蘇格蘭和北愛爾蘭的自殺率持續高於倫敦和東南部，這反映了地區性社會經濟因素和醫療資源可及性的影響。",
+            socioeconomicTitle: "社經狀況：貧困的沉重代價",
+            socioeconomicDesc: "社會經濟剝奪程度與自殺率之間存在強烈的正相關。居住在最貧困地區的人群，其自殺風險遠高於最富裕地區，這揭示了貧窮和財務壓力是自殺風險的根本驅動因素之一。",
+            trendTitle: "歷史趨勢：一道不斷擴大的性別鴻溝",
+            trendDesc: "儘管長期來看整體自殺率有所下降，但近年數據呈現令人警惕的回升。尤其值得關注的是，自1981年以來，男性自殺率的下降幅度遠小於女性，導致性別差距持續擴大。",
+            causesTitle: "理解背後成因：一個複雜的風險網絡",
+            causesDesc: "自殺從來不是由單一原因造成，而是多種因素相互作用的悲劇性結果。從社會經濟壓力到個人心理健康，再到特定群體面臨的獨特挑戰，這些因素共同構成了一個複雜的風險網絡。",
+            cause1Title: "社會經濟因素",
+            cause1Desc: "貧困、債務、失業和不穩定的住房狀況是強大的壓力源。經濟衰退和緊縮政策被證實與自殺率上升有關，尤其對男性影響更甚。",
+            cause2Title: "心理健康與個人狀況",
+            cause2Desc: "抑鬱症、物質濫用、社會孤立、關係破裂及慢性病痛等都是重要風險因素。然而，精神健康服務輪候時間過長，使許多人無法及時獲得幫助。",
+            cause3Title: "特定脆弱群體",
+            cause3Desc: "LGBTQ+社群、自閉症譜系人士、少數族裔和曾接觸司法系統者，因面臨歧視、污名化和額外壓力，自殺風險顯著更高。",
+            internationalTitle: "國際比較：英國在世界上的位置",
+            internationalDesc: "將英國的數據與其他國家進行比較，有助於我們更客觀地評估其自殺問題的嚴重程度。總體而言，英國的自殺率高於全球平均水平，在G7和OECD等已開發國家中處於中等水平。",
+            internationalChartTitle: "部分OECD國家男性自殺率比較 (2021)",
+            internationalChartDesc: "此圖表展示了部分已開發國家的男性自殺率。可以看出，儘管英國的數據令人擔憂，但仍低於美國、日本和韓國等國家。這表明在相似發展水平的國家中，實現更低的自殺率是可能的。",
+            preventionTitle: "預防與協助：希望之路",
+            preventionDesc: "面對嚴峻挑戰，英國政府、國民保健署(NHS)及眾多非政府組織正共同努力，推行全面的預防策略。從改善精神健康服務到支援脆弱群體，再到提升公眾意識，每一份努力都是點亮希望的燭光。",
+            strategy1Title: "🏛️ 政府策略",
+            strategy1Desc: "推行五年跨部門自殺預防策略，針對高風險群體提供支援，並從財務困難、網絡安全等多方面著手，強調「自殺預防，人人有責」。",
+            strategy2Title: "🏥 NHS 服務",
+            strategy2Desc: "增加精神健康服務投資，推廣「NHS Talking Therapies」等心理治療服務，並改善危機支援，如設立24小時精神健康緊急熱線。",
+            strategy3Title: "🤝 非政府組織",
+            strategy3Desc: "撒瑪利亞會(Samaritans)、Mind、CALM等慈善機構提供至關重要的前線支援，包括24小時熱線、線上諮詢和公眾倡議。",
+            helpTitle: "尋求協助，你並不孤單",
+            helpDesc: "如果你或你認識的人正在經歷困難時期，請記住，尋求幫助是一種堅強的表現。以下是一些可以提供即時、保密支援的機構。",
+            helpOrg1: "24/7 電話支援",
+            helpOrg2: "專為男性提供支援",
+            helpOrg3: "為35歲以下年輕人服務",
+            footer1: "本互動式報告根據《英國自殺率現況及成因分析》報告製作。",
+            footer2: "數據和分析僅供參考，不應取代專業醫療建議。",
+            langSwitchToEnglish: "Switch to English"
+        }
+    };
+
+    // --- CHART DATA ---
+    const dataStore = {
+        age: {
+            'zh-Hant': {
+                labels: ['10-24歲', '25-44歲', '45-64歲', '65+歲'],
+                datasets: [
+                    { label: '男性自殺率 (每十萬人, 2023)', data: [7.4, 21.1, 22.4, 15.1], backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 },
+                    { label: '女性自殺率 (每十萬人, 2023)', data: [3.1, 6.7, 7.5, 4.4], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1 }
+                ]
+            },
+            'en': {
+                labels: ['10-24 years', '25-44 years', '45-64 years', '65+ years'],
+                datasets: [
+                    { label: 'Male suicide rate (per 100,000, 2023)', data: [7.4, 21.1, 22.4, 15.1], backgroundColor: 'rgba(59, 130, 246, 0.6)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 },
+                    { label: 'Female suicide rate (per 100,000, 2023)', data: [3.1, 6.7, 7.5, 4.4], backgroundColor: 'rgba(239, 68, 68, 0.6)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1 }
+                ]
+            }
+        },
+        region: {
+            'zh-Hant': {
+                labels: ['西北部', '東北部', '威爾斯', '蘇格蘭', '北愛爾蘭', '英格蘭平均', '倫敦'],
+                datasets: [{ label: '自殺率 (每十萬人, 2023)', data: [14.7, 13.5, 14.0, 14.6, 13.3, 11.2, 7.3], backgroundColor: 'rgba(13, 148, 136, 0.6)', borderColor: 'rgba(13, 148, 136, 1)', borderWidth: 1 }]
+            },
+            'en': {
+                labels: ['North West', 'North East', 'Wales', 'Scotland', 'Northern Ireland', 'England Average', 'London'],
+                datasets: [{ label: 'Suicide rate (per 100,000, 2023)', data: [14.7, 13.5, 14.0, 14.6, 13.3, 11.2, 7.3], backgroundColor: 'rgba(13, 148, 136, 0.6)', borderColor: 'rgba(13, 148, 136, 1)', borderWidth: 1 }]
+            }
+        },
+        socioeconomic: {
+            'zh-Hant': {
+                labels: ['最貧困 10% 地區', '最富裕 10% 地區'],
+                datasets: [{ label: '自殺率 (每十萬人, 英格蘭)', data: [14.1, 7.4], backgroundColor: ['rgba(217, 119, 6, 0.6)', 'rgba(13, 148, 136, 0.6)'], borderColor: ['rgba(217, 119, 6, 1)', 'rgba(13, 148, 136, 1)'], borderWidth: 1 }]
+            },
+            'en': {
+                labels: ['Most deprived 10% areas', 'Least deprived 10% areas'],
+                datasets: [{ label: 'Suicide rate (per 100,000, England)', data: [14.1, 7.4], backgroundColor: ['rgba(217, 119, 6, 0.6)', 'rgba(13, 148, 136, 0.6)'], borderColor: ['rgba(217, 119, 6, 1)', 'rgba(13, 148, 136, 1)'], borderWidth: 1 }]
+            }
+        },
+        trend: {
+            'zh-Hant': {
+                labels: ['1981', '1990', '2000', '2010', '2017', '2023'],
+                datasets: [
+                    { label: '男性 (每十萬人)', data: [19.2, 18.0, 17.0, 17.0, 15.5, 17.4], borderColor: 'rgba(59, 130, 246, 1)', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.1 },
+                    { label: '女性 (每十萬人)', data: [10.5, 6.7, 5.4, 5.0, 4.8, 5.7], borderColor: 'rgba(239, 68, 68, 1)', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.1 }
+                ]
+            },
+            'en': {
+                labels: ['1981', '1990', '2000', '2010', '2017', '2023'],
+                datasets: [
+                    { label: 'Males (per 100,000)', data: [19.2, 18.0, 17.0, 17.0, 15.5, 17.4], borderColor: 'rgba(59, 130, 246, 1)', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.1 },
+                    { label: 'Females (per 100,000)', data: [10.5, 6.7, 5.4, 5.0, 4.8, 5.7], borderColor: 'rgba(239, 68, 68, 1)', backgroundColor: 'rgba(239, 68, 68, 0.1)', fill: true, tension: 0.1 }
+                ]
+            }
+        },
+        international: {
+            'zh-Hant': {
+                labels: ['韓國', '立陶宛', '美國', '日本', '法國', '澳洲', '德國', '英國', '西班牙', '希臘'],
+                datasets: [{ label: '男性自殺率 (每十萬人, 2021)', data: [35, 33, 24, 21, 20, 19, 15, 13, 12, 7], backgroundColor: 'rgba(75, 85, 99, 0.6)', borderColor: 'rgba(75, 85, 99, 1)', borderWidth: 1 }]
+            },
+            'en': {
+                labels: ['S. Korea', 'Lithuania', 'USA', 'Japan', 'France', 'Australia', 'Germany', 'UK', 'Spain', 'Greece'],
+                datasets: [{ label: 'Male suicide rate (per 100,000, 2021)', data: [35, 33, 24, 21, 20, 19, 15, 13, 12, 7], backgroundColor: 'rgba(75, 85, 99, 0.6)', borderColor: 'rgba(75, 85, 99, 1)', borderWidth: 1 }]
+            }
+        }
+    };
+    
+    let currentLang = 'zh-Hant';
+    let charts = {};
+
+    // --- LANGUAGE SWITCHER LOGIC ---
+    function translatePage(lang) {
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (translations[lang] && translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        document.documentElement.lang = lang;
+        const langSwitcher = document.getElementById('lang-switcher');
+        langSwitcher.textContent = lang === 'en' ? translations.en.langSwitchToChinese : translations['zh-Hant'].langSwitchToEnglish;
+    }
+
+    // --- CHART LOGIC ---
+    const chartFontFamily = "'Lato', 'Noto Sans TC', sans-serif";
+    const commonChartOptions = {
+        maintainAspectRatio: false,
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: { font: { family: chartFontFamily } }
+            },
+            tooltip: {
+                titleFont: { family: chartFontFamily },
+                bodyFont: { family: chartFontFamily }
+            }
+        },
+    };
+
+    function createChart(ctx, type, data, options) {
+        return new Chart(ctx, { type, data, options });
+    }
+    
+    function destroyCharts() {
+        Object.values(charts).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+        charts = {};
+    }
+
+    function initCharts(lang) {
+        destroyCharts();
+        
+        const verticalBarOptions = {
+            ...commonChartOptions,
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: chartFontFamily }, callback: value => value + ' ' } },
+                x: { grid: { display: false }, ticks: { font: { family: chartFontFamily } } }
+            }
+        };
+        const horizontalBarOptions = {
+            ...commonChartOptions,
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: chartFontFamily } } },
+                y: { grid: { display: false }, ticks: { font: { family: chartFontFamily } } }
+            }
+        };
+        const lineChartOptions = {
+             ...commonChartOptions,
+             scales: {
+                y: { beginAtZero: false, grid: { color: 'rgba(0, 0, 0, 0.05)' }, ticks: { font: { family: chartFontFamily }, callback: value => value + ' ' } },
+                x: { grid: { display: false }, ticks: { font: { family: chartFontFamily } } }
+            }
+        };
+
+        charts.ageChart = createChart(document.getElementById('ageChart').getContext('2d'), 'bar', dataStore.age[lang], verticalBarOptions);
+        charts.regionChart = createChart(document.getElementById('regionChart').getContext('2d'), 'bar', dataStore.region[lang], { ...horizontalBarOptions, plugins: { ...horizontalBarOptions.plugins, legend: {display: false} } });
+        charts.socioeconomicChart = createChart(document.getElementById('socioeconomicChart').getContext('2d'), 'bar', dataStore.socioeconomic[lang], { ...verticalBarOptions, plugins: { ...verticalBarOptions.plugins, legend: { display: false } } });
+        charts.trendChart = createChart(document.getElementById('trendChart').getContext('2d'), 'line', dataStore.trend[lang], lineChartOptions);
+        charts.internationalChart = createChart(document.getElementById('internationalChart').getContext('2d'), 'bar', dataStore.international[lang], { ...horizontalBarOptions, plugins: { ...horizontalBarOptions.plugins, legend: { display: false } } });
+    }
+
+    // --- EVENT LISTENERS ---
+    const tabs = document.querySelectorAll('.tab-button');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(item => item.classList.remove('active'));
+            tab.classList.add('active');
+            const target = tab.getAttribute('data-target');
+            contents.forEach(content => {
+                content.id === `${target}-content` ? content.classList.remove('hidden') : content.classList.add('hidden');
+            });
+        });
+    });
+
+    const navLinks = document.querySelectorAll('.nav-button');
+    const sections = document.querySelectorAll('main section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { root: null, rootMargin: '0px', threshold: 0.4 });
+    sections.forEach(section => observer.observe(section));
+
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        currentLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+        translatePage(currentLang);
+        initCharts(currentLang);
+    });
+
+    // --- INITIALIZATION ---
+    translatePage(currentLang);
+    initCharts(currentLang);
+});
+</script>
+</body>
+</html>
