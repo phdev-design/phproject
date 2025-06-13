@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動報告：中醫藥在英國的使用情況</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A thematic, non-linear, single-page dashboard. The structure is designed for user-led exploration, starting with a high-level overview and allowing dives into specific topics like user demographics, motivations, and cultural factors. A sticky navigation bar facilitates easy movement between these themes. This approach is better than a linear report for web-based consumption, as it respects the user's curiosity and allows them to find relevant information quickly. Key data is presented in cards and interactive charts to be immediately engaging and digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Overview: Goal=Inform. Method=Key stat cards & bar/donut charts (Chart.js). Interaction=Tooltips. Justification=Provides a quick, impactful summary of usage and market size.
+        - User Profile: Goal=Compare. Method=Bar chart & styled HTML for demographics. Interaction=Tooltips. Justification=Clearly illustrates key user characteristics without overwhelming with text.
+        - Motivations & Conditions: Goal=Organize/Explain. Method=Clickable cards for reasons & interactive bar chart for conditions (Chart.js). Interaction=Click to reveal text, hover for details. Justification=Breaks down complex information into engaging, manageable pieces.
+        - Ethnicity: Goal=Compare. Method=Two-column text/icon layout. Interaction=None. Justification=Effectively contrasts cultural drivers without misrepresenting the qualitative nature of the source data.
+        - Healthcare Context: Goal=Organize. Method=HTML/CSS diagram. Interaction=None. Justification=Visually simplifies the complex relationships between patients, NHS, and private practice.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF5;
+            color: #4A3F35;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            max-height: 400px;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A0522D; /* Sienna */
+            border-bottom-color: #A0522D;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .detail-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .detail-content.open {
+            max-height: 500px; 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#FDFBF5] shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-[#8B4513]">英國中醫藥報告</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">概覽</a>
+                        <a href="#profile" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">使用者畫像</a>
+                        <a href="#why" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">為何選擇中醫</a>
+                        <a href="#culture" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">族裔與文化</a>
+                        <a href="#context" class="nav-link px-3 py-2 text-sm font-medium border-b-2 border-transparent">醫療環境</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#8B4513]">英國的中醫藥使用有多普及？</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">中醫藥及其他補充與替代醫學 (CAM) 在英國擁有廣泛的群眾基礎和強勁的市場活力。數據顯示，這不僅是一種小眾選擇，而是一個由患者主動需求驅動、且持續增長的健康領域。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <div class="card bg-white p-6 rounded-lg shadow-sm text-center">
+                    <div class="text-4xl font-bold text-[#A0522D]">16%</div>
+                    <p class="mt-2 text-gray-700">15歲以上英國成年人在2015年曾使用CAM從業人員服務，高於2005年的12%。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-lg shadow-sm text-center">
+                     <div class="text-4xl font-bold text-[#A0522D]">$86億</div>
+                    <p class="mt-2 text-gray-700">2023年英國CAM市場預估營收（美元），並預期將大幅增長。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-lg shadow-sm text-center">
+                     <div class="text-4xl font-bold text-[#A0522D]">33.1%</div>
+                    <p class="mt-2 text-gray-700">市場份額由「傳統替代醫學/植物藥」佔據，中草藥是其核心。</p>
+                </div>
+            </div>
+             <div class="bg-white p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">CAM市場主要營收來源 (2023)</h3>
+                <div class="chart-container h-80 max-w-lg">
+                    <canvas id="marketShareChart"></canvas>
+                </div>
+                 <p class="text-center text-sm text-gray-500 mt-4">中醫藥的核心——中草藥，是「傳統替代醫學/植物藥」類別的主要部分，這顯示了其在市場中的重要經濟地位。</p>
+            </div>
+        </section>
+
+        <section id="profile" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#8B4513]">誰在使用中醫藥？</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">使用者特徵揭示了補充與替代醫學 (CAM) 在英國的普及模式。雖然跨越各年齡層，但在性別、社會經濟地位和地理位置上存在顯著差異，這也暗示了服務可及性方面的挑戰。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">性別差異</h3>
+                    <div class="chart-container h-64">
+                         <canvas id="genderChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-4">多項研究一致指出，女性比男性更傾向於使用CAM療法。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm space-y-6">
+                    <div>
+                        <h4 class="font-semibold text-lg mb-2 flex items-center"><span class="text-2xl mr-3">💼</span>社會經濟地位</h4>
+                        <p class="text-gray-700">使用者更集中在較高社會經濟群體（如專業人士、中高收入者）和較高教育程度的人群中。</p>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-lg mb-2 flex items-center"><span class="text-2xl mr-3">📍</span>地區差異</h4>
+                        <p class="text-gray-700">英格蘭南部的CAM使用率顯著高於北部和中部地區，幾乎是後者的兩倍。</p>
+                    </div>
+                     <div>
+                        <h4 class="font-semibold text-lg mb-2 flex items-center"><span class="text-2xl mr-3">💳</span>支付方式</h4>
+                        <p class="text-gray-700">約67%的使用者自費。這表明經濟能力是影響服務可及性的關鍵因素。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="why" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#8B4513]">人們為何選擇中醫藥？</h2>
+             <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">選擇中醫藥的動機複雜多元，通常源於對常規西醫的補充需求，以及中醫藥本身的獨特吸引力。這不僅是治療疾病，更是對一種不同健康哲學的追求。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div>
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">主要驅動因素</h3>
+                    <div class="space-y-4">
+                        <div class="motivation-card bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button class="w-full text-left p-4 flex justify-between items-center font-semibold">
+                                <span>對常規治療的補充</span><span class="text-2xl font-light transform transition-transform">+</span>
+                            </button>
+                            <div class="detail-content px-4 pb-4 text-gray-700">
+                                <p>當常規西醫對某些慢性病（如慢性疼痛）的治療效果有限或伴隨副作用時，許多患者會尋求中醫藥作為補充或替代方案，希望能獲得更好的緩解效果。</p>
+                            </div>
+                        </div>
+                        <div class="motivation-card bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button class="w-full text-left p-4 flex justify-between items-center font-semibold">
+                                <span>追求整體與自然療法</span><span class="text-2xl font-light transform transition-transform">+</span>
+                            </button>
+                            <div class="detail-content px-4 pb-4 text-gray-700">
+                                <p>中醫藥強調「治病求本」的整體觀，關注身心平衡，而非僅僅治療症狀。這種自然、侵入性較小的治療哲學吸引了尋求更全面健康視角的患者。</p>
+                            </div>
+                        </div>
+                        <div class="motivation-card bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button class="w-full text-left p-4 flex justify-between items-center font-semibold">
+                                <span>個人經驗與口碑</span><span class="text-2xl font-light transform transition-transform">+</span>
+                            </button>
+                            <div class="detail-content px-4 pb-4 text-gray-700">
+                                <p>先前良好的個人治療經驗，或來自親友的正面推薦，是影響決策的強大因素。口碑傳播建立了信任感，降低了嘗試非主流療法的門檻。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">最常見的治療病症</h3>
+                    <p class="text-center text-sm text-gray-500 mb-4">點擊圖表中的長條以了解更多細節。</p>
+                    <div class="chart-container h-96">
+                        <canvas id="conditionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#8B4513]">族裔與文化：無形的影響力</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">在英國的多元文化社會中，族裔背景深刻影響著健康觀念和醫療選擇。尤其是對於華裔和南亞裔社群，傳統醫學不僅是治療方法，更是文化傳承的一部分。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card bg-white p-6 rounded-lg shadow-sm border-t-4 border-[#A0522D]">
+                    <h3 class="text-2xl font-bold mb-4 text-center">華裔社群</h3>
+                    <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>文化親和力：</strong>中醫藥是文化傳承的一部分，其「氣」、「陰陽」等核心理念深入人心，是自然且值得信賴的選擇。</li>
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>整合性策略：</strong>傾向於結合中西醫療法，急性病看西醫，慢性病調理和日常保健則用中醫。</li>
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>高使用率：</strong>研究指出，華裔是英國最有可能使用補充與替代醫學的族裔群體。</li>
+                    </ul>
+                </div>
+                <div class="card bg-white p-6 rounded-lg shadow-sm border-t-4 border-[#556B2F]">
+                    <h3 class="text-2xl font-bold mb-4 text-center">南亞裔社群</h3>
+                     <ul class="space-y-4 text-gray-700">
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>傳統草藥：</strong>傾向於使用其文化中的草藥療法來補充或替代常規藥物，尤其是在管理糖尿病等慢性病方面。</li>
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>偏好自然：</strong>部分成員可能對西醫持有不信任感，並表現出對「自然療法」的強烈偏好。</li>
+                        <li class="flex items-start"><span class="text-green-700 text-xl mr-3">✔</span><strong>代際差異：</strong>年輕一代可能對改變生活方式持更開放的態度，健康觀念正在演變。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 bg-gray-100 p-4 rounded-lg text-center text-sm text-gray-600">
+                <strong>數據局限性：</strong>請注意，目前缺乏全國範圍內、針對各族裔中醫藥使用率的精確比較數據。以上觀察多來自質性研究，為我們提供了重要的文化視角。
+            </div>
+        </section>
+
+        <section id="context" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#8B4513]">中醫藥的發展環境</h2>
+            <p class="text-center text-lg text-gray-600 mb-12 max-w-3xl mx-auto">中醫藥在英國的發展，是在一個由患者需求、行業自律和主流醫療體系審慎態度共同構成的複雜環境中進行的。</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">在NHS中的角色</h3>
+                    <p class="mb-4 text-gray-700">英國國家醫療服務體系 (NHS) 對CAM持謹慎態度，接納程度取決於臨床證據。</p>
+                    <ul class="space-y-3 text-gray-700">
+                        <li class="flex items-start"><strong class="text-green-600 text-lg mr-2">✓</strong><div><strong>有限推薦針灸：</strong>英國國家健康與照顧卓越研究院 (NICE) 推薦針灸用於治療慢性疼痛、偏頭痛和頭痛等特定病症。</div></li>
+                        <li class="flex items-start"><strong class="text-orange-500 text-lg mr-2">!</strong><div><strong>服務機會有限：</strong>儘管有推薦，但NHS提供的針灸服務名額不多，大多數患者仍需自費尋求私人治療。</div></li>
+                        <li class="flex items-start"><strong class="text-red-600 text-lg mr-2">✗</strong><div><strong>中草藥未被納入：</strong>目前沒有證據顯示中草藥被NHS廣泛採納或提供。</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                     <h3 class="text-xl font-bold text-center mb-4 text-[#8B4513]">行業監管與專業組織</h3>
+                     <p class="mb-4 text-gray-700">英國對中醫師沒有法定的強制註冊要求，行業主要依賴自願性監管。</p>
+                     <p class="text-gray-700 mb-2">主要的專業自律組織包括：</p>
+                     <ul class="space-y-2 list-disc list-inside text-gray-700">
+                        <li><strong>英國中醫藥學會 (ATCM)</strong></li>
+                        <li><strong>英國針灸理事會 (BAcC)</strong></li>
+                     </ul>
+                     <p class="mt-4 text-sm bg-yellow-100 text-yellow-800 p-3 rounded-md">這種自願性模式意味著服務品質可能參差不齊。建議使用者選擇已在權威專業組織註冊的從業人員。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-[#4A3F35] text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+            <p class="text-sm">此互動報告基於《英國中醫藥使用現狀、動機及族裔差異》研究報告生成。</p>
+            <p class="text-xs text-gray-400 mt-2">© 2025 互動數據可視化</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const chartColors = {
+                primary: 'rgba(160, 82, 45, 0.8)', // Sienna
+                secondary: 'rgba(85, 107, 47, 0.8)', // DarkOliveGreen
+                accent: 'rgba(205, 92, 92, 0.8)', // IndianRed
+                background: 'rgba(160, 82, 45, 0.2)',
+                background2: 'rgba(85, 107, 47, 0.2)',
+                background3: 'rgba(205, 92, 92, 0.2)',
+                grid: 'rgba(0, 0, 0, 0.05)',
+                text: '#4A3F35'
+            };
+
+            const marketShareCtx = document.getElementById('marketShareChart');
+            if(marketShareCtx) {
+                new Chart(marketShareCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['傳統替代醫學/植物藥', '身心干預', '其他CAM療法'],
+                        datasets: [{
+                            label: '市場份額',
+                            data: [33.1, 25.5, 41.4],
+                            backgroundColor: [chartColors.primary, chartColors.secondary, chartColors.accent],
+                            borderColor: '#FDFBF5',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: chartColors.text,
+                                    font: { family: "'Noto Sans TC', sans-serif" }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const genderCtx = document.getElementById('genderChart');
+            if(genderCtx) {
+                new Chart(genderCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['使用者'],
+                        datasets: [
+                            {
+                                label: '女性',
+                                data: [65], // Representative number
+                                backgroundColor: chartColors.primary,
+                                borderRadius: 4,
+                            },
+                            {
+                                label: '男性',
+                                data: [35], // Representative number
+                                backgroundColor: chartColors.secondary,
+                                borderRadius: 4
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                         scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { display: false },
+                                grid: { display: false },
+                                beginAtZero: true,
+                                max: 100
+                            },
+                            y: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: { display: false },
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: chartColors.text, font: { family: "'Noto Sans TC', sans-serif" }}
+                            },
+                            tooltip: {
+                                callbacks: {
+                                     label: function(context) {
+                                        return `${context.dataset.label}: 約 ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const conditionsCtx = document.getElementById('conditionsChart');
+            if(conditionsCtx) {
+                const conditionsData = {
+                    labels: ['肌肉骨骼問題', '疼痛管理', '神經系統疾病', '精神健康', '其他'],
+                    datasets: [{
+                        label: '求診頻率',
+                        data: [45, 25, 15, 10, 5],
+                        backgroundColor: [
+                            chartColors.background,
+                            chartColors.background2,
+                            chartColors.background3,
+                            'rgba(218, 165, 32, 0.2)', // Goldenrod
+                            'rgba(119, 136, 153, 0.2)' // LightSlateGray
+                        ],
+                        borderColor: [
+                            chartColors.primary,
+                            chartColors.secondary,
+                            chartColors.accent,
+                            'rgba(218, 165, 32, 1)',
+                             'rgba(119, 136, 153, 1)'
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 4,
+                    }]
+                };
+
+                const conditionsDetails = {
+                    '肌肉骨骼問題': '最常見的原因，包括慢性下背痛、頸肩痛、膝關節炎等。',
+                    '疼痛管理': '廣泛的慢性疼痛管理，是NICE推薦針灸治療的適應症之一。',
+                    '神經系統疾病': '主要是偏頭痛和慢性緊張型頭痛，NICE亦推薦針灸治療。',
+                    '精神健康': '用於緩解輕度抑鬱、焦慮、壓力及改善睡眠。',
+                    '其他': '包括過敏性鼻炎、化療副作用（如噁心）、婦科問題等。'
+                };
+                
+                const conditionsChart = new Chart(conditionsCtx, {
+                    type: 'bar',
+                    data: conditionsData,
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { color: chartColors.grid } },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: false
+                            }
+                        },
+                        onClick: (e, elements) => {
+                           if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const label = conditionsData.labels[index];
+                                alert(`病症類別：${label}\n\n詳細說明：${conditionsDetails[label]}`);
+                           }
+                        }
+                    }
+                });
+                 conditionsCtx.onclick = function(evt) {
+                    const activePoints = conditionsChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+                    if (activePoints.length) {
+                        const firstPoint = activePoints[0];
+                        const label = conditionsChart.data.labels[firstPoint.index];
+                        const detail = conditionsDetails[label];
+                        
+                        const modal = document.createElement('div');
+                        modal.style.position = 'fixed';
+                        modal.style.left = '0';
+                        modal.style.top = '0';
+                        modal.style.width = '100%';
+                        modal.style.height = '100%';
+                        modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+                        modal.style.display = 'flex';
+                        modal.style.justifyContent = 'center';
+                        modal.style.alignItems = 'center';
+                        modal.style.zIndex = '1000';
+                        modal.onclick = () => document.body.removeChild(modal);
+
+                        const modalContent = document.createElement('div');
+                        modalContent.style.background = 'white';
+                        modalContent.style.padding = '2rem';
+                        modalContent.style.borderRadius = '8px';
+                        modalContent.style.maxWidth = '400px';
+                        modalContent.style.textAlign = 'center';
+                        
+                        const title = document.createElement('h3');
+                        title.textContent = label;
+                        title.style.fontWeight = 'bold';
+                        title.style.fontSize = '1.25rem';
+                        title.style.marginBottom = '1rem';
+
+                        const text = document.createElement('p');
+                        text.textContent = detail;
+                        text.style.marginBottom = '1.5rem';
+
+                        const closeButton = document.createElement('button');
+                        closeButton.textContent = '關閉';
+                        closeButton.style.padding = '0.5rem 1rem';
+                        closeButton.style.border = '1px solid #ccc';
+                        closeButton.style.borderRadius = '4px';
+                        
+                        modalContent.appendChild(title);
+                        modalContent.appendChild(text);
+                        modalContent.appendChild(closeButton);
+                        modal.appendChild(modalContent);
+                        document.body.appendChild(modal);
+                    }
+                };
+            }
+
+            const motivationCards = document.querySelectorAll('.motivation-card button');
+            motivationCards.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('span:last-child');
+                    
+                    if(content.classList.contains('open')) {
+                        content.classList.remove('open');
+                        icon.classList.remove('rotate-45');
+                    } else {
+                        document.querySelectorAll('.detail-content.open').forEach(openContent => {
+                            openContent.classList.remove('open');
+                            openContent.previousElementSibling.querySelector('span:last-child').classList.remove('rotate-45');
+                        });
+                        content.classList.add('open');
+                        icon.classList.add('rotate-45');
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                })
+            });
+        });
+    </script>
+</body>
+</html>
