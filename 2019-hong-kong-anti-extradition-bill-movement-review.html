@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">資訊圖表：2019香港反修例運動回顧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f0f2f5;
+            transition: background-color 0.3s;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .section-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .timeline {
+            position: relative;
+            padding: 1rem 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 40px;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 12px;
+            top: 5px;
+            height: 1.5rem;
+            width: 1.5rem;
+            background-color: #004FF9;
+            border: 4px solid #f0f2f5;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .big-number {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #004FF9;
+        }
+        .lang-switcher button {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .lang-switcher button.active {
+            background-color: #004FF9;
+            color: white;
+        }
+        .lang-switcher button:not(.active) {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <div class="flex justify-end mb-4">
+            <div class="lang-switcher flex space-x-1 p-1 bg-gray-200 rounded-lg">
+                <button id="lang-zh" class="active">中文</button>
+                <button id="lang-en">EN</button>
+            </div>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4" data-lang-key="headerTitle">2019年香港反修例運動</h1>
+            <p class="text-xl text-gray-600" data-lang-key="headerSubtitle">一場由單一法案引發，席捲全城的社會政治風暴</p>
+        </header>
+
+        <main>
+            <section id="introduction" class="section-card">
+                <h2 class="text-2xl font-bold mb-4 text-gray-900" data-lang-key="introTitle">一、危機的火花：逃犯條例修訂草案</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="text-gray-700 leading-relaxed mb-4" data-lang-key="introP1">2019年初，香港政府提出《逃犯條例》修訂草案，旨在容許以個案形式將逃犯移交至包括中國大陸在內的司法管轄區。此舉被廣泛視為對香港司法獨立和「一國兩制」原則的直接威脅，觸發了市民對中國大陸司法體系根深蒂固的不信任，點燃了社會早已積壓的政治及民生怨氣。</p>
+                        <p class="text-gray-700 leading-relaxed" data-lang-key="introP2">政府雖以處理台灣殺人案為由，卻未能釋除公眾疑慮，反映了其對民情判斷的嚴重失誤，為後續的大規模抗爭埋下了伏筆。</p>
+                    </div>
+                    <div>
+                        <div class="chart-container h-64 sm:h-80">
+                            <canvas id="oppositionChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-600 mt-2" data-lang-key="introChartCaption">民意調查顯示，絕大多數市民反對修例，憂慮其對個人自由及香港自治地位的衝擊。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="timeline" class="section-card">
+                <h2 class="text-2xl font-bold mb-6 text-gray-900" data-lang-key="timelineTitle">二、動盪的編年史：抗爭規模的演變</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    <div class="lg:col-span-3">
+                         <div class="chart-container" style="height: 400px;">
+                            <canvas id="protestSizeChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-600 mt-4" data-lang-key="timelineChartCaption">上圖展示了2019年數次主要遊行的參與人數，數據分別來自民陣（主辦方）及警方。遊行人數的急劇增長，反映了民怨的迅速升級和社會動員的空前規模。</p>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800" data-lang-key="timelineKeyEvents">關鍵事件時間軸</h3>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate1">4月28日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent1">13萬人遊行，為當時最大規模。</p>
+                            </div>
+                             <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate2">6月9日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent2">民陣稱逾百萬人遊行，政府堅持二讀。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate3">6月12日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent3">包圍立法會爆發衝突，警方定性為「暴動」。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate4">6月16日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent4">民陣稱近200萬人遊行，要求撤回條例及追究警暴。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate5">7月21日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent5">元朗襲擊事件，警民信任危機加劇。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot" style="background-color: #FF5C00;"></div>
+                                <p class="font-bold text-gray-800" data-lang-key="timelineDate6">9月4日</p>
+                                <p class="text-sm text-gray-600" data-lang-key="timelineEvent6">政府正式宣布撤回修例。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="five-demands" class="section-card">
+                <h2 class="text-2xl font-bold mb-4 text-gray-900" data-lang-key="demandsTitle">三、運動的核心：「五大訴求，缺一不可」</h2>
+                <p class="text-gray-700 leading-relaxed mb-6" data-lang-key="demandsP1">隨著運動的發展，示威者的目標從單一的反對修例，演變成涵蓋政治問責和制度改革的「五大訴求」。這個口號突顯了示威者的團結立場，並清晰地反映出民怨已從單一事件升級為對管治、警權及政治前景的全面質疑。</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-4 border-b-2 border-gray-200 font-semibold text-gray-700" data-lang-key="tableH1">訴求</th>
+                                <th class="p-4 border-b-2 border-gray-200 font-semibold text-gray-700" data-lang-key="tableH2">內容解釋</th>
+                                <th class="p-4 border-b-2 border-gray-200 font-semibold text-gray-700" data-lang-key="tableH3">截至2019年底狀況</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand1">1. 全面撤回修例</td>
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand1Desc">完全且無條件地收回法案。</td>
+                                <td class="p-4 border-b border-gray-200 text-green-600 font-semibold" data-lang-key="demand1Status">已達成 (9月4日宣布)</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand2">2. 撤回「暴動」定性</td>
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand2Desc">取消官方對示威的「暴動」標籤。</td>
+                                <td class="p-4 border-b border-gray-200 text-red-600 font-semibold" data-lang-key="demand2Status">被拒絕</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand3">3. 釋放被捕示威者</td>
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand3Desc">撤銷對示威者的控罪並釋放。</td>
+                                <td class="p-4 border-b border-gray-200 text-red-600 font-semibold" data-lang-key="demand3Status">被拒絕</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand4">4. 成立獨立調查委員會</td>
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand4Desc">徹底追究警隊涉嫌濫權情況。</td>
+                                <td class="p-4 border-b border-gray-200 text-red-600 font-semibold" data-lang-key="demand4Status">被拒絕</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand5">5. 實行「真雙普選」</td>
+                                <td class="p-4 border-b border-gray-200" data-lang-key="demand5Desc">改革選舉制度以達致真普選。</td>
+                                <td class="p-4 border-b border-gray-200 text-red-600 font-semibold" data-lang-key="demand5Status">被拒絕</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                 <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-900" data-lang-key="trustTitle">四、信任的崩潰：警民關係與關鍵事件</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4" data-lang-key="trustP1">報告指出，對警方處理示威手法的不滿，成為市民參與示威的核心原因之一，其重要性甚至一度超越其他訴求。721元朗襲擊事件中警方被指反應遲緩，以及831太子站事件中被指控濫用武力，成為警民信任徹底破裂的標誌性時刻，使「追究警暴」成為示威者堅定不移的訴求。</p>
+                    <div class="chart-container h-64 sm:h-80">
+                        <canvas id="reasonsChart"></canvas>
+                    </div>
+                     <p class="text-center text-gray-600 mt-2" data-lang-key="trustChartCaption">示威者參與動機分析（示意圖）</p>
+                </div>
+
+                <div class="section-card">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-900" data-lang-key="electionTitle">五、民意的判決：區議會選舉</h2>
+                    <p class="text-gray-700 leading-relaxed mb-4" data-lang-key="electionP1">2019年11月24日的區議會選舉，被廣泛視為對運動的一次變相公投。選舉創下了香港歷史性的高投票率，而結果亦極具象徵意義。</p>
+                    <div class="text-center my-6">
+                        <div class="big-number">71.23%</div>
+                        <div class="text-xl font-semibold text-gray-700" data-lang-key="electionTurnout">歷史性投票率</div>
+                    </div>
+                    <div class="chart-container h-48 sm:h-64">
+                         <canvas id="electionChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-2" data-lang-key="electionChartCaption">民主派在全港18區中贏得17區的控制權，此結果清晰地反駁了「沉默大多數」反對示威的說法，在政治上確認了運動的民意基礎。</p>
+                </div>
+            </section>
+
+            <section id="characteristics" class="section-card">
+                <h2 class="text-2xl font-bold mb-4 text-gray-900" data-lang-key="featuresTitle">六、運動的特徵：如水無形，網絡驅動</h2>
+                 <p class="text-gray-700 leading-relaxed mb-6" data-lang-key="featuresP1">2019年的運動展現了與過往截然不同的抗爭模式，其去中心化和靈活的特性，使其能夠持續數月之久，並對當局的應對構成極大挑戰。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <div class="text-5xl mb-2">🌊</div>
+                        <h3 class="text-lg font-semibold text-gray-800" data-lang-key="feature1Title">Be Water (如水)</h3>
+                        <p class="text-sm text-gray-600" data-lang-key="feature1Desc">採納李小龍哲學，強調靈活性、適應性和不可預測性，快速集結和疏散。</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <div class="text-5xl mb-2">👥</div>
+                        <h3 class="text-lg font-semibold text-gray-800" data-lang-key="feature2Title">無大台 (無領袖)</h3>
+                        <p class="text-sm text-gray-600" data-lang-key="feature2Desc">沒有單一組織或個人指揮，依靠網絡平台如LIHKG和Telegram進行集體決策與協調。</p>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                         <div class="text-5xl mb-2">🤝</div>
+                        <h3 class="text-lg font-semibold text-gray-800" data-lang-key="feature3Title">不割蓆 (不分離)</h3>
+                        <p class="text-sm text-gray-600" data-lang-key="feature3Desc">和平與激進示威者之間維持團結，不互相指摘，共同面對壓力。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="section-card mt-8 text-center bg-gray-800 text-white">
+                 <h2 class="text-2xl font-bold mb-4" data-lang-key="conclusionTitle">七、結論：深刻的裂痕與不可逆轉的改變</h2>
+                 <p class="text-gray-300 leading-relaxed max-w-3xl mx-auto" data-lang-key="conclusionP1">2019年的反修例運動，由反對單一法案演變成一場對管治、警權及自治的全面抗爭。它暴露了「一國兩制」下的深刻矛盾與社會裂痕。儘管街頭抗爭最終平息，政府亦未在撤回條例外作出更多讓步，但這場運動從根本上改變了香港的政治生態，並為日後《港區國安法》的實施鋪平了道路，成為香港歷史上一個重要的分水嶺。</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        // --- DATA & TRANSLATIONS ---
+        const translations = {
+            zh: {
+                pageTitle: '資訊圖表：2019香港反修例運動回顧',
+                headerTitle: '2019年香港反修例運動',
+                headerSubtitle: '一場由單一法案引發，席捲全城的社會政治風暴',
+                introTitle: '一、危機的火花：逃犯條例修訂草案',
+                introP1: '2019年初，香港政府提出《逃犯條例》修訂草案，旨在容許以個案形式將逃犯移交至包括中國大陸在內的司法管轄區。此舉被廣泛視為對香港司法獨立和「一國兩制」原則的直接威脅，觸發了市民對中國大陸司法體系根深蒂固的不信任，點燃了社會早已積壓的政治及民生怨氣。',
+                introP2: '政府雖以處理台灣殺人案為由，卻未能釋除公眾疑慮，反映了其對民情判斷的嚴重失誤，為後續的大規模抗爭埋下了伏筆。',
+                introChartCaption: '民意調查顯示，絕大多數市民反對修例，憂慮其對個人自由及香港自治地位的衝擊。',
+                timelineTitle: '二、動盪的編年史：抗爭規模的演變',
+                timelineChartCaption: '上圖展示了2019年數次主要遊行的參與人數，數據分別來自民陣（主辦方）及警方。遊行人數的急劇增長，反映了民怨的迅速升級和社會動員的空前規模。',
+                timelineKeyEvents: '關鍵事件時間軸',
+                timelineDate1: '4月28日',
+                timelineEvent1: '13萬人遊行，為當時最大規模。',
+                timelineDate2: '6月9日',
+                timelineEvent2: '民陣稱逾百萬人遊行，政府堅持二讀。',
+                timelineDate3: '6月12日',
+                timelineEvent3: '包圍立法會爆發衝突，警方定性為「暴動」。',
+                timelineDate4: '6月16日',
+                timelineEvent4: '民陣稱近200萬人遊行，要求撤回條例及追究警暴。',
+                timelineDate5: '7月21日',
+                timelineEvent5: '元朗襲擊事件，警民信任危機加劇。',
+                timelineDate6: '9月4日',
+                timelineEvent6: '政府正式宣布撤回修例。',
+                demandsTitle: '三、運動的核心：「五大訴求，缺一不可」',
+                demandsP1: '隨著運動的發展，示威者的目標從單一的反對修例，演變成涵蓋政治問責和制度改革的「五大訴求」。這個口號突顯了示威者的團結立場，並清晰地反映出民怨已從單一事件升級為對管治、警權及政治前景的全面質疑。',
+                tableH1: '訴求',
+                tableH2: '內容解釋',
+                tableH3: '截至2019年底狀況',
+                demand1: '1. 全面撤回修例',
+                demand1Desc: '完全且無條件地收回法案。',
+                demand1Status: '已達成 (9月4日宣布)',
+                demand2: '2. 撤回「暴動」定性',
+                demand2Desc: '取消官方對示威的「暴動」標籤。',
+                demand2Status: '被拒絕',
+                demand3: '3. 釋放被捕示威者',
+                demand3Desc: '撤銷對示威者的控罪並釋放。',
+                demand3Status: '被拒絕',
+                demand4: '4. 成立獨立調查委員會',
+                demand4Desc: '徹底追究警隊涉嫌濫權情況。',
+                demand4Status: '被拒絕',
+                demand5: '5. 實行「真雙普選」',
+                demand5Desc: '改革選舉制度以達致真普選。',
+                demand5Status: '被拒絕',
+                trustTitle: '四、信任的崩潰：警民關係與關鍵事件',
+                trustP1: '報告指出，對警方處理示威手法的不滿，成為市民參與示威的核心原因之一，其重要性甚至一度超越其他訴求。721元朗襲擊事件中警方被指反應遲緩，以及831太子站事件中被指控濫用武力，成為警民信任徹底破裂的標誌性時刻，使「追究警暴」成為示威者堅定不移的訴求。',
+                trustChartCaption: '示威者參與動機分析（示意圖）',
+                electionTitle: '五、民意的判決：區議會選舉',
+                electionP1: '2019年11月24日的區議會選舉，被廣泛視為對運動的一次變相公投。選舉創下了香港歷史性的高投票率，而結果亦極具象徵意義。',
+                electionTurnout: '歷史性投票率',
+                electionChartCaption: '民主派在全港18區中贏得17區的控制權，此結果清晰地反駁了「沉默大多數」反對示威的說法，在政治上確認了運動的民意基礎。',
+                featuresTitle: '六、運動的特徵：如水無形，網絡驅動',
+                featuresP1: '2019年的運動展現了與過往截然不同的抗爭模式，其去中心化和靈活的特性，使其能夠持續數月之久，並對當局的應對構成極大挑戰。',
+                feature1Title: 'Be Water (如水)',
+                feature1Desc: '採納李小龍哲學，強調靈活性、適應性和不可預測性，快速集結和疏散。',
+                feature2Title: '無大台 (無領袖)',
+                feature2Desc: '沒有單一組織或個人指揮，依靠網絡平台如LIHKG和Telegram進行集體決策與協調。',
+                feature3Title: '不割蓆 (不分離)',
+                feature3Desc: '和平與激進示威者之間維持團結，不互相指摘，共同面對壓力。',
+                conclusionTitle: '七、結論：深刻的裂痕與不可逆轉的改變',
+                conclusionP1: '2019年的反修例運動，由反對單一法案演變成一場對管治、警權及自治的全面抗爭。它暴露了「一國兩制」下的深刻矛盾與社會裂痕。儘管街頭抗爭最終平息，政府亦未在撤回條例外作出更多讓步，但這場運動從根本上改變了香港的政治生態，並為日後《港區國安法》的實施鋪平了道路，成為香港歷史上一個重要的分水嶺。'
+            },
+            en: {
+                pageTitle: 'Infographic: 2019 Hong Kong Anti-Extradition Bill Movement Review',
+                headerTitle: '2019 Hong Kong Anti-Extradition Bill Movement',
+                headerSubtitle: 'A city-wide socio-political storm sparked by a single bill',
+                introTitle: 'I. The Spark: The Fugitive Offenders Bill',
+                introP1: "In early 2019, the Hong Kong government proposed the Fugitive Offenders and Mutual Legal Assistance in Criminal Matters Legislation (Amendment) Bill. It aimed to allow case-by-case extradition of fugitives to jurisdictions including mainland China. This was widely seen as a direct threat to Hong Kong's judicial independence and the 'One Country, Two Systems' principle, igniting deep-rooted distrust of mainland China's judicial system and long-simmering political and social grievances.",
+                introP2: 'Although the government justified the bill as a way to address a murder case in Taiwan, it failed to assuage public fears, reflecting a severe misjudgment of public sentiment and setting the stage for the massive protests that followed.',
+                introChartCaption: 'Polls showed that the vast majority of citizens opposed the bill, fearing its impact on personal freedoms and Hong Kong\'s autonomy.',
+                timelineTitle: 'II. Chronicle of Turmoil: Evolution of Protest Scale',
+                timelineChartCaption: 'The chart above shows the turnout for several major marches in 2019, with figures from both the organizer (CHRF) and the police. The sharp increase in participants reflects the rapid escalation of public anger and the unprecedented scale of social mobilization.',
+                timelineKeyEvents: 'Key Events Timeline',
+                timelineDate1: 'April 28',
+                timelineEvent1: '130,000 people march, the largest protest at the time.',
+                timelineDate2: 'June 9',
+                timelineEvent2: 'CHRF claims over a million marched; government insists on second reading.',
+                timelineDate3: 'June 12',
+                timelineEvent3: 'Clashes erupt as protesters surround the legislature; police declare a "riot".',
+                timelineDate4: 'June 16',
+                timelineEvent4: 'CHRF claims nearly 2 million marched, demanding withdrawal and accountability for police brutality.',
+                timelineDate5: 'July 21',
+                timelineEvent5: 'Yuen Long attack occurs, exacerbating the crisis of trust in the police.',
+                timelineDate6: 'September 4',
+                timelineEvent6: 'The government formally announces the withdrawal of the bill.',
+                demandsTitle: 'III. Core of the Movement: "Five Demands, Not One Less"',
+                demandsP1: "As the movement evolved, protesters' goals expanded from simply opposing the bill to the 'Five Demands,' which encompassed political accountability and systemic reforms. This slogan highlighted the protesters' unity and clearly showed that public discontent had escalated from a single issue to a comprehensive questioning of governance, police power, and the political future.",
+                tableH1: 'Demand',
+                tableH2: 'Explanation',
+                tableH3: 'Status by End of 2019',
+                demand1: '1. Full withdrawal of the bill',
+                demand1Desc: 'To retract the bill completely and unconditionally.',
+                demand1Status: 'Achieved (Announced Sep 4)',
+                demand2: '2. Retraction of the "riot" characterization',
+                demand2Desc: 'To remove the official "riot" label from the protests.',
+                demand2Status: 'Refused',
+                demand3: '3. Release of arrested protesters',
+                demand3Desc: 'To drop charges against and release all protesters.',
+                demand3Status: 'Refused',
+                demand4: '4. Independent inquiry into police conduct',
+                demand4Desc: 'To investigate alleged police brutality thoroughly.',
+                demand4Status: 'Refused',
+                demand5: '5. Implementation of genuine universal suffrage',
+                demand5Desc: 'To reform the electoral system to achieve genuine universal suffrage.',
+                demand5Status: 'Refused',
+                trustTitle: 'IV. Collapse of Trust: Police-Civilian Relations',
+                trustP1: 'Reports indicated that dissatisfaction with the police\'s handling of protests became a core reason for public participation, at times surpassing other demands. The perceived slow police response during the 721 Yuen Long attack and alleged use of excessive force during the 831 Prince Edward station incident became symbolic moments that shattered police-civilian trust, making "accountability for police brutality" an unwavering demand.',
+                trustChartCaption: 'Analysis of protesters\' motivations (Illustrative)',
+                electionTitle: 'V. The People\'s Verdict: District Council Election',
+                electionP1: 'The District Council election on November 24, 2019, was widely seen as a de facto referendum on the movement. The election saw a historic voter turnout, and the results were highly symbolic.',
+                electionTurnout: 'Historic Voter Turnout',
+                electionChartCaption: "The pro-democracy camp won control of 17 out of 18 districts. This result clearly refuted the 'silent majority' narrative against the protests and politically affirmed the movement's popular support base.",
+                featuresTitle: 'VI. Movement Characteristics: Be Water, Network-Driven',
+                featuresP1: 'The 2019 movement demonstrated a protest model starkly different from previous ones. Its decentralized and fluid nature allowed it to persist for months and posed a significant challenge to the authorities.',
+                feature1Title: 'Be Water',
+                feature1Desc: 'Adopting Bruce Lee\'s philosophy, emphasizing flexibility, adaptability, and unpredictability to gather and disperse quickly.',
+                feature2Title: 'Leaderless',
+                feature2Desc: 'No single organization or individual led the movement; it relied on online platforms like LIHKG and Telegram for collective decision-making and coordination.',
+                feature3Title: 'No Splitting',
+                feature3Desc: 'Maintaining solidarity between peaceful and more radical protesters, refraining from mutual criticism to face pressure together.',
+                conclusionTitle: 'VII. Conclusion: Deep Rifts and Irreversible Changes',
+                conclusionP1: "The 2019 Anti-Extradition Bill Movement evolved from opposing a single bill into a full-scale struggle over governance, police power, and autonomy. It exposed the deep contradictions and social rifts under 'One Country, Two Systems.' Although the street protests eventually subsided and the government made no further concessions beyond withdrawing the bill, the movement fundamentally altered Hong Kong's political landscape and paved the way for the subsequent implementation of the National Security Law, becoming a crucial watershed in the city's history."
+            }
+        };
+
+        const VIBRANT_PALETTE = {
+            blue: '#004FF9', lightBlue: '#65AFFF', yellow: '#FFB600', orange: '#FF5C00',
+            dark: '#1D2B45', grey: '#e5e7eb', red: '#DC2626', green: '#16A34A',
+        };
+
+        let currentLanguage = 'zh';
+        let charts = {}; // To hold chart instances for destruction
+
+        // --- LANGUAGE SWITCHER LOGIC ---
+        function switchLanguage(lang) {
+            if (lang === currentLanguage) return;
+            currentLanguage = lang;
+
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            
+            // Update button styles
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            
+            // Update all text elements with data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            // Re-render all charts with new language
+            renderAllCharts();
+        }
+
+        // --- CHARTING LOGIC ---
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+        }
+
+        function wrapText(str, maxWidth) {
+            if (typeof str !== 'string') return [String(str)];
+            if (str.length <= maxWidth) return str;
+            let wrapped = [];
+            let currentLine = '';
+            const words = currentLanguage === 'en' ? str.split(' ') : str.split('');
+            
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                const separator = currentLanguage === 'en' ? ' ' : '';
+                if ((currentLine + separator + word).length > maxWidth) {
+                    if (currentLine.length > 0) wrapped.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine.length > 0 ? separator : '') + word;
+                }
+            }
+            if (currentLine.length > 0) wrapped.push(currentLine);
+            return wrapped;
+        }
+
+        const tooltipTitleCallback = function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join('') : label;
+        };
+        
+        const getFontFamily = () => currentLanguage === 'zh' ? "'Noto Sans TC', sans-serif" : "'Inter', sans-serif";
+
+        const getDefaultChartOptions = () => ({
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: VIBRANT_PALETTE.dark, font: { family: getFontFamily() } } },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    titleFont: { family: getFontFamily() },
+                    bodyFont: { family: getFontFamily() }
+                }
+            },
+            scales: {
+                x: { ticks: { color: VIBRANT_PALETTE.dark, font: { family: getFontFamily() } }, grid: { display: false } },
+                y: { ticks: { color: VIBRANT_PALETTE.dark, font: { family: getFontFamily() } }, grid: { color: VIBRANT_PALETTE.grey } }
+            }
+        });
+
+        function renderOppositionChart() {
+            const data = {
+                zh: { labels: ['反對修例', '其他/無意見'], title: '市民對《逃犯條例》修訂草案的態度' },
+                en: { labels: ['Oppose Bill', 'Other/No Opinion'], title: 'Public Stance on the Fugitive Offenders Bill' }
+            };
+            const ctx = document.getElementById('oppositionChart').getContext('2d');
+            let options = getDefaultChartOptions();
+            options.plugins.title = { display: true, text: data[currentLanguage].title, color: VIBRANT_PALETTE.dark, font: { size: 16, family: getFontFamily() } };
+            options.plugins.legend.position = 'bottom';
+            options.scales = { x: { display: false }, y: { display: false } };
+
+            charts.opposition = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data[currentLanguage].labels,
+                    datasets: [{ data: [66, 34], backgroundColor: [VIBRANT_PALETTE.orange, VIBRANT_PALETTE.grey], borderColor: '#ffffff', borderWidth: 4 }]
+                },
+                options: options
+            });
+        }
+        
+        function renderProtestSizeChart() {
+            const data = {
+                zh: { labels: ['3月31日', '4月28日', '6月9日', '6月16日', '12月8日'], ds1: '主辦方稱 (萬人)', ds2: '警方稱 (萬人)', yTitle: '參與人數 (萬)' },
+                en: { labels: ['Mar 31', 'Apr 28', 'Jun 9', 'Jun 16', 'Dec 8'], ds1: 'Organizer (x10k)', ds2: 'Police (x10k)', yTitle: 'Participants (x10,000)' }
+            };
+            const ctx = document.getElementById('protestSizeChart').getContext('2d');
+            let options = getDefaultChartOptions();
+            options.scales.y.title = { display: true, text: data[currentLanguage].yTitle, color: VIBRANT_PALETTE.dark, font: { family: getFontFamily() } };
+            
+            charts.protestSize = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data[currentLanguage].labels,
+                    datasets: [
+                        { label: data[currentLanguage].ds1, data: [1.2, 13, 103, 200, 80], backgroundColor: VIBRANT_PALETTE.blue },
+                        { label: data[currentLanguage].ds2, data: [0.52, 2.28, 24, 33.8, 18.3], backgroundColor: VIBRANT_PALETTE.lightBlue }
+                    ]
+                },
+                options: options
+            });
+        }
+        
+        function renderReasonsChart() {
+            const data = {
+                zh: {
+                    labels: [wrapText('表達對警方處理手法的不滿', 10), wrapText('爭取立即實行「真雙普選」', 10), wrapText('要求撤回對示威的暴動定性', 10), '要求政府問責'],
+                    ds1: '示威者認同度 (%)', xTitle: '認同度 (%)'
+                },
+                en: {
+                    labels: [wrapText('Dissatisfaction with police conduct', 15), wrapText('Demand for genuine universal suffrage', 15), wrapText('Retraction of "riot" characterization', 15), 'Demand government accountability'],
+                    ds1: 'Protester Agreement (%)', xTitle: 'Agreement (%)'
+                }
+            };
+            const ctx = document.getElementById('reasonsChart').getContext('2d');
+            let options = getDefaultChartOptions();
+            options.indexAxis = 'y';
+            options.scales.x.max = 100;
+            options.scales.x.title = { display: true, text: data[currentLanguage].xTitle, color: VIBRANT_PALETTE.dark, font: { family: getFontFamily() }};
+            options.scales.y.grid = { display: false };
+            options.plugins.legend.display = false;
+            
+            charts.reasons = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data[currentLanguage].labels,
+                    datasets: [{
+                        label: data[currentLanguage].ds1,
+                        data: [92, 85, 82, 75],
+                        backgroundColor: [VIBRANT_PALETTE.orange, VIBRANT_PALETTE.blue, VIBRANT_PALETTE.lightBlue, VIBRANT_PALETTE.yellow],
+                        borderColor: '#ffffff', borderWidth: 2
+                    }]
+                },
+                options: options
+            });
+        }
+        
+        function renderElectionChart() {
+            const data = {
+                zh: { labels: ['民主派控制區議會', '建制派控制區議會'], title: '18區區議會控制權結果' },
+                en: { labels: ['Pro-democracy controlled', 'Pro-establishment controlled'], title: 'Control of 18 District Councils' }
+            };
+            const ctx = document.getElementById('electionChart').getContext('2d');
+            let options = getDefaultChartOptions();
+            options.plugins.title = { display: true, text: data[currentLanguage].title, color: VIBRANT_PALETTE.dark, font: { size: 16, family: getFontFamily() } };
+            options.plugins.legend.position = 'bottom';
+            options.scales = { x: { display: false }, y: { display: false } };
+
+            charts.election = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data[currentLanguage].labels,
+                    datasets: [{ data: [17, 1], backgroundColor: [VIBRANT_PALETTE.yellow, VIBRANT_PALETTE.blue], borderColor: '#ffffff', borderWidth: 4 }]
+                },
+                options: options
+            });
+        }
+        
+        function renderAllCharts() {
+            destroyCharts();
+            renderOppositionChart();
+            renderProtestSizeChart();
+            renderReasonsChart();
+            renderElectionChart();
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+            document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+            
+            // Initial render
+            switchLanguage('zh'); 
+        });
+    </script>
+</body>
+</html>
