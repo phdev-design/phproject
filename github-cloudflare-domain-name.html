@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Pages 多倉庫自訂子網域教學 (使用 Cloudflare)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .content-container a {
+            color: #3b82f6; /* text-blue-500 */
+            text-decoration: underline;
+        }
+        .content-container a:hover {
+            color: #2563eb; /* text-blue-600 */
+        }
+        .code-block {
+            background-color: #1f2937; /* gray-800 */
+            color: #d1d5db; /* gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .note {
+            background-color: #fef9c3; /* yellow-100 */
+            border-left: 4px solid #facc15; /* yellow-400 */
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin: 1.5rem 0;
+        }
+        .note p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">GitHub Pages 多倉庫自訂子網域教學</h1>
+            <p class="mt-4 text-lg text-gray-600">如何為你的多個 GitHub 專案設定專屬子網域 (例如: `project.yourdomain.com`)</p>
+        </header>
+
+        <main class="content-container bg-white p-6 sm:p-8 rounded-lg shadow-md">
+            
+            <section id="intro">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">前言</h2>
+                <p class="mb-4">當你在 GitHub 上擁有多個專案，並都使用 GitHub Pages 部署成靜態網站時，你可能會希望為每一個專案網站設定一個獨立且好記的子網域，而不是使用預設的 `your-username.github.io/repository-name` 格式。</p>
+                <p>本教學將引導你如何使用 <a href="https://www.cloudflare.com/" target="_blank">Cloudflare</a> 來管理你的 DNS，並成功將你的根網域 (`yourdomain.com`) 下的多個子網域，分別指向不同的 GitHub Pages 倉庫。</p>
+                <p class="mt-4"><strong>我們將以以下通用範例進行操作：</strong></p>
+                <ul class="list-disc list-inside bg-gray-100 p-4 rounded-md mt-2">
+                    <li>將 `project-a.yourdomain.com` 指向 `your-username/project-a` 倉庫。</li>
+                    <li>將 `project-b.yourdomain.com` 指向 `your-username/project-b` 倉庫。</li>
+                </ul>
+            </section>
+
+            <section id="github-setup" class="mt-10">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">第一步：設定 GitHub Repository</h2>
+                <p class="mb-4">這個步驟需要在你 **每一個** 想要設定自訂網域的 GitHub 倉庫中重複進行。</p>
+                
+                <ol class="list-decimal list-inside space-y-6">
+                    <li>
+                        <strong>進入倉庫設定</strong><br>
+                        前往你的 GitHub 倉庫，點擊頂部的 <code class="bg-gray-200 p-1 rounded">Settings</code> 標籤。
+                    </li>
+                    <li>
+                        <strong>前往 Pages 頁面</strong><br>
+                        在左側選單中，點擊 <code class="bg-gray-200 p-1 rounded">Pages</code>。
+                    </li>
+                    <li>
+                        <strong>輸入自訂網域</strong><br>
+                        在 "Custom domain" 的輸入框中，填寫你為這個專案規劃的完整子網域。例如，在 `project-a` 倉庫中，我們填寫：
+                        <div class="code-block my-2">project-a.yourdomain.com</div>
+                        填寫完成後，點擊 <code class="bg-gray-200 p-1 rounded">Save</code>。
+                        <img src="https://placehold.co/800x350/374151/e5e7eb?text=GitHub+Custom+Domain+Setting" alt="GitHub Custom Domain Setting" class="mt-3 rounded-lg shadow-sm w-full">
+                    </li>
+                     <li>
+                        <strong>重複操作</strong><br>
+                        對你的第二個倉庫 `project-b` 也進行相同操作，但在輸入框中填寫：
+                        <div class="code-block my-2">project-b.yourdomain.com</div>
+                    </li>
+                </ol>
+                 <div class="note mt-6">
+                    <p><strong>提示：</strong>儲存後，GitHub 可能會顯示網域尚未正確設定的警告。這是正常的，因為我們還沒去 Cloudflare 設定 DNS。請繼續下一步。</p>
+                </div>
+            </section>
+
+            <section id="cloudflare-setup" class="mt-10">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">第二步：設定 Cloudflare DNS</h2>
+                <p class="mb-4">現在，我們需要登入 Cloudflare，告訴它如何將這些子網域指向 GitHub。</p>
+                
+                <ol class="list-decimal list-inside space-y-6">
+                    <li>
+                        <strong>登入並選擇網域</strong><br>
+                        登入你的 Cloudflare 帳戶，並選擇你的根網域（例如：`yourdomain.com`）。
+                    </li>
+                    <li>
+                        <strong>進入 DNS 設定</strong><br>
+                        點擊左側選單的 <code class="bg-gray-200 p-1 rounded">DNS</code> 圖示。
+                    </li>
+                    <li>
+                        <strong>新增 CNAME 記錄</strong><br>
+                        點擊 <code class="bg-gray-200 p-1 rounded">Add record</code> 按鈕來新增 DNS 記錄。你需要為每一個子網域新增一筆 `CNAME` 記錄。
+                        
+                        <p class="mt-4"><strong>為 `project-a.yourdomain.com` 新增記錄：</strong></p>
+                        <ul class="list-disc list-inside bg-gray-100 p-4 rounded-md mt-2 space-y-1">
+                            <li><strong>Type (類型)</strong>: `CNAME`</li>
+                            <li><strong>Name (名稱)</strong>: `project-a` (Cloudflare 會自動補完為 project-a.yourdomain.com)</li>
+                            <li><strong>Target (目標)</strong>: `your-username.github.io` (你的 GitHub 使用者名稱.github.io)</li>
+                            <li><strong>Proxy status (代理狀態)</strong>: <span class="font-bold text-orange-600">先暫時設為 "DNS only" (灰色雲朵)</span></li>
+                        </ul>
+
+                        <p class="mt-4"><strong>為 `project-b.yourdomain.com` 新增記錄：</strong></p>
+                         <ul class="list-disc list-inside bg-gray-100 p-4 rounded-md mt-2 space-y-1">
+                            <li><strong>Type (類型)</strong>: `CNAME`</li>
+                            <li><strong>Name (名稱)</strong>: `project-b`</li>
+                            <li><strong>Target (目標)</strong>: `your-username.github.io` <span class="font-bold">(注意：目標和上面那筆完全相同)</span></li>
+                            <li><strong>Proxy status (代理狀態)</strong>: 同樣設為 "DNS only" (灰色雲朵)</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>儲存記錄</strong><br>
+                        新增完成後，你的 DNS 記錄頁面看起來會像這樣：
+                         <img src="https://placehold.co/800x300/374151/e5e7eb?text=Cloudflare+DNS+CNAME+Settings" alt="Cloudflare DNS CNAME Settings" class="mt-3 rounded-lg shadow-sm w-full">
+                    </li>
+                </ol>
+                <div class="note mt-6">
+                    <p><strong>為什麼所有 Target 都一樣？</strong><br>
+                    所有子網域的 CNAME 記錄都指向你的主 GitHub Pages 地址 (`your-username.github.io`)。GitHub 會根據訪問請求中的網域名稱（例如 `project-a.yourdomain.com`），自動將流量路由到正確的倉庫。</p>
+                    <p class="mt-2"><strong>為什麼要先關閉 Proxy (代理)？</strong><br>
+                    先設定為 "DNS only" 可以讓 GitHub 順利驗證你的網域所有權並為其簽發 SSL/TLS 憑證。等一切就緒後，我們再將其開啟以享受 Cloudflare 的加速和安全功能。</p>
+                </div>
+            </section>
+
+            <section id="verification" class="mt-10">
+                <h2 class="text-2xl font-bold mb-4 border-b pb-2">第三步：驗證與完成</h2>
+                <ol class="list-decimal list-inside space-y-6">
+                    <li>
+                        <strong>等待 DNS 生效</strong><br>
+                        DNS 記錄的更新通常在幾分鐘內完成，但有時可能需要更長的時間。請耐心等候。
+                    </li>
+                    <li>
+                        <strong>檢查 GitHub 狀態</strong><br>
+                        回到你每一個倉庫的 GitHub Pages 設定頁面。如果 DNS 設定成功，你會看到 "Custom domain" 區塊出現綠色勾號，並顯示 "Your site is ready to be published at..."。
+                    </li>
+                    <li>
+                        <strong>強制 HTTPS</strong><br>
+                        確認網域驗證成功後，務必勾選下方的 <code class="bg-gray-200 p-1 rounded">Enforce HTTPS</code> 選項。這會確保你的網站流量全程加密。
+                         <img src="https://placehold.co/800x200/374151/e5e7eb?text=GitHub+Enforce+HTTPS+Option" alt="GitHub Enforce HTTPS Option" class="mt-3 rounded-lg shadow-sm w-full">
+                    </li>
+                     <li>
+                        <strong>重新開啟 Cloudflare 代理 (重要！)</strong><br>
+                        當 GitHub 顯示一切就緒後，回到 Cloudflare 的 DNS 設定頁面，將你剛剛新增的那幾筆 CNAME 記錄的 Proxy status 從 "DNS only" (灰色雲朵) <span class="font-bold">點擊改回 "Proxied" (橘色雲朵)</span>。
+                    </li>
+                </ol>
+            </section>
+
+            <section id="conclusion" class="mt-10">
+                 <h2 class="text-2xl font-bold mb-4 border-b pb-2">大功告成！</h2>
+                 <p>完成以上所有步驟後，你現在應該可以透過 `project-a.yourdomain.com` 和 `project-b.yourdomain.com` 來訪問你對應的專案網站了。未來若有新的專案，只需重複上述流程即可！</p>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-8 text-gray-500 text-sm">
+            <p>這份教學由 Gemini 產生。</p>
+        </footer>
+    </div>
+
+</body>
+</html>
