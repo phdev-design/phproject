@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>傳送 HTML 到 Git</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            line-height: 1.6; 
+            padding: 2rem; 
+            max-width: 800px; 
+            margin: auto; 
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        h1 {
+            color: #343a40;
+        }
+        form {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        input[type="text"], textarea { 
+            width: 100%; 
+            padding: 0.75rem; 
+            margin-bottom: 1rem; 
+            box-sizing: border-box; 
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        textarea {
+            min-height: 250px;
+            font-family: "Courier New", Courier, monospace;
+        }
+        button { 
+            display: inline-block;
+            padding: 0.75rem 1.5rem; 
+            cursor: pointer; 
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #status { 
+            margin-top: 1.5rem; 
+            font-weight: bold; 
+            padding: 1rem;
+            border-radius: 4px;
+            display: none; /* 預設隱藏 */
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            display: block;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+        .status-sending {
+            background-color: #fff3cd;
+            color: #856404;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>傳送 HTML 到 Git 倉庫</h1>
+
+    <form id="gitForm">
+        <label for="fileName">檔案名稱 (例如: my-page.html):</label>
+        <input type="text" id="fileName" name="fileName" required>
+
+        <label for="htmlContent">HTML 程式碼:</label>
+        <textarea id="htmlContent" name="htmlContent" rows="15" required></textarea>
+
+        <button type="submit" id="submitBtn">傳送</button>
+    </form>
+
+    <div id="status"></div>
+
+    <script>
+        document.getElementById('gitForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 防止表單傳統提交
+
+            // ****** 請將這裡的 URL 換成您 n8n Webhook 節點的 URL ******
+            const webhookUrl = 'YOUR_N8N_WEBHOOK_URL'; 
+            
+            const statusDiv = document.getElementById('status');
+            const submitBtn = document.getElementById('submitBtn');
+            const fileName = document.getElementById('fileName').value;
+            const htmlContent = document.getElementById('htmlContent').value;
+            
+            if (!webhookUrl || webhookUrl === 'YOUR_N8N_WEBHOOK_URL') {
+                alert('請先在 JavaScript 程式碼中設定 n8n Webhook 的 URL！');
+                return;
+            }
+
+            // 更新 UI 狀態
+            statusDiv.className = 'status-sending';
+            statusDiv.textContent = '傳送中...';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fileName: fileName,
+                        htmlContent: htmlContent
+                    })
+                });
+
+                if (!response.ok) {
+                    // 嘗試讀取錯誤訊息
+                    const errorData = await response.text();
+                    throw new Error(`伺服器回應錯誤: ${response.status}. ${errorData}`);
+                }
+
+                // n8n Webhook 成功後通常會回傳一個簡單的成功訊息
+                const result = await response.json();
+                console.log('Success:', result);
+                statusDiv.className = 'status-success';
+                statusDiv.textContent = '成功傳送！已將檔案提交至 Git 倉庫。';
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.className = 'status-error';
+                statusDiv.textContent = `傳送失敗: ${error.message}`;
+            } finally {
+                // 無論成功或失敗，都重新啟用按鈕
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
