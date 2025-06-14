@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>雞眼全方位互動指南 | Comprehensive Guide to Corns</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Earth -->
+    <!-- Application Structure Plan: A tab-based single-page application (SPA) is chosen for its intuitive user flow. Users can quickly navigate between key tasks: 1) 'Quick Identification' to diagnose their issue, 2) 'Cause Analysis' to understand the 'why', 3) 'Treatment Solutions' to find remedies, 4) 'Prevention Methods' for long-term health, and 5) a prominent 'High-Risk Warning'. This task-oriented structure is more user-friendly than a linear report, allowing users to access the information most relevant to them immediately. Key interactions include an interactive comparison table, charts for visualizing data, and accordions for progressive disclosure of information. -->
+    <!-- Visualization & Content Choices: 
+        - 'Quick Identification': Report info on differentiating corns, calluses, and warts -> Goal: Compare -> Viz: Interactive HTML table with JS highlighting + a Chart.js Bar Chart for pain types -> Justification: The interactive table is more engaging and clearer than a static one. The bar chart visually simplifies a key diagnostic clue.
+        - 'Cause Analysis': Report info on causes -> Goal: Inform/Show proportion -> Viz: Chart.js Doughnut Chart + HTML/CSS icons -> Justification: The doughnut chart quickly conveys that ill-fitting shoes are the primary cause. Icons improve scannability.
+        - 'Treatment Solutions': Report info on treatment tiers -> Goal: Organize/Guide -> Viz: HTML/CSS/JS Accordion -> Justification: Accordions break down dense information into manageable, user-triggered sections, preventing overwhelm.
+        - 'High-Risk Warning': Report info on diabetes/poor circulation -> Goal: Warn -> Viz: Visually distinct section with strong colors and icons -> Justification: High-contrast visuals ensure this critical safety information is not missed.
+        - Library/Method: Chart.js for all charts on Canvas. All other visuals via HTML/CSS/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        :lang(en) {
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            background-color: #FDF8F0;
+            color: #5C544B;
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-btn.active {
+            border-bottom-color: #A3B18A;
+            color: #495831;
+            font-weight: 700;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .comparison-table button.active {
+            background-color: #A3B18A !important;
+            color: white !important;
+        }
+        .comparison-table td.highlight {
+            background-color: #F0F2EB;
+        }
+        #lang-switcher {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl relative">
+        
+        <button id="lang-switcher" class="px-3 py-2 bg-[#A3B18A] text-white rounded-md hover:bg-[#8f9d76] transition-colors duration-300" data-lang-key="langSwitch">
+            English
+        </button>
+
+        <header class="text-center mb-8 pt-12 md:pt-0">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#495831] mb-2" data-lang-key="mainTitle">雞眼全方位互動指南</h1>
+            <p class="text-lg text-gray-600" data-lang-key="mainSubtitle">一個基於專業報告的互動式工具，助您了解、處理與預防足部困擾。</p>
+        </header>
+
+        <nav class="sticky top-0 bg-[#FDF8F0] z-10 mb-8 border-b border-gray-200">
+            <div class="flex flex-wrap justify-center -mb-px">
+                <button class="nav-btn active text-lg px-4 py-3" data-tab="identification" data-lang-key="navIdentification">快速辨識</button>
+                <button class="nav-btn text-lg px-4 py-3" data-tab="causes" data-lang-key="navCauses">成因分析</button>
+                <button class="nav-btn text-lg px-4 py-3" data-tab="treatment" data-lang-key="navTreatment">處理對策</button>
+                <button class="nav-btn text-lg px-4 py-3" data-tab="prevention" data-lang-key="navPrevention">預防之道</button>
+                <button class="nav-btn text-lg px-4 py-3 text-[#E76F51] font-bold" data-tab="warning" data-lang-key="navWarning">高風險警示</button>
+            </div>
+        </nav>
+
+        <main>
+            <section id="identification" class="content-section active">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800" data-lang-key="idTitle">第一步：準確辨識您的足部問題</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto" data-lang-key="idSubtitle">錯誤的判斷可能導致治療無效，甚至使問題惡化。使用下方的互動工具，比較雞眼、厚繭和病毒疣的關鍵特徵。</p>
+                </div>
+
+                <div class="card p-6 md:p-8 comparison-table">
+                     <div class="flex justify-center mb-6 space-x-2 md:space-x-4">
+                        <button data-type="corn" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 transition" data-lang-key="btnCorn">雞眼</button>
+                        <button data-type="callus" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 transition" data-lang-key="btnCallus">厚繭</button>
+                        <button data-type="wart" class="px-4 py-2 rounded-full bg-gray-200 text-gray-700 transition" data-lang-key="btnWart">病毒疣</button>
+                        <button data-type="none" class="px-4 py-2 rounded-full bg-gray-500 text-white transition active" data-lang-key="btnShowAll">顯示全部</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 font-semibold text-sm text-gray-700 border-b" data-lang-key="tableFeature">特徵</th>
+                                    <th class="p-3 font-semibold text-sm text-gray-700 border-b text-center" data-lang-key="tableCorn">雞眼 (Corn)</th>
+                                    <th class="p-3 font-semibold text-sm text-gray-700 border-b text-center" data-lang-key="tableCallus">厚繭 (Callus)</th>
+                                    <th class="p-3 font-semibold text-sm text-gray-700 border-b text-center" data-lang-key="tableWart">病毒疣 (Wart)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-medium border-b border-gray-200" data-lang-key="featureCause">成因</td>
+                                    <td class="p-3 border-b border-gray-200 text-center corn" data-lang-key="causeCorn">集中壓力</td>
+                                    <td class="p-3 border-b border-gray-200 text-center callus" data-lang-key="causeCallus">大面積摩擦</td>
+                                    <td class="p-3 border-b border-gray-200 text-center wart" data-lang-key="causeWart">病毒感染 (HPV)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-medium border-b border-gray-200" data-lang-key="featureAppearance">外觀</td>
+                                    <td class="p-3 border-b border-gray-200 text-center corn" data-lang-key="appearanceCorn">小而圓、有硬核心</td>
+                                    <td class="p-3 border-b border-gray-200 text-center callus" data-lang-key="appearanceCallus">大而扁平、邊界模糊</td>
+                                    <td class="p-3 border-b border-gray-200 text-center wart" data-lang-key="appearanceWart">表面粗糙、有小黑點</td>
+                                </tr>
+                                 <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-medium border-b border-gray-200" data-lang-key="featureSkinTexture">皮膚紋理</td>
+                                    <td class="p-3 border-b border-gray-200 text-center corn" data-lang-key="textureCorn">皮紋連續穿過</td>
+                                    <td class="p-3 border-b border-gray-200 text-center callus" data-lang-key="textureCallus">皮紋連續</td>
+                                    <td class="p-3 border-b border-gray-200 text-center wart" data-lang-key="textureWart">皮紋中斷、繞過病灶</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-medium border-b border-gray-200" data-lang-key="featurePainType">疼痛類型</td>
+                                    <td class="p-3 border-b border-gray-200 text-center corn" data-lang-key="painCorn">垂直按壓劇痛 (壓痛)</td>
+                                    <td class="p-3 border-b border-gray-200 text-center callus" data-lang-key="painCallus">通常無痛或輕微壓痛</td>
+                                    <td class="p-3 border-b border-gray-200 text-center wart" data-lang-key="painWart">兩側擠捏劇痛 (捏痛)</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-3 font-medium border-b border-gray-200" data-lang-key="featureContagious">傳染性</td>
+                                    <td class="p-3 border-b border-gray-200 text-center corn" data-lang-key="contagiousCorn">無</td>
+                                    <td class="p-3 border-b border-gray-200 text-center callus" data-lang-key="contagiousCallus">無</td>
+                                    <td class="p-3 border-b border-gray-200 text-center wart text-red-600 font-bold" data-lang-key="contagiousWart">有</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card p-6 md:p-8 mt-8">
+                    <h3 class="text-xl font-bold text-center mb-4 text-gray-800" data-lang-key="painChartTitle">疼痛類型快速比較</h3>
+                    <p class="text-center text-gray-600 mb-6" data-lang-key="painChartSubtitle">這是區分雞眼與病毒疣的重要線索。試著按壓或擠捏患部，對照下圖。</p>
+                    <div class="chart-container">
+                        <canvas id="painChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="causes" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800" data-lang-key="causesTitle">追根究底：雞眼為何找上我？</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto" data-lang-key="causesSubtitle">雞眼的形成是「壓力」的結果。了解壓力來源是預防復發的關鍵。不合腳的鞋子是首要元兇。</p>
+                </div>
+                 <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="card p-6 md:p-8">
+                        <h3 class="text-xl font-bold text-center mb-4 text-gray-800" data-lang-key="causesChartTitle">主要成因分佈</h3>
+                         <div class="chart-container h-64 md:h-80">
+                            <canvas id="causesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="card p-6">
+                            <h4 class="font-bold text-lg text-[#495831]" data-lang-key="extrinsicTitle">👟 外部因素：不合適的鞋履</h4>
+                            <ul class="list-disc list-inside mt-2 text-gray-700 space-y-1">
+                                <li data-lang-key="extrinsic1"><strong>高跟鞋：</strong>將壓力集中於前腳掌。</li>
+                                <li data-lang-key="extrinsic2"><strong>窄頭/尖頭鞋：</strong>擠壓腳趾，造成摩擦。</li>
+                                <li data-lang-key="extrinsic3"><strong>尺寸不合：</strong>過緊造成壓迫，過鬆造成滑動摩擦。</li>
+                            </ul>
+                        </div>
+                        <div class="card p-6">
+                            <h4 class="font-bold text-lg text-[#495831]" data-lang-key="intrinsicTitle">🦶 內在因素：足部結構與步態</h4>
+                             <ul class="list-disc list-inside mt-2 text-gray-700 space-y-1">
+                                <li data-lang-key="intrinsic1"><strong>足部結構異常：</strong>拇趾外翻、錘狀趾、骨刺等造成骨骼突出。</li>
+                                <li data-lang-key="intrinsic2"><strong>足弓形態：</strong>高足弓或扁平足改變壓力分佈。</li>
+                                <li data-lang-key="intrinsic3"><strong>步態問題：</strong>不正確的走路姿勢導致壓力集中。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="treatment" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800" data-lang-key="treatmentTitle">循序漸進：雞眼的處理對策</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto" data-lang-key="treatmentSubtitle">治療應由淺入深，從最溫和的居家護理開始。若無效或情況嚴重，再考慮市售產品或尋求專業醫療協助。</p>
+                </div>
+                <div class="max-w-4xl mx-auto space-y-4">
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-5 text-xl font-semibold flex justify-between items-center">
+                            <span data-lang-key="tier1Title">第一級：安全居家護理</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content px-5 pb-5">
+                            <p class="mb-4" data-lang-key="tier1Desc">核心理念是「溫和移除壓力」與「軟化角質」，切勿操之過急。</p>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li data-lang-key="tier1Step1"><strong>浸泡軟化：</strong>用溫肥皂水浸泡10-20分鐘。</li>
+                                <li data-lang-key="tier1Step2"><strong>溫和磨除：</strong>用浮石或腳皮銼輕輕單向磨除軟化的死皮。</li>
+                                <li data-lang-key="tier1Step3"><strong>保濕滋潤：</strong>塗抹護足霜保持皮膚柔軟。</li>
+                            </ol>
+                            <div class="mt-4 p-3 bg-red-100 text-red-800 rounded-lg">
+                                <strong class="font-bold" data-lang-key="tier1WarningTitle">⚠️ 嚴正警告：</strong><span data-lang-key="tier1Warning">絕對不要使用刀片、剪刀等尖銳器具自行切割，極易引發嚴重感染！</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-5 text-xl font-semibold flex justify-between items-center">
+                            <span data-lang-key="tier2Title">第二級：市售產品 (OTC)</span>
+                             <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content px-5 pb-5">
+                           <p class="mb-4" data-lang-key="tier2Desc">含水楊酸的雞眼貼/藥水是強效選擇，但需精準使用以保護周圍健康皮膚。</p>
+                            <ol class="list-decimal list-inside space-y-2">
+                                <li data-lang-key="tier2Step1"><strong>準備：</strong>先溫水浸泡並擦乾。</li>
+                                <li data-lang-key="tier2Step2"><strong>保護：</strong>在雞眼周圍健康皮膚塗抹凡士林作為屏障。</li>
+                                <li data-lang-key="tier2Step3"><strong>施藥：</strong>將產品「僅僅」敷在雞眼上。</li>
+                                <li data-lang-key="tier2Step4"><strong>覆蓋：</strong>按說明書指示時間覆蓋 (通常1-2天更換)。</li>
+                                <li data-lang-key="tier2Step5"><strong>移除：</strong>更換時，輕輕刮除變白軟化的死皮，耐心重複療程。</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="accordion-item card">
+                        <button class="accordion-header w-full text-left p-5 text-xl font-semibold flex justify-between items-center">
+                            <span data-lang-key="tier3Title">第三級：專業醫療介入</span>
+                             <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content px-5 pb-5">
+                            <p class="mb-4" data-lang-key="tier3Desc">當居家護理無效、疼痛難忍或您是高風險族群時，請務必尋求醫生協助。</p>
+                            <ul class="list-disc list-inside space-y-2">
+                                <li data-lang-key="tier3Step1"><strong>削切與清創：</strong>最常見的處理，醫生用無菌刀片移除核心，立即緩解疼痛。</li>
+                                <li data-lang-key="tier3Step2"><strong>冷凍治療：</strong>用液態氮冷凍破壞雞眼組織。</li>
+                                <li data-lang-key="tier3Step3"><strong>激光治療：</strong>用激光精確氣化移除雞眼。</li>
+                                <li data-lang-key="tier3Step4"><strong>手術矯正：</strong>針對骨骼結構問題導致的慢性雞眼，從根本上解決問題。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="prevention" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800" data-lang-key="preventionTitle">終極目標：預防之道與長期保健</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto" data-lang-key="preventionSubtitle">預防勝於治療。建立一套全面的足部健康策略，從根本上消除雞眼產生的土壤。</p>
+
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="preventionShoesTitle">科學選鞋：您的第一道防線</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionShoes1"><strong>寬敞鞋頭：</strong>讓腳趾有足夠空間活動。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionShoes2"><strong>適當長度：</strong>最長腳趾與鞋尖應有約1.3公分距離。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionShoes3"><strong>良好支撐：</strong>足弓支撐能均勻分散壓力。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionShoes4"><strong>柔軟材質：</strong>透氣、柔軟的材質減少摩擦。</div></li>
+                             <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionShoes5"><strong>購鞋時機：</strong>選擇下午或傍晚，此時腳最大。</div></li>
+                        </ul>
+                    </div>
+                     <div class="card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="preventionCareTitle">積極護理與輔具</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionCare1"><strong>緩衝減壓：</strong>使用非藥性的中空雞眼護墊分散壓力。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionCare2"><strong>矯正鞋墊：</strong>若有結構問題，可訂製鞋墊從根本解決。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionCare3"><strong>日常護理：</strong>每日清洗、擦乾、塗抹潤膚霜。</div></li>
+                            <li class="flex items-start"><span class="text-green-600 mr-3">✓</span><div data-lang-key="preventionCare4"><strong>正確剪甲：</strong>平剪趾甲，避免形成嵌甲。</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="warning" class="content-section">
+                <div class="card bg-red-50 border border-red-200 p-6 md:p-8 text-center">
+                    <div class="text-5xl mb-4">⚠️</div>
+                    <h2 class="text-3xl font-bold text-red-800" data-lang-key="warningTitle">高風險族群：不可逾越的紅線</h2>
+                    <p class="mt-4 text-xl text-red-700 max-w-3xl mx-auto" data-lang-key="warningSubtitle">
+                        如果您是 <strong>糖尿病患者</strong> 或患有 <strong>周邊動脈疾病（血液循環不良）</strong>，您的足部極其脆弱。
+                    </p>
+                    <div class="mt-6 p-4 bg-white rounded-lg shadow-inner">
+                        <p class="text-2xl font-bold text-red-900" data-lang-key="warningMain">
+                           絕對禁止自行處理任何足部問題！
+                        </p>
+                         <p class="mt-2 text-red-700" data-lang-key="warningDetail">
+                            包括自行切割或使用任何市售雞眼產品。一個微小傷口都可能導致無法癒合的潰瘍，甚至需要截肢。
+                        </p>
+                    </div>
+                    <p class="mt-8 text-2xl font-bold text-gray-800" data-lang-key="warningAction">
+                        一旦發現任何足部異常（雞眼、厚繭、水泡、傷口），請<span class="underline decoration-red-500 decoration-4">立即尋求專業醫療協助</span>。
+                    </p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- TRANSLATION DATA ---
+            const translations = {
+                en: {
+                    langSwitch: '中文',
+                    mainTitle: 'Comprehensive Interactive Guide to Corns',
+                    mainSubtitle: 'An interactive tool based on professional reports to help you understand, treat, and prevent foot problems.',
+                    navIdentification: 'Quick ID',
+                    navCauses: 'Cause Analysis',
+                    navTreatment: 'Treatment Plan',
+                    navPrevention: 'Prevention',
+                    navWarning: 'High-Risk Warning',
+                    idTitle: 'Step 1: Accurately Identify Your Foot Issue',
+                    idSubtitle: 'Misdiagnosis can lead to ineffective treatment or even worsen the problem. Use the interactive tools below to compare the key features of corns, calluses, and warts.',
+                    btnCorn: 'Corn',
+                    btnCallus: 'Callus',
+                    btnWart: 'Wart',
+                    btnShowAll: 'Show All',
+                    tableFeature: 'Feature',
+                    tableCorn: 'Corn',
+                    tableCallus: 'Callus',
+                    tableWart: 'Wart',
+                    featureCause: 'Cause',
+                    causeCorn: 'Concentrated pressure',
+                    causeCallus: 'Widespread friction',
+                    causeWart: 'Viral infection (HPV)',
+                    featureAppearance: 'Appearance',
+                    appearanceCorn: 'Small, round, with a hard core',
+                    appearanceCallus: 'Large, flat, with indistinct borders',
+                    appearanceWart: 'Rough surface, with tiny black dots',
+                    featureSkinTexture: 'Skin Lines',
+                    textureCorn: 'Skin lines pass through',
+                    textureCallus: 'Skin lines are continuous',
+                    textureWart: 'Skin lines are interrupted and go around',
+                    featurePainType: 'Pain Type',
+                    painCorn: 'Sharp pain on direct pressure',
+                    painCallus: 'Usually painless or mild tenderness',
+                    painWart: 'Sharp pain when squeezed from the sides',
+                    featureContagious: 'Contagious',
+                    contagiousCorn: 'No',
+                    contagiousCallus: 'No',
+                    contagiousWart: 'Yes',
+                    painChartTitle: 'Quick Pain Type Comparison',
+                    painChartSubtitle: 'This is a key clue to differentiate corns from warts. Try pressing or squeezing the affected area and compare with the chart below.',
+                    painChartYAxis: 'Pain Index (Subjective)',
+                    painChartLabelCorn: 'Corn (Direct Pressure)',
+                    painChartLabelWart: 'Wart (Squeezing)',
+                    causesTitle: 'Root Cause: Why Do I Get Corns?',
+                    causesSubtitle: 'Corns are the result of "pressure". Identifying the source of pressure is key to preventing recurrence. Ill-fitting shoes are the primary culprit.',
+                    causesChartTitle: 'Primary Cause Distribution',
+                    causesChartLabelShoes: 'Ill-fitting Shoes',
+                    causesChartLabelStructure: 'Foot Structure Issues',
+                    causesChartLabelGait: 'Gait & Others',
+                    extrinsicTitle: '👟 Extrinsic Factors: Improper Footwear',
+                    extrinsic1: '<strong>High heels:</strong> Concentrate pressure on the forefoot.',
+                    extrinsic2: '<strong>Narrow/pointed shoes:</strong> Squeeze toes, causing friction.',
+                    extrinsic3: '<strong>Improper size:</strong> Too tight causes pressure, too loose causes sliding friction.',
+                    intrinsicTitle: '🦶 Intrinsic Factors: Foot Structure & Gait',
+                    intrinsic1: '<strong>Foot deformities:</strong> Bone protrusions from bunions, hammertoes, bone spurs, etc.',
+                    intrinsic2: '<strong>Arch type:</strong> High arches or flat feet alter pressure distribution.',
+                    intrinsic3: '<strong>Gait problems:</strong> Incorrect walking posture leads to concentrated pressure.',
+                    treatmentTitle: 'Step-by-Step: Corn Treatment Plan',
+                    treatmentSubtitle: 'Treatment should progress from simple to complex, starting with the gentlest home care. If it\'s ineffective or severe, consider over-the-counter products or seek professional medical help.',
+                    tier1Title: 'Tier 1: Safe Home Care',
+                    tier1Desc: 'The core concepts are "gentle pressure relief" and "softening the keratin". Do not rush.',
+                    tier1Step1: '<strong>Soak to soften:</strong> Soak in warm, soapy water for 10-20 minutes.',
+                    tier1Step2: '<strong>Gently file:</strong> Use a pumice stone or foot file to gently remove softened dead skin in one direction.',
+                    tier1Step3: '<strong>Moisturize:</strong> Apply foot cream to keep skin soft.',
+                    tier1WarningTitle: '⚠️ Stern Warning: ',
+                    tier1Warning: 'NEVER use sharp tools like blades or scissors to cut it yourself. This can easily lead to severe infection!',
+                    tier2Title: 'Tier 2: Over-the-Counter (OTC) Products',
+                    tier2Desc: 'Salicylic acid pads/solutions are a powerful option but require precise application to protect surrounding healthy skin.',
+                    tier2Step1: '<strong>Preparation:</strong> First, soak in warm water and dry thoroughly.',
+                    tier2Step2: '<strong>Protection:</strong> Apply petroleum jelly to the healthy skin around the corn as a barrier.',
+                    tier2Step3: '<strong>Application:</strong> Apply the product "only" onto the corn.',
+                    tier2Step4: '<strong>Cover:</strong> Cover for the time indicated in the instructions (usually changed every 1-2 days).',
+                    tier2Step5: '<strong>Removal:</strong> When changing, gently scrape off the whitened, softened dead skin. Repeat the process patiently.',
+                    tier3Title: 'Tier 3: Professional Medical Intervention',
+                    tier3Desc: 'When home care fails, the pain is severe, or you are in a high-risk group, you must seek medical help.',
+                    tier3Step1: '<strong>Paring and debridement:</strong> The most common treatment. A doctor uses a sterile scalpel to remove the core for immediate pain relief.',
+                    tier3Step2: '<strong>Cryotherapy:</strong> Uses liquid nitrogen to freeze and destroy the corn tissue.',
+                    tier3Step3: '<strong>Laser therapy:</strong> Uses a laser to precisely vaporize and remove the corn.',
+                    tier3Step4: '<strong>Corrective surgery:</strong> For chronic corns caused by bone structure issues, this addresses the root problem.',
+                    preventionTitle: 'The Ultimate Goal: Prevention & Long-Term Care',
+                    preventionSubtitle: 'Prevention is better than cure. Establish a comprehensive foot health strategy to eliminate the conditions that cause corns.',
+                    preventionShoesTitle: 'Scientific Shoe Selection: Your First Line of Defense',
+                    preventionShoes1: '<strong>Spacious toe box:</strong> Allows toes to move freely.',
+                    preventionShoes2: '<strong>Proper length:</strong> About 1.3 cm (0.5 in) of space between your longest toe and the shoe tip.',
+                    preventionShoes3: '<strong>Good support:</strong> Arch support helps distribute pressure evenly.',
+                    preventionShoes4: '<strong>Soft materials:</strong> Breathable, soft materials reduce friction.',
+                    preventionShoes5: '<strong>Shopping time:</strong> Choose shoes in the afternoon or evening when your feet are largest.',
+                    preventionCareTitle: 'Proactive Care & Aids',
+                    preventionCare1: '<strong>Cushioning:</strong> Use non-medicated, donut-shaped corn pads to distribute pressure.',
+                    preventionCare2: '<strong>Orthotics:</strong> If there are structural issues, custom orthotics can solve the problem at its root.',
+                    preventionCare3: '<strong>Daily care:</strong> Wash, dry, and apply moisturizer daily.',
+                    preventionCare4: '<strong>Proper nail trimming:</strong> Cut toenails straight across to prevent ingrown nails.',
+                    warningTitle: 'High-Risk Groups: The Uncrossable Red Line',
+                    warningSubtitle: 'If you have <strong>diabetes</strong> or <strong>peripheral artery disease (poor circulation)</strong>, your feet are extremely vulnerable.',
+                    warningMain: 'NEVER attempt to self-treat any foot problems!',
+                    warningDetail: 'This includes cutting or using any over-the-counter corn products. A tiny wound can lead to a non-healing ulcer, or even amputation.',
+                    warningAction: 'If you find any foot abnormality (corn, callus, blister, wound), please <span class="underline decoration-red-500 decoration-4">seek professional medical help immediately</span>.',
+                },
+                zh: {
+                    langSwitch: 'English',
+                    mainTitle: '雞眼全方位互動指南',
+                    mainSubtitle: '一個基於專業報告的互動式工具，助您了解、處理與預防足部困擾。',
+                    navIdentification: '快速辨識',
+                    navCauses: '成因分析',
+                    navTreatment: '處理對策',
+                    navPrevention: '預防之道',
+                    navWarning: '高風險警示',
+                    idTitle: '第一步：準確辨識您的足部問題',
+                    idSubtitle: '錯誤的判斷可能導致治療無效，甚至使問題惡化。使用下方的互動工具，比較雞眼、厚繭和病毒疣的關鍵特徵。',
+                    btnCorn: '雞眼',
+                    btnCallus: '厚繭',
+                    btnWart: '病毒疣',
+                    btnShowAll: '顯示全部',
+                    tableFeature: '特徵',
+                    tableCorn: '雞眼 (Corn)',
+                    tableCallus: '厚繭 (Callus)',
+                    tableWart: '病毒疣 (Wart)',
+                    featureCause: '成因',
+                    causeCorn: '集中壓力',
+                    causeCallus: '大面積摩擦',
+                    causeWart: '病毒感染 (HPV)',
+                    featureAppearance: '外觀',
+                    appearanceCorn: '小而圓、有硬核心',
+                    appearanceCallus: '大而扁平、邊界模糊',
+                    appearanceWart: '表面粗糙、有小黑點',
+                    featureSkinTexture: '皮膚紋理',
+                    textureCorn: '皮紋連續穿過',
+                    textureCallus: '皮紋連續',
+                    textureWart: '皮紋中斷、繞過病灶',
+                    featurePainType: '疼痛類型',
+                    painCorn: '垂直按壓劇痛 (壓痛)',
+                    painCallus: '通常無痛或輕微壓痛',
+                    painWart: '兩側擠捏劇痛 (捏痛)',
+                    featureContagious: '傳染性',
+                    contagiousCorn: '無',
+                    contagiousCallus: '無',
+                    contagiousWart: '有',
+                    painChartTitle: '疼痛類型快速比較',
+                    painChartSubtitle: '這是區分雞眼與病毒疣的重要線索。試著按壓或擠捏患部，對照下圖。',
+                    painChartYAxis: '疼痛指數 (主觀感受)',
+                    painChartLabelCorn: '雞眼 (壓痛)',
+                    painChartLabelWart: '病毒疣 (捏痛)',
+                    causesTitle: '追根究底：雞眼為何找上我？',
+                    causesSubtitle: '雞眼的形成是「壓力」的結果。了解壓力來源是預防復發的關鍵。不合腳的鞋子是首要元兇。',
+                    causesChartTitle: '主要成因分佈',
+                    causesChartLabelShoes: '不合適的鞋履',
+                    causesChartLabelStructure: '足部結構問題',
+                    causesChartLabelGait: '步態與其他',
+                    extrinsicTitle: '👟 外部因素：不合適的鞋履',
+                    extrinsic1: '<strong>高跟鞋：</strong>將壓力集中於前腳掌。',
+                    extrinsic2: '<strong>窄頭/尖頭鞋：</strong>擠壓腳趾，造成摩擦。',
+                    extrinsic3: '<strong>尺寸不合：</strong>過緊造成壓迫，過鬆造成滑動摩擦。',
+                    intrinsicTitle: '🦶 內在因素：足部結構與步態',
+                    intrinsic1: '<strong>足部結構異常：</strong>拇趾外翻、錘狀趾、骨刺等造成骨骼突出。',
+                    intrinsic2: '<strong>足弓形態：</strong>高足弓或扁平足改變壓力分佈。',
+                    intrinsic3: '<strong>步態問題：</strong>不正確的走路姿勢導致壓力集中。',
+                    treatmentTitle: '循序漸進：雞眼的處理對策',
+                    treatmentSubtitle: '治療應由淺入深，從最溫和的居家護理開始。若無效或情況嚴重，再考慮市售產品或尋求專業醫療協助。',
+                    tier1Title: '第一級：安全居家護理',
+                    tier1Desc: '核心理念是「溫和移除壓力」與「軟化角質」，切勿操之過急。',
+                    tier1Step1: '<strong>浸泡軟化：</strong>用溫肥皂水浸泡10-20分鐘。',
+                    tier1Step2: '<strong>溫和磨除：</strong>用浮石或腳皮銼輕輕單向磨除軟化的死皮。',
+                    tier1Step3: '<strong>保濕滋潤：</strong>塗抹護足霜保持皮膚柔軟。',
+                    tier1WarningTitle: '⚠️ 嚴正警告：',
+                    tier1Warning: '絕對不要使用刀片、剪刀等尖銳器具自行切割，極易引發嚴重感染！',
+                    tier2Title: '第二級：市售產品 (OTC)',
+                    tier2Desc: '含水楊酸的雞眼貼/藥水是強效選擇，但需精準使用以保護周圍健康皮膚。',
+                    tier2Step1: '<strong>準備：</strong>先溫水浸泡並擦乾。',
+                    tier2Step2: '<strong>保護：</strong>在雞眼周圍健康皮膚塗抹凡士林作為屏障。',
+                    tier2Step3: '<strong>施藥：</strong>將產品「僅僅」敷在雞眼上。',
+                    tier2Step4: '<strong>覆蓋：</strong>按說明書指示時間覆蓋 (通常1-2天更換)。',
+                    tier2Step5: '<strong>移除：</strong>更換時，輕輕刮除變白軟化的死皮，耐心重複療程。',
+                    tier3Title: '第三級：專業醫療介入',
+                    tier3Desc: '當居家護理無效、疼痛難忍或您是高風險族群時，請務必尋求醫生協助。',
+                    tier3Step1: '<strong>削切與清創：</strong>最常見的處理，醫生用無菌刀片移除核心，立即緩解疼痛。',
+                    tier3Step2: '<strong>冷凍治療：</strong>用液態氮冷凍破壞雞眼組織。',
+                    tier3Step3: '<strong>激光治療：</strong>用激光精確氣化移除雞眼。',
+                    tier3Step4: '<strong>手術矯正：</strong>針對骨骼結構問題導致的慢性雞眼，從根本上解決問題。',
+                    preventionTitle: '終極目標：預防之道與長期保健',
+                    preventionSubtitle: '預防勝於治療。建立一套全面的足部健康策略，從根本上消除雞眼產生的土壤。',
+                    preventionShoesTitle: '科學選鞋：您的第一道防線',
+                    preventionShoes1: '<strong>寬敞鞋頭：</strong>讓腳趾有足夠空間活動。',
+                    preventionShoes2: '<strong>適當長度：</strong>最長腳趾與鞋尖應有約1.3公分距離。',
+                    preventionShoes3: '<strong>良好支撐：</strong>足弓支撐能均勻分散壓力。',
+                    preventionShoes4: '<strong>柔軟材質：</strong>透氣、柔軟的材質減少摩擦。',
+                    preventionShoes5: '<strong>購鞋時機：</strong>選擇下午或傍晚，此時腳最大。',
+                    preventionCareTitle: '積極護理與輔具',
+                    preventionCare1: '<strong>緩衝減壓：</strong>使用非藥性的中空雞眼護墊分散壓力。',
+                    preventionCare2: '<strong>矯正鞋墊：</strong>若有結構問題，可訂製鞋墊從根本解決。',
+                    preventionCare3: '<strong>日常護理：</strong>每日清洗、擦乾、塗抹潤膚霜。',
+                    preventionCare4: '<strong>正確剪甲：</strong>平剪趾甲，避免形成嵌甲。',
+                    warningTitle: '高風險族群：不可逾越的紅線',
+                    warningSubtitle: '如果您是 <strong>糖尿病患者</strong> 或患有 <strong>周邊動脈疾病（血液循環不良）</strong>，您的足部極其脆弱。',
+                    warningMain: '絕對禁止自行處理任何足部問題！',
+                    warningDetail: '包括自行切割或使用任何市售雞眼產品。一個微小傷口都可能導致無法癒合的潰瘍，甚至需要截肢。',
+                    warningAction: '一旦發現任何足部異常（雞眼、厚繭、水泡、傷口），請<span class="underline decoration-red-500 decoration-4">立即尋求專業醫療協助</span>。',
+                }
+            };
+            
+            // --- GLOBAL VARIABLES ---
+            const langSwitcher = document.getElementById('lang-switcher');
+            const tabs = document.querySelectorAll('.nav-btn');
+            const sections = document.querySelectorAll('.content-section');
+            const comparisonButtons = document.querySelectorAll('.comparison-table button');
+            const tableCells = document.querySelectorAll('.comparison-table td[class*="corn"], .comparison-table td[class*="callus"], .comparison-table td[class*="wart"]');
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            let causesChartInstance, painChartInstance;
+            let currentLang = 'zh';
+
+            // --- CHART DATA GENERATOR ---
+            function getChartData(lang) {
+                const langData = translations[lang];
+                return {
+                    causesData: {
+                        labels: [langData.causesChartLabelShoes, langData.causesChartLabelStructure, langData.causesChartLabelGait],
+                        datasets: [{ label: langData.causesChartTitle, data: [70, 20, 10], backgroundColor: ['#E76F51', '#F4A261', '#A3B18A'], hoverOffset: 4 }]
+                    },
+                    painData: {
+                        labels: [langData.painChartLabelCorn, langData.painChartLabelWart],
+                        datasets: [{ label: langData.painChartYAxis, data: [8, 9], backgroundColor: ['#E76F51', '#F4A261'], borderColor: ['#D66041', '#E39251'], borderWidth: 1 }]
+                    }
+                };
+            }
+
+            // --- LANGUAGE UPDATE FUNCTION ---
+            function updateLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        // Use innerHTML for elements that contain HTML tags like <strong>
+                        if (['extrinsic1', 'extrinsic2', 'extrinsic3', 'intrinsic1', 'intrinsic2', 'intrinsic3', 'tier1Step1', 'tier1Step2', 'tier1Step3', 'tier1Warning', 'tier2Step1', 'tier2Step2', 'tier2Step3', 'tier2Step4', 'tier2Step5', 'tier3Step1', 'tier3Step2', 'tier3Step3', 'tier3Step4', 'preventionShoes1', 'preventionShoes2', 'preventionShoes3', 'preventionShoes4', 'preventionShoes5', 'preventionCare1', 'preventionCare2', 'preventionCare3', 'preventionCare4', 'warningAction', 'warningSubtitle'].includes(key)) {
+                           el.innerHTML = translations[lang][key];
+                        } else if(key === 'tier1WarningTitle'){
+                            el.childNodes[0].nodeValue = translations[lang][key];
+                        } 
+                        else {
+                           el.innerText = translations[lang][key];
+                        }
+                    }
+                });
+                
+                // Re-initialize charts with the new language
+                const activeTab = document.querySelector('.nav-btn.active').dataset.tab;
+                if (activeTab === 'causes') {
+                    if(causesChartInstance) causesChartInstance.destroy();
+                    initCausesChart();
+                } else if (activeTab === 'identification') {
+                    if(painChartInstance) painChartInstance.destroy();
+                    initPainChart();
+                }
+            }
+            
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(newLang);
+            });
+
+            // --- CHART INITIALIZATION ---
+            function initCausesChart() {
+                const ctx = document.getElementById('causesChart').getContext('2d');
+                const data = getChartData(currentLang);
+                causesChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data.causesData,
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initPainChart() {
+                const ctx = document.getElementById('painChart').getContext('2d');
+                const data = getChartData(currentLang);
+                painChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: data.painData,
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, title: { display: true, text: translations[currentLang].painChartYAxis } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            // --- UI LOGIC ---
+            function setActiveTab(tab) {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const targetId = tab.dataset.tab;
+                sections.forEach(s => s.classList.remove('active', 'active'));
+                document.getElementById(targetId).classList.add('active');
+                
+                if (targetId === 'causes' && !causesChartInstance) {
+                    initCausesChart();
+                } else if(targetId === 'causes' && causesChartInstance) {
+                    causesChartInstance.destroy();
+                    initCausesChart();
+                } else if (targetId === 'identification' && !painChartInstance) {
+                    initPainChart();
+                } else if (targetId === 'identification' && painChartInstance) {
+                    painChartInstance.destroy();
+                    initPainChart();
+                }
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => setActiveTab(tab)));
+            
+            comparisonButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const type = button.dataset.type;
+                    comparisonButtons.forEach(b => b.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    tableCells.forEach(cell => {
+                        cell.classList.remove('highlight');
+                        if (type !== 'none' && cell.classList.contains(type)) {
+                            cell.classList.add('highlight');
+                        }
+                    });
+                });
+            });
+
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = header.querySelector('span:last-child');
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+                    // Close all other accordions
+                    accordionItems.forEach(otherItem => {
+                         if (otherItem !== item) {
+                            otherItem.querySelector('.accordion-content').style.maxHeight = '0px';
+                            otherItem.querySelector('.accordion-header span:last-child').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    // Toggle the clicked accordion
+                    if (isOpen) {
+                        content.style.maxHeight = '0px';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // --- INITIAL LOAD ---
+            setActiveTab(tabs[0]); // Activate the first tab and its chart
+        });
+    </script>
+
+</body>
+</html>
