@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19：未解之謎的互動報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Somber Neutral -->
+    <!-- Application Structure Plan: The SPA is designed as a single-page interactive dashboard with three thematic sections: "The Human Cost," "The Origin Debate," and "The Unfinished Investigation," accessible via a sticky navigation bar. This structure moves beyond the linear report format to prioritize user-led exploration. "The Human Cost" uses a dashboard layout with charts to immediately convey the scale of mortality. "The Origin Debate" uses an interactive side-by-side comparison toggled by the user, allowing for direct, objective analysis of the two main hypotheses. "The Unfinished Investigation" uses a vertical flow to explain the complex political stalemate. This non-linear, task-oriented design was chosen to make the dense, multi-faceted information more digestible and engaging for a general audience. -->
+    <!-- Visualization & Content Choices: 1. Official vs. Excess Deaths -> Goal: Compare -> Bar Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Directly visualizes the report's key finding on the true death toll. 2. Excess Deaths by Income -> Goal: Show Proportion -> Donut Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Clearly illustrates the unequal burden on middle-income nations. 3. Origin Hypotheses -> Goal: Compare & Organize -> Interactive HTML/CSS/JS Toggle -> Interaction: User clicks to switch views -> Justification: Allows for a focused, side-by-side comparison of complex arguments without overwhelming the user, superior to a static table. 4. Investigation Stalemate -> Goal: Organize & Explain -> HTML/CSS Diagram -> Interaction: Static visual flow -> Justification: Simplifies the complex geopolitical interactions into an easy-to-understand visual narrative. All charts use Chart.js on Canvas. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #343a40;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #6c757d;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d6efd;
+            border-bottom-color: #0d6efd;
+        }
+        .hypothesis-toggle button.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+        .kpi-label {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #dee2e6;
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 4px solid #f8f9fa;
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header and Navigation -->
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">COVID-19: 未解之謎</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#cost" class="nav-link pb-1">人類的代價</a>
+                <a href="#origin" class="nav-link pb-1">起源之爭</a>
+                <a href="#investigation" class="nav-link pb-1">未竟的調查</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Intro Section -->
+        <section class="text-center mb-20">
+            <h2 class="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">一場全球大流行的未解之謎</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                一份關於COVID-19死亡人數、病毒起源與未竟調查的互動式分析報告。本頁面將帶您探索疫情背後的驚人數據、充滿爭議的科學假說，以及因政治角力而陷入僵局的溯源之路。
+            </p>
+        </section>
+
+        <!-- Section 1: The Human Cost -->
+        <section id="cost" class="mb-24 pt-16">
+            <h3 class="section-title">1. 量化沉重的人類代價</h3>
+            <p class="section-subtitle">
+                官方統計數字僅是冰山一角。「超額死亡」數據揭示了這場全球悲劇更為真實且驚人的規模，並暴露了其在全球範圍內深刻的不平等。
+            </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="card">
+                    <h4 class="text-xl font-bold mb-4 text-center">官方報告 vs. 真實衝擊</h4>
+                    <div class="chart-container">
+                        <canvas id="mortalityComparisonChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="card">
+                        <h4 class="text-xl font-bold mb-4 text-center">超額死亡負擔：收入水平的差異</h4>
+                        <div class="chart-container h-64 max-h-[30vh]">
+                            <canvas id="incomeDistributionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card text-center">
+                         <h4 class="text-xl font-bold mb-2">地理分佈的極度集中</h4>
+                        <p class="text-gray-600"><span class="font-bold text-blue-600 text-2xl">84%</span> 的超額死亡集中在東南亞、歐洲和美洲，而約 <span class="font-bold text-blue-600 text-2xl">68%</span> 僅發生在全球10個國家。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Origin Debate -->
+        <section id="origin" class="mb-24 pt-16">
+            <h3 class="section-title">2. 起源之爭：自然溢出或實驗室洩漏？</h3>
+            <p class="section-subtitle">
+                病毒從何而來？科學界的主流意見與揮之不去的質疑形成了兩大對立假說。點擊下方按鈕，互動比較雙方的核心論點、證據與弱點。
+            </p>
+            
+            <div class="mb-8 p-6 bg-gray-100 rounded-lg shadow-inner">
+                <h4 class="text-xl font-bold mb-4 text-center">疫情早期關鍵時間線</h4>
+                <div class="relative">
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <div class="timeline-dot" style="background-color: #ffc107;"></div>
+                        <p class="font-semibold text-gray-800">2019年12月1日</p>
+                        <p class="text-gray-600">首位已知症狀患者出現，但與華南海鮮市場無關聯。</p>
+                    </div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <div class="timeline-dot" style="background-color: #fd7e14;"></div>
+                        <p class="font-semibold text-gray-800">2019年12月31日</p>
+                        <p class="text-gray-600">中國首次向WHO通報武漢出現不明原因肺炎病例。</p>
+                    </div>
+                    <div class="timeline-item relative pl-8 pb-8">
+                        <div class="timeline-dot" style="background-color: #dc3545;"></div>
+                        <p class="font-semibold text-gray-800">2020年1月1日</p>
+                        <p class="text-gray-600">武漢政府下令關閉華南海鮮批發市場。</p>
+                    </div>
+                     <div class="timeline-item relative pl-8">
+                        <div class="timeline-dot" style="background-color: #8B0000;"></div>
+                        <p class="font-semibold text-gray-800">2020年1月20日</p>
+                        <p class="text-gray-600">中國官方首次公開確認病毒存在「人傳人」證據。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center mb-8 hypothesis-toggle">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <button type="button" data-hypothesis="natural" class="px-6 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500 active">
+                        自然起源假說
+                    </button>
+                    <button type="button" data-hypothesis="lab" class="px-6 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-500">
+                        實驗室洩漏假說
+                    </button>
+                </div>
+            </div>
+
+            <div id="hypothesis-content" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Content will be injected by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Section 3: The Unfinished Investigation -->
+        <section id="investigation" class="mb-16 pt-16">
+            <h3 class="section-title">3. 未竟的調查：政治如何癱瘓科學</h3>
+            <p class="section-subtitle">
+                尋找答案的努力，從一開始就因數據不透明而受阻，並最終演變為地緣政治的角力場，使科學調查陷入停滯。一個確切的答案至今仍然遙不可及。
+            </p>
+            <div class="space-y-8 max-w-4xl mx-auto">
+                <div class="card">
+                    <h4 class="text-xl font-bold mb-3 flex items-center"><span class="text-2xl mr-3">🌐</span>世界衛生組織 (WHO) 的艱難探索</h4>
+                    <p class="text-gray-600">2021年初的聯合調查因中方限制而廣受批評，其「極不可能實驗室洩漏」的結論隨後被總幹事本人認為是「過早的」。後續成立的SAGO專家組也因無法進入中國進行有意義的調查而陷入困境。</p>
+                </div>
+                 <div class="card">
+                    <h4 class="text-xl font-bold mb-3 flex items-center"><span class="text-2xl mr-3">🇺🇸</span>美國情報界的內部分裂</h4>
+                    <p class="text-gray-600">美國情報界未能達成共識。FBI和能源部以「中」或「低」度信心認為實驗室洩漏可能性更大，而其他多個機構則傾向於自然起源，或認為證據不足以判斷。各方均承認沒有「確鑿證據」。</p>
+                </div>
+                 <div class="card">
+                    <h4 class="text-xl font-bold mb-3 flex items-center"><span class="text-2xl mr-3">🇨🇳⚔️🇺🇸</span>地緣政治的僵局</h4>
+                    <p class="text-gray-600">溯源問題迅速淪為中美對抗的代理戰場。美國指責中國掩蓋真相，中國則反斥其為「政治病毒」和抹黑。這種敵對氛圍使得任何基於科學的合作都變得不可能，調查實質上已完全停滯。</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Conclusion Section -->
+        <section class="mt-24 pt-12 border-t border-gray-200">
+             <h3 class="section-title">結論與未來展望</h3>
+             <p class="section-subtitle">
+                這次疫情暴露了全球公共衛生體系的脆弱性。為避免重蹈覆轍，國際社會必須從慘痛的教訓中汲取經驗。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center max-w-6xl mx-auto">
+                <div class="bg-gray-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg mb-2">強化WHO權威</h4>
+                    <p class="text-sm text-gray-600">賦予WHO在未來疫情爆發時進行快速、獨立調查的權力。</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg mb-2">建立數據透明機制</h4>
+                    <p class="text-sm text-gray-600">強制要求各國在疫情爆發時立即分享流行病學數據。</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg mb-2">監管高風險研究</h4>
+                    <p class="text-sm text-gray-600">建立全球框架，監管高風險病毒學研究，確保生物安全。</p>
+                </div>
+                <div class="bg-gray-100 p-6 rounded-lg">
+                    <h4 class="font-bold text-lg mb-2">科學與政治脫鉤</h4>
+                    <p class="text-sm text-gray-600">重新致力於全球合作，而非對抗，以應對未來的公共衛生危機。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-6 mt-12 bg-gray-100">
+        <p class="text-gray-500 text-sm">基於《一場全球大流行的未解之謎》報告生成的互動式分析頁面。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Data from the report ---
+            const mortalityData = {
+                official: 7010681,
+                excess: 14900000
+            };
+
+            const incomeDistributionData = {
+                labels: ['中等收入國家', '高收入國家', '低收入國家'],
+                percentages: [81, 15, 4],
+                colors: ['#fd7e14', '#0d6efd', '#6c757d']
+            };
+
+            const originHypotheses = {
+                natural: {
+                    title: '自然起源假說 (人畜共患溢出)',
+                    argument: '病毒在武漢華南海鮮市場從動物（可能經由中間宿主）自然傳播給人類。這是絕大多數科學證據支持的觀點。',
+                    evidence: [
+                        { icon: '🧬', text: '基因組分析顯示病毒與蝙蝠冠狀病毒高度相關。' },
+                        { icon: '🗺️', text: '早期病例在地理上高度集中於曾販售野生動物的華南海鮮市場。' },
+                        { icon: '🐾', text: '市場環境樣本中檢測出病毒與野生動物DNA同時存在。' },
+                        { icon: '🔄', text: '疫情初期存在兩種病毒譜系，暗示至少有兩次獨立的跨物種傳播事件。' }
+                    ],
+                    weaknesses: [
+                        { icon: '❓', text: '至今未能找到攜帶SARS-CoV-2祖先病毒的確切中間宿主動物。' },
+                        { icon: '⏳', text: '最接近的已知蝙蝠病毒RaTG13與SARS-CoV-2存在數十年的演化差距。' }
+                    ]
+                },
+                lab: {
+                    title: '實驗室洩漏假說',
+                    argument: '病毒從進行高風險冠狀病毒研究的武漢病毒研究所（WIV）因意外而洩漏。此假說主要基於間接證據和推論。',
+                    evidence: [
+                        { icon: '📍', text: '地理鄰近性：WIV與疫情爆發地同在武漢。' },
+                        { icon: '🔬', text: '研究性質：WIV有進行高風險的「功能增益」研究的歷史。' },
+                        { icon: '🇺🇸', text: '美國FBI和能源部等情報機構以不同信心程度傾向此說。' },
+                        { icon: '🤫', text: '關於早期研究人員患病的未經證實的情報傳聞。' }
+                    ],
+                    weaknesses: [
+                        { icon: '🚫', text: '缺乏任何直接證據，如「零號病人」身份或實驗室病毒樣本。' },
+                        { icon: '🕊️', text: '所有情報機構一致認為病毒並非作為生物武器被研發。' },
+                        { icon: '🧑‍🔬', text: '被點名的患病研究員已公開否認，並提供陰性抗體證明。' }
+                    ]
+                }
+            };
+
+            // --- Chart Rendering ---
+            const renderMortalityComparisonChart = () => {
+                const ctx = document.getElementById('mortalityComparisonChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['官方通報死亡人數', '估計超額死亡人數'],
+                        datasets: [{
+                            label: '人數',
+                            data: [mortalityData.official, mortalityData.excess],
+                            backgroundColor: ['#6c757d', '#dc3545'],
+                            borderColor: ['#6c757d', '#dc3545'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.dataset.label}: ${context.parsed.y.toLocaleString()} 人`
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => `${(value / 1000000)}M`
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const renderIncomeDistributionChart = () => {
+                const ctx = document.getElementById('incomeDistributionChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: incomeDistributionData.labels,
+                        datasets: [{
+                            data: incomeDistributionData.percentages,
+                            backgroundColor: incomeDistributionData.colors,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${context.label}: ${context.parsed}%`
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            // --- Interactivity ---
+            const hypothesisContainer = document.getElementById('hypothesis-content');
+            const hypothesisToggleButtons = document.querySelectorAll('.hypothesis-toggle button');
+
+            const renderHypothesisContent = (key) => {
+                const data = originHypotheses[key];
+                hypothesisContainer.innerHTML = `
+                    <div class="card animate-fade-in">
+                        <h4 class="text-xl font-bold mb-4 text-blue-600">${data.title}</h4>
+                        <p class="text-gray-700 mb-6">${data.argument}</p>
+                        <div>
+                            <h5 class="font-semibold mb-3 text-gray-800">主要證據</h5>
+                            <ul class="space-y-3">
+                                ${data.evidence.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="font-semibold mb-3 text-gray-800">主要弱點 / 疑點</h5>
+                            <ul class="space-y-3">
+                                ${data.weaknesses.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            };
+            
+            // Generate two columns on load
+            const initialRenderHypotheses = () => {
+                const naturalData = originHypotheses.natural;
+                const labData = originHypotheses.lab;
+
+                hypothesisContainer.innerHTML = `
+                    <div id="natural-hypothesis" class="card">
+                        <h4 class="text-xl font-bold mb-4 text-blue-600">${naturalData.title}</h4>
+                        <p class="text-gray-700 mb-6">${naturalData.argument}</p>
+                        <div>
+                            <h5 class="font-semibold mb-3 text-gray-800">主要證據</h5>
+                            <ul class="space-y-3">
+                                ${naturalData.evidence.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="font-semibold mb-3 text-gray-800">主要弱點 / 疑點</h5>
+                            <ul class="space-y-3">
+                                ${naturalData.weaknesses.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                     <div id="lab-hypothesis" class="card">
+                        <h4 class="text-xl font-bold mb-4 text-red-600">${labData.title}</h4>
+                        <p class="text-gray-700 mb-6">${labData.argument}</p>
+                        <div>
+                            <h5 class="font-semibold mb-3 text-gray-800">主要證據</h5>
+                            <ul class="space-y-3">
+                                ${labData.evidence.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="mt-6">
+                            <h5 class="font-semibold mb-3 text-gray-800">主要弱點 / 疑點</h5>
+                            <ul class="space-y-3">
+                                ${labData.weaknesses.map(item => `
+                                    <li class="flex items-start">
+                                        <span class="mr-3 text-xl">${item.icon}</span>
+                                        <span class="text-gray-600">${item.text}</span>
+                                    </li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                 
+                // Modify toggle to highlight, not hide
+                const naturalCol = document.getElementById('natural-hypothesis');
+                const labCol = document.getElementById('lab-hypothesis');
+                
+                hypothesisToggleButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        hypothesisToggleButtons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        
+                        const selected = button.dataset.hypothesis;
+                        
+                        if (selected === 'natural') {
+                            naturalCol.style.opacity = 1;
+                            naturalCol.style.transform = 'scale(1.02)';
+                            labCol.style.opacity = 0.6;
+                            labCol.style.transform = 'scale(0.98)';
+                        } else {
+                            labCol.style.opacity = 1;
+                            labCol.style.transform = 'scale(1.02)';
+                            naturalCol.style.opacity = 0.6;
+                            naturalCol.style.transform = 'scale(0.98)';
+                        }
+                        
+                        [naturalCol, labCol].forEach(col => {
+                           col.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                        });
+                    });
+                });
+                
+                // Set initial state
+                document.querySelector('[data-hypothesis="natural"]').classList.add('active');
+                naturalCol.style.opacity = 1;
+                naturalCol.style.transform = 'scale(1.02)';
+                labCol.style.opacity = 0.6;
+                labCol.style.transform = 'scale(0.98)';
+            };
+
+
+            // Smooth scrolling for nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // --- Initial Calls ---
+            renderMortalityComparisonChart();
+            renderIncomeDistributionChart();
+            initialRenderHypotheses();
+            
+            // Add fade-in animation style
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .animate-fade-in {
+                    animation: fadeIn 0.5s ease-out forwards;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>
