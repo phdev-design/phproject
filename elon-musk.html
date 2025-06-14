@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動分析：解讀伊隆·馬斯克的成功密碼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured as a single-page dashboard with a fixed sidebar navigation for thematic exploration. This design choice transforms the linear report into a non-linear, interactive experience. Users can jump between key themes like Musk's 'Venture Empire', 'Innovation Principles', 'Leadership Style', and 'Clash of Titans' comparison. This structure facilitates better understanding by breaking down complex information into digestible, interactive modules (e.g., clickable company timeline, dynamic charts), encouraging user-driven discovery over passive reading. The flow allows for both a quick overview and deep dives into specific areas of interest. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Musk's company history -> Goal: Organize/Inform -> Viz: Interactive Timeline (HTML/CSS) -> Interaction: Click company logo to show details -> Justification: More engaging than a static table, showing growth over time.
+        - Report Info: First Principles Thinking on battery costs -> Goal: Explain -> Viz: Bar Chart (Chart.js) -> Interaction: Animate on load, tooltips on hover -> Justification: Visually quantifies the impact of a core principle.
+        - Report Info: Musk's leadership traits -> Goal: Organize/Inform -> Viz: Radar Chart (Chart.js) -> Interaction: Tooltips on hover -> Justification: Provides a holistic, multi-faceted view of his complex leadership profile.
+        - Report Info: Comparison with other tech leaders -> Goal: Compare/Analyze -> Viz: Grouped Bar Chart (Chart.js) -> Interaction: Buttons to switch comparison target (Jobs/Bezos/Gates), updating the chart and text -> Justification: Turns a static table into a dynamic, user-controlled analytical tool.
+        - Report Info: Long-term vision (Mars, Energy, AI) -> Goal: Inspire/Inform -> Viz: Thematic Cards (HTML/CSS) -> Interaction: Subtle hover effects -> Justification: Clearly presents his grand, future-focused goals.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .sidebar-link {
+            transition: all 0.3s ease;
+        }
+        .sidebar-link.active, .sidebar-link:hover {
+            background-color: #EAE8E1;
+            color: #005A9C;
+            transform: translateX(4px);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tech-leader-btn.active {
+            background-color: #005A9C;
+            color: white;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <div class="flex min-h-screen">
+        <nav id="sidebar" class="w-64 bg-[#F0EDE5] p-6 fixed top-0 left-0 h-full shadow-lg hidden lg:block">
+            <div class="text-center mb-10">
+                <h1 class="text-xl font-bold text-gray-800">馬斯克成功密碼</h1>
+                <p class="text-sm text-gray-500">互動式分析</p>
+            </div>
+            <ul>
+                <li><a href="#home" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">首頁總覽</a></li>
+                <li><a href="#ventures" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">創業版圖</a></li>
+                <li><a href="#principles" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">創新法則</a></li>
+                <li><a href="#leadership" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">領導風格</a></li>
+                <li><a href="#comparison" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">巔峰對決</a></li>
+                <li><a href="#vision" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">宏大願景</a></li>
+            </ul>
+        </nav>
+
+        <main class="flex-1 lg:ml-64 p-4 sm:p-6 md:p-10 bg-[#F8F7F4]">
+            <button id="menu-toggle" class="lg:hidden fixed top-4 right-4 z-50 bg-white p-2 rounded-md shadow">
+                <span class="text-2xl">☰</span>
+            </button>
+
+            <div id="mobile-menu" class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 hidden">
+                <div class="w-64 bg-[#F0EDE5] h-full p-6 shadow-lg">
+                     <div class="text-center mb-10">
+                        <h1 class="text-xl font-bold text-gray-800">馬斯克成功密碼</h1>
+                        <p class="text-sm text-gray-500">互動式分析</p>
+                    </div>
+                    <ul>
+                       <li><a href="#home" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">首頁總覽</a></li>
+                       <li><a href="#ventures" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">創業版圖</a></li>
+                       <li><a href="#principles" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">創新法則</a></li>
+                       <li><a href="#leadership" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">領導風格</a></li>
+                       <li><a href="#comparison" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">巔峰對決</a></li>
+                       <li><a href="#vision" class="sidebar-link block py-3 px-4 rounded-lg font-medium text-gray-700">宏大願景</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <section id="home" class="content-section">
+                <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-4 text-gray-800">解讀伊隆·馬斯克：創新、願景與顛覆性領導力</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6">伊隆·馬斯克已成為21世紀科技與商業的標誌性人物，其影響力橫跨金融、太空、電動車到人工智慧等多個領域。本互動報告旨在深入剖析他非凡成功的核心要素，而非僅僅是個人傳記的敘述。我們將透過互動式圖表和分析，揭示其宏大願景、第一性原理思維、獨特的領導風格及高風險承受能力如何相互作用，使其能夠不斷顛覆傳統產業，並實現看似不可能的目標。</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                        <div class="bg-[#F0EDE5] p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-2">宏大願景</h3>
+                            <p class="text-sm text-gray-600">以解決人類生存風險為創業的根本驅動力。</p>
+                        </div>
+                        <div class="bg-[#F0EDE5] p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-2">第一性原理</h3>
+                            <p class="text-sm text-gray-600">將問題回歸本質，從物理定律出發重構解決方案。</p>
+                        </div>
+                        <div class="bg-[#F0EDE5] p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-2">極限領導</h3>
+                            <p class="text-sm text-gray-600">設定不可能的目標，激發團隊的極致潛力。</p>
+                        </div>
+                        <div class="bg-[#F0EDE5] p-6 rounded-xl">
+                            <h3 class="text-xl font-semibold mb-2">擁抱風險</h3>
+                            <p class="text-sm text-gray-600">將失敗視為學習過程，無畏地進行戰略性豪賭。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="ventures" class="content-section">
+                 <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800">創業版圖：從支付到星辰大海</h2>
+                    <p class="text-gray-600 leading-relaxed mb-8">馬斯克的創業歷程是一個不斷擴展的生態系統，從早期的網路金融，到顛覆性的太空探索與電動車，再到前沿的腦機介面與人工智慧。每家公司都旨在解決他認為對人類未來至關重要的根本性挑戰。點擊下方公司圖標，了解其核心目標與關鍵里程碑。</p>
+                    <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mb-8">
+                    </div>
+                    <div id="venture-details" class="p-6 bg-[#F0EDE5] rounded-xl min-h-[150px] transition-all duration-300">
+                        <p class="text-center text-gray-500">請點擊上方圖標以查看詳細資訊</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="principles" class="content-section">
+                <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800">創新法則：打破常規的思維武器</h2>
+                     <p class="text-gray-600 leading-relaxed mb-8">馬斯克的創新並非偶然，而是基於一套獨特且可複製的方法論。其中，「第一性原理思維」是核心，它要求將複雜問題分解至最基本的物理或經濟原則，然後從零開始構建解決方案，徹底擺脫傳統類比思維的束縛。這種方法論貫穿於他所有公司的技術突破之中。</p>
+                    <div class="grid lg:grid-cols-2 gap-8">
+                        <div>
+                             <h3 class="text-2xl font-semibold mb-4 text-center">案例：顛覆電池成本</h3>
+                             <p class="text-gray-600 mb-4 text-sm">傳統觀點認為電池組成本高昂（約$600/kWh）是無法改變的。馬斯克應用第一性原理，將電池分解為其基礎材料（鈷、鎳、碳等），發現原材料的市場成本遠低於此（約$80/kWh）。這證明高成本源於低效的製造過程，而非材料本身。這一洞察引導Tesla垂直整合並創新製造技術，從根本上重塑了電池產業的成本結構。</p>
+                             <div class="chart-container">
+                                <canvas id="batteryCostChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">垂直整合</h3>
+                                <p class="text-gray-600">從原料到終端產品，將供應鏈關鍵環節內部化。Tesla的超級工廠和SpaceX的火箭製造皆是典範。這確保了對品質、成本和開發速度的極致控制，為快速迭代奠定基礎。</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-2">快速迭代</h3>
+                                <p class="text-gray-600">「快速測試-失敗-學習」的循環。決策以小時而非週為單位，失敗被視為寶貴數據。SpaceX火箭的多次試飛失敗正是其可回收技術能迅速成熟的關鍵。</p>
+                            </div>
+                             <div>
+                                <h3 class="text-xl font-semibold mb-2">創新生態系</h3>
+                                <p class="text-gray-600">各事業體並非孤立，而是相互協同。Tesla的AI技術可支援Optimus機器人；Starlink的收入資助Starship的火星夢。這形成了一個自我強化的創新與資金閉環。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="leadership" class="content-section">
+                 <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800">領導風格：願景驅動的極限挑戰者</h2>
+                     <p class="text-gray-600 leading-relaxed mb-8">馬斯克的領導風格是變革型與獨裁式的混合體，充滿了魅力與爭議。他以宏大願景激勵團隊，賦予工作超越金錢的使命感。同時，他設定極端的時間表和不妥協的高標準，營造出高壓甚至殘酷的環境，將團隊推向極限。這種風格雖成就了無數技術突破，但也伴隨著員工倦怠和高流動率的代價。</p>
+                    <div class="grid lg:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container">
+                            <canvas id="leadershipRadarChart"></canvas>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-semibold text-lg">▶ 願景驅動 (Vision-Driven)</h3>
+                                <p class="text-gray-600 text-sm pl-4">以「使人類成為多行星物種」等宏大使命激勵團隊，賦予工作深刻意義。</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg">▶ 高壓要求 (High-Pressure)</h3>
+                                <p class="text-gray-600 text-sm pl-4">設定「不切實際」的目標和激進的截止日期，迫使團隊突破舒適區。</p>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-lg">▶ 親力親為 (Hands-On)</h3>
+                                <p class="text-gray-600 text-sm pl-4">深入工程和設計細節，被稱為「奈米級管理者」，確保執行力。</p>
+                            </div>
+                             <div>
+                                <h3 class="font-semibold text-lg">▶ 挑戰權威 (Challenge Status Quo)</h3>
+                                <p class="text-gray-600 text-sm pl-4">鼓勵基於邏輯和數據的辯論，即使是挑戰他本人，但對挑戰其願景的異議容忍度低。</p>
+                            </div>
+                             <div>
+                                <h3 class="font-semibold text-lg">▶ 快速決策 (Rapid Decision-Making)</h3>
+                                <p class="text-gray-600 text-sm pl-4">極度厭惡官僚程序，決策速度快，以維持動能。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparison" class="content-section">
+                <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800">巔峰對決：與科技巨擘的風格碰撞</h2>
+                    <p class="text-gray-600 leading-relaxed mb-6">要理解馬斯克的獨特性，將他與其他科技界的傳奇人物進行比較至關重要。雖然他們都是富有遠見的創新者，但在領導風格、創新方法和風險態度上卻大相徑庭。選擇一位領袖，看看他與馬斯克的風格有何不同。</p>
+                    <div id="comparison-controls" class="flex justify-center space-x-2 sm:space-x-4 mb-8">
+                        <button class="tech-leader-btn px-4 py-2 rounded-lg font-semibold transition" data-leader="jobs">史蒂夫·賈伯斯</button>
+                        <button class="tech-leader-btn px-4 py-2 rounded-lg font-semibold transition" data-leader="bezos">傑夫·貝佐斯</button>
+                        <button class="tech-leader-btn px-4 py-2 rounded-lg font-semibold transition" data-leader="gates">比爾·蓋茲</button>
+                    </div>
+                    <div class="grid lg:grid-cols-5 gap-8">
+                        <div class="lg:col-span-3 chart-container h-[400px] sm:h-[450px]">
+                            <canvas id="comparisonChart"></canvas>
+                        </div>
+                        <div id="comparison-text" class="lg:col-span-2 space-y-4">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="vision" class="content-section">
+                <div class="bg-white p-8 rounded-2xl shadow-md">
+                    <h2 class="text-3xl font-bold mb-2 text-gray-800">宏大願景：驅動一切的終極目標</h2>
+                    <p class="text-gray-600 leading-relaxed mb-8">馬斯克所有事業的核心，都指向幾個相互關聯的宏大願景。這些不僅是商業目標，更是他對人類文明未來的深刻思考和應對方案。從確保物種存續到能源轉型，再到定義人與AI的關係，他的行動始終圍繞著解決人類面臨的根本性、長期性挑戰。</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-[#F0EDE5] p-6 rounded-xl border-l-4 border-[#005A9C]">
+                            <h3 class="text-2xl font-bold mb-3">多行星物種</h3>
+                            <p class="text-gray-600">透過SpaceX和Starship，實現火星殖民，為人類文明建立「備份」，以應對地球潛在的生存危機。這是他最核心、最長遠的目標。</p>
+                        </div>
+                         <div class="bg-[#F0EDE5] p-6 rounded-xl border-l-4 border-[#4CAF50]">
+                            <h3 class="text-2xl font-bold mb-3">永續能源轉型</h3>
+                            <p class="text-gray-600">透過Tesla的電動車、SolarCity的太陽能和儲能產品（Powerwall），加速世界擺脫對化石燃料的依賴，應對氣候變遷。</p>
+                        </div>
+                         <div class="bg-[#F0EDE5] p-6 rounded-xl border-l-4 border-[#FFC107]">
+                            <h3 class="text-2xl font-bold mb-3">AI與人腦融合</h3>
+                            <p class="text-gray-600">透過xAI確保人工智慧安全發展，並透過Neuralink開發腦機介面，旨在增強人類認知能力，實現人與AI的共生，避免人類被超越。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const ventureData = {
+        zip2: { name: 'Zip2 (1995)', icon: '🗺️', desc: '馬斯克的首次創業，提供線上商業目錄與地圖服務，為後續事業奠定基礎。' },
+        paypal: { name: 'X.com/PayPal (1999)', icon: '💳', desc: '創立X.com，後合併為PayPal，顛覆了線上支付。出售後獲得的資金成為SpaceX和Tesla的啟動資本。' },
+        spacex: { name: 'SpaceX (2002)', icon: '🚀', desc: '旨在降低太空運輸成本，實現火星殖民。以可重複使用火箭技術顛覆了航太產業。' },
+        tesla: { name: 'Tesla (2004)', icon: '🚗', desc: '引領全球電動車革命，加速世界向永續能源的轉型，業務擴及儲能與AI。' },
+        solarcity: { name: 'SolarCity (2006)', icon: '☀️', desc: '推動太陽能解決方案，後被Tesla收購，構成其能源生態閉環。' },
+        neuralink: { name: 'Neuralink (2016)', icon: '🧠', desc: '開發高頻寬腦機介面，旨在融合人腦與AI，治療神經系統疾病。' },
+        boring: { name: 'The Boring Co. (2017)', icon: '🚇', desc: '旨在透過隧道技術解決城市交通擁堵問題，已在拉斯維加斯營運。' },
+        x: { name: 'X/Twitter (2022)', icon: '🇽', desc: '收購Twitter並更名為X，旨在打造言論自由的「萬能應用程式」。' },
+        xai: { name: 'xAI (2023)', icon: '🤖', desc: '創立以開發安全、有益的人工智慧，與他對AI風險的長期擔憂相符。' }
+    };
+
+    const comparisonData = {
+        jobs: {
+            name: '史蒂夫·賈伯斯',
+            values: [8, 5, 9, 8],
+            text: `
+                <h3 class="text-xl font-bold mb-2">與賈伯斯的異同</h3>
+                <p class="text-gray-600 text-sm mb-2"><strong>相似處：</strong>同為富有遠見、追求完美、敢於冒險的產品驅動型領導者。</p>
+                <p class="text-gray-600 text-sm mb-2"><strong>差異點：</strong><br><strong>焦點：</strong>賈伯斯專注於消費電子的使用者體驗與設計美學；馬斯克則專注於跨產業的硬核工程與基礎技術突破。<br><strong>文化：</strong>賈伯斯的蘋果是封閉生態；馬斯克的Tesla則開源專利，相對開放。</p>
+            `
+        },
+        bezos: {
+            name: '傑夫·貝佐斯',
+            values: [7, 9, 5, 6],
+            text: `
+                <h3 class="text-xl font-bold mb-2">與貝佐斯的異同</h3>
+                <p class="text-gray-600 text-sm mb-2"><strong>相似處：</strong>都建立了擁有宏大目標的商業帝國，並善用創新資本。</p>
+                <p class="text-gray-600 text-sm mb-2"><strong>差異點：</strong><br><strong>方法：</strong>貝佐斯是「客戶至上」，從需求逆向工作；馬斯克是「技術至上」，相信自己比客戶更懂未來。<br><strong>節奏：</strong>貝佐斯耐心、「循序漸進」；馬斯克則不耐煩、追求「技術大躍進」。</p>
+            `
+        },
+        gates: {
+            name: '比爾·蓋茲',
+            values: [6, 8, 4, 7],
+            text: `
+                <h3 class="text-xl font-bold mb-2">與蓋茲的異同</h3>
+                <p class="text-gray-600 text-sm mb-2"><strong>相似處：</strong>都是從零開始建立科技帝國的技術專家。</p>
+                <p class="text-gray-600 text-sm mb-2"><strong>差異點：</strong><br><strong>風格：</strong>蓋茲更偏向協作、溝通與穩健的長期計劃；馬斯克則是高壓、快速行動、擁抱失敗的風格。<br><strong>後期焦點：</strong>蓋茲專注於戰略性慈善；馬斯克則持續投入於解決人類生存的技術難題。</p>
+            `
+        }
+    };
+    
+    const sidebarLinks = document.querySelectorAll('.sidebar-link');
+    const contentSections = document.querySelectorAll('.content-section');
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    function navigateTo(hash) {
+        contentSections.forEach(section => {
+            if ('#' + section.id === hash) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
+            }
+        });
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === hash) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+        
+        if (window.innerWidth < 1024) {
+            mobileMenu.classList.add('hidden');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        if (hash === '#principles' && !window.batteryChartInstance) {
+            renderBatteryCostChart();
+        }
+        if (hash === '#leadership' && !window.leadershipRadarChartInstance) {
+            renderLeadershipRadarChart();
+        }
+        if (hash === '#comparison' && !window.comparisonChartInstance) {
+            renderComparisonChart('jobs');
+        }
+    }
+
+    sidebarLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const hash = link.getAttribute('href');
+            history.pushState(null, null, hash);
+            navigateTo(hash);
+        });
+    });
+    
+    menuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    mobileMenu.addEventListener('click', (e) => {
+        if (e.target === mobileMenu) {
+            mobileMenu.classList.add('hidden');
+        }
+    });
+
+    window.addEventListener('popstate', () => {
+        navigateTo(window.location.hash || '#home');
+    });
+
+    navigateTo(window.location.hash || '#home');
+
+    function setupVentures() {
+        const container = document.querySelector('#ventures .flex-wrap');
+        const detailsContainer = document.getElementById('venture-details');
+        
+        Object.keys(ventureData).forEach(key => {
+            const venture = ventureData[key];
+            const button = document.createElement('button');
+            button.className = 'flex flex-col items-center gap-2 p-3 rounded-xl transition duration-300 hover:bg-[#EAE8E1] focus:outline-none focus:ring-2 focus:ring-[#005A9C]';
+            button.innerHTML = `
+                <span class="text-4xl">${venture.icon}</span>
+                <span class="text-xs font-medium text-gray-700">${venture.name}</span>
+            `;
+            button.addEventListener('click', () => {
+                document.querySelectorAll('#ventures .flex-wrap button').forEach(btn => btn.classList.remove('bg-[#EAE8E1]'));
+                button.classList.add('bg-[#EAE8E1]');
+                detailsContainer.innerHTML = `
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${venture.name}</h3>
+                    <p class="text-gray-600">${venture.desc}</p>
+                `;
+            });
+            container.appendChild(button);
+        });
+    }
+    setupVentures();
+
+    function renderBatteryCostChart() {
+        const ctx = document.getElementById('batteryCostChart').getContext('2d');
+        window.batteryChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['傳統電池組成本', '原材料市場價值'],
+                datasets: [{
+                    label: '成本 (美元/kWh)',
+                    data: [600, 80],
+                    backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(75, 192, 192, 0.6)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(75, 192, 192, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: '第一性原理：電池成本分析',
+                        font: { size: 16, family: "'Noto Sans TC', sans-serif" }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.x);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: { display: true, text: '成本 (美元/kWh)' }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderLeadershipRadarChart() {
+        const ctx = document.getElementById('leadershipRadarChart').getContext('2d');
+        window.leadershipRadarChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['願景驅動', '高壓要求', '親力親為', '挑戰權威', '快速決策', '風險承受'],
+                datasets: [{
+                    label: '馬斯克領導力特質',
+                    data: [10, 9, 9, 7, 9, 10],
+                    backgroundColor: 'rgba(0, 90, 156, 0.2)',
+                    borderColor: 'rgba(0, 90, 156, 1)',
+                    pointBackgroundColor: 'rgba(0, 90, 156, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(0, 90, 156, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: '領導力風格多維度評估',
+                        font: { size: 16, family: "'Noto Sans TC', sans-serif" }
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                        grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                        pointLabels: { font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
+                        suggestedMin: 0,
+                        suggestedMax: 10,
+                        ticks: {
+                           backdropColor: 'transparent',
+                           stepSize: 2
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderComparisonChart(leaderKey) {
+        const leaderData = comparisonData[leaderKey];
+        const comparisonTextContainer = document.getElementById('comparison-text');
+        
+        const data = {
+            labels: ['創新焦點 (工程 vs 設計)', '行事風格 (激進 vs 穩健)', '風險態度 (極高 vs 計算)', '管理模式 (集權 vs 授權)'],
+            datasets: [
+                {
+                    label: '伊隆·馬斯克',
+                    data: [9, 9, 10, 8],
+                    backgroundColor: 'rgba(0, 90, 156, 0.7)',
+                    borderColor: 'rgba(0, 90, 156, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: leaderData.name,
+                    data: leaderData.values,
+                    backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }
+            ]
+        };
+
+        if (window.comparisonChartInstance) {
+            window.comparisonChartInstance.data = data;
+            window.comparisonChartInstance.update();
+        } else {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            window.comparisonChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: {
+                            display: true,
+                            text: '領導風格對比',
+                            font: { size: 16, family: "'Noto Sans TC', sans-serif" }
+                        },
+                         tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + ' / 10';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: { stepSize: 2 }
+                        }
+                    }
+                }
+            });
+        }
+        
+        comparisonTextContainer.innerHTML = leaderData.text;
+
+        document.querySelectorAll('.tech-leader-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.dataset.leader === leaderKey) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    const comparisonControls = document.getElementById('comparison-controls');
+    comparisonControls.addEventListener('click', e => {
+        if (e.target.matches('button')) {
+            const leaderKey = e.target.dataset.leader;
+            renderComparisonChart(leaderKey);
+        }
+    });
+
+});
+</script>
+</body>
+</html>
