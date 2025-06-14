@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title">互動式報告：美國無證移民的起源</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4;
+            color: #333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #0d9488; /* teal-600 */
+        }
+        .timeline-item.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .timeline-item {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        /* Language switcher style */
+        #lang-switcher {
+            border: 1px solid #0d9488;
+            color: #0d9488;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        #lang-switcher:hover {
+            background-color: #0d9488;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center max-w-7xl">
+            <h1 class="font-bold text-lg md:text-xl text-teal-700" data-lang-key="nav_title">美國移民體系的起源</h1>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium">
+                <a href="#intro" class="nav-link text-slate-600" data-lang-key="nav_intro">導論</a>
+                <a href="#timeline" class="nav-link text-slate-600" data-lang-key="nav_timeline">歷史的塑造</a>
+                <a href="#drivers" class="nav-link text-slate-600" data-lang-key="nav_drivers">驅動的引擎</a>
+                <a href="#paradox" class="nav-link text-slate-600" data-lang-key="nav_paradox">執法的悖論</a>
+                <a href="#broken-system" class="nav-link text-slate-600" data-lang-key="nav_system">失靈的體系</a>
+                <a href="#solutions" class="nav-link text-slate-600" data-lang-key="nav_solutions">前行之路</a>
+                <button id="lang-switcher" class="text-sm">English</button>
+            </div>
+            <div class="flex items-center md:hidden">
+                <button id="lang-switcher-mobile" class="text-sm mr-4" style="border: 1px solid #0d9488; color: #0d9488; padding: 4px 8px; border-radius: 9999px;">EN</button>
+                <button id="mobile-menu-button" class="text-slate-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+             <a href="#intro" class="block py-2 nav-link text-slate-600" data-lang-key="nav_intro_mobile">導論</a>
+             <a href="#timeline" class="block py-2 nav-link text-slate-600" data-lang-key="nav_timeline_mobile">歷史的塑造</a>
+             <a href="#drivers" class="block py-2 nav-link text-slate-600" data-lang-key="nav_drivers_mobile">驅動的引擎</a>
+             <a href="#paradox" class="block py-2 nav-link text-slate-600" data-lang-key="nav_paradox_mobile">執法的悖論</a>
+             <a href="#broken-system" class="block py-2 nav-link text-slate-600" data-lang-key="nav_system_mobile">失靈的體系</a>
+             <a href="#solutions" class="block py-2 nav-link text-slate-600" data-lang-key="nav_solutions_mobile">前行之路</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-16 max-w-7xl">
+
+        <!-- Section: Introduction -->
+        <section id="intro" class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-bold text-teal-800 mb-4" data-lang-key="intro_title">一個非預期的體系</h2>
+            <p class="text-lg md:text-xl text-slate-600 max-w-4xl mx-auto" data-lang-key="intro_p">
+                美國龐大的無證移民人口並非一場意外，而是一個世紀以來，充滿矛盾且往往適得其反的政策所共同塑造的系統性結果。本報告將揭示，這個「失靈」的體系是如何被刻意建構，又如何與美國的經濟現實及人道價值觀相脫節。
+            </p>
+        </section>
+
+        <!-- Section: Timeline -->
+        <section id="timeline" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2" data-lang-key="timeline_title">歷史的塑造：法律如何創造「非法」</h3>
+                <p class="text-slate-600 max-w-3xl mx-auto" data-lang-key="timeline_p">點擊下方的年份，探索關鍵法律如何逐步定義並最終將一個合法的勞動力流動「非法化」。</p>
+            </div>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                <button class="timeline-item text-sm md:text-base font-bold py-2 px-4 rounded-full bg-white shadow-sm" data-id="1882">1882</button>
+                <button class="timeline-item text-sm md:text-base font-bold py-2 px-4 rounded-full bg-white shadow-sm" data-id="1924">1924</button>
+                <button class="timeline-item text-sm md:text-base font-bold py-2 px-4 rounded-full bg-white shadow-sm" data-id="1964">1964-65</button>
+                <button class="timeline-item text-sm md:text-base font-bold py-2 px-4 rounded-full bg-white shadow-sm" data-id="1994">1994</button>
+            </div>
+            <div id="timeline-content" class="bg-white p-6 md:p-8 rounded-lg shadow-lg min-h-[200px] transition-all duration-500 max-w-4xl mx-auto">
+                <!-- Content will be injected by JS -->
+            </div>
+        </section>
+
+        <!-- Section: Drivers -->
+        <section id="drivers" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2" data-lang-key="drivers_title">移民的引擎：拉力與推力</h3>
+                <p class="text-slate-600 max-w-3xl mx-auto" data-lang-key="drivers_p">強大的經濟與社會力量，與日益嚴苛的法律限制產生巨大張力，構成了無證移民現象的核心動力。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Pull Factors -->
+                <div class="bg-teal-50 p-6 rounded-lg border-l-4 border-teal-500">
+                    <h4 class="text-xl font-bold mb-4 text-teal-800" data-lang-key="drivers_pull_title">🇺🇸 美國的拉力 (Pull Factors)</h4>
+                    <ul class="space-y-3 text-slate-700">
+                        <li data-lang-key="drivers_pull_1"><strong>勞動力磁鐵:</strong> 農業、建築和服務業長期依賴低成本、靈活的勞動力。這種結構性需求是吸引移民最根本的原因。</li>
+                        <li data-lang-key="drivers_pull_2"><strong>工資鴻溝:</strong> 在美國從事低技術工作的報酬遠高於來源國，巨大的經濟梯度構成了強大的誘因。</li>
+                        <li data-lang-key="drivers_pull_3"><strong>社會網絡:</strong> 已在美的移民通過家庭團聚和「鏈式移民」，為後來的同鄉提供資訊、住所和資金，極大降低了移民的風險和成本。</li>
+                    </ul>
+                </div>
+                <!-- Push Factors -->
+                <div class="bg-orange-50 p-6 rounded-lg border-l-4 border-orange-500">
+                    <h4 class="text-xl font-bold mb-4 text-orange-800" data-lang-key="drivers_push_title">🌍 來源國的推力 (Push Factors)</h4>
+                    <ul class="space-y-3 text-slate-700">
+                        <li data-lang-key="drivers_push_1"><strong>經濟動盪:</strong> 《北美自由貿易協定》(NAFTA) 等政策衝擊了墨西哥農業，導致數百萬農民流離失所，被迫北上。</li>
+                        <li data-lang-key="drivers_push_2"><strong>暴力與失能:</strong> 中美洲北三角地區的幫派暴力、政府腐敗和法治不彰，迫使人們為求生存而逃離家園。</li>
+                        <li data-lang-key="drivers_push_3"><strong>氣候變遷:</strong> 長期乾旱和極端天氣事件摧毀了農業生計，加劇了糧食不安全，使移民成為許多農村家庭的唯一選擇。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Enforcement Paradox -->
+        <section id="paradox" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2" data-lang-key="paradox_title">執法的悖論：邊境管制如何適得其反</h3>
+                <p class="text-slate-600 max-w-3xl mx-auto" data-lang-key="paradox_p">自90年代以來，美國採取「以威懾預防」的執法策略。數據顯示，這不僅未能阻止移民，反而產生了一系列悲劇性的、意想不到的後果。</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="text-lg font-bold text-center mb-4" data-lang-key="paradox_chart1_title">悖論一：支出飆升，循環終結</h4>
+                    <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="paradox_chart1_p">1965年後，合法勞工渠道關閉，邊境逮捕人數（衡量無證流動的指標）隨之上升。強化的邊境執法並未阻止人們前來，而是終結了以往的「循環移民」模式，迫使移民長期定居。</p>
+                    <div class="chart-container">
+                        <canvas id="braceroChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="text-lg font-bold text-center mb-4" data-lang-key="paradox_chart2_title">悖論二：預算越多，死亡越多</h4>
+                    <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="paradox_chart2_p">邊境巡邏隊預算急劇增加，將移民推向更危險的沙漠地帶。結果是邊境死亡人數同步攀升，催生了龐大的偷渡產業，使邊境變得更危險。</p>
+                    <div class="chart-container">
+                        <canvas id="enforcementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section: A Broken System -->
+        <section id="broken-system" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold mb-2" data-lang-key="system_title">一個失靈的體系：合法渠道的瓶頸</h3>
+                <p class="text-slate-600 max-w-3xl mx-auto" data-lang-key="system_p">許多人問：「他們為什麼不合法地來？」答案是：對於絕大多數人來說，合法渠道幾乎不存在或形同虛設，這本身就是製造無證人口的另一個源頭。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h4 class="text-lg font-bold mb-2" data-lang-key="system_card1_title">簽證逾期居留</h4>
+                    <p class="text-sm text-slate-500 mb-4" data-lang-key="system_card1_p">一個常被忽視的事實：近半數的無證移民是合法入境，但在簽證到期後留下。這不僅僅是邊境問題。</p>
+                    <div class="chart-container h-64 max-h-[30vh]">
+                        <canvas id="overstayChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center flex flex-col justify-center">
+                    <h4 class="text-lg font-bold mb-2" data-lang-key="system_card2_title">長達數十年的積壓</h4>
+                    <p class="text-slate-700 text-3xl font-bold text-red-600 mb-2" data-lang-key="system_card2_year">~20+ 年</p>
+                    <p class="text-sm text-slate-500" data-lang-key="system_card2_p">對於某些家庭擔保類別，獲得綠卡的等待時間超過20年。一個形同虛設的「合法途徑」，在現實中毫無意義。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h4 class="text-lg font-bold mb-2" data-lang-key="system_card3_title">臨時工簽證：杯水車薪</h4>
+                     <p class="text-sm text-slate-500 mb-4" data-lang-key="system_card3_p">美國經濟急需的非農業臨時工(H-2B)簽證，每年全球配額僅6.6萬個，遠無法滿足市場需求。</p>
+                    <div class="chart-container h-64 max-h-[30vh]">
+                        <canvas id="h2bChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Solutions -->
+        <section id="solutions" class="bg-slate-100 -mx-6 px-6 py-16 md:-mx-16 md:px-16">
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12">
+                    <h3 class="text-2xl md:text-4xl font-bold mb-2" data-lang-key="solutions_title">政治僵局與前行之路</h3>
+                    <p class="text-slate-600 max-w-3xl mx-auto" data-lang-key="solutions_p">任何全面的解決方案都必須擺脫黨派之爭，採取務實的、多管齊下的策略，將法律渠道、經濟現實和人道主義考量統一起來。</p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-bold mb-6 text-center text-teal-800" data-lang-key="solutions_subtitle">邁向一個連貫政策的深度建議</h4>
+                    <ol class="space-y-4 list-decimal list-inside text-slate-700">
+                        <li data-lang-key="solutions_1"><strong>擴大和改革合法渠道：</strong> 創建靈活的、能響應市場需求的臨時工人簽證計畫，為勞工提供合法的替代方案，釜底抽薪。</li>
+                        <li data-lang-key="solutions_2"><strong>清理簽證積壓：</strong> 為移民管理機構提供足夠資源，大幅削減長達數十年的簽證積壓，恢復合法渠道的可靠性。</li>
+                        <li data-lang-key="solutions_3"><strong>重新思考邊境管理：</strong> 從「威懾」轉向「管理」，將資源投入官方入境口岸，以便安全、有序、高效地處理庇護及其他合法入境請求。</li>
+                        <li data-lang-key="solutions_4"><strong>針對根源進行長期投入：</strong> 與來源國建立真正的夥伴關係，共同應對驅動移民的暴力、腐敗和氣候變化等根本問題。</li>
+                        <li data-lang-key="solutions_5"><strong>為已定居者提供解決方案：</strong> 為數百萬已深度融入美國社會的無證移民提供獲得合法身份的途徑，這既是務實也是人道的選擇，符合美國的國家利益。</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- TRANSLATION DATA ---
+    const translations = {
+        'zh': {
+            page_title: '互動式報告：美國無證移民的起源',
+            nav_title: '美國移民體系的起源',
+            nav_intro: '導論', nav_timeline: '歷史的塑造', nav_drivers: '驅動的引擎', nav_paradox: '執法的悖論', nav_system: '失靈的體系', nav_solutions: '前行之路',
+            nav_intro_mobile: '導論', nav_timeline_mobile: '歷史的塑造', nav_drivers_mobile: '驅動的引擎', nav_paradox_mobile: '執法的悖論', nav_system_mobile: '失靈的體系', nav_solutions_mobile: '前行之路',
+            intro_title: '一個非預期的體系',
+            intro_p: '美國龐大的無證移民人口並非一場意外，而是一個世紀以來，充滿矛盾且往往適得其反的政策所共同塑造的系統性結果。本報告將揭示，這個「失靈」的體系是如何被刻意建構，又如何與美國的經濟現實及人道價值觀相脫節。',
+            timeline_title: '歷史的塑造：法律如何創造「非法」',
+            timeline_p: '點擊下方的年份，探索關鍵法律如何逐步定義並最終將一個合法的勞動力流動「非法化」。',
+            timeline_data: {
+                '1882': { title: '1882年《排華法案》', content: '這是美國第一部針對特定族裔的重大限制性移民法。它禁止華人勞工入境，並剝奪已在美華人歸化為公民的權利。這部法律首次在聯邦層面基於種族和階級創造了「非法」移民類別，並確立了驅逐出境的法律框架。' },
+                '1924': { title: '1924年《國家起源法案》', content: '該法案建立了基於國籍的歧視性配額制度，旨在限制南歐和東歐移民，維護美國的「種族同質性」。然而，為了滿足西南部農業的勞動力需求，法案豁免了對西半球國家（包括墨西哥）的數量限制，為墨西哥勞工保留了一條合法的流動渠道。' },
+                '1964': { title: '1964-65年 政策的致命疊加', content: '1964年，為美國農業提供了數十年合法勞工的「布拉塞羅計畫」被終止。僅一年後，1965年的《移民與國籍法》在廢除種族配額制的同時，首次對西半球移民施加了年度數量上限。這兩個政策疊加，幾乎在一夜之間將一個長期合法的、循環的勞動力流動全面「非法化」。' },
+                '1994': { title: '1994年 NAFTA與邊境軍事化', content: '《北美自由貿易協定》(NAFTA)生效，衝擊了墨西哥農業，製造了大量流離失所的農民。同年，美國啟動「守門員行動」，開始大規模軍事化邊境，推行「以威懾預防」戰略。這標誌著美國應對無證移民的策略，從被動逮捕轉向主動威懾，但卻帶來了災難性的後果。' }
+            },
+            drivers_title: '移民的引擎：拉力與推力',
+            drivers_p: '強大的經濟與社會力量，與日益嚴苛的法律限制產生巨大張力，構成了無證移民現象的核心動力。',
+            drivers_pull_title: '🇺🇸 美國的拉力 (Pull Factors)',
+            drivers_pull_1: '<strong>勞動力磁鐵:</strong> 農業、建築和服務業長期依賴低成本、靈活的勞動力。這種結構性需求是吸引移民最根本的原因。',
+            drivers_pull_2: '<strong>工資鴻溝:</strong> 在美國從事低技術工作的報酬遠高於來源國，巨大的經濟梯度構成了強大的誘因。',
+            drivers_pull_3: '<strong>社會網絡:</strong> 已在美的移民通過家庭團聚和「鏈式移民」，為後來的同鄉提供資訊、住所和資金，極大降低了移民的風險和成本。',
+            drivers_push_title: '🌍 來源國的推力 (Push Factors)',
+            drivers_push_1: '<strong>經濟動盪:</strong> 《北美自由貿易協定》(NAFTA) 等政策衝擊了墨西哥農業，導致數百萬農民流離失所，被迫北上。',
+            drivers_push_2: '<strong>暴力與失能:</strong> 中美洲北三角地區的幫派暴力、政府腐敗和法治不彰，迫使人們為求生存而逃離家園。',
+            drivers_push_3: '<strong>氣候變遷:</strong> 長期乾旱和極端天氣事件摧毀了農業生計，加劇了糧食不安全，使移民成為許多農村家庭的唯一選擇。',
+            paradox_title: '執法的悖論：邊境管制如何適得其反',
+            paradox_p: '自90年代以來，美國採取「以威懾預防」的執法策略。數據顯示，這不僅未能阻止移民，反而產生了一系列悲劇性的、意想不到的後果。',
+            paradox_chart1_title: '悖論一：支出飆升，循環終結',
+            paradox_chart1_p: '1965年後，合法勞工渠道關閉，邊境逮捕人數（衡量無證流動的指標）隨之上升。強化的邊境執法並未阻止人們前來，而是終結了以往的「循環移民」模式，迫使移民長期定居。',
+            paradox_chart2_title: '悖論二：預算越多，死亡越多',
+            paradox_chart2_p: '邊境巡邏隊預算急劇增加，將移民推向更危險的沙漠地帶。結果是邊境死亡人數同步攀升，催生了龐大的偷渡產業，使邊境變得更危險。',
+            system_title: '一個失靈的體系：合法渠道的瓶頸',
+            system_p: '許多人問：「他們為什麼不合法地來？」答案是：對於絕大多數人來說，合法渠道幾乎不存在或形同虛設，這本身就是製造無證人口的另一個源頭。',
+            system_card1_title: '簽證逾期居留',
+            system_card1_p: '一個常被忽視的事實：近半數的無證移民是合法入境，但在簽證到期後留下。這不僅僅是邊境問題。',
+            system_card2_title: '長達數十年的積壓',
+            system_card2_year: '~20+ 年',
+            system_card2_p: '對於某些家庭擔保類別，獲得綠卡的等待時間超過20年。一個形同虛設的「合法途徑」，在現實中毫無意義。',
+            system_card3_title: '臨時工簽證：杯水車薪',
+            system_card3_p: '美國經濟急需的非農業臨時工(H-2B)簽證，每年全球配額僅6.6萬個，遠無法滿足市場需求。',
+            solutions_title: '政治僵局與前行之路',
+            solutions_p: '任何全面的解決方案都必須擺脫黨派之爭，採取務實的、多管齊下的策略，將法律渠道、經濟現實和人道主義考量統一起來。',
+            solutions_subtitle: '邁向一個連貫政策的深度建議',
+            solutions_1: '<strong>擴大和改革合法渠道：</strong> 創建靈活的、能響應市場需求的臨時工人簽證計畫，為勞工提供合法的替代方案，釜底抽薪。',
+            solutions_2: '<strong>清理簽證積壓：</strong> 為移民管理機構提供足夠資源，大幅削減長達數十年的簽證積壓，恢復合法渠道的可靠性。',
+            solutions_3: '<strong>重新思考邊境管理：</strong> 從「威懾」轉向「管理」，將資源投入官方入境口岸，以便安全、有序、高效地處理庇護及其他合法入境請求。',
+            solutions_4: '<strong>針對根源進行長期投入：</strong> 與來源國建立真正的夥伴關係，共同應對驅動移民的暴力、腐敗和氣候變化等根本問題。',
+            solutions_5: '<strong>為已定居者提供解決方案：</strong> 為數百萬已深度融入美國社會的無證移民提供獲得合法身份的途徑，這既是務實也是人道的選擇，符合美國的國家利益。',
+            charts: {
+                bracero_l1: '合法布拉塞羅計畫入境人數', bracero_l2: '邊境逮捕人數', bracero_y1: '合法入境人數', bracero_y2: '逮捕人數',
+                enforce_l1: '邊境巡邏隊預算(十億美元)', enforce_l2: '邊境記錄的移民死亡人數', enforce_y1: '預算 (十億美元)', enforce_y2: '死亡人數',
+                overstay_l1: '簽證逾期居留', overstay_l2: '無證越境',
+                h2b_l1: '年度配額', h2b_l2: '預估勞動力需求', h2b_x1: '人數 (對數尺度)',
+            }
+        },
+        'en': {
+            page_title: 'Interactive Report: The Origins of Undocumented Immigration in the U.S.',
+            nav_title: 'Origins of the U.S. Immigration System',
+            nav_intro: 'Introduction', nav_timeline: 'Shaped by History', nav_drivers: 'The Driving Engine', nav_paradox: 'The Enforcement Paradox', nav_system: 'A Broken System', nav_solutions: 'The Path Forward',
+            nav_intro_mobile: 'Introduction', nav_timeline_mobile: 'Shaped by History', nav_drivers_mobile: 'The Driving Engine', nav_paradox_mobile: 'The Enforcement Paradox', nav_system_mobile: 'A Broken System', nav_solutions_mobile: 'The Path Forward',
+            intro_title: 'An Unintended System',
+            intro_p: "America's large undocumented population is not an accident but the systematic result of a century of contradictory and often counterproductive policies. This report reveals how this 'broken' system was intentionally constructed and how it disconnects from U.S. economic realities and humanitarian values.",
+            timeline_title: 'Shaped by History: How Law Created "Illegality"',
+            timeline_p: 'Click on the years below to explore how key laws progressively defined and ultimately criminalized a previously legal labor flow.',
+            timeline_data: {
+                '1882': { title: '1882 Chinese Exclusion Act', content: 'This was the first significant restrictive immigration law in the U.S. targeting a specific ethnicity. It barred Chinese laborers from entering and denied Chinese already in the U.S. the right to naturalize. This law created the category of "illegal" immigrant at the federal level based on race and class and established the legal framework for deportation.' },
+                '1924': { title: '1924 National Origins Act', content: 'This act established a discriminatory quota system based on national origin, designed to limit immigration from Southern and Eastern Europe to maintain America\'s "racial homogeneity." However, to meet the labor demands of Southwestern agriculture, the act exempted countries in the Western Hemisphere (including Mexico) from numerical limits, preserving a legal channel for Mexican laborers.' },
+                '1964': { title: '1964-65 The Fateful Combination', content: 'In 1964, the Bracero Program, which had supplied legal labor to U.S. agriculture for decades, was terminated. Just a year later, the Immigration and Nationality Act of 1965, while abolishing racial quotas, imposed an annual numerical cap on immigration from the Western Hemisphere for the first time. This combination effectively illegalized a long-standing, circular labor flow overnight.' },
+                '1994': { title: '1994 NAFTA & Border Militarization', content: 'The North American Free Trade Agreement (NAFTA) took effect, disrupting Mexican agriculture and displacing millions of farmers. In the same year, the U.S. launched "Operation Gatekeeper," beginning the large-scale militarization of the border and implementing a "prevention through deterrence" strategy. This marked a shift in U.S. strategy from passive apprehension to active deterrence, with disastrous consequences.' }
+            },
+            drivers_title: 'The Engine of Migration: Pull and Push',
+            drivers_p: 'Powerful economic and social forces create immense tension with increasingly restrictive laws, forming the core dynamic of undocumented migration.',
+            drivers_pull_title: '🇺🇸 Pull Factors of the U.S.',
+            drivers_pull_1: '<strong>Labor Magnet:</strong> Agriculture, construction, and service industries have a long-term reliance on low-cost, flexible labor. This structural demand is the most fundamental reason for attracting immigrants.',
+            drivers_pull_2: '<strong>Wage Gap:</strong> The pay for low-skilled jobs in the U.S. is far higher than in source countries, creating a powerful economic incentive.',
+            drivers_pull_3: '<strong>Social Networks:</strong> Immigrants already in the U.S. provide information, housing, and funds for newcomers through family reunification and "chain migration," significantly reducing the risks and costs of migration.',
+            drivers_push_title: '🌍 Push Factors of Source Countries',
+            drivers_push_1: '<strong>Economic Dislocation:</strong> Policies like the North American Free Trade Agreement (NAFTA) devastated Mexican agriculture, displacing millions of farmers who were forced to move north.',
+            drivers_push_2: '<strong>Violence and Instability:</strong> Gang violence, government corruption, and a lack of rule of law in the Northern Triangle of Central America force people to flee their homes for survival.',
+            drivers_push_3: '<strong>Climate Change:</strong> Prolonged droughts and extreme weather events have destroyed agricultural livelihoods and exacerbated food insecurity, making migration the only option for many rural families.',
+            paradox_title: 'The Enforcement Paradox: How Border Control Backfired',
+            paradox_p: "Since the 1990s, the U.S. has adopted a 'prevention through deterrence' enforcement strategy. Data shows this not only failed to stop migration but also produced a series of tragic, unintended consequences.",
+            paradox_chart1_title: 'Paradox 1: Spending Soars, Circulation Ends',
+            paradox_chart1_p: 'After 1965, with legal labor channels closed, border apprehensions (a proxy for undocumented flows) rose. Increased enforcement didn\'t stop people from coming; it ended the historical pattern of "circular migration," compelling migrants to settle permanently.',
+            paradox_chart2_title: 'Paradox 2: More Budget, More Deaths',
+            paradox_chart2_p: 'A dramatic increase in the Border Patrol budget pushed migrants into more dangerous desert terrains. The result was a parallel rise in border deaths and the creation of a vast smuggling industry, making the border deadlier.',
+            system_title: 'A Broken System: The Legal Channel Bottleneck',
+            system_p: 'Many ask, "Why don\'t they just come legally?" The answer is: for the vast majority, legal channels are virtually non-existent or illusory, which is another source of the undocumented population.',
+            system_card1_title: 'Visa Overstays',
+            system_card1_p: 'An often-overlooked fact: nearly half of all undocumented immigrants entered legally and then overstayed their visas. This is not just a border issue.',
+            system_card2_title: 'Decades-Long Backlogs',
+            system_card2_year: '~20+ Years',
+            system_card2_p: 'For some family-sponsored categories, the waiting time for a green card exceeds 20 years. A "legal path" that is practically meaningless in reality.',
+            system_card3_title: 'Temporary Worker Visas: A Drop in the Bucket',
+            system_card3_p: 'The U.S. economy desperately needs non-agricultural temporary workers (H-2B visas), but the annual global quota is only 66,000, far from meeting market demand.',
+            solutions_title: 'Political Stalemate and the Path Forward',
+            solutions_p: 'Any comprehensive solution must move beyond partisan squabbles and adopt a pragmatic, multi-pronged strategy that aligns legal channels with economic realities and humanitarian considerations.',
+            solutions_subtitle: 'In-Depth Recommendations for a Coherent Policy',
+            solutions_1: '<strong>Expand and Reform Legal Channels:</strong> Create flexible temporary worker visa programs that respond to market demands, providing a legal alternative and addressing the root cause.',
+            solutions_2: '<strong>Clear the Visa Backlog:</strong> Provide adequate resources to immigration agencies to drastically reduce the decades-long visa backlogs, restoring the reliability of legal channels.',
+            solutions_3: '<strong>Rethink Border Management:</strong> Shift from "deterrence" to "management," investing resources at official ports of entry to process asylum and other legal entry requests safely, orderly, and efficiently.',
+            solutions_4: '<strong>Invest in Long-Term Root Cause Mitigation:</strong> Build genuine partnerships with source countries to collectively address the underlying drivers of migration, such as violence, corruption, and climate change.',
+            solutions_5: '<strong>Provide a Solution for the Settled Population:</strong> Offer a pathway to legal status for the millions of undocumented immigrants deeply integrated into American society. This is both a pragmatic and humane choice that serves the national interest.',
+            charts: {
+                bracero_l1: 'Legal Bracero Program Admissions', bracero_l2: 'Border Patrol Apprehensions', bracero_y1: 'Legal Admissions', bracero_y2: 'Apprehensions',
+                enforce_l1: 'Border Patrol Budget ($ Billions)', enforce_l2: 'Migrant Deaths Recorded at Border', enforce_y1: 'Budget ($ Billions)', enforce_y2: 'Number of Deaths',
+                overstay_l1: 'Visa Overstays', overstay_l2: 'Unauthorized Crossings',
+                h2b_l1: 'Annual Quota', h2b_l2: 'Estimated Labor Need', h2b_x1: 'Number of People (Log Scale)',
+            }
+        }
+    };
+    
+    // --- GLOBAL STATE ---
+    let currentLang = localStorage.getItem('lang') || 'zh';
+    let activeCharts = {};
+    const timelineContainer = document.getElementById('timeline-content');
+    const timelineButtons = document.querySelectorAll('.timeline-item');
+
+    // --- LANGUAGE SWITCHING LOGIC ---
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        localStorage.setItem('lang', lang);
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+        // Update all elements with data-lang-key
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (translations[lang] && translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        
+        // Update language switcher buttons
+        const switcher = document.getElementById('lang-switcher');
+        const switcherMobile = document.getElementById('lang-switcher-mobile');
+        if (lang === 'en') {
+            switcher.textContent = '中文';
+            switcherMobile.textContent = '中';
+        } else {
+            switcher.textContent = 'English';
+            switcherMobile.textContent = 'EN';
+        }
+        
+        // Update dynamic content
+        const activeTimelineButton = document.querySelector('.timeline-item.active') || document.querySelector('.timeline-item[data-id="1964"]');
+        updateTimelineContent(activeTimelineButton.dataset.id);
+        createAllCharts();
+    };
+    
+    // --- UI EVENT LISTENERS ---
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+
+    document.getElementById('lang-switcher').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+    document.getElementById('lang-switcher-mobile').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+
+
+    // --- DYNAMIC CONTENT RENDERING ---
+    function updateTimelineContent(id) {
+        const data = translations[currentLang].timeline_data[id];
+        if (data) {
+            timelineContainer.innerHTML = `
+                <h4 class="text-xl font-bold mb-3 text-teal-700">${data.title}</h4>
+                <p class="text-slate-600">${data.content}</p>
+            `;
+            timelineButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.id === id) btn.classList.add('active');
+            });
+        }
+    }
+
+    timelineButtons.forEach(button => {
+        button.addEventListener('click', () => updateTimelineContent(button.dataset.id));
+    });
+
+    // --- CHART CREATION ---
+    function createAllCharts() {
+        // Destroy existing charts before redrawing
+        Object.values(activeCharts).forEach(chart => chart.destroy());
+        activeCharts = {};
+
+        const chartLang = translations[currentLang].charts;
+        Chart.defaults.font.family = currentLang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Inter', sans-serif";
+        Chart.defaults.plugins.tooltip.titleFont = { size: 14, weight: 'bold' };
+        Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+        Chart.defaults.plugins.tooltip.padding = 10;
+        Chart.defaults.plugins.tooltip.boxPadding = 4;
+        
+        // Chart 1: Bracero vs Apprehensions
+        activeCharts.bracero = new Chart(document.getElementById('braceroChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['1956', '1959', '1964', '1968', '1970', '1973', '1976'],
+                datasets: [{
+                    label: chartLang.bracero_l1,
+                    data: [445197, 437643, 177736, 0, 0, 0, 0],
+                    borderColor: '#0d9488', fill: true, backgroundColor: 'rgba(13, 148, 136, 0.1)', yAxisID: 'y', tension: 0.1,
+                }, {
+                    label: chartLang.bracero_l2,
+                    data: [72442, 45336, 86597, 212057, 345353, 655968, 875915],
+                    borderColor: '#f97316', fill: true, backgroundColor: 'rgba(249, 115, 22, 0.1)', yAxisID: 'y1', tension: 0.1,
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { type: 'linear', display: true, position: 'left', title: { display: true, text: chartLang.bracero_y1 } }, y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: chartLang.bracero_y2 }, grid: { drawOnChartArea: false } } }, plugins: { tooltip: { mode: 'index', intersect: false }, legend: { position: 'bottom' } } }
+        });
+
+        // Chart 2: Enforcement vs Deaths
+        activeCharts.enforcement = new Chart(document.getElementById('enforcementChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['1992', '2000', '2007', '2013', '2021', '2022'],
+                datasets: [{
+                    label: chartLang.enforce_l1,
+                    data: [0.7, 2.1, 3.6, 4.7, 4.9, 5.5],
+                    backgroundColor: '#0d9488', yAxisID: 'y',
+                }, {
+                    type: 'line', label: chartLang.enforce_l2,
+                    data: [6, 380, 398, 451, 605, 890],
+                    borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.5)', yAxisID: 'y1', tension: 0.1, pointRadius: 5, pointHoverRadius: 7
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { type: 'linear', display: true, position: 'left', title: { display: true, text: chartLang.enforce_y1 } }, y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: chartLang.enforce_y2 }, grid: { drawOnChartArea: false }, min: 0 } }, plugins: { tooltip: { mode: 'index', intersect: false }, legend: { position: 'bottom' } } }
+        });
+        
+        // Chart 3: Overstay
+        activeCharts.overstay = new Chart(document.getElementById('overstayChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: [chartLang.overstay_l1, chartLang.overstay_l2],
+                datasets: [{ data: [40, 60], backgroundColor: ['#34d399', '#fb923c'], hoverOffset: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: false } } }
+        });
+
+        // Chart 4: H-2B Visa
+        activeCharts.h2b = new Chart(document.getElementById('h2bChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: [chartLang.h2b_label],
+                datasets: [{ label: chartLang.h2b_l1, data: [66000], backgroundColor: '#0d9488', barPercentage: 0.4 }, { label: chartLang.h2b_l2, data: [2000000], backgroundColor: 'rgba(13, 148, 136, 0.2)', barPercentage: 0.4 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                scales: { x: { title: { display: true, text: chartLang.h2b_x1 }, type: 'logarithmic' } },
+                plugins: { legend: { display: true, position: 'bottom' }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.x !== null) { label += new Intl.NumberFormat('en-US').format(context.parsed.x); } return label; } } } }
+            }
+        });
+    }
+
+    // --- INITIALIZATION ---
+    switchLanguage(currentLang);
+});
+</script>
+</body>
+</html>
