@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靈魂的旅程：一場敘事性探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@400;500&family=Inter:wght@400;500;600&family=Lora:wght@400;600&display=swap" rel="stylesheet">
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        /* Base styles for both languages */
+        body {
+            background-color: #FDFBF8;
+            color: #4a4a4a;
+        }
+        /* Styles for Chinese */
+        .lang-zh-TW {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .lang-zh-TW h1, .lang-zh-TW h2, .lang-zh-TW h3, .lang-zh-TW .font-serif {
+            font-family: 'Noto Serif TC', serif;
+        }
+        /* Styles for English */
+        .lang-en {
+            font-family: 'Inter', sans-serif;
+        }
+        .lang-en h1, .lang-en h2, .lang-en h3, .lang-en .font-serif {
+            font-family: 'Lora', serif;
+        }
+        .narrative-section {
+            padding: 6rem 1rem;
+            max-width: 800px;
+            margin: auto;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .belief-card {
+            background-color: white;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        .belief-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
+        }
+        .belief-card .header {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .belief-card .content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding: 0 1.5rem;
+            background-color: #fafafa;
+        }
+        .belief-card.active .content {
+            max-height: 1000px; /* Large enough to fit content */
+            padding: 1.5rem;
+            transition: max-height 0.7s ease-in, padding 0.7s ease-in;
+        }
+        .accent-color {
+            color: #6b8a82; /* Muted teal/sage */
+        }
+        .court-item {
+            opacity: 0.3;
+            transition: opacity 0.5s ease-in-out;
+            padding: 2rem;
+            margin-bottom: 5rem;
+            border-left: 2px solid #e0e0e0;
+        }
+        .court-item.is-visible {
+            opacity: 1;
+            border-left-color: #6b8a82;
+        }
+        /* Language switcher button */
+        #lang-switcher {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #6b8a82;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s;
+        }
+        #lang-switcher:hover {
+            background-color: #5a7870;
+        }
+    </style>
+</head>
+<body class="antialiased leading-relaxed">
+
+    <!-- Language Switcher Button -->
+    <div id="lang-switcher">English</div>
+
+    <!-- Hero Section -->
+    <section class="hero narrative-section text-center border-none">
+        <h1 class="text-5xl md:text-7xl font-bold mb-4" data-translate="hero_title"></h1>
+        <p class="text-xl md:text-2xl text-gray-500" data-translate="hero_subtitle"></p>
+        <div class="mt-12 text-gray-400 animate-bounce">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- The Two Paths Section -->
+    <section class="narrative-section">
+        <h2 class="text-4xl font-bold text-center mb-4" data-translate="paths_title"></h2>
+        <p class="text-lg text-center text-gray-500 max-w-2xl mx-auto mb-12" data-translate="paths_intro"></p>
+        <div class="grid md:grid-cols-2 gap-12">
+            <div class="text-center">
+                <h3 class="text-2xl font-semibold mb-2 font-serif" data-translate="paths_linear_title"></h3>
+                <p class="text-gray-600" data-translate="paths_linear_desc"></p>
+            </div>
+            <div class="text-center">
+                <h3 class="text-2xl font-semibold mb-2 font-serif" data-translate="paths_cyclical_title"></h3>
+                <p class="text-gray-600" data-translate="paths_cyclical_desc"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beliefs Section -->
+    <section class="narrative-section">
+        <h2 class="text-4xl font-bold text-center mb-4" data-translate="beliefs_title"></h2>
+        <p class="text-lg text-center text-gray-500 max-w-2xl mx-auto mb-12" data-translate="beliefs_intro"></p>
+        <div id="belief-container" class="space-y-4">
+            <!-- Cards will be injected by JS -->
+        </div>
+    </section>
+
+    <!-- Chinese Underworld Section -->
+    <section class="narrative-section">
+        <h2 class="text-4xl font-bold text-center mb-4" data-translate="underworld_title"></h2>
+        <p class="text-lg text-center text-gray-500 max-w-2xl mx-auto mb-20" data-translate="underworld_intro"></p>
+        <div id="courts-journey">
+            <!-- Courts will be injected by JS -->
+        </div>
+    </section>
+
+    <!-- Science Section -->
+    <section class="narrative-section">
+        <h2 class="text-4xl font-bold text-center mb-4" data-translate="science_title"></h2>
+        <p class="text-lg text-center text-gray-500 max-w-2xl mx-auto mb-12" data-translate="science_intro"></p>
+        <div class="space-y-8">
+            <div>
+                <h3 class="text-2xl font-semibold mb-2 font-serif" data-translate="science_symphony_title"></h3>
+                <p class="text-gray-600" data-translate="science_symphony_desc"></p>
+            </div>
+            <div>
+                <h3 class="text-2xl font-semibold mb-2 font-serif" data-translate="science_puzzle_title"></h3>
+                <p class="text-gray-600" data-translate="science_puzzle_desc"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conclusion Section -->
+    <section class="narrative-section text-center border-none">
+        <h2 class="text-4xl font-bold text-center mb-4" data-translate="conclusion_title"></h2>
+        <p class="text-lg text-gray-500 max-w-2xl mx-auto" data-translate="conclusion_desc"></p>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DATA STORE ---
+            const translations = {
+                "zh-TW": {
+                    lang_switcher: "English",
+                    hero_title: "當終章響起",
+                    hero_subtitle: "靈魂將踏上怎樣的旅程？",
+                    paths_title: "兩條歧路",
+                    paths_intro: "面對死亡的寂靜，人類的想像編織出兩幅截然不同的彼岸圖景：一條是奔赴終點的單行道，另一條是無盡循環的生命之河。",
+                    paths_linear_title: "線性彼岸",
+                    paths_linear_desc: "生命如離弦之箭，僅此一回。死亡是終極的門檻，身後是永恆的天堂或地獄，一場不可逆轉的最終審判。",
+                    paths_cyclical_title: "循環之輪",
+                    paths_cyclical_desc: "生命如四季更迭，往復不息。死亡僅是暫歇，靈魂將卸下舊的皮囊，在業力的牽引下，踏入新的輪迴。",
+                    beliefs_title: "信仰的迴響",
+                    beliefs_intro: "輕觸下方的卡片，聆聽不同文明對靈魂歸宿的低語。每一個故事，都是對存在意義的一種解答。",
+                    underworld_title: "冥府的階梯",
+                    underworld_intro: "在華夏的想像中，冥府是一套精密的官僚體系。請向下捲動，跟隨亡魂的腳步，一步步走過這十殿閻羅的審判之路。",
+                    science_title: "科學的燭光",
+                    science_intro: "當信仰的史詩漸息，科學點亮了另一盞探照燈，試圖窺探意識消逝瞬間，大腦內部的風景。",
+                    science_symphony_title: "瀕死的交響樂",
+                    science_symphony_desc: "研究揭示，心跳停止的瞬間，大腦並非沉寂，反而爆發出強烈而有序的「伽瑪」腦波。這場神經的「煙火秀」，或許是那些奇異瀕死體驗（人生回顧、靈魂出竅）的生理根源。",
+                    science_puzzle_title: "最後的謎題",
+                    science_puzzle_desc: "這場大腦風暴，究竟是意識徹底消散前的最後迴響，還是在暗示著，意識本身能夠短暫地超越大腦而存在？科學走到了邊界，前方是深邃的哲學之海。",
+                    conclusion_title: "未竟的旅程",
+                    conclusion_desc: "無論是信仰的慰藉，還是科學的求索，人類從未停止描繪彼岸的地圖。或許，這趟對死亡的探問，其意義不在於找到唯一的答案，而在於旅程本身。",
+                    beliefsData: [
+                        { title: "佛教", color: "#a0522d", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>核心概念：無我輪迴</h4><p class='mb-4'>不存在永恆的「靈魂」，只有相續不斷的「意識流」。如同燭火相傳，業力是那火焰，驅動意識在六道（天、人、阿修羅、畜生、餓鬼、地獄）中流轉，而沒有一個固定的「我」在轉世。</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>終極目標：涅槃</h4><p>並非進入一個更好的世界，而是「吹滅」痛苦與慾望的火焰，徹底跳出無盡的生死循環。</p>" },
+                        { title: "基督教/伊斯蘭教", color: "#4682b4", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>核心概念：最終審判</h4><p class='mb-4'>生命僅有一次，死後，獨一無二的靈魂將面臨上帝（或真主）的審判。一本記錄著畢生善惡的「生命冊」，將是判決的唯一依據。</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>終極目標：永恆歸宿</h4><p>善者、信者將進入天堂（或樂園）享受永恆的福樂；而作惡者、不信者則墜入地獄，承受永恆的懲罰。這是一條沒有回頭路的單向旅程。</p>" },
+                        { title: "印度教", color: "#c04040", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>核心概念：梵我合一</h4><p class='mb-4'>每一個生命體內，都存有永恆的真我「阿特曼」(Atman)。這個真我被無始以來的「業力」所束縛，在無盡的生命形態中輪迴。</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>終極目標：解脫</h4><p>通過修行與智慧，了悟到個體的「阿特曼」與宇宙的終極實在「梵」(Brahman) 本質為一，從而掙脫業力的枷鎖，從輪迴的苦海中徹底解脫。</p>" },
+                        { title: "華人民間信仰", color: "#8b4513", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>核心概念：三魂七魄</h4><p class='mb-4'>靈魂是一個複雜的集合體。人死後，精神性的「三魂」與肉體性的「七魄」分離。一魂歸墓地，一魂附牌位，另一魂則進入冥府，接受官僚體系的審判。</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>終極目標：好的來世</h4><p>通過十殿閻羅的層層審判後，依據生前功過，決定下一世的去向。陽間親人的祭祀與燒化的紙錢，能幫助亡魂在陰間過得更好，甚至影響判決。</p>" }
+                    ],
+                    courtsData: [
+                        { title: "第 1 殿", text: "一殿秦廣王：初步甄別善惡，決定發往何殿。" },
+                        { title: "第 2 殿", text: "二殿楚江王：審理傷害、殺生之罪。" },
+                        { title: "第 3 殿", text: "三殿宋帝王：審理不孝、唆使訴訟之罪。" },
+                        { title: "第 4 殿", text: "四殿五官王：審理欺詐、欠租賴稅之罪。" },
+                        { title: "第 5 殿", text: "五殿閻羅王：審理阻礙信仰、毀謗三寶之罪。" },
+                        { title: "第 6 殿", text: "六殿卞城王：審理怨天尤人、盜竊之罪。" },
+                        { title: "第 7 殿", text: "七殿泰山王：審理造謠、離間親族之罪。" },
+                        { title: "第 8 殿", text: "八殿都市王：審理不孝、隱瞞父母之罪。" },
+                        { title: "第 9 殿", text: "九殿平等王：審理姦淫、殺嬰之罪。" },
+                        { title: "第 10 殿", text: "十殿轉輪王：綜合評定，決定來世去向，送往投胎。" }
+                    ]
+                },
+                "en": {
+                    lang_switcher: "中文",
+                    hero_title: "When the Final Chapter Sounds",
+                    hero_subtitle: "What journey will the soul embark on?",
+                    paths_title: "Two Divergent Paths",
+                    paths_intro: "Facing the silence of death, human imagination has woven two vastly different tapestries of the afterlife: one is a one-way street to a final destination, the other a river of life in an endless cycle.",
+                    paths_linear_title: "The Linear Afterlife",
+                    paths_linear_desc: "Life is like an arrow shot from a bow, a single journey. Death is the ultimate threshold, followed by an eternal heaven or hell, an irreversible final judgment.",
+                    paths_cyclical_title: "The Wheel of Circulation",
+                    paths_cyclical_desc: "Life is like the changing seasons, endlessly repeating. Death is but a temporary pause; the soul sheds its old form and, guided by karma, steps into a new cycle of rebirth.",
+                    beliefs_title: "Echoes of Belief",
+                    beliefs_intro: "Gently touch the cards below to hear the whispers of different civilizations about the soul's destination. Each story is an answer to the meaning of existence.",
+                    underworld_title: "The Stairway of the Underworld",
+                    underworld_intro: "In Chinese imagination, the underworld is a sophisticated bureaucracy. Scroll down to follow the footsteps of the departed, step by step, through the trial of the Ten Courts of Hell.",
+                    science_title: "The Candlelight of Science",
+                    science_intro: "As the epics of faith fade, science lights another searchlight, attempting to peek into the landscape of the brain at the moment consciousness vanishes.",
+                    science_symphony_title: "The Near-Death Symphony",
+                    science_symphony_desc: "Studies reveal that at the moment of cardiac arrest, the brain is not silent but erupts with intense, organized gamma brainwaves. This neural 'fireworks show' might be the physiological source of bizarre near-death experiences (life review, out-of-body sensations).",
+                    science_puzzle_title: "The Final Enigma",
+                    science_puzzle_desc: "Is this brain storm the final echo before consciousness completely dissipates, or does it suggest that consciousness itself can briefly exist beyond the brain? Science has reached its frontier, and before it lies the deep sea of philosophy.",
+                    conclusion_title: "The Unfinished Journey",
+                    conclusion_desc: "Whether through the solace of faith or the inquiry of science, humanity has never stopped mapping the afterlife. Perhaps the meaning of this quest into death lies not in finding a single answer, but in the journey itself.",
+                     beliefsData: [
+                        { title: "Buddhism", color: "#a0522d", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>Core Concept: Anatta & Rebirth</h4><p class='mb-4'>There is no permanent 'soul,' only a continuous 'stream of consciousness.' Like a flame passed from one candle to another, karma is the flame that drives consciousness through the Six Realms (Devas, Humans, Asuras, Animals, Hungry Ghosts, Hell), with no fixed 'self' being reincarnated.</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>Ultimate Goal: Nirvana</h4><p>Not to enter a better world, but to 'extinguish' the flames of suffering and desire, completely escaping the endless cycle of birth and death.</p>" },
+                        { title: "Christianity/Islam", color: "#4682b4", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>Core Concept: Final Judgment</h4><p class='mb-4'>Life is lived only once. After death, the unique soul faces judgment by God (or Allah). The 'Book of Life,' recording all deeds, will be the sole basis for the verdict.</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>Ultimate Goal: Eternal Destiny</h4><p>The righteous and faithful will enter Heaven (or Paradise) to enjoy eternal bliss, while the wicked and unbelieving will be cast into Hell for eternal punishment. It is a one-way journey with no return.</p>" },
+                        { title: "Hinduism", color: "#c04040", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>Core Concept: Atman & Brahman</h4><p class='mb-4'>Within every living being exists the eternal self, 'Atman.' This true self is bound by beginningless 'karma' and reincarnates through endless forms of life.</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>Ultimate Goal: Moksha (Liberation)</h4><p>Through spiritual practice and wisdom, one realizes that the individual 'Atman' is identical to the ultimate reality of the universe, 'Brahman,' thus breaking free from the shackles of karma and gaining liberation from the sea of suffering in reincarnation.</p>" },
+                        { title: "Chinese Folk Religion", color: "#8b4513", content: "<h4 class='font-bold text-lg mb-2 accent-color font-serif'>Core Concept: Three Huns and Seven Pos</h4><p class='mb-4'>The soul is a complex entity. After death, the spiritual 'Three Huns' separate from the physical 'Seven Pos.' One hun goes to the grave, one to the ancestral tablet, and the third enters the underworld to be judged by a bureaucratic system.</p><h4 class='font-bold text-lg mb-2 accent-color font-serif'>Ultimate Goal: A Good Rebirth</h4><p>After passing through the trials of the Ten Courts, the next life is determined by one's merits and demerits. Ancestral worship and burnt offerings can help the deceased fare better in the underworld and even influence the judgment.</p>" }
+                    ],
+                    courtsData: [
+                        { title: "1st Court", text: "King Qinguang: Initial screening of good and evil, deciding which court to send the soul to." },
+                        { title: "2nd Court", text: "King Chujiang: Presides over crimes of injury and killing." },
+                        { title: "3rd Court", text: "King Songdi: Presides over crimes of unfilial piety and inciting litigation." },
+                        { title: "4th Court", text: "King Wuguan: Presides over crimes of fraud and tax evasion." },
+                        { title: "5th Court", text: "King Yama: Presides over crimes of obstructing faith and slandering Buddhism." },
+                        { title: "6th Court", text: "King Biancheng: Presides over crimes of complaining against heaven and theft." },
+                        { title: "7th Court", text: "King Taishan: Presides over crimes of spreading rumors and alienating relatives." },
+                        { title: "8th Court", text: "King Dushi: Presides over crimes of unfilial piety and deceiving parents." },
+                        { title: "9th Court", text: "King Pingdeng: Presides over crimes of adultery and infanticide." },
+                        { title: "10th Court", text: "King Zhuanlun: Makes a final assessment, determines the path of the next life, and sends the soul for reincarnation." }
+                    ]
+                }
+            };
+
+            let currentLang = 'zh-TW';
+
+            const langSwitcher = document.getElementById('lang-switcher');
+            const beliefContainer = document.getElementById('belief-container');
+            const courtsJourneyContainer = document.getElementById('courts-journey');
+            
+            // --- FUNCTIONS ---
+
+            // Function to set text for all static elements
+            function setTextContent(lang) {
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[lang][key]) {
+                        element.innerHTML = translations[lang][key];
+                    }
+                });
+                document.documentElement.lang = lang;
+                document.body.className = `antialiased leading-relaxed lang-${lang}`;
+                langSwitcher.textContent = translations[lang].lang_switcher;
+            }
+
+            // Function to generate belief cards dynamically
+            function generateBeliefs(lang) {
+                beliefContainer.innerHTML = ''; // Clear existing cards
+                const beliefsData = translations[lang].beliefsData;
+                beliefsData.forEach(belief => {
+                    const card = document.createElement('div');
+                    card.className = 'belief-card';
+                    card.innerHTML = `
+                        <div class="header font-serif" style="background-color: ${belief.color}20; color: ${belief.color};">
+                            ${belief.title}
+                        </div>
+                        <div class="content">
+                            ${belief.content}
+                        </div>
+                    `;
+                    beliefContainer.appendChild(card);
+
+                    card.addEventListener('click', () => {
+                        document.querySelectorAll('.belief-card.active').forEach(activeCard => {
+                            if (activeCard !== card) {
+                                activeCard.classList.remove('active');
+                            }
+                        });
+                        card.classList.toggle('active');
+                    });
+                });
+            }
+
+            // Function to generate underworld journey items
+            function generateCourts(lang) {
+                courtsJourneyContainer.innerHTML = ''; // Clear existing courts
+                const courtsData = translations[lang].courtsData;
+                courtsData.forEach(court => {
+                    const item = document.createElement('div');
+                    item.className = 'court-item';
+                    item.innerHTML = `<h3 class="text-2xl font-semibold mb-2 font-serif">${court.title}</h3><p class="text-gray-600">${court.text}</p>`;
+                    courtsJourneyContainer.appendChild(item);
+                });
+                observeCourtItems(); // Re-apply observer to new items
+            }
+
+            // Function to observe court items for scroll animation
+            function observeCourtItems() {
+                const courtItems = document.querySelectorAll('.court-item');
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('is-visible');
+                        }
+                    });
+                }, { threshold: 0.5 });
+                courtItems.forEach(item => observer.observe(item));
+            }
+            
+            // --- MAIN EXECUTION ---
+
+            // Initial page load
+            function initializePage(lang) {
+                setTextContent(lang);
+                generateBeliefs(lang);
+                generateCourts(lang);
+            }
+            
+            // Switch language event listener
+            langSwitcher.addEventListener('click', () => {
+                currentLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+                initializePage(currentLang);
+            });
+            
+            // Fire up on first load
+            initializePage(currentLang);
+        });
+    </script>
+</body>
+</html>
