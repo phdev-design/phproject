@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTuber 的真實挑戰：互動式探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Creator -->
+    <!-- Application Structure Plan: The application is designed as a "YouTuber's Journey" single-page application, divided into thematic sections that users can navigate via a sticky header. This structure (The Start -> Challenges -> Income -> Algorithm -> Strategy) was chosen over a linear report format to create a more engaging, exploratory user flow. It allows users to jump to topics of interest or follow the logical progression of a creator's career. Key interactions include an investment calculator, an income simulator with a dynamic bar chart, and interactive cards for exploring challenges and revenue streams. This non-linear, task-oriented design enhances usability by breaking down dense information into manageable, interactive modules, making the complex realities of the profession more digestible and memorable. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Startup Costs (Table 1) -> Goal: Inform/Interact -> Viz/Method: Interactive Radio Buttons + JS updater -> Justification: More engaging than a static table, allows user input. -> Library: Vanilla JS.
+        - Report Info: Burnout Statistic (80%) -> Goal: Impactful Stat -> Viz/Method: Donut Chart -> Justification: Strong visual anchor for a key data point. -> Library: Chart.js.
+        - Report Info: Income Estimates (Table 3) -> Goal: Compare/Show Volatility -> Viz/Method: Dynamic Bar Chart linked to buttons -> Justification: Visually demonstrates the huge income disparity and makes data explorable. -> Library: Chart.js.
+        - Report Info: Monetization Methods (Table 2) -> Goal: Organize/Inform -> Viz/Method: Interactive cards with hover/click details -> Justification: Cleanly presents multiple options without UI clutter. -> Library: HTML/CSS/JS.
+        - Report Info: Algorithm Signals (Table 4) -> Goal: Compare/Rank -> Viz/Method: Horizontal Bar Chart -> Justification: Clearly shows the hierarchy of importance for different factors. -> Library: Chart.js.
+        - Report Info: Algorithm Systems -> Goal: Organize/Explain -> Viz/Method: HTML/CSS diagram -> Justification: A simplified visual is more intuitive than dense text. -> Library: Tailwind CSS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visualizations are either Chart.js canvas or structured HTML/CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdfaf6;
+            color: #3f3c3a;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #c79248;
+            border-color: #c79248;
+        }
+        .card {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.08);
+        }
+        .btn {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .btn-primary {
+            background-color: #c79248;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #b3823f;
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .btn-secondary.active, .btn-secondary:hover {
+            background-color: #4a5568;
+            color: #fff;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold text-gray-800">YouTuber 冒險旅程</h1>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#start" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">🚀 起點</a>
+                    <a href="#challenges" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">🧗 挑戰</a>
+                    <a href="#income" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">💰 收入</a>
+                    <a href="#algorithm" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">⚙️ 演算法</a>
+                    <a href="#strategy" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">🗺️ 策略</a>
+                </div>
+                <div class="md:hidden">
+                     <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="#start">🚀 起點</option>
+                        <option value="#challenges">🧗 挑戰</option>
+                        <option value="#income">💰 收入</option>
+                        <option value="#algorithm">⚙️ 演算法</option>
+                        <option value="#strategy">🗺️ 策略</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="start" class="text-center mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">旅程的起點：熱情的代價</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-8">開啟 YouTube 頻道看似免費，但要製作出能吸引觀眾的專業內容，往往需要一筆初期投資。這不僅是金錢的投入，更是時間與精力的奉獻。請選擇您的起點裝備，看看這趟旅程的門票需要多少錢。</p>
+            <div class="card max-w-2xl mx-auto p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-6">🎬 頻道啟動成本計算機</h3>
+                <div class="flex justify-center space-x-4 mb-6">
+                    <div>
+                        <input type="radio" id="basic-setup" name="setup-type" value="basic" class="hidden peer" checked>
+                        <label for="basic-setup" class="inline-block px-6 py-2 border-2 rounded-lg cursor-pointer peer-checked:bg-yellow-100 peer-checked:border-yellow-400">基礎入門</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="pro-setup" name="setup-type" value="pro" class="hidden peer">
+                        <label for="pro-setup" class="inline-block px-6 py-2 border-2 rounded-lg cursor-pointer peer-checked:bg-green-100 peer-checked:border-green-400">專業品質</label>
+                    </div>
+                </div>
+                <div id="cost-breakdown" class="text-left space-y-4">
+                </div>
+                <div class="mt-6 pt-4 border-t-2 border-dashed">
+                    <div class="flex justify-between items-center text-xl font-bold">
+                        <span>預估總計:</span>
+                        <span id="total-cost" class="text-2xl text-green-600"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">無可避免的挑戰：汗水與淚水</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">光鮮亮麗的背後，是無盡的付出。從無情的更新壓力到精神上的巨大消耗，這是一場對身心的全面考驗。這裡呈現的是每位創作者都可能面臨的困境。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">🕒</span> 內容創作的壓力鍋</h3>
+                    <p class="text-gray-600 mb-4">為了迎合演算法與觀眾期待，規律更新成為常態。「週更」是基本，「日更」是目標。這意味著每週投入 40 小時以上是家常便飯，犧牲個人時間、甚至在品質與產量間掙扎。</p>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <p class="font-bold text-center text-gray-700">「成為 YouTuber 需要全職投入。」</p>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">⚖️</span> 工作與生活的失衡</h3>
+                    <p class="text-gray-600 mb-4">當你的家就是辦公室，你的生活就是創作素材時，「下班」成了一個奢侈的詞。工作與生活的界線逐漸模糊，個人隱私和人際關係都可能成為創作的代價。</p>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <p class="font-bold text-center text-gray-700">「基本上不存在所謂的下班時間。」</p>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                     <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">😩</span> 職業倦怠的風暴</h3>
+                    <p class="text-gray-600 mb-4">持續的創作壓力、不穩定的財務、對演算法的恐懼，共同催生了職業倦怠。這不僅影響心理健康，更會衝擊內容品質，形成惡性循環。</p>
+                    <div class="chart-container h-48 sm:h-56">
+                        <canvas id="burnoutChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">孤立感與負評</span></h3>
+                    <p class="text-gray-600 mb-4">儘管坐擁百萬粉絲，創作者卻常感孤單。缺乏同事的支持系統，還要獨自面對無可避免的負面評論與網路騷擾。這是一場孤獨的戰鬥。</p>
+                    <div class="bg-gray-100 p-4 rounded-lg">
+                        <p class="font-bold text-center text-gray-700">「酸民攻擊少不了，這是必經之路。」</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="income" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">收入的迷宮：現實與迷思</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">YouTuber 到底能賺多少錢？現實遠比媒體報導的要複雜。廣告收入極不穩定，且收入分佈極不平均。點擊下方按鈕，探索不同規模頻道的收入現實，並了解為何多元化是生存的關鍵。</p>
+            <div class="card max-w-4xl mx-auto p-6 md:p-8">
+                <h3 class="text-2xl font-bold mb-6 text-center">💸 AdSense 月收入模擬器</h3>
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="btn btn-secondary px-4 py-2 rounded-lg text-sm" data-level="1k">1千-1萬 粉</button>
+                    <button class="btn btn-secondary px-4 py-2 rounded-lg text-sm" data-level="10k">1萬-10萬 粉</button>
+                    <button class="btn btn-secondary px-4 py-2 rounded-lg text-sm active" data-level="100k">10萬-100萬 粉</button>
+                    <button class="btn btn-secondary px-4 py-2 rounded-lg text-sm" data-level="1m">100萬+ 粉</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+                <p id="income-context" class="text-center text-gray-500 mt-4 text-sm"></p>
+            </div>
+            <div class="mt-12">
+                <h3 class="text-2xl font-bold text-center mb-8">🧭 廣告之外：多元化變現途徑</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">🤝</p>
+                        <h4 class="font-bold">品牌合作</h4>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">🛍️</p>
+                        <h4 class="font-bold">商品銷售</h4>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">👑</p>
+                        <h4 class="font-bold">頻道會員</h4>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">🔗</p>
+                        <h4 class="font-bold">聯盟行銷</h4>
+                    </div>
+                     <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">🎓</p>
+                        <h4 class="font-bold">線上課程</h4>
+                    </div>
+                    <div class="card p-4 text-center">
+                        <p class="text-2xl mb-2">💖</p>
+                        <h4 class="font-bold">超級感謝</h4>
+                    </div>
+                    <div class="card p-4 text-center col-span-2 md:col-span-1 lg:col-span-2 bg-red-50 border-red-200">
+                        <p class="text-2xl mb-2">⚠️</p>
+                        <h4 class="font-bold text-red-700">被取消營利資格</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="algorithm" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">神秘的引擎：解密演算法</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">演算法是決定影片生死的神秘力量。它不是單一程式，而是一套複雜的系統，目標是讓觀眾在平台上停留更久。了解其運作的關鍵訊號，是提升內容能見度的第一步。</p>
+            <div class="lg:flex lg:space-x-8">
+                <div class="lg:w-1/2 mb-8 lg:mb-0">
+                    <div class="card p-6 md:p-8 h-full">
+                        <h3 class="text-2xl font-bold mb-6 text-center">📈 演算法的關鍵訊號</h3>
+                        <div class="chart-container h-80 sm:h-96">
+                            <canvas id="algorithmChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <div class="card p-6 md:p-8 h-full">
+                        <h3 class="text-2xl font-bold mb-6 text-center">📝 YouTube SEO 最佳實踐</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 mt-1">✓</span>
+                                <div><strong class="text-gray-800">關鍵字研究：</strong>找出觀眾會搜尋的詞彙。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 mt-1">✓</span>
+                                <div><strong class="text-gray-800">優化標題與描述：</strong>自然地融入核心關鍵字。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 mt-1">✓</span>
+                                <div><strong class="text-gray-800">設計吸睛縮圖：</strong>90% 的熱門影片都使用自訂縮圖。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-3 mt-1">✓</span>
+                                <div><strong class="text-gray-800">鼓勵互動：</strong>按讚、留言、分享都是重要的正面訊號。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-green-500 mr-3 mt-1">✓</span>
+                                <div><strong class="text-gray-800">組織播放清單：</strong>增加系列觀看時長，讓觀眾看更多。</div>
+                            </li>
+                        </ul>
+                        <div class="mt-6 bg-blue-50 border-blue-200 border p-4 rounded-lg text-center">
+                            <p class="text-blue-800">最終，演算法服務於「觀眾滿意度」。高品質、能留住觀眾的內容，才是王道。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="strategy" class="scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">規劃成功之路：長遠的策略</h2>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">成功並非偶然。除了應對挑戰和理解演算法，長遠的策略性思考至關重要。從找到自己的聲音到建立忠實社群，再到對未來的規劃，每一步都決定了你能走多遠。</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-6 md:p-8">
+                    <div class="text-center mb-4">
+                        <span class="text-4xl">🎯</span>
+                        <h3 class="text-xl font-bold mt-2">找到你的聲音</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                        <li>選擇你熱愛且具備專業的利基市場。</li>
+                        <li>發展獨特的內容風格與價值主張。</li>
+                        <li>原創性與真實感是建立忠實粉絲的基石。</li>
+                        <li>在「你喜歡的」與「觀眾喜歡的」之間找到平衡。</li>
+                    </ul>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <div class="text-center mb-4">
+                        <span class="text-4xl">👨‍👩‍👧‍👦</span>
+                        <h3 class="text-xl font-bold mt-2">建立蓬勃的社群</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                        <li>積極回應留言，與觀眾互動。</li>
+                        <li>善用「社群」分頁發布動態。</li>
+                        <li>忠誠的社群能抵禦演算法的波動。</li>
+                        <li>將觀眾從「流量」轉變為「支持者」。</li>
+                    </ul>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <div class="text-center mb-4">
+                        <span class="text-4xl">🔭</span>
+                        <h3 class="text-xl font-bold mt-2">具備長遠眼光</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-600 list-disc list-inside">
+                        <li>思考平台之外的職涯發展。</li>
+                        <li>保持學習與適應變化的能力。</li>
+                        <li>建立超越單一平台的個人品牌。</li>
+                        <li>準備備用計畫，避免將雞蛋放同個籃子。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-16 md:mt-24">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <p class="font-bold text-lg mb-2">這是一場艱鉅但充滿可能性的旅程</p>
+            <p class="text-gray-400 text-sm max-w-2xl mx-auto">成為 YouTuber 絕非易事，它要求巨大的奉獻、抗壓性與策略思維。儘管挑戰重重，它依然為有才華、有毅力的人提供了一個獨特的舞台。這份回報是否值得，取決於每位創作者的審慎評估與抉擇。</p>
+        </div>
+    </footer>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const costData = {
+            basic: [
+                { item: '相機與腳架', cost: '$0 - $50 (手機)', note: '使用現有手機即可開始' },
+                { item: '麥克風', cost: '$15 - $30', note: '提升收音品質至關重要' },
+                { item: '燈光設備', cost: '$0 - $30', note: '可善用自然光' },
+                { item: '剪輯軟體', cost: '$0', note: '使用免費軟體' },
+            ],
+            pro: [
+                { item: '相機與腳架', cost: '$500+', note: '專業相機提升畫質' },
+                { item: '麥克風', cost: '$100+', note: '專業收音，音質更清晰' },
+                { item: '燈光設備', cost: '$60 - $200+', note: '專業燈光改善視覺效果' },
+                { item: '剪輯軟體', cost: '$20/月 - $300', note: '付費軟體功能更強大' },
+            ],
+            total: {
+                basic: '$15 - $120',
+                pro: '$680 - $1160+'
+            }
+        };
+
+        const costBreakdownEl = document.getElementById('cost-breakdown');
+        const totalCostEl = document.getElementById('total-cost');
+        const setupRadios = document.querySelectorAll('input[name="setup-type"]');
+
+        function updateCosts(type) {
+            costBreakdownEl.innerHTML = '';
+            costData[type].forEach(d => {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between items-baseline';
+                row.innerHTML = `
+                    <div>
+                        <p class="font-semibold">${d.item}</p>
+                        <p class="text-xs text-gray-500">${d.note}</p>
+                    </div>
+                    <p class="font-mono text-right">${d.cost}</p>
+                `;
+                costBreakdownEl.appendChild(row);
+            });
+            totalCostEl.textContent = costData.total[type];
+            if (type === 'basic') {
+                 totalCostEl.classList.remove('text-red-600');
+                 totalCostEl.classList.add('text-green-600');
+            } else {
+                 totalCostEl.classList.remove('text-green-600');
+                 totalCostEl.classList.add('text-red-600');
+            }
+        }
+        
+        setupRadios.forEach(radio => {
+            radio.addEventListener('change', (event) => {
+                updateCosts(event.target.value);
+            });
+        });
+        
+        updateCosts('basic');
+
+        const burnoutCtx = document.getElementById('burnoutChart').getContext('2d');
+        new Chart(burnoutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['曾有職業倦怠', '未曾感受'],
+                datasets: [{
+                    data: [80, 20],
+                    backgroundColor: ['#ef4444', '#e5e7eb'],
+                    borderColor: '#fdfaf6',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}% 的創作者`;
+                            }
+                        }
+                    },
+                     title: {
+                        display: true,
+                        text: '高達 80% 創作者曾感職業倦怠',
+                        padding: {
+                            bottom: 10
+                        },
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        });
+
+        const incomeData = {
+            '1k': { range: [50, 600], context: '收入極不穩定，高度依賴內容利基與觀眾互動。' },
+            '10k': { range: [300, 4000], context: '開始有較穩定收入，但仍強烈建議多元化。' },
+            '100k': { range: [2000, 25000], context: '有潛力成為全職收入，但受眾特質與內容類型影響巨大。' },
+            '1m': { range: [12500, 35000], context: '頂級頻道廣告收入可觀，且通常有多元收入來源。' }
+        };
+        const incomeCtx = document.getElementById('incomeChart').getContext('2d');
+        const incomeContextEl = document.getElementById('income-context');
+        const incomeButtons = document.querySelectorAll('#income .btn-secondary');
+        let incomeChart;
+
+        function updateIncomeChart(level) {
+            const data = incomeData[level];
+            incomeContextEl.textContent = `*估算基於 AdSense 廣告分潤。${data.context}`;
+
+            if (incomeChart) {
+                incomeChart.data.datasets[0].data = data.range;
+                incomeChart.update();
+            } else {
+                incomeChart = new Chart(incomeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['每月最低估算', '每月最高估算'],
+                        datasets: [{
+                            label: '月收入估算 (美元)',
+                            data: data.range,
+                            backgroundColor: ['#fdba74', '#34d399'],
+                            borderColor: ['#f97316', '#059669'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` 約 $${context.raw.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+             incomeButtons.forEach(btn => {
+                if (btn.dataset.level === level) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        incomeButtons.forEach(button => {
+            button.addEventListener('click', (event) => {
+                updateIncomeChart(event.target.dataset.level);
+            });
+        });
+
+        updateIncomeChart('100k');
+
+        const algorithmCtx = document.getElementById('algorithmChart').getContext('2d');
+        new Chart(algorithmCtx, {
+            type: 'bar',
+            data: {
+                labels: ['觀看時長/續看率', '點擊率 (CTR)', '互動 (讚/留言/分享)', '標題/描述相關性', '發布初期表現', '頻道一致性'],
+                datasets: [{
+                    label: '對演算法的重要性',
+                    data: [95, 88, 75, 70, 65, 60],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.7)',
+                        'rgba(249, 115, 22, 0.7)',
+                        'rgba(245, 158, 11, 0.7)',
+                        'rgba(52, 211, 153, 0.7)',
+                        'rgba(59, 130, 246, 0.7)',
+                        'rgba(139, 92, 246, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(249, 115, 22, 1)',
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(52, 211, 153, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(139, 92, 246, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                 scales: {
+                    x: {
+                        display: false,
+                    },
+                    y: {
+                       ticks: {
+                           autoSkip: false
+                       }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += context.parsed.x + ' (相對權重)';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        function changeActiveLink() {
+            let index = sections.length;
+            while(--index && window.scrollY + 100 < sections[index].offsetTop) {}
+            
+            navLinks.forEach((link) => link.classList.remove('active'));
+            if(navLinks[index]) {
+                navLinks[index].classList.add('active');
+            }
+        }
+        
+        mobileNav.addEventListener('change', () => {
+           window.location.hash = mobileNav.value;
+        });
+
+        changeActiveLink();
+        window.addEventListener('scroll', changeActiveLink);
+
+    });
+    </script>
+</body>
+</html>
