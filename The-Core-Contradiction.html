@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：《香港國安法》的經濟影響</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+    Infographic Narrative & Structure Plan:
+    1.  Introduction: The Core Contradiction - Stability vs. Risk. Big numbers for GDP vs. HSI.
+    2.  Capital & Confidence: FDI sources (Donut Chart), HQ changes (Bar Chart).
+    3.  Talent Reshuffle: Inflow vs. Outflow visualization (HTML/CSS Diagram).
+    4.  Sector Spotlight: Grid layout for Finance/Law, Tech/Data, Tourism/Retail.
+    5.  HK vs. Singapore: Comparative analysis (Grouped Bar Chart) and role definition diagram.
+    6.  Conclusion: The "Two Economies" (China-facing vs. West-facing) model visualization.
+
+    Visualization Selection Plan:
+    -   HSI & GDP Trend: Goal: Change. Viz: Line Chart (Chart.js/Canvas). Justification: Best for showing trends over time. NO SVG.
+    -   Regional HQs in HK: Goal: Compare. Viz: Bar Chart (Chart.js/Canvas). Justification: Clearly compares quantities across categories (countries) over time. NO SVG.
+    -   Talent Reshuffle: Goal: Organize/Compare. Viz: HTML/CSS Diagram. Justification: A custom flow diagram can better illustrate the "replacement" concept than a standard chart. NO SVG, NO MERMAID.
+    -   Tourist Spending: Goal: Compare. Viz: Bar Chart (Chart.js/Canvas). Justification: Simple and effective for comparing values between two points in time. NO SVG.
+    -   HK vs. SG: Goal: Compare. Viz: Grouped Bar Chart (Chart.js/Canvas). Justification: Ideal for direct comparison of multiple metrics between two entities. NO SVG.
+    -   "Two Economies" Model: Goal: Organize. Viz: HTML/CSS Diagram. Justification: A conceptual model is best represented with a custom layout. NO SVG, NO MERMAID.
+    -   NEITHER Mermaid JS NOR SVG were used anywhere in the output.
+
+    Color Palette Selection: Brilliant Blues (#004AAD, #0766AD, #29ADB2, #C5E898).
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .text-shadow {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .brand-dark-blue { color: #004AAD; }
+        .brand-mid-blue { color: #0766AD; }
+        .brand-teal { color: #29ADB2; }
+        .brand-green-accent { color: #C5E898; }
+        .bg-brand-dark-blue { background-color: #004AAD; }
+        .bg-brand-mid-blue { background-color: #0766AD; }
+        .bg-brand-teal { background-color: #29ADB2; }
+        .bg-brand-green-accent { background-color: #C5E898; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-brand-dark-blue text-white p-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-2 text-shadow">《香港國安法》下的經濟變局</h1>
+        <p class="text-lg md:text-xl text-gray-200">一場以穩定為名，以結構轉型為實的深刻演變</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="intro" class="text-center mb-12">
+            <p class="max-w-4xl mx-auto text-lg text-gray-700 mb-8">
+                《香港國安法》實施近五載，為香港帶來了商界期盼的社會穩定，卻也從根本上重塑了其法律與政治風險格局。這並未遏止，反而加速了香港與內地經濟的融合。香港正從昔日的「全球東西方橋樑」，轉型為主要服務中國的「離岸國際金融中心」。本資訊圖表將深入剖析此轉變下的關鍵經濟現象。
+            </p>
+        </section>
+
+        <section id="macro-economy" class="mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2 brand-dark-blue">宏觀經濟的雙軌現象</h2>
+                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">實體經濟在穩定後展現韌性，但金融市場的表現卻反映出國際投資者對新增政治風險的審慎態度，形成「實體經濟穩、金融市場弱」的分化格局。</p>
+                <div class="chart-container">
+                    <canvas id="gdpVsHsiChart"></canvas>
+                </div>
+                <div class="mt-6 text-sm text-gray-500 text-center">
+                    <p>上圖展示了自2018年以來，香港實質GDP增長率與恒生指數年終點位的對比趨勢。GDP在經歷震盪後恢復正增長，而恒生指數則持續在低位徘徊，遠未及昔日高點，清晰地揭示了市場信心與經濟基本面之間的分歧。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="investment" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 brand-dark-blue">資本版圖重塑：企業總部與外資來源的轉向</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col">
+                    <h3 class="text-2xl font-bold mb-4 text-center brand-mid-blue">變化的天際線：跨國企業總部誰主浮沉？</h3>
+                    <p class="text-gray-600 mb-6 flex-grow">數據顯示，西方企業的地區總部正緩慢流失，而內地企業在港設立的地區總部數量則持續增長，並在近年首次超越美國，成為香港最大的地區總部來源地。</p>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="hqChart"></canvas>
+                    </div>
+                     <div class="mt-6 text-sm text-gray-500 text-center">
+                        <p>上圖比較了2018年與2023年主要國家/地區在港設立地區總部的數量變化。美國、英國和日本的數量明顯下降，而中國內地的數量則顯著上升。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col">
+                    <h3 class="text-2xl font-bold mb-4 text-center brand-mid-blue">外來直接投資(FDI)的內在驅動力</h3>
+                    <p class="text-gray-600 mb-6 flex-grow">雖然香港的FDI總量依然龐大，但其來源結構揭示了對內地資本的高度依賴。中國內地及常被用作內地資本管道的英屬維爾京群島（BVI），合計佔據了FDI存量的絕大部分。</p>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="fdiChart"></canvas>
+                    </div>
+                    <div class="mt-6 text-sm text-gray-500 text-center">
+                        <p>此圖顯示，在2023年底，中國內地是香港最大的直接投資來源地，佔比達34.3%。這突顯了香港經濟與內地的高度融合。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="talent" class="mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-2 brand-dark-blue">人才大洗牌：一場深刻的結構置換</h2>
+                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">香港正經歷一場複雜的「人才置換」，而非單純的「人才流失」。經「救生艇」計劃流出的國際化人才，正被經各項人才計劃湧入的內地專才所取代，這正從根本上重塑香港的人才庫結構。</p>
+                <div class="relative p-4 md:p-8">
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0">
+                        <div class="w-full md:w-2/5 text-center p-4">
+                            <h4 class="text-2xl font-bold text-red-600">人才外流</h4>
+                            <p class="text-5xl font-bold my-4">~29.6<span class="text-2xl ml-1">萬人</span></p>
+                            <p class="text-gray-600">經BNO、「救生艇」等計劃移居英、加、澳等地 (估算至2024年初)</p>
+                        </div>
+                        <div class="w-full md:w-1/5 flex justify-center items-center my-4 md:my-0">
+                            <div class="text-4xl text-brand-dark-blue transform transition duration-500 hover:scale-110">
+                                &#x21c4;
+                            </div>
+                        </div>
+                        <div class="w-full md:w-2/5 text-center p-4">
+                            <h4 class="text-2xl font-bold text-green-600">人才引進</h4>
+                            <p class="text-5xl font-bold my-4">~52.9<span class="text-2xl ml-1">萬人</span></p>
+                            <p class="text-gray-600">經「高才通」、單程證等計劃移入 (估算至2024年4月)</p>
+                        </div>
+                    </div>
+                    <div class="mt-8 text-sm text-gray-500 text-center max-w-3xl mx-auto">
+                        <p>此消彼長之間，香港的總人口雖保持穩定，但專業階層正經歷一場深刻的同質化轉變。新來港人才以內地背景為主，削弱了香港人才庫原有的「雙文化」及全球網絡特質，強化了其服務內地市場的能力。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="sectors" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 brand-dark-blue">行業影響深層剖析：挑戰與轉型</h2>
+             <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">宏觀轉變在不同行業產生了迥異的影響。依賴信任與資訊自由的行業面臨生存挑戰，而依賴人流物流的行業則面臨結構性適應壓力。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold mb-4 brand-mid-blue">金融與法律服務</h3>
+                    <p class="text-gray-600 mb-4">對司法獨立的國際憂慮，正侵蝕香港作為國際仲裁中心的基石。儘管日常營運穩定，但處理高價值、需絕對信任的爭議解決業務面臨長期風險。</p>
+                    <div class="text-4xl text-center p-4 bg-brand-teal text-white rounded-lg">⚖️</div>
+                    <p class="text-center mt-4 text-red-600 font-semibold">核心挑戰：信任危機</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold mb-4 brand-mid-blue">科技與數據</h3>
+                    <p class="text-gray-600 mb-4">國安法賦予的廣泛數據存取權力，與西方數據隱私法規存在衝突。這導致部分國際科技公司將數據中心遷離，窒礙香港成為全球創科中心的雄心。</p>
+                    <div class="text-4xl text-center p-4 bg-brand-teal text-white rounded-lg">💾</div>
+                    <p class="text-center mt-4 text-red-600 font-semibold">核心挑戰：數據安全困境</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6 md:col-span-2 lg:col-span-1">
+                    <h3 class="text-2xl font-bold mb-4 brand-mid-blue">旅遊與零售</h3>
+                    <p class="text-gray-600 mb-4">旅遊業復甦高度依賴內地旅客，但其消費模式已從奢侈品購物轉向「體驗式消費」，導致人均消費額大幅下降，嚴重衝擊傳統零售業。</p>
+                     <div class="chart-container h-64">
+                        <canvas id="touristSpendingChart"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-red-600 font-semibold">核心挑戰：消費結構轉變</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="singapore" class="mb-16">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                 <h2 class="text-3xl font-bold text-center mb-2 brand-dark-blue">港新競爭新格局：角色分化</h2>
+                 <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">香港與新加坡已不再是全方位的直接競爭者，而是朝著不同的專業化角色演進。國安法成為了這一分化的催化劑。</p>
+                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+                    <div class="lg:col-span-3">
+                        <div class="chart-container h-96">
+                            <canvas id="hkVsSgChart"></canvas>
+                        </div>
+                         <div class="mt-6 text-sm text-gray-500 text-center">
+                            <p>上圖比較了兩地在關鍵經濟指標上的表現。新加坡在人均GDP和IMD競爭力排名上佔優，而香港則擁有規模遠超對手的龐大股票市場，金融門戶地位突出。</p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="border-l-4 border-brand-dark-blue p-4 rounded-r-lg bg-blue-50">
+                            <h4 class="text-xl font-bold brand-dark-blue">🇭🇰 香港：中國的華爾街</h4>
+                            <p class="text-gray-700 mt-1">鞏固作為內地資本首選的離岸金融中心地位，專注於IPO、財富管理及人民幣國際化業務。</p>
+                        </div>
+                        <div class="border-l-4 border-brand-teal p-4 rounded-r-lg bg-teal-50">
+                            <h4 class="text-xl font-bold brand-teal">🇸🇬 新加坡：亞洲的瑞士</h4>
+                            <p class="text-gray-700 mt-1">蛻變為政治中立、經濟多元的樞紐，吸引尋求對沖地緣政治風險的全球人才、財富和區域總部。</p>
+                        </div>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="text-center">
+             <h2 class="text-3xl font-bold text-center mb-4 brand-dark-blue">未來展望：一個城市，兩種經濟</h2>
+             <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">香港的經濟正呈現日益明顯的兩極化趨勢，其未來將由「對內」與「對外」兩種經濟模式的消長所定義。</p>
+             <div class="flex flex-col md:flex-row justify-center items-stretch gap-8 max-w-4xl mx-auto">
+                <div class="flex-1 bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
+                    <h3 class="text-2xl font-bold text-green-600 text-center mb-4">📈 對內經濟 (China-facing)</h3>
+                    <ul class="list-disc list-inside space-y-2 text-left text-gray-700">
+                        <li>中資企業IPO</li>
+                        <li>服務內地客戶的財富管理</li>
+                        <li>人民幣國際化</li>
+                        <li>貿易融資</li>
+                        <li class="font-semibold text-green-700">前景：在中國持續需要離岸資本門戶的背景下，預計將保持強勁。</li>
+                    </ul>
+                </div>
+                 <div class="flex-1 bg-white rounded-xl shadow-lg p-6 border-t-4 border-red-500">
+                    <h3 class="text-2xl font-bold text-red-600 text-center mb-4">📉 對外經濟 (West-facing)</h3>
+                     <ul class="list-disc list-inside space-y-2 text-left text-gray-700">
+                        <li>國際仲裁與爭議解決</li>
+                        <li>西方跨國公司亞太區總部</li>
+                        <li>國際數據中心</li>
+                        <li>全球科技業務</li>
+                        <li class="font-semibold text-red-700">前景：因法治、數據安全及地緣政治擔憂面臨巨大逆風，全球競爭力存疑。</li>
+                    </ul>
+                </div>
+             </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center p-6 mt-12 bg-gray-800 text-gray-400 text-sm">
+        <p>本資訊圖表內容根據《香港國安法令香港帶來的經濟影響：五年評估》報告製作。</p>
+        <p>所有數據均來源於該報告引述的公開資料。圖表僅為視覺化呈現，不構成任何投資建議。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const wrapLabel = (label, maxLength) => {
+                if (typeof label !== 'string' || label.length <= maxLength) {
+                    return label;
+                }
+                const words = label.split(' ');
+                const lines = [];
+                let currentLine = '';
+                for (const word of words) {
+                    if ((currentLine + ' ' + word).trim().length > maxLength && currentLine.length > 0) {
+                        lines.push(currentLine);
+                        currentLine = word;
+                    } else {
+                        currentLine = (currentLine + ' ' + word).trim();
+                    }
+                }
+                if (currentLine.length > 0) {
+                    lines.push(currentLine);
+                }
+                return lines;
+            };
+
+            const tooltipConfig = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                    return label.join(' ');
+                                } else {
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            const brilliantBluesPalette = {
+                darkBlue: '#004AAD',
+                midBlue: '#0766AD',
+                teal: '#29ADB2',
+                greenAccent: '#C5E898',
+                lightGrey: '#f3f4f6',
+                darkText: '#374151'
+            };
+
+            const createGdpVsHsiChart = () => {
+                const ctx = document.getElementById('gdpVsHsiChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2025 (預測)'],
+                        datasets: [
+                            {
+                                label: '實質GDP增長 (%)',
+                                data: [2.8, -1.7, -6.5, 6.5, -3.7, 3.2, 2.5],
+                                borderColor: brilliantBluesPalette.teal,
+                                backgroundColor: brilliantBluesPalette.teal + '33',
+                                yAxisID: 'y',
+                                tension: 0.1,
+                                borderWidth: 3,
+                            },
+                            {
+                                label: '恒生指數 (年終點)',
+                                data: [25845, 28189, 27231, 23397, 19781, 17047, 23000],
+                                borderColor: brilliantBluesPalette.midBlue,
+                                backgroundColor: brilliantBluesPalette.midBlue + '33',
+                                yAxisID: 'y1',
+                                tension: 0.1,
+                                borderWidth: 3,
+                            }
+                        ]
+                    },
+                    options: {
+                        ...tooltipConfig,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: 'GDP增長 (%)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '恒生指數點數'
+                                },
+                                grid: {
+                                    drawOnChartArea: false, 
+                                },
+                            }
+                        }
+                    }
+                });
+            };
+            
+            const createHqChart = () => {
+                const ctx = document.getElementById('hqChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['美國', '日本', '英國', '中國內地'],
+                        datasets: [
+                            {
+                                label: '2018年',
+                                data: [290, 247, 148, 173],
+                                backgroundColor: brilliantBluesPalette.midBlue,
+                            },
+                            {
+                                label: '2023年',
+                                data: [214, 206, 115, 247],
+                                backgroundColor: brilliantBluesPalette.teal,
+                            }
+                        ]
+                    },
+                    options: {
+                        ...tooltipConfig,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            ...tooltipConfig.plugins,
+                            title: {
+                                display: true,
+                                text: '駐港地區總部數量變化'
+                            },
+                            legend: {
+                                position: 'bottom',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            };
+
+            const createFdiChart = () => {
+                const ctx = document.getElementById('fdiChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['中國內地', '英屬維爾京群島', '開曼群島', '百慕達', '荷蘭', '其他'],
+                        datasets: [{
+                            label: 'FDI 來源地佔比 (%)',
+                            data: [34.3, 27.3, 8.9, 3.8, 3.1, 22.6],
+                            backgroundColor: [
+                                brilliantBluesPalette.darkBlue,
+                                brilliantBluesPalette.midBlue,
+                                brilliantBluesPalette.teal,
+                                '#60a5fa',
+                                '#93c5fd',
+                                '#dbeafe'
+                            ],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        ...tooltipConfig,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            ...tooltipConfig.plugins,
+                            title: {
+                                display: true,
+                                text: 'FDI 存量按主要來源地劃分 (2023年底)'
+                            },
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
+                    }
+                });
+            };
+
+            const createTouristSpendingChart = () => {
+                const ctx = document.getElementById('touristSpendingChart');
+                if (!ctx) return;
+                 new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['內地過夜旅客人均消費額 (港元)'],
+                        datasets: [
+                            {
+                                label: '2018年',
+                                data: [6600],
+                                backgroundColor: brilliantBluesPalette.midBlue,
+                                barPercentage: 0.5,
+                            },
+                            {
+                                label: '2023年',
+                                data: [4700],
+                                backgroundColor: brilliantBluesPalette.teal,
+                                barPercentage: 0.5,
+                            }
+                        ]
+                    },
+                    options: {
+                        ...tooltipConfig,
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            ...tooltipConfig.plugins,
+                            title: {
+                                display: true,
+                                text: '旅客消費模式轉變'
+                            },
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'HK$' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const createHkVsSgChart = () => {
+                const ctx = document.getElementById('hkVsSgChart');
+                if (!ctx) return;
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            wrapLabel('人均GDP (美元)', 16), 
+                            wrapLabel('IMD 世界競爭力排名', 16), 
+                            wrapLabel('股市總市值 (萬億美元)', 16)
+                        ],
+                        datasets: [
+                            {
+                                label: '🇭🇰 香港',
+                                data: [50889, 5, 3.8],
+                                backgroundColor: brilliantBluesPalette.darkBlue,
+                            },
+                            {
+                                label: '🇸🇬 新加坡',
+                                data: [84734, 1, 0.7],
+                                backgroundColor: brilliantBluesPalette.teal,
+                            }
+                        ]
+                    },
+                    options: {
+                        ...tooltipConfig,
+                        responsive: true,
+                        maintainAspectRatio: false,
+                         plugins: {
+                            ...tooltipConfig.plugins,
+                            title: {
+                                display: true,
+                                text: '香港 vs 新加坡 關鍵指標 (2023/2024)'
+                            },
+                            legend: {
+                                position: 'bottom',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'logarithmic',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '數值 (對數標度)'
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            createGdpVsHsiChart();
+            createHqChart();
+            createFdiChart();
+            createTouristSpendingChart();
+            createHkVsSgChart();
+        });
+    </script>
+</body>
+</html>
