@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Boy 互動式演變史</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Retro Tech -->
+    <!-- Application Structure Plan: 本應用程式採用以時間軸為核心的單頁滾動式設計。這種非線性的資訊架構能鼓勵使用者主動探索，而非被動閱讀。頂部設有固定導覽列，可快速跳轉至「起源哲學」、「主機演變」、「掌機戰爭」、「軟體王朝」及「數據洞察」等主題區塊。核心互動是一個動態時間軸，點擊不同型號的主機，右側會即時更新詳細規格與歷史意義，將大量數據轉化為易於比較的視覺化內容。這種設計旨在將靜態的歷史報告，改造成一個富有探索樂趣的互動體驗，讓使用者能依自身興趣深入了解 Game Boy 歷史的特定面向。 -->
+    <!-- Visualization & Content Choices: 
+        - 報告資訊：主機演變歷史 -> 目標：組織與比較 -> 視覺化/呈現方式：互動式垂直時間軸 (HTML/CSS) 搭配動態內容面板 (JS) -> 互動：點擊時間軸上的主機按鈕，即時更新右側的圖片、規格與描述 -> 理由：比單純的列表更能吸引使用者探索不同型號間的細微差異 -> 函式庫/方法：Vanilla JS DOM 操作。
+        - 報告資訊：第一次掌機戰爭數據 (價格、續航、銷量) -> 目標：比較 -> 視覺化/呈現方式：動態長條圖 -> 互動：點擊按鈕切換比較維度（價格/續航/銷量），圖表隨之更新 -> 理由：互動式圖表比靜態表格更能突顯 Game Boy 的策略性優勢 -> 函式庫/方法：Chart.js。
+        - 報告資訊：暢銷遊戲排行 -> 目標：告知與比較 -> 視覺化/呈現方式：垂直長條圖 -> 互動：無 (靜態展示) -> 理由：直觀展示軟體陣容的強大實力 -> 函式庫/方法：Chart.js。
+        - 報告資訊：總銷量分佈 (GB/GBC vs GBA) -> 目標：告知比例 -> 視覺化/呈現方式：環圈圖 -> 互動：無 (靜態展示) -> 理由：清晰呈現兩大世代的商業成就佔比 -> 函式庫/方法：Chart.js。
+        - 報告資訊：橫井軍平的設計哲學 -> 目標：告知 -> 視覺化/呈現方式：特色引言區塊 (HTML/CSS) -> 互動：無 -> 理由：突出核心概念，作為整個故事的基調 -> 函式庫/方法：Tailwind CSS。
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333;
+        }
+        .retro-screen {
+            background-color: #9BBC0F;
+            border: 20px solid #808080;
+            border-bottom-width: 40px;
+            border-radius: 10px 10px 30px 10px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -21px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            background-color: #A0A0A0;
+            border-radius: 50%;
+            border: 3px solid #F8F7F4;
+        }
+        .timeline-item.active::before {
+            background-color: #4A5568;
+            transform: translateY(-50%) scale(1.2);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .btn-active {
+            background-color: #4A5568 !important;
+            color: #FFF !important;
+        }
+        .console-icon {
+            border: 4px solid #777;
+            border-radius: 8px;
+            background: #D1D5DB;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .console-screen {
+            background: #222;
+            width: 70%;
+            height: 50%;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .console-buttons {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .console-dpad {
+            width: 25px;
+            height: 25px;
+            background: #555;
+            position: relative;
+        }
+        .console-dpad::before, .console-dpad::after {
+            content: '';
+            position: absolute;
+            background: #555;
+        }
+        .console-dpad::before {
+            width: 100%;
+            height: 33.33%;
+            top: 33.33%;
+            left: 0;
+        }
+        .console-dpad::after {
+            width: 33.33%;
+            height: 100%;
+            top: 0;
+            left: 33.33%;
+        }
+        .console-ab {
+            display: flex;
+            gap: 4px;
+        }
+        .console-ab div {
+            width: 15px;
+            height: 15px;
+            background: #A30000;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-gray-700 text-white shadow-lg sticky top-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold">Game Boy 傳奇</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#origin" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">起源哲學</a>
+                        <a href="#evolution" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">主機演變</a>
+                        <a href="#war" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">掌機戰爭</a>
+                        <a href="#software" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">軟體王朝</a>
+                        <a href="#legacy" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">文化遺產</a>
+                        <a href="#data" class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-600">數據洞察</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="hero" class="text-center py-12 md:py-20">
+            <div class="retro-screen w-full max-w-md mx-auto p-4 flex justify-center items-center h-48 md:h-64 shadow-2xl">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-800 tracking-tight leading-tight">任天堂 Game Boy<br/>互動式演變史</h2>
+            </div>
+            <p class="mt-8 max-w-3xl mx-auto text-lg text-gray-600">
+                一部不僅定義了掌上遊戲，更憑藉「成熟技術的水平思考」理念，創造了一個橫跨十五年的娛樂帝國。點擊下方導覽或向下滾動，開始探索這段傳奇歷史。
+            </p>
+        </section>
+
+        <div class="my-12 border-t border-gray-300"></div>
+
+        <section id="origin" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">起源哲學</h3>
+                <p class="mt-2 text-gray-600">一切始於一個簡單而深刻的理念。</p>
+            </div>
+            <div class="max-w-4xl mx-auto bg-amber-50 border-l-4 border-amber-400 p-6 md:p-8 rounded-r-lg shadow-md">
+                <h4 class="text-2xl font-bold text-gray-900">「枯れた技術の水平思考」</h4>
+                <p class="text-lg text-amber-800 mt-1 mb-4">Kareta Gijutsu no Suihei Shikō</p>
+                <p class="text-gray-700 text-base leading-relaxed">
+                    這是 Game Boy 之父——橫井軍平為任天堂奠定的核心設計理念，意為「成熟技術的水平思考」。其精髓在於，不盲目追求最新、最昂貴的技術，而是利用那些已經發展成熟、穩定可靠且成本低廉的「枯萎技術」，透過創新的「水平思考」，將其應用於全新的娛樂領域。Game Boy 的單色螢幕、低功耗處理器和長效電池續航力，都是此哲學的完美體現。它證明了偉大的產品並非源於最強的規格，而是源於對使用者真實需求的深刻洞察。
+                </p>
+            </div>
+        </section>
+
+        <div class="my-12 border-t border-gray-300"></div>
+        
+        <section id="evolution" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">主機演變</h3>
+                <p class="mt-2 text-gray-600">點擊左側時間軸上的型號，查看其詳細資訊與歷史意義。</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/3 lg:w-1/4">
+                    <div id="timeline-nav" class="relative border-l-2 border-gray-300 pl-6 space-y-2">
+                    </div>
+                </div>
+                <div class="md:w-2/3 lg:w-3/4 bg-white p-6 rounded-lg shadow-lg min-h-[400px]">
+                    <div id="evolution-content">
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <div class="my-12 border-t border-gray-300"></div>
+
+        <section id="war" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">第一次掌機戰爭</h3>
+                <p class="mt-2 text-gray-600">Game Boy 如何憑藉「弱點」戰勝技術更強的對手。</p>
+            </div>
+            <div class="text-center mb-6">
+                <div id="war-buttons" class="inline-flex rounded-md shadow-sm" role="group">
+                    <button type="button" data-metric="price" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                        發售價格
+                    </button>
+                    <button type="button" data-metric="battery" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                        電池續航
+                    </button>
+                    <button type="button" data-metric="sales" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                        全球銷量
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="warChart"></canvas>
+            </div>
+            <p id="war-narrative" class="max-w-3xl mx-auto mt-6 text-center text-gray-600 transition-opacity duration-300"></p>
+        </section>
+
+        <div class="my-12 border-t border-gray-300"></div>
+
+        <section id="software" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">軟體王朝</h3>
+                <p class="mt-2 text-gray-600">硬體的潛力由軟體釋放，兩款遊戲定義了 Game Boy 的成功。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="text-2xl font-bold text-center mb-4">《俄羅斯方塊》</h4>
+                    <p class="text-gray-700">作為歐美版 Game Boy 的捆綁遊戲，這是一個天才之舉。《俄羅斯方塊》簡單、易上癮的玩法跨越了所有人群，將 Game Boy 從兒童玩具提升為全民文化現象，完美詮釋了「隨時隨地提供純粹樂趣」的核心價值。它是無數人購買 Game Boy 的第一個理由。</p>
+                    <div class="mt-4 text-center text-3xl font-bold text-blue-600">3500萬+</div>
+                    <div class="text-center text-gray-500">全球銷量</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h4 class="text-2xl font-bold text-center mb-4">《精靈寶可夢》</h4>
+                    <p class="text-gray-700">這款遊戲奇蹟般地延長了 Game Boy 的生命週期。它巧妙利用了前瞻性設計的「Game Link 連接埠」，將遊戲從單人娛樂變為需要真實社交的集體活動。「交換」與「對戰」的核心玩法，讓硬體功能與軟體創意完美結合，引爆了全球性的「寶可夢狂熱」。</p>
+                    <div class="mt-4 text-center text-3xl font-bold text-red-600">4600萬+</div>
+                    <div class="text-center text-gray-500">第一世代全球銷量</div>
+                </div>
+            </div>
+            <h4 class="text-2xl font-bold text-center mb-6">Game Boy & Game Boy Color 十大暢銷遊戲</h4>
+            <div class="chart-container">
+                <canvas id="topGamesChart"></canvas>
+            </div>
+        </section>
+
+        <div class="my-12 border-t border-gray-300"></div>
+
+        <section id="legacy" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">文化遺產</h3>
+                <p class="mt-2 text-gray-600">Game Boy 的影響力遠不止於遊戲本身。</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-4xl mb-3">🛡️</div>
+                    <h4 class="text-xl font-bold mb-2">傳奇耐用性</h4>
+                    <p class="text-gray-600 text-sm">在波斯灣戰爭中被炸毀但仍能開機的 Game Boy，成為其「堅不可摧」品質的最好證明，至今仍在紐約任天堂商店展出。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-4xl mb-3">🎵</div>
+                    <h4 class="text-xl font-bold mb-2">Chiptune 音樂</h4>
+                    <p class="text-gray-600 text-sm">其獨特的4聲道音效晶片意外催生了「Chiptune」電子音樂流派，至今仍有音樂家使用改裝的 Game Boy 進行創作。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-4xl mb-3">📸</div>
+                    <h4 class="text-xl font-bold mb-2">奇趣周邊</h4>
+                    <p class="text-gray-600 text-sm">Game Boy 相機和印表機等配件，是消費級數位相機的早期形態，再次體現了任天堂利用成熟技術進行創新的能力。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                    <div class="text-4xl mb-3">⭐</div>
+                    <h4 class="text-xl font-bold mb-2">時尚潮流</h4>
+                    <p class="text-gray-600 text-sm">從瑪丹娜到麥可·傑克森，無數名人都是它的粉絲。Game Boy 成為90年代電影、音樂中的常客，是一個時代的文化符號。</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="my-12 border-t border-gray-300"></div>
+
+        <section id="data" class="py-12 md:py-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800">數據洞察</h3>
+                <p class="mt-2 text-gray-600">驚人的商業成就，鑄就了掌機帝國。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto">
+                <div class="chart-container h-[350px] max-h-[40vh]">
+                     <canvas id="salesBreakdownChart"></canvas>
+                </div>
+                <div class="text-center md:text-left">
+                    <div class="mb-6">
+                        <p class="text-5xl font-bold text-blue-600">1.18億</p>
+                        <p class="text-gray-600">Game Boy & Color 總銷量</p>
+                    </div>
+                    <div class="mb-6">
+                        <p class="text-5xl font-bold text-green-600">8151萬</p>
+                        <p class="text-gray-600">Game Boy Advance 家族總銷量</p>
+                    </div>
+                    <div>
+                        <p class="text-5xl font-bold text-gray-800">~2億</p>
+                        <p class="text-gray-600">Game Boy 品牌累計總銷量</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <h4 class="text-xl font-bold">Game Boy 精神的永續</h4>
+            <p class="max-w-3xl mx-auto mt-4 text-gray-400">
+                Game Boy 的傳奇雖已落幕，但其「優先考慮可玩性與創新體驗」的精神，深刻烙印在任天堂的 DNA 中。從 Wii 的體感、DS 的觸控到 Switch 的混合設計，我們都能看到 Game Boy 靈魂的傳承。它定義的「隨時、隨地、與任何人同樂」的理念，至今仍在為全球玩家帶來歡樂。
+            </p>
+            <p class="mt-6 text-sm text-gray-500">此互動式報告根據公開歷史資料生成。</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const evolutionData = {
+            'dmg-01': {
+                name: 'Game Boy (DMG-01)',
+                year: '1989',
+                desc: '帝國的基石。採用「夠用就好」的設計，以橄欖綠單色螢幕、超長續航和親民價格，在與技術更強對手的競爭中大獲全勝。',
+                specs: [
+                    { label: 'CPU', value: '8-bit Sharp SM83 @ 4.19 MHz' },
+                    { label: '螢幕', value: '2.5吋 STN LCD (4階橄欖綠)' },
+                    { label: '電池', value: '4x AA, 續航 15-30 小時' },
+                    { label: '特點', value: '極其耐用, Game Link 連接埠' }
+                ]
+            },
+            'mgb-001': {
+                name: 'Game Boy Pocket',
+                year: '1996',
+                desc: '輕薄化的再定義。回應市場對初代機「笨重」的看法，體積和重量大幅縮小，並採用了對比度更高、無殘影的真正黑白螢幕。',
+                specs: [
+                    { label: 'CPU', value: '8-bit Sharp SM83 @ 4.19 MHz' },
+                    { label: '螢幕', value: '2.56吋 FSTN LCD (黑白)' },
+                    { label: '電池', value: '2x AAA, 續航約 10 小時' },
+                    { label: '特點', value: '更小、更輕, 螢幕清晰度提升' }
+                ]
+            },
+            'mgl-001': {
+                name: 'Game Boy Light (日本限定)',
+                year: '1998',
+                desc: '黑夜中的曙光。任天堂首款內置背光的掌機，解決了在昏暗環境下無法遊戲的痛點。因 GBC 即將上市而曇花一現，是單色時代的最終完美形態。',
+                specs: [
+                    { label: 'CPU', value: '8-bit Sharp SM83 @ 4.19 MHz' },
+                    { label: '螢幕', value: '2.5吋 FSTN LCD (帶背光)' },
+                    { label: '電池', value: '2x AA, 續航 12-20 小時' },
+                    { label: '特點', value: '電致發光背板, 收藏價值高' }
+                ]
+            },
+            'gbc': {
+                name: 'Game Boy Color',
+                year: '1998',
+                desc: '遲來的色彩革命。為掌上世界帶來了色彩，並增強了處理器性能。最關鍵的成功因素是「向下相容」，發售即繼承龐大的經典遊戲庫。',
+                specs: [
+                    { label: 'CPU', value: '8-bit Sharp SM83 @ 4/8 MHz' },
+                    { label: '螢幕', value: '2.3吋 TFT LCD (56色同顯)' },
+                    { label: '電池', value: '2x AA, 續航約 10 小時' },
+                    { label: '特點', value: '彩色螢幕, CPU 雙倍速, 向下相容' }
+                ]
+            },
+            'gba': {
+                name: 'Game Boy Advance',
+                year: '2001',
+                desc: '超級任天堂在掌上重現。真正的世代更迭，搭載 32-bit 處理器，性能大幅提升。橫向設計和新增的 L/R 肩鍵帶來更豐富的遊戲體驗，但初版無背光螢幕是其致命缺陷。',
+                specs: [
+                    { label: 'CPU', value: '32-bit ARM7TDMI @ 16.78 MHz' },
+                    { label: '螢幕', value: '2.9吋 反射式 TFT LCD' },
+                    { label: '電池', value: '2x AA, 續航約 15 小時' },
+                    { label: '特點', value: '32-bit 性能, 橫向設計, 向下相容' }
+                ]
+            },
+            'gba-sp': {
+                name: 'Game Boy Advance SP',
+                year: '2003',
+                desc: '設計與功能的完美融合。採用革命性的翻蓋設計，內置充電鋰電池，並終於加入了螢幕光源，解決了前代所有痛點。後期更有畫面更亮的背光版 (AGS-101)。',
+                specs: [
+                    { label: 'CPU', value: '32-bit ARM7TDMI @ 16.78 MHz' },
+                    { label: '螢幕', value: '2.9吋 前光式/背光式 TFT LCD' },
+                    { label: '電池', value: '可充電鋰電池, 續航 10-18 小時' },
+                    { label: '特點', value: '翻蓋設計, 內置光源, 可充電' }
+                ]
+            },
+            'gbm': {
+                name: 'Game Boy Micro',
+                year: '2005',
+                desc: '極致小型化的絕唱。作為 Game Boy 家族的最後成員，它是一次對時尚化的大膽嘗試。體積極其微小，可更換金屬面板，但為此犧牲了向下相容功能。',
+                specs: [
+                    { label: 'CPU', value: '32-bit ARM7TDMI @ 16.78 MHz' },
+                    { label: '螢幕', value: '2.0吋 背光式 LCD' },
+                    { label: '電池', value: '可充電鋰電池, 續航約 10 小時' },
+                    { label: '特點', value: '極致小巧, 可換面板, 無向下相容' }
+                ]
+            }
+        };
+
+        const timelineNav = document.getElementById('timeline-nav');
+        const evolutionContent = document.getElementById('evolution-content');
+
+        function updateEvolutionContent(id) {
+            const data = evolutionData[id];
+            if (!data) return;
+
+            evolutionContent.innerHTML = `
+                <div class="flex flex-col sm:flex-row items-center gap-6 mb-6">
+                    <div class="console-icon w-32 h-40 flex-shrink-0">
+                        <div class="console-screen"></div>
+                        <div class="console-buttons">
+                            <div class="console-dpad"></div>
+                            <div class="console-ab">
+                                <div></div>
+                                <div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-bold">${data.name}</h4>
+                        <p class="text-gray-500 font-medium">${data.year}</p>
+                    </div>
+                </div>
+                <p class="text-gray-700 mb-6">${data.desc}</p>
+                <div class="border-t border-gray-200 pt-4">
+                    <h5 class="font-bold mb-2">關鍵規格：</h5>
+                    <ul class="space-y-2 text-sm">
+                        ${data.specs.map(spec => `
+                            <li class="flex justify-between">
+                                <span class="font-semibold text-gray-600">${spec.label}</span>
+                                <span class="text-right text-gray-800">${spec.value}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+            
+            document.querySelectorAll('#timeline-nav .timeline-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`#timeline-nav .timeline-item[data-id="${id}"]`).classList.add('active');
+        }
+        
+        Object.keys(evolutionData).forEach(id => {
+            const data = evolutionData[id];
+            const item = document.createElement('div');
+            item.className = 'timeline-item relative cursor-pointer p-2 rounded-md hover:bg-gray-100';
+            item.dataset.id = id;
+            item.innerHTML = `
+                <h5 class="font-bold">${data.name}</h5>
+                <p class="text-sm text-gray-500">${data.year}</p>
+            `;
+            item.addEventListener('click', () => updateEvolutionContent(id));
+            timelineNav.appendChild(item);
+        });
+
+        updateEvolutionContent('dmg-01');
+
+        let warChart;
+        const warData = {
+            labels: ['Nintendo Game Boy', 'Atari Lynx', 'Sega Game Gear'],
+            price: {
+                data: [89.99, 179.99, 149.99],
+                label: '發售價格 (美元)',
+                narrative: 'Game Boy 的價格遠低於競爭對手，使其能觸及更廣泛的家庭和年輕消費者，這是其市場成功的關鍵第一步。'
+            },
+            battery: {
+                data: [22.5, 4.5, 4], 
+                label: '平均電池續航 (小時)',
+                narrative: '續航力是決定性優勢。Game Boy 長達十數小時的遊玩時間，完勝對手耗電的彩色螢幕，真正實現了「便攜」的核心價值。'
+            },
+            sales: {
+                data: [118.69, 1, 10.62],
+                label: '全球銷量 (百萬台)',
+                narrative: '最終的市場銷量證明了任天堂策略的成功。專注於可玩性、價格和續航，而非紙面規格，為 Game Boy 贏得了壓倒性的勝利。'
+            }
+        };
+
+        const warNarrativeEl = document.getElementById('war-narrative');
+
+        function createWarChart(metric) {
+            const ctx = document.getElementById('warChart').getContext('2d');
+            const currentData = warData[metric];
+            
+            warNarrativeEl.textContent = currentData.narrative;
+            
+            if (warChart) {
+                warChart.data.datasets[0].data = currentData.data;
+                warChart.data.datasets[0].label = currentData.label;
+                warChart.options.scales.y.title.text = currentData.label;
+                warChart.update();
+                return;
+            }
+            
+            warChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: warData.labels,
+                    datasets: [{
+                        label: currentData.label,
+                        data: currentData.data,
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        let unit = '';
+                                        if (metric === 'price') unit = ' 美元';
+                                        if (metric === 'battery') unit = ' 小時';
+                                        if (metric === 'sales') unit = ' 百萬台';
+                                        label += context.parsed.x + unit;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                             title: {
+                                display: true,
+                                text: currentData.label
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                autoSkip: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        const warButtons = document.getElementById('war-buttons');
+        warButtons.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const metric = e.target.dataset.metric;
+                createWarChart(metric);
+
+                warButtons.querySelectorAll('button').forEach(btn => btn.classList.remove('btn-active'));
+                e.target.classList.add('btn-active');
+            }
+        });
+
+        warButtons.querySelector('button[data-metric="price"]').classList.add('btn-active');
+        createWarChart('price');
+
+        const topGamesCtx = document.getElementById('topGamesChart').getContext('2d');
+        new Chart(topGamesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['寶可夢 紅/綠/藍/黃', '俄羅斯方塊', '寶可夢 金/銀/水晶', '超級瑪利歐樂園', '超級瑪利歐樂園2', '瑪利歐醫生', '寶可夢彈珠台', '瓦利歐樂園', '星之卡比', '超級瑪利歐豪華版'],
+                datasets: [{
+                    label: '全球銷量 (百萬套)',
+                    data: [46, 35, 29, 18.14, 11.18, 5.34, 5.31, 5.19, 5.13, 5.07],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                 plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.parsed.x} 百萬套`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '全球銷量 (百萬套)'
+                        }
+                    },
+                    y: {
+                        ticks: {
+                            callback: function(value, index, values) {
+                                const label = this.getLabelForValue(value);
+                                return label.length > 10 ? label.substring(0, 10) + '...' : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const salesBreakdownCtx = document.getElementById('salesBreakdownChart').getContext('2d');
+        new Chart(salesBreakdownCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Game Boy & Color', 'Game Boy Advance 家族'],
+                datasets: [{
+                    label: '銷量',
+                    data: [11869, 8151],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => ` ${context.label}: ${context.parsed.toLocaleString()} 萬台`
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
+</body>
+</html>
