@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="documentTitle">GitHub 的故事：從 Git 到全球開發中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active {
+            color: #4A90E2;
+            border-bottom-color: #4A90E2;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background-color: #A3BFFA;
+            border: 4px solid #F8F7F4;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800" data-i18n="headerTitle">GitHub 的故事</h1>
+            <div class="hidden md:flex space-x-8 items-center">
+                <a href="#problem" class="nav-link text-gray-600 hover:text-blue-500 border-b-2 border-transparent pb-1" data-i18n="navProblem">緣起</a>
+                <a href="#git" class="nav-link text-gray-600 hover:text-blue-500 border-b-2 border-transparent pb-1" data-i18n="navGit">革命</a>
+                <a href="#github" class="nav-link text-gray-600 hover:text-blue-500 border-b-2 border-transparent pb-1" data-i18n="navPlatform">平台</a>
+                <a href="#growth" class="nav-link text-gray-600 hover:text-blue-500 border-b-2 border-transparent pb-1" data-i18n="navGrowth">成長</a>
+                <a href="#impact" class="nav-link text-gray-600 hover:text-blue-500 border-b-2 border-transparent pb-1" data-i18n="navImpact">影響</a>
+                <!-- 語言切換按鈕 -->
+                <button id="lang-toggle" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full text-sm transition-colors duration-300">
+                    English
+                </button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <span class="text-3xl">☰</span>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#problem" class="block text-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-i18n="navProblem">緣起</a>
+            <a href="#git" class="block text-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-i18n="navGit">革命</a>
+            <a href="#github" class="block text-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-i18n="navPlatform">平台</a>
+            <a href="#growth" class="block text-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-i18n="navGrowth">成長</a>
+            <a href="#impact" class="block text-center py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-i18n="navImpact">影響</a>
+            <!-- 手機版語言切換按鈕 -->
+            <button id="mobile-lang-toggle" class="block w-full text-center py-2 px-4 text-sm bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300">
+                English
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Hero Section -->
+        <section class="text-center py-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4" data-i18n="heroTitle">從一行指令到全球社群</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-i18n="heroText">
+                這不僅是一個關於程式碼的故事，更是一場關於協作、社群與創新的革命。探索 Git 如何誕生，以及 GitHub 如何在其基礎上建立起當代軟體開發的核心平台。
+            </p>
+        </section>
+        
+        <!-- Section 1: The Problem -->
+        <section id="problem" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2" data-i18n="problemSectionTitle">協作的困境：Git 之前的時代</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto" data-i18n="problemSectionText">在 Git 出現之前，軟體開發協作充滿挑戰。開發者依賴集中式版本控制系統 (CVCS)，這種模式雖然可行，但存在著單點故障、離線工作困難以及分支合併流程繁瑣等根本性問題，嚴重阻礙了開源社群的發展。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="p-8 bg-white rounded-lg shadow-md border border-gray-200">
+                    <h4 class="text-2xl font-bold mb-4 text-center text-red-600" data-i18n="cvcsTitle">集中式 (CVCS)</h4>
+                    <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-4 border-2 border-red-300">
+                            <span class="text-4xl">🗄️</span>
+                        </div>
+                        <p class="text-center font-semibold mb-4" data-i18n="cvcsServer">中央伺服器</p>
+                        <div class="w-full h-px bg-gray-300 my-2"></div>
+                        <div class="flex justify-around w-full mt-4">
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl">💻</span>
+                                <p data-i18n="developerA">開發者A</p>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl">💻</span>
+                                <p data-i18n="developerB">開發者B</p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="mt-6 space-y-2 text-gray-600 list-disc list-inside">
+                        <li data-i18n="cvcsBullet1"><b>單點故障：</b>中央伺服器一旦崩潰，所有人都無法工作。</li>
+                        <li data-i18n="cvcsBullet2"><b>離線受限：</b>必須連網才能提交、比較或還原版本。</li>
+                        <li data-i18n="cvcsBullet3"><b>分支緩慢：</b>創建分支成本高，合併過程痛苦且易出錯。</li>
+                    </ul>
+                </div>
+                <div class="p-8 bg-white rounded-lg shadow-md border border-gray-200">
+                    <h4 class="text-2xl font-bold mb-4 text-center text-green-600" data-i18n="dvcsTitle">分佈式 (DVCS)</h4>
+                     <div class="flex flex-col items-center">
+                        <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-4 border-2 border-green-300">
+                           <span class="text-4xl">🌐</span>
+                        </div>
+                        <p class="text-center font-semibold mb-4" data-i18n="dvcsRemoteRepo">遠端程式碼庫</p>
+                        <div class="w-full h-px bg-gray-300 my-2"></div>
+                        <div class="flex justify-around w-full mt-4">
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl">💽</span>
+                                <p data-i18n="developerAWithCopy">開發者A (完整副本)</p>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-3xl">💽</span>
+                                <p data-i18n="developerBWithCopy">開發者B (完整副本)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="mt-6 space-y-2 text-gray-600 list-disc list-inside">
+                        <li data-i18n="dvcsBullet1"><b>無單點故障：</b>每個開發者都有完整的程式碼庫備份。</li>
+                        <li data-i18n="dvcsBullet2"><b>離線工作：</b>可在本地提交、查看歷史、創建分支。</li>
+                        <li data-i18n="dvcsBullet3"><b>分支輕快：</b>分支創建和合併極其快速、簡單。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Git -->
+        <section id="git" class="py-16 bg-gray-50 rounded-xl scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2" data-i18n="gitSectionTitle">革命的火種：Git 的誕生</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto" data-i18n="gitSectionText">2005年，因原有的版本控制工具 BitKeeper 停止對開源社群免費，Linux 核心的創造者 Linus Torvalds 面臨危機。他僅用約10天時間，親手打造了 Git 的初始版本，一個專為速度、效率和分佈式協作而生的系統，徹底改變了軟體開發的遊戲規則。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="gitFeature1Title">驚人速度</h4>
+                    <p class="text-gray-600" data-i18n="gitFeature1Text">Git 的核心操作幾乎都在本地完成，速度極快，無需等待網路延遲。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="gitFeature2Title">輕量級分支</h4>
+                    <p class="text-gray-600" data-i18n="gitFeature2Text">創建、切換和合併分支變得輕而易舉，鼓勵開發者大膽實驗，而不影響主線開發。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="gitFeature3Title">分佈式設計</h4>
+                    <p class="text-gray-600" data-i18n="gitFeature3Text">每個開發者都擁有完整的程式碼歷史，實現了真正的離線工作和強大的備份能力。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: GitHub -->
+        <section id="github" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2" data-i18n="githubSectionTitle">平台的崛起：從工具到社群</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto" data-i18n="githubSectionText">Git 本身是一個強大的命令列工具，但它缺乏一個易於使用的視覺化介面和集中的協作中心。2008年，Tom Preston-Werner、Chris Wanstrath 和 P.J. Hyett 創立了 GitHub，旨在解決這個問題。他們建立了一個基於 Web 的平台，不僅託管 Git 程式碼庫，更加入了社交功能，將開發變成了一種社群活動。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="p-6 bg-white rounded-lg shadow-sm border text-center hover:scale-105 transition-transform">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="githubFeature1Title">程式碼託管</h4>
+                    <p class="text-gray-600" data-i18n="githubFeature1Text">為 Git 倉庫提供了一個穩定、可靠的雲端家園。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm border text-center hover:scale-105 transition-transform">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="githubFeature2Title">Pull Request</h4>
+                    <p class="text-gray-600" data-i18n="githubFeature2Text">革命性的協作流程，讓程式碼審查和貢獻變得透明和簡單。</p>
+                </div>
+                 <div class="p-6 bg-white rounded-lg shadow-sm border text-center hover:scale-105 transition-transform">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="githubFeature3Title">議題追蹤</h4>
+                    <p class="text-gray-600" data-i18n="githubFeature3Text">整合的議題追蹤系統，方便管理專案任務和錯誤回報。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm border text-center hover:scale-105 transition-transform">
+                    <h4 class="text-xl font-bold mb-2" data-i18n="githubFeature4Title">社交功能</h4>
+                    <p class="text-gray-600" data-i18n="githubFeature4Text">關注、Fork、Star 等功能，讓開發者可以互相學習和建立聯繫。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Growth -->
+        <section id="growth" class="py-16 bg-gray-50 rounded-xl scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2" data-i18n="growthSectionTitle">指數級增長：數據見證歷史</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto" data-i18n="growthSectionText">自上線以來，GitHub 的用戶和程式碼庫數量呈現爆炸性增長，迅速成為全球最大的開發者社群和開源專案聚集地。以下圖表和時間軸展示了其驚人的發展軌跡。</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 mb-16">
+                <div>
+                    <h4 class="text-xl font-bold text-center mb-4" data-i18n="userGrowthChartTitle">用戶增長趨勢</h4>
+                    <div class="chart-container">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-center mb-4" data-i18n="repoGrowthChartTitle">程式碼庫增長趨勢</h4>
+                    <div class="chart-container">
+                        <canvas id="repoGrowthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-2xl font-bold text-center mb-8" data-i18n="milestonesTitle">關鍵里程碑</h4>
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="absolute left-4 top-0 h-full w-0.5 bg-gray-300"></div>
+                    <div class="space-y-12 pl-16">
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2005Title">2005年4月</p>
+                            <p class="text-gray-600" data-i18n="milestone2005Text">Linus Torvalds 創建 Git。</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2008Title">2008年4月</p>
+                            <p class="text-gray-600" data-i18n="milestone2008Text">GitHub.com 正式向公眾推出。</p>
+                        </div>
+                         <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2010Title">2010年7月</p>
+                            <p class="text-gray-600" data-i18n="milestone2010Text">平台上託管的程式碼庫達到 100 萬個。</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2012Title">2012年7月</p>
+                            <p class="text-gray-600" data-i18n="milestone2012Text">獲得 Andreessen Horowitz 1億美元 A 輪融資。</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2013Title">2013年12月</p>
+                            <p class="text-gray-600" data-i18n="milestone2013Text">程式碼庫數量突破 1000 萬個。</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2018Title">2018年10月</p>
+                            <p class="text-gray-600" data-i18n="milestone2018Text">微軟以 75 億美元收購 GitHub。</p>
+                        </div>
+                        <div class="timeline-item relative">
+                            <p class="font-bold text-lg" data-i18n="milestone2023Title">2023年1月</p>
+                            <p class="text-gray-600" data-i18n="milestone2023Text">用戶數量正式突破 1 億大關。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Impact -->
+        <section id="impact" class="py-16 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800 mb-2" data-i18n="impactSectionTitle">深遠的影響：重塑軟體開發</h3>
+                <p class="text-gray-600 max-w-2xl mx-auto" data-i18n="impactSectionText">GitHub 的影響力遠不止於程式碼託管。它徹底改變了開源協作的模式，標準化了現代軟體開發的工作流程，並催生了一個充滿活力的全球開發者生態系統，成為推動技術創新的關鍵基礎設施。</p>
+            </div>
+
+            <div class="max-w-4xl mx-auto space-y-6">
+                <div class="p-6 bg-white rounded-lg shadow-sm border">
+                    <h4 class="font-bold text-lg" data-i18n="impact1Title">開源協作的民主化</h4>
+                    <p class="text-gray-600" data-i18n="impact1Text">「Fork and Pull Request」工作流程極大地降低了參與開源專案的門檻，任何人都可以輕鬆地為專案貢獻自己的力量。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm border">
+                    <h4 class="font-bold text-lg" data-i18n="impact2Title">現代開發實踐的標準</h4>
+                    <p class="text-gray-600" data-i18n="impact2Text">GitHub 將版本控制、程式碼審查、持續整合 (CI/CD) 等實踐推廣開來，成為行業的標準工作流程。</p>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm border">
+                    <h4 class="font-bold text-lg" data-i18n="impact3Title">全球開發者社群的樞紐</h4>
+                    <p class="text-gray-600" data-i18n="impact3Text">它不僅是程式碼的家園，更是開發者學習、分享、交流和建立職業聲譽的核心平台。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-6 mt-16">
+        <p data-i18n="footerText">&copy; 2024 GitHub 的故事。基於公開報告資料製作的互動式應用程式。</p>
+    </footer>
+
+    <script>
+        // 翻譯資料庫
+        const translations = {
+            'zh-Hant': {
+                documentTitle: 'GitHub 的故事：從 Git 到全球開發中心',
+                headerTitle: 'GitHub 的故事',
+                navProblem: '緣起',
+                navGit: '革命',
+                navPlatform: '平台',
+                navGrowth: '成長',
+                navImpact: '影響',
+                heroTitle: '從一行指令到全球社群',
+                heroText: '這不僅是一個關於程式碼的故事，更是一場關於協作、社群與創新的革命。探索 Git 如何誕生，以及 GitHub 如何在其基礎上建立起當代軟體開發的核心平台。',
+                problemSectionTitle: '協作的困境：Git 之前的時代',
+                problemSectionText: '在 Git 出現之前，軟體開發協作充滿挑戰。開發者依賴集中式版本控制系統 (CVCS)，這種模式雖然可行，但存在著單點故障、離線工作困難以及分支合併流程繁瑣等根本性問題，嚴重阻礙了開源社群的發展。',
+                cvcsTitle: '集中式 (CVCS)',
+                cvcsServer: '中央伺服器',
+                developerA: '開發者A',
+                developerB: '開發者B',
+                cvcsBullet1: '<b>單點故障：</b>中央伺服器一旦崩潰，所有人都無法工作。',
+                cvcsBullet2: '<b>離線受限：</b>必須連網才能提交、比較或還原版本。',
+                cvcsBullet3: '<b>分支緩慢：</b>創建分支成本高，合併過程痛苦且易出錯。',
+                dvcsTitle: '分佈式 (DVCS)',
+                dvcsRemoteRepo: '遠端程式碼庫',
+                developerAWithCopy: '開發者A (完整副本)',
+                developerBWithCopy: '開發者B (完整副本)',
+                dvcsBullet1: '<b>無單點故障：</b>每個開發者都有完整的程式碼庫備份。',
+                dvcsBullet2: '<b>離線工作：</b>可在本地提交、查看歷史、創建分支。',
+                dvcsBullet3: '<b>分支輕快：</b>分支創建和合併極其快速、簡單。',
+                gitSectionTitle: '革命的火種：Git 的誕生',
+                gitSectionText: '2005年，因原有的版本控制工具 BitKeeper 停止對開源社群免費，Linux 核心的創造者 Linus Torvalds 面臨危機。他僅用約10天時間，親手打造了 Git 的初始版本，一個專為速度、效率和分佈式協作而生的系統，徹底改變了軟體開發的遊戲規則。',
+                gitFeature1Title: '驚人速度',
+                gitFeature1Text: 'Git 的核心操作幾乎都在本地完成，速度極快，無需等待網路延遲。',
+                gitFeature2Title: '輕量級分支',
+                gitFeature2Text: '創建、切換和合併分支變得輕而易舉，鼓勵開發者大膽實驗，而不影響主線開發。',
+                gitFeature3Title: '分佈式設計',
+                gitFeature3Text: '每個開發者都擁有完整的程式碼歷史，實現了真正的離線工作和強大的備份能力。',
+                githubSectionTitle: '平台的崛起：從工具到社群',
+                githubSectionText: 'Git 本身是一個強大的命令列工具，但它缺乏一個易於使用的視覺化介面和集中的協作中心。2008年，Tom Preston-Werner、Chris Wanstrath 和 P.J. Hyett 創立了 GitHub，旨在解決這個問題。他們建立了一個基於 Web 的平台，不僅託管 Git 程式碼庫，更加入了社交功能，將開發變成了一種社群活動。',
+                githubFeature1Title: '程式碼託管',
+                githubFeature1Text: '為 Git 倉庫提供了一個穩定、可靠的雲端家園。',
+                githubFeature2Title: 'Pull Request',
+                githubFeature2Text: '革命性的協作流程，讓程式碼審查和貢獻變得透明和簡單。',
+                githubFeature3Title: '議題追蹤',
+                githubFeature3Text: '整合的議題追蹤系統，方便管理專案任務和錯誤回報。',
+                githubFeature4Title: '社交功能',
+                githubFeature4Text: '關注、Fork、Star 等功能，讓開發者可以互相學習和建立聯繫。',
+                growthSectionTitle: '指數級增長：數據見證歷史',
+                growthSectionText: '自上線以來，GitHub 的用戶和程式碼庫數量呈現爆炸性增長，迅速成為全球最大的開發者社群和開源專案聚集地。以下圖表和時間軸展示了其驚人的發展軌跡。',
+                userGrowthChartTitle: '用戶增長趨勢',
+                userGrowthLabel: '用戶數',
+                repoGrowthChartTitle: '程式碼庫增長趨勢',
+                repoGrowthLabel: '程式碼庫數量',
+                milestonesTitle: '關鍵里程碑',
+                milestone2005Title: '2005年4月',
+                milestone2005Text: 'Linus Torvalds 創建 Git。',
+                milestone2008Title: '2008年4月',
+                milestone2008Text: 'GitHub.com 正式向公眾推出。',
+                milestone2010Title: '2010年7月',
+                milestone2010Text: '平台上託管的程式碼庫達到 100 萬個。',
+                milestone2012Title: '2012年7月',
+                milestone2012Text: '獲得 Andreessen Horowitz 1億美元 A 輪融資。',
+                milestone2013Title: '2013年12月',
+                milestone2013Text: '程式碼庫數量突破 1000 萬個。',
+                milestone2018Title: '2018年10月',
+                milestone2018Text: '微軟以 75 億美元收購 GitHub。',
+                milestone2023Title: '2023年1月',
+                milestone2023Text: '用戶數量正式突破 1 億大關。',
+                impactSectionTitle: '深遠的影響：重塑軟體開發',
+                impactSectionText: 'GitHub 的影響力遠不止於程式碼託管。它徹底改變了開源協作的模式，標準化了現代軟體開發的工作流程，並催生了一個充滿活力的全球開發者生態系統，成為推動技術創新的關鍵基礎設施。',
+                impact1Title: '開源協作的民主化',
+                impact1Text: '「Fork and Pull Request」工作流程極大地降低了參與開源專案的門檻，任何人都可以輕鬆地為專案貢獻自己的力量。',
+                impact2Title: '現代開發實踐的標準',
+                impact2Text: 'GitHub 將版本控制、程式碼審查、持續整合 (CI/CD) 等實踐推廣開來，成為行業的標準工作流程。',
+                impact3Title: '全球開發者社群的樞紐',
+                impact3Text: '它不僅是程式碼的家園，更是開發者學習、分享、交流和建立職業聲譽的核心平台。',
+                footerText: '&copy; 2024 GitHub 的故事。基於公開報告資料製作的互動式應用程式。',
+                toggleToEnglish: 'English',
+                toggleToChinese: '中文'
+            },
+            'en': {
+                documentTitle: 'The Story of GitHub: From Git to Global Development Hub',
+                headerTitle: 'The Story of GitHub',
+                navProblem: 'The Problem',
+                navGit: 'The Revolution',
+                navPlatform: 'The Platform',
+                navGrowth: 'Growth',
+                navImpact: 'Impact',
+                heroTitle: 'From Command Line to Global Community',
+                heroText: 'This is more than just a story about code; it\'s a revolution in collaboration, community, and innovation. Explore how Git was born and how GitHub built upon its foundation to become the central platform for modern software development.',
+                problemSectionTitle: 'The Collaboration Conundrum: The Era Before Git',
+                problemSectionText: 'Before Git, software development collaboration was challenging. Developers relied on Centralized Version Control Systems (CVCS), a functional but fundamentally flawed model with issues like single points of failure, difficulty working offline, and cumbersome branching and merging, severely hindering open-source community growth.',
+                cvcsTitle: 'Centralized (CVCS)',
+                cvcsServer: 'Central Server',
+                developerA: 'Developer A',
+                developerB: 'Developer B',
+                cvcsBullet1: '<b>Single Point of Failure:</b> If the central server crashes, everyone stops working.',
+                cvcsBullet2: '<b>Limited Offline Work:</b> Requires an internet connection to commit, compare, or revert versions.',
+                cvcsBullet3: '<b>Slow Branching:</b> Creating branches is costly, and merging is painful and error-prone.',
+                dvcsTitle: 'Distributed (DVCS)',
+                dvcsRemoteRepo: 'Remote Repository',
+                developerAWithCopy: 'Developer A (Full Copy)',
+                developerBWithCopy: 'Developer B (Full Copy)',
+                dvcsBullet1: '<b>No Single Point of Failure:</b> Every developer has a complete backup of the codebase.',
+                dvcsBullet2: '<b>Offline Work:</b> Can commit locally, view history, and create branches offline.',
+                dvcsBullet3: '<b>Fast Branching:</b> Branch creation and merging are incredibly quick and simple.',
+                gitSectionTitle: 'The Spark of Revolution: The Birth of Git',
+                gitSectionText: 'In 2005, facing a crisis after the existing version control tool BitKeeper stopped being free for the open-source community, Linus Torvalds, creator of the Linux kernel, acted. In just about 10 days, he personally built the initial version of Git, a system designed for speed, efficiency, and distributed collaboration, completely changing the rules of software development.',
+                gitFeature1Title: 'Blazing Speed',
+                gitFeature1Text: 'Git\'s core operations are almost entirely local, making them extremely fast without network latency.',
+                gitFeature2Title: 'Lightweight Branching',
+                gitFeature2Text: 'Creating, switching, and merging branches became effortless, encouraging developers to experiment boldly without affecting the main line of development.',
+                gitFeature3Title: 'Distributed Design',
+                gitFeature3Text: 'Every developer has a complete code history, enabling true offline work and robust backup capabilities.',
+                githubSectionTitle: 'The Rise of the Platform: From Tool to Community',
+                githubSectionText: 'Git itself is a powerful command-line tool, but it lacked an easy-to-use visual interface and a centralized collaboration hub. In 2008, Tom Preston-Werner, Chris Wanstrath, and P.J. Hyett founded GitHub to solve this. They built a web-based platform that not only hosted Git repositories but also added social features, turning development into a community activity.',
+                githubFeature1Title: 'Code Hosting',
+                githubFeature1Text: 'Provides a stable, reliable cloud home for Git repositories.',
+                githubFeature2Title: 'Pull Request',
+                githubFeature2Text: 'A revolutionary collaboration workflow that makes code review and contributions transparent and simple.',
+                githubFeature3Title: 'Issue Tracking',
+                githubFeature3Text: 'Integrated issue tracking system for easy management of project tasks and bug reports.',
+                githubFeature4Title: 'Social Features',
+                githubFeature4Text: 'Features like Follow, Fork, and Star allow developers to learn from each other and build connections.',
+                growthSectionTitle: 'Exponential Growth: Data as Witness to History',
+                growthSectionText: 'Since its launch, GitHub has seen explosive growth in users and repositories, quickly becoming the world\'s largest developer community and open-source project hub. The charts and timeline below illustrate its remarkable trajectory.',
+                userGrowthChartTitle: 'User Growth Trend',
+                userGrowthLabel: 'Number of Users',
+                repoGrowthChartTitle: 'Repository Growth Trend',
+                repoGrowthLabel: 'Number of Repositories',
+                milestonesTitle: 'Key Milestones',
+                milestone2005Title: 'April 2005',
+                milestone2005Text: 'Linus Torvalds creates Git.',
+                milestone2008Title: 'April 2008',
+                milestone2008Text: 'GitHub.com officially launches to the public.',
+                milestone2010Title: 'July 2010',
+                milestone2010Text: '1 million repositories hosted on the platform.',
+                milestone2012Title: 'July 2012',
+                milestone2012Text: 'Receives $100 million Series A funding from Andreessen Horowitz.',
+                milestone2013Title: 'December 2013',
+                milestone2013Text: 'Repository count surpasses 10 million.',
+                milestone2018Title: 'October 2018',
+                milestone2018Text: 'Microsoft acquires GitHub for $7.5 billion.',
+                milestone2023Title: 'January 2023',
+                milestone2023Text: 'User count officially exceeds 100 million.',
+                impactSectionTitle: 'Profound Impact: Reshaping Software Development',
+                impactSectionText: 'GitHub\'s influence extends far beyond code hosting. It has revolutionized open-source collaboration, standardized modern software development workflows, and fostered a vibrant global developer ecosystem, becoming a critical infrastructure driving technological innovation.',
+                impact1Title: 'Democratization of Open Source Collaboration',
+                impact1Text: 'The "Fork and Pull Request" workflow significantly lowered the barrier to participating in open-source projects, allowing anyone to easily contribute to a project.',
+                impact2Title: 'Standardization of Modern Development Practices',
+                impact2Text: 'GitHub popularized practices like version control, code review, and Continuous Integration/Continuous Delivery (CI/CD), making them industry standard workflows.',
+                impact3Title: 'Hub for the Global Developer Community',
+                impact3Text: 'It is not only a home for code but also a core platform for developers to learn, share, communicate, and build professional reputations.',
+                footerText: '&copy; 2024 The Story of GitHub. Interactive application based on public report data.',
+                toggleToEnglish: 'English',
+                toggleToChinese: '中文'
+            }
+        };
+
+        // 用於儲存 Chart.js 實例的變數
+        let userGrowthChartInstance;
+        let repoGrowthChartInstance;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Close mobile menu on link click
+            const mobileLinks = mobileMenu.querySelectorAll('a');
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Navigation scroll highlighting
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // 初始化 Chart.js
+            function initializeCharts(lang) {
+                // 如果圖表已經存在，先銷毀它們
+                if (userGrowthChartInstance) {
+                    userGrowthChartInstance.destroy();
+                }
+                if (repoGrowthChartInstance) {
+                    repoGrowthChartInstance.destroy();
+                }
+
+                const chartDefaultOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            titleFont: { size: 14, family: "'Noto Sans TC', sans-serif" },
+                            bodyFont: { size: 12, family: "'Noto Sans TC', sans-serif" },
+                            padding: 10,
+                            cornerRadius: 4,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false,
+                            },
+                            ticks: {
+                                font: {
+                                    family: "'Noto Sans TC', sans-serif"
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb'
+                            },
+                            ticks: {
+                                font: {
+                                    family: "'Noto Sans TC', sans-serif"
+                                },
+                                callback: function(value) {
+                                    if (value >= 1000000) return value / 1000000 + 'M';
+                                    if (value >= 1000) return value / 1000 + 'k';
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                };
+                
+                // User Growth Chart
+                const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+                const userGrowthData = {
+                    labels: ['2009', '2013 (初)', '2013 (末)', '2023'],
+                    datasets: [{
+                        label: translations[lang].userGrowthLabel, // 翻譯標籤
+                        data: [100000, 3000000, 4000000, 100000000],
+                        borderColor: '#4A90E2',
+                        backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#4A90E2',
+                    }]
+                };
+                userGrowthChartInstance = new Chart(userGrowthCtx, {
+                    type: 'line',
+                    data: userGrowthData,
+                    options: chartDefaultOptions
+                });
+
+                // Repo Growth Chart
+                const repoGrowthCtx = document.getElementById('repoGrowthChart').getContext('2d');
+                const repoGrowthData = {
+                    labels: ['2009', '2010', '2013'],
+                    datasets: [{
+                        label: translations[lang].repoGrowthLabel, // 翻譯標籤
+                        data: [46000, 1000000, 10000000],
+                        borderColor: '#50E3C2',
+                        backgroundColor: 'rgba(80, 227, 194, 0.2)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#50E3C2'
+                    }]
+                };
+                repoGrowthChartInstance = new Chart(repoGrowthCtx, {
+                    type: 'line',
+                    data: repoGrowthData,
+                    options: chartDefaultOptions
+                });
+            }
+
+            // 語言切換邏輯
+            const langToggleBtn = document.getElementById('lang-toggle');
+            const mobileLangToggleBtn = document.getElementById('mobile-lang-toggle');
+            let currentLanguage = localStorage.getItem('selectedLanguage') || 'zh-Hant'; // 預設為繁體中文
+
+            function setLanguage(lang) {
+                document.documentElement.lang = lang;
+                localStorage.setItem('selectedLanguage', lang);
+
+                // 更新所有帶有 data-i18n 屬性的元素
+                document.querySelectorAll('[data-i18n]').forEach(element => {
+                    const key = element.dataset.i18n;
+                    if (translations[lang] && translations[lang][key]) {
+                        // 使用 innerHTML 因為有些翻譯包含 HTML 標籤 (如 <b>)
+                        element.innerHTML = translations[lang][key]; 
+                    }
+                });
+
+                // 更新語言切換按鈕的文字
+                if (lang === 'zh-Hant') {
+                    langToggleBtn.textContent = translations['zh-Hant'].toggleToEnglish; // 顯示 "English"
+                    mobileLangToggleBtn.textContent = translations['zh-Hant'].toggleToEnglish; // 顯示 "English"
+                } else {
+                    langToggleBtn.textContent = translations['en'].toggleToChinese; // 顯示 "中文"
+                    mobileLangToggleBtn.textContent = translations['en'].toggleToChinese; // 顯示 "中文"
+                }
+
+                // 重新初始化圖表以更新標籤
+                initializeCharts(lang);
+            }
+
+            // 桌面版語言切換按鈕點擊事件
+            langToggleBtn.addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(currentLanguage);
+            });
+
+            // 手機版語言切換按鈕點擊事件
+            mobileLangToggleBtn.addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(currentLanguage);
+                mobileMenu.classList.add('hidden'); // 切換後關閉手機選單
+            });
+
+            // 頁面載入時設定初始語言
+            setLanguage(currentLanguage);
+        });
+    </script>
+
+</body>
+</html>
