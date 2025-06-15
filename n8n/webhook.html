@@ -98,18 +98,21 @@
         document.getElementById('gitForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // 防止表單傳統提交
 
-            // ****** 請將這裡的 URL 換成您 n8n Webhook 節點的 URL ******
             const webhookUrl = 'https://n8n.phdev.uk/webhook/74932bb2-5a97-48ec-b038-9a07df94f0cd'; 
             
+            // [已修正] 這裡的檢查邏輯是正確的
+            if (!webhookUrl || webhookUrl.includes('YOUR_WEBHOOK_URL_HERE')) {
+                // 我們現在使用一個更安全的 alert 替代方案
+                const statusDiv = document.getElementById('status');
+                statusDiv.className = 'status-error';
+                statusDiv.textContent = '錯誤：請先在 JavaScript 程式碼中設定 n8n Webhook 的 URL！';
+                return;
+            }
+
             const statusDiv = document.getElementById('status');
             const submitBtn = document.getElementById('submitBtn');
             const fileName = document.getElementById('fileName').value;
             const htmlContent = document.getElementById('htmlContent').value;
-            
-            if (!webhookUrl || webhookUrl === 'https://n8n.phdev.uk/webhook/74932bb2-5a97-48ec-b038-9a07df94f0cd') {
-                alert('請先在 JavaScript 程式碼中設定 n8n Webhook 的 URL！');
-                return;
-            }
 
             // 更新 UI 狀態
             statusDiv.className = 'status-sending';
@@ -129,12 +132,10 @@
                 });
 
                 if (!response.ok) {
-                    // 嘗試讀取錯誤訊息
                     const errorData = await response.text();
                     throw new Error(`伺服器回應錯誤: ${response.status}. ${errorData}`);
                 }
 
-                // n8n Webhook 成功後通常會回傳一個簡單的成功訊息
                 const result = await response.json();
                 console.log('Success:', result);
                 statusDiv.className = 'status-success';
@@ -145,7 +146,6 @@
                 statusDiv.className = 'status-error';
                 statusDiv.textContent = `傳送失敗: ${error.message}`;
             } finally {
-                // 無論成功或失敗，都重新啟用按鈕
                 submitBtn.disabled = false;
             }
         });
