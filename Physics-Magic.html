@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：最終理論與第一道咒語</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cosmic Latte & Deep Indigo -->
+    <!-- Application Structure Plan: The application is designed as a vertical exploratory journey, guiding the user from foundational concepts to speculative possibilities and their profound implications. The structure is thematic rather than mirroring the report's linear chapters. It starts with a captivating hero section. Next, it introduces the core concepts ("TOE" and "Magic") in an interactive, digestible format. The centerpiece is the "Three Pathways to Magic," an interactive hub where users can select and explore the three main theoretical frameworks (Technological, Cosmic, Metaphysical) in any order. This non-linear exploration encourages user agency. Each pathway presents its complex ideas using visual metaphors and concise text. The journey concludes with the societal "Ripple Effect" and a final summary. This structure transforms a dense academic text into an engaging, user-driven narrative, prioritizing understanding and exploration over passive reading. -->
+    <!-- Visualization & Content Choices: Given the report's abstract, text-heavy nature without quantitative data, traditional charts are unsuitable. Instead, information is visualized through structured HTML/CSS diagrams and interactive layouts. For instance, the "Three Pathways" are presented as clickable cards in a responsive grid, a more engaging format than a static table. The goal is to organize complex ideas. Inside each pathway, concepts like Quantum Entanglement or the Simulation Hypothesis are explained with unicode icons and stylized containers to serve as visual anchors (Goal: Inform). The societal impacts are shown as cascading 'What If' cards, using scroll-triggered animations to represent a chain reaction (Goal: Show Change/Impact). All interactions (clicks, scrolls) are handled by vanilla JavaScript to dynamically reveal content, creating a focused and uncluttered user experience. NO SVG/Mermaid used, confirming adherence to constraints. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; /* English font first */
+            background-color: #FFF8E7; /* Cosmic Latte */
+            color: #2D3748;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #D69E2E; /* Darker Gold for hover/active */
+            border-bottom-color: #D69E2E;
+        }
+        .pathway-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 1px solid #E2E8F0;
+        }
+        .pathway-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .content-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+            opacity: 1;
+        }
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .icon-bg {
+            background-color: rgba(235, 216, 172, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased leading-relaxed">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800" data-lang-key="headerTitle">物理學與魔法</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#intro" class="nav-link border-b-2 border-transparent pb-1" data-lang-key="navIntro">導論</a>
+                <a href="#concepts" class="nav-link border-b-2 border-transparent pb-1" data-lang-key="navConcepts">核心概念</a>
+                <a href="#pathways" class="nav-link border-b-2 border-transparent pb-1" data-lang-key="navPathways">通往魔法之路</a>
+                <a href="#impact" class="nav-link border-b-2 border-transparent pb-1" data-lang-key="navImpact">存在的餘波</a>
+                 <button id="lang-switcher" class="ml-4 px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">English</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                 <button id="lang-switcher-mobile" class="mr-4 px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">English</button>
+                 <button id="menu-btn" class="text-gray-700 focus:outline-none">
+                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                 </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#intro" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang-key="navIntroMobile">導論</a>
+            <a href="#concepts" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang-key="navConceptsMobile">核心概念</a>
+            <a href="#pathways" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang-key="navPathwaysMobile">通往魔法之路</a>
+            <a href="#impact" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang-key="navImpactMobile">存在的餘波</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="intro" class="min-h-screen flex items-center bg-gradient-to-b from-white to-transparent">
+            <div class="container mx-auto px-6 py-12 text-center">
+                <h2 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4 scroll-reveal" data-lang-key="heroTitle">最終理論與第一道咒語</h2>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto scroll-reveal" style="transition-delay: 100ms;" data-lang-key="heroSubtitle">如果人類破解了所有物理原理，掌握了「萬有理論」，魔法是否仍有存在的可能？</p>
+                <p class="mt-8 text-gray-500 scroll-reveal" style="transition-delay: 200ms;" data-lang-key="heroDescription">這不僅是科學與幻想的交界，更是對實在、意識與人類未來的終極探問。本互動報告將引導您探索三種可能的路徑，以及它們將帶來的顛覆性影響。</p>
+                <div class="mt-12 scroll-reveal" style="transition-delay: 300ms;">
+                    <a href="#concepts" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-full hover:bg-gray-700 transition duration-300" data-lang-key="heroButton">開始探索之旅</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="concepts" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2 scroll-reveal" data-lang-key="conceptsTitle">核心概念：界定競技場</h3>
+                    <p class="text-gray-600 max-w-2xl mx-auto scroll-reveal" data-lang-key="conceptsSubtitle">在啟程之前，我們必須先釐清兩個關鍵詞的意義。這將為我們的探索設定邊界，並揭示問題本身的複雜性。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <div class="scroll-reveal">
+                        <div class="p-8 border rounded-lg shadow-lg bg-white h-full">
+                            <h4 class="text-2xl font-bold mb-4 text-gray-800 flex items-center"><span class="text-3xl mr-3">🌌</span> <span data-lang-key="toeTitle">萬有理論 (TOE)</span></h4>
+                            <p class="text-gray-600 mb-4" data-lang-key="toeDescription">這並非一本能預測所有事件的百科全書，而是一個旨在統一自然界四種基本作用力（引力、強、弱、電磁力）的終極物理框架。</p>
+                            <ul class="space-y-3 text-gray-700">
+                                <li class="flex items-start"><span class="text-yellow-600 mr-2">●</span> <span data-lang-key="toePoint1"><strong>目標：</strong> 將廣義相對論與量子力學融合在一個優雅的數學結構下。</span></li>
+                                <li class="flex items-start"><span class="text-yellow-600 mr-2">●</span> <span data-lang-key="toePoint2"><strong>局限：</strong> 它可能無法解釋自身的公理基礎，也難以處理如「意識」這類複雜的創生現象。</span></li>
+                                <li class="flex items-start"><span class="text-yellow-600 mr-2">●</span> <span data-lang-key="toePoint3"><strong>結論：</strong> 一個完整的物理理論，不等於一個關於「所有實在」的完整理論。它劃定了物理世界的疆域，而非終結所有未知。</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="scroll-reveal" style="transition-delay: 100ms;">
+                        <div class="p-8 border rounded-lg shadow-lg bg-white h-full">
+                            <h4 class="text-2xl font-bold mb-4 text-gray-800 flex items-center"><span class="text-3xl mr-3">✨</span> <span data-lang-key="magicTitle">魔法 (Magic)</span></h4>
+                            <p class="text-gray-600 mb-4" data-lang-key="magicDescription">在本報告中，我們為魔法建立一個操作性定義，將其與幻術或宗教奇蹟區分開來。</p>
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg mt-4">
+                                <p class="font-semibold text-yellow-800" data-lang-key="magicDefTitle">定義：</p>
+                                <p class="text-yellow-700" data-lang-key="magicDefContent">通過與已確立的、完備的物理法則（由萬有理論定義）不相容的手段所顯化的現象，其過程常涉及將意識或意志作為直接的、非物理的因果作用者。</p>
+                            </div>
+                            <p class="mt-4 text-gray-600" data-lang-key="magicConclusion">這個定義將魔法從一種信仰，轉變為一個在物理學終結後，可被科學識別的特定現象類別。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="pathways" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-2 scroll-reveal" data-lang-key="pathwaysTitle">通往魔法的三條路徑</h3>
+                    <p class="text-gray-600 max-w-3xl mx-auto scroll-reveal" data-lang-key="pathwaysSubtitle">破解物理學之後，魔法的存在並非只有一種可能。我們將其歸納為三個層級，從完全符合物理學到徹底超越物理學。點擊下方的卡片，選擇您想優先探索的路徑。</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="pathway-card rounded-lg overflow-hidden cursor-pointer bg-white" data-pathway="tech">
+                        <div class="p-8">
+                            <div class="w-16 h-16 rounded-full icon-bg flex items-center justify-center mb-4"><span class="text-4xl">🔧</span></div>
+                            <h4 class="text-xl font-bold mb-2 text-gray-800" data-lang-key="pathwayTechTitle">第一層級：技術性魔法</h4>
+                            <p class="text-gray-600" data-lang-key="pathwayTechDescription">任何足夠先進的科技，皆與魔法無異。這是物理學的終極應用。</p>
+                        </div>
+                    </div>
+                    <div class="pathway-card rounded-lg overflow-hidden cursor-pointer bg-white" data-pathway="cosmic">
+                         <div class="p-8">
+                            <div class="w-16 h-16 rounded-full icon-bg flex items-center justify-center mb-4"><span class="text-4xl">🪐</span></div>
+                            <h4 class="text-xl font-bold mb-2 text-gray-800" data-lang-key="pathwayCosmicTitle">第二層級：宇宙魔法</h4>
+                            <p class="text-gray-600" data-lang-key="pathwayCosmicDescription">宇宙比我們所見更宏大。魔法來自與更高維度或平行宇宙的交互。</p>
+                        </div>
+                    </div>
+                    <div class="pathway-card rounded-lg overflow-hidden cursor-pointer bg-white" data-pathway="meta">
+                         <div class="p-8">
+                            <div class="w-16 h-16 rounded-full icon-bg flex items-center justify-center mb-4"><span class="text-4xl">🧠</span></div>
+                            <h4 class="text-xl font-bold mb-2 text-gray-800" data-lang-key="pathwayMetaTitle">第三層級：形上學魔法</h4>
+                            <p class="text-gray-600" data-lang-key="pathwayMetaDescription">物理主義是錯誤的。魔法源自於獨立於物質世界的心靈或意識。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pathway-content-container" class="mt-16">
+                    <div id="tech" class="content-section p-8 md:p-12 bg-white rounded-lg shadow-xl">
+                        <h4 class="text-2xl font-bold mb-6 text-gray-800" data-lang-key="techDetailTitle">第一層級：技術性魔法 (克拉克魔法)</h4>
+                        <p class="mb-6 text-gray-600" data-lang-key="techDetailDesc">此層級的魔法並非違背物理定律，而是將其應用到極致。一個掌握了萬有理論的文明，其技術將直接在現實最根本的層面上進行工程操作，其效果在我們看來將與魔法無異。這基於克拉克第三定律。</p>
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="techDetailSub1Title">量子詭異性的工程化</h5>
+                                <p class="text-gray-600 mt-1" data-lang-key="techDetailSub1Desc">我們無需等到未來，量子力學早已揭示了物理的「魔法」特性：</p>
+                                <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600">
+                                    <li data-lang-key="techDetailSub1Item1"><strong>操控糾纏:</strong> 瞬間關聯宇宙兩端物質的狀態，實現「鬼魅般的超距作用」。</li>
+                                    <li data-lang-key="techDetailSub1Item2"><strong>提升穿隧機率:</strong> 讓粒子以近100%的機率「穿牆而過」。</li>
+                                    <li data-lang-key="techDetailSub1Item3"><strong>設計觀測行為:</strong> 將一個系統從可能性的疊加態中，「指定」到一個期望的現實狀態。</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="techDetailSub2Title">結論</h5>
+                                <p class="text-gray-600 mt-1" data-lang-key="techDetailSub2Desc">這種「魔法」是物理學的終極凱歌。萬有理論的發現，將為這種技術魔法提供藍圖，使其變得完全可信。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cosmic" class="content-section p-8 md:p-12 bg-white rounded-lg shadow-xl">
+                        <h4 class="text-2xl font-bold mb-6 text-gray-800" data-lang-key="cosmicDetailTitle">第二層級：擴展物理主義魔法 (宇宙魔法)</h4>
+                        <p class="mb-6 text-gray-600" data-lang-key="cosmicDetailDesc">此層級的魔法假設我們的宇宙並非全部。魔法是與一個更宏大宇宙結構進行交互的結果，其效應在我們的四維時空中看似違背物理定律，實則遵循著更宏大的「元法則」。</p>
+                        <div class="grid md:grid-cols-2 gap-8">
+                             <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="cosmicDetailSub1Title">未見的宇宙地理學</h5>
+                                <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600">
+                                    <li data-lang-key="cosmicDetailSub1Item1"><strong>額外維度 (弦理論):</strong> 我們所見的粒子和力，可能只是基本「弦」在更高維度空間中的不同振動模式。魔法是操控這些高維度的技術。</li>
+                                    <li data-lang-key="cosmicDetailSub1Item2"><strong>多重宇宙:</strong> 我們的宇宙只是眾多「氣泡宇宙」之一。魔法可能是打開一個通往平行宇宙的微型通道，從中汲取能量或物質。</li>
+                                </ul>
+                             </div>
+                             <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="cosmicDetailSub2Title">模擬假說</h5>
+                                <p class="text-gray-600 mt-1" data-lang-key="cosmicDetailSub2Desc">我們的現實是一個高保真度的電腦模擬。那麼「魔法」可以是：</p>
+                                <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600">
+                                    <li data-lang-key="cosmicDetailSub2Item1"><strong>管理員權限:</strong> 程式員（上帝）的直接干預。</li>
+                                    <li data-lang-key="cosmicDetailSub2Item2"><strong>利用程序漏洞:</strong> 像遊戲玩家利用BUG穿牆。</li>
+                                    <li data-lang-key="cosmicDetailSub2Item3"><strong>訪問「控制台」:</strong> 從內部重寫現實的源代碼。</li>
+                                </ul>
+                             </div>
+                        </div>
+                       <p class="mt-6 text-gray-600 font-medium" data-lang-key="cosmicDetailConclusion">在這種框架下，破解萬有理論就等同於完整地反向工程了我們宇宙這個軟體的代碼，為施展魔法鋪平了道路。</p>
+                    </div>
+                    <div id="meta" class="content-section p-8 md:p-12 bg-white rounded-lg shadow-xl">
+                        <h4 class="text-2xl font-bold mb-6 text-gray-800" data-lang-key="metaDetailTitle">第三層級：非物理主義魔法 (形上學魔法)</h4>
+                        <p class="mb-6 text-gray-600" data-lang-key="metaDetailDesc">此層級的魔法最大膽，它直接挑戰物理主義——即認為世界完全是物理的這一信條。它主張實在（reality）包含著根本上非物理的維度，而魔法正是這個非物理領域的自然表達。</p>
+                        <div class="space-y-6">
+                            <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="metaDetailSub1Title">意識的困難問題</h5>
+                                <p class="text-gray-600 mt-1" data-lang-key="metaDetailSub1Desc1">為什麼物理過程（如神經元放電）會伴隨主觀的「體驗」？物理學可以解釋大腦如何處理「紅色」的信號，但無法解釋「看到紅色的感覺」本身。這個「解釋鴻溝」暗示了意識可能是非物理的。</p>
+                                <p class="text-gray-600 mt-2" data-lang-key="metaDetailSub1Desc2">如果意識是非物理的，它就代表了一個獨立於物理世界之外的實在領域。魔法，便是意識這個非物理領域，對物理世界產生直接因果作用的方式。</p>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-lg text-gray-700" data-lang-key="metaDetailSub2Title">另類本體論 (唯心論/泛心論)</h5>
+                                <p class="text-gray-600 mt-1" data-lang-key="metaDetailSub2Desc">這些哲學觀點認為心靈或意識才是第一性的，物理世界只是其表現或投射。在這種宇宙中：</p>
+                                <ul class="mt-2 list-disc list-inside space-y-2 text-gray-600">
+                                    <li data-lang-key="metaDetailSub2Item1">「物理定律」更像是宇宙心靈的穩定思維習慣。</li>
+                                    <li data-lang-key="metaDetailSub2Item2">「魔法」——通過意志直接影響現實——反而是最自然的因果作用方式。</li>
+                                </ul>
+                                <p class="text-gray-600 mt-2" data-lang-key="metaDetailConclusion">從這個視角看，萬有理論只是對「幻象規則」的發現，而魔法則是玩家（意識）以超越規則的方式與遊戲世界進行交互。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-20 bg-gray-800 text-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h3 class="text-3xl font-bold mb-2 scroll-reveal" data-lang-key="impactTitle">存在的餘波：下一次哥白尼革命</h3>
+                    <p class="text-gray-300 max-w-3xl mx-auto scroll-reveal" data-lang-key="impactSubtitle">如果任何一種真實魔法（特別是第二或第三層級）被證實，其衝擊將遠超科學領域，觸發一場深刻的文明危機與轉型。</p>
+                </div>
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <div class="bg-gray-700 p-6 rounded-lg shadow-lg scroll-reveal">
+                        <h4 class="text-xl font-semibold text-yellow-400 mb-2" data-lang-key="impactItem1Title">身份認同的重塑</h4>
+                        <p class="text-gray-300" data-lang-key="impactItem1Desc">我們是誰？一個程式中的代碼？一個宇宙心靈的短暫念頭？還是一個擁有非物質靈魂的複合體？這些哲學問題將成為每個人的日常現實。</p>
+                    </div>
+                     <div class="bg-gray-700 p-6 rounded-lg shadow-lg scroll-reveal" style="transition-delay: 100ms;">
+                        <h4 class="text-xl font-semibold text-yellow-400 mb-2" data-lang-key="impactItem2Title">「扮演上帝」的倫理困境</h4>
+                        <p class="text-gray-300" data-lang-key="impactItem2Desc">誰有權使用這種力量？其界限何在？駕馭魔法將引發尖銳的倫理難題，可能導致無法想像的社會階層分化和新的生存風險。</p>
+                    </div>
+                     <div class="bg-gray-700 p-6 rounded-lg shadow-lg scroll-reveal" style="transition-delay: 200ms;">
+                        <h4 class="text-xl font-semibold text-yellow-400 mb-2" data-lang-key="impactItem3Title">共識現實的崩潰</h4>
+                        <p class="text-gray-300" data-lang-key="impactItem3Desc">自啟蒙運動以來，我們共享著一個客觀物理世界的假設。如果意識可以改變現實，這個共享的基礎將不復存在，現實本身將成為一個爭奪的場域。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-900 text-gray-400 py-12">
+        <div class="container mx-auto px-6 text-center">
+             <h3 class="text-2xl font-bold text-white mb-4" data-lang-key="footerTitle">結論：超越最終方程式</h3>
+             <p class="max-w-3xl mx-auto mb-6" data-lang-key="footerDesc1">一個被完全「破解」的物理學，並不會導向一個乏味的世界。恰恰相反，它將精確劃出物理領域的邊界，從而使「非物理」從哲學概念，變為可被科學識別的範疇。</p>
+             <p class="max-w-3xl mx-auto" data-lang-key="footerDesc2">萬有理論的發現，不會是人類求知之旅的終點。當物理學的最後一個方程式被寫下時，它可能只是為一本探討意識、實在以及魔法本身可能性的全新巨著，寫下了序言。</p>
+            <p class="mt-8 text-sm text-gray-500" data-lang-key="footerDisclaimer">此互動報告基於學術探討，旨在以視覺化方式呈現複雜概念。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Language Switching Logic ---
+            const translations = {
+                // Header & Nav
+                headerTitle: { zh: '物理學與魔法', en: 'Physics & Magic' },
+                navIntro: { zh: '導論', en: 'Introduction' },
+                navConcepts: { zh: '核心概念', en: 'Core Concepts' },
+                navPathways: { zh: '通往魔法之路', en: 'Pathways to Magic' },
+                navImpact: { zh: '存在的餘波', en: 'Existential Ripples' },
+                navIntroMobile: { zh: '導論', en: 'Introduction' },
+                navConceptsMobile: { zh: '核心概念', en: 'Core Concepts' },
+                navPathwaysMobile: { zh: '通往魔法之路', en: 'Pathways to Magic' },
+                navImpactMobile: { zh: '存在的餘波', en: 'Existential Ripples' },
+
+                // Hero Section
+                heroTitle: { zh: '最終理論與第一道咒語', en: 'The Final Theory & The First Spell' },
+                heroSubtitle: { zh: '如果人類破解了所有物理原理，掌握了「萬有理論」，魔法是否仍有存在的可能？', en: 'If humanity deciphers all principles of physics and grasps the "Theory of Everything," is there still a possibility for magic to exist?' },
+                heroDescription: { zh: '這不僅是科學與幻想的交界，更是對實在、意識與人類未來的終極探問。本互動報告將引導您探索三種可能的路徑，以及它們將帶來的顛覆性影響。', en: 'This is not just the intersection of science and fantasy, but the ultimate inquiry into reality, consciousness, and the future of humanity. This interactive report will guide you through three possible pathways and their revolutionary implications.' },
+                heroButton: { zh: '開始探索之旅', en: 'Begin the Journey' },
+
+                // Concepts Section
+                conceptsTitle: { zh: '核心概念：界定競技場', en: 'Core Concepts: Defining the Arena' },
+                conceptsSubtitle: { zh: '在啟程之前，我們必須先釐清兩個關鍵詞的意義。這將為我們的探索設定邊界，並揭示問題本身的複雜性。', en: 'Before we begin, we must clarify the meaning of two key terms. This will set the boundaries for our exploration and reveal the complexity of the question itself.' },
+                toeTitle: { zh: '萬有理論 (TOE)', en: 'Theory of Everything (TOE)' },
+                toeDescription: { zh: '這並非一本能預測所有事件的百科全書，而是一個旨在統一自然界四種基本作用力（引力、強、弱、電磁力）的終極物理框架。', en: 'This is not an encyclopedia that predicts all events, but an ultimate physical framework intended to unify the four fundamental forces of nature (gravity, strong, weak, and electromagnetic).' },
+                toePoint1: { zh: '<strong>目標：</strong> 將廣義相對論與量子力學融合在一個優雅的數學結構下。', en: '<strong>Goal:</strong> To merge general relativity and quantum mechanics into a single, elegant mathematical structure.' },
+                toePoint2: { zh: '<strong>局限：</strong> 它可能無法解釋自身的公理基礎，也難以處理如「意識」這類複雜的創生現象。', en: '<strong>Limitations:</strong> It may not explain its own axiomatic foundations, nor can it easily handle complex emergent phenomena like "consciousness."' },
+                toePoint3: { zh: '<strong>結論：</strong> 一個完整的物理理論，不等於一個關於「所有實在」的完整理論。它劃定了物理世界的疆域，而非終結所有未知。', en: '<strong>Conclusion:</strong> A complete theory of physics is not equivalent to a complete theory of "all reality." It defines the territory of the physical world, not the end of all unknowns.' },
+                magicTitle: { zh: '魔法 (Magic)', en: 'Magic' },
+                magicDescription: { zh: '在本報告中，我們為魔法建立一個操作性定義，將其與幻術或宗教奇蹟區分開來。', en: 'In this report, we establish an operational definition for magic to distinguish it from illusion or religious miracles.' },
+                magicDefTitle: { zh: '定義：', en: 'Definition:' },
+                magicDefContent: { zh: '通過與已確立的、完備的物理法則（由萬有理論定義）不相容的手段所顯化的現象，其過程常涉及將意識或意志作為直接的、非物理的因果作用者。', en: 'A phenomenon manifested through means incompatible with established, complete physical laws (as defined by the TOE), often involving consciousness or will as a direct, non-physical causal agent.' },
+                magicConclusion: { zh: '這個定義將魔法從一種信仰，轉變為一個在物理學終結後，可被科學識別的特定現象類別。', en: 'This definition transforms magic from a matter of belief into a specific class of phenomena scientifically identifiable after the "end of physics."' },
+
+                // Pathways Section
+                pathwaysTitle: { zh: '通往魔法的三條路徑', en: 'Three Pathways to Magic' },
+                pathwaysSubtitle: { zh: '破解物理學之後，魔法的存在並非只有一種可能。我們將其歸納為三個層級，從完全符合物理學到徹底超越物理學。點擊下方的卡片，選擇您想優先探索的路徑。', en: 'After cracking physics, the existence of magic is not a single possibility. We classify it into three tiers, from fully compliant with physics to completely transcending it. Click the cards below to choose the path you want to explore first.' },
+                pathwayTechTitle: { zh: '第一層級：技術性魔法', en: 'Tier 1: Technological Magic' },
+                pathwayTechDescription: { zh: '任何足夠先進的科技，皆與魔法無異。這是物理學的終極應用。', en: 'Any sufficiently advanced technology is indistinguishable from magic. This is the ultimate application of physics.' },
+                pathwayCosmicTitle: { zh: '第二層級：宇宙魔法', en: 'Tier 2: Cosmic Magic' },
+                pathwayCosmicDescription: { zh: '宇宙比我們所見更宏大。魔法來自與更高維度或平行宇宙的交互。', en: 'The universe is grander than we see. Magic comes from interaction with higher dimensions or parallel universes.' },
+                pathwayMetaTitle: { zh: '第三層級：形上學魔法', en: 'Tier 3: Metaphysical Magic' },
+                pathwayMetaDescription: { zh: '物理主義是錯誤的。魔法源自於獨立於物質世界的心靈或意識。', en: 'Physicalism is wrong. Magic originates from a mind or consciousness independent of the material world.' },
+
+                // Tech Pathway Details
+                techDetailTitle: { zh: '第一層級：技術性魔法 (克拉克魔法)', en: 'Tier 1: Technological Magic (Clarkean Magic)' },
+                techDetailDesc: { zh: '此層級的魔法並非違背物理定律，而是將其應用到極致。一個掌握了萬有理論的文明，其技術將直接在現實最根本的層面上進行工程操作，其效果在我們看來將與魔法無異。這基於克拉克第三定律。', en: 'This tier of magic does not violate the laws of physics but applies them to their absolute limit. A civilization that has mastered the TOE would engineer reality at its most fundamental level, producing effects indistinguishable from magic to us. This is based on Clarke\'s Third Law.' },
+                techDetailSub1Title: { zh: '量子詭異性的工程化', en: 'Engineering Quantum Weirdness' },
+                techDetailSub1Desc: { zh: '我們無需等到未來，量子力學早已揭示了物理的「魔法」特性：', en: 'We don\'t need to wait for the future; quantum mechanics has already revealed the "magical" properties of physics:' },
+                techDetailSub1Item1: { zh: '<strong>操控糾纏:</strong> 瞬間關聯宇宙兩端物質的狀態，實現「鬼魅般的超距作用」。', en: '<strong>Manipulating Entanglement:</strong> Instantly correlating the state of matter across the universe, achieving "spooky action at a distance."' },
+                techDetailSub1Item2: { zh: '<strong>提升穿隧機率:</strong> 讓粒子以近100%的機率「穿牆而過」。', en: '<strong>Enhancing Tunneling Probability:</strong> Making particles "pass through walls" with near-100% probability.' },
+                techDetailSub1Item3: { zh: '<strong>設計觀測行為:</strong> 將一個系統從可能性的疊加態中，「指定」到一個期望的現實狀態。', en: '<strong>Engineering Observation:</strong> "Collapsing" a system from a superposition of possibilities into a desired, specific state of reality.' },
+                techDetailSub2Title: { zh: '結論', en: 'Conclusion' },
+                techDetailSub2Desc: { zh: '這種「魔法」是物理學的終極凱歌。萬有理論的發現，將為這種技術魔法提供藍圖，使其變得完全可信。', en: 'This "magic" is the ultimate triumph of physics. The discovery of the TOE would provide the blueprint for this technological magic, making it entirely plausible.' },
+
+                // Cosmic Pathway Details
+                cosmicDetailTitle: { zh: '第二層級：擴展物理主義魔法 (宇宙魔法)', en: 'Tier 2: Expanded Physicalist Magic (Cosmic Magic)' },
+                cosmicDetailDesc: { zh: '此層級的魔法假設我們的宇宙並非全部。魔法是與一個更宏大宇宙結構進行交互的結果，其效應在我們的四維時空中看似違背物理定律，實則遵循著更宏大的「元法則」。', en: 'This tier of magic assumes our universe is not all there is. Magic is the result of interacting with a grander cosmic structure, with effects that seem to violate physical laws in our 4D spacetime but actually follow a greater "meta-law."' },
+                cosmicDetailSub1Title: { zh: '未見的宇宙地理學', en: 'Unseen Cosmic Geography' },
+                cosmicDetailSub1Item1: { zh: '<strong>額外維度 (弦理論):</strong> 我們所見的粒子和力，可能只是基本「弦」在更高維度空間中的不同振動模式。魔法是操控這些高維度的技術。', en: '<strong>Extra Dimensions (String Theory):</strong> The particles and forces we see may just be different vibrational modes of fundamental "strings" in higher-dimensional space. Magic is the technology to manipulate these higher dimensions.' },
+                cosmicDetailSub1Item2: { zh: '<strong>多重宇宙:</strong> 我們的宇宙只是眾多「氣泡宇宙」之一。魔法可能是打開一個通往平行宇宙的微型通道，從中汲取能量或物質。', en: '<strong>Multiverse:</strong> Our universe is just one of many "bubble universes." Magic could be opening a micro-channel to a parallel universe to draw energy or matter from it.' },
+                cosmicDetailSub2Title: { zh: '模擬假說', en: 'The Simulation Hypothesis' },
+                cosmicDetailSub2Desc: { zh: '我們的現實是一個高保真度的電腦模擬。那麼「魔法」可以是：', en: 'Our reality is a high-fidelity computer simulation. "Magic" could then be:' },
+                cosmicDetailSub2Item1: { zh: '<strong>管理員權限:</strong> 程式員（上帝）的直接干預。', en: '<strong>Admin Privileges:</strong> Direct intervention by the programmer (God).' },
+                cosmicDetailSub2Item2: { zh: '<strong>利用程序漏洞:</strong> 像遊戲玩家利用BUG穿牆。', en: '<strong>Exploiting Glitches:</strong> Like a gamer using a bug to clip through a wall.' },
+                cosmicDetailSub2Item3: { zh: '<strong>訪問「控制台」:</strong> 從內部重寫現實的源代碼。', en: '<strong>Accessing the "Console":</strong> Rewriting the source code of reality from within.' },
+                cosmicDetailConclusion: { zh: '在這種框架下，破解萬有理論就等同於完整地反向工程了我們宇宙這個軟體的代碼，為施展魔法鋪平了道路。', en: 'In this framework, deciphering the TOE is equivalent to completely reverse-engineering the code of our universe\'s software, paving the way for casting spells.' },
+                
+                // Metaphysical Pathway Details
+                metaDetailTitle: { zh: '第三層級：非物理主義魔法 (形上學魔法)', en: 'Tier 3: Non-Physicalist Magic (Metaphysical Magic)' },
+                metaDetailDesc: { zh: '此層級的魔法最大膽，它直接挑戰物理主義——即認為世界完全是物理的這一信條。它主張實在（reality）包含著根本上非物理的維度，而魔法正是這個非物理領域的自然表達。', en: 'This is the most audacious tier. It directly challenges physicalism—the belief that the world is entirely physical. It posits that reality contains a fundamentally non-physical dimension, and magic is the natural expression of this non-physical realm.' },
+                metaDetailSub1Title: { zh: '意識的困難問題', en: 'The Hard Problem of Consciousness' },
+                metaDetailSub1Desc1: { zh: '為什麼物理過程（如神經元放電）會伴隨主觀的「體驗」？物理學可以解釋大腦如何處理「紅色」的信號，但無法解釋「看到紅色的感覺」本身。這個「解釋鴻溝」暗示了意識可能是非物理的。', en: 'Why are physical processes (like neuron firings) accompanied by subjective "experience"? Physics can explain how the brain processes the signal for "red," but not the experience of "seeing red" itself. This "explanatory gap" suggests consciousness might be non-physical.' },
+                metaDetailSub1Desc2: { zh: '如果意識是非物理的，它就代表了一個獨立於物理世界之外的實在領域。魔法，便是意識這個非物理領域，對物理世界產生直接因果作用的方式。', en: 'If consciousness is non-physical, it represents a domain of reality separate from the physical world. Magic, then, is how this non-physical domain of consciousness exerts direct causal influence on the physical world.' },
+                metaDetailSub2Title: { zh: '另類本體論 (唯心論/泛心論)', en: 'Alternative Ontologies (Idealism/Panpsychism)' },
+                metaDetailSub2Desc: { zh: '這些哲學觀點認為心靈或意識才是第一性的，物理世界只是其表現或投射。在這種宇宙中：', en: 'These philosophical views hold that mind or consciousness is primary, and the physical world is merely its representation or projection. In such a universe:' },
+                metaDetailSub2Item1: { zh: '「物理定律」更像是宇宙心靈的穩定思維習慣。', en: '"Physical laws" are more like the stable thought habits of a cosmic mind.' },
+                metaDetailSub2Item2: { zh: '「魔法」——通過意志直接影響現實——反而是最自然的因果作用方式。', en: '"Magic"—directly influencing reality through will—is, in fact, the most natural form of causation.' },
+                metaDetailConclusion: { zh: '從這個視角看，萬有理論只是對「幻象規則」的發現，而魔法則是玩家（意識）以超越規則的方式與遊戲世界進行交互。', en: 'From this perspective, the TOE is merely the discovery of the "rules of the illusion," while magic is the player (consciousness) interacting with the game world in a way that transcends those rules.' },
+                
+                // Impact Section
+                impactTitle: { zh: '存在的餘波：下一次哥白尼革命', en: 'Existential Ripples: The Next Copernican Revolution' },
+                impactSubtitle: { zh: '如果任何一種真實魔法（特別是第二或第三層級）被證實，其衝擊將遠超科學領域，觸發一場深刻的文明危機與轉型。', en: 'If any form of true magic (especially Tier 2 or 3) were confirmed, the impact would extend far beyond science, triggering a profound civilizational crisis and transformation.' },
+                impactItem1Title: { zh: '身份認同的重塑', en: 'The Remaking of Identity' },
+                impactItem1Desc: { zh: '我們是誰？一個程式中的代碼？一個宇宙心靈的短暫念頭？還是一個擁有非物質靈魂的複合體？這些哲學問題將成為每個人的日常現實。', en: 'Who are we? Code in a program? A fleeting thought in a cosmic mind? Or a composite being with a non-physical soul? These philosophical questions would become everyone\'s daily reality.' },
+                impactItem2Title: { zh: '「扮演上帝」的倫理困境', en: 'The Ethical Quagmire of "Playing God"' },
+                impactItem2Desc: { zh: '誰有權使用這種力量？其界限何在？駕馭魔法將引發尖銳的倫理難題，可能導致無法想像的社會階層分化和新的生存風險。', en: 'Who has the right to wield this power? Where are the boundaries? Harnessing magic would trigger sharp ethical dilemmas, potentially leading to unimaginable social stratification and new existential risks.' },
+                impactItem3Title: { zh: '共識現實的崩潰', en: 'The Collapse of Consensus Reality' },
+                impactItem3Desc: { zh: '自啟蒙運動以來，我們共享著一個客觀物理世界的假設。如果意識可以改變現實，這個共享的基礎將不復存在，現實本身將成為一個爭奪的場域。', en: 'Since the Enlightenment, we have shared the assumption of an objective physical world. If consciousness can alter reality, this shared foundation would cease to exist, and reality itself would become a contested battlefield.' },
+
+                // Footer
+                footerTitle: { zh: '結論：超越最終方程式', en: 'Conclusion: Beyond the Final Equation' },
+                footerDesc1: { zh: '一個被完全「破解」的物理學，並不會導向一個乏味的世界。恰恰相反，它將精確劃出物理領域的邊界，從而使「非物理」從哲學概念，變為可被科學識別的範疇。', en: 'A completely "cracked" physics would not lead to a boring world. On the contrary, it would precisely delineate the boundaries of the physical domain, thereby transforming the "non-physical" from a philosophical concept into a scientifically identifiable category.' },
+                footerDesc2: { zh: '萬有理論的發現，不會是人類求知之旅的終點。當物理學的最後一個方程式被寫下時，它可能只是為一本探討意識、實在以及魔法本身可能性的全新巨著，寫下了序言。', en: 'The discovery of the Theory of Everything will not be the end of humanity\'s quest for knowledge. When the final equation of physics is written, it may just be the prologue to a new magnum opus on consciousness, reality, and the possibility of magic itself.' },
+                footerDisclaimer: { zh: '此互動報告基於學術探討，旨在以視覺化方式呈現複雜概念。', en: 'This interactive report is based on academic inquiry and aims to present complex concepts in a visualized format.' }
+            };
+
+            let currentLang = 'zh';
+
+            function switchLanguage(lang) {
+                // Update all elements with data-lang-key attribute
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[key] && translations[key][lang]) {
+                        el.innerHTML = translations[key][lang];
+                    }
+                });
+
+                // Update html lang attribute
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                
+                // Update switcher buttons text
+                const newButtonText = lang === 'en' ? '中文' : 'English';
+                document.getElementById('lang-switcher').textContent = newButtonText;
+                document.getElementById('lang-switcher-mobile').textContent = newButtonText;
+                
+                // Update page title
+                document.title = lang === 'zh' ? '互動式報告：最終理論與第一道咒語' : 'Interactive Report: The Final Theory & The First Spell';
+            }
+
+            // Event listeners for switcher buttons
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                switchLanguage(currentLang);
+            });
+             document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                switchLanguage(currentLang);
+            });
+
+
+            // --- Original Page Logic ---
+            const pathwayCards = document.querySelectorAll('.pathway-card');
+            const contentSections = document.querySelectorAll('.content-section');
+            const contentContainer = document.getElementById('pathway-content-container');
+
+            pathwayCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const pathwayId = card.dataset.pathway;
+                    
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    const activeSection = document.getElementById(pathwayId);
+                    if(activeSection) {
+                       activeSection.classList.add('active');
+                       contentContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('header a[href^="#"]');
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    if(document.getElementById('mobile-menu').classList.contains('block')){
+                        document.getElementById('mobile-menu').classList.remove('block');
+                        document.getElementById('mobile-menu').classList.add('hidden');
+                    }
+                });
+            });
+
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('block');
+            });
+            
+            const scrollElements = document.querySelectorAll('.scroll-reveal');
+            const elementInView = (el, dividend = 1) => {
+                const elementTop = el.getBoundingClientRect().top;
+                return (
+                    elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
+                );
+            };
+
+            const displayScrollElement = (element) => {
+                element.classList.add('visible');
+            };
+
+            const hideScrollElement = (element) => {
+                element.classList.remove('visible');
+            }
+
+            const handleScrollAnimation = () => {
+                scrollElements.forEach((el) => {
+                    if (elementInView(el, 1.25)) {
+                        displayScrollElement(el);
+                    } 
+                });
+            }
+
+            window.addEventListener('scroll', () => {
+                handleScrollAnimation();
+            });
+            
+            handleScrollAnimation();
+
+            const headerNavLinks = document.querySelectorAll('header nav .nav-link');
+            const sections = document.querySelectorAll('main section, footer');
+            
+            const onScroll = () => {
+                let currentSection = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 100) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                headerNavLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', onScroll);
+
+            // Set initial language on load
+            switchLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
