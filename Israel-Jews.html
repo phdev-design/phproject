@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>以色列與猶太人：互動式解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Slate/Stone neutrals, muted Blue accent) -->
+    <!-- Application Structure Plan: A narrative, single-page scrolling experience designed to guide users from a direct answer to the core question, through comparative definitions, data visualizations of global and national populations, an interactive historical timeline, and finally to a nuanced conclusion. This structure prioritizes educational flow and clarity over mirroring the report's chapter format, making the complex topic accessible by breaking it into logical, visually supported themes. -->
+    <!-- Visualization & Content Choices:
+    - Core Question: Goal(Inform) -> Method(Large Text) -> Interaction(None) -> Justification(Immediate clarity).
+    - Definitions: Goal(Compare) -> Method(Side-by-side HTML layout) -> Interaction(None) -> Justification(Direct comparison).
+    - Global Population: Goal(Compare/Inform) -> Method(Chart.js Donut & Bar Charts) -> Interaction(Hover tooltips) -> Justification(Best for showing proportions and rankings). Library: Chart.js.
+    - Israeli Demographics: Goal(Inform) -> Method(Chart.js Donut Chart) -> Interaction(Hover tooltips) -> Justification(Clear visual for population breakdown). Library: Chart.js.
+    - Historical Connection: Goal(Change/Organize) -> Method(Interactive HTML/CSS/JS timeline) -> Interaction(Click to reveal text) -> Justification(Engaging way to present history without overwhelming text). Method: Custom JS.
+    - Conclusion: Goal(Inform) -> Method(Styled text) -> Interaction(None) -> Justification(Summarizes key takeaways).
+     -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif; /* 優先使用中文，英文fallback */
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 320px;
+            width: 100%;
+            max-width: 450px;
+        }
+        @media (min-width: 640px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .timeline-dot {
+            transition: all 0.3s ease;
+        }
+        .timeline-dot.active {
+            background-color: #2563eb;
+            transform: scale(1.25);
+        }
+        .timeline-dot.active span {
+            font-weight: 700;
+            color: #2563eb;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-900" data-key="headerTitle">以色列與猶太人</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#definition" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" data-key="navDefinition">身份定義</a>
+                            <a href="#global" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" data-key="navGlobal">全球分佈</a>
+                            <a href="#israel" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" data-key="navIsrael">以色列國情</a>
+                            <a href="#connection" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" data-key="navConnection">歷史連結</a>
+                            <a href="#identity" class="text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium" data-key="navIdentity">身份認同</a>
+                        </div>
+                    </div>
+                    <!-- Language Toggle Button -->
+                    <button id="language-toggle" class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200">
+                        English / 中文
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="intro" class="text-center py-16 md:py-24">
+            <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-slate-900" data-key="introQuestion">猶太人就是以色列人嗎？</h2>
+            <p class="mt-4 text-6xl md:text-8xl font-bold text-blue-600" data-key="introAnswer">否</p>
+            <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-slate-600" data-key="introText">
+                這兩個身份緊密相連，但並不完全相同。「猶太人」是一個擁有數千年歷史的全球性民族宗教群體，而「以色列人」是現代以色列國的公民。讓我們一同探索其中的區別與聯繫。
+            </p>
+        </section>
+
+        <section id="definition" class="py-16 md:py-20 bg-white rounded-2xl shadow-lg">
+            <div class="max-w-5xl mx-auto px-6 lg:px-8">
+                <h3 class="text-center text-3xl font-bold text-slate-900 mb-4" data-key="defTitle">兩個身份，一個核心</h3>
+                <p class="text-center text-lg text-slate-600 mb-12 max-w-3xl mx-auto" data-key="defDescription">此部分旨在清晰界定「猶太人」和「以色列人」這兩個群體。透過並列比較，您可以快速理解他們在根源、身份基礎、人口分佈和地理位置上的核心差異與共同點。</p>
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-2xl font-bold text-blue-700 mb-4" data-key="jewishTitle">✡️ 誰是猶太人？</h4>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><strong class="font-semibold text-slate-900" data-key="jewishOriginLabel">根源：</strong><span data-key="jewishOriginContent">源自西亞的古代民族，祖先為希伯來人，擁有超過三千年的歷史。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="jewishIdentityLabel">身份基礎：</strong><span data-key="jewishIdentityContent">一個「民族宗教」群體。身份主要基於母系血緣傳承或皈依猶太教。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="jewishGlobalPopLabel">全球人口：</strong><span data-key="jewishGlobalPopContent">約 1,570 萬人 (2023年數據)。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="jewishGeographyLabel">地理分佈：</strong><span data-key="jewishGeographyContent">遍佈全球，是一個跨國界的民族。約46%居住在以色列，54%散居世界各地。</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-2xl font-bold text-green-700 mb-4" data-key="israeliTitle">🇮🇱 誰是以色列人？</h4>
+                        <ul class="space-y-3 text-slate-700">
+                            <li><strong class="font-semibold text-slate-900" data-key="israeliOriginLabel">根源：</strong><span data-key="israeliOriginContent">現代主權國家以色列國的公民，該國成立於1948年。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="israeliIdentityLabel">身份基礎：</strong><span data-key="israeliIdentityContent">「國家公民」身份。主要依據國籍法，不限於任何特定族裔或宗教。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="israeliTotalPopLabel">總人口：</strong><span data-key="israeliTotalPopContent">約 1,001 萬人 (2025年預估)。</span></li>
+                            <li><strong class="font-semibold text-slate-900" data-key="israeliGeographyLabel">地理分佈：</strong><span data-key="israeliGeographyContent">絕大多數居住在以色列國內。其公民身份包含猶太人、阿拉伯人、德魯茲人等多個族群。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="global" class="py-16 md:py-20">
+             <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-900" data-key="globalTitle">全球視野：一個民族的分佈</h3>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-key="globalDescription">本節透過數據圖表，直觀展示全球猶太人口的分佈情況。您會發現，儘管以色列是猶太民族的國家，但超過一半的猶太人生活在其境外，形成了一個真正意義上的全球性民族。</p>
+            </div>
+            <div class="grid lg:grid-cols-5 gap-8 items-center">
+                <div class="lg:col-span-2 text-center lg:text-left">
+                    <h4 class="text-2xl font-bold text-slate-800 mb-4" data-key="globalChart1Title">以色列 vs. 僑居地</h4>
+                    <p class="text-slate-600 mb-6" data-key="globalChart1Desc">全球約1,570萬猶太人中，居住在以色列和世界其他地區（僑居地）的人口比例幾乎各半。這凸顯了猶太民族的跨國特性。美國是海外最大的猶太社群所在地。</p>
+                    <div class="chart-container">
+                        <canvas id="globalJewishPopulationChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-3">
+                    <h4 class="text-2xl font-bold text-slate-800 mb-4 text-center lg:text-left" data-key="globalChart2Title">主要猶太人口國家 (2023)</h4>
+                    <div class="relative h-96 w-full">
+                        <canvas id="topCountriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="israel" class="py-16 md:py-20 bg-white rounded-2xl shadow-lg">
+             <div class="max-w-5xl mx-auto px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-slate-900" data-key="israelTitle">深入以色列：一個多元的國家</h3>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-key="israelDescription">現在，我們將焦點轉向以色列內部。這個被稱為「猶太國家」的地方，其公民身份實際上包含了多元的族群。圖表將揭示以色列社會的構成，證明「以色列人」並不單指猶太人。</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h4 class="text-2xl font-bold text-slate-800 mb-4" data-key="israelChartTitle">以色列公民的族群構成</h4>
+                        <p class="text-slate-600 mb-6" data-key="israelChartDesc">以色列總人口中，猶太裔雖佔絕大多數，但仍有超過四分之一的公民屬於其他族群，其中以阿拉伯裔為主。這塑造了以色列獨特且複雜的多元文化社會。</p>
+                         <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded-full mr-3" style="background-color: #3b82f6;"></div>
+                                <span data-key="israelChartLabel1">猶太裔 (約 74%)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded-full mr-3" style="background-color: #10b981;"></div>
+                                <span data-key="israelChartLabel2">阿拉伯裔 (約 21%)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 rounded-full mr-3" style="background-color: #64748b;"></div>
+                                <span data-key="israelChartLabel3">其他族裔 (約 5%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="israelDemographicsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="connection" class="py-16 md:py-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-900" data-key="connectionTitle">歷史的連結：從古地到現代國家</h3>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-key="connectionDescription">猶太民族與「以色列地」的深厚聯繫是理解兩者關係的關鍵。本節的互動式時間軸將帶您穿越數千年歷史，從古代王國的建立，到漫長的流散，再到現代以色列國的誕生，揭示這段充滿韌性與回歸的歷程。</p>
+            </div>
+            <div class="w-full max-w-4xl mx-auto">
+                <div class="relative">
+                    <div class="absolute left-1/2 -translate-x-1/2 w-1 h-full bg-slate-200 rounded-full"></div>
+                    <div id="timeline" class="space-y-16 relative">
+                    </div>
+                </div>
+                <div id="timeline-content" class="mt-8 bg-white p-6 rounded-lg shadow-md min-h-[150px] flex items-center justify-center">
+                    <p class="text-slate-500" data-key="timelineInitialText">點擊上方時間軸的節點以查看詳細資訊。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="identity" class="py-16 md:py-20">
+            <div class="max-w-3xl mx-auto text-center">
+                <h3 class="text-3xl font-bold text-slate-900" data-key="identityTitle">結論：交織的身份認同</h3>
+                <p class="mt-4 text-lg text-slate-600" data-key="identitySummary">
+                    綜上所述，猶太人與以色列人的關係是民族、宗教與國家主權交織的獨特範例。
+                </p>
+                <div class="mt-8 text-left bg-white p-8 rounded-2xl shadow-lg space-y-4">
+                     <p class="text-slate-700"><strong data-key="identityPoint1Strong">「猶太人」</strong><span data-key="identityPoint1Content">是一個擁有共同血緣、文化與宗教傳承的全球性民族，其身份超越國界。</span></p>
+                     <p class="text-slate-700"><strong data-key="identityPoint2Strong">「以色列國」</strong><span data-key="identityPoint2Content">是這個民族在歷史故土上建立的現代主權國家，為全球猶太人提供了一個家園和安全的保障，其核心法律《回歸法》是連接兩者的關鍵橋樑。</span></p>
+                     <p class="text-slate-700" data-key="identityPoint3">然而，我們必須清楚區分：<strong>並非所有猶太人都是以色列公民</strong>（超過半數生活在海外），也<strong>並非所有以色列公民都是猶太人</strong>（國內有顯著的非猶太裔人口）。</p>
+                     <p class="text-slate-700" data-key="identityPoint4">隨著以色列本土出生世代的增加，一種新的、植根於共同國家經歷的「以色列人」身份正在形成，這使得身份認同的圖景更加豐富和動態。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 py-6">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p data-key="footerText1">此互動式報告根據學術資料生成，旨在提供教育性參考。</p>
+            <p data-key="footerText2">&copy; 2025 互動式解析</p>
+        </div>
+    </footer>
+
+    <script>
+        // All translatable content
+        const translations = {
+            'zh-TW': {
+                headerTitle: '以色列與猶太人',
+                navDefinition: '身份定義',
+                navGlobal: '全球分佈',
+                navIsrael: '以色列國情',
+                navConnection: '歷史連結',
+                navIdentity: '身份認同',
+
+                introQuestion: '猶太人就是以色列人嗎？',
+                introAnswer: '否',
+                introText: '這兩個身份緊密相連，但並不完全相同。「猶太人」是一個擁有數千年歷史的全球性民族宗教群體，而「以色列人」是現代以色列國的公民。讓我們一同探索其中的區別與聯繫。',
+
+                defTitle: '兩個身份，一個核心',
+                defDescription: '此部分旨在清晰界定「猶太人」和「以色列人」這兩個群體。透過並列比較，您可以快速理解他們在根源、身份基礎、人口分佈和地理位置上的核心差異與共同點。',
+                jewishTitle: '✡️ 誰是猶太人？',
+                jewishOriginLabel: '根源：',
+                jewishOriginContent: '源自西亞的古代民族，祖先為希伯來人，擁有超過三千年的歷史。',
+                jewishIdentityLabel: '身份基礎：',
+                jewishIdentityContent: '一個「民族宗教」群體。身份主要基於母系血緣傳承或皈依猶太教。',
+                jewishGlobalPopLabel: '全球人口：',
+                jewishGlobalPopContent: '約 1,570 萬人 (2023年數據)。',
+                jewishGeographyLabel: '地理分佈：',
+                jewishGeographyContent: '遍佈全球，是一個跨國界的民族。約46%居住在以色列，54%散居世界各地。',
+
+                israeliTitle: '🇮🇱 誰是以色列人？',
+                israeliOriginLabel: '根源：',
+                israeliOriginContent: '現代主權國家以色列國的公民，該國成立於1948年。',
+                israeliIdentityLabel: '身份基礎：',
+                israeliIdentityContent: '「國家公民」身份。主要依據國籍法，不限於任何特定族裔或宗教。',
+                israeliTotalPopLabel: '總人口：',
+                israeliTotalPopContent: '約 1,001 萬人 (2025年預估)。',
+                israeliGeographyLabel: '地理分佈：',
+                israeliGeographyContent: '絕大多數居住在以色列國內。其公民身份包含猶太人、阿拉伯人、德魯茲人等多個族群。',
+
+                globalTitle: '全球視野：一個民族的分佈',
+                globalDescription: '本節透過數據圖表，直觀展示全球猶太人口的分佈情況。您會發現，儘管以色列是猶太民族的國家，但超過一半的猶太人生活在其境外，形成了一個真正意義上的全球性民族。',
+                globalChart1Title: '以色列 vs. 僑居地',
+                globalChart1Desc: '全球約1,570萬猶太人中，居住在以色列和世界其他地區（僑居地）的人口比例幾乎各半。這凸顯了猶太民族的跨國特性。美國是海外最大的猶太社群所在地。',
+                globalChart1Label1: '以色列境內 (46%)',
+                globalChart1Label2: '以色列境外 (54%)',
+                globalChart2Title: '主要猶太人口國家 (2023)',
+                globalChart2DatasetLabel: '主要僑居國猶太人口 (萬)',
+                globalChart2XAxisLabel: '人口 (萬)',
+
+                israelTitle: '深入以色列：一個多元的國家',
+                israelDescription: '現在，我們將焦點轉向以色列內部。這個被稱為「猶太國家」的地方，其公民身份實際上包含了多元的族群。圖表將揭示以色列社會的構成，證明「以色列人」並不單指猶太人。',
+                israelChartTitle: '以色列公民的族群構成',
+                israelChartDesc: '以色列總人口中，猶太裔雖佔絕大多數，但仍有超過四分之一的公民屬於其他族群，其中以阿拉伯裔為主。這塑造了以色列獨特且複雜的多元文化社會。',
+                israelChartLabel1: '猶太裔 (約 74%)',
+                israelChartLabel2: '阿拉伯裔 (約 21%)',
+                israelChartLabel3: '其他族裔 (約 5%)',
+
+                connectionTitle: '歷史的連結：從古地到現代國家',
+                connectionDescription: '猶太民族與「以色列地」的深厚聯繫是理解兩者關係的關鍵。本節的互動式時間軸將帶您穿越數千年歷史，從古代王國的建立，到漫長的流散，再到現代以色列國的誕生，揭示這段充滿韌性與回歸的歷程。',
+                timelineInitialText: '點擊上方時間軸的節點以查看詳細資訊。',
+                timelineData: [
+                    { year: '約西元前1000年', title: '古代王國', content: '大衛王統一以色列各支派，定都耶路撒冷，建立起第一個統一的猶太國家。這片土地從此成為猶太民族的歷史與精神中心。' },
+                    { year: '約西元70年', title: '聖殿被毀與流散', content: '羅馬帝國摧毀耶路撒冷的第二聖殿，導致大規模的猶太人被迫流亡（Diaspora），開始了長達近兩千年的全球散居歷史。' },
+                    { year: '19世紀末', title: '錫安主義興起', content: '面對歐洲日益猖獗的反猶主義，錫安主義（猶太復國主義）運動應運而生，旨在建立一個猶太民族的國家，以尋求民族自決與安全。' },
+                    { year: '1947年', title: '聯合國分治方案', content: '二戰後，聯合國通過第181號決議，建議將巴勒斯坦地區分割為一個阿拉伯國和一個猶太國，為以色列建國提供了國際法理依據。' },
+                    { year: '1948年', title: '以色列國成立', content: '在英國結束託管的當天，猶太人民委員會宣布以色列國成立。此舉立即引發了第一次中東戰爭，也開啟了現代以色列的歷史新頁。' },
+                    { year: '1950年', title: '《回歸法》通過', content: '以色列國會通過《回歸法》，賦予全球所有猶太人及其親屬移民以色列並自動獲得公民身份的權利，這是連接全球猶太人與以色列國的關鍵法律橋樑。' }
+                ],
+
+                identityTitle: '結論：交織的身份認同',
+                identitySummary: '綜上所述，猶太人與以色列人的關係是民族、宗教與國家主權交織的獨特範例。',
+                identityPoint1Strong: '「猶太人」',
+                identityPoint1Content: '是一個擁有共同血緣、文化與宗教傳承的全球性民族，其身份超越國界。',
+                identityPoint2Strong: '「以色列國」',
+                identityPoint2Content: '是這個民族在歷史故土上建立的現代主權國家，為全球猶太人提供了一個家園和安全的保障，其核心法律《回歸法》是連接兩者的關鍵橋樑。',
+                identityPoint3: '然而，我們必須清楚區分：<strong>並非所有猶太人都是以色列公民</strong>（超過半數生活在海外），也<strong>並非所有以色列公民都是猶太人</strong>（國內有顯著的非猶太裔人口）。',
+                identityPoint4: '隨著以色列本土出生世代的增加，一種新的、植根於共同國家經歷的「以色列人」身份正在形成，這使得身份認同的圖景更加豐富和動態。',
+
+                footerText1: '此互動式報告根據學術資料生成，旨在提供教育性參考。',
+                footerText2: '&copy; 2025 互動式解析'
+            },
+            'en': {
+                headerTitle: 'Israel & Jews',
+                navDefinition: 'Definitions',
+                navGlobal: 'Global Distribution',
+                navIsrael: 'Israeli Demographics',
+                navConnection: 'Historical Links',
+                navIdentity: 'Identity',
+
+                introQuestion: 'Are all Jews Israelis?',
+                introAnswer: 'No',
+                introText: 'These two identities are closely related but not identical. "Jew" refers to a global ethno-religious group with thousands of years of history, while "Israeli" refers to a citizen of the modern State of Israel. Let\'s explore the distinctions and connections.',
+
+                defTitle: 'Two Identities, One Core',
+                defDescription: 'This section aims to clearly define the groups "Jews" and "Israelis." Through side-by-side comparison, you can quickly understand their core differences and commonalities in origin, identity basis, population distribution, and geographical location.',
+                jewishTitle: '✡️ Who are Jews?',
+                jewishOriginLabel: 'Origin:',
+                jewishOriginContent: 'An ancient ethno-religious group originating from West Asia, ancestors of the Hebrews, with over three millennia of history.',
+                jewishIdentityLabel: 'Identity Basis:',
+                jewishIdentityContent: 'An "ethno-religious" group. Identity is primarily based on matrilineal descent or conversion to Judaism.',
+                jewishGlobalPopLabel: 'Global Population:',
+                jewishGlobalPopContent: 'Approximately 15.7 million (2023 data).',
+                jewishGeographyLabel: 'Geographical Distribution:',
+                jewishGeographyContent: 'Spread globally as a transnational people. About 46% live in Israel, and 54% are dispersed worldwide.',
+
+                israeliTitle: '🇮🇱 Who are Israelis?',
+                israeliOriginLabel: 'Origin:',
+                israeliOriginContent: 'Citizens of the modern sovereign State of Israel, established in 1948.',
+                israeliIdentityLabel: 'Identity Basis:',
+                israeliIdentityContent: '"National Citizenship" status. Primarily based on nationality law, not limited to any specific ethnicity or religion.',
+                israeliTotalPopLabel: 'Total Population:',
+                israeliTotalPopContent: 'Approximately 10.01 million (2025 estimate).',
+                israeliGeographyLabel: 'Geographical Distribution:',
+                israeliGeographyContent: 'The vast majority reside within Israel. Its citizens include Jews, Arabs, Druze, and other groups.',
+
+                globalTitle: 'Global Perspective: Distribution of a People',
+                globalDescription: 'This section visually demonstrates the global distribution of the Jewish population through data charts. You will find that although Israel is the nation-state of the Jewish people, over half of all Jews live outside its borders, forming a truly global people.',
+                globalChart1Title: 'Israel vs. Diaspora',
+                globalChart1Desc: 'Of the approximately 15.7 million Jews globally, the proportion living in Israel versus other parts of the world (Diaspora) is almost evenly split. This highlights the transnational nature of the Jewish people. The United States hosts the largest Jewish community outside Israel.',
+                globalChart1Label1: 'In Israel (46%)',
+                globalChart1Label2: 'Outside Israel (54%)',
+                globalChart2Title: 'Major Jewish Population Countries (2023)',
+                globalChart2DatasetLabel: 'Jewish Population in Major Diaspora Countries (Millions)',
+                globalChart2XAxisLabel: 'Population (Millions)',
+
+                israelTitle: 'Deep Dive into Israel: A Diverse Nation',
+                israelDescription: 'Now, we turn our focus to Israel\'s internal demographics. Although known as a "Jewish State," its citizenship actually encompasses diverse ethnic groups. The chart will reveal the composition of Israeli society, proving that "Israeli" does not exclusively refer to Jews.',
+                israelChartTitle: 'Ethnic Composition of Israeli Citizens',
+                israelChartDesc: 'While Jewish Israelis constitute the vast majority of Israel\'s total population, over a quarter of its citizens belong to other ethnic groups, primarily Arabs. This shapes Israel\'s unique and complex multicultural society.',
+                israelChartLabel1: 'Jewish (approx. 74%)',
+                israelChartLabel2: 'Arab (approx. 21%)',
+                israelChartLabel3: 'Other (approx. 5%)',
+
+                connectionTitle: 'Historical Connection: From Ancient Land to Modern State',
+                connectionDescription: 'The deep connection between the Jewish people and the "Land of Israel" is key to understanding their relationship. This interactive timeline will take you through thousands of years of history, from the establishment of ancient kingdoms to the long diaspora, and finally to the birth of the modern State of Israel, revealing this journey of resilience and return.',
+                timelineInitialText: 'Click on a timeline node above to view details.',
+                timelineData: [
+                    { year: 'c. 1000 BCE', title: 'Ancient Kingdom', content: 'King David united the Israelite tribes, established Jerusalem as the capital, and founded the first united Jewish state. This land became the historical and spiritual center for the Jewish people.' },
+                    { year: 'c. 70 CE', title: 'Temple Destruction & Diaspora', content: 'The Roman Empire destroyed the Second Temple in Jerusalem, leading to the large-scale forced exile (Diaspora) of Jews, beginning nearly two millennia of global dispersion.' },
+                    { year: 'Late 19th Century', title: 'Rise of Zionism', content: 'In response to growing antisemitism in Europe, the Zionist movement emerged, aiming to establish a national home for the Jewish people to seek self-determination and security.' },
+                    { year: '1947', title: 'UN Partition Plan', content: 'After WWII, the UN adopted Resolution 181, recommending the partition of Palestine into an Arab state and a Jewish state, providing international legal basis for Israel\'s establishment.' },
+                    { year: '1948', title: 'Establishment of the State of Israel', content: 'On the day the British Mandate ended, the Jewish People\'s Council declared the establishment of the State of Israel. This immediately triggered the First Arab-Israeli War, marking a new chapter in modern Israeli history.' },
+                    { year: '1950', title: 'Law of Return Passed', content: 'The Israeli Knesset passed the Law of Return, granting all Jews worldwide and their relatives the right to immigrate to Israel and automatically gain citizenship, serving as a crucial legal bridge connecting global Jewry with the State of Israel.' }
+                ],
+
+                identityTitle: 'Conclusion: Intertwined Identities',
+                identitySummary: 'In summary, the relationship between Jews and Israelis is a unique example where ethnicity, religion, and national sovereignty intertwine.',
+                identityPoint1Strong: '“Jews”',
+                identityPoint1Content: 'are a global people with a shared lineage, culture, and religious heritage, whose identity transcends national borders.',
+                identityPoint2Strong: '“The State of Israel”',
+                identityPoint2Content: 'is the modern sovereign state established by this people in their historical homeland, providing a home and security for Jews worldwide. Its core law, the Law of Return, is a key bridge connecting the two.',
+                identityPoint3: 'However, we must clearly distinguish: <strong>not all Jews are Israeli citizens</strong> (over half live abroad), and <strong>not all Israeli citizens are Jews</strong> (there is a significant non-Jewish population within the country).',
+                identityPoint4: 'With the increase of native-born Israeli generations, a new "Israeli" identity rooted in shared national experience is emerging, which enriches and dynamizes the identity landscape.' ,
+
+                footerText1: 'This interactive report is generated based on academic sources and aims to provide educational reference.',
+                footerText2: '&copy; 2025 Interactive Analysis'
+            }
+        };
+
+        let currentLang = localStorage.getItem('language') || 'zh-TW'; // Default to Traditional Chinese
+        let charts = {}; // To store chart instances
+
+        /**
+         * Updates the content of the page based on the selected language.
+         * @param {string} lang - The target language ('zh-TW' or 'en').
+         */
+        function updateContent(lang) {
+            // Update document language
+            document.documentElement.lang = lang;
+            document.title = lang === 'zh-TW' ? '以色列與猶太人：互動式解析' : 'Israel & Jews: Interactive Analysis';
+
+            // Update text elements
+            document.querySelectorAll('[data-key]').forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    // Handle strong tags separately for 'identityPoint1' and 'identityPoint2' for styling
+                    if (key === 'identityPoint1Strong' || key === 'identityPoint2Strong') {
+                        element.textContent = translations[lang][key];
+                    } else if (key === 'identityPoint3') {
+                         // Preserve inner strong tags for identityPoint3
+                        element.innerHTML = translations[lang][key];
+                    }
+                    else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Update navigation links' text
+            document.querySelectorAll('header a').forEach(link => {
+                const key = link.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    link.textContent = translations[lang][key];
+                }
+            });
+
+            // Update chart data and re-render charts
+            updateCharts(lang);
+
+            // Re-render timeline
+            renderTimeline(lang);
+        }
+
+        /**
+         * Initializes or updates Chart.js instances with localized data.
+         * @param {string} lang - The target language ('zh-TW' or 'en').
+         */
+        function updateCharts(lang) {
+            // Destroy existing charts to prevent memory leaks and ensure clean redraw
+            for (const chartId in charts) {
+                if (charts[chartId]) {
+                    charts[chartId].destroy();
+                }
+            }
+            charts = {}; // Clear the charts object
+
+            // Global Jewish Population Chart Data
+            const globalJewishPopulationData = {
+                labels: [translations[lang].globalChart1Label1, translations[lang].globalChart1Label2],
+                datasets: [{
+                    label: translations[lang].globalChart1Title,
+                    data: [720, 850], // Data remains constant
+                    backgroundColor: ['#3b82f6', '#64748b'],
+                    borderColor: '#f8fafc',
+                    borderWidth: 4,
+                    hoverOffset: 4
+                }]
+            };
+
+            // Top Countries Chart Data
+            const topCountriesData = {
+                labels: ['美國', '法國', '加拿大', '英國', '阿根廷', '俄羅斯', '德國'], // Country names remain constant
+                datasets: [{
+                    label: translations[lang].globalChart2DatasetLabel,
+                    data: [630, 44.2, 39.4, 29.2, 17.3, 14.5, 11.8],
+                    backgroundColor: '#10b981',
+                    borderColor: '#059669',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            };
+
+            // Israel Demographics Chart Data
+            const israelDemographicsData = {
+                labels: [translations[lang].israelChartLabel1, translations[lang].israelChartLabel2, translations[lang].israelChartLabel3],
+                datasets: [{
+                    label: translations[lang].israelChartTitle,
+                    data: [74, 21, 5],
+                    backgroundColor: ['#3b82f6', '#10b981', '#64748b'],
+                    borderColor: '#ffffff',
+                    borderWidth: 4,
+                    hoverOffset: 4
+                }]
+            };
+
+            // Chart Options - general settings
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#475569',
+                            font: {
+                                size: 14,
+                                family: lang === 'zh-TW' ? "'Noto Sans TC', sans-serif" : "'Inter', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                     // For bar chart
+                                     label += context.parsed.y + (lang === 'zh-TW' ? '萬' : 'M');
+                                } else if (context.parsed !== null) {
+                                     // For doughnut charts (global Jewish population)
+                                     label += context.raw + (lang === 'zh-TW' ? '萬人' : 'M people');
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Pie/Doughnut Chart specific options
+            const pieChartOptions = {
+                ...chartOptions,
+                 plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                // Specific for the global Jewish population chart
+                                if (context.chart.canvas.id === 'globalJewishPopulationChart') {
+                                    return ` ${context.label}: ${context.raw} ${lang === 'zh-TW' ? '萬人' : 'M people'}`;
+                                }
+                                // Specific for Israel Demographics chart (percentage)
+                                if (context.chart.canvas.id === 'israelDemographicsChart') {
+                                    return ` ${context.label}: 約 ${context.raw}%`;
+                                }
+                                return `${context.label}: ${context.raw}`; // Fallback
+                            }
+                        }
+                    }
+                }
+            };
+
+            // Bar Chart specific options
+            const barChartOptions = {
+                ...chartOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                         title: {
+                            display: true,
+                            text: translations[lang].globalChart2XAxisLabel,
+                            color: '#475569'
+                        }
+                    },
+                    y: {
+                        ticks: { color: '#475569' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            };
+
+
+            if(document.getElementById('globalJewishPopulationChart')) {
+                 charts.globalJewishPopulationChart = new Chart(document.getElementById('globalJewishPopulationChart'), {
+                    type: 'doughnut',
+                    data: globalJewishPopulationData,
+                    options: pieChartOptions
+                });
+            }
+
+            if(document.getElementById('topCountriesChart')) {
+                charts.topCountriesChart = new Chart(document.getElementById('topCountriesChart'), {
+                    type: 'bar',
+                    data: topCountriesData,
+                    options: barChartOptions
+                });
+            }
+
+            if(document.getElementById('israelDemographicsChart')) {
+                charts.israelDemographicsChart = new Chart(document.getElementById('israelDemographicsChart'), {
+                    type: 'doughnut',
+                    data: israelDemographicsData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ` ${context.label}: 約 ${context.raw}%`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        /**
+         * Renders the timeline content based on the selected language.
+         * @param {string} lang - The target language ('zh-TW' or 'en').
+         */
+        function renderTimeline(lang) {
+            const timelineContainer = document.getElementById('timeline');
+            const contentContainer = document.getElementById('timeline-content');
+
+            if (timelineContainer && contentContainer) {
+                // Clear existing timeline content
+                timelineContainer.innerHTML = '';
+                contentContainer.innerHTML = `<p class="text-slate-500" data-key="timelineInitialText">${translations[lang].timelineInitialText}</p>`;
+                contentContainer.querySelector('p').setAttribute('data-key', 'timelineInitialText'); // Ensure data-key is set
+
+                const timelineDataForLang = translations[lang].timelineData;
+
+                timelineDataForLang.forEach((item, index) => {
+                    const sideClass = index % 2 === 0 ? 'md:mr-auto md:ml-0' : 'md:ml-auto md:mr-0';
+                    const textAlign = index % 2 === 0 ? 'md:text-right' : 'md:text-left';
+                    const dotPosition = index % 2 === 0 ? 'md:left-1/2 md:-translate-x-1/2' : 'md:left-1/2 md:-translate-x-1/2';
+                    const timelineItem = `
+                        <div class="ml-auto mr-auto md:w-1/2 ${sideClass}">
+                            <div class="relative flex items-center">
+                                <div class="timeline-dot w-6 h-6 bg-slate-300 rounded-full cursor-pointer absolute top-1/2 -translate-y-1/2 ${dotPosition}" data-index="${index}"></div>
+                                <div class="p-2 w-full ${textAlign}">
+                                    <span class="font-bold text-slate-500">${item.year}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    timelineContainer.innerHTML += timelineItem;
+                });
+
+                const dots = document.querySelectorAll('.timeline-dot');
+                dots.forEach(dot => {
+                    dot.addEventListener('click', () => {
+                        dots.forEach(d => d.classList.remove('active'));
+                        dot.classList.add('active');
+                        const index = parseInt(dot.getAttribute('data-index'));
+                        const item = timelineDataForLang[index];
+                        contentContainer.innerHTML = `
+                            <div class="text-center fade-in">
+                                <h5 class="text-xl font-bold text-slate-800 mb-2">${item.title}</h5>
+                                <p class="text-slate-600">${item.content}</p>
+                            </div>
+                        `;
+                    });
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial language from localStorage or default
+            updateContent(currentLang);
+
+            // Language Toggle Event Listener
+            const languageToggleButton = document.getElementById('language-toggle');
+            if (languageToggleButton) {
+                languageToggleButton.addEventListener('click', () => {
+                    currentLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+                    localStorage.setItem('language', currentLang);
+                    updateContent(currentLang);
+                });
+            }
+
+            // Smooth scrolling for navigation links
+            const navLinks = document.querySelectorAll('header a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if(targetElement){
+                        const headerOffset = 80; // Adjust for sticky header height
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
