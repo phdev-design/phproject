@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">互動式量子運算探索指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif; /* 添加 Roboto 以優化英文顯示 */
+            background-color: #f8f9fa;
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4f46e5;
+            border-bottom-color: #4f46e5;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 400px;
+            width: 100%;
+            max-width: 800px;
+        }
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; border-radius: 0.75rem; }
+        .flip-card-front { background-color: #ffffff; border: 1px solid #e5e7eb; color: #111827; }
+        .flip-card-back { background-color: #4338ca; color: white; transform: rotateY(180deg); }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #6366f1;
+            border: 4px solid #e0e7ff;
+        }
+        .lang-toggle {
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .lang-toggle:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-indigo-700" data-lang-key="headerTitle">量子運算探索</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#intro" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navIntro">介紹</a>
+                            <a href="#concepts" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navConcepts">核心概念</a>
+                            <a href="#tech" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navTech">硬體路徑</a>
+                            <a href="#challenges" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navChallenges">挑戰之路</a>
+                            <a href="#roadmap" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navRoadmap">發展藍圖</a>
+                            <a href="#myths" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navMyths">迷思破解</a>
+                            <a href="#impact" class="nav-link px-3 py-2 text-sm font-medium text-gray-600" data-lang-key="navImpact">未來衝擊</a>
+                        </div>
+                    </div>
+                    <div id="lang-toggle" class="ml-4 lang-toggle text-sm text-gray-700">中 / EN</div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-20 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                    <span class="block" data-lang-key="introTitle1">什麼是量子電腦？</span>
+                    <span class="block text-indigo-600" data-lang-key="introTitle2">它真的能實現嗎？</span>
+                </h2>
+                <p class="mt-6 max-w-3xl mx-auto text-lg text-gray-600" data-lang-key="introText">
+                    量子運算並非傳統電腦的升級版，而是一種基於量子力學奇特規則的全新計算典範。它不會取代您的筆電，而是像一個專門的「超級加速器」，旨在解決當今最強電腦也無能為力的特定複雜問題。本頁面將帶您探索它的原理、挑戰與未來。
+                </p>
+            </div>
+        </section>
+
+        <section id="concepts" class="py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="conceptsTitle">核心概念：計算的量子躍遷</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="conceptsSubtitle">量子運算的威力源於三個反直覺的量子現象。本節將透過視覺化方式，幫助您理解這些構成量子計算基石的概念。</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-white p-8 rounded-xl shadow-md">
+                        <div class="flex justify-center items-center h-20 w-20 rounded-full bg-indigo-100 mx-auto"><span class="text-3xl">Qubits</span></div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900" data-lang-key="concept1Title">量子位元 (Qubit)</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="concept1Text">傳統位元只能是0或1。量子位元則利用「疊加態」，可以同時是0<span class="text-indigo-500 font-bold" data-lang-key="concept1And">和</span>1。這使得N個量子位元能同時處理 $2^N$ 個狀態，提供了指數級增長的計算空間。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-md">
+                        <div class="flex justify-center items-center h-20 w-20 rounded-full bg-indigo-100 mx-auto"><span class="text-3xl">얽힘</span></div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900" data-lang-key="concept2Title">量子糾纏</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="concept2Text">被愛因斯坦稱為「鬼魅般的超距作用」。兩個糾纏的量子位元會成為一個整體，無論相隔多遠，測量其中一個會瞬間影響另一個。這是實現複雜量子演算法的關鍵。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-md">
+                         <div class="flex justify-center items-center h-20 w-20 rounded-full bg-indigo-100 mx-auto"><span class="text-3xl">간섭</span></div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900" data-lang-key="concept3Title">量子干涉</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="concept3Text">量子計算的精髓。演算法透過精確操控，讓通往錯誤答案的路徑相互抵消（破壞性干涉），而通往正確答案的路徑則被放大（建設性干涉），從而高效找出解答。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="techTitle">硬體路徑：打造量子位元的多元探索</h2>
+                     <p class="mt-4 text-lg text-gray-600" data-lang-key="techSubtitle">將理論化為現實，需要找到承載量子位元的物理實體。全球科學家正沿著多條技術路徑競賽，各有優劣。下方的互動圖表能讓您比較不同技術在關鍵指標上的表現。</p>
+                </div>
+                <div class="max-w-4xl mx-auto bg-gray-50 p-6 rounded-lg shadow">
+                     <label for="metric-select" class="block text-sm font-medium text-gray-700 mb-2" data-lang-key="techSelectorLabel">選擇比較指標：</label>
+                     <select id="metric-select" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="coherence" selected data-lang-key="techOption1">相干時間 (越長越好)</option>
+                        <option value="speed" data-lang-key="techOption2">閘門速度 (越快越好)</option>
+                        <option value="fidelity" data-lang-key="techOption3">保真度 (越高越好)</option>
+                    </select>
+                </div>
+                <div class="mt-8 chart-container">
+                    <canvas id="techChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-16">
+             <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="challengesTitle">通往霸權的荊棘之路</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="challengesSubtitle">建造實用的量子電腦，必須克服兩大根本性挑戰：脆弱的量子態與不可避免的錯誤。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-red-600" data-lang-key="challenge1Title">挑戰1：退相干的詛咒</h3>
+                        <p class="mt-4 text-gray-600" data-lang-key="challenge1Text1">量子態極其脆弱，任何來自環境的微小干擾（如溫度波動、電磁波）都會破壞其疊加與糾纏，導致計算錯誤。這個過程稱為「退相干」。</p>
+                        <p class="mt-4 text-gray-600" data-lang-key="challenge1Text2"><strong>主要策略：</strong>將量子晶片置於接近絕對零度的極端低溫環境中，並用多層結構進行屏蔽，實現極致的物理隔離。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg">
+                        <h3 class="text-2xl font-bold text-green-600" data-lang-key="solution1Title">解決方案：容錯的聖杯</h3>
+                        <p class="mt-4 text-gray-600" data-lang-key="solution1Text1">既然錯誤無法完全避免，就必須即時偵測並修正。這就是「量子糾錯」的目標。</p>
+                        <p class="mt-4 text-gray-600" data-lang-key="solution1Text2"><strong>核心思想：</strong>用多個容易出錯的「物理量子位元」，透過冗餘編碼，共同組成一個更穩健的「邏輯量子位元」。這也是當前量子競賽的真正焦點：從追求物理位元的數量，轉向提升邏輯位元的品質。</p>
+                    </div>
+                </div>
+             </div>
+        </section>
+        
+        <section id="roadmap" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="roadmapTitle">實現的藍圖：一個持續演進的過程</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="roadmapSubtitle">量子電腦的實現並非一蹴可幾，而是一個分階段的旅程。業界專家對「實用」機器的時程預測雖有分歧，但普遍認同以下的發展路徑。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="relative pl-8 border-l-2 border-indigo-200">
+                        <div class="mb-10 relative timeline-item">
+                            <h4 class="text-xl font-semibold text-indigo-700" data-lang-key="stage1Title">第一階段 (已實現)</h4>
+                            <p class="text-gray-600" data-lang-key="stage1Text"><strong>量子霸權：</strong>在特定問題上，展示出超越最強超級電腦的計算能力。Google在2019年已達成此里程碑。</p>
+                        </div>
+                        <div class="mb-10 relative timeline-item">
+                            <h4 class="text-xl font-semibold text-indigo-700" data-lang-key="stage2Title">第二階段 (進行中)</h4>
+                            <p class="text-gray-600" data-lang-key="stage2Text"><strong>NISQ 時代：</strong>充滿噪聲的中等規模量子處理器開始為特定商業問題提供初步價值，主要透過雲端平台提供服務。</p>
+                        </div>
+                        <div class="mb-10 relative timeline-item">
+                            <h4 class="text-xl font-semibold text-indigo-700" data-lang-key="stage3Title">第三階段 (下個十年)</h4>
+                            <p class="text-gray-600" data-lang-key="stage3Text"><strong>容錯開端：</strong>開發出具備糾錯能力的小規模容錯量子電腦，並在重要商業問題上展現「量子優勢」。</p>
+                        </div>
+                         <div class="relative timeline-item">
+                            <h4 class="text-xl font-semibold text-indigo-700" data-lang-key="stage4Title">第四階段 (長期目標)</h4>
+                            <p class="text-gray-600" data-lang-key="stage4Text"><strong>通用容錯量子電腦：</strong>建成大規模、高可靠性的通用量子電腦，仍需數十年努力，但潛力巨大。</p>
+                        </div>
+                    </div>
+                    <div class="chart-container h-80">
+                         <p class="text-center font-medium text-gray-700 mb-2" data-lang-key="timelineChartTitle">專家對「實用」量子電腦的時程預測</p>
+                        <canvas id="timelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="myths" class="py-16">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="mythsTitle">現實與炒作：破解六大常見迷思</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="mythsSubtitle">隨著關注度提高，許多誤解也隨之產生。點擊下方的卡片，揭開迷思背後的真相。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth1Title">迷思一</h4><p class="mt-2" data-lang-key="myth1Text">量子電腦將取代我的筆電和手機。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality1Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality1Text">錯誤。它們是昂貴、龐大的專用加速器，更可能以雲端服務形式存在。</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth2Title">迷思二</h4><p class="mt-2" data-lang-key="myth2Text">量子電腦在所有任務上都更快。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality2Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality2Text">錯誤。其優勢僅限於特定問題，如模擬、因數分解，對日常任務反而更慢。</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth3Title">迷思三</h4><p class="mt-2" data-lang-key="myth3Text">量子位元數量越多越好。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality3Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality3Text">錯誤。量子位元的「品質」（保真度、相干時間）遠比「數量」重要。</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth4Title">迷思四</h4><p class="mt-2" data-lang-key="myth4Text">量子糾纏能實現超光速通訊。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality4Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality4Text">錯誤。它產生的是「關聯」，無法傳遞傳統資訊，不違反相對論。</p></div>
+                        </div>
+                    </div>
+                    <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth5Title">迷思五</h4><p class="mt-2" data-lang-key="myth5Text">對網路安全的「量子末日」迫在眉睫。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality5Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality5Text">威脅真實，但距破解現有加密的機器可能還有數十年，學界正積極研發對策。</p></div>
+                        </div>
+                    </div>
+                     <div class="flip-card h-64 cursor-pointer">
+                        <div class="flip-card-inner rounded-xl shadow-md">
+                            <div class="flip-card-front"><h4 class="text-xl font-bold" data-lang-key="myth6Title">迷思六</h4><p class="mt-2" data-lang-key="myth6Text">量子計算只是一個工程問題。</p></div>
+                            <div class="flip-card-back"><h4 class="text-xl font-bold" data-lang-key="reality6Title">現實</h4><p class="mt-2 text-indigo-100" data-lang-key="reality6Text">它既是巨大的工程挑戰，也涉及基礎物理的前沿研究，特別是新類型量子位元的探索。</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900" data-lang-key="impactTitle">顛覆未來的潛在應用</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="impactSubtitle">一旦實用量子電腦問世，它將在多個領域掀起革命性的變化。</p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="text-center p-6">
+                        <div class="flex justify-center items-center h-20 w-20 rounded-full bg-green-100 mx-auto text-4xl text-green-700">💊</div>
+                        <h3 class="mt-6 text-xl font-bold" data-lang-key="app1Title">新藥開發與材料科學</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="app1Text">精確模擬分子交互作用，大幅加速新藥研發、設計更高性能的電池材料或更高效的催化劑。</p>
+                    </div>
+                    <div class="text-center p-6">
+                        <div class="flex justify-center items-center h-20 w-20 rounded-full bg-blue-100 mx-auto text-4xl text-blue-700">📈</div>
+                        <h3 class="mt-6 text-xl font-bold" data-lang-key="app2Title">金融與最佳化</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="app2Text">解決複雜的最佳化問題，應用於投資組合管理、高精度風險分析，以及物流與供應鏈排程。</p>
+                    </div>
+                    <div class="text-center p-6">
+                        <div class="flex justify-center items-center h-20 w-20 rounded-full bg-red-100 mx-auto text-4xl text-red-700">🛡️</div>
+                        <h3 class="mt-6 text-xl font-bold" data-lang-key="app3Title">密碼學的矛與盾</h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="app3Text">雖然威脅當前的加密系統，但也催生了「後量子密碼學」和「量子金鑰分發」等更安全的通訊技術。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-gray-800">
+            <div class="container mx-auto py-12 px-4 text-center text-white">
+                 <h3 class="text-2xl font-bold" data-lang-key="footerTitle">結論：一場正在進行的革命</h3>
+                 <p class="mt-4 max-w-3xl mx-auto text-gray-300" data-lang-key="footerText">
+                    所以，量子電腦真的能實現嗎？答案是肯定的，且這是一場已經開始的、分階段的持續過程。我們應將焦點從「是否實現」轉向「我們處於哪個階段，它能帶來什麼價值？」。這場革命不會是一聲巨響，而是一場漸進但深刻的偉大征程。
+                 </p>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- 語言資料庫 ---
+            const translations = {
+                zh: {
+                    pageTitle: '互動式量子運算探索指南',
+                    headerTitle: '量子運算探索',
+                    navIntro: '介紹',
+                    navConcepts: '核心概念',
+                    navTech: '硬體路徑',
+                    navChallenges: '挑戰之路',
+                    navRoadmap: '發展藍圖',
+                    navMyths: '迷思破解',
+                    navImpact: '未來衝擊',
+                    introTitle1: '什麼是量子電腦？',
+                    introTitle2: '它真的能實現嗎？',
+                    introText: '量子運算並非傳統電腦的升級版，而是一種基於量子力學奇特規則的全新計算典範。它不會取代您的筆電，而是像一個專門的「超級加速器」，旨在解決當今最強電腦也無能為力的特定複雜問題。本頁面將帶您探索它的原理、挑戰與未來。',
+                    conceptsTitle: '核心概念：計算的量子躍遷',
+                    conceptsSubtitle: '量子運算的威力源於三個反直覺的量子現象。本節將透過視覺化方式，幫助您理解這些構成量子計算基石的概念。',
+                    concept1Title: '量子位元 (Qubit)',
+                    concept1Text: '傳統位元只能是0或1。量子位元則利用「疊加態」，可以同時是0<span class="text-indigo-500 font-bold" data-lang-key="concept1And">和</span>1。這使得N個量子位元能同時處理 $2^N$ 個狀態，提供了指數級增長的計算空間。',
+                    concept1And: '和',
+                    concept2Title: '量子糾纏',
+                    concept2Text: '被愛因斯坦稱為「鬼魅般的超距作用」。兩個糾纏的量子位元會成為一個整體，無論相隔多遠，測量其中一個會瞬間影響另一個。這是實現複雜量子演算法的關鍵。',
+                    concept3Title: '量子干涉',
+                    concept3Text: '量子計算的精髓。演算法透過精確操控，讓通往錯誤答案的路徑相互抵消（破壞性干涉），而通往正確答案的路徑則被放大（建設性干涉），從而高效找出解答。',
+                    techTitle: '硬體路徑：打造量子位元的多元探索',
+                    techSubtitle: '將理論化為現實，需要找到承載量子位元的物理實體。全球科學家正沿著多條技術路徑競賽，各有優劣。下方的互動圖表能讓您比較不同技術在關鍵指標上的表現。',
+                    techSelectorLabel: '選擇比較指標：',
+                    techOption1: '相干時間 (越長越好)',
+                    techOption2: '閘門速度 (越快越好)',
+                    techOption3: '保真度 (越高越好)',
+                    techChartXLabelLog: '相對性能 (對數尺度)',
+                    techChartXLabelLinear: '保真度 (%)',
+                    challengesTitle: '通往霸權的荊棘之路',
+                    challengesSubtitle: '建造實用的量子電腦，必須克服兩大根本性挑戰：脆弱的量子態與不可避免的錯誤。',
+                    challenge1Title: '挑戰1：退相干的詛咒',
+                    challenge1Text1: '量子態極其脆弱，任何來自環境的微小干擾（如溫度波動、電磁波）都會破壞其疊加與糾纏，導致計算錯誤。這個過程稱為「退相干」。',
+                    challenge1Text2: '<strong>主要策略：</strong>將量子晶片置於接近絕對零度的極端低溫環境中，並用多層結構進行屏蔽，實現極致的物理隔離。',
+                    solution1Title: '解決方案：容錯的聖杯',
+                    solution1Text1: '既然錯誤無法完全避免，就必須即時偵測並修正。這就是「量子糾錯」的目標。',
+                    solution1Text2: '<strong>核心思想：</strong>用多個容易出錯的「物理量子位元」，透過冗餘編碼，共同組成一個更穩健的「邏輯量子位元」。這也是當前量子競賽的真正焦點：從追求物理位元的數量，轉向提升邏輯位元的品質。',
+                    roadmapTitle: '實現的藍圖：一個持續演進的過程',
+                    roadmapSubtitle: '量子電腦的實現並非一蹴可幾，而是一個分階段的旅程。業界專家對「實用」機器的時程預測雖有分歧，但普遍認同以下的發展路徑。',
+                    stage1Title: '第一階段 (已實現)',
+                    stage1Text: '<strong>量子霸權：</strong>在特定問題上，展示出超越最強超級電腦的計算能力。Google在2019年已達成此里程碑。',
+                    stage2Title: '第二階段 (進行中)',
+                    stage2Text: '<strong>NISQ 時代：</strong>充滿噪聲的中等規模量子處理器開始為特定商業問題提供初步價值，主要透過雲端平台提供服務。',
+                    stage3Title: '第三階段 (下個十年)',
+                    stage3Text: '<strong>容錯開端：</strong>開發出具備糾錯能力的小規模容錯量子電腦，並在重要商業問題上展現「量子優勢」。',
+                    stage4Title: '第四階段 (長期目標)',
+                    stage4Text: '<strong>通用容錯量子電腦：</strong>建成大規模、高可靠性的通用量子電腦，仍需數十年努力，但潛力巨大。',
+                    timelineChartTitle: '專家對「實用」量子電腦的時程預測',
+                    timelineChartXLabel: '年',
+                    timelineChartTooltipPrefix: '預測: ',
+                    mythsTitle: '現實與炒作：破解六大常見迷思',
+                    mythsSubtitle: '隨著關注度提高，許多誤解也隨之產生。點擊下方的卡片，揭開迷思背後的真相。',
+                    myth1Title: '迷思一', myth1Text: '量子電腦將取代我的筆電和手機。', reality1Title: '現實', reality1Text: '錯誤。它們是昂貴、龐大的專用加速器，更可能以雲端服務形式存在。',
+                    myth2Title: '迷思二', myth2Text: '量子電腦在所有任務上都更快。', reality2Title: '現實', reality2Text: '錯誤。其優勢僅限於特定問題，如模擬、因數分解，對日常任務反而更慢。',
+                    myth3Title: '迷思三', myth3Text: '量子位元數量越多越好。', reality3Title: '現實', reality3Text: '錯誤。量子位元的「品質」（保真度、相干時間）遠比「數量」重要。',
+                    myth4Title: '迷思四', myth4Text: '量子糾纏能實現超光速通訊。', reality4Title: '現實', reality4Text: '錯誤。它產生的是「關聯」，無法傳遞傳統資訊，不違反相對論。',
+                    myth5Title: '迷思五', myth5Text: '對網路安全的「量子末日」迫在眉睫。', reality5Title: '現實', reality5Text: '威脅真實，但距破解現有加密的機器可能還有數十年，學界正積極研發對策。',
+                    myth6Title: '迷思六', myth6Text: '量子計算只是一個工程問題。', reality6Title: '現實', reality6Text: '它既是巨大的工程挑戰，也涉及基礎物理的前沿研究，特別是新類型量子位元的探索。',
+                    impactTitle: '顛覆未來的潛在應用',
+                    impactSubtitle: '一旦實用量子電腦問世，它將在多個領域掀起革命性的變化。',
+                    app1Title: '新藥開發與材料科學', app1Text: '精確模擬分子交互作用，大幅加速新藥研發、設計更高性能的電池材料或更高效的催化劑。',
+                    app2Title: '金融與最佳化', app2Text: '解決複雜的最佳化問題，應用於投資組合管理、高精度風險分析，以及物流與供應鏈排程。',
+                    app3Title: '密碼學的矛與盾', app3Text: '雖然威脅當前的加密系統，但也催生了「後量子密碼學」和「量子金鑰分發」等更安全的通訊技術。',
+                    footerTitle: '結論：一場正在進行的革命',
+                    footerText: '所以，量子電腦真的能實現嗎？答案是肯定的，且這是一場已經開始的、分階段的持續過程。我們應將焦點從「是否實現」轉向「我們處於哪個階段，它能帶來什麼價值？」。這場革命不會是一聲巨響，而是一場漸進但深刻的偉大征程。',
+                },
+                en: {
+                    pageTitle: 'Interactive Guide to Quantum Computing',
+                    headerTitle: 'Quantum Explorer',
+                    navIntro: 'Intro',
+                    navConcepts: 'Concepts',
+                    navTech: 'Hardware',
+                    navChallenges: 'Challenges',
+                    navRoadmap: 'Roadmap',
+                    navMyths: 'Myths',
+                    navImpact: 'Impact',
+                    introTitle1: 'What is a Quantum Computer?',
+                    introTitle2: 'Is It Really Achievable?',
+                    introText: 'Quantum computing is not an upgraded version of traditional computers, but a completely new paradigm of computation based on the peculiar rules of quantum mechanics. It won\'t replace your laptop; instead, it acts as a specialized "super-accelerator" designed to solve specific, complex problems that are intractable for even the most powerful classical computers today. This page will guide you through its principles, challenges, and future.',
+                    conceptsTitle: 'Core Concepts: The Quantum Leap in Computation',
+                    conceptsSubtitle: 'The power of quantum computing stems from three counter-intuitive quantum phenomena. This section uses visualizations to help you understand these foundational concepts.',
+                    concept1Title: 'Qubit',
+                    concept1Text: 'A classical bit can only be 0 or 1. A qubit, however, leverages "superposition" to be both 0 <span class="text-indigo-500 font-bold" data-lang-key="concept1And">and</span> 1 simultaneously. This allows N qubits to process $2^N$ states at once, providing an exponentially larger computational space.',
+                    concept1And: 'and',
+                    concept2Title: 'Entanglement',
+                    concept2Text: 'Described by Einstein as "spooky action at a distance." Two entangled qubits become a single system. No matter how far apart they are, measuring one instantly affects the other. This is key to implementing complex quantum algorithms.',
+                    concept3Title: 'Interference',
+                    concept3Text: 'The essence of quantum computation. Algorithms use precise control to make paths to wrong answers cancel each other out (destructive interference), while paths to the right answer are amplified (constructive interference), efficiently finding the solution.',
+                    techTitle: 'Hardware Paths: The Diverse Quest for a Qubit',
+                    techSubtitle: 'To turn theory into reality, we need a physical system to host qubits. Scientists worldwide are racing along multiple technological paths, each with its own pros and cons. The interactive chart below lets you compare different technologies on key metrics.',
+                    techSelectorLabel: 'Select a metric to compare:',
+                    techOption1: 'Coherence Time (Longer is better)',
+                    techOption2: 'Gate Speed (Faster is better)',
+                    techOption3: 'Fidelity (Higher is better)',
+                    techChartXLabelLog: 'Relative Performance (Logarithmic Scale)',
+                    techChartXLabelLinear: 'Fidelity (%)',
+                    challengesTitle: 'The Thorny Path to Supremacy',
+                    challengesSubtitle: 'Building a useful quantum computer requires overcoming two fundamental challenges: fragile quantum states and unavoidable errors.',
+                    challenge1Title: 'Challenge 1: The Curse of Decoherence',
+                    challenge1Text1: 'Quantum states are extremely fragile. Any tiny disturbance from the environment (like temperature fluctuations or electromagnetic waves) can destroy their superposition and entanglement, leading to computational errors. This process is called "decoherence."',
+                    challenge1Text2: '<strong>Key Strategy:</strong> Placing the quantum chip in an extremely cold environment near absolute zero and shielding it with multiple layers to achieve ultimate physical isolation.',
+                    solution1Title: 'Solution: The Holy Grail of Fault Tolerance',
+                    solution1Text1: 'Since errors cannot be completely avoided, they must be detected and corrected in real-time. This is the goal of "quantum error correction."',
+                    solution1Text2: '<strong>Core Idea:</strong> Using multiple error-prone "physical qubits" to form a single, more robust "logical qubit" through redundant encoding. This is the real focus of the current quantum race: shifting from pursuing the quantity of physical qubits to improving the quality of logical qubits.',
+                    roadmapTitle: 'The Blueprint for Realization: An Evolving Process',
+                    roadmapSubtitle: 'The realization of quantum computers is not an overnight event but a phased journey. While expert predictions on the timeline for "practical" machines vary, there is a general consensus on the following development path.',
+                    stage1Title: 'Phase 1 (Achieved)',
+                    stage1Text: '<strong>Quantum Supremacy:</strong> Demonstrating computational power beyond the most powerful supercomputers on a specific problem. Google achieved this milestone in 2019.',
+                    stage2Title: 'Phase 2 (Ongoing)',
+                    stage2Text: '<strong>The NISQ Era:</strong> Noisy Intermediate-Scale Quantum processors are beginning to provide initial value for specific business problems, primarily delivered via cloud platforms.',
+                    stage3Title: 'Phase 3 (Next Decade)',
+                    stage3Text: '<strong>Early Fault-Tolerance:</strong> Developing small-scale, error-corrected fault-tolerant quantum computers that demonstrate "quantum advantage" on important commercial problems.',
+                    stage4Title: 'Phase 4 (Long-term Goal)',
+                    stage4Text: '<strong>Universal Fault-Tolerant Quantum Computer:</strong> Building large-scale, highly reliable universal quantum computers. This will still require decades of effort but holds enormous potential.',
+                    timelineChartTitle: 'Expert Timeline Predictions for "Practical" Quantum Computers',
+                    timelineChartXLabel: 'Years',
+                    timelineChartTooltipPrefix: 'Prediction: ',
+                    mythsTitle: 'Reality vs. Hype: Debunking Six Common Myths',
+                    mythsSubtitle: 'As attention grows, so do misconceptions. Click the cards below to uncover the truth behind the myths.',
+                    myth1Title: 'Myth 1', myth1Text: 'Quantum computers will replace my laptop and phone.', reality1Title: 'Reality', reality1Text: 'False. They are expensive, huge, specialized accelerators, more likely to exist as cloud services.',
+                    myth2Title: 'Myth 2', myth2Text: 'Quantum computers are faster for all tasks.', reality2Title: 'Reality', reality2Text: 'False. Their advantage is limited to specific problems like simulation and factorization; they are slower for everyday tasks.',
+                    myth3Title: 'Myth 3', myth3Text: 'The more qubits, the better.', reality3Title: 'Reality', reality3Text: 'False. The "quality" of qubits (fidelity, coherence time) is far more important than the "quantity."',
+                    myth4Title: 'Myth 4', myth4Text: 'Entanglement allows faster-than-light communication.', reality4Title: 'Reality', reality4Text: 'False. It creates "correlation," not information transfer, and does not violate relativity.',
+                    myth5Title: 'Myth 5', myth5Text: 'The "quantum apocalypse" for cybersecurity is imminent.', reality5Title: 'Reality', reality5Text: 'The threat is real, but machines capable of breaking current encryption are likely decades away. The community is actively developing countermeasures.',
+                    myth6Title: 'Myth 6', myth6Text: 'Quantum computing is just an engineering problem.', reality6Title: 'Reality', reality6Text: 'It\'s both a massive engineering challenge and involves frontier research in fundamental physics, especially in exploring new types of qubits.',
+                    impactTitle: 'Potential Applications to Revolutionize the Future',
+                    impactSubtitle: 'Once practical quantum computers become available, they will spark revolutionary changes in multiple fields.',
+                    app1Title: 'Drug Discovery & Materials Science', app1Text: 'Precisely simulating molecular interactions to drastically accelerate new drug development, design higher-performance battery materials, or more efficient catalysts.',
+                    app2Title: 'Finance & Optimization', app2Text: 'Solving complex optimization problems for applications in portfolio management, high-precision risk analysis, and logistics and supply chain scheduling.',
+                    app3Title: 'The Spear and Shield of Cryptography', app3Text: 'While threatening current encryption systems, it also gives rise to more secure communication technologies like "post-quantum cryptography" and "quantum key distribution."',
+                    footerTitle: 'Conclusion: A Revolution in Progress',
+                    footerText: 'So, can quantum computers really be built? The answer is yes, and it is a phased, ongoing process that has already begun. We should shift our focus from "if" it will happen to "what stage are we in, and what value can it bring?" This revolution will not be a big bang, but a gradual yet profound journey.',
+                }
+            };
+            
+            // --- 圖表資料 (英文) ---
+            const techDataEN = {
+                labels: ['Superconducting', 'Trapped Ion', 'Silicon Spin', 'Photonic', 'Topological'],
+                datasets: {
+                    coherence: {
+                        label: 'Coherence Time (Log Scale)',
+                        data: [3, 5, 4, 6, 6], 
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        tooltip: ['Shorter (μs)', 'Very Long (s to min)', 'Medium', 'Very Long', 'Theoretically Very Long'],
+                    },
+                    speed: {
+                        label: 'Gate Speed (Log Scale)',
+                        data: [6, 2, 5, 6, 1], 
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        tooltip: ['Very Fast (GHz)', 'Slower (kHz)', 'Fast (MHz-GHz)', 'Extremely Fast', 'Theoretically Slower'],
+                    },
+                    fidelity: {
+                        label: 'Fidelity',
+                        data: [99, 99.9, 99, 95, 99.99], 
+                        backgroundColor: 'rgba(219, 39, 119, 0.7)',
+                        tooltip: ['Lower (99%+)', 'Very High (>99.9%)', 'High (99%+)', 'Medium', 'Theoretically Very High'],
+                    }
+                }
+            };
+            // --- 圖表資料 (中文) ---
+            const techDataZH = {
+                labels: ['超導量子位元', '離子阱', '矽自旋量子位元', '光子', '拓樸量子位元'],
+                datasets: {
+                    coherence: {
+                        label: '相干時間 (對數尺度)',
+                        data: [3, 5, 4, 6, 6], 
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        tooltip: ['較短 (微秒級)', '極長 (秒至分鐘級)', '中等', '極長', '理論上極長'],
+                    },
+                    speed: {
+                        label: '閘門速度 (對數尺度)',
+                        data: [6, 2, 5, 6, 1], 
+                        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                        tooltip: ['極快 (GHz)', '較慢 (kHz)', '快 (MHz-GHz)', '極快', '理論上較慢'],
+                    },
+                    fidelity: {
+                        label: '保真度',
+                        data: [99, 99.9, 99, 95, 99.99], 
+                        backgroundColor: 'rgba(219, 39, 119, 0.7)',
+                        tooltip: ['較低 (99%+)', '極高 (>99.9%)', '較高 (99%+)', '中等', '理論上極高'],
+                    }
+                }
+            };
+            const timelineDataEN = {
+                labels: ['Optimists (Google, Microsoft)', 'Pragmatists (D-Wave)', 'Conservatives (NVIDIA)'],
+                datasets: [{
+                    data: [10, 0, 30],
+                    backgroundColor: ['rgba(56, 189, 248, 0.7)', 'rgba(167, 139, 250, 0.7)', 'rgba(244, 114, 182, 0.7)'],
+                    borderColor: ['#0284c7', '#8b5cf6', '#db2777'],
+                    borderWidth: 1,
+                    tooltips: ['Within 3-10 years', 'Available now (Specialized)', '15-30 years']
+                }]
+            };
+            const timelineDataZH = {
+                labels: ['樂觀派 (Google, Microsoft)', '務實派 (D-Wave)', '保守派 (NVIDIA)'],
+                datasets: [{
+                    data: [10, 0, 30],
+                    backgroundColor: ['rgba(56, 189, 248, 0.7)', 'rgba(167, 139, 250, 0.7)', 'rgba(244, 114, 182, 0.7)'],
+                    borderColor: ['#0284c7', '#8b5cf6', '#db2777'],
+                    borderWidth: 1,
+                    tooltips: ['3-10年內', '已問世 (專用型)', '15-30年']
+                }]
+            };
+
+
+            let techChartInstance, timelineChartInstance;
+            const ctxTech = document.getElementById('techChart').getContext('2d');
+            const ctxTimeline = document.getElementById('timelineChart').getContext('2d');
+
+            function createTechChart(metric, lang) {
+                const techData = lang === 'zh' ? techDataZH : techDataEN;
+                if (techChartInstance) techChartInstance.destroy();
+                
+                const isLog = (metric !== 'fidelity');
+                const xLabelKey = isLog ? 'techChartXLabelLog' : 'techChartXLabelLinear';
+
+                techChartInstance = new Chart(ctxTech, {
+                    type: 'bar',
+                    data: {
+                        labels: techData.labels,
+                        datasets: [{
+                            label: techData.datasets[metric].label,
+                            data: techData.datasets[metric].data,
+                            backgroundColor: techData.datasets[metric].backgroundColor,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (c) => techData.datasets[metric].tooltip[c.dataIndex] } }
+                        },
+                        scales: { x: { beginAtZero: true, type: isLog ? 'logarithmic' : 'linear', title: { display: true, text: translations[lang][xLabelKey] } } }
+                    }
+                });
+            }
+            
+            function createTimelineChart(lang) {
+                const timelineData = lang === 'zh' ? timelineDataZH : timelineDataEN;
+                if (timelineChartInstance) timelineChartInstance.destroy();
+
+                timelineChartInstance = new Chart(ctxTimeline, {
+                    type: 'bar', data: { labels: timelineData.labels, datasets: timelineData.datasets },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (c) => `${translations[lang]['timelineChartTooltipPrefix']}${timelineData.datasets[0].tooltips[c.dataIndex]}` }}
+                        },
+                        scales: { x: { title: { display: true, text: translations[lang]['timelineChartXLabel'] } } }
+                    }
+                });
+            }
+
+            // --- 語言切換主函式 ---
+            function switchLanguage(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                
+                // 更新圖表
+                const currentMetric = document.getElementById('metric-select').value;
+                createTechChart(currentMetric, lang);
+                createTimelineChart(lang);
+
+                localStorage.setItem('language', lang); // 保存選擇
+            }
+
+            // --- 初始頁面加載和事件監聽 ---
+            const langToggle = document.getElementById('lang-toggle');
+            langToggle.addEventListener('click', () => {
+                const currentLang = document.documentElement.lang.startsWith('en') ? 'zh' : 'en';
+                switchLanguage(currentLang);
+            });
+
+            const flipCards = document.querySelectorAll('.flip-card');
+            flipCards.forEach(card => card.addEventListener('click', () => card.classList.toggle('is-flipped')));
+            
+            const metricSelect = document.getElementById('metric-select');
+            metricSelect.addEventListener('change', (e) => {
+                const currentLang = localStorage.getItem('language') || 'zh';
+                createTechChart(e.target.value, currentLang);
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const headerHeight = document.getElementById('header').offsetHeight;
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    if (pageYOffset >= section.offsetTop - headerHeight - 20) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // 初始化語言
+            const savedLang = localStorage.getItem('language') || 'zh';
+            switchLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
