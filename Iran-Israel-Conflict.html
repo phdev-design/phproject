@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>從陰影到明火：伊朗-以色列衝突互動解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Geopolitical Calm -->
+    <!-- Application Structure Plan: The application is designed as a top-down narrative journey, starting with a broad overview and a central interactive timeline. The user can either follow the chronological flow via the timeline or jump to thematic deep-dive sections below (Core Drivers, Arenas of Conflict, Global Impact). This hybrid chronological-thematic structure allows for both linear storytelling and non-linear exploration. The key interaction is the timeline, which dynamically updates a content panel, making the cause-and-effect relationships clearer than a static report. This was chosen to transform the dense report into an engaging learning tool, helping users grasp the "what" and "why" of the conflict intuitively. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Historical Evolution -> Goal: Show Change -> Viz: Interactive vertical timeline -> Interaction: Click on eras to filter content -> Justification: Breaks down 70+ years of history into digestible phases, making it the app's central navigation. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Defense Spending -> Goal: Compare -> Viz: Bar Chart -> Interaction: Hover tooltips for exact figures -> Justification: Provides a stark, easily understood quantitative comparison of national priorities. -> Library/Method: Chart.js.
+        - Report Info: Iran's Nuclear Program -> Goal: Show Change over time -> Viz: Stacked bar chart for uranium stockpile/enrichment levels -> Interaction: Buttons to switch between "Pre-JCPOA", "Post-JCPOA", "Current" states -> Justification: Visually demonstrates the direct impact of international policy on Iran's nuclear progress. -> Library/Method: Chart.js.
+        - Report Info: Axis of Resistance -> Goal: Organize/Show Relationships -> Viz: Diagram of interconnected nodes -> Interaction: Hover over nodes to highlight connections and show info tooltips -> Justification: Simplifies the complex proxy network into a clear visual map. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: International Stances -> Goal: Compare/Organize -> Viz: Tabbed content area -> Interaction: Click tabs to switch views -> Justification: Neatly organizes comparative analysis of different state actors without clutter. -> Library/Method: HTML/Tailwind/JS.
+    -->
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 50vh; }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #f59e0b; border-color: #f59e0b; }
+        .timeline-item.active .timeline-dot { background-color: #f59e0b; transform: scale(1.5); }
+        .timeline-item.active .timeline-content h3 { color: #f59e0b; }
+        .tab-button.active { background-color: #1e3a8a; color: white; }
+        .tab-button { transition: background-color 0.3s, color 0.3s; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-blue-900" data-key="headerTitle">伊朗-以色列衝突解析</h1>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#timeline" class="nav-link border-b-2 border-transparent pb-1" data-key="navTimeline">演變時間軸</a>
+                    <a href="#drivers" class="nav-link border-b-2 border-transparent pb-1" data-key="navDrivers">核心驅動因素</a>
+                    <a href="#arenas" class="nav-link border-b-2 border-transparent pb-1" data-key="navArenas">衝突的競技場</a>
+                    <a href="#impact" class="nav-link border-b-2 border-transparent pb-1" data-key="navImpact">全球影響</a>
+                    <button id="lang-switcher" data-key="langButton" class="ml-4 px-3 py-1 text-sm border-2 border-blue-800 text-blue-800 rounded-full hover:bg-blue-800 hover:text-white transition-colors">English</button>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden text-stone-600 focus:outline-none">
+                    <span class="text-2xl">☰</span>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-2">
+            <a href="#timeline" class="block nav-link text-center py-2" data-key="navTimelineMobile">演變時間軸</a>
+            <a href="#drivers" class="block nav-link text-center py-2" data-key="navDriversMobile">核心驅動因素</a>
+            <a href="#arenas" class="block nav-link text-center py-2" data-key="navArenasMobile">衝突的競技場</a>
+            <a href="#impact" class="block nav-link text-center py-2" data-key="navImpactMobile">全球影響</a>
+            <button id="lang-switcher-mobile" data-key="langButtonMobile" class="w-full mt-2 px-3 py-2 text-sm border-2 border-blue-800 text-blue-800 rounded-full hover:bg-blue-800 hover:text-white transition-colors">English</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section class="text-center mb-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-blue-950 mb-4" data-key="mainTitle">從陰影到明火</h2>
+            <p class="max-w-3xl mx-auto text-stone-600 text-lg" data-key="mainSubtitle">一份互動指南，深入剖析伊朗與以色列如何從昔日的秘密盟友，演變為瀕臨全面戰爭邊緣的公開敵人。本應用程式將帶您探索這場衝突的關鍵轉折點、深層動機與全球漣漪。</p>
+        </section>
+
+        <section id="timeline" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-950" data-key="timelineTitle">衝突演變時間軸</h2>
+                <p class="text-stone-600 mt-2" data-key="timelineSubtitle">點擊下方不同時期，探索兩國關係的劇烈轉變。</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-8">
+                <div id="timeline-nav" class="md:w-1/3">
+                    <!-- Timeline items will be injected by JS -->
+                </div>
+                <div id="timeline-display" class="md:w-2/3 bg-white p-6 rounded-lg shadow-lg fade-in">
+                    <!-- Timeline content will be displayed here by JS -->
+                </div>
+            </div>
+        </section>
+        
+        <section id="drivers" class="mb-20 py-12 bg-white rounded-lg shadow-lg scroll-mt-20">
+            <div class="text-center mb-12 px-4">
+                <h2 class="text-3xl font-bold text-blue-950" data-key="driversTitle">核心驅動因素：他們為何而戰？</h2>
+                <p class="text-stone-600 mt-2 max-w-2xl mx-auto" data-key="driversSubtitle">這場衝突不僅是領土爭議，而是由意識形態、國安焦慮和核武競賽三者交織而成的複雜賽局。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 px-6">
+                <div class="text-center p-6 bg-stone-50 rounded-lg">
+                    <div class="text-4xl mb-4">📜</div>
+                    <h3 class="text-xl font-bold text-teal-800 mb-2" data-key="driver1Title">革命意識形態</h3>
+                    <p class="text-stone-600" data-key="driver1Desc">1979年伊斯蘭革命後，伊朗將以色列定義為「小撒旦」，是西方帝國主義安插在穆斯林世界的「錫安主義實體」。反以色列成為新政權合法性的基石與凝聚國內支持的工具。</p>
+                </div>
+                <div class="text-center p-6 bg-stone-50 rounded-lg">
+                    <div class="text-4xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-bold text-sky-800 mb-2" data-key="driver2Title">國家安全焦慮</h3>
+                    <p class="text-stone-600" data-key="driver2Desc">雙方都陷入了「安全困境」。以色列視伊朗的代理人網絡和核計畫為生存威脅；伊朗則認為其核能力與區域影響力是抵禦以色列和美國侵略的必要保障。</p>
+                </div>
+                <div class="text-center p-6 bg-stone-50 rounded-lg">
+                    <div class="text-4xl mb-4">⚛️</div>
+                    <h3 class="text-xl font-bold text-amber-700 mb-2" data-key="driver3Title">核武競賽</h3>
+                    <p class="text-stone-600" data-key="driver3Desc">對以色列而言，一個擁有核武的伊朗是不可逾越的紅線。這引發了數十年的秘密破壞、暗殺和網路攻擊，也最終成為2025年直接衝突的導火線。</p>
+                </div>
+            </div>
+            <div class="mt-12">
+                 <h3 class="text-2xl font-bold text-center text-blue-950 mb-4" data-key="nuclearChartTitle">伊朗核計畫的進程</h3>
+                 <div class="chart-container">
+                    <canvas id="nuclearChart"></canvas>
+                 </div>
+                 <p class="text-center text-sm text-stone-500 mt-2 px-4" data-key="nuclearChartCaption">此圖表為示意圖，展示了《伊朗核協議》(JCPOA)對其濃縮鈾活動的影響。</p>
+            </div>
+        </section>
+
+        <section id="arenas" class="mb-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-blue-950" data-key="arenasTitle">衝突的競技場</h2>
+                <p class="text-stone-600 mt-2" data-key="arenasSubtitle">從代理人戰爭到網路攻擊，這是一場在多個維度同時進行的戰爭。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl mb-3 text-teal-800" data-key="arena1Title">代理人戰爭:「抵抗軸心」</h3>
+                    <p class="text-stone-600 mb-4" data-key="arena1Desc">伊朗不直接出兵，而是透過資助和武裝其代理人網絡，在以色列邊境製造持續威脅。這是一種低成本、高槓桿的非對稱戰略。</p>
+                    <ul class="space-y-2 text-stone-700" data-key="arena1List">
+                        <li><span class="font-bold">🇱🇧 真主黨 (Hezbollah):</span> 伊朗最成功的代理人，在黎巴嫩南部形成強大武力。</li>
+                        <li><span class="font-bold">🇵🇸 哈馬斯 & 伊斯蘭聖戰組織:</span> 在加薩開闢第二戰線，將巴勒斯坦問題武器化。</li>
+                        <li><span class="font-bold">🇸🇾 敘利亞:</span> 作為連接伊朗與真主黨的關鍵陸地橋樑和武器轉運站。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="font-bold text-xl mb-3 text-sky-800" data-key="arena2Title">影子戰爭: 秘密行動</h3>
+                    <p class="text-stone-600 mb-4" data-key="arena2Desc">在公開衝突之外，以色列長期透過秘密行動來削弱伊朗。這是一場發生在暗處的鬥爭，目標是延緩伊朗的核計畫和軍事發展。</p>
+                     <ul class="space-y-2 text-stone-700" data-key="arena2List">
+                        <li><span class="font-bold">🎯 定點清除:</span> 多名伊朗高級核科學家在境內被暗殺。</li>
+                        <li><span class="font-bold">💥 設施破壞:</span> 針對核設施與軍事基地的神秘爆炸頻繁發生。</li>
+                        <li><span class="font-bold">🧠 心理戰:</span> 旨在伊朗內部製造偏執、不信任感與不安全感。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg md:col-span-2 lg:col-span-1">
+                    <h3 class="font-bold text-xl mb-3 text-amber-700" data-key="arena3Title">網路戰:「震網」病毒</h3>
+                    <p class="text-stone-600" data-key="arena3Desc">2010年，被認為由美國和以色列開發的「震網」(Stuxnet) 蠕蟲，是世界首個造成大規模物理破壞的數位武器。它成功感染並摧毀了伊朗納坦茲核設施中約1000台離心機，極大延緩了其核計畫，並開啟了國家級網路戰的新時代。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-12 bg-white rounded-lg shadow-lg scroll-mt-20">
+             <div class="text-center mb-12 px-4">
+                <h2 class="text-3xl font-bold text-blue-950" data-key="impactTitle">全球影響與各方立場</h2>
+                <p class="text-stone-600 mt-2" data-key="impactSubtitle">這場區域衝突的漣漪效應，觸及了全球經濟、大國博弈與人道危機。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 px-6">
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-950 mb-4" data-key="impactEconTitle">經濟衝擊</h3>
+                    <p class="text-stone-600 mb-6" data-key="impactEconDesc">衝突對全球經濟構成重大威脅，尤其體現在能源市場。對荷姆茲海峽（全球1/5石油運輸要道）的任何干擾都可能引發油價飆升，加劇全球通膨。</p>
+                    <div class="chart-container h-64 sm:h-72">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-stone-500 mt-2" data-key="spendingChartCaption">2024年國防開支顯著增加，擠壓了兩國的民生預算。</p>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-950 mb-4" data-key="impactIntlTitle">國際反應</h3>
+                    <div class="flex border-b border-stone-200 mb-4">
+                        <button class="tab-button flex-1 py-2 px-4 text-stone-600 active" data-tab="usa" data-key="tabUSA">🇺🇸 美國</button>
+                        <button class="tab-button flex-1 py-2 px-4 text-stone-600" data-tab="russia" data-key="tabRussia">🇷� 俄羅斯</button>
+                        <button class="tab-button flex-1 py-2 px-4 text-stone-600" data-tab="arab" data-key="tabArab">🇸🇦 阿拉伯國家</button>
+                    </div>
+                    <div id="tab-content" class="fade-in">
+                        <!-- Tab content injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-blue-950 text-white mt-16">
+        <div class="container mx-auto px-8 py-6 text-center">
+            <p data-key="footerCredit">本互動應用程式內容根據「從邊緣到懸崖：伊朗-以色列衝突的詳盡分析報告」製作。</p>
+            <p class="text-sm text-blue-200 mt-2" data-key="footerDisclaimer">旨在提供一個教育性和資訊性的視角，以理解複雜的地緣政治動態。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- DATA & TRANSLATIONS ---
+            let currentLang = 'zh';
+            let nuclearChartInstance;
+            let spendingChartInstance;
+
+            const translations = {
+                zh: {
+                    pageTitle: '從陰影到明火：伊朗-以色列衝突互動解析',
+                    headerTitle: '伊朗-以色列衝突解析',
+                    navTimeline: '演變時間軸', navDrivers: '核心驅動因素', navArenas: '衝突的競技場', navImpact: '全球影響',
+                    mainTitle: '從陰影到明火',
+                    mainSubtitle: '一份互動指南，深入剖析伊朗與以色列如何從昔日的秘密盟友，演變為瀕臨全面戰爭邊緣的公開敵人。本應用程式將帶您探索這場衝突的關鍵轉折點、深層動機與全球漣漪。',
+                    timelineTitle: '衝突演變時間軸',
+                    timelineSubtitle: '點擊下方不同時期，探索兩國關係的劇烈轉變。',
+                    driversTitle: '核心驅動因素：他們為何而戰？',
+                    driversSubtitle: '這場衝突不僅是領土爭議，而是由意識形態、國安焦慮和核武競賽三者交織而成的複雜賽局。',
+                    driver1Title: '革命意識形態',
+                    driver1Desc: '1979年伊斯蘭革命後，伊朗將以色列定義為「小撒旦」，是西方帝國主義安插在穆斯林世界的「錫安主義實體」。反以色列成為新政權合法性的基石與凝聚國內支持的工具。',
+                    driver2Title: '國家安全焦慮',
+                    driver2Desc: '雙方都陷入了「安全困境」。以色列視伊朗的代理人網絡和核計畫為生存威脅；伊朗則認為其核能力與區域影響力是抵禦以色列和美國侵略的必要保障。',
+                    driver3Title: '核武競賽',
+                    driver3Desc: '對以色列而言，一個擁有核武的伊朗是不可逾越的紅線。這引發了數十年的秘密破壞、暗殺和網路攻擊，也最終成為2025年直接衝突的導火線。',
+                    nuclearChartTitle: '伊朗核計畫的進程',
+                    nuclearChartCaption: '此圖表為示意圖，展示了《伊朗核協議》(JCPOA)對其濃縮鈾活動的影響。',
+                    nuclearChartYAxis: '濃縮鈾庫存量 (kg)',
+                    nuclearChartLEU: '低濃縮鈾庫存 (示意)',
+                    nuclearChartHEU: '高濃縮鈾 (60%) 庫存 (示意)',
+                    nuclearChartLabels: ['2014 (協議前)', '2017 (協議中)', '2022 (美退出後)'],
+                    arenasTitle: '衝突的競技場',
+                    arenasSubtitle: '從代理人戰爭到網路攻擊，這是一場在多個維度同時進行的戰爭。',
+                    arena1Title: '代理人戰爭:「抵抗軸心」',
+                    arena1Desc: '伊朗不直接出兵，而是透過資助和武裝其代理人網絡，在以色列邊境製造持續威脅。這是一種低成本、高槓桿的非對稱戰略。',
+                    arena1List: `<li><span class="font-bold">🇱🇧 真主黨 (Hezbollah):</span> 伊朗最成功的代理人，在黎巴嫩南部形成強大武力。</li>
+                                 <li><span class="font-bold">🇵🇸 哈馬斯 & 伊斯蘭聖戰組織:</span> 在加薩開闢第二戰線，將巴勒斯坦問題武器化。</li>
+                                 <li><span class="font-bold">🇸🇾 敘利亞:</span> 作為連接伊朗與真主黨的關鍵陸地橋樑和武器轉運站。</li>`,
+                    arena2Title: '影子戰爭: 秘密行動',
+                    arena2Desc: '在公開衝突之外，以色列長期透過秘密行動來削弱伊朗。這是一場發生在暗處的鬥爭，目標是延緩伊朗的核計畫和軍事發展。',
+                    arena2List: `<li><span class="font-bold">🎯 定點清除:</span> 多名伊朗高級核科學家在境內被暗殺。</li>
+                                 <li><span class="font-bold">💥 設施破壞:</span> 針對核設施與軍事基地的神秘爆炸頻繁發生。</li>
+                                 <li><span class="font-bold">🧠 心理戰:</span> 旨在伊朗內部製造偏執、不信任感與不安全感。</li>`,
+                    arena3Title: '網路戰:「震網」病毒',
+                    arena3Desc: '2010年，被認為由美國和以色列開發的「震網」(Stuxnet) 蠕蟲，是世界首個造成大規模物理破壞的數位武器。它成功感染並摧毀了伊朗納坦茲核設施中約1000台離心機，極大延緩了其核計畫，並開啟了國家級網路戰的新時代。',
+                    impactTitle: '全球影響與各方立場',
+                    impactSubtitle: '這場區域衝突的漣漪效應，觸及了全球經濟、大國博弈與人道危機。',
+                    impactEconTitle: '經濟衝擊',
+                    impactEconDesc: '衝突對全球經濟構成重大威脅，尤其體現在能源市場。對荷姆茲海峽（全球1/5石油運輸要道）的任何干擾都可能引發油價飆升，加劇全球通膨。',
+                    spendingChartCaption: '2024年國防開支顯著增加，擠壓了兩國的民生預算。',
+                    spendingChartLabel: '2024年國防開支增長 (示意)',
+                    spendingChartXAxis: '年度增長率 (%)',
+                    spendingChartCountries: ['以色列', '伊朗'],
+                    impactIntlTitle: '國際反應',
+                    tabUSA: '🇺🇸 美國', tabRussia: '🇷🇺 俄羅斯', tabArab: '🇸🇦 阿拉伯國家',
+                    footerCredit: '本互動應用程式內容根據「從邊緣到懸崖：伊朗-以色列衝突的詳盡分析報告」製作。',
+                    footerDisclaimer: '旨在提供一個教育性和資訊性的視角，以理解複雜的地緣政治動態。',
+                    langButton: 'English',
+                    langButtonMobile: 'English'
+                },
+                en: {
+                    pageTitle: 'From Shadow to Fire: An Interactive Analysis of the Iran-Israel Conflict',
+                    headerTitle: 'Iran-Israel Conflict Analysis',
+                    navTimeline: 'Timeline', navDrivers: 'Core Drivers', navArenas: 'Arenas of Conflict', navImpact: 'Global Impact',
+                    mainTitle: 'From Shadow to Fire',
+                    mainSubtitle: 'An interactive guide exploring how Iran and Israel devolved from covert allies to overt enemies on the brink of all-out war. This application will guide you through the key turning points, deep-seated motivations, and global ripples of this conflict.',
+                    timelineTitle: 'Timeline of the Conflict\'s Evolution',
+                    timelineSubtitle: 'Click on the different eras below to explore the dramatic shifts in the relationship.',
+                    driversTitle: 'Core Drivers: Why Do They Fight?',
+                    driversSubtitle: 'This is not just a territorial dispute, but a complex game woven from ideology, national security anxieties, and a nuclear arms race.',
+                    driver1Title: 'Revolutionary Ideology',
+                    driver1Desc: 'After the 1979 Islamic Revolution, Iran defined Israel as the "Little Satan," a "Zionist entity" planted by Western imperialism in the Muslim world. Anti-Israel sentiment became a cornerstone of the new regime\'s legitimacy and a tool to rally domestic support.',
+                    driver2Title: 'National Security Anxiety',
+                    driver2Desc: 'Both sides are trapped in a "security dilemma." Israel views Iran\'s proxy network and nuclear program as existential threats; Iran sees its nuclear capability and regional influence as necessary guarantees against Israeli and American aggression.',
+                    driver3Title: 'The Nuclear Race',
+                    driver3Desc: 'For Israel, a nuclear-armed Iran is an insurmountable red line. This has triggered decades of covert sabotage, assassinations, and cyberattacks, ultimately becoming the flashpoint for direct conflict in 2025.',
+                    nuclearChartTitle: 'Progress of Iran\'s Nuclear Program',
+                    nuclearChartCaption: 'This chart is illustrative, showing the impact of the Iran Nuclear Deal (JCPOA) on its uranium enrichment activities.',
+                    nuclearChartYAxis: 'Enriched Uranium Stockpile (kg)',
+                    nuclearChartLEU: 'Low-Enriched Uranium Stockpile (Illustrative)',
+                    nuclearChartHEU: 'High-Enriched (60%) Uranium Stockpile (Illustrative)',
+                    nuclearChartLabels: ['2014 (Pre-JCPOA)', '2017 (JCPOA in effect)', '2022 (Post-US withdrawal)'],
+                    arenasTitle: 'Arenas of Conflict',
+                    arenasSubtitle: 'From proxy wars to cyberattacks, this is a war fought simultaneously across multiple dimensions.',
+                    arena1Title: 'Proxy War: The "Axis of Resistance"',
+                    arena1Desc: 'Instead of direct military engagement, Iran funds and arms its network of proxies to create a constant threat on Israel\'s borders. This is a low-cost, high-leverage asymmetric strategy.',
+                    arena1List: `<li><span class="font-bold">🇱🇧 Hezbollah:</span> Iran's most successful proxy, forming a formidable force in southern Lebanon.</li>
+                                 <li><span class="font-bold">🇵🇸 Hamas & Islamic Jihad:</span> Opening a second front in Gaza, weaponizing the Palestinian issue.</li>
+                                 <li><span class="font-bold">🇸🇾 Syria:</span> Serving as a critical land bridge and weapons transit hub connecting Iran to Hezbollah.</li>`,
+                    arena2Title: 'Shadow War: Covert Operations',
+                    arena2Desc: 'Beyond public view, Israel has long used covert operations to weaken Iran. This is a struggle in the dark, aimed at delaying Iran\'s nuclear and military development.',
+                    arena2List: `<li><span class="font-bold">🎯 Targeted Assassinations:</span> Several high-level Iranian nuclear scientists have been assassinated within the country.</li>
+                                 <li><span class="font-bold">💥 Facility Sabotage:</span> Mysterious explosions frequently occur at nuclear facilities and military bases.</li>
+                                 <li><span class="font-bold">🧠 Psychological Warfare:</span> Aimed at creating paranoia, distrust, and a sense of insecurity within Iran.</li>`,
+                    arena3Title: 'Cyber War: The "Stuxnet" Virus',
+                    arena3Desc: 'In 2010, the "Stuxnet" worm, believed to be developed by the US and Israel, was the world\'s first digital weapon to cause large-scale physical damage. It successfully infected and destroyed about 1,000 centrifuges at Iran\'s Natanz nuclear facility, significantly delaying its nuclear program and ushering in a new era of state-sponsored cyber warfare.',
+                    impactTitle: 'Global Impact & Stances',
+                    impactSubtitle: 'The ripple effects of this regional conflict touch the global economy, great power competition, and humanitarian crises.',
+                    impactEconTitle: 'Economic Shock',
+                    impactEconDesc: 'The conflict poses a significant threat to the global economy, particularly in energy markets. Any disruption to the Strait of Hormuz (where 1/5 of global oil transits) could trigger a spike in oil prices, exacerbating global inflation.',
+                    spendingChartCaption: 'The significant increase in 2024 defense spending squeezes the domestic budgets of both nations.',
+                    spendingChartLabel: '2024 Defense Spending Growth (Illustrative)',
+                    spendingChartXAxis: 'Annual Growth Rate (%)',
+                    spendingChartCountries: ['Israel', 'Iran'],
+                    impactIntlTitle: 'International Reactions',
+                    tabUSA: '🇺🇸 USA', tabRussia: '🇷🇺 Russia', tabArab: '🇸🇦 Arab States',
+                    footerCredit: 'Content for this interactive application is adapted from the "From the Brink to the Cliff: A Detailed Analysis of the Iran-Israel Conflict" report.',
+                    footerDisclaimer: 'This is intended to provide an educational and informational perspective on complex geopolitical dynamics.',
+                    langButton: '中文',
+                    langButtonMobile: '中文'
+                }
+            };
+            
+            const timelineData = {
+                zh: [
+                    { id: 'alliance', year: '1948–1979', title: '不可能的聯盟', summary: '基於共同威脅（蘇聯、泛阿拉伯主義），奉行巴勒維王朝的伊朗與以色列建立了務實的半秘密聯盟。', details: [ { icon: '🤝', text: '<strong>事實上承認 (1950):</strong> 伊朗成為繼土耳其後第二個承認以色列的穆斯林佔多數國家。' }, { icon: '🛢️', text: '<strong>經濟合作:</strong> 雙方合資建立埃拉特-阿什凱隆輸油管道，讓伊朗石油繞過蘇伊士運河銷往歐洲，為兩國帶來巨大利益。' }, { icon: '🤫', text: '<strong>秘密軍事情報合作:</strong> 以色列協助伊朗發展武器（如「花卉計畫」），並在德黑蘭設有情報站。' }] },
+                    { id: 'rupture', year: '1979', title: '革命性的決裂', summary: '何梅尼領導的伊斯蘭革命徹底顛覆了伊朗，將其從美國的盟友變為敵人，與以色列的關係也隨之決裂。', details: [ { icon: '👹', text: '<strong>「小撒旦」誕生:</strong> 新政權將美國定義為「大撒旦」，以色列為「小撒旦」，反錫安主義成為國策。' }, { icon: '🇵🇸', text: '<strong>外交轉向:</strong> 伊朗關閉以色列大使館，並將其移交給巴勒斯坦解放組織（PLO），徹底斷絕關係。' }, { icon: '🤔', text: '<strong>國內動機:</strong> 激烈的反以色列立場，是新政權鞏固權力、與被推翻的親西方國王劃清界線的關鍵手段。' }] },
+                    { id: 'proxy', year: '1982–2024', title: '代理人戰爭時代', summary: '伊朗發展出「抵抗軸心」策略，透過資助和武裝其在中東各地的代理人，對以色列發動非對稱戰爭。', details: [ { icon: '🇱🇧', text: '<strong>真主黨的創建 (1982):</strong> 伊朗革命衛隊在黎巴嫩組織、訓練並資助真主黨，使其成為以色列北部最強大的威脅。' }, { icon: '🇵🇸', text: '<strong>支持巴勒斯坦派系:</strong> 從1990年代起，伊朗向哈馬斯和伊斯蘭聖戰組織提供資金與軍事訓練，在加薩開闢第二戰線。' }, { icon: '🇸🇾', text: '<strong>敘利亞戰場:</strong> 敘利亞成為伊朗向真主黨運送武器的關鍵通道。以色列為阻止伊朗在敘建立軍事據點，發動了數百次空襲。' }] },
+                    { id: 'shadow', year: '2010s–2024', title: '影子戰爭與核對峙', summary: '伊朗核計畫成為衝突核心。以色列視其為生存威脅，發動了一場長期的秘密戰爭以破壞和延遲其進程。', details: [ { icon: '⚛️', text: '<strong>核計畫加速:</strong> 美國2018年退出《伊朗核協議》(JCPOA)後，伊朗加速鈾濃縮活動，將「突破時間」縮短至數週。' }, { icon: '🎯', text: '<strong>秘密行動:</strong> 以色列摩薩德被指控在伊朗境內暗殺多名核科學家，並對核設施進行物理破壞。' }, { icon: '💻', text: '<strong>震網病毒 (2010):</strong> 美以合作的電腦蠕蟲，成功破壞伊朗納坦茲設施近千台離心機，是網路戰的里程碑事件。' }] },
+                    { id: 'open', year: '2024–2025', title: '走向公開戰爭', summary: '長期以來的交戰規則被打破，雙方從代理人與影子戰爭，升級為前所未有的直接軍事攻擊。', details: [ { icon: '💥', text: '<strong>大馬士革遇襲 (2024/4):</strong> 以色列空襲伊朗駐敘利亞領事館，炸死革命衛隊高級將領，被伊朗視為對其主權的直接攻擊。' }, { icon: '🚀', text: '<strong>伊朗首次直擊 (2024/4):</strong> 伊朗發射超過300架無人機和飛彈直接攻擊以色列領土，跨越了直接衝突的門檻。' }, { icon: '🦁', text: '<strong>「雄獅崛起」行動 (2025/6):</strong> 以色列以伊朗即將擁核為由，發動大規模先發制人空襲，目標包括核設施與領導層，將衝突推向全面戰爭。' }] }
+                ],
+                en: [
+                    { id: 'alliance', year: '1948–1979', title: 'The Unlikely Alliance', summary: 'Based on shared threats (the Soviet Union, Pan-Arabism), Pahlavi-era Iran and Israel established a pragmatic, semi-covert alliance.', details: [ { icon: '🤝', text: '<strong>De Facto Recognition (1950):</strong> Iran became the second Muslim-majority country after Turkey to recognize Israel.' }, { icon: '🛢️', text: '<strong>Economic Cooperation:</strong> They jointly built the Eilat-Ashkelon pipeline, allowing Iranian oil to bypass the Suez Canal to Europe, bringing huge profits to both nations.' }, { icon: '🤫', text: '<strong>Covert Military-Intel Cooperation:</strong> Israel assisted Iran in weapons development (e.g., Project Flower) and maintained an intelligence station in Tehran.' }] },
+                    { id: 'rupture', year: '1979', title: 'The Revolutionary Rupture', summary: 'The Islamic Revolution led by Khomeini completely upended Iran, turning it from a US ally into an enemy, and its relationship with Israel ruptured accordingly.', details: [ { icon: '👹', text: '<strong>Birth of the "Little Satan":</strong> The new regime defined the US as the "Great Satan" and Israel as the "Little Satan," making anti-Zionism a state policy.' }, { icon: '🇵🇸', text: '<strong>Diplomatic Shift:</strong> Iran closed the Israeli embassy and handed it over to the Palestine Liberation Organization (PLO), completely severing ties.' }, { icon: '🤔', text: '<strong>Domestic Motivation:</strong> Fierce anti-Israel rhetoric was a key tool for the new regime to consolidate power and distance itself from the overthrown, pro-Western Shah.' }] },
+                    { id: 'proxy', year: '1982–2024', title: 'The Era of Proxy Wars', summary: 'Iran developed its "Axis of Resistance" strategy, waging an asymmetric war against Israel by funding and arming its proxies across the Middle East.', details: [ { icon: '🇱🇧', text: '<strong>Creation of Hezbollah (1982):</strong> Iran\'s IRGC organized, trained, and funded Hezbollah in Lebanon, making it the most potent threat on Israel\'s northern border.' }, { icon: '🇵🇸', text: '<strong>Support for Palestinian Factions:</strong> From the 1990s, Iran provided funds and military training to Hamas and Islamic Jihad, opening a second front in Gaza.' }, { icon: '🇸🇾', text: '<strong>The Syrian Arena:</strong> Syria became a crucial corridor for Iran to transfer weapons to Hezbollah. Israel launched hundreds of airstrikes to prevent Iran from establishing a military foothold there.' }] },
+                    { id: 'shadow', year: '2010s–2024', title: 'Shadow War & Nuclear Standoff', summary: 'Iran\'s nuclear program became the core of the conflict. Israel, viewing it as an existential threat, waged a long-term covert war to sabotage and delay its progress.', details: [ { icon: '⚛️', text: '<strong>Nuclear Acceleration:</strong> After the US withdrew from the JCPOA in 2018, Iran accelerated its uranium enrichment, reducing its "breakout time" to a matter of weeks.' }, { icon: '🎯', text: '<strong>Covert Operations:</strong> Israel\'s Mossad is accused of assassinating several nuclear scientists inside Iran and physically sabotaging nuclear facilities.' }, { icon: '💻', text: '<strong>Stuxnet Virus (2010):</strong> A US-Israeli computer worm that successfully destroyed nearly 1,000 centrifuges at Iran\'s Natanz facility, a milestone in cyber warfare.' }] },
+                    { id: 'open', year: '2024–2025', title: 'Towards Open War', summary: 'Long-standing rules of engagement were broken, as both sides escalated from proxy and shadow wars to unprecedented direct military attacks.', details: [ { icon: '💥', text: '<strong>Damascus Strike (Apr 2024):</strong> An Israeli airstrike on the Iranian consulate in Syria killed senior IRGC commanders, seen by Iran as a direct attack on its sovereignty.' }, { icon: '🚀', text: '<strong>Iran\'s First Direct Hit (Apr 2024):</strong> Iran launched over 300 drones and missiles directly at Israeli territory, crossing the threshold of direct conflict.' }, { icon: '🦁', text: '<strong>Operation Lion\'s Rise (Jun 2025):</strong> Citing Iran\'s imminent nuclear capability, Israel launched a massive preemptive airstrike targeting nuclear facilities and leadership, pushing the conflict towards all-out war.' }] }
+                ]
+            };
+            
+            const internationalPositions = {
+                zh: {
+                    usa: { title: "🇺🇸 美國：複雜的盟友", content: "作為以色列最關鍵的盟友，美國提供巨額軍事援助並直接參與防禦。然而，華盛頓也極力避免被拖入一場更廣泛的中東戰爭。其政策在『外交談判』與『極限施壓』間搖擺，且對以色列的約束力有限，尤其當以色列感知到生存威脅時。" },
+                    russia: { title: "🇷🇺 俄羅斯：模糊的仲裁者", content: "俄羅斯與衝突雙方都保持關係，將自己定位為潛在的調解人。它譴責以色列的攻擊違反國際法，但其在敘利亞與伊朗的結盟關係，以及普遍的反西方立場，意味著它並非中立一方，其主要目標是提升自身區域影響力並制衡美國。" },
+                    arab: { title: "🇸🇦 阿拉伯國家：謹慎的旁觀者", content: "沙烏地阿拉伯、阿聯酋等海灣國家與以色列同樣擔憂伊朗的野心。然而，出於經濟自我保護和避免引火燒身的恐懼，他們公開譴責以色列的攻擊並呼籲降溫。這是一種『戰略對沖』：公開與伊朗緩和關係，私下則依賴與美國的安全聯繫。" }
+                },
+                en: {
+                    usa: { title: "🇺🇸 USA: The Complicated Ally", content: "As Israel's most critical ally, the US provides massive military aid and directly participates in its defense. However, Washington is also desperate to avoid being dragged into a broader Middle East war. Its policy swings between 'diplomatic negotiation' and 'maximum pressure,' and its ability to restrain Israel is limited, especially when Israel perceives an existential threat." },
+                    russia: { title: "🇷🇺 Russia: The Ambiguous Arbiter", content: "Russia maintains relations with both sides, positioning itself as a potential mediator. It condemns Israeli attacks as violations of international law, but its alliance with Iran in Syria and its general anti-Western stance mean it is not a neutral party. Its main goal is to enhance its regional influence and counterbalance the US." },
+                    arab: { title: "🇸🇦 Arab States: The Cautious Onlookers", content: "Gulf states like Saudi Arabia and the UAE share Israel's concerns about Iranian ambitions. However, out of economic self-preservation and fear of getting caught in the crossfire, they publicly condemn Israeli attacks and call for de-escalation. This is a 'strategic hedge': publicly easing tensions with Iran while privately relying on security ties with the US." }
+                }
+            };
+            
+            // --- DOM Elements ---
+            const timelineNav = document.getElementById('timeline-nav');
+            const timelineDisplay = document.getElementById('timeline-display');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContent = document.getElementById('tab-content');
+            
+            // --- FUNCTIONS ---
+            
+            function updateTextContent(lang) {
+                const t = translations[lang];
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.title = t.pageTitle;
+
+                // Update all elements with data-key attributes
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.dataset.key;
+                    if (t[key]) {
+                        // Handle special cases like list content
+                        if (key === 'arena1List' || key === 'arena2List') {
+                             el.innerHTML = t[key];
+                        } else {
+                            el.textContent = t[key];
+                        }
+                    }
+                });
+                
+                // Update mobile nav links separately as they have unique keys in the data model
+                document.querySelector('[data-key="navTimelineMobile"]').textContent = t.navTimeline;
+                document.querySelector('[data-key="navDriversMobile"]').textContent = t.navDrivers;
+                document.querySelector('[data-key="navArenasMobile"]').textContent = t.navArenas;
+                document.querySelector('[data-key="navImpactMobile"]').textContent = t.navImpact;
+            }
+            
+            function renderTimeline(lang) {
+                timelineNav.innerHTML = '';
+                const data = timelineData[lang];
+                
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'timeline-item cursor-pointer p-4 rounded-lg transition hover:bg-stone-100';
+                    div.dataset.id = item.id;
+                    div.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="timeline-dot w-4 h-4 bg-stone-300 rounded-full border-4 border-white shadow-md transition-transform duration-300"></div>
+                            <div class="ml-4 timeline-content">
+                                <h3 class="text-lg font-semibold text-stone-700 transition">${item.title}</h3>
+                                <p class="text-sm text-stone-500">${item.year}</p>
+                            </div>
+                        </div>
+                    `;
+                    div.addEventListener('click', () => renderTimelineContent(item.id, lang));
+                    timelineNav.appendChild(div);
+                });
+                
+                // Initially render the first item
+                if (data.length > 0) {
+                    renderTimelineContent(data[0].id, lang);
+                }
+            }
+
+            function renderTimelineContent(id, lang) {
+                const item = timelineData[lang].find(d => d.id === id);
+                if (!item) return;
+
+                timelineDisplay.innerHTML = `
+                    <div class="fade-in">
+                        <h3 class="text-2xl font-bold mb-1 text-blue-900">${item.title}</h3>
+                        <p class="text-sm text-stone-500 mb-4">${item.year}</p>
+                        <p class="text-stone-700 mb-6">${item.summary}</p>
+                        <ul class="space-y-3">
+                            ${item.details.map(detail => `
+                                <li class="flex items-start">
+                                    <span class="text-xl mr-3 mt-1">${detail.icon}</span>
+                                    <span class="text-stone-600">${detail.text}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                document.querySelectorAll('.timeline-item').forEach(el => {
+                    el.classList.toggle('active', el.dataset.id === id);
+                });
+            }
+            
+            function renderTabContent(tabId, lang) {
+                const data = internationalPositions[lang][tabId];
+                if (!data) return;
+
+                tabContent.innerHTML = `
+                    <div class="p-4 bg-stone-50 rounded-lg fade-in">
+                        <h4 class="font-bold text-lg mb-2 text-blue-900">${data.title}</h4>
+                        <p class="text-stone-600">${data.content}</p>
+                    </div>
+                `;
+                tabButtons.forEach(button => {
+                    button.classList.toggle('active', button.dataset.tab === tabId);
+                });
+            }
+            
+            function createNuclearChart(lang) {
+                if (nuclearChartInstance) nuclearChartInstance.destroy();
+                const t = translations[lang];
+                const nuclearCtx = document.getElementById('nuclearChart').getContext('2d');
+                nuclearChartInstance = new Chart(nuclearCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: t.nuclearChartLabels,
+                        datasets: [
+                            { label: t.nuclearChartLEU, data: [7000, 300, 3800], backgroundColor: 'rgba(2, 132, 199, 0.6)', borderColor: 'rgba(2, 132, 199, 1)', borderWidth: 1 },
+                            { label: t.nuclearChartHEU, data: [0, 0, 100], backgroundColor: 'rgba(217, 119, 6, 0.6)', borderColor: 'rgba(217, 119, 6, 1)', borderWidth: 1 },
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, stacked: true, title: { display: true, text: t.nuclearChartYAxis } }, x: { stacked: true } }, plugins: { tooltip: { mode: 'index', intersect: false }, title: { display: false } } }
+                });
+            }
+            
+            function createSpendingChart(lang) {
+                if (spendingChartInstance) spendingChartInstance.destroy();
+                const t = translations[lang];
+                const spendingCtx = document.getElementById('spendingChart').getContext('2d');
+                spendingChartInstance = new Chart(spendingCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: t.spendingChartCountries,
+                        datasets: [{ label: t.spendingChartLabel, data: [65, 30], backgroundColor: ['rgba(30, 64, 175, 0.6)', 'rgba(0, 100, 80, 0.6)'], borderColor: ['rgba(30, 64, 175, 1)', 'rgba(0, 100, 80, 1)'], borderWidth: 1 }]
+                    },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, title: { display: true, text: t.spendingChartXAxis } } }, plugins: { legend: { display: false }, title: { display: false } } }
+                });
+            }
+            
+            function switchLanguage() {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateUIForLanguage(currentLang);
+            }
+            
+            function updateUIForLanguage(lang) {
+                 // 1. Update all static text
+                updateTextContent(lang);
+                
+                // 2. Re-render dynamic components
+                renderTimeline(lang);
+                
+                // 3. Re-create charts with new labels
+                createNuclearChart(lang);
+                createSpendingChart(lang);
+
+                // 4. Update the active tab with the new language
+                const activeTab = document.querySelector('.tab-button.active');
+                if (activeTab) {
+                    renderTabContent(activeTab.dataset.tab, lang);
+                }
+            }
+            
+            // --- EVENT LISTENERS ---
+            
+            // Language Switcher
+            document.getElementById('lang-switcher').addEventListener('click', switchLanguage);
+            document.getElementById('lang-switcher-mobile').addEventListener('click', switchLanguage);
+            
+            // Tabs
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    renderTabContent(button.dataset.tab, currentLang);
+                });
+            });
+            
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Smooth Scrolling & Active Nav Link Highlighting
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                       mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section[id]');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // --- INITIALIZATION ---
+            updateUIForLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
