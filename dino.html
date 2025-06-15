@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：白堊紀大滅絕之謎</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Neutrals & Muted Tones (Stone, Slate, Amber, Teal) -->
+    <!-- Application Structure Plan: A single-page, vertical scrolling narrative. The structure guides the user from the primary cause (the impact), through its cascading effects, introduces the secondary factor (volcanism) with an interactive comparison, visualizes the survival patterns with filters, and concludes with the aftermath. This thematic, story-driven flow is more engaging than a simple report reproduction and uses targeted interactions (toggles, filters, tabs) to make complex data digestible and memorable. -->
+    <!-- Visualization & Content Choices: 1. Impact Stats (Table 1) -> Goal: Inform -> Method: Key figure cards (HTML/Tailwind) for quick visual intake. 2. Impact vs. Volcano (Table 2) -> Goal: Compare -> Method: Interactive bar chart (Chart.js) with a toggle to dynamically switch datasets, providing a clear, active comparison. 3. Survivor List (Table 3) -> Goal: Organize/Filter -> Method: Interactive grid of cards with Unicode icons and JS-powered filters, turning a static table into an exploratory tool. 4. Disaster Timeline -> Goal: Show Process -> Method: JS-powered tabs for different timeframes (Hours, Years) to break down complex sequential events. Justification: These choices prioritize user interaction and visual storytelling to make the dense scientific information accessible and engaging. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #f59e0b; /* amber-500 */
+            border-color: #f59e0b; /* amber-500 */
+        }
+        .filter-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .filter-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .tab-btn.active {
+            border-color: #f59e0b; /* amber-500 */
+            color: #f59e0b;
+            background-color: #fefce8; /* yellow-50 */
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-slate-800">
+
+    <header id="main-header" class="bg-white/80 backdrop-blur-lg shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="text-xl md:text-2xl font-bold text-slate-700 hover:text-amber-500 transition">滅絕之謎</a>
+            <div class="hidden md:flex space-x-6 text-slate-600">
+                <a href="#impact" class="nav-link pb-1 border-b-2 border-transparent">主要元兇</a>
+                <a href="#cascade" class="nav-link pb-1 border-b-2 border-transparent">連鎖災難</a>
+                <a href="#accomplice" class="nav-link pb-1 border-b-2 border-transparent">罪行同謀</a>
+                <a href="#filter" class="nav-link pb-1 border-b-2 border-transparent">偉大過濾器</a>
+                <a href="#legacy" class="nav-link pb-1 border-b-2 border-transparent">新紀元</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white py-2">
+            <a href="#impact" class="block text-center py-2 text-slate-600 hover:bg-stone-100">主要元兇</a>
+            <a href="#cascade" class="block text-center py-2 text-slate-600 hover:bg-stone-100">連鎖災難</a>
+            <a href="#accomplice" class="block text-center py-2 text-slate-600 hover:bg-stone-100">罪行同謀</a>
+            <a href="#filter" class="block text-center py-2 text-slate-600 hover:bg-stone-100">偉大過濾器</a>
+            <a href="#legacy" class="block text-center py-2 text-slate-600 hover:bg-stone-100">新紀元</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="min-h-screen flex flex-col justify-center items-center text-center bg-white px-4">
+            <div class="max-w-4xl">
+                <h1 class="text-4xl md:text-6xl font-bold text-amber-500 tracking-wider">白堊紀的彌天之死</h1>
+                <p class="mt-4 text-lg md:text-2xl text-slate-600">六千六百萬年前，一場宇宙級的災難，終結了恐龍長達1.7億年的統治。</p>
+                <p class="mt-8 text-md md:text-lg text-slate-500">這是一場由小行星撞擊與大規模火山噴發共同導演的滅絕事件。本互動報告將帶您深入探究這場遠古浩劫的完整面貌，揭示地球生命史上最關鍵的轉捩點。</p>
+                <a href="#impact" class="mt-12 inline-block bg-amber-500 text-white font-bold py-3 px-8 rounded-full text-lg hover:bg-amber-600 transition-transform transform hover:scale-105">
+                    向下滾動，揭開謎底
+                </a>
+            </div>
+        </section>
+
+        <section id="impact" class="py-20 px-4">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-800">第一章：主要元兇 — 希克蘇魯伯撞擊</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-slate-600">科學界的壓倒性共識指出，一顆直徑約10至15公里的小行星是引發大滅絕的主要觸發因素。本章節將展示指向這次撞擊的關鍵證據，如同法醫學調查般，呈現「犯罪現場」的細節。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform">
+                        <div class="text-5xl text-amber-500">☄️</div>
+                        <h3 class="font-bold text-xl mt-4">宇宙子彈</h3>
+                        <p class="text-slate-600 mt-2">一顆直徑 <span class="font-bold text-amber-600">10-15公里</span> 的小行星，以每秒超過25公里的速度撞擊地球。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform">
+                        <div class="text-5xl text-amber-500">💥</div>
+                        <h3 class="font-bold text-xl mt-4">驚人能量</h3>
+                        <p class="text-slate-600 mt-2">釋放約 <span class="font-bold text-amber-600">100萬億噸</span> TNT的能量，相當於數十億顆原子彈。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform">
+                        <div class="text-5xl text-amber-500">🌍</div>
+                        <h3 class="font-bold text-xl mt-4">歸零地</h3>
+                        <p class="text-slate-600 mt-2">在今日墨西哥猶加敦半島，留下一個直徑 <span class="font-bold text-amber-600">180-200公里</span> 的巨大隕石坑。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform">
+                        <div class="text-5xl text-amber-500">🔬</div>
+                        <h3 class="font-bold text-xl mt-4">化學指紋</h3>
+                        <p class="text-slate-600 mt-2">全球K-Pg邊界地層中發現的 <span class="font-bold text-amber-600">「銥」異常層</span>，是小行星撞擊的鐵證。</p>
+                    </div>
+                </div>
+
+                 <div class="mt-16 bg-white rounded-lg shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-center mb-6">決定性的證據鏈</h3>
+                    <p class="text-center text-slate-600 mb-8 max-w-4xl mx-auto">撞擊理論的確立並非基於單一證據，而是多個獨立學科證據相互印證的結果。從全球性的地球化學異常，到撞擊點的物理證據，再到鑽探隕石坑內部的「冒煙的槍」，形成了一個無可辯駁的證據閉環。</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0">
+                        <div class="text-center p-4">
+                            <div class="bg-amber-100 text-amber-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow">銥異常</div>
+                            <p class="mt-2 font-semibold">全球化學指紋</p>
+                        </div>
+                        <div class="text-4xl text-slate-400 font-light mx-4 hidden md:block">→</div>
+                        <div class="text-4xl text-slate-400 font-light my-2 md:hidden">↓</div>
+                        <div class="text-center p-4">
+                             <div class="bg-amber-100 text-amber-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-2xl font-bold shadow">衝擊石英</div>
+                            <p class="mt-2 font-semibold">極端壓力證據</p>
+                        </div>
+                        <div class="text-4xl text-slate-400 font-light mx-4 hidden md:block">→</div>
+                        <div class="text-4xl text-slate-400 font-light my-2 md:hidden">↓</div>
+                        <div class="text-center p-4">
+                             <div class="bg-amber-100 text-amber-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-2xl font-bold shadow">玻璃隕石</div>
+                            <p class="mt-2 font-semibold">熔融岩石之雨</p>
+                        </div>
+                        <div class="text-4xl text-slate-400 font-light mx-4 hidden md:block">→</div>
+                        <div class="text-4xl text-slate-400 font-light my-2 md:hidden">↓</div>
+                        <div class="text-center p-4">
+                             <div class="bg-amber-100 text-amber-700 rounded-full w-24 h-24 flex items-center justify-center mx-auto text-3xl font-bold shadow">隕石坑</div>
+                            <p class="mt-2 font-semibold">找到撞擊地點</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="cascade" class="py-20 px-4 bg-white">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-800">第二章：陷入混亂的世界 — 連鎖災難反應</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-slate-600">撞擊引發了一系列環環相扣的殺傷機制，從撞擊點的瞬時毀滅，到長期的全球性環境危機。本章節將透過時間軸的方式，展示地球如何在短時間內變成煉獄。</p>
+                </div>
+                
+                <div class="max-w-4xl mx-auto">
+                    <div class="border-b border-slate-200 mb-6">
+                        <nav class="flex space-x-2 md:space-x-4" aria-label="Tabs">
+                            <button class="tab-btn active" data-tab="1">即時後果 (分鐘-小時)</button>
+                            <button class="tab-btn" data-tab="2">中期影響 (月-年)</button>
+                            <button class="tab-btn" data-tab="3">長期影響 (年-十年)</button>
+                        </nav>
+                    </div>
+
+                    <div id="tab-content-1" class="tab-content">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-stone-100 p-6 rounded-lg">
+                                <h4 class="font-bold text-xl text-red-600">🔥 熱脈衝與全球野火</h4>
+                                <p class="mt-2 text-slate-700">撞擊噴射物再入大氣層，產生強烈熱輻射，如同烤箱般烘烤地表，引發全球性野火。地層中的大量煙灰是這場大火的證據。</p>
+                            </div>
+                            <div class="bg-stone-100 p-6 rounded-lg">
+                                <h4 class="font-bold text-xl text-blue-600">🌊 超級海嘯與地震</h4>
+                                <p class="mt-2 text-slate-700">撞擊引發規模超過11級的超級地震，激起高達1.5公里的海嘯，沖刷大陸海岸線，留下混亂的沉積層。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-content-2" class="tab-content hidden">
+                         <div class="bg-stone-100 p-6 rounded-lg">
+                            <h4 class="font-bold text-xl text-slate-700">🌑 撞擊冬天：黑暗與飢荒</h4>
+                            <p class="mt-2 text-slate-700">數萬億噸的塵埃、煙灰和硫酸鹽氣溶膠籠罩大氣，遮蔽陽光長達數年。光合作用停止，導致全球食物網從根基上崩潰，植食性恐龍首先餓死，隨後肉食性恐龍也因缺乏食物而滅亡。</p>
+                        </div>
+                    </div>
+                    <div id="tab-content-3" class="tab-content hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-stone-100 p-6 rounded-lg">
+                                <h4 class="font-bold text-xl text-sky-600">🧊 全球降溫</h4>
+                                <p class="mt-2 text-slate-700">陽光被阻擋，導致全球氣溫劇降，地球陷入持續數年到十多年的冰凍狀態，遠超白堊紀生物的承受極限。</p>
+                            </div>
+                            <div class="bg-stone-100 p-6 rounded-lg">
+                                <h4 class="font-bold text-xl text-green-600">💧 全球酸雨</h4>
+                                <p class="mt-2 text-slate-700">撞擊點氣化的含硫岩石，與大氣中的水蒸氣結合形成腐蝕性極強的硫酸雨，毒害植被並酸化海洋，溶解了海洋生物的外殼。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="accomplice" class="py-20 px-4">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-800">第三章：罪行的同謀 — 德干火山活動</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-slate-600">在撞擊發生的同時，地球內部也正在上演一場史詩級的災難——德干暗色岩大規模火山噴發。科學界曾激烈辯論誰是主兇，但現在的共識是兩者存在致命的協同作用。本章節讓您能互動比較這兩大事件的環境效應。</p>
+                </div>
+
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="text-center mb-6">
+                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                            <button type="button" id="impact-btn" class="comparison-btn active py-2 px-4 text-sm font-medium text-white bg-amber-500 rounded-l-lg hover:bg-amber-600">
+                                希克蘇魯伯撞擊
+                            </button>
+                            <button type="button" id="volcano-btn" class="comparison-btn py-2 px-4 text-sm font-medium text-slate-900 bg-white border-t border-b border-slate-200 hover:bg-slate-100 hover:text-amber-600">
+                                德干火山活動
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                    <div id="conclusion-text" class="mt-8 text-center max-w-3xl mx-auto text-slate-600">
+                        <h4 class="font-bold text-xl mb-2">綜合結論：致命的「組合拳」</h4>
+                        <p>德干火山活動在撞擊前已使地球生態變得脆弱，如同一個慢性病患者。而希克蘇魯伯撞擊則是給予這個虛弱系統的致命一擊。甚至有假說認為，撞擊的巨大地震波可能加劇了火山的噴發，將兩者直接聯繫起來。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="filter" class="py-20 px-4 bg-white">
+            <div class="container mx-auto">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-slate-800">第四章：偉大的過濾器 — 生命與死亡的模式</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-slate-600">這場滅絕並非隨機的死亡抽籤，而是根據一套嚴格的生存法則，篩選出了具有特定特徵的物種。在本節中，您可以互動探索哪些生物類群倖存，哪些滅絕，並了解體型、食性和棲息地等關鍵特徵如何決定牠們的命運。</p>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-2 mb-8">
+                    <button class="filter-btn active" data-filter="all">全部</button>
+                    <button class="filter-btn" data-filter="survived">倖存者</button>
+                    <button class="filter-btn" data-filter="extinct">滅絕者</button>
+                    <button class="filter-btn" data-filter="small">小型體型</button>
+                    <button class="filter-btn" data-filter="large">大型體型</button>
+                    <button class="filter-btn" data-filter="aquatic">水生/半水生</button>
+                </div>
+
+                <div id="survivor-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <section id="legacy" class="py-20 px-4 text-center">
+             <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800">終章：新紀元的黎明</h2>
+                <p class="mt-4 text-lg text-slate-600">毀滅，亦是創造。非鳥類恐龍的滅絕，為地球生態系統留下了大量的空白，為倖存者們提供了一個前所未有的演化舞台。</p>
+                <div class="mt-12 flex flex-col md:flex-row justify-center items-center gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm">
+                        <div class="text-6xl">👑</div>
+                        <h3 class="text-2xl font-bold mt-4">哺乳動物的崛起</h3>
+                        <p class="mt-2 text-slate-600">在恐龍時代一直生活在其陰影之下的哺乳動物，抓住了這個機會，迅速輻射演化，體型變大，形態多樣，最終誕生了包括人類在內的現代哺乳動物世界。</p>
+                    </div>
+                     <div class="text-5xl font-thin text-slate-400">&</div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg max-w-sm">
+                        <div class="text-6xl">🐦</div>
+                        <h3 class="text-2xl font-bold mt-4">鳥類的繁榮</h3>
+                        <p class="mt-2 text-slate-600">作為恐龍唯一倖存的血脈，鳥類也經歷了大規模的演化，佔據了天空，成為地球上最多樣化的脊椎動物之一。</p>
+                    </div>
+                </div>
+                <p class="mt-12 text-xl font-medium text-slate-700">這場遠古的彌天之死，既是終點，也是一個全新紀元的起點。</p>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-slate-800 text-stone-300 py-6 text-center">
+        <p>基於《白堊紀的彌天之死：恐龍滅絕的權威性分析報告》創建的互動式報告。</p>
+        <p class="text-sm text-stone-400 mt-1">僅供教育與展示用途。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+
+            // Nav link active state on scroll
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            sections.forEach(section => observer.observe(section));
+
+            // Disaster cascade tabs
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    tabContents.forEach(content => {
+                        if (content.id === `tab-content-${tabId}`) {
+                            content.classList.remove('hidden');
+                        } else {
+                            content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            // Comparison Chart
+            const impactData = {
+                labels: ['氣候效應', '持續時間', '地理尺度', '發生速度', '主要化學因子'],
+                datasets: [{
+                    label: '希克蘇魯伯撞擊',
+                    data: [10, 8, 10, 10, 9],
+                    backgroundColor: 'rgba(245, 158, 11, 0.6)', // amber-500
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const volcanoData = {
+                labels: ['氣候效應', '持續時間', '地理尺度', '發生速度', '主要化學因子'],
+                datasets: [{
+                    label: '德干火山活動',
+                    data: [6, 10, 7, 3, 7],
+                    backgroundColor: 'rgba(13, 148, 136, 0.6)', // teal-600
+                    borderColor: 'rgba(13, 148, 136, 1)',
+                    borderWidth: 1
+                }]
+            };
+            
+            const chartTooltips = {
+                '氣候效應': {
+                    '希克蘇魯伯撞擊': '劇烈、快速的全球降溫（撞擊冬天）',
+                    '德干火山活動': '緩慢、長期的全球暖化'
+                },
+                '持續時間': {
+                    '希克蘇魯伯撞擊': '數年至數十年',
+                    '德干火山活動': '數十萬年至百萬年'
+                },
+                '地理尺度': {
+                    '希克蘇魯伯撞擊': '全球性、同步',
+                    '德干火山活動': '全球性，但影響可能呈梯度'
+                },
+                '發生速度': {
+                    '希克蘇魯伯撞擊': '瞬時（幾小時內）',
+                    '德干火山活動': '漸進、脈衝式'
+                },
+                '主要化學因子': {
+                    '希克蘇魯伯撞擊': '硫酸鹽氣溶膠、煙灰、塵埃',
+                    '德干火山活動': '二氧化碳、二氧化硫'
+                }
+            }
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: impactData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            display: false
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 14,
+                                    family: "'Noto Sans TC', sans-serif"
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        const category = context.label;
+                                        const detail = chartTooltips[category][label];
+                                        return `${label}: ${detail}`;
+                                    }
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const impactBtn = document.getElementById('impact-btn');
+            const volcanoBtn = document.getElementById('volcano-btn');
+            impactBtn.addEventListener('click', () => {
+                comparisonChart.data = impactData;
+                comparisonChart.update();
+                impactBtn.classList.add('bg-amber-500', 'text-white');
+                impactBtn.classList.remove('bg-white', 'text-slate-900', 'border-t', 'border-b', 'border-slate-200');
+                volcanoBtn.classList.add('bg-white', 'text-slate-900', 'border-t', 'border-b', 'border-slate-200');
+                volcanoBtn.classList.remove('bg-amber-500', 'text-white');
+                volcanoBtn.classList.remove('rounded-l-lg');
+                volcanoBtn.classList.add('rounded-r-lg');
+            });
+            volcanoBtn.addEventListener('click', () => {
+                comparisonChart.data = volcanoData;
+                comparisonChart.update();
+                volcanoBtn.classList.add('bg-amber-500', 'text-white');
+                volcanoBtn.classList.remove('bg-white', 'text-slate-900', 'border-t', 'border-b', 'border-slate-200');
+                impactBtn.classList.add('bg-white', 'text-slate-900');
+                impactBtn.classList.remove('bg-amber-500', 'text-white');
+            });
+
+            // Survivor Filter
+            const survivorData = [
+                { name: '非鳥類恐龍', icon: '🦖', fate: 'extinct', size: 'large', habitat: 'land', reason: '體型巨大、食性專一' },
+                { name: '鳥類 (恐龍)', icon: '🐦', fate: 'survived', size: 'small', habitat: 'land', reason: '體型小、有喙可食種子' },
+                { name: '哺乳動物', icon: '🐁', fate: 'survived', size: 'small', habitat: 'land', reason: '體型小、穴居、雜食性' },
+                { name: '鱷形類', icon: '🐊', fate: 'survived', size: 'large', habitat: 'aquatic', reason: '半水生、腐食性、代謝慢' },
+                { name: '蜥蜴與蛇', icon: '🐍', fate: 'survived', size: 'small', habitat: 'land', reason: '體型小、穴居' },
+                { name: '翼龍', icon: '🦇', fate: 'extinct', size: 'large', habitat: 'land', reason: '體型較大、食性專一' },
+                { name: '海洋爬行動物', icon: '🐉', fate: 'extinct', size: 'large', habitat: 'aquatic', reason: '頂級掠食者、食物網崩潰' },
+                { name: '菊石', icon: '🐚', fate: 'extinct', size: 'small', habitat: 'aquatic', reason: '依賴浮游生物、卵脆弱' },
+                { name: '浮游生物', icon: '🦠', fate: 'extinct', size: 'small', habitat: 'aquatic', reason: '依賴光合作用、海洋酸化' },
+                { name: '陸地植物', icon: '🌿', fate: 'survived', size: 'small', habitat: 'land', reason: '種子和孢子可休眠' }
+            ];
+
+            const grid = document.getElementById('survivor-grid');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            function renderGrid(filter) {
+                grid.innerHTML = '';
+                const filteredData = survivorData.filter(item => {
+                    if (filter === 'all') return true;
+                    if (filter === 'survived') return item.fate === 'survived';
+                    if (filter === 'extinct') return item.fate === 'extinct';
+                    if (filter === 'small') return item.size === 'small';
+                    if (filter === 'large') return item.size === 'large';
+                    if (filter === 'aquatic') return item.habitat === 'aquatic';
+                });
+
+                filteredData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-lg shadow transition-all duration-300 ${item.fate === 'survived' ? 'bg-teal-50' : 'bg-red-50'}`;
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <span class="text-4xl">${item.icon}</span>
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full ${item.fate === 'survived' ? 'bg-teal-200 text-teal-800' : 'bg-red-200 text-red-800'}">
+                                ${item.fate === 'survived' ? '倖存' : '滅絕'}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-lg mt-3">${item.name}</h4>
+                        <p class="text-sm text-slate-600 mt-1">關鍵因素：${item.reason}</p>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    renderGrid(button.dataset.filter);
+                });
+            });
+
+            renderGrid('all');
+        });
+    </script>
+</body>
+</html>
