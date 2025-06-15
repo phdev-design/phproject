@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時間的旅程：一日24小時的起源</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Papyrus Tones -->
+    <!-- Application Structure Plan: The application is designed as a single-page, vertical scrolling narrative with a sticky sidebar for thematic navigation. This structure allows users to either follow the historical-to-modern story linearly or jump directly to key concepts like "Ancient Origins," "Evolution of Precision," "Earth's Dance," or "The Atomic Standard." This hybrid approach caters to both immersive readers and users seeking specific information. Key interactions, such as the animated Solar/Sidereal day comparison and the chart on timekeeping stability, are strategically placed to explain the most complex topics visually, enhancing comprehension far beyond static text. This information architecture transforms the dense report into an engaging and intuitive educational experience. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Ancient Egyptian & Mesopotamian systems. Goal: Compare contributions. Viz/Method: HTML/Tailwind comparison table. Justification: Provides a clear, direct side-by-side view of their distinct roles. Library: HTML/Tailwind.
+        - Report Info: Evolution of timekeeping devices. Goal: Show chronological progress. Viz/Method: Vertical timeline using styled HTML/Tailwind. Justification: A classic and intuitive way to represent historical progression. Library: HTML/Tailwind.
+        - Report Info: Solar Day vs. Sidereal Day. Goal: Visually explain the ~4-minute difference. Viz/Method: Canvas animation showing Earth's rotation and revolution. Interaction: Play button to start animation. Justification: A dynamic visualization is superior to static text for explaining this core astronomical concept. Library: Canvas API.
+        - Report Info: Earth's unstable rotation vs. atomic clock stability. Goal: Demonstrate the need for atomic time. Viz/Method: Chart.js line chart comparing a stable atomic time stream with a fluctuating Earth time. Justification: A line chart is the clearest way to show stability vs. variability over time. Library: Chart.js.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fdf6e3; /* Solarized Light - Base */
+            color: #586e75; /* Solarized Text */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 45vh;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            color: #657b83; /* Solarized Secondary Text */
+            border-left: 3px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #cb4b16; /* Solarized Orange */
+            border-left-color: #cb4b16;
+            transform: translateX(5px);
+        }
+        .prose-custom h3 {
+            border-bottom: 2px solid #eee8d5; /* Solarized Light Accent */
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #073642; /* Solarized Dark Base */
+        }
+        .prose-custom p {
+            line-height: 1.8;
+        }
+        .prose-custom strong {
+            color: #b58900; /* Solarized Yellow */
+        }
+        .prose-custom .highlight {
+            background-color: #eee8d5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background-color: #268bd2; /* Solarized Blue */
+            color: #fff;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #1a6a9e;
+        }
+    </style>
+</head>
+<body class="scroll-smooth">
+
+    <div class="max-w-7xl mx-auto">
+        <div class="flex flex-col lg:flex-row">
+
+            <!-- Sticky Sidebar Navigation -->
+            <aside class="w-full lg:w-1/4 lg:sticky lg:top-0 lg:h-screen p-4 lg:p-8 bg-fdf6e3 lg:bg-transparent">
+                <div class="lg:mt-12">
+                    <h2 class="text-2xl font-bold mb-2 text-gray-700">時間的旅程</h2>
+                    <p class="text-sm text-gray-500 mb-8">一日24小時的起源探究</p>
+                    <nav id="sidebar-nav" class="flex flex-row lg:flex-col lg:space-y-4 overflow-x-auto pb-4 lg:pb-0">
+                        <a href="#intro" class="nav-link text-lg font-medium py-2 px-4 whitespace-nowrap">序章：時間的織錦</a>
+                        <a href="#origins" class="nav-link text-lg font-medium py-2 px-4 whitespace-nowrap">第一章：古代的源頭</a>
+                        <a href="#precision" class="nav-link text-lg font-medium py-2 px-4 whitespace-nowrap">第二章：精度的演進</a>
+                        <a href="#dance" class="nav-link text-lg font-medium py-2 px-4 whitespace-nowrap">第三章：地球的舞蹈</a>
+                        <a href="#atomic" class="nav-link text-lg font-medium py-2 px-4 whitespace-nowrap">第四章：原子的標尺</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="w-full lg:w-3/4 p-4 md:p-8 lg:p-12">
+                <section id="intro" class="min-h-screen flex flex-col justify-center prose-custom">
+                    <h1 class="text-4xl md:text-6xl font-bold text-center leading-tight mb-4" style="color: #073642;">解構「一日」</h1>
+                    <p class="text-xl text-center text-gray-600">探究24小時制的歷史與科學根源</p>
+                    <div class="mt-8 text-lg">
+                        <p>我們生活在一個由時鐘的滴答聲所支配的世界，<span class="highlight">一日24小時、一小時60分鐘、一分鐘60秒</span>的框架，已成為我們感知現實的基礎。然而，這個看似理所當然的時間體系，並非源於某個單一的邏輯發明，而是一部橫跨數千年，融合了古代宇宙觀、數學巧思、技術革命與現代物理學精確定義的宏大史詩。</p>
+                        <p>本頁將帶領您穿越這趟旅程，揭示這個日常的時間單位，實則是一個由人類觀察、信仰、計算與創新共同編織而成的複雜建構。請向下滾動，或使用左側導航開始探索。</p>
+                    </div>
+                </section>
+
+                <section id="origins" class="min-h-screen py-16 prose-custom">
+                    <h2 class="text-3xl font-bold mb-6">第一章：古代的源頭</h2>
+                    <p>我們當今所使用的時間系統，其核心數字 — <span class="highlight">24、60、60</span> — 源自兩個截然不同卻最終匯流的古代文明。這個體系並非一次性的設計，而是<strong>古埃及的宇宙觀</strong>與<strong>美索不達米亞的數學傳統</strong>的歷史性綜合體。本章節將解析這兩大文明如何分別為我們的時間框架奠定了基礎。</p>
+                    
+                    <h3>古埃及的贈禮：太陽與星辰的24段框架</h3>
+                    <p>古埃及人基於對太陽和星辰的觀測，首創了將一天劃分為24個部分的概念。他們將白天用日晷劃分為12個部分，夜晚則透過觀測12顆特定的「旬星」升起，也劃分為12個部分。這兩者相加，便構成了<span class="highlight">一日24「小時」</span>的雛形。然而，這些「小時」的長度會隨季節變化，是一種「不定時制」。</p>
+
+                    <h3>美索不達米亞的數學：六十進位制的遺產</h3>
+                    <p>如果說埃及人提供了24小時的「容器」，那麼為這個容器提供精細刻度的「標尺」，則來自美索不達米亞的蘇美爾人與巴比倫人。他們發明的<strong>六十進位制</strong>，因其優越的可除性（60可被1, 2, 3, 4, 5, 6, 10, 12, 15, 20, 30整除），極大地方便了分數運算。這個為天文學和數學而生的系統，最終被用來將小時劃分為60分鐘，分鐘再劃分為60秒。</p>
+
+                    <div class="mt-12 bg-white/50 p-6 rounded-lg shadow-md">
+                        <h4 class="text-xl font-bold text-center mb-6">兩大文明的貢獻</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                            <div class="border-r-0 md:border-r border-gray-200 pr-4">
+                                <h5 class="text-lg font-semibold mb-2" style="color: #2aa198;">古埃及</h5>
+                                <p class="text-4xl font-bold my-4">24</p>
+                                <p>基於對<strong>太陽與星辰</strong>的觀測，建立了晝夜循環的框架。</p>
+                            </div>
+                            <div>
+                                <h5 class="text-lg font-semibold mb-2" style="color: #d33682;">美索不達米亞</h5>
+                                <p class="text-4xl font-bold my-4">60</p>
+                                <p>基於<strong>數學的便利性</strong>，提供了時間細分的度量衡。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="precision" class="min-h-screen py-16 prose-custom">
+                    <h2 class="text-3xl font-bold mb-6">第二章：精度的演進</h2>
+                    <p>從古代基於自然觀測的流動時間，到現代社會由抽象均勻單位構成的剛性時間，這一轉變的核心驅動力是<strong>計時技術的演進</strong>。正是對更高精確度的不懈追求，最終將「等長小時」從一個科學概念變為社會現實，並塑造了我們今天的時間觀念。本章將追溯從水鐘到擺鐘的技術革命。</p>
+
+                    <div class="mt-12 relative border-l-2 border-yellow-700/30 ml-4">
+                        <!-- Timeline Item 1 -->
+                        <div class="mb-10 ml-8">
+                            <span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-200 rounded-full -left-4 ring-4 ring-white">⏳</span>
+                            <h3 class="text-xl font-semibold m-0">早期計時器</h3>
+                            <time class="block mb-2 text-sm font-normal leading-none text-gray-500">約公元前1500年</time>
+                            <p class="text-base font-normal">日晷的缺陷（夜晚和陰天無法使用）催生了<strong>水鐘、火鐘、沙漏</strong>等不依賴陽光的計時方法。它們標誌著人類將時間從天體運動中解放出來的首次嘗試，但主要用於測量一段持續時間，而非指示時刻。</p>
+                        </div>
+                        <!-- Timeline Item 2 -->
+                        <div class="mb-10 ml-8">
+                             <span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-300 rounded-full -left-4 ring-4 ring-white">⚙️</span>
+                            <h3 class="text-xl font-semibold m-0">機械鐘革命</h3>
+                            <time class="block mb-2 text-sm font-normal leading-none text-gray-500">約公元1300年</time>
+                            <p class="text-base font-normal">歐洲發明的<strong>擒縱器</strong>，將重物下落的連續動力轉化為規律的「滴答」聲。這項技術的本質決定了它只能產生<strong>等長時間單位</strong>。機械鐘的普及，將「等長小時」從一個抽象概念變成了社會現實，創造了現代時間。</p>
+                        </div>
+                        <!-- Timeline Item 3 -->
+                        <div class="ml-8">
+                            <span class="absolute flex items-center justify-center w-8 h-8 bg-yellow-400 rounded-full -left-4 ring-4 ring-white">⚖️</span>
+                            <h3 class="text-xl font-semibold m-0">鐘擺的節拍</h3>
+                            <time class="block mb-2 text-sm font-normal leading-none text-gray-500">1656年</tIme>
+                            <p class="text-base font-normal">惠更斯基於伽利略的<strong>等時性原理</strong>發明了擺鐘，精度驚人地提高。這使得在鐘面上增加實用的<strong>分針和秒針</strong>成為可能。源自古巴比倫的六十進位制，終於在普通家庭的鐘盤上找到了自己的位置。</p>
+                        </div>
+                    </div>
+                </section>
+                
+                <section id="dance" class="min-h-screen py-16 prose-custom">
+                    <h2 class="text-3xl font-bold mb-6">第三章：地球的舞蹈</h2>
+                    <p>我們日常所說的「一天」，在科學上並非單一概念。天文學家區分了兩種「日」，它們的微小差異，深刻揭示了地球在宇宙中同時自轉與公轉的精妙物理現實。本章節將透過視覺化方式，解釋我們日常使用的<strong>太陽日</strong>與地球真實自轉週期的<strong>恆星日</strong>之間的區別。</p>
+
+                    <h3>太陽日 vs. 恆星日：那消失的四分鐘</h3>
+                    <p>我們日常使用的24小時制，基於<strong>太陽日</strong>，即太陽連續兩次出現在天空中同一最高點所需的時間。而<strong>恆星日</strong>則是地球相對於遙遠恆星完成一次360度自轉的真實時間，約為<strong>23小時56分4秒</strong>。這近4分鐘的差異，正是因為地球在自轉的同時，也在圍繞太陽公轉。</p>
+                    
+                    <div class="mt-8 bg-white/50 p-6 rounded-lg shadow-md">
+                        <div class="chart-container h-[400px] md:h-[500px]">
+                            <canvas id="earthDanceCanvas"></canvas>
+                        </div>
+                        <div class="text-center mt-4">
+                            <button id="playAnimationBtn" class="btn-primary font-bold py-2 px-4 rounded-lg">▶️ 播放動畫演示</button>
+                            <p class="text-sm mt-2 text-gray-600">此動畫演示了地球在自轉（藍色箭頭）的同時圍繞太陽公轉。為了讓太陽（黃色）重新回到正上方，地球需要比完成360°自轉（相對於遠方恆星，灰色線）後，再多轉動一個小角度。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="atomic" class="min-h-screen py-16 prose-custom">
+                    <h2 class="text-3xl font-bold mb-6">第四章：原子的標尺</h2>
+                    <p>進入20世紀，科學對時間精度的要求達到了前所未有的高度。高精度測量揭示，地球自轉並非完美的時鐘，其速率會因潮汐摩擦、地核流動等因素而變化。這迫使人類放棄以地球為終極時鐘的傳統，轉向物質世界最微觀的層面，尋求一個更完美的節拍器 — <strong>原子鐘</strong>。</p>
+
+                    <h3>從天文秒到原子秒</h3>
+                    <p>1967年，國際度量衡大會重新定義了「秒」：它不再是太陽日的1/86400，而是基於<strong>銫-133原子</strong>在特定能級間躍遷時所輻射電磁波的<span class="highlight">9,192,631,770</span>個週期。這個定義將時間的最高權威從天文學移交給了量子物理學，其穩定性遠超地球自轉。</p>
+
+                    <h3>協調兩個世界：UTC與閏秒</h3>
+                    <p>原子鐘的誕生帶來了兩種時間尺度：純粹物理的<strong>國際原子時 (TAI)</strong> 和反映地球自轉的<strong>世界時 (UT1)</strong>。為了平衡原子鐘的穩定性與人類對太陽日的依賴，全球採用了<strong>協調世界時 (UTC)</strong>。UTC以原子秒為步長，但會透過不定期插入「閏秒」的方式，讓自身時刻與UT1的差異保持在0.9秒之內，等待自轉變慢的地球「跟上來」。</p>
+
+                    <div class="mt-8 bg-white/50 p-6 rounded-lg shadow-md">
+                        <h4 class="text-xl font-bold text-center mb-4">時間標準的穩定性比較</h4>
+                        <div class="chart-container">
+                            <canvas id="timeStabilityChart"></canvas>
+                        </div>
+                        <p class="text-sm text-center mt-2 text-gray-600">此圖表示意性地展示了完美均勻的原子時間（TAI）與不規則且逐漸變慢的地球自轉時間（UT1）之間的差異隨時間推移而擴大，這正是需要閏秒來協調的原因。</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Sidebar Navigation Active State ---
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('#sidebar-nav a');
+            
+            const activateLink = (id) => {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        activateLink(entry.target.id);
+                    }
+                });
+            }, { rootMargin: '-30% 0px -70% 0px', threshold: 0 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+
+            // --- Earth Dance Canvas Animation ---
+            const canvas = document.getElementById('earthDanceCanvas');
+            const ctx = canvas.getContext('2d');
+            let animationFrameId;
+
+            let angle = 0;
+            const orbitRadius = 150;
+            const earthRadius = 10;
+            const sunRadius = 20;
+
+            function resizeCanvas() {
+                const container = canvas.parentElement;
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            }
+
+            function drawEarthDance() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const centerX = canvas.width / 2;
+                const centerY = canvas.height / 2;
+
+                // Orbit path
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, orbitRadius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.stroke();
+
+                // Sun
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, sunRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#cb4b16';
+                ctx.fill();
+
+                // Earth position
+                const earthX = centerX + orbitRadius * Math.cos(angle * Math.PI / 180 / 10);
+                const earthY = centerY + orbitRadius * Math.sin(angle * Math.PI / 180 / 10);
+                
+                // Earth
+                ctx.beginPath();
+                ctx.arc(earthX, earthY, earthRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#268bd2';
+                ctx.fill();
+
+                // Sidereal Day Reference (fixed star)
+                ctx.beginPath();
+                ctx.moveTo(earthX, earthY);
+                ctx.lineTo(earthX, earthY - 50); // Points "up"
+                ctx.strokeStyle = '#657b83';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([2, 2]);
+                ctx.stroke();
+                
+                // Rotation indicator (blue arrow)
+                const rotationAngle = angle * Math.PI / 180;
+                ctx.save();
+                ctx.translate(earthX, earthY);
+                ctx.rotate(rotationAngle);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, -earthRadius * 3);
+                ctx.strokeStyle = '#268bd2';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([]);
+                ctx.stroke();
+                ctx.restore();
+                
+                // Solar Day Reference (line to sun)
+                ctx.beginPath();
+                ctx.moveTo(earthX, earthY);
+                ctx.lineTo(centerX, centerY);
+                ctx.strokeStyle = '#b58900';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            function animate() {
+                angle += 2;
+                if (angle > 396) angle = 0;
+                drawEarthDance();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+            
+            document.getElementById('playAnimationBtn').addEventListener('click', () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                    document.getElementById('playAnimationBtn').innerHTML = '▶️ 播放動畫演示';
+                } else {
+                    angle = 0;
+                    animate();
+                    document.getElementById('playAnimationBtn').innerHTML = '⏸️ 停止動畫';
+                }
+            });
+
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+            drawEarthDance(); // Initial draw
+
+
+            // --- Time Stability Chart ---
+            const stabilityCtx = document.getElementById('timeStabilityChart').getContext('2d');
+            const timeData = {
+                labels: Array.from({length: 11}, (_, i) => `第 ${i*5} 年`),
+                datasets: [
+                    {
+                        label: '國際原子時 (TAI) - 穩定',
+                        data: Array(11).fill(0),
+                        borderColor: '#268bd2',
+                        backgroundColor: 'rgba(38, 139, 210, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        tension: 0.1,
+                        fill: true
+                    },
+                    {
+                        label: '地球自轉時間 (UT1) - 不穩定',
+                        data: Array.from({length: 11}, (_, i) => i * (Math.random() * 0.2 + 0.8) * i * 0.05),
+                        borderColor: '#dc322f',
+                        backgroundColor: 'rgba(220, 50, 47, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            };
+
+            new Chart(stabilityCtx, {
+                type: 'line',
+                data: timeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: '與理想時間的累積差異 (秒)'
+                            }
+                        },
+                        x: {
+                             title: {
+                                display: true,
+                                text: '時間推移'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>
