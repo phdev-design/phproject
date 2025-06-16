@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票的奧秘：互動探索之旅 (藍色風格)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Professional Blue -->
+    <!-- Application Structure Plan: The application is designed as a single-page narrative journey, guiding the user from foundational concepts to advanced topics. This thematic, scrolling structure is more intuitive than mirroring the report's chapters. It starts with a Hero section to grab attention, followed by: 1) 'What is a Stock?' using interactive cards and a comparative chart for clarity. 2) 'The Birth of Stocks' uses a visual timeline for historical context. 3) 'The Investor's World' employs interactive elements to explain motivations and complex psychological biases in a digestible way. 4) 'The Pulse of the Economy' features a dashboard-style interactive chart to demonstrate the crucial relationship between macro indicators and the market. 5) 'The Great Asset Comparison' uses a radar chart for an effective multi-variable comparison. This flow is designed for progressive learning and engagement, turning passive reading into active exploration. -->
+    <!-- Visualization & Content Choices: The application translates the report's text-heavy content into interactive visualizations. 1) Common vs. Preferred Stock: A bar chart (Chart.js) is used to clearly compare risk and reward, which is more effective than a table. 2) Investor Psychology: Interactive flip cards are used to present behavioral biases, making them more engaging to learn. 3) Economy & Markets: A dynamic line chart (Chart.js) with user controls (buttons) demonstrates the cause-and-effect of interest rates on the market, a core concept. 4) Asset Comparison: A radar chart (Chart.js) is chosen for its ability to compare multiple assets across multiple dimensions (risk, return, liquidity) in a single, intuitive graphic. This replaces a static table with a powerful visual summary. All interactions are designed to deepen understanding of the report's key concepts. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F0F4F8; /* Light Blue-Gray */
+            color: #1A202C; /* Dark Slate */
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 600px;
+            max-height: 400px;
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover {
+            color: #3B82F6; /* Primary Blue */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .btn-primary {
+            background-color: #3B82F6; /* Primary Blue */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #2563EB; /* Darker Blue */
+        }
+        .btn-secondary {
+            background-color: #6B7280; /* Gray */
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+            background-color: #4B5563; /* Darker Gray */
+        }
+        .section-title {
+            color: #1A202C;
+            border-bottom: 3px solid #3B82F6; /* Primary Blue */
+            padding-bottom: 0.5rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #60A5FA; /* Lighter Blue */
+            border: 3px solid #F0F4F8;
+        }
+        .timeline {
+            border-left: 3px solid #93C5FD; /* Lightest Blue */
+        }
+        .flip-card { perspective: 1000px; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d;}
+        .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem;}
+        .flip-card-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">股票的奧秘</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#what" class="nav-link">基本概念</a>
+                <a href="#history" class="nav-link">歷史起源</a>
+                <a href="#investor" class="nav-link">投資者世界</a>
+                <a href="#economy" class="nav-link">經濟脈動</a>
+                <a href="#compare" class="nav-link">資產比較</a>
+            </div>
+            <div class="md:hidden">
+                <select onchange="window.location.href=this.value" class="bg-gray-200 rounded-md p-2">
+                    <option value="#">導覽...</option>
+                    <option value="#what">基本概念</option>
+                    <option value="#history">歷史起源</option>
+                    <option value="#investor">投資者世界</option>
+                    <option value="#economy">經濟脈動</option>
+                    <option value="#compare">資產比較</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="text-center py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-6">
+                <h1 class="text-4xl md:text-6xl font-bold mb-4 text-gray-900">股票的奧秘</h1>
+                <p class="text-lg md:text-2xl text-[#3B82F6] mb-8">一場探索財富、風險與人性的互動之旅</p>
+                <p class="max-w-3xl mx-auto text-gray-600">這不是一份枯燥的報告，而是一個互動式的學習工具。我們將帶您揭開股票的神秘面紗，了解它如何誕生、為何如此重要，以及它如何與我們的經濟和心理緊密相連。</p>
+            </div>
+        </section>
+
+        <section id="what" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 section-title inline-block">什麼是股票？</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">股票並非賭場裡的籌碼，而是一份代表公司部分「所有權」的法律憑證。當您購買股票，您就成為了公司的股東，分享其成長果實，也承擔其經營風險。</p>
+                
+                <h3 class="text-2xl font-bold text-center mb-8">身為股東，您擁有什麼權利？</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">💰</div>
+                        <h4 class="text-xl font-bold mb-2">利潤分享權</h4>
+                        <p class="text-gray-600">當公司賺錢時，您有權獲得公司發放的「股息」，這就是俗稱的配息或配股。</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">🗳️</div>
+                        <h4 class="text-xl font-bold mb-2">投票表決權</h4>
+                        <p class="text-gray-600">您能對公司重大決策進行投票，例如選舉董事，影響公司的未來走向。</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">🏠</div>
+                        <h4 class="text-xl font-bold mb-2">剩餘財產分配權</h4>
+                        <p class="text-gray-600">若公司不幸清算，在償還所有債務後，剩餘的資產將分配給股東。</p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">⚖️</div>
+                        <h4 class="text-xl font-bold mb-2">其他權利</h4>
+                        <p class="text-gray-600">包括自由轉讓股份，以及在權益受損時提起訴訟的權利。</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-8">普通股 vs. 特別股：風險與回報的抉擇</h3>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8">公司發行不同類型的股票以吸引不同需求的投資者。普通股潛力無限，但風險較高；特別股如同領固定薪水，穩定但成長有限。下圖為您清晰展示兩者的核心差異。</p>
+                    <div class="chart-container">
+                        <canvas id="stockTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="history" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 section-title inline-block">股票的誕生</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">股票的出現並非偶然，而是為了解決一個世紀難題：如何為充滿巨大風險的遠洋貿易融資？讓我們回到17世紀的大航海時代，見證一場金融革命的誕生。</p>
+                <div class="max-w-3xl mx-auto">
+                    <div class="relative timeline pl-8">
+                        <div class="timeline-item mb-12">
+                            <h4 class="font-bold text-xl mb-1 text-[#60A5FA]">17世紀初：高風險的挑戰</h4>
+                            <p class="text-gray-600">前往亞洲的香料貿易利潤驚人，但海盜、風暴等風險也極高。任何單一商人都難以承擔船毀人亡的災難性損失，這使得大規模貿易難以進行。</p>
+                        </div>
+                        <div class="timeline-item mb-12">
+                            <h4 class="font-bold text-xl mb-1 text-[#60A5FA]">1602年：一個天才的構想</h4>
+                            <p class="text-gray-600">荷蘭政府成立了「荷蘭東印度公司」(VOC)，並採取了一項革命性創舉：向所有公眾（從富商到女僕）出售公司的「股份」。</p>
+                        </div>
+                        <div class="timeline-item mb-12">
+                            <h4 class="font-bold text-xl mb-1 text-[#60A5FA]">金融創新：風險分散與資本匯集</h4>
+                            <p class="text-gray-600">投資者不再是賭單一航次的成敗，而是投資整個公司的數百次航行。災難性風險被轉化為可管理的系統性風險，巨額資本因此得以匯集。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="font-bold text-xl mb-1 text-[#60A5FA]">永恆的遺產：現代公司的藍圖</h4>
+                            <p class="text-gray-600">VOC開創的股份制、有限責任和可自由交易的模式，為現代資本主義鋪平了道路，成為推動工業革命、資助全球企業的引擎。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="investor" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 section-title inline-block">投資者的世界</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">人們為何熱衷於「玩」股票？這背後既有理性的財務回報追求，也受到許多非理性的心理偏誤影響。這是一場對抗市場，也對抗自身人性的遊戲。</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-16 items-center">
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-bold mb-4">回報的雙引擎</h3>
+                        <p class="text-gray-600 mb-4">投資股票的回報主要來自兩個方面：</p>
+                        <ul class="space-y-2">
+                            <li><strong class="text-[#3B82F6]">📈 資本利得：</strong>低買高賣賺取的價差，是成長型投資者的主要目標。</li>
+                            <li><strong class="text-[#60A5FA]">💰 股息收入：</strong>公司定期發放的現金紅利，是收益型投資者（存股族）的穩定現金流來源。</li>
+                        </ul>
+                    </div>
+                    <div class="card p-8">
+                        <h3 class="text-2xl font-bold mb-4 text-center">理性的面具下：常見的心理偏誤</h3>
+                        <p class="text-gray-600 mb-4 text-center">點擊卡片，看看我們的大腦如何欺騙自己。</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="flip-card h-32">
+                                <div class="flip-card-inner card">
+                                    <div class="flip-card-front bg-blue-100">🐑<br>羊群效應</div>
+                                    <div class="flip-card-back bg-blue-200">不管對錯，跟著大家買賣就對了。</div>
+                                </div>
+                            </div>
+                             <div class="flip-card h-32">
+                                <div class="flip-card-inner card">
+                                    <div class="flip-card-front bg-indigo-100">💔<br>損失厭惡</div>
+                                    <div class="flip-card-back bg-indigo-200">賠錢的痛苦遠大於賺錢的快樂，導致死抱虧損股。</div>
+                                </div>
+                            </div>
+                             <div class="flip-card h-32">
+                                <div class="flip-card-inner card">
+                                    <div class="flip-card-front bg-sky-100">😎<br>過度自信</div>
+                                    <div class="flip-card-back bg-sky-200">高估自己的判斷力，導致交易過於頻繁。</div>
+                                </div>
+                            </div>
+                             <div class="flip-card h-32">
+                                <div class="flip-card-inner card">
+                                    <div class="flip-card-front bg-gray-200">⚓<br>錨定效應</div>
+                                    <div class="flip-card-back bg-gray-300">被買入成本價綁架，影響後續賣出決策。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="economy" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 section-title inline-block">經濟的脈動</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">股票市場常被稱作「經濟的晴雨錶」，因為它不僅反映經濟現況，更預示著未來。同時，它也受經濟數據和央行政策的深刻影響，形成一個複雜的共生關係。</p>
+                <div class="bg-gray-50 p-8 rounded-lg shadow-inner">
+                    <h3 class="text-2xl font-bold text-center mb-2">互動儀表板：利率如何影響股市？</h3>
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-6">利率是影響股市最強大的力量之一。點擊下方按鈕，模擬央行升息或降息，觀察市場可能發生的變化。這有助於理解為何投資者如此關注央行的每一句話。</p>
+                    <div class="flex justify-center space-x-4 mb-6">
+                        <button id="raiseRateBtn" class="btn-secondary font-bold py-2 px-4 rounded-lg">模擬升息</button>
+                        <button id="lowerRateBtn" class="btn-primary font-bold py-2 px-4 rounded-lg">模擬降息</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="marketEconomyChart"></canvas>
+                    </div>
+                     <p id="chart-explanation" class="text-center text-gray-600 mt-4 max-w-2xl mx-auto transition-opacity duration-500">利率就像金融市場的「引力」。</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="compare" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 section-title inline-block">資產大比拼</h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">股票只是眾多投資工具的一種。建立一個健康的投資組合，需要了解不同資產的特性。這張雷達圖為您比較了四種主要資產在三大維度上的表現。</p>
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                     <div class="chart-container h-[50vh] sm:h-[60vh]">
+                        <canvas id="assetComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t mt-16">
+        <div class="container mx-auto px-6 py-8 text-center text-gray-600">
+            <h3 class="text-2xl font-bold mb-4 text-gray-800">結論：從「遊戲」到「認知」</h3>
+            <p class="max-w-3xl mx-auto mb-4">
+                透過這次互動探索，希望您對股票的理解已從一個神秘的「遊戲」，轉化為對現代經濟一個基本支柱的清晰認知。它不僅是資產配置的工具，更是理解全球經濟、企業戰略乃至人性心理的一扇窗口。
+            </p>
+            <p class="text-sm">本應用程式內容基於提供的專家報告生成，僅供教育和資訊參考。 </p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        const stockTypeCtx = document.getElementById('stockTypeChart');
+        if (stockTypeCtx) {
+            new Chart(stockTypeCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['潛在回報', '風險水平', '股息穩定性', '投票權'],
+                    datasets: [{
+                        label: '普通股',
+                        data: [9, 8, 3, 10],
+                        backgroundColor: 'rgba(59, 130, 246, 0.6)', // Primary Blue
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: '特別股',
+                        data: [4, 3, 9, 1],
+                        backgroundColor: 'rgba(147, 197, 253, 0.6)', // Lighter Blue
+                        borderColor: 'rgba(147, 197, 253, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    if(value === 10) return '高';
+                                    if(value === 5) return '中';
+                                    if(value === 0) return '低';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '普通股與特別股特性比較 (數值僅為示意)',
+                            padding: { top: 10, bottom: 20 },
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    let value = context.parsed.y;
+                                    if (value > 8) label += '高';
+                                    else if (value > 5) label += '中高';
+                                    else if (value > 3) label += '中低';
+                                    else label += '低';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        const marketEconomyCtx = document.getElementById('marketEconomyChart');
+        if(marketEconomyCtx){
+            const initialData = {
+                labels: ['第一季', '第二季', '第三季', '第四季', '第五季', '第六季'],
+                datasets: [
+                    {
+                        label: '股市指數',
+                        data: [15000, 15500, 16000, 15800, 16200, 16500],
+                        borderColor: '#3B82F6', // Primary Blue
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                     {
+                        label: '利率水平',
+                        data: [1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+                        borderColor: '#6B7280', // Gray
+                        borderDash: [5, 5],
+                        fill: false,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            };
+            const marketEconomyChart = new Chart(marketEconomyCtx, {
+                type: 'line',
+                data: initialData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                       x: {
+                           title: { display: true, text: '時間' }
+                       },
+                       y: {
+                           type: 'linear',
+                           display: true,
+                           position: 'left',
+                           title: { display: true, text: '股市指數' },
+                           beginAtZero: false
+                       },
+                       y1: {
+                           type: 'linear',
+                           display: true,
+                           position: 'right',
+                           title: { display: true, text: '利率 (%)' },
+                           grid: {
+                               drawOnChartArea: false, 
+                           },
+                           suggestedMin: 0,
+                           suggestedMax: 5
+                       }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '利率變動對股市的模擬影響',
+                            padding: { top: 10, bottom: 20 },
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                }
+            });
+            
+            const explanationEl = document.getElementById('chart-explanation');
+
+            document.getElementById('raiseRateBtn').addEventListener('click', () => {
+                const stockData = marketEconomyChart.data.datasets[0].data;
+                const rateData = marketEconomyChart.data.datasets[1].data;
+                marketEconomyChart.data.datasets[0].data = stockData.map(p => p - (Math.random() * 200 + 300));
+                marketEconomyChart.data.datasets[1].data = rateData.map(p => Math.min(p + 0.25, 5));
+                marketEconomyChart.update();
+                explanationEl.textContent = '升息通常會增加企業借貸成本，使債券等安全資產更具吸引力，可能對股市造成壓力。';
+                explanationEl.style.opacity = 1;
+            });
+
+            document.getElementById('lowerRateBtn').addEventListener('click', () => {
+                const stockData = marketEconomyChart.data.datasets[0].data;
+                const rateData = marketEconomyChart.data.datasets[1].data;
+                marketEconomyChart.data.datasets[0].data = stockData.map(p => p + (Math.random() * 200 + 300));
+                marketEconomyChart.data.datasets[1].data = rateData.map(p => Math.max(p - 0.25, 0));
+                marketEconomyChart.update();
+                explanationEl.textContent = '降息通常會降低企業融資成本，刺激經濟活動，並降低儲蓄的吸引力，可能對股市形成利多。';
+                explanationEl.style.opacity = 1;
+            });
+        }
+        
+        const assetComparisonCtx = document.getElementById('assetComparisonChart');
+        if (assetComparisonCtx) {
+            new Chart(assetComparisonCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['潛在回報', '風險水平', '流動性(變現速度)'],
+                    datasets: [{
+                        label: '股票',
+                        data: [9, 8, 8],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    }, {
+                        label: '債券',
+                        data: [4, 3, 6],
+                         backgroundColor: 'rgba(96, 165, 250, 0.2)',
+                        borderColor: 'rgba(96, 165, 250, 1)',
+                        pointBackgroundColor: 'rgba(96, 165, 250, 1)',
+                    }, {
+                        label: '房地產',
+                        data: [6, 5, 2],
+                        backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                        borderColor: 'rgba(22, 163, 74, 1)',
+                        pointBackgroundColor: 'rgba(22, 163, 74, 1)',
+                    },{
+                        label: 'ETF',
+                        data: [7, 6, 8],
+                        backgroundColor: 'rgba(107, 114, 128, 0.2)',
+                        borderColor: 'rgba(107, 114, 128, 1)',
+                        pointBackgroundColor: 'rgba(107, 114, 128, 1)',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            pointLabels: {
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '主要資產類別特性雷達圖 (數值僅為示意)',
+                            padding: { top: 10, bottom: 20 },
+                            font: { size: 16 }
+                        },
+                        legend: {
+                           position: 'top',
+                        },
+                    }
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>
