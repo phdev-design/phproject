@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火星殖民可行性資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #1C1C1C;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .brand-blue { color: #00A9E0; }
+        .brand-magenta { color: #E0007A; }
+        .brand-green { color: #00E07A; }
+        .bg-brand-blue { background-color: #00A9E0; }
+        .bg-brand-magenta { background-color: #E0007A; }
+        .bg-brand-green { background-color: #00E07A; }
+        .border-brand-blue { border-color: #00A9E0; }
+        .border-brand-magenta { border-color: #E0007A; }
+        .border-brand-green { border-color: #00E07A; }
+        .text-shadow {
+            text-shadow: 0 0 8px rgba(0, 169, 224, 0.7), 0 0 12px rgba(224, 0, 122, 0.5);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="h-screen bg-cover bg-center flex items-center justify-center text-center px-4" style="background-image: url('https://placehold.co/1920x1080/1C1C1C/FFFFFF?text=MARS');">
+        <div class="bg-black bg-opacity-60 p-8 rounded-xl">
+            <h1 class="text-4xl md:text-7xl font-black uppercase text-shadow">火星命題</h1>
+            <p class="mt-4 text-lg md:text-2xl text-gray-300">人類移居紅色星球的可行性有多高？</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16 space-y-24">
+
+        <section id="motivation">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">為何是火星？</h2>
+                <p class="mt-4 text-lg text-gray-300">將人類文明擴展至火星的驅動力是多方面的，融合了對物種存續的深層憂慮、科學探求，以及對技術和經濟新邊疆的開拓渴望。這三者共同構成了推動人類邁向紅色星球的強大合力。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">🛡️</div>
+                    <h3 class="text-xl font-bold brand-green">物種存續</h3>
+                    <p class="mt-2 text-gray-400">建立一個地外「備份」，以應對地球潛在的滅絕級災難，是確保人類文明火種不滅的終極保險。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">🔬</div>
+                    <h3 class="text-xl font-bold brand-green">科學需求</h3>
+                    <p class="mt-2 text-gray-400">尋找火星上過去或現在的生命跡象，並通過比較行星學研究，深入理解地球的演化與未來。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <div class="text-5xl mb-4">🚀</div>
+                    <h3 class="text-xl font-bold brand-green">技術經濟</h3>
+                    <p class="mt-2 text-gray-400">挑戰極限的火星任務是強大的技術催化劑，並可能孵化出全新的地外經濟模式。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">兩個世界的對比</h2>
+                <p class="mt-4 text-lg text-gray-300">火星是一個充滿極端挑戰的世界，其環境與地球的差異不僅是程度上的，更是本質上的。這些數據揭示了殖民者將面臨的嚴峻現實。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">行星關鍵參數比較</h3>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="planetComparisonChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-400 text-center">此圖表比較了地球與火星在重力、平均溫度和一天長度上的巨大差異。火星的重力僅為地球的38%，氣溫極低，但一天長度驚人地相似。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">大氣成分：生與死的距離</h3>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="atmosphereCompositionChart"></canvas>
+                    </div>
+                     <p class="mt-4 text-sm text-gray-400 text-center">地球大氣富含可供呼吸的氧氣，而火星大氣95%以上是二氧化碳，壓力不足地球的1%，對人類是劇毒且致命的。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="journey">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">艱險的星際旅程</h2>
+                <p class="mt-4 text-lg text-gray-300">從地球到火星的旅程本身就是一項巨大的挑戰。成功抵達只是第一步，而安全著陸，即「進入、下降與著陸」（EDL），是整個任務中最危險的階段。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center">著陸酬載的巨大飛躍</h3>
+                    <p class="text-center mt-2 mb-4 text-gray-400">殖民火星需要將酬載能力從噸級提升至百噸級，這是一次根本性的範式轉變。</p>
+                    <div class="chart-container">
+                        <canvas id="payloadMassChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold">漫長的航程</h3>
+                        <div class="flex items-center space-x-4 mt-2">
+                             <div class="text-4xl brand-magenta">⏱️</div>
+                            <div>
+                                <div class="text-2xl font-bold">6-9 個月</div>
+                                <div class="text-gray-400">單程飛行時間</div>
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-bold">發射窗口</h3>
+                        <div class="flex items-center space-x-4 mt-2">
+                            <div class="text-4xl brand-magenta">🗓️</div>
+                            <div>
+                                <div class="text-2xl font-bold">每 26 個月</div>
+                                <div class="text-gray-400">霍曼轉移軌道機會</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold">「恐怖七分鐘」</h3>
+                        <div class="flex items-center space-x-4 mt-2">
+                           <div class="text-4xl brand-magenta">💥</div>
+                            <div>
+                                <div class="text-2xl font-bold">完全自主</div>
+                                <div class="text-gray-400">信號延遲導致無法遙控著陸</div>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="survival">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">生存的架構</h2>
+                <p class="mt-4 text-lg text-gray-300">要在火星生存，必須建立一個可持續的立足點。現地資源利用（ISRU）、可靠的能源和安全的棲息地是構成火星生存架構的三大支柱。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold brand-green text-center mb-4">就地取材 (ISRU)</h3>
+                    <p class="text-gray-400 mb-4">利用火星大氣和水冰製造生命必需品是實現自給自足的關鍵。NASA的MOXIE實驗已成功在火星從CO₂中制取氧氣。</p>
+                    <div class="border-2 border-brand-green p-4 rounded-lg">
+                        <div class="flex items-center justify-center space-x-2">
+                            <span class="text-lg font-mono">CO₂ (大氣)</span>
+                            <span class="text-2xl font-bold brand-blue">→</span>
+                            <span class="text-lg font-mono">O₂ (呼吸/燃料)</span>
+                        </div>
+                         <div class="text-center text-4xl my-2 brand-blue">+</div>
+                         <div class="flex items-center justify-center space-x-2">
+                            <span class="text-lg font-mono">H₂O (水冰)</span>
+                            <span class="text-2xl font-bold brand-blue">→</span>
+                            <span class="text-lg font-mono">CH₄ (燃料)</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold brand-green text-center mb-4">棲息地</h3>
+                    <p class="text-gray-400 mb-4">棲息地必須提供壓力、隔熱和至關重要的輻射防護。未來可能利用火星土壤進行3D列印建造。</p>
+                    <div class="space-y-3">
+                       <div class="flex items-center space-x-3"><span class="text-3xl"> inflatable </span> <span>充氣式結構：快速部署</span></div>
+                       <div class="flex items-center space-x-3"><span class="text-3xl"> 🚇 </span> <span>地下棲息地：天然輻射屏障</span></div>
+                       <div class="flex items-center space-x-3"><span class="text-3xl"> 🏗️ </span> <span>3D列印建築：利用當地材料</span></div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                     <h3 class="text-xl font-bold brand-green text-center mb-4">能源選擇</h3>
+                     <p class="text-gray-400 mb-4">持續可靠的電力是所有活動的基礎。由於沙塵暴和距離太陽遙遠，核能被認為是比太陽能更可靠的選擇。</p>
+                     <div class="chart-container h-64">
+                        <canvas id="powerSourceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="health">
+            <div class="text-center max-w-3xl mx-auto">
+                 <h2 class="text-3xl md:text-4xl font-bold brand-blue">脆弱的殖民者</h2>
+                <p class="mt-4 text-lg text-gray-300">最不確定的變數是人類自身。長期太空飛行對太空人的身心都是巨大的考驗，其中輻射是最大的健康威脅。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                     <h3 class="text-xl font-bold text-center mb-4">主要健康風險</h3>
+                    <div class="grid grid-cols-2 gap-6 text-center">
+                        <div>
+                            <div class="text-5xl">🦴</div>
+                            <p class="mt-2 font-bold">骨質流失</p>
+                            <p class="text-sm text-gray-400">每月~1%</p>
+                        </div>
+                        <div>
+                            <div class="text-5xl">💪</div>
+                            <p class="mt-2 font-bold">肌肉萎縮</p>
+                            <p class="text-sm text-gray-400">力量耐力下降</p>
+                        </div>
+                        <div>
+                            <div class="text-5xl">👁️</div>
+                            <p class="mt-2 font-bold">視力問題</p>
+                             <p class="text-sm text-gray-400">SANS症候群</p>
+                        </div>
+                        <div>
+                            <div class="text-5xl">🧠</div>
+                             <p class="mt-2 font-bold">心理壓力</p>
+                            <p class="text-sm text-gray-400">隔離與延遲</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">輻射暴露：壓倒性的威脅</h3>
+                    <div class="chart-container">
+                        <canvas id="radiationDoseChart"></canvas>
+                    </div>
+                     <p class="mt-4 text-sm text-gray-400 text-center">一次往返火星任務的輻射劑量，遠超地球背景值和職業限值，顯著增加患癌風險。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="race">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">新太空競賽</h2>
+                <p class="mt-4 text-lg text-gray-300">當前，通往火星的道路呈現出多極化格局。國家機構與私營巨頭採取了截然不同的戰略、技術路徑和時間表，既合作又競爭。</p>
+            </div>
+            <div class="mt-12 bg-gray-800 p-6 rounded-lg shadow-lg">
+                 <h3 class="text-xl font-bold text-center mb-6">主要火星探索計劃比較</h3>
+                <div class="chart-container h-[450px]">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+                <p class="mt-4 text-sm text-gray-400 text-center">此圖比較了主要參與者的目標、方法和預計首次載人登陸時間。SpaceX的目標最為激進，而NASA則採取更為穩健的「月球到火星」策略。ESA和CNSA則各有側重。</p>
+            </div>
+        </section>
+
+        <section id="economics">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">火星賬本</h2>
+                <p class="mt-4 text-lg text-gray-300">火星殖民的成本是天文數字。其經濟可行性取決於能否從根本上改變成本結構，並為這個地外前哨找到可行的經濟模型。</p>
+            </div>
+            <div class="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4">成本的革命</h3>
+                    <div class="text-center">
+                        <p class="text-gray-400">傳統火星任務成本</p>
+                        <p class="text-4xl md:text-5xl font-black my-2 brand-magenta">~ $5000 億</p>
+                         <p class="text-gray-400">SpaceX星艦目標單次發射成本</p>
+                        <p class="text-4xl md:text-5xl font-black my-2 brand-green">~ $200 萬</p>
+                        <p class="mt-4 text-sm text-gray-400">SpaceX的核心理念是通過完全可重複使用的星艦，將發射成本降低幾個數量級，從而使大規模殖民在經濟上成為可能。</p>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                     <h3 class="text-xl font-bold text-center mb-4">火星經濟體模型</h3>
+                     <p class="text-center text-gray-400 mb-4">一個自給自足的火星經濟體，其出口產品可能不是實物商品，而是無形的智慧和戰略價值。</p>
+                     <div class="space-y-4">
+                        <div class="bg-gray-900 p-4 rounded-md">
+                            <h4 class="font-bold brand-blue">智慧財產權</h4>
+                            <p class="text-sm text-gray-400">為適應極端環境而發明的自動化、生命保障等技術專利，可授權給地球使用。</p>
+                        </div>
+                        <div class="bg-gray-900 p-4 rounded-md">
+                            <h4 class="font-bold brand-blue">物流樞紐</h4>
+                            <p class="text-sm text-gray-400">作為開發小行星帶資源的後勤基地和製造中心，在未來太陽系經濟中扮演關鍵角色。</p>
+                        </div>
+                     </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ethics">
+            <div class="text-center max-w-3xl mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold brand-blue">倫理的十字路口</h2>
+                <p class="mt-4 text-lg text-gray-300">殖民火星不僅是工程問題，更是深刻的哲學命題。我們與火星互動的三個主要目標——科學保護、載人探索和永久殖民——之間存在著內在的、幾乎不可調和的衝突。</p>
+            </div>
+            <div class="mt-12 max-w-lg mx-auto">
+                <div class="relative flex flex-col items-center">
+                    <div class="w-full md:w-3/4 p-6 bg-brand-magenta text-center rounded-lg shadow-lg z-30">
+                        <h3 class="text-xl font-bold">3. 永久殖民 / 地球化</h3>
+                        <p class="text-sm mt-1">徹底改變火星環境，以人類利益為最高優先級。代表了對保護原則的徹底顛覆。</p>
+                    </div>
+                    <div class="absolute top-full left-1/2 transform -translate-x-1/2 -translate-y-2 h-16 w-1 bg-gray-600"></div>
+                    <div class="w-full md:w-11/12 mt-12 p-6 bg-brand-blue text-center rounded-lg shadow-lg z-20">
+                        <h3 class="text-xl font-bold">2. 載人探索</h3>
+                        <p class="text-sm mt-1">接受有限的、可控的生物污染風險，以換取人類親身探索的價值。一種務實的妥協。</p>
+                    </div>
+                    <div class="absolute top-[calc(100%+8rem)] left-1/2 transform -translate-x-1/2 -translate-y-2 h-16 w-1 bg-gray-600"></div>
+                     <div class="w-full mt-28 p-6 bg-brand-green text-white text-center rounded-lg shadow-lg z-10">
+                        <h3 class="text-xl font-bold">1. 科學保護</h3>
+                        <p class="text-sm mt-1">將火星視為原始實驗室，嚴格防止地球微生物污染，以尋找原生生命。最高級別的保護。</p>
+                    </div>
+                </div>
+                <p class="mt-8 text-sm text-gray-400 text-center">這個金字塔展示了人類對火星目標的層級衝突。我們無法同時擁有一個原始受保護的火星和一個繁榮的人類殖民地，這是一個必須在技術成為現實前做出的倫理抉擇。</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 border-t border-gray-700">
+        <p class="text-gray-500">資訊圖表基於《火星命題：對人類殖民可行性的全面分析》報告製作。</p>
+        <p class="text-xs text-gray-600 mt-2">© 2025 火星殖民可行性分析</p>
+    </footer>
+
+    <script>
+        const brandColors = {
+            blue: '#00A9E0',
+            magenta: '#E0007A',
+            green: '#00E07A',
+            white: '#FFFFFF',
+            gray: '#6b7280'
+        };
+
+        const chartTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        
+        function wrapLabel(str, maxWidth = 16) {
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines.filter(line => line.length > 0);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultChartOptions = {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: brandColors.white
+                        }
+                    },
+                     tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: brandColors.gray },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y: {
+                        ticks: { color: brandColors.gray },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            };
+            
+            new Chart(document.getElementById('planetComparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['表面重力 (g)', '平均溫度 (°C)', '一天長度 (小時)'],
+                    datasets: [
+                        {
+                            label: '地球',
+                            data: [1, 15, 23.9],
+                            backgroundColor: brandColors.blue,
+                        },
+                        {
+                            label: '火星',
+                            data: [0.38, -60, 24.6],
+                            backgroundColor: brandColors.magenta,
+                        }
+                    ]
+                },
+                options: defaultChartOptions
+            });
+
+            new Chart(document.getElementById('atmosphereCompositionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        ['二氧化碳', '(95.3%)'], 
+                        ['氮氣', '(2.7%)'], 
+                        ['氬氣', '(1.6%)'], 
+                        ['其他', '(<1%)']
+                    ],
+                    datasets: [{
+                        label: '火星大氣',
+                        data: [95.3, 2.7, 1.6, 0.4],
+                        backgroundColor: [brandColors.magenta, brandColors.blue, brandColors.green, brandColors.gray],
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+            
+            new Chart(document.getElementById('payloadMassChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['毅力號 (2020)', '星艦 (目標)'],
+                    datasets: [{
+                        label: '著陸酬載質量 (公噸)',
+                        data: [1, 100],
+                        backgroundColor: [brandColors.blue, brandColors.green],
+                        borderColor: brandColors.white,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                         x: {
+                            ticks: { color: brandColors.gray },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            ticks: { color: brandColors.gray,
+                                callback: function(value, index, values) {
+                                    return Number(value.toString());
+                                }
+                             },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+            
+            new Chart(document.getElementById('powerSourceChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['核能 (全天候)', '太陽能 (受限)'],
+                    datasets: [{
+                        data: [99, 45],
+                        backgroundColor: [brandColors.green, brandColors.magenta],
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                     plugins: {
+                        ...defaultChartOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += (context.label === '核能 (全天候)') ? '~99% 可用率' : '~45% 可用率 (最佳)';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+            
+            new Chart(document.getElementById('radiationDoseChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['地球年均背景輻射', '火星任務總輻射'],
+                    datasets: [{
+                        label: '輻射劑量 (毫西弗, mSv)',
+                        data: [2.4, 660],
+                        backgroundColor: [brandColors.blue, brandColors.magenta]
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                     plugins: { legend: { display: false } }
+                }
+            });
+            
+            const timelineLabels = [
+                wrapLabel('NASA (月球到火星)'),
+                wrapLabel('SpaceX (直達火星)'),
+                wrapLabel('ESA (科學驅動)'),
+                wrapLabel('CNSA (採樣返回優先)')
+            ];
+
+            new Chart(document.getElementById('timelineChart'), {
+                type: 'bar',
+                data: {
+                    labels: timelineLabels,
+                    datasets: [
+                        {
+                            label: '預計首次載人登陸',
+                            data: [2040, 2030, null, null],
+                            backgroundColor: brandColors.blue,
+                            stack: 'stack1'
+                        },
+                        {
+                            label: '當前核心任務',
+                            data: [null, null, 2030, 2030],
+                            backgroundColor: brandColors.green,
+                             stack: 'stack1'
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    ...defaultChartOptions,
+                    scales: {
+                        x: {
+                            min: 2024,
+                            max: 2045,
+                            ticks: {
+                                stepSize: 5,
+                                color: brandColors.gray
+                            },
+                             grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                           ticks: { color: brandColors.gray },
+                           grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        ...defaultChartOptions.plugins,
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                },
+                                label: function(context) {
+                                    if (context.dataset.label === '預計首次載人登陸') {
+                                        return '載人登陸目標: ' + context.raw;
+                                    }
+                                    return '關鍵無人任務目標: ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
