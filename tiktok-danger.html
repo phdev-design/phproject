@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音系統性風險互動分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The application is designed as a thematic, single-page dashboard rather than a linear document. This structure uses a sticky navigation bar to allow users to jump between distinct, digestible themes: 'Overview', 'Personal Risks', 'Data Surveillance', 'National Security', 'Global Response', 'The Debate', and 'The Path Forward'. This non-linear approach enhances usability by allowing users to explore topics based on their interest, compare different facets of the risk (e.g., personal vs. national), and interact with data through visualizations. This is superior to a simple text scroll because it transforms passive reading into an active exploration, making the complex, multi-layered argument of the source report more accessible and memorable. -->
+    <!-- Visualization & Content Choices: 
+        - Threat Chain Diagram (Overview): Goal: Summarize the core thesis. Method: An HTML/CSS flexbox layout with icons (brain, server, shield) to visually represent the risk progression from personal to national. Justification: Provides an immediate, high-level understanding of the report's main argument.
+        - Interactive Cards (Personal Risks): Goal: Detail specific harms. Method: HTML/Tailwind cards that reveal more information on click. Justification: Breaks down dense information into manageable chunks, encouraging user interaction.
+        - Data Collection Comparison (Data Surveillance): Goal: Highlight the extent of data gathering. Method: A two-column HTML layout. Justification: Clearly contrasts what is officially stated versus what is independently investigated.
+        - Radar Chart (The Debate): Goal: Compare platform risk models. Method: Chart.js radar chart. Justification: Visually effective for comparing multiple quantitative/qualitative attributes across different entities (TikTok vs. Meta vs. Google), directly addressing the "whataboutism" argument in a data-driven way.
+        - Filterable Grid (Global Response): Goal: Showcase global actions without a map. Method: HTML/JS interactive filter buttons and a card grid. Justification: A practical and effective alternative to a map, avoiding the NO SVG/Mermaid constraint while still providing powerful filtering and exploration capabilities.
+        - Accordion (The Path Forward): Goal: Present recommendations clearly. Method: An HTML/JS accordion. Justification: Organizes recommendations for different audiences (policymakers, users) in a clean, compact, and accessible manner.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #D97706; /* amber-600 */
+            border-bottom-color: #D97706;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.is-flipped .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF8] text-gray-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 lg:px-6 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-xl md:text-2xl font-bold text-amber-700">抖音風險分析</h1>
+                <div class="hidden lg:flex items-center space-x-6 text-sm">
+                    <a href="#overview" class="nav-link font-medium">風險總覽</a>
+                    <a href="#personal" class="nav-link font-medium">個人風險</a>
+                    <a href="#surveillance" class="nav-link font-medium">數據監控</a>
+                    <a href="#national-security" class="nav-link font-medium">國家安全</a>
+                    <a href="#global" class="nav-link font-medium">全球應對</a>
+                    <a href="#debate" class="nav-link font-medium">爭議與觀點</a>
+                    <a href="#forward" class="nav-link font-medium">未來與建議</a>
+                </div>
+                <div class="lg:hidden">
+                    <select id="mobile-nav" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5">
+                        <option value="#overview">風險總覽</option>
+                        <option value="#personal">個人風險</option>
+                        <option value="#surveillance">數據監控</option>
+                        <option value="#national-security">國家安全</option>
+                        <option value="#global">全球應對</option>
+                        <option value="#debate">爭議與觀點</option>
+                        <option value="#forward">未來與建議</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 lg:px-6 py-8 md:py-12">
+
+        <!-- 風險總覽 -->
+        <section id="overview" class="text-center mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold mb-4">一個環環相扣的系統性風險</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 mb-12">抖音的危害並非孤立事件，而是一個從個人心理、數據隱私到國家安全的完整威脅鏈。本分析旨在解構此風險傳導路徑，揭示其深層結構與全球影響。</p>
+            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0">
+                <div class="flex-1 flex flex-col items-center p-6 bg-white rounded-lg shadow-lg max-w-sm">
+                    <div class="text-5xl mb-3">🧠</div>
+                    <h3 class="text-xl font-bold mb-2">心理層面奠基</h3>
+                    <p class="text-sm text-gray-600">成癮性演算法塑造了一個認知上更脆弱的龐大用戶群體。</p>
+                </div>
+                <div class="text-2xl text-amber-500 font-bold mx-4 hidden md:block">&rarr;</div>
+                 <div class="text-2xl text-amber-500 font-bold my-2 md:hidden">&darr;</div>
+                <div class="flex-1 flex flex-col items-center p-6 bg-white rounded-lg shadow-lg max-w-sm">
+                    <div class="text-5xl mb-3">📡</div>
+                    <h3 class="text-xl font-bold mb-2">數據層面捕獲</h3>
+                    <p class="text-sm text-gray-600">無所不包的監控架構對用戶進行深度數據挖掘，建立精細檔案。</p>
+                </div>
+                <div class="text-2xl text-amber-500 font-bold mx-4 hidden md:block">&rarr;</div>
+                 <div class="text-2xl text-amber-500 font-bold my-2 md:hidden">&darr;</div>
+                <div class="flex-1 flex flex-col items-center p-6 bg-white rounded-lg shadow-lg max-w-sm">
+                    <div class="text-5xl mb-3">🛡️</div>
+                    <h3 class="text-xl font-bold mb-2">國家層面武器化</h3>
+                    <p class="text-sm text-gray-600">所有權結構使其成為可被用於間諜活動和認知作戰的潛在工具。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 個人風險 -->
+        <section id="personal" class="mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">個人風險：演算法的心理印記</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">風險始於個人。抖音的核心機制透過精密的演算法設計，對用戶的心理健康、認知能力和人身安全構成直接威脅，特別是對青少年群體。</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold mb-3 text-amber-800">多巴胺機器：精心設計的成癮性</h3>
+                    <p class="text-gray-600 mb-4">短小、刺激的影片提供快速獎勵，觸發大腦釋放多巴胺，形成「快速酬償迴路」，導致用戶難以自控，陷入無意識的滾動循環。</p>
+                    <div class="text-sm bg-amber-50 p-3 rounded"><strong>驚人數據：</strong>部分青少年用戶每天在抖音上花費近8小時。</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold mb-3 text-amber-800">「抖音腦」：認知能力的衰退</h3>
+                    <p class="text-gray-600 mb-4">長期接觸快節奏內容，訓練大腦頻繁切換任務而非深度專注，導致注意力廣度縮短、記憶力下降，並削弱批判性思維能力。</p>
+                    <div class="text-sm bg-amber-50 p-3 rounded"><strong>用戶感受：</strong>50%的用戶認為觀看超過一分鐘的影片會帶來「壓力」。</div>
+                </div>
+                <div class="md:col-span-2 lg:col-span-1 bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold mb-3 text-amber-800">致命挑戰：有害內容的放大器</h3>
+                    <p class="text-gray-600 mb-4">演算法同樣高效地傳播危險挑戰，利用青少年從眾心理，已釀成多起致命悲劇。</p>
+                    <ul class="text-sm text-gray-600 list-disc list-inside space-y-1">
+                        <li><strong>昏迷挑戰:</strong> 已導致全球至少15-20名兒童死亡。</li>
+                        <li><strong>苯海拉明挑戰:</strong> 導致多人住院甚至死亡。</li>
+                        <li><strong>吸嗅挑戰:</strong> 已有少女因此腦死。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 數據監控 -->
+        <section id="surveillance" class="mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">數據監控：無形的數位指紋</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">在成癮性的基礎上，抖音建立了龐大的監控架構。其數據收集的廣度與深度遠超公開政策，旨在為每位用戶建立一個全面的「數位指紋」。</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold mb-3 text-amber-800">收集什麼數據？</h3>
+                    <p class="text-gray-600 mb-4">其收集範圍涵蓋了從基本資料到最私密的行為模式。</p>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold">官方政策承認收集：</h4>
+                            <ul class="text-sm list-disc list-inside text-gray-600 mt-1">
+                                <li>用戶內容（即使未發布）、私人訊息、剪貼簿內容</li>
+                                <li>購買資訊、社交關係網絡、GPS位置</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold">獨立調查發現收集：</h4>
+                            <ul class="text-sm list-disc list-inside text-gray-600 mt-1">
+                                <li>生物特徵（臉部與聲音模式）</li>
+                                <li>鍵盤敲擊模式和節奏</li>
+                                <li>跨平台網路行為追蹤</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+                    <h3 class="text-xl font-bold mb-3 text-amber-800">「德州計畫」為何無效？</h3>
+                    <p class="text-gray-600 mb-4">抖音耗資15億美元試圖將美國數據與中國母公司隔離，但計畫存在根本漏洞。</p>
+                    <ul class="text-sm list-disc list-inside text-gray-600 space-y-2">
+                        <li><strong>核心控制權：</strong>演算法的原始碼仍由位於中國的字節跳動團隊開發和維護，存在植入後門的可能。</li>
+                        <li><strong>內部證據：</strong>洩漏的內部會議錄音證實，中國員工曾多次、常規性地存取美國用戶的數據。</li>
+                        <li><strong>法律義務：</strong>最關鍵的是，母公司字節跳動受中國《國家情報法》約束，這使其任何數據安全承諾都顯得蒼白無力。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 國家安全 -->
+        <section id="national-security" class="mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">國家安全：平台的武器化</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">地緣政治風險是各國採取嚴厲監管的根本原因。字節跳動與中國政府的聯繫，以及中國的法律框架，將一個社交平台轉變為對他國構成間諜活動與認知作戰的雙重威脅。</p>
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-center mb-6">根本問題：所有權與《國家情報法》</h3>
+                <div class="flex flex-col md:flex-row items-center justify-center text-center gap-6">
+                    <div class="p-4">
+                        <p class="text-lg font-semibold">字節跳動 (ByteDance)</p>
+                        <p class="text-sm">位於北京的母公司</p>
+                    </div>
+                    <div class="text-2xl text-amber-500 font-bold transform rotate-90 md:rotate-0">&harr;</div>
+                    <div class="p-4">
+                        <p class="text-lg font-semibold">中國政府 (CCP)</p>
+                        <p class="text-sm">透過黃金股、人員聯繫施加影響</p>
+                    </div>
+                    <div class="text-2xl text-amber-500 font-bold mx-4">&rArr;</div>
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-lg font-semibold text-red-800">《國家情報法》第七條</p>
+                        <p class="text-sm text-red-700">「任何組織和公民都應當依法支持、協助和配合國家情報工作。」</p>
+                    </div>
+                </div>
+                <hr class="my-8">
+                <h3 class="text-2xl font-bold text-center mb-6">構成的雙重威脅</h3>
+                <div class="grid md:grid-cols-2 gap-8 text-center">
+                    <div>
+                        <div class="text-5xl mb-3">🕵️</div>
+                        <h4 class="text-xl font-bold mb-2">威脅一：間諜活動</h4>
+                        <p class="text-gray-600">利用海量用戶數據建立個人檔案，用於情資搜集、目標識別、勒索或招募，特別是針對政府及軍方人員。</p>
+                    </div>
+                    <div>
+                        <div class="text-5xl mb-3">📢</div>
+                        <h4 class="text-xl font-bold mb-2">威脅二：認知作戰</h4>
+                        <p class="text-gray-600">操縱演算法，秘密推廣親北京敘事、審查異議聲音、散播不實資訊、製造社會對立，甚至干預他國選舉。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 全球應對 -->
+        <section id="global" class="mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">全球應對：禁令與法規的拼圖</h2>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">全球對抖音的風險已形成廣泛共識，但解決方案各不相同，形成了以「地緣政治安全」和「社會內容危害」為主要考量的兩大陣營。</p>
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <button class="filter-btn bg-amber-500 text-white py-2 px-4 rounded-full" data-filter="all">全部</button>
+                <button class="filter-btn bg-white py-2 px-4 rounded-full border" data-filter="ban">全面/政府禁用</button>
+                <button class="filter-btn bg-white py-2 px-4 rounded-full border" data-filter="regulate">監管/調查</button>
+                <button class="filter-btn bg-white py-2 px-4 rounded-full border" data-filter="temp_ban">暫時/內容封鎖</button>
+            </div>
+            <div id="global-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <!-- 爭議與觀點 -->
+        <section id="debate" class="mb-20 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">爭議與觀點：一場複雜的辯論</h2>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">反對禁令的聲音同樣強烈，主要圍繞言論自由、經濟衝擊和不公平針對三大核心論點展開，揭示了這場爭議的複雜性。</p>
+            <div class="grid lg:grid-cols-2 gap-8">
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-lg card-flip">
+                        <div class="card-flip-inner">
+                            <div class="card-face p-4 rounded-lg border border-gray-200">
+                                <h3 class="text-xl font-bold mb-2">論點一：侵犯言論自由</h3>
+                                <p class="text-sm text-center text-gray-600">禁令被視為關閉一個擁有1.7億美國用戶的獨特言論平台，是「前所未有的政府審查行為」。</p>
+                                <button class="flipper-btn mt-4 text-amber-600 text-xs font-bold">點擊看政府反駁 &rarr;</button>
+                            </div>
+                            <div class="card-back p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                <h3 class="text-xl font-bold mb-2">政府反駁</h3>
+                                <p class="text-sm text-center text-gray-600">法案旨在監管構成國安風險的實體，而非審查內容。對資訊流的控制權本身威脅了言論自由。</p>
+                                <button class="flipper-btn mt-4 text-amber-600 text-xs font-bold">&larr; 返回</button>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-bold mb-2">論點二：衝擊創作者經濟</h3>
+                        <p class="text-gray-600">禁令將打擊超過700萬家利用抖音行銷的小企業，並切斷數百萬內容創作者的生計。在2023年，該平台為美國經濟貢獻了超過240億美元。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-bold mb-2">論點三：不公平的雙重標準</h3>
+                        <p class="text-gray-600">指控者認為，Meta、Google等美國平台也大量收集數據，禁令是出於地緣政治競爭而非單純的國安考量。他們呼籲應制定適用於所有平台的全面數據隱私法。</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-xl font-bold text-center mb-4">主要社交平台風險模型比較</h3>
+                        <p class="text-center text-sm text-gray-500 mb-4">抖音與西方平台的根本區別在於母公司的法律管轄權。</p>
+                        <div class="chart-container">
+                            <canvas id="riskComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 未來與建議 -->
+        <section id="forward" class="scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-4">未來與建議：超越禁令的框架</h2>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-12">解決方案不應僅限於單一應用，而需建立一個更具韌性的治理框架，以應對當前及未來的數位生態系統挑戰。</p>
+            <div id="recommendations-accordion" class="space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-lg flex justify-between items-center hover:bg-amber-50 focus:outline-none">
+                        <span>對政策制定者</span>
+                        <span class="accordion-icon transform transition-transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>推動全面數據隱私立法：</strong>制定類似歐盟GDPR的法律，從源頭上降低所有平台數據庫的戰略價值。</li>
+                                <li><strong>強制演算法透明：</strong>立法要求超大型平台向獨立研究者和監管機構開放演算法，打破「黑箱」。</li>
+                                <li><strong>加強數位供應鏈安全：</strong>為資訊技術服務建立更嚴格的安全標準和審查機制。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-lg flex justify-between items-center hover:bg-amber-50 focus:outline-none">
+                        <span>對企業與行銷人員</span>
+                        <span class="accordion-icon transform transition-transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t">
+                             <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>風險分散：</strong>避免將業務完全建立在單一平台上，實行多平台策略以增強韌性。</li>
+                                <li><strong>加強審計：</strong>對在社交平台上的活動進行嚴格的隱私和安全審計，減少敏感數據暴露。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <button class="accordion-header w-full text-left p-5 font-semibold text-lg flex justify-between items-center hover:bg-amber-50 focus:outline-none">
+                        <span>對個人用戶與家長</span>
+                        <span class="accordion-icon transform transition-transform">+</span>
+                    </button>
+                    <div class="accordion-content max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                        <div class="p-5 border-t">
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>培養數位素養：</strong>積極培養批判性思維，以辨別和抵制不實資訊及演算法操縱。</li>
+                                <li><strong>設定使用界線：</strong>為自己和子女設定嚴格的使用時間限制，減輕對心理健康的傷害。</li>
+                                <li><strong>強化隱私意識：</strong>充分利用隱私設定，認識到數據隱私是與地緣政治緊密相關的議題。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const globalResponseData = [
+        { country: '美國', action: '「不賣就禁」法案，禁止政府設備使用', reason: '國家安全、數據存取風險、認知作戰', category: 'ban' },
+        { country: '歐盟', action: '依據《數位服務法》進行多項調查', reason: '廣告透明度、未成年人保護、選舉誠信', category: 'regulate' },
+        { country: '印度', action: '2020年起全面禁止', reason: '國家主權、國防、國家安全', category: 'ban' },
+        { country: '台灣', action: '禁止政府設備使用，考慮全面禁止', reason: '國家安全、防範「認知作戰」', category: 'ban' },
+        { country: '加拿大', action: '禁止政府設備使用', reason: '國家安全、數據隱私風險', category: 'ban' },
+        { country: '英國', action: '禁止政府設備使用', reason: '國家安全、數據處理擔憂', category: 'ban' },
+        { country: '澳洲', action: '禁止政府設備使用，立法禁止16歲以下使用', reason: '國家安全、保護青少年', category: 'ban' },
+        { country: '紐西蘭', action: '禁止議會相關設備使用', reason: '網路安全風險', category: 'ban' },
+        { country: '北約', action: '禁止北約發行的設備使用', reason: '安全考量', category: 'ban' },
+        { country: '阿爾巴尼亞', action: '宣布全國禁用至少一年', reason: '青少年暴力事件與平台內容相關', category: 'temp_ban' },
+        { country: '印度尼西亞', action: '曾暫時禁止', reason: '傳播不當內容，對青少年有害', category: 'temp_ban' },
+        { country: '巴基斯坦', action: '曾多次禁止', reason: '傳播不道德內容', category: 'temp_ban' },
+    ];
+
+    const globalGrid = document.getElementById('global-grid');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    function renderGlobalGrid(filter = 'all') {
+        globalGrid.innerHTML = '';
+        const filteredData = filter === 'all' ? globalResponseData : globalResponseData.filter(item => item.category === filter);
+        
+        filteredData.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'bg-white p-6 rounded-lg shadow-md border border-gray-200 transition-all duration-300';
+            card.innerHTML = `
+                <h3 class="text-xl font-bold mb-2">${item.country}</h3>
+                <p class="font-semibold text-amber-700 text-sm mb-2">${item.action}</p>
+                <p class="text-gray-600 text-xs">${item.reason}</p>
+            `;
+            globalGrid.appendChild(card);
+        });
+    }
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.replace('bg-amber-500','bg-white'));
+            filterBtns.forEach(b => b.classList.replace('text-white','text-gray-800'));
+            btn.classList.replace('bg-white','bg-amber-500');
+            btn.classList.replace('text-gray-800','text-white');
+            renderGlobalGrid(btn.dataset.filter);
+        });
+    });
+
+    renderGlobalGrid();
+
+    const ctx = document.getElementById('riskComparisonChart').getContext('2d');
+    const riskComparisonChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['數據收集廣度', '法律後門風險', '演算法不透明', '認知作戰風險', '國內極化風險'],
+            datasets: [
+                {
+                    label: '抖音 (TikTok)',
+                    data: [9, 10, 9, 10, 7],
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(239, 68, 68, 1)'
+                },
+                {
+                    label: 'Meta (FB/IG)',
+                    data: [9, 3, 7, 6, 9],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(59, 130, 246, 1)'
+                },
+                 {
+                    label: 'Google (YouTube)',
+                    data: [10, 3, 8, 5, 8],
+                    backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                    borderColor: 'rgba(251, 191, 36, 1)',
+                    pointBackgroundColor: 'rgba(251, 191, 36, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(251, 191, 36, 1)'
+                }
+            ]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 10,
+                    pointLabels: {
+                        font: {
+                           size: 11
+                        }
+                    },
+                    ticks: {
+                       backdropColor: 'transparent',
+                       stepSize: 2
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.r !== null) {
+                                label += context.parsed.r + ' / 10';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    const flipperBtns = document.querySelectorAll('.flipper-btn');
+    flipperBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const card = btn.closest('.card-flip');
+            card.classList.toggle('is-flipped');
+        });
+    });
+
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.accordion-icon');
+            
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+                icon.textContent = '+';
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.textContent = '-';
+            }
+        });
+    });
+
+    const mobileNav = document.getElementById('mobile-nav');
+    mobileNav.addEventListener('change', () => {
+        window.location.href = mobileNav.value;
+    });
+
+    const navLinks = document.querySelectorAll('header .nav-link');
+    const sections = document.querySelectorAll('main section');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+});
+</script>
+</body>
+</html>
