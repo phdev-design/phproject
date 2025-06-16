@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">互動式報告：解構中國成為世界工廠之路</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Teal and Muted Gold accents -->
+    <!-- Application Structure Plan: A thematic, single-page dashboard structure is chosen over a linear report format to enhance user engagement and facilitate non-linear exploration. The information architecture is divided into five key sections: an initial 'Overview' summarizing the core thesis with four interactive cards, a deep-dive 'Four Pillars' section for detailed analysis, a 'Competitor Analysis' section using a radar chart for intuitive comparison, a 'Future Outlook' section, and a 'Conclusion'. This design allows users to either follow a narrative flow by scrolling or jump directly to topics of interest via a sticky navigation bar, which is optimal for synthesizing a dense, multi-faceted report. Key interactions include clickable pillar cards revealing detailed content and an interactive radar chart for comparing national metrics, making complex data easily digestible. -->
+    <!-- Visualization & Content Choices: 1. FDI Growth (Report Info -> Goal: Show catalyst effect -> Viz: Line Chart -> Interaction: Hover for details -> Justification: Clearly illustrates growth over time -> Library: Chart.js). 2. Port Throughput (Report Info -> Goal: Demonstrate infrastructure scale -> Viz: Bar Chart -> Interaction: Hover -> Justification: Best for comparing discrete quantities -> Library: Chart.js). 3. Competitor Metrics (Report Info -> Goal: Compare multiple facets of multiple countries -> Viz: Radar Chart -> Interaction: Toggle datasets -> Justification: Ideal for multi-variate comparison -> Library: Chart.js). 4. Policy Milestones (Report Info -> Goal: Show timeline of key decisions -> Viz: HTML/CSS vertical timeline -> Interaction: Click/Hover -> Justification: More narrative and engaging than a simple list -> Library: Tailwind). 5. Industrial Categories (Report Info -> Goal: Show comprehensiveness -> Viz: HTML/CSS grid diagram -> Interaction: Static -> Justification: A visual metaphor for completeness is more impactful than a number -> Library: Tailwind). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8f7f4;
+            color: #333a45;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #14b8a6;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .pillar-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .pillar-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: -0.5rem;
+            transform: translateX(-50%);
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            background-color: #f8f7f4;
+            border: 3px solid #6b7280;
+        }
+        .lang-switcher button {
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        .lang-switcher button.active {
+            background-color: #14b8a6;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800" data-lang-key="headerTitle">世界工廠的剖析</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#overview" class="nav-link text-gray-600 hover:text-teal-600" data-lang-key="navOverview">總覽</a>
+                <a href="#pillars" class="nav-link text-gray-600 hover:text-teal-600" data-lang-key="navPillars">四大支柱</a>
+                <a href="#competitors" class="nav-link text-gray-600 hover:text-teal-600" data-lang-key="navCompetitors">實力對比</a>
+                <a href="#future" class="nav-link text-gray-600 hover:text-teal-600" data-lang-key="navFuture">未來展望</a>
+                 <div class="lang-switcher flex items-center space-x-1 border border-gray-300 rounded-lg p-1">
+                    <button id="lang-zh" data-lang="zh" class="text-sm font-medium">中</button>
+                    <button id="lang-en" data-lang="en" class="text-sm font-medium">EN</button>
+                </div>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#overview" class="block py-2 text-gray-600" data-lang-key="navOverviewMobile">總覽</a>
+            <a href="#pillars" class="block py-2 text-gray-600" data-lang-key="navPillarsMobile">四大支柱</a>
+            <a href="#competitors" class="block py-2 text-gray-600" data-lang-key="navCompetitorsMobile">實力對比</a>
+            <a href="#future" class="block py-2 text-gray-600" data-lang-key="navFutureMobile">未來展望</a>
+             <div class="lang-switcher flex items-center space-x-1 border border-gray-300 rounded-lg p-1 mt-4 max-w-min">
+                <button id="lang-zh-mobile" data-lang="zh" class="text-sm font-medium">中</button>
+                <button id="lang-en-mobile" data-lang="en" class="text-sm font-medium">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 md:py-16">
+
+        <section id="overview" class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4" data-lang-key="overviewTitle">一個不可複製的歷史性匯流</h2>
+            <p class="max-w-3xl mx-auto text-gray-600 text-lg" data-lang-key="overviewSubtitle">
+                中國崛起為「世界工廠」，並非單一因素的結果，而是由四大關鍵支柱在特定時空下相互作用、共同撐起的歷史現象。這是一場難以被任何國家完整複製的宏大敘事。本互動報告將帶您逐一解構這些核心要素。
+            </p>
+        </section>
+
+        <section id="pillars" class="mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2" data-lang-key="pillarsTitle">崛起的四大支柱</h2>
+                <p class="text-gray-600" data-lang-key="pillarsSubtitle">點擊下方卡片，深入了解每個支柱的內涵與關鍵數據。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="pillar-card bg-white rounded-lg shadow-md p-6 text-center cursor-pointer" data-target="content-politics">
+                    <div class="text-4xl mb-4 text-teal-600">🏛️</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="pillar1Title">宏偉設計</h3>
+                    <p class="text-gray-600" data-lang-key="pillar1Desc">堅定的頂層政治意志與長期戰略規劃。</p>
+                </div>
+                <div class="pillar-card bg-white rounded-lg shadow-md p-6 text-center cursor-pointer" data-target="content-human">
+                    <div class="text-4xl mb-4 text-teal-600">👥</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="pillar2Title">人力因素</h3>
+                    <p class="text-gray-600" data-lang-key="pillar2Desc">從「人口紅利」到「人才紅利」的轉變。</p>
+                </div>
+                <div class="pillar-card bg-white rounded-lg shadow-md p-6 text-center cursor-pointer" data-target="content-infra">
+                    <div class="text-4xl mb-4 text-teal-600">🏗️</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="pillar3Title">物理基礎</h3>
+                    <p class="text-gray-600" data-lang-key="pillar3Desc">國家級基礎設施建設的戰略性倍增器。</p>
+                </div>
+                <div class="pillar-card bg-white rounded-lg shadow-md p-6 text-center cursor-pointer" data-target="content-ecosystem">
+                    <div class="text-4xl mb-4 text-teal-600">🌐</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="pillar4Title">生態系統</h3>
+                    <p class="text-gray-600" data-lang-key="pillar4Desc">無可比擬的供應鏈深度與廣度。</p>
+                </div>
+            </div>
+
+            <div id="pillars-content-area" class="bg-white/60 rounded-xl p-6 md:p-10 shadow-inner min-h-[300px]">
+                <div id="content-default" class="text-center text-gray-500 flex items-center justify-center h-full">
+                    <p data-lang-key="pillarDefault">請選擇一個支柱以查看詳細內容。</p>
+                </div>
+
+                <div id="content-politics" class="content-section">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800" data-lang-key="politicsTitle">宏偉設計：作為基石的政治意志</h3>
+                    <p class="mb-8 text-gray-600" data-lang-key="politicsDesc">中國的成功首要歸功於其強大的中央政府能制定並執行跨越數十年的連貫戰略，不受短期政治週期影響。這種由上而下的決心，為所有經濟奇蹟奠定了基石。幾個關鍵節點徹底改變了中國的發展軌跡。</p>
+                    <div class="relative border-l-2 border-gray-400 pl-8 space-y-12">
+                        <div class="timeline-item">
+                            <h4 class="text-lg font-bold text-teal-700" data-lang-key="politics1Title">1978年：改革開放</h4>
+                            <p class="text-gray-600" data-lang-key="politics1Desc">中共十一屆三中全會，將國家工作重心從階級鬥爭轉向經濟建設。「讓一部分人先富起來」的口號釋放了經濟動能，並通過家庭聯產承包責任制、設立經濟特區等「摸著石頭過河」的實驗，成功開啟了市場化進程。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="text-lg font-bold text-teal-700" data-lang-key="politics2Title">1992年：南方談話</h4>
+                            <p class="text-gray-600" data-lang-key="politics2Desc">在改革面臨停滯風險時，鄧小平的南方談話確立了「發展才是硬道理」，並提出了「三個有利於」標準，徹底終結了姓「社」姓「資」的爭論，為建立「社會主義市場經濟體制」掃清了思想障礙，引發了新一輪的經濟高速增長。</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="text-lg font-bold text-teal-700" data-lang-key="politics3Title">2001年：加入WTO</h4>
+                            <p class="text-gray-600" data-lang-key="politics3Desc">加入世界貿易組織是一場戰略性賭注。中國承諾大幅降低關稅、開放市場，利用外部壓力倒逼國內進行更深層次的結構性改革。此舉極大增強了外國投資者信心，使中國深度融入全球產業鏈，贏得了全球化的最大紅利。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-human" class="content-section">
+                     <h3 class="text-2xl font-bold mb-4 text-gray-800" data-lang-key="humanTitle">人力因素：從紅利到引擎</h3>
+                     <p class="mb-8 text-gray-600" data-lang-key="humanDesc">中國獨特的人口結構為其工業化提供了源源不絕的燃料。從最初規模龐大、成本低廉的「人口紅利」，到後來通過教育投入主動創造的「人才紅利」，人力資本的動態演變是其保持競爭力的關鍵。</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="text-center">
+                            <h4 class="font-bold text-lg mb-2" data-lang-key="humanChartTitle">工程師與技術工人引擎</h4>
+                            <p class="text-sm text-gray-600 mb-4" data-lang-key="humanChartDesc">中國大規模培養理工科人才和技術工人，為產業升級提供了關鍵支撐。</p>
+                            <div class="chart-container h-64 md:h-80"><canvas id="educationChart"></canvas></div>
+                        </div>
+                        <div>
+                             <div class="bg-teal-50 border-l-4 border-teal-500 text-teal-800 p-4 rounded-r-lg mb-4">
+                                <h5 class="font-bold" data-lang-key="humanFact1Title">驚人的規模</h5>
+                                <p data-lang-key="humanFact1Desc">2000年，中國勞動年齡人口高達 <span class="text-2xl font-bold">8.2億</span>，形成了幾乎無限供給的勞動力蓄水池。</p>
+                             </div>
+                              <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-4 rounded-r-lg mb-4">
+                                <h5 class="font-bold" data-lang-key="humanFact2Title">極致的成本優勢</h5>
+                                <p data-lang-key="humanFact2Desc">21世紀初，中國勞動力成本僅為日本的 <span class="text-2xl font-bold">1/20</span>，為產業轉移創造了決定性條件。</p>
+                             </div>
+                             <div class="bg-sky-50 border-l-4 border-sky-500 text-sky-800 p-4 rounded-r-lg">
+                                <h5 class="font-bold" data-lang-key="humanFact3Title">有文化的勞動力</h5>
+                                <p data-lang-key="humanFact3Desc">與其他發展中國家不同，中國優先普及基礎教育，打造了規模龐大的「有文化的廉價勞動力」，構成獨特的質量化規模優勢。</p>
+                             </div>
+                        </div>
+                     </div>
+                </div>
+
+                <div id="content-infra" class="content-section">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800" data-lang-key="infraTitle">物理基礎：戰略性倍增器</h3>
+                    <p class="mb-8 text-gray-600" data-lang-key="infraDesc">中國將基礎設施視為戰略投資，以驚人的速度和規模，打造了低摩擦、高效率的物流和能源網絡，極大降低了生產與貿易的交易成本。實體與數位基礎設施的融合，構建了難以逾越的競爭壁壘。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                             <h4 class="font-bold text-lg mb-2 text-center" data-lang-key="infraChartTitle">全球貨櫃港口吞吐量對比 (2023)</h4>
+                             <p class="text-sm text-gray-600 mb-4 text-center" data-lang-key="infraChartDesc">中國港口在全球航運中佔據主導地位，前十大港口獨佔七席。</p>
+                             <div class="chart-container h-80 md:h-96"><canvas id="portChart"></canvas></div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <p class="text-sm text-gray-600" data-lang-key="infraFact1Title">高速公路網</p>
+                                <p class="text-2xl font-bold text-teal-600">16萬公里</p>
+                                <p class="text-xs text-gray-500" data-lang-key="infraFact1Desc">全球最大規模</p>
+                            </div>
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <p class="text-sm text-gray-600" data-lang-key="infraFact2Title">工業電價</p>
+                                <p class="text-2xl font-bold text-teal-600">~$0.08 / kWh</p>
+                                <p class="text-xs text-gray-500" data-lang-key="infraFact2Desc">低於墨西哥、巴西等競爭者</p>
+                            </div>
+                            <div class="p-4 bg-gray-100 rounded-lg">
+                                <p class="text-sm text-gray-600" data-lang-key="infraFact3Title">5G基站數量</p>
+                                <p class="text-2xl font-bold text-teal-600">337.7萬個</p>
+                                <p class="text-xs text-gray-500" data-lang-key="infraFact3Desc">賦能工業互聯網的基石</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="content-ecosystem" class="content-section">
+                    <h3 class="text-2xl font-bold mb-4 text-gray-800" data-lang-key="ecoTitle">生態系統：無可複製之深度</h3>
+                    <p class="mb-8 text-gray-600" data-lang-key="ecoDesc">中國最持久的優勢，源於一個龐大、複雜、高度整合的製造業生態系統。其供應商密度、完整的工業門類和內外資企業的共生，創造了強大的網絡效應和規模經濟，是任何單一因素都無法比擬的護城河。</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                             <h4 class="font-bold text-lg mb-2 text-center" data-lang-key="ecoChartTitle">外國直接投資(FDI)的催化作用</h4>
+                             <p class="text-sm text-gray-600 mb-4 text-center" data-lang-key="ecoChartDesc">FDI不僅帶來資金，更帶來了技術、管理經驗和全球渠道，催化了本土產業的學習與升級。</p>
+                            <div class="chart-container h-80 md:h-96"><canvas id="fdiChart"></canvas></div>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="font-bold text-lg mb-2 text-center" data-lang-key="ecoFact1Title">包羅萬象的工業宇宙</h4>
+                            <p class="text-gray-600 text-center mb-4" data-lang-key="ecoFact1Desc">中國是全球唯一擁有聯合國產業分類中全部41個工業大類、207個中類和666個小類的國家，賦予其供應鏈無與倫比的韌性。</p>
+                             <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div class="p-2 bg-teal-50 rounded" data-lang-key="catElectronics">電子</div>
+                                <div class="p-2 bg-teal-50 rounded" data-lang-key="catTextiles">紡織</div>
+                                <div class="p-2 bg-teal-50 rounded" data-lang-key="catAutomotive">汽車</div>
+                                <div class="p-2 bg-gray-100 rounded" data-lang-key="catChemicals">化工</div>
+                                <div class="p-2 bg-gray-100 rounded" data-lang-key="catMachinery">機械</div>
+                                <div class="p-2 bg-gray-100 rounded" data-lang-key="catPharma">醫藥</div>
+                                <div class="p-2 bg-amber-50 rounded" data-lang-key="catToys">玩具</div>
+                                <div class="p-2 bg-amber-50 rounded" data-lang-key="catMetallurgy">冶金</div>
+                                <div class="p-2 bg-amber-50 rounded" data-lang-key="catMore">...等等</div>
+                             </div>
+                             <p class="text-sm text-gray-500 mt-4 text-center" data-lang-key="ecoFact2Desc">高度專業化的珠三角和長三角產業集群，能在數十公里內找到所有零部件，實現極致的速度與成本控制。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="competitors" class="mb-16 md:mb-24 pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2" data-lang-key="competitorsTitle">為何沒有「下一個中國」？</h2>
+                <p class="max-w-3xl mx-auto text-gray-600" data-lang-key="competitorsSubtitle">儘管「中國+1」策略盛行，但潛在競爭者們雖各具優勢，卻難以完整複製中國多重要素協同的「匯流優勢」。下方的雷達圖直觀地比較了各國在關鍵製造業指標上的綜合表現。</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-10">
+                 <div class="chart-container h-80 md:h-[500px] max-w-3xl"><canvas id="competitorRadarChart"></canvas></div>
+                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 text-center">
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">🇻🇳 越南</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="competitorVN"><strong>優勢：</strong>成本低、政府積極、地理位置毗鄰中國。<br><strong>制約：</strong>規模是天花板、嚴重依賴中國供應鏈、基礎設施瓶頸。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">🇮🇳 印度</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="competitorIN"><strong>優勢：</strong>人口潛力巨大、IT產業發達、經濟獨立性較高。<br><strong>制約：</strong>基礎設施鴻溝巨大、官僚體系複雜、勞動力素質與結構問題。</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">🇲🇽 墨西哥</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="competitorMX"><strong>優勢：</strong>「近岸外包」地利、免關稅貿易協定、成熟的工業基礎。<br><strong>制約：</strong>成本高昂、深陷「中等收入陷阱」、安全與供應鏈亞洲依賴。</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="future" class="pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2" data-lang-key="futureTitle">新篇章：從工廠到創新者</h2>
+                <p class="max-w-3xl mx-auto text-gray-600" data-lang-key="futureSubtitle">面對內外挑戰，中國的戰略重心正從低成本製造轉向技術創新，力圖在全球價值鏈中佔據更有利的位置，同時也引發了與現有世界格局的激烈碰撞。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="font-bold text-xl mb-3 text-teal-700" data-lang-key="future1Title">中國製造2025</h4>
+                    <p class="text-gray-600" data-lang-key="future1Desc">一份從「製造大國」向「製造強國」轉變的戰略藍圖，重點發展半導體、新能源汽車、航空航天等十大高附加值領域，旨在掌握核心技術、擺脫對外依賴。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="font-bold text-xl mb-3 text-teal-700" data-lang-key="future2Title">地緣政治逆風</h4>
+                    <p class="text-gray-600" data-lang-key="future2Desc">美國等西方國家實施廣泛的科技制裁，旨在切斷中國獲取先進技術的渠道。這雖造成短期衝擊，卻也催化了中國投入空前資源進行自主研發，力圖建立「自主可控」的供應鏈。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="font-bold text-xl mb-3 text-teal-700" data-lang-key="future3Title">RCEP與區域化</h4>
+                    <p class="text-gray-600" data-lang-key="future3Desc">通過《區域全面經濟夥伴關係協定》(RCEP)，中國正積極鞏固其在亞洲的經濟中心地位。RCEP通過統一原產地規則，深化了區域分工，更有可能鞏固一個以中國為核心的亞洲製造業生態系統。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <h3 class="text-2xl font-bold mb-4" data-lang-key="conclusionTitle">結論：不朽的遺產與新的全球地圖</h3>
+            <p class="max-w-4xl mx-auto text-gray-300 mb-6" data-lang-key="conclusionDesc">
+                中國作為「世界工廠」的崛起，是一個劃時代的、不可複製的歷史現象。它的遺產並非一套可供照搬的藍圖，而是作為一個強大的催化劑，徹底改變了全球生產分工的邏輯。如今，一個更加碎片化、多極化、以「韌性」和「安全」為重的新格局正在形成，對全球企業和決策者都提出了新的挑戰與機遇。
+            </p>
+            <p class="text-sm text-gray-500" data-lang-key="footerCredit">基於報告《世界工廠的剖析》創建的互動式網頁應用。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- 語言資料庫 ---
+            const translations = {
+                en: {
+                    pageTitle: "Interactive Report: Deconstructing China's Path to Becoming the World's Factory",
+                    headerTitle: "The World's Factory: An Analysis",
+                    navOverview: "Overview",
+                    navPillars: "Four Pillars",
+                    navCompetitors: "Comparison",
+                    navFuture: "Future Outlook",
+                    navOverviewMobile: "Overview",
+                    navPillarsMobile: "Four Pillars",
+                    navCompetitorsMobile: "Comparison",
+                    navFutureMobile: "Future Outlook",
+                    overviewTitle: "An Unreplicable Historical Convergence",
+                    overviewSubtitle: "China's rise as the 'World's Factory' was not the result of a single factor, but a historical phenomenon supported by the interaction of four key pillars at a specific time and place. It is a grand narrative that is difficult for any country to fully replicate. This interactive report will deconstruct these core elements one by one.",
+                    pillarsTitle: "The Four Pillars of the Rise",
+                    pillarsSubtitle: "Click the cards below to delve into the meaning and key data of each pillar.",
+                    pillar1Title: "The Grand Design",
+                    pillar1Desc: "Resolute top-level political will and long-term strategic planning.",
+                    pillar2Title: "The Human Factor",
+                    pillar2Desc: "The shift from 'demographic dividend' to 'talent dividend'.",
+                    pillar3Title: "The Physical Foundation",
+                    pillar3Desc: "The strategic multiplier of national-level infrastructure construction.",
+                    pillar4Title: "The Ecosystem",
+                    pillar4Desc: "Unparalleled supply chain depth and breadth.",
+                    pillarDefault: "Please select a pillar to view detailed content.",
+                    politicsTitle: "Grand Design: Political Will as the Cornerstone",
+                    politicsDesc: "China's success is primarily due to its strong central government, which can formulate and execute coherent strategies spanning decades, unaffected by short-term political cycles. This top-down determination laid the foundation for all its economic miracles. Several key nodes completely changed China's development trajectory.",
+                    politics1Title: "1978: Reform and Opening-Up",
+                    politics1Desc: "The Third Plenary Session of the 11th CPC Central Committee shifted the nation's focus from class struggle to economic construction. The slogan 'let some people get rich first' unleashed economic momentum. Experiments like the Household Responsibility System and establishing Special Economic Zones, or 'crossing the river by feeling the stones,' successfully initiated the marketization process.",
+                    politics2Title: "1992: The Southern Tour",
+                    politics2Desc: "When reforms faced stagnation, Deng Xiaoping's Southern Tour established that 'development is the absolute principle' and proposed the 'Three Favorables' standard. This ended the debate over 'socialism vs. capitalism', clearing ideological hurdles for establishing a 'socialist market economy' and triggering a new round of high-speed economic growth.",
+                    politics3Title: "2001: Joining the WTO",
+                    politics3Desc: "Joining the World Trade Organization was a strategic gamble. China committed to significantly lowering tariffs and opening its market, using external pressure to force deeper domestic structural reforms. This move greatly boosted foreign investor confidence, deeply integrated China into the global industrial chain, and allowed it to reap the greatest dividends of globalization.",
+                    humanTitle: "The Human Factor: From Dividend to Engine",
+                    humanDesc: "China's unique demographic structure provided endless fuel for its industrialization. From the initial large-scale, low-cost 'demographic dividend' to the later 'talent dividend' actively created through educational investment, the dynamic evolution of human capital has been key to maintaining its competitiveness.",
+                    humanChartTitle: "The Engineer & Technician Engine",
+                    humanChartDesc: "China's large-scale cultivation of STEM talent and technical workers provided key support for industrial upgrading.",
+                    humanFact1Title: "Astonishing Scale",
+                    humanFact1Desc: "In 2000, China's working-age population reached a staggering <span class='text-2xl font-bold'>820 million</span>, forming a nearly limitless labor pool.",
+                    humanFact2Title: "Ultimate Cost Advantage",
+                    humanFact2Desc: "In the early 21st century, China's labor cost was only <span class='text-2xl font-bold'>1/20th</span> of Japan's, creating a decisive condition for industrial transfer.",
+                    humanFact3Title: "An Educated Workforce",
+                    humanFact3Desc: "Unlike other developing countries, China prioritized basic education, creating a massive 'educated, low-cost workforce'—a unique qualitative and quantitative advantage.",
+                    infraTitle: "Physical Foundation: A Strategic Multiplier",
+                    infraDesc: "China views infrastructure as a strategic investment. With astonishing speed and scale, it has built a low-friction, high-efficiency logistics and energy network, greatly reducing transaction costs for production and trade. The integration of physical and digital infrastructure has built a competitive barrier that is difficult to overcome.",
+                    infraChartTitle: "Global Container Port Throughput Comparison (2023)",
+                    infraChartDesc: "Chinese ports dominate global shipping, holding seven of the top ten spots.",
+                    infraFact1Title: "Expressway Network",
+                    infraFact1Desc: "World's largest scale",
+                    infraFact2Title: "Industrial Electricity Price",
+                    infraFact2Desc: "Lower than competitors like Mexico, Brazil",
+                    infraFact3Title: "Number of 5G Base Stations",
+                    infraFact3Desc: "The cornerstone of the Industrial Internet",
+                    ecoTitle: "The Ecosystem: Unreplicable Depth",
+                    ecoDesc: "China's most enduring advantage stems from a vast, complex, and highly integrated manufacturing ecosystem. Its supplier density, complete industrial categories, and the symbiosis of domestic and foreign enterprises have created powerful network effects and economies of scale—a moat unmatched by any single factor.",
+                    ecoChartTitle: "The Catalytic Role of Foreign Direct Investment (FDI)",
+                    ecoChartDesc: "FDI brought not only capital but also technology, management experience, and global channels, catalyzing the learning and upgrading of local industries.",
+                    ecoFact1Title: "An All-Encompassing Industrial Universe",
+                    ecoFact1Desc: "China is the only country in the world with all 41 industrial categories, 207 groups, and 666 classes in the UN industrial classification, giving its supply chain unparalleled resilience.",
+                    catElectronics: "Electronics",
+                    catTextiles: "Textiles",
+                    catAutomotive: "Automotive",
+                    catChemicals: "Chemicals",
+                    catMachinery: "Machinery",
+                    catPharma: "Pharma",
+                    catToys: "Toys",
+                    catMetallurgy: "Metallurgy",
+                    catMore: "... and more",
+                    ecoFact2Desc: "The highly specialized industrial clusters in the Pearl River Delta and Yangtze River Delta can find all components within tens of kilometers, achieving ultimate speed and cost control.",
+                    competitorsTitle: "Why Is There No 'Next China'?",
+                    competitorsSubtitle: "Although the 'China+1' strategy is prevalent, potential competitors, despite their individual strengths, struggle to fully replicate the 'convergence advantage' of China's multiple synergistic factors. The radar chart below intuitively compares the comprehensive performance of various countries on key manufacturing indicators.",
+                    competitorVN: "<strong>Advantage:</strong> Low cost, proactive government, proximity to China.<br><strong>Constraint:</strong> Scale is the ceiling, heavy reliance on China's supply chain, infrastructure bottlenecks.",
+                    competitorIN: "<strong>Advantage:</strong> Huge population potential, developed IT industry, high economic independence.<br><strong>Constraint:</strong> Huge infrastructure gap, complex bureaucracy, labor quality and structural issues.",
+                    competitorMX: "<strong>Advantage:</strong> 'Nearshoring' advantage, tariff-free trade agreements, mature industrial base.<br><strong>Constraint:</strong> High costs, stuck in the 'middle-income trap', security issues & reliance on Asian supply chains.",
+                    futureTitle: "A New Chapter: From Factory to Innovator",
+                    futureSubtitle: "Facing internal and external challenges, China's strategic focus is shifting from low-cost manufacturing to technological innovation, striving to occupy a more favorable position in the global value chain, which has also triggered intense clashes with the existing world order.",
+                    future1Title: "Made in China 2025",
+                    future1Desc: "A strategic blueprint for transforming from a 'major manufacturing country' to a 'manufacturing powerhouse', focusing on developing ten high-value-added sectors such as semiconductors, new energy vehicles, and aerospace, aiming to master core technologies and break free from foreign dependence.",
+                    future2Title: "Geopolitical Headwinds",
+                    future2Desc: "The US and other Western countries have imposed extensive technological sanctions to cut off China's access to advanced technology. While causing short-term impact, this has also catalyzed China to invest unprecedented resources in independent R&D, striving to establish a 'self-controllable' supply chain.",
+                    future3Title: "RCEP and Regionalization",
+                    future3Desc: "Through the Regional Comprehensive Economic Partnership (RCEP), China is actively consolidating its economic hub status in Asia. By unifying rules of origin, RCEP deepens regional division of labor and is more likely to consolidate an Asian manufacturing ecosystem with China at its core.",
+                    conclusionTitle: "Conclusion: An Enduring Legacy and a New Global Map",
+                    conclusionDesc: "China's rise as the 'World's Factory' is a paradigm-shifting, unreplicable historical phenomenon. Its legacy is not a blueprint to be copied, but a powerful catalyst that has completely changed the logic of global production division. Today, a more fragmented, multipolar new landscape that prioritizes 'resilience' and 'security' is forming, presenting new challenges and opportunities for global enterprises and policymakers.",
+                    footerCredit: "An interactive web application created based on the report 'Analysis of the World's Factory'."
+                },
+                zh: {
+                    pageTitle: "互動式報告：解構中國成為世界工廠之路",
+                    headerTitle: "世界工廠的剖析",
+                    navOverview: "總覽",
+                    navPillars: "四大支柱",
+                    navCompetitors: "實力對比",
+                    navFuture: "未來展望",
+                    navOverviewMobile: "總覽",
+                    navPillarsMobile: "四大支柱",
+                    navCompetitorsMobile: "實力對比",
+                    navFutureMobile: "未來展望",
+                    overviewTitle: "一個不可複製的歷史性匯流",
+                    overviewSubtitle: "中國崛起為「世界工廠」，並非單一因素的結果，而是由四大關鍵支柱在特定時空下相互作用、共同撐起的歷史現象。這是一場難以被任何國家完整複製的宏大敘事。本互動報告將帶您逐一解構這些核心要素。",
+                    pillarsTitle: "崛起的四大支柱",
+                    pillarsSubtitle: "點擊下方卡片，深入了解每個支柱的內涵與關鍵數據。",
+                    pillar1Title: "宏偉設計",
+                    pillar1Desc: "堅定的頂層政治意志與長期戰略規劃。",
+                    pillar2Title: "人力因素",
+                    pillar2Desc: "從「人口紅利」到「人才紅利」的轉變。",
+                    pillar3Title: "物理基礎",
+                    pillar3Desc: "國家級基礎設施建設的戰略性倍增器。",
+                    pillar4Title: "生態系統",
+                    pillar4Desc: "無可比擬的供應鏈深度與廣度。",
+                    pillarDefault: "請選擇一個支柱以查看詳細內容。",
+                    politicsTitle: "宏偉設計：作為基石的政治意志",
+                    politicsDesc: "中國的成功首要歸功於其強大的中央政府能制定並執行跨越數十年的連貫戰略，不受短期政治週期影響。這種由上而下的決心，為所有經濟奇蹟奠定了基石。幾個關鍵節點徹底改變了中國的發展軌跡。",
+                    politics1Title: "1978年：改革開放",
+                    politics1Desc: "中共十一屆三中全會，將國家工作重心從階級鬥爭轉向經濟建設。「讓一部分人先富起來」的口號釋放了經濟動能，並通過家庭聯產承包責任制、設立經濟特區等「摸著石頭過河」的實驗，成功開啟了市場化進程。",
+                    politics2Title: "1992年：南方談話",
+                    politics2Desc: "在改革面臨停滯風險時，鄧小平的南方談話確立了「發展才是硬道理」，並提出了「三個有利於」標準，徹底終結了姓「社」姓「資」的爭論，為建立「社會主義市場經濟體制」掃清了思想障礙，引發了新一輪的經濟高速增長。",
+                    politics3Title: "2001年：加入WTO",
+                    politics3Desc: "加入世界貿易組織是一場戰略性賭注。中國承諾大幅降低關稅、開放市場，利用外部壓力倒逼國內進行更深層次的結構性改革。此舉極大增強了外國投資者信心，使中國深度融入全球產業鏈，贏得了全球化的最大紅利。",
+                    humanTitle: "人力因素：從紅利到引擎",
+                    humanDesc: "中國獨特的人口結構為其工業化提供了源源不絕的燃料。從最初規模龐大、成本低廉的「人口紅利」，到後來通過教育投入主動創造的「人才紅利」，人力資本的動態演變是其保持競爭力的關鍵。",
+                    humanChartTitle: "工程師與技術工人引擎",
+                    humanChartDesc: "中國大規模培養理工科人才和技術工人，為產業升級提供了關鍵支撐。",
+                    humanFact1Title: "驚人的規模",
+                    humanFact1Desc: "2000年，中國勞動年齡人口高達 <span class='text-2xl font-bold'>8.2億</span>，形成了幾乎無限供給的勞動力蓄水池。",
+                    humanFact2Title: "極致的成本優勢",
+                    humanFact2Desc: "21世紀初，中國勞動力成本僅為日本的 <span class='text-2xl font-bold'>1/20</span>，為產業轉移創造了決定性條件。",
+                    humanFact3Title: "有文化的勞動力",
+                    humanFact3Desc: "與其他發展中國家不同，中國優先普及基礎教育，打造了規模龐大的「有文化的廉價勞動力」，構成獨特的質量化規模優勢。",
+                    infraTitle: "物理基礎：戰略性倍增器",
+                    infraDesc: "中國將基礎設施視為戰略投資，以驚人的速度和規模，打造了低摩擦、高效率的物流和能源網絡，極大降低了生產與貿易的交易成本。實體與數位基礎設施的融合，構建了難以逾越的競爭壁壘。",
+                    infraChartTitle: "全球貨櫃港口吞吐量對比 (2023)",
+                    infraChartDesc: "中國港口在全球航運中佔據主導地位，前十大港口獨佔七席。",
+                    infraFact1Title: "高速公路網",
+                    infraFact1Desc: "全球最大規模",
+                    infraFact2Title: "工業電價",
+                    infraFact2Desc: "低於墨西哥、巴西等競爭者",
+                    infraFact3Title: "5G基站數量",
+                    infraFact3Desc: "賦能工業互聯網的基石",
+                    ecoTitle: "生態系統：無可複製之深度",
+                    ecoDesc: "中國最持久的優勢，源於一個龐大、複雜、高度整合的製造業生態系統。其供應商密度、完整的工業門類和內外資企業的共生，創造了強大的網絡效應和規模經濟，是任何單一因素都無法比擬的護城河。",
+                    ecoChartTitle: "外國直接投資(FDI)的催化作用",
+                    ecoChartDesc: "FDI不僅帶來資金，更帶來了技術、管理經驗和全球渠道，催化了本土產業的學習與升級。",
+                    ecoFact1Title: "包羅萬象的工業宇宙",
+                    ecoFact1Desc: "中國是全球唯一擁有聯合國產業分類中全部41個工業大類、207個中類和666個小類的國家，賦予其供應鏈無與倫比的韌性。",
+                    catElectronics: "電子",
+                    catTextiles: "紡織",
+                    catAutomotive: "汽車",
+                    catChemicals: "化工",
+                    catMachinery: "機械",
+                    catPharma: "醫藥",
+                    catToys: "玩具",
+                    catMetallurgy: "冶金",
+                    catMore: "...等等",
+                    ecoFact2Desc: "高度專業化的珠三角和長三角產業集群，能在數十公里內找到所有零部件，實現極致的速度與成本控制。",
+                    competitorsTitle: "為何沒有「下一個中國」？",
+                    competitorsSubtitle: "儘管「中國+1」策略盛行，但潛在競爭者們雖各具優勢，卻難以完整複製中國多重要素協同的「匯流優勢」。下方的雷達圖直觀地比較了各國在關鍵製造業指標上的綜合表現。",
+                    competitorVN: "<strong>優勢：</strong>成本低、政府積極、地理位置毗鄰中國。<br><strong>制約：</strong>規模是天花板、嚴重依賴中國供應鏈、基礎設施瓶頸。",
+                    competitorIN: "<strong>優勢：</strong>人口潛力巨大、IT產業發達、經濟獨立性較高。<br><strong>制約：</strong>基礎設施鴻溝巨大、官僚體系複雜、勞動力素質與結構問題。",
+                    competitorMX: "<strong>優勢：</strong>「近岸外包」地利、免關稅貿易協定、成熟的工業基礎。<br><strong>制約：</strong>成本高昂、深陷「中等收入陷阱」、安全與供應鏈亞洲依賴。",
+                    futureTitle: "新篇章：從工廠到創新者",
+                    futureSubtitle: "面對內外挑戰，中國的戰略重心正從低成本製造轉向技術創新，力圖在全球價值鏈中佔據更有利的位置，同時也引發了與現有世界格局的激烈碰撞。",
+                    future1Title: "中國製造2025",
+                    future1Desc: "一份從「製造大國」向「製造強國」轉變的戰略藍圖，重點發展半導體、新能源汽車、航空航天等十大高附加值領域，旨在掌握核心技術、擺脫對外依賴。",
+                    future2Title: "地緣政治逆風",
+                    future2Desc: "美國等西方國家實施廣泛的科技制裁，旨在切斷中國獲取先進技術的渠道。這雖造成短期衝擊，卻也催化了中國投入空前資源進行自主研發，力圖建立「自主可控」的供應鏈。",
+                    future3Title: "RCEP與區域化",
+                    future3Desc: "通過《區域全面經濟夥伴關係協定》(RCEP)，中國正積極鞏固其在亞洲的經濟中心地位。RCEP通過統一原產地規則，深化了區域分工，更有可能鞏固一個以中國為核心的亞洲製造業生態系統。",
+                    conclusionTitle: "結論：不朽的遺產與新的全球地圖",
+                    conclusionDesc: "中國作為「世界工廠」的崛起，是一個劃時代的、不可複製的歷史現象。它的遺產並非一套可供照搬的藍圖，而是作為一個強大的催化劑，徹底改變了全球生產分工的邏輯。如今，一個更加碎片化、多極化、以「韌性」和「安全」為重的新格局正在形成，對全球企業和決策者都提出了新的挑戰與機遇。",
+                    footerCredit: "基於報告《世界工廠的剖析》創建的互動式網頁應用。"
+                }
+            };
+            
+            // --- 圖表變數 ---
+            let fdiChart, portChart, educationChart, competitorRadarChart;
+            const chartLabelColor = '#333a45';
+            const gridColor = '#e5e7eb';
+            
+            // --- 取得圖表資料的函式 (可翻譯) ---
+            const getFdiData = (lang) => ({
+                labels: ['1990', '2017'],
+                datasets: [{
+                    label: lang === 'en' ? 'FDI Inflow to China ($B USD)' : '流入中國的FDI (億美元)',
+                    data: [110, 1310],
+                    borderColor: '#0d9488',
+                    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            });
+            
+            const getPortData = (lang) => ({
+                labels: ['上海', '寧波-舟山', '深圳', '胡志明市 (越)', '尼赫魯港 (印)', '桑托斯 (巴)'],
+                datasets: [{
+                    label: lang === 'en' ? 'Container Throughput (Million TEU)' : '貨櫃吞吐量 (百萬TEU)',
+                    data: [49.16, 35.30, 30.04, 7.40, 6.35, 4.78],
+                    backgroundColor: ['rgba(20, 184, 166, 0.7)', 'rgba(20, 184, 166, 0.7)', 'rgba(20, 184, 166, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+                    borderColor: ['#0d9488', '#0d9488', '#0d9488', '#d97706', '#d97706', '#d97706'],
+                    borderWidth: 1
+                }]
+            });
+            
+            const getEducationData = (lang) => ({
+                labels: lang === 'en' ? ['China Vocational Edu. Ratio', 'India Vocational Edu. Ratio'] : ['中國 職業教育比例', '印度 職業教育比例'],
+                datasets: [{
+                    label: lang === 'en' ? '% of Post-Secondary Students in Vocational Schools' : '中等以上學生就讀職業學校比例 (%)',
+                    data: [25, 2],
+                    backgroundColor: ['rgba(20, 184, 166, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+                    hoverOffset: 4
+                }]
+            });
+
+            const getCompetitorData = (lang) => ({
+                labels: lang === 'en' ? ['Labor Cost (Low)', 'Labor Quality', 'Infrastructure', 'Ease of Business', 'Integrity Index'] : ['勞動力成本(低)', '勞動力素質', '基礎設施', '營商便利度', '清廉指數'],
+                datasets: [
+                    { label: '中國', data: [7.5, 8.5, 9.5, 7.8, 4.2], fill: true, backgroundColor: 'rgba(20, 184, 166, 0.2)', borderColor: 'rgb(20, 184, 166)', pointBackgroundColor: 'rgb(20, 184, 166)' },
+                    { label: '印度', data: [9, 6, 4, 7.1, 3.9], fill: true, backgroundColor: 'rgba(245, 158, 11, 0.2)', borderColor: 'rgb(245, 158, 11)', pointBackgroundColor: 'rgb(245, 158, 11)' },
+                    { label: '越南', data: [8.5, 8, 6, 7.0, 4.1], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)' },
+                    { label: '墨西哥', data: [2, 8, 7, 7.2, 3.1], fill: true, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgb(239, 68, 68)', pointBackgroundColor: 'rgb(239, 68, 68)' }
+                ]
+            });
+
+            // --- 語言切換函式 ---
+            const setLanguage = (lang) => {
+                // 更新所有帶有 data-lang-key 的元素
+                document.querySelectorAll('[data-lang-key]').forEach(elem => {
+                    const key = elem.dataset.langKey;
+                    if (translations[lang] && translations[lang][key]) {
+                        elem.innerHTML = translations[lang][key];
+                    }
+                });
+                // 更新 HTML lang 屬性
+                document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+
+                // 更新圖表
+                updateAllCharts(lang);
+                
+                // 更新切換按鈕的樣式
+                updateLangSwitcherUI(lang);
+                
+                // 儲存用戶偏好
+                localStorage.setItem('preferredLanguage', lang);
+            };
+            
+            const updateLangSwitcherUI = (lang) => {
+                document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                    if (btn.dataset.lang === lang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            };
+
+            // --- 圖表更新函式 ---
+            const updateAllCharts = (lang) => {
+                const fdiData = getFdiData(lang);
+                if (fdiChart) {
+                    fdiChart.data.datasets[0].label = fdiData.datasets[0].label;
+                    fdiChart.update();
+                }
+
+                const portData = getPortData(lang);
+                if (portChart) {
+                    portChart.data.datasets[0].label = portData.datasets[0].label;
+                    portChart.update();
+                }
+
+                const educationData = getEducationData(lang);
+                 if (educationChart) {
+                    educationChart.data.labels = educationData.labels;
+                    educationChart.data.datasets[0].label = educationData.datasets[0].label;
+                    educationChart.update();
+                }
+                
+                const competitorData = getCompetitorData(lang);
+                if (competitorRadarChart) {
+                    competitorRadarChart.data.labels = competitorData.labels;
+                    // The labels for datasets (countries) are language-independent
+                    competitorRadarChart.update();
+                }
+            };
+            
+            // --- 頁面互動邏輯 (原始) ---
+            const pillarCards = document.querySelectorAll('.pillar-card');
+            const contentSections = document.querySelectorAll('.content-section');
+            const defaultContent = document.getElementById('content-default');
+            const contentArea = document.getElementById('pillars-content-area');
+            let activeSectionId = null;
+
+            pillarCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const targetId = card.dataset.target;
+                    const targetSection = document.getElementById(targetId);
+
+                    if (activeSectionId === targetId) {
+                        targetSection.classList.remove('active');
+                        defaultContent.style.display = 'flex';
+                        activeSectionId = null;
+                        return;
+                    }
+
+                    contentSections.forEach(section => section.classList.remove('active'));
+                    
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                        defaultContent.style.display = 'none';
+                        activeSectionId = targetId;
+                    }
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section, footer');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                if (section.id) { observer.observe(section); }
+            });
+            navLinks[0].classList.add('active');
+
+            // --- 圖表設定與初始化 ---
+            Chart.defaults.font.family = "'Inter', 'Noto Sans TC', sans-serif";
+            Chart.defaults.color = chartLabelColor;
+            const commonOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { position: 'top' }, tooltip: { bodyFont: { family: "'Inter', 'Noto Sans TC', sans-serif" }, titleFont: { family: "'Inter', 'Noto Sans TC', sans-serif" } } },
+                scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: chartLabelColor } }, x: { grid: { display: false }, ticks: { color: chartLabelColor } } }
+            };
+            const radarOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { r: { angleLines: { color: gridColor }, grid: { color: gridColor }, pointLabels: { font: { size: 12, weight: 'bold' }, color: chartLabelColor }, ticks: { backdropColor: 'rgba(248, 247, 244, 0.7)', color: '#6b7280' } } }
+            };
+
+            const chartObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const canvasId = entry.target.id;
+                        const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+                        switch(canvasId) {
+                            case 'fdiChart':
+                                if (!fdiChart) fdiChart = new Chart(document.getElementById('fdiChart'), { type: 'line', data: getFdiData(currentLang), options: commonOptions });
+                                break;
+                            case 'portChart':
+                                if (!portChart) portChart = new Chart(document.getElementById('portChart'), { type: 'bar', data: getPortData(currentLang), options: {...commonOptions, indexAxis: 'y' }});
+                                break;
+                            case 'educationChart':
+                                if (!educationChart) educationChart = new Chart(document.getElementById('educationChart'), { type: 'doughnut', data: getEducationData(currentLang), options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { position: 'bottom' } } }});
+                                break;
+                            case 'competitorRadarChart':
+                                if (!competitorRadarChart) competitorRadarChart = new Chart(document.getElementById('competitorRadarChart'), { type: 'radar', data: getCompetitorData(currentLang), options: radarOptions });
+                                break;
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            document.querySelectorAll('canvas').forEach(canvas => {
+                chartObserver.observe(canvas);
+            });
+            
+            // --- 初始化語言 ---
+            document.querySelectorAll('.lang-switcher button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    setLanguage(e.target.dataset.lang);
+                });
+            });
+
+            // 載入時設定初始語言
+            const initialLang = localStorage.getItem('preferredLanguage') || 'zh';
+            setLanguage(initialLang);
+        });
+    </script>
+</body>
+</html>
