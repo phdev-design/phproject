@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：印度仿製藥的全面解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #cbd5e1;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+        }
+        .timeline-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-container.left {
+            left: 0;
+        }
+        .timeline-container.right {
+            left: 50%;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -17px;
+            background-color: white;
+            border: 4px solid #0d9488;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-container.right::after {
+            left: -16px;
+        }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+        }
+        @media screen and (max-width: 768px) {
+            .timeline::after {
+                left: 31px;
+            }
+            .timeline-container {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            .timeline-container.right {
+                left: 0%;
+            }
+            .timeline-container.left::after, .timeline-container.right::after {
+                left: 15px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800" data-translate="header_title">印度仿製藥解析</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_overview">概覽</a>
+                            <a href="#rise" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_rise">崛起之路</a>
+                            <a href="#rules" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_rules">全球規則</a>
+                            <a href="#crisis" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_crisis">品質危機</a>
+                            <a href="#economy" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_economy">經濟剖析</a>
+                            <a href="#impact" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-translate="nav_impact">世界影響</a>
+                        </div>
+                    </div>
+                    <button id="lang-switcher" class="ml-4 px-3 py-1.5 rounded-md text-sm font-medium bg-teal-600 text-white hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">English</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="overview" class="py-12 md:py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-5xl" data-translate="overview_title">
+                    世界藥房：印度仿製藥的雙面刃
+                </h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-translate="overview_subtitle">
+                    印度仿製藥產業是全球公共衛生的重要支柱，它以極低的價格提供救命藥物，被譽為「發展中國家的藥房」。然而，在這巨大成功的背後，卻也隱藏著品質堪憂與監管失序的陰影。本報告將帶您深入探索這個充滿矛盾的產業。
+                </p>
+
+                <div class="mt-10">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-2" data-translate="overview_chart_title">驚人的價格差距</h3>
+                    <p class="text-md text-gray-600 mb-6 max-w-3xl mx-auto" data-translate="overview_chart_desc">以著名抗癌藥物「格列衛」(Gleevec) 為例，印度仿製藥的出現，使其價格從天文數字變得觸手可及，這也是印度與全球大型藥廠法律戰的核心。</p>
+                    <div class="chart-container">
+                        <canvas id="priceComparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rise" class="py-12 md:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-teal-700" data-translate="rise_title">崛起之路：國家意志的鑄就</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600" data-translate="rise_subtitle">
+                        印度製藥業的成功並非偶然，而是一系列國家級戰略精心佈局的結果。其中，1970年的《專利法》是這一切轉變的基石，它徹底改變了遊戲規則，為本土產業的騰飛創造了條件。
+                    </p>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-container left">
+                        <div class="timeline-content card">
+                            <h3 class="font-bold text-lg text-teal-700" data-translate="rise_1970_title">1970年《專利法》</h3>
+                            <p class="text-sm text-gray-600 mt-2" data-translate="rise_1970_desc">廢除藥品「產品專利」，僅保留「製程專利」。這項關鍵變革允許印度公司合法地對跨國公司的藥品進行「逆向工程」，只要能研發出不同的生產方法即可。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-container right">
+                        <div class="timeline-content card">
+                            <h3 class="font-bold text-lg text-teal-700" data-translate="rise_1995_title">1995年 加入WTO</h3>
+                            <p class="text-sm text-gray-600 mt-2" data-translate="rise_1995_desc">印度承諾遵守TRIPS協議，必須在2005年前恢復藥品產品專利。這對其仿製藥模式構成生存威脅，也開啟了產業轉型之路。</p>
+                        </div>
+                    </div>
+                    <div class="timeline-container left">
+                        <div class="timeline-content card">
+                            <h3 class="font-bold text-lg text-teal-700" data-translate="rise_2005_title">2005年《專利法(修正案)》</h3>
+                            <p class="text-sm text-gray-600 mt-2" data-translate="rise_2005_desc">正式恢復產品專利，但巧妙地引入了極具爭議性的第3(d)條，旨在防止「專利常青」，為日後的法律戰埋下伏筆。</p>
+                        </div>
+                    </div>
+                     <div class="timeline-container right">
+                        <div class="timeline-content card">
+                            <h3 class="font-bold text-lg text-teal-700" data-translate="rise_2013_title">2013年 諾華案判決</h3>
+                            <p class="text-sm text-gray-600 mt-2" data-translate="rise_2013_desc">印度最高法院駁回諾華公司對其藥物新晶型的專利申請，確立了藥品專利必須證明「顯著增強治療功效」的高標準，成為全球藥物可及性的里程碑事件。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rules" class="py-12 md:py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-teal-700" data-translate="rules_title">全球規則：TRIPS協議與法律戰</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600" data-translate="rules_subtitle">
+                        在融入全球貿易體系的過程中，印度巧妙地利用規則，在履行國際義務與保障公共衛生之間尋求平衡。諾華訴印度政府案，正是這場高風險博弈的終極壓力測試。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl text-gray-800" data-translate="rules_card1_title">TRIPS 協議</h3>
+                        <p class="mt-2 text-gray-600" data-translate="rules_card1_desc">要求成員國為藥品提供20年產品專利保護，直接挑戰印度仿製藥的根基。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl text-gray-800" data-translate="rules_card2_title">第 3(d) 條</h3>
+                        <p class="mt-2 text-gray-600" data-translate="rules_card2_desc">印度的獨創條款：已知藥物的新形式，除非能證明「療效顯著增強」，否則不授予專利，以此打擊「專利常青」行為。</p>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="font-bold text-xl text-gray-800" data-translate="rules_card3_title">諾華案裁決</h3>
+                        <p class="mt-2 text-gray-600" data-translate="rules_card3_desc">法院將「療效」定義為「治療功效」，而非物理性質的改善，為藥品專利設立了極高的門檻，捍衛了仿製藥的生存空間。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="crisis" class="py-12 md:py-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-red-600" data-translate="crisis_title">品質危機：信任的裂痕</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600" data-translate="crisis_subtitle">
+                        「世界藥房」光環的背後，是層出不窮的品質醜聞。系統性的數據造假和生產違規，不僅是產業最大的弱點，也持續挑戰著全球對印度藥品的信任。
+                    </p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <div class="p-6">
+                         <h3 class="text-xl font-bold text-gray-800 mb-4" data-translate="crisis_table_title">美國FDA重大執法行動案例</h3>
+                         <div class="flex flex-wrap gap-2 mb-4">
+                            <button class="filter-btn bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-sm hover:bg-teal-600 hover:text-white" data-filter="all" data-translate="crisis_filter_all">所有公司</button>
+                            <button class="filter-btn bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-sm hover:bg-teal-600 hover:text-white" data-filter="Ranbaxy">蘭伯西</button>
+                            <button class="filter-btn bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-sm hover:bg-teal-600 hover:text-white" data-filter="Intas">Intas</button>
+                            <button class="filter-btn bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-sm hover:bg-teal-600 hover:text-white" data-filter="Aurobindo">Aurobindo</button>
+                         </div>
+                         <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="crisis_th_company">公司</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="crisis_th_year">年份</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="crisis_th_violation">主要違規行為</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fda-actions-table" class="bg-white divide-y divide-gray-200">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                 <p class="mt-6 text-center text-gray-600 text-sm max-w-2xl mx-auto" data-translate="crisis_footer">最令人擔憂的是系統性的數據完整性問題，包括偽造檢測結果、銷毀原始記錄等。這表明低成本高產量的壓力，有時會壓倒品質至上的原則。</p>
+            </div>
+        </section>
+
+        <section id="economy" class="py-12 md:py-20 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-teal-700" data-translate="economy_title">經濟剖析：低成本優勢及其脆弱性</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600" data-translate="economy_subtitle">
+                        印度仿製藥的巨大價格優勢從何而來？這是一個由歷史、政策和生產要素共同構成的複雜生態系統。然而，這個成功的模式也存在著致命的戰略弱點。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center" data-translate="economy_chart1_title">成本優勢的構成</h3>
+                        <div class="chart-container">
+                            <canvas id="costAdvantageChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center" data-translate="economy_chart2_title">致命弱點：對中國的依賴</h3>
+                         <p class="text-md text-gray-600 mb-6 text-center" data-translate="economy_chart2_desc">印度約有60-70%的藥品核心原料（API）從中國進口，這在地緣政治緊張或供應鏈中斷時，構成了巨大的國家安全風險。</p>
+                         <div class="chart-container" style="height: 300px; max-height: 35vh;">
+                             <canvas id="apiDependencyChart"></canvas>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-12 md:py-20">
+             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-teal-700" data-translate="impact_title">世界影響：南方的救世主</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-gray-600" data-translate="impact_subtitle">
+                        印度仿製藥從根本上改變了全球公共衛生的面貌，尤其是在對抗愛滋病的鬥争中，它將無數患者從死亡邊緣拉回，成為了全球健康的生命線。
+                    </p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center" data-translate="impact_chart_title">對抗愛滋病：價格的革命</h3>
+                        <p class="text-md text-gray-600 mb-6 text-center" data-translate="impact_chart_desc">在21世紀初，印度藥廠西普拉(Cipla)將愛滋病(ARV)療法年費從超過1萬美元/人，降至每日不到1美元，使大規模治療成為可能。</p>
+                        <div class="chart-container">
+                            <canvas id="arvCostChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="card p-6 flex items-center">
+                           <div class="flex-shrink-0 bg-teal-500 text-white rounded-lg p-3">
+                               <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"/></svg>
+                           </div>
+                           <div class="ml-4">
+                                <h4 class="text-lg font-bold text-gray-800" data-translate="impact_card1_title">全球最大供應國</h4>
+                                <p class="text-gray-600" data-translate="impact_card1_desc">印度是全球銷量最大的仿製藥供應國，也是最大的疫苗供應國。</p>
+                           </div>
+                        </div>
+                        <div class="card p-6 flex items-center">
+                            <div class="flex-shrink-0 bg-teal-500 text-white rounded-lg p-3">
+                                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5-2.5-6 1.5 2.5 2.5 4.5 2.5 6.5-3 0-3 2.5-3 2.5s2.5-1.5 4.5-3.5c0 2 .5 5-2.5 6C11 13 12.5 10.5 15 10.5c2.5 0 3 2.5 3 2.5z"/></svg>
+                           </div>
+                           <div class="ml-4">
+                                <h4 class="text-lg font-bold text-gray-800" data-translate="impact_card2_title">拯救數百萬生命</h4>
+                                <p class="text-gray-600" data-translate="impact_card2_desc">廉價的印度藥物使無國界醫生等組織能夠在非洲和亞洲大規模推廣治療，拯救了無數生命。</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h3 class="text-2xl font-bold" data-translate="footer_title">結論：矛盾的巨人，挑戰的未來</h3>
+            <p class="mt-4 max-w-3xl mx-auto text-gray-300" data-translate="footer_subtitle">
+                印度仿製藥產業是「救世主」與「罪人」的矛盾結合體。它必須證明自己不僅能成為世界最廉價的藥房，更能成為最值得信賴的藥房。能否成功應對品質監管、對外依賴和產業升級的挑戰，將決定其在全球製藥版圖中的最終地位。
+            </p>
+            <p class="mt-6 text-xs text-gray-500" data-translate="footer_credit">此互動式報告根據「世界藥房：對印度仿製藥產業的全面分析」報告生成。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- TRANSLATION DATA ---
+    const translations = {
+        'zh-Hant': {
+            page_title: '互動式報告：印度仿製藥的全面解析',
+            lang_switcher: 'English',
+            header_title: '印度仿製藥解析',
+            nav_overview: '概覽',
+            nav_rise: '崛起之路',
+            nav_rules: '全球規則',
+            nav_crisis: '品質危機',
+            nav_economy: '經濟剖析',
+            nav_impact: '世界影響',
+            overview_title: '世界藥房：印度仿製藥的雙面刃',
+            overview_subtitle: '印度仿製藥產業是全球公共衛生的重要支柱，它以極低的價格提供救命藥物，被譽為「發展中國家的藥房」。然而，在這巨大成功的背後，卻也隱藏著品質堪憂與監管失序的陰影。本報告將帶您深入探索這個充滿矛盾的產業。',
+            overview_chart_title: '驚人的價格差距',
+            overview_chart_desc: '以著名抗癌藥物「格列衛」(Gleevec) 為例，印度仿製藥的出現，使其價格從天文數字變得觸手可及，這也是印度與全球大型藥廠法律戰的核心。',
+            rise_title: '崛起之路：國家意志的鑄就',
+            rise_subtitle: '印度製藥業的成功並非偶然，而是一系列國家級戰略精心佈局的結果。其中，1970年的《專利法》是這一切轉變的基石，它徹底改變了遊戲規則，為本土產業的騰飛創造了條件。',
+            rise_1970_title: '1970年《專利法》',
+            rise_1970_desc: '廢除藥品「產品專利」，僅保留「製程專利」。這項關鍵變革允許印度公司合法地對跨國公司的藥品進行「逆向工程」，只要能研發出不同的生產方法即可。',
+            rise_1995_title: '1995年 加入WTO',
+            rise_1995_desc: '印度承諾遵守TRIPS協議，必須在2005年前恢復藥品產品專利。這對其仿製藥模式構成生存威脅，也開啟了產業轉型之路。',
+            rise_2005_title: '2005年《專利法(修正案)》',
+            rise_2005_desc: '正式恢復產品專利，但巧妙地引入了極具爭議性的第3(d)條，旨在防止「專利常青」，為日後的法律戰埋下伏筆。',
+            rise_2013_title: '2013年 諾華案判決',
+            rise_2013_desc: '印度最高法院駁回諾華公司對其藥物新晶型的專利申請，確立了藥品專利必須證明「顯著增強治療功效」的高標準，成為全球藥物可及性的里程碑事件。',
+            rules_title: '全球規則：TRIPS協議與法律戰',
+            rules_subtitle: '在融入全球貿易體系的過程中，印度巧妙地利用規則，在履行國際義務與保障公共衛生之間尋求平衡。諾華訴印度政府案，正是這場高風險博弈的終極壓力測試。',
+            rules_card1_title: 'TRIPS 協議',
+            rules_card1_desc: '要求成員國為藥品提供20年產品專利保護，直接挑戰印度仿製藥的根基。',
+            rules_card2_title: '第 3(d) 條',
+            rules_card2_desc: '印度的獨創條款：已知藥物的新形式，除非能證明「療效顯著增強」，否則不授予專利，以此打擊「專利常青」行為。',
+            rules_card3_title: '諾華案裁決',
+            rules_card3_desc: '法院將「療效」定義為「治療功效」，而非物理性質的改善，為藥品專利設立了極高的門檻，捍衛了仿製藥的生存空間。',
+            crisis_title: '品質危機：信任的裂痕',
+            crisis_subtitle: '「世界藥房」光環的背後，是層出不窮的品質醜聞。系統性的數據造假和生產違規，不僅是產業最大的弱點，也持續挑戰著全球對印度藥品的信任。',
+            crisis_table_title: '美國FDA重大執法行動案例',
+            crisis_filter_all: '所有公司',
+            crisis_th_company: '公司',
+            crisis_th_year: '年份',
+            crisis_th_violation: '主要違規行為',
+            crisis_footer: '最令人擔憂的是系統性的數據完整性問題，包括偽造檢測結果、銷毀原始記錄等。這表明低成本高產量的壓力，有時會壓倒品質至上的原則。',
+            economy_title: '經濟剖析：低成本優勢及其脆弱性',
+            economy_subtitle: '印度仿製藥的巨大價格優勢從何而來？這是一個由歷史、政策和生產要素共同構成的複雜生態系統。然而，這個成功的模式也存在著致命的戰略弱點。',
+            economy_chart1_title: '成本優勢的構成',
+            economy_chart2_title: '致命弱點：對中國的依賴',
+            economy_chart2_desc: '印度約有60-70%的藥品核心原料（API）從中國進口，這在地緣政治緊張或供應鏈中斷時，構成了巨大的國家安全風險。',
+            impact_title: '世界影響：南方的救世主',
+            impact_subtitle: '印度仿製藥從根本上改變了全球公共衛生的面貌，尤其是在對抗愛滋病的鬥争中，它將無數患者從死亡邊緣拉回，成為了全球健康的生命線。',
+            impact_chart_title: '對抗愛滋病：價格的革命',
+            impact_chart_desc: '在21世紀初，印度藥廠西普拉(Cipla)將愛滋病(ARV)療法年費從超過1萬美元/人，降至每日不到1美元，使大規模治療成為可能。',
+            impact_card1_title: '全球最大供應國',
+            impact_card1_desc: '印度是全球銷量最大的仿製藥供應國，也是最大的疫苗供應國。',
+            impact_card2_title: '拯救數百萬生命',
+            impact_card2_desc: '廉價的印度藥物使無國界醫生等組織能夠在非洲和亞洲大規模推廣治療，拯救了無數生命。',
+            footer_title: '結論：矛盾的巨人，挑戰的未來',
+            footer_subtitle: '印度仿製藥產業是「救世主」與「罪人」的矛盾結合體。它必須證明自己不僅能成為世界最廉價的藥房，更能成為最值得信賴的藥房。能否成功應對品質監管、對外依賴和產業升級的挑戰，將決定其在全球製藥版圖中的最終地位。',
+            footer_credit: '此互動式報告根據「世界藥房：對印度仿製藥產業的全面分析」報告生成。'
+        },
+        'en': {
+            page_title: 'Interactive Report: A Comprehensive Analysis of India\'s Generic Drug Industry',
+            lang_switcher: '中文',
+            header_title: 'Indian Generics Analysis',
+            nav_overview: 'Overview',
+            nav_rise: 'The Rise',
+            nav_rules: 'Global Rules',
+            nav_crisis: 'Quality Crisis',
+            nav_economy: 'Economy',
+            nav_impact: 'Global Impact',
+            overview_title: 'Pharmacy of the World: The Double-Edged Sword of Indian Generics',
+            overview_subtitle: 'India\'s generic drug industry is a vital pillar of global public health, providing life-saving medicines at extremely low prices, earning it the title "pharmacy of the developing world." However, behind this immense success lies a shadow of quality concerns and regulatory failures. This report delves into this paradoxical industry.',
+            overview_chart_title: 'A Startling Price Gap',
+            overview_chart_desc: 'Take the famous anti-cancer drug Gleevec for example. The emergence of Indian generics made its price plummet from astronomical to accessible, forming the core of the legal battles between India and global pharmaceutical giants.',
+            rise_title: 'The Path to Prominence: Forged by National Will',
+            rise_subtitle: 'The success of India\'s pharmaceutical industry was no accident, but the result of carefully planned national strategies. The 1970 Patents Act was the cornerstone of this transformation, completely changing the rules of the game and creating the conditions for the domestic industry to soar.',
+            rise_1970_title: '1970 Patents Act',
+            rise_1970_desc: 'Abolished "product patents" for medicines, retaining only "process patents." This key change allowed Indian companies to legally "reverse-engineer" drugs from multinational corporations, as long as they could develop a different production method.',
+            rise_1995_title: '1995 Joins the WTO',
+            rise_1995_desc: 'India committed to complying with the TRIPS agreement, requiring the restoration of product patents for drugs by 2005. This posed an existential threat to its generic model and initiated a path of industrial transformation.',
+            rise_2005_title: '2005 Patents (Amendment) Act',
+            rise_2005_desc: 'Officially restored product patents but cleverly introduced the highly controversial Section 3(d), aimed at preventing "patent evergreening" and setting the stage for future legal battles.',
+            rise_2013_title: '2013 Novartis Case Ruling',
+            rise_2013_desc: 'The Supreme Court of India rejected Novartis\'s patent application for a new crystalline form of its drug, establishing a high standard that drug patents must demonstrate "enhanced therapeutic efficacy," a landmark event for global drug accessibility.',
+            rules_title: 'Global Rules: The TRIPS Agreement and Legal Warfare',
+            rules_subtitle: 'While integrating into the global trade system, India skillfully used the rules to strike a balance between international obligations and protecting public health. The Novartis v. Union of India case was the ultimate stress test of this high-stakes game.',
+            rules_card1_title: 'TRIPS Agreement',
+            rules_card1_desc: 'Required member countries to provide 20-year product patent protection for pharmaceuticals, directly challenging the foundation of India\'s generic industry.',
+            rules_card2_title: 'Section 3(d)',
+            rules_card2_desc: 'India\'s unique clause: new forms of known substances are not patentable unless they demonstrate "enhanced efficacy," a measure to combat "patent evergreening."',
+            rules_card3_title: 'Novartis Ruling',
+            rules_card3_desc: 'The court defined "efficacy" as "therapeutic efficacy," not just improvements in physical properties, setting a very high bar for drug patents and defending the space for generics.',
+            crisis_title: 'The Quality Crisis: A Fissure in Trust',
+            crisis_subtitle: 'Behind the halo of "Pharmacy of the World" are endless quality scandals. Systemic data fabrication and manufacturing violations are not only the industry\'s biggest weakness but also continually challenge global trust in Indian medicines.',
+            crisis_table_title: 'Major US FDA Enforcement Action Cases',
+            crisis_filter_all: 'All Companies',
+            crisis_th_company: 'Company',
+            crisis_th_year: 'Year',
+            crisis_th_violation: 'Major Violations',
+            crisis_footer: 'Most concerning are the systemic data integrity issues, including falsifying test results and destroying original records. This indicates that the pressure for low-cost, high-volume production sometimes overrides the principle of quality first.',
+            economy_title: 'Economic Analysis: Cost Advantage and Its Fragility',
+            economy_subtitle: 'Where does the huge price advantage of Indian generics come from? It is a complex ecosystem shaped by history, policy, and production factors. However, this successful model also has a critical strategic vulnerability.',
+            economy_chart1_title: 'Composition of Cost Advantage',
+            economy_chart2_title: 'The Achilles\' Heel: Dependence on China',
+            economy_chart2_desc: 'India imports about 60-70% of its core drug ingredients (APIs) from China. This poses a significant national security risk during times of geopolitical tension or supply chain disruptions.',
+            impact_title: 'Global Impact: Savior of the Global South',
+            impact_subtitle: 'Indian generic drugs have fundamentally changed the landscape of global public health. Especially in the fight against AIDS, they have pulled countless patients back from the brink of death, becoming a lifeline for global health.',
+            impact_chart_title: 'Fighting AIDS: A Price Revolution',
+            impact_chart_desc: 'In the early 2000s, Indian pharmaceutical company Cipla reduced the annual cost of HIV/AIDS (ARV) therapy from over $10,000 per person to less than $1 per day, making large-scale treatment possible.',
+            impact_card1_title: 'World\'s Largest Supplier',
+            impact_card1_desc: 'India is the world\'s largest supplier of generic drugs by volume and also the largest supplier of vaccines.',
+            impact_card2_title: 'Saving Millions of Lives',
+            impact_card2_desc: 'Inexpensive Indian medicines enabled organizations like Doctors Without Borders to scale up treatment in Africa and Asia, saving countless lives.',
+            footer_title: 'Conclusion: A Contradictory Giant, A Challenging Future',
+            footer_subtitle: 'The Indian generic industry is a paradoxical combination of "savior" and "sinner." It must prove that it can be not only the world\'s cheapest pharmacy but also its most trustworthy. Its ability to tackle challenges in quality regulation, foreign dependency, and industrial upgrading will determine its ultimate place in the global pharmaceutical landscape.',
+            footer_credit: 'This interactive report was generated based on the report "Pharmacy of the World: A Comprehensive Analysis of the Indian Generic Drug Industry".'
+        }
+    };
+    
+    const fdaActionsData = {
+        'zh-Hant': [
+            { company: 'Ranbaxy', year: 2013, violation: '系統性數據偽造、銷售摻假藥品、向FDA提供虛假陳述。' },
+            { company: 'Sun Pharma', year: 2022, violation: 'FDA查廠未通過，導致生產中斷。' },
+            { company: 'Intas', year: '2022-2023', violation: '銷毀品質文件、操縱數據、忽視微生物污染調查。' },
+            { company: 'Aurobindo', year: '2022-2023', violation: '降血壓藥檢出過高致癌風險雜質、生產設備清潔不當。' }
+        ],
+        'en': [
+            { company: 'Ranbaxy', year: 2013, violation: 'Systemic data fabrication, selling adulterated drugs, making false statements to the FDA.' },
+            { company: 'Sun Pharma', year: 2022, violation: 'Failed FDA plant inspection, leading to production halt.' },
+            { company: 'Intas', year: '2022-2023', violation: 'Destroyed quality documents, manipulated data, ignored microbial contamination investigations.' },
+            { company: 'Aurobindo', year: '2022-2023', violation: 'High levels of a probable carcinogen found in blood pressure medication, improper cleaning of production equipment.' }
+        ]
+    };
+
+    let currentLang = 'zh-Hant';
+    let charts = {}; // To hold chart instances
+
+    // --- RENDER TABLE FUNCTION ---
+    function renderTable(filter = 'all') {
+        const tableBody = document.getElementById('fda-actions-table');
+        const data = fdaActionsData[currentLang];
+        tableBody.innerHTML = '';
+        const filteredData = filter === 'all' 
+            ? data 
+            : data.filter(item => item.company.toLowerCase().includes(filter.toLowerCase()));
+
+        if (filteredData.length === 0) {
+            const noDataText = currentLang === 'en' ? 'No matching data found' : '無符合條件的資料';
+            tableBody.innerHTML = `<tr><td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${noDataText}</td></tr>`;
+            return;
+        }
+            
+        filteredData.forEach(item => {
+            const row = `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.company}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.year}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">${item.violation}</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    // --- CHART CREATION FUNCTION ---
+    function createCharts() {
+        // Destroy existing charts if they exist
+        Object.values(charts).forEach(chart => chart.destroy());
+        charts = {};
+
+        const chartConfigs = {
+            'zh-Hant': {
+                priceComparison: {
+                    type: 'bar',
+                    data: { labels: ['原廠藥 (Gleevec)', '印度仿製藥'], datasets: [{ label: '每月費用 (美元)', data: [2200, 88], backgroundColor: ['#6b7280', '#10b981'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: value => '$' + value } } } }
+                },
+                costAdvantage: {
+                    type: 'doughnut',
+                    data: { labels: ['低研發支出', '政府支持', '低勞動力/運營成本', '規模經濟'], datasets: [{ data: [40, 20, 25, 15], backgroundColor: ['#14b8a6', '#0d9488', '#0f766e', '#047857'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: context => context.label + ': ' + context.parsed + '%' } } } }
+                },
+                apiDependency: {
+                    type: 'bar',
+                    data: { labels: ['藥品核心原料 (API)'], datasets: [{ label: '從中國進口', data: [65], backgroundColor: '#ef4444' }, { label: '其他來源', data: [35], backgroundColor: '#6b7280' }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { callback: value => value + "%" } }, y: { stacked: true } }, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: context => context.dataset.label + ': ' + context.parsed.x + '%' } } } }
+                },
+                arvCost: {
+                    type: 'line',
+                    data: { labels: ['2000前', '2001 (Cipla)'], datasets: [{ label: '愛滋病(ARV)療法年費/人 (美元)', data: [10000, 350], borderColor: '#0d9488', tension: 0.1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { type: 'logarithmic', ticks: { callback: value => '$' + value.toLocaleString() } } } }
+                }
+            },
+            'en': {
+                 priceComparison: {
+                    type: 'bar',
+                    data: { labels: ['Brand-name (Gleevec)', 'Indian Generic'], datasets: [{ label: 'Monthly Cost (USD)', data: [2200, 88], backgroundColor: ['#6b7280', '#10b981'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: value => '$' + value } } } }
+                },
+                costAdvantage: {
+                    type: 'doughnut',
+                    data: { labels: ['Low R&D', 'Govt. Support', 'Low Labor/Overhead', 'Economies of Scale'], datasets: [{ data: [40, 20, 25, 15], backgroundColor: ['#14b8a6', '#0d9488', '#0f766e', '#047857'] }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: context => context.label + ': ' + context.parsed + '%' } } } }
+                },
+                apiDependency: {
+                    type: 'bar',
+                    data: { labels: ['Active Pharmaceutical Ingredients (APIs)'], datasets: [{ label: 'Imported from China', data: [65], backgroundColor: '#ef4444' }, { label: 'Other Sources', data: [35], backgroundColor: '#6b7280' }] },
+                    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true, ticks: { callback: value => value + "%" } }, y: { stacked: true } }, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: context => context.dataset.label + ': ' + context.parsed.x + '%' } } } }
+                },
+                arvCost: {
+                    type: 'line',
+                    data: { labels: ['Pre-2000', '2001 (Cipla)'], datasets: [{ label: 'Annual ARV Therapy Cost/Person (USD)', data: [10000, 350], borderColor: '#0d9488', tension: 0.1 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { type: 'logarithmic', ticks: { callback: value => '$' + value.toLocaleString() } } } }
+                }
+            }
+        };
+
+        const langConfig = chartConfigs[currentLang];
+        charts.priceComparison = new Chart(document.getElementById('priceComparisonChart'), langConfig.priceComparison);
+        charts.costAdvantage = new Chart(document.getElementById('costAdvantageChart'), langConfig.costAdvantage);
+        charts.apiDependency = new Chart(document.getElementById('apiDependencyChart'), langConfig.apiDependency);
+        charts.arvCost = new Chart(document.getElementById('arvCostChart'), langConfig.arvCost);
+    }
+
+    // --- SET LANGUAGE FUNCTION ---
+    function setLanguage(lang) {
+        currentLang = lang;
+        const langPack = translations[lang];
+
+        // Set page language and title
+        document.documentElement.lang = lang;
+        document.title = langPack.page_title;
+        
+        // Translate all elements with data-translate attribute
+        document.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.getAttribute('data-translate');
+            if (langPack[key]) {
+                el.textContent = langPack[key];
+            }
+        });
+
+        // Update switcher button text
+        document.getElementById('lang-switcher').textContent = langPack.lang_switcher;
+
+        // Re-render table and charts
+        renderTable();
+        createCharts();
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+        setLanguage(newLang);
+    });
+
+    document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('bg-teal-600', 'text-white'));
+            e.target.classList.add('bg-teal-600', 'text-white');
+            renderTable(e.target.dataset.filter);
+        });
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    navLinks.forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // --- INITIALIZE ---
+    setLanguage('zh-Hant'); // Initial language load
+    document.querySelector('.filter-btn[data-filter="all"]').classList.add('bg-teal-600', 'text-white');
+
+});
+</script>
+
+</body>
+</html>
