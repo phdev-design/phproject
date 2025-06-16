@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稀土：戰略資源互動解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Tech Accents -->
+    <!-- Application Structure Plan: The application is designed as a thematic, single-page journey, breaking away from the report's linear structure for better usability. A sticky navigation bar allows users to jump between four core themes: 1) 'What are Rare Earths?', an interactive discovery section; 2) 'China's Dominance', a data-driven dashboard visualizing supply chain control; 3) 'Global Response', showcasing diversification efforts through interactive cards and lists; and 4) 'Future Outlook', which organizes conclusions into audience-specific tabs. This non-linear, thematic structure encourages exploration and allows users to focus on areas of interest, making the dense information more digestible and engaging than a simple scroll-through report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info (Table 1 - 17 Elements): Goal: Organize/Inform -> Viz/Method: Interactive HTML/CSS Grid. Interaction: Click on an element to see its details in a modal. Justification: More engaging and less overwhelming than a static table. Library: Vanilla JS for modal.
+        - Report Info (Table 2 & 3 - Production/Processing Data): Goal: Compare/Inform -> Viz/Method: Doughnut and Bar charts. Interaction: Tooltips on hover; toggle button to switch between reserves and production data. Justification: Visually powerful way to show China's overwhelming dominance and the reserves vs. production paradox. Library: Chart.js (Canvas).
+        - Report Info (Section 2 - China's Strategy): Goal: Show Change over Time -> Viz/Method: Interactive HTML/CSS vertical timeline. Interaction: Click on a year to reveal key policy events. Justification: Better illustrates the long-term, strategic nature of China's actions. Library: Vanilla JS.
+        - Report Info (Tables 4, 5, 6 - Global Response): Goal: Organize/Explore -> Viz/Method: Interactive cards for technologies and alternatives. Interaction: Click a card to flip or expand for details. Justification: Breaks down dense tables into digestible, user-driven chunks. Library: Vanilla JS.
+        - Report Info (Section 5 - Recommendations): Goal: Inform/Organize -> Viz/Method: Tabbed content area. Interaction: Click tabs for 'Policymakers', 'Industry', 'Investors'. Justification: Neatly segments advice for different audiences. Library: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #fdfcf9; color: #3a3a3a; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #818cf8; border-bottom-color: #818cf8; }
+        .nav-link:hover { color: #a78bfa; }
+        .timeline-item-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .element-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .element-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .tech-card { transition: all 0.3s ease; }
+        .tech-card:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(129, 140, 248, 0.2); }
+        .tab-button.active { background-color: #6d28d9; color: white; }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#hero" class="text-xl font-bold text-purple-700">稀土解析</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#what-are-rees" class="nav-link pb-1 border-b-2 border-transparent">什麼是稀土？</a>
+                <a href="#china-dominance" class="nav-link pb-1 border-b-2 border-transparent">中國的支配地位</a>
+                <a href="#global-response" class="nav-link pb-1 border-b-2 border-transparent">全球應對策略</a>
+                <a href="#future-outlook" class="nav-link pb-1 border-b-2 border-transparent">未來展望</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-600">
+                <div class="space-y-2">
+                    <span class="block w-6 h-0.5 bg-gray-600"></span>
+                    <span class="block w-6 h-0.5 bg-gray-600"></span>
+                    <span class="block w-6 h-0.5 bg-gray-600"></span>
+                </div>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+             <a href="#what-are-rees" class="block py-2 px-4 text-sm hover:bg-purple-50">什麼是稀土？</a>
+             <a href="#china-dominance" class="block py-2 px-4 text-sm hover:bg-purple-50">中國的支配地位</a>
+             <a href="#global-response" class="block py-2 px-4 text-sm hover:bg-purple-50">全球應對策略</a>
+             <a href="#future-outlook" class="block py-2 px-4 text-sm hover:bg-purple-50">未來展望</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="relative text-center py-20 md:py-32 bg-white overflow-hidden">
+            <div class="absolute inset-0 bg-grid-purple-100/50 [mask-image:linear-gradient(to_bottom,white_20%,transparent_100%)]"></div>
+            <div class="container mx-auto px-6 relative z-10">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4 tracking-tight">稀土：現代世界的隱形引擎</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                    從您的智慧型手機到綠色能源革命，深入了解這17種關鍵元素，以及全球對其供應的激烈競爭。
+                </p>
+                <div class="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white/50 p-6 rounded-xl shadow-md backdrop-blur-sm border border-gray-200/50">
+                        <p class="text-4xl font-bold text-purple-600" id="stat1">0%</p>
+                        <p class="mt-2 text-gray-700">全球永磁體製造</p>
+                    </div>
+                    <div class="bg-white/50 p-6 rounded-xl shadow-md backdrop-blur-sm border border-gray-200/50">
+                        <p class="text-4xl font-bold text-purple-600" id="stat2">0%</p>
+                        <p class="mt-2 text-gray-700">全球稀土精煉產能</p>
+                    </div>
+                    <div class="bg-white/50 p-6 rounded-xl shadow-md backdrop-blur-sm border border-gray-200/50">
+                        <p class="text-4xl font-bold text-purple-600" id="stat3">0%</p>
+                        <p class="mt-2 text-gray-700">全球稀土開採量</p>
+                    </div>
+                </div>
+                 <p class="mt-4 text-xs text-gray-500">*以上為中國在全球供應鏈中的份額佔比</p>
+            </div>
+        </section>
+
+        <section id="what-are-rees" class="py-16 md:py-24 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">什麼是稀土？</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">稀土並非「土」，而是一個由17種化學性質相似的金屬元素組成的家族。它們是現代科技不可或缺的「維生素」。點擊下方元素卡片以了解更多。</p>
+                </div>
+                <div id="elements-grid" class="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-4">
+                </div>
+            </div>
+        </section>
+
+        <section id="china-dominance" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">中國的支配地位：一場精心策劃的佈局</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">中國的領先並非偶然。這是數十年戰略遠見、全產業鏈控制和技術投資的結果，徹底重塑了全球市場。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-center">
+                    <div class="lg:col-span-1 space-y-8">
+                        <div>
+                             <h3 class="text-xl font-semibold mb-2 text-center">全球供應鏈控制力</h3>
+                             <div class="chart-container h-64 md:h-80"><canvas id="supplyChainChart"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-8">
+                        <div>
+                             <div class="flex justify-center items-center mb-4">
+                                <h3 class="text-xl font-semibold">全球稀土儲量 vs. 產量 (2024)</h3>
+                                <button id="toggleChartButton" class="ml-4 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition">切換至產量</button>
+                             </div>
+                             <div class="chart-container h-80"><canvas id="reservesProductionChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="mt-20">
+                    <h3 class="text-2xl font-bold text-center mb-10">戰略時間軸：中國如何佈局</h3>
+                    <div id="timeline-container" class="relative w-full max-w-4xl mx-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="global-response" class="py-16 md:py-24 bg-stone-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">全球應對：尋求供應鏈韌性</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">面對供應鏈風險，世界各國正積極行動，從開發新礦源、推動回收技術到尋找無稀土替代品，一場艱鉅的探索已然展開。</p>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center">新興的回收與替代技術</h3>
+                        <div id="tech-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center">供應來源多元化：主要項目</h3>
+                        <div id="diversification-projects" class="space-y-4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future-outlook" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">未來展望與戰略建議</h2>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">雖然中國的支配地位短期難以動搖，但全球格局已在改變。面對未來，各方應如何應對？</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="mb-6 flex justify-center border-b border-gray-200">
+                        <button data-tab="policymakers" class="tab-button px-6 py-3 text-lg font-medium text-gray-600 border-b-2 border-transparent hover:text-purple-600 hover:border-purple-600 transition active">政策制定者</button>
+                        <button data-tab="industry" class="tab-button px-6 py-3 text-lg font-medium text-gray-600 border-b-2 border-transparent hover:text-purple-600 hover:border-purple-600 transition">產業領袖</button>
+                        <button data-tab="investors" class="tab-button px-6 py-3 text-lg font-medium text-gray-600 border-b-2 border-transparent hover:text-purple-600 hover:border-purple-600 transition">投資者</button>
+                    </div>
+                    <div id="tabs-content" class="p-2 md:p-6 bg-stone-50 rounded-lg">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 稀土戰略資源互動解析。本站內容基於公開報告進行可視化呈現，僅供教育與研究目的。</p>
+        </div>
+    </footer>
+
+    <div id="element-modal" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg relative animate-fade-in-up">
+            <button id="close-modal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            <div class="p-6 md:p-8">
+                <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+                <div id="modal-content" class="space-y-4 text-gray-700"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const appData = {
+        elements: [
+            { name: '鈧', symbol: 'Sc', number: 21, type: 'HREE', color: 'bg-red-200', app: '航太鋁合金、固態氧化物燃料電池、高強度照明。' },
+            { name: '釔', symbol: 'Y', number: 39, type: 'HREE', color: 'bg-red-200', app: '紅色磷光體、雷射晶體、隱形塗層。' },
+            { name: '鑭', symbol: 'La', number: 57, type: 'LREE', color: 'bg-blue-200', app: '石油催化劑、高級光學鏡片、鎳氫電池電極。' },
+            { name: '鈰', symbol: 'Ce', number: 58, type: 'LREE', color: 'bg-blue-200', app: '汽車尾氣催化劑、精密拋光粉、玻璃脫色劑。' },
+            { name: '鐠', symbol: 'Pr', number: 59, type: 'LREE', color: 'bg-blue-200', app: '永磁材料、玻璃著色劑、飛機發動機合金。' },
+            { name: '釹', symbol: 'Nd', number: 60, type: 'LREE', color: 'bg-blue-200', app: '最強永磁體(NdFeB)，用於電動車、風力發電機。' },
+            { name: '鉕', symbol: 'Pm', number: 61, type: 'LREE', color: 'bg-blue-200', app: '核電池、螢光塗料 (放射性，極罕見)。' },
+            { name: '釤', symbol: 'Sm', number: 62, type: 'LREE', color: 'bg-blue-200', app: '耐高溫永磁體(SmCo)，用於軍事、航太。' },
+            { name: '銪', symbol: 'Eu', number: 63, type: 'LREE', color: 'bg-blue-200', app: '紅色磷光體，實現電視/LED的真彩色顯示。' },
+            { name: '釓', symbol: 'Gd', number: 64, type: 'LREE', color: 'bg-blue-200', app: '核磁共振(MRI)造影劑、核反應堆屏蔽材料。' },
+            { name: '鋱', symbol: 'Tb', number: 65, type: 'HREE', color: 'bg-red-200', app: '綠色磷光體、永磁體耐高溫添加劑、國防聲納。' },
+            { name: '鏑', symbol: 'Dy', number: 66, type: 'HREE', color: 'bg-red-200', app: '永磁體耐熱性添加劑，決定高性能馬達的成敗。' },
+            { name: '鈥', symbol: 'Ho', number: 67, type: 'HREE', color: 'bg-red-200', app: '高功率雷射、核反應堆控制棒。' },
+            { name: '鉺', symbol: 'Er', number: 68, type: 'HREE', color: 'bg-red-200', app: '光纖放大器，保障全球長途通訊。' },
+            { name: '銩', symbol: 'Tm', number: 69, type: 'HREE', color: 'bg-red-200', app: '可攜式X光機、高溫超導體。' },
+            { name: '鐿', symbol: 'Yb', number: 70, type: 'HREE', color: 'bg-red-200', app: '光纖雷射、不鏽鋼添加劑。' },
+            { name: '鑥', symbol: 'Lu', number: 71, type: 'HREE', color: 'bg-red-200', app: 'PET掃描探測器、石油裂解催化劑。' }
+        ],
+        chinaDominance: {
+            supplyChain: { labels: ['開採', '分離/精煉', '永磁體'], data: [69, 90, 92] },
+            reserves: { labels: ['中國', '越南', '巴西', '美國', '澳洲', '其他'], data: [44, 22, 21, 2.3, 4.2, 10.5] },
+            production: { labels: ['中國', '美國', '緬甸', '澳洲', '其他'], data: [270, 45, 31, 13, 31] },
+        },
+        timeline: [
+            { year: '1980s', title: '奠定基礎', content: '在徐光憲等科學家帶領下，中國開始系統性地佈局稀土研究與人才培養。' },
+            { year: '1992', title: '戰略定位', content: '鄧小平發表「中東有石油，中國有稀土」的名言，將稀土提升至國家戰略資源高度。' },
+            { year: '2010', title: '危機警鐘', content: '因釣魚台爭端，中國暫停對日稀土出口，引發全球「稀土危機」，價格飆漲，震驚全球產業鏈。' },
+            { year: '2010s', title: '產業整合', content: '中國政府強勢將分散的稀土產業整合為「六大集團」，強化國家控制與對外定價權。' },
+            { year: '2024', title: '法律確立', content: '《稀土管理條例》施行，將國家對稀土的全流程監管以法律形式固定，強化戰略控制。' }
+        ],
+        globalResponse: {
+            technologies: [
+                { name: '氫處理磁鐵廢料 (HPMS)', content: '利用氫氣使磁鐵脆化，實現低能耗、無強酸的「磁鐵到磁鐵」直接回收。', type: '回收' },
+                { name: '氮化鐵 (FeN) 磁鐵', content: '理論性能可超越現有最強磁鐵，且原料豐富，是極具潛力的無稀土替代品。', type: '替代' },
+                { name: '生物浸出法', content: '利用特定細菌產生的有機酸提取稀土，過程環保，減少對化學品的依賴。', type: '回收' },
+                { name: '錳基磁鐵', content: '性能雖中等，但成本極低，無關鍵原料依賴，適用於特定領域。', type: '替代' }
+            ],
+            projects: [
+                { name: 'MP Materials (美國)', content: '重啟加州礦山，並在德州建設從精煉到磁鐵的垂直整合供應鏈。', icon: '🇺🇸' },
+                { name: 'Lynas Rare Earths (澳洲/馬來西亞)', content: '全球最大的非中國稀土生產商，並在美國國防部資助下建設重稀土分離設施。', icon: '🇦🇺' },
+                { name: '歐盟《關鍵原材料法案》', content: '資助瑞典、法國、挪威等地的開採與加工項目，建立獨立的歐洲稀土生態系統。', icon: '🇪🇺' },
+                 { name: 'Aclara Resources (南美)', content: '在巴西和智利開發重稀土項目，旨在供應北美及歐洲市場。', icon: '🇧🇷' }
+            ]
+        },
+        futureOutlook: {
+            policymakers: [
+                '制定長期產業政策，解決市場協調失靈問題。',
+                '大力資助回收技術和替代材料的研發。',
+                '建立關鍵重稀土（如鏑、鋱）的國家戰略儲備。'
+            ],
+            industry: [
+                '立即開始供應鏈多元化佈局，對沖地緣政治風險。',
+                '投資新興回收技術與替代材料初創公司，搶佔未來制高點。',
+                '在產品設計階段就考慮減少或替代稀土（節約化設計）。'
+            ],
+            investors: [
+                '認識到稀土行業深受地緣政治影響，中國政策是最大變數。',
+                '關注非中國供應鏈中的高風險、高回報投資機會。',
+                '對投資標的進行深入的盡職調查，準備應對長期不確定性。'
+            ]
+        }
+    };
+    
+    function animateStat(element, finalValue, duration = 1500) {
+        let start = 0;
+        const stepTime = 20;
+        const steps = duration / stepTime;
+        const increment = finalValue / steps;
+        
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= finalValue) {
+                start = finalValue;
+                clearInterval(timer);
+            }
+            element.textContent = `${Math.floor(start)}%`;
+        }, stepTime);
+    }
+    
+    const stat1 = document.getElementById('stat1');
+    const stat2 = document.getElementById('stat2');
+    const stat3 = document.getElementById('stat3');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateStat(stat1, 92);
+                animateStat(stat2, 90);
+                animateStat(stat3, 69);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    observer.observe(document.getElementById('hero'));
+
+    const elementsGrid = document.getElementById('elements-grid');
+    appData.elements.forEach(el => {
+        const card = document.createElement('div');
+        card.className = `element-card cursor-pointer p-4 rounded-lg text-center ${el.color} shadow-sm`;
+        card.dataset.element = el.name;
+        card.innerHTML = `
+            <div class="text-xs text-gray-700">${el.number}</div>
+            <div class="text-2xl font-bold text-gray-900">${el.symbol}</div>
+            <div class="text-sm font-medium text-gray-800">${el.name}</div>
+        `;
+        elementsGrid.appendChild(card);
+    });
+
+    const modal = document.getElementById('element-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalContent = document.getElementById('modal-content');
+
+    elementsGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.element-card');
+        if (card) {
+            const elName = card.dataset.element;
+            const elData = appData.elements.find(el => el.name === elName);
+            if (elData) {
+                modalTitle.textContent = `${elData.name} (${elData.symbol})`;
+                modalContent.innerHTML = `
+                    <p><strong>原子序:</strong> ${elData.number}</p>
+                    <p><strong>分類:</strong> <span class="px-2 py-1 text-sm rounded-full ${elData.color}">${elData.type === 'HREE' ? '重稀土' : '輕稀土'}</span></p>
+                    <p><strong>關鍵應用:</strong> ${elData.app}</p>
+                `;
+                modal.classList.remove('hidden');
+            }
+        }
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    const supplyChainCtx = document.getElementById('supplyChainChart').getContext('2d');
+    new Chart(supplyChainCtx, {
+        type: 'doughnut',
+        data: {
+            labels: appData.chinaDominance.supplyChain.labels,
+            datasets: [{
+                label: '中國全球份額 (%)',
+                data: appData.chinaDominance.supplyChain.data,
+                backgroundColor: ['rgba(167, 139, 250, 0.7)', 'rgba(129, 140, 248, 0.7)', 'rgba(99, 102, 241, 0.7)'],
+                borderColor: ['#a78bfa', '#818cf8', '#6366f1'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { callbacks: { label: (context) => `${context.label}: ${context.raw}%` } }
+            }
+        }
+    });
+
+    const reservesProductionCtx = document.getElementById('reservesProductionChart').getContext('2d');
+    let reservesProductionChart = new Chart(reservesProductionCtx, {
+        type: 'bar',
+        data: {
+            labels: appData.chinaDominance.reserves.labels,
+            datasets: [{
+                label: '儲量 (百萬公噸)',
+                data: appData.chinaDominance.reserves.data,
+                backgroundColor: 'rgba(129, 140, 248, 0.6)',
+                borderColor: '#818cf8',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: { display: false },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: '百萬公噸' }
+                }
+            }
+        }
+    });
+
+    const toggleChartButton = document.getElementById('toggleChartButton');
+    let isShowingReserves = true;
+    toggleChartButton.addEventListener('click', () => {
+        isShowingReserves = !isShowingReserves;
+        if (isShowingReserves) {
+            reservesProductionChart.data.labels = appData.chinaDominance.reserves.labels;
+            reservesProductionChart.data.datasets[0].data = appData.chinaDominance.reserves.data;
+            reservesProductionChart.data.datasets[0].label = '儲量 (百萬公噸)';
+            reservesProductionChart.options.scales.x.title.text = '百萬公噸';
+            toggleChartButton.textContent = '切換至產量';
+        } else {
+            reservesProductionChart.data.labels = appData.chinaDominance.production.labels;
+            reservesProductionChart.data.datasets[0].data = appData.chinaDominance.production.data;
+            reservesProductionChart.data.datasets[0].label = '產量 (千公噸)';
+             reservesProductionChart.options.scales.x.title.text = '千公噸';
+            toggleChartButton.textContent = '切換至儲量';
+        }
+        reservesProductionChart.update();
+    });
+
+    const timelineContainer = document.getElementById('timeline-container');
+    appData.timeline.forEach((item, index) => {
+        const isLeft = index % 2 === 0;
+        const timelineItem = document.createElement('div');
+        timelineItem.className = `timeline-item mb-8 flex justify-between items-center w-full ${isLeft ? '' : 'flex-row-reverse'}`;
+        timelineItem.innerHTML = `
+            <div class="order-1 w-5/12"></div>
+            <div class="z-20 flex items-center order-1 bg-purple-600 shadow-xl w-12 h-12 rounded-full">
+                <h1 class="mx-auto font-semibold text-lg text-white">${item.year}</h1>
+            </div>
+            <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 cursor-pointer">
+                <h3 class="font-bold text-gray-800 text-lg">${item.title}</h3>
+                <p class="timeline-item-content text-sm leading-snug tracking-wide text-gray-600">${item.content}</p>
+            </div>
+        `;
+        timelineContainer.appendChild(timelineItem);
+    });
+
+    timelineContainer.innerHTML += '<div class="absolute top-0 left-1/2 h-full w-1 bg-gray-200" style="transform: translateX(-50%);"></div>';
+    
+    timelineContainer.querySelectorAll('.order-1.bg-white').forEach(card => {
+        card.addEventListener('click', () => {
+            const content = card.querySelector('.timeline-item-content');
+            if (content.style.maxHeight) {
+                content.style.maxHeight = null;
+            } else {
+                content.style.maxHeight = content.scrollHeight + "px";
+            }
+        });
+    });
+
+    const techContainer = document.getElementById('tech-cards-container');
+    appData.globalResponse.technologies.forEach(tech => {
+        const card = document.createElement('div');
+        card.className = 'tech-card bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-400';
+        card.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <h4 class="font-bold text-lg text-purple-800">${tech.name}</h4>
+                <span class="text-xs font-semibold ${tech.type === '回收' ? 'bg-green-100 text-green-800' : 'bg-indigo-100 text-indigo-800'} px-2 py-1 rounded-full">${tech.type}</span>
+            </div>
+            <p class="text-gray-600">${tech.content}</p>
+        `;
+        techContainer.appendChild(card);
+    });
+    
+    const projectContainer = document.getElementById('diversification-projects');
+    appData.globalResponse.projects.forEach(proj => {
+        const item = document.createElement('div');
+        item.className = 'bg-white p-5 rounded-lg shadow-md flex items-start space-x-4';
+        item.innerHTML = `
+            <div class="text-2xl">${proj.icon}</div>
+            <div>
+                <h4 class="font-bold text-lg">${proj.name}</h4>
+                <p class="text-gray-600">${proj.content}</p>
+            </div>
+        `;
+        projectContainer.appendChild(item);
+    });
+
+
+    const tabsContainer = document.querySelector('.max-w-4xl .flex.justify-center');
+    const tabsContent = document.getElementById('tabs-content');
+    
+    function updateTabContent(tabName) {
+        const contentData = appData.futureOutlook[tabName];
+        tabsContent.innerHTML = `<ul class="list-disc list-inside space-y-3 text-gray-700">${contentData.map(item => `<li>${item}</li>`).join('')}</ul>`;
+    }
+
+    tabsContainer.addEventListener('click', (e) => {
+        const button = e.target.closest('.tab-button');
+        if (button) {
+            tabsContainer.querySelector('.active')?.classList.remove('active', 'bg-purple-700', 'text-white');
+            button.classList.add('active', 'bg-purple-700', 'text-white');
+            updateTabContent(button.dataset.tab);
+        }
+    });
+
+    updateTabContent('policymakers');
+    tabsContainer.querySelector('[data-tab="policymakers"]').classList.add('active', 'bg-purple-700', 'text-white');
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+    const sections = document.querySelectorAll('main section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 60) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === current) {
+                link.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>
