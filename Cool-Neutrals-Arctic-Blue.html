@@ -5,40 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>互動式北極主權解析</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chosen Palette: Cool Neutrals & Arctic Blue -->
-    <!-- Application Structure Plan: A thematic, single-page application designed for non-linear exploration. The structure prioritizes user understanding over mirroring the source report's linear format. It begins with a foundational section (Legal Framework) to establish core concepts, then moves to specific case studies of disputes (Seabed & Waterways), and concludes with the broader geopolitical context. A sticky navigation bar allows users to jump between these themes. Interactive elements like hover-to-reveal diagrams, tabbed interfaces, and clickable comparison cards are used to break down complex legal arguments into digestible pieces. This structure was chosen because the subject matter is interconnected; users might be interested in a specific dispute (e.g., Northwest Passage) without needing to read the entire report sequentially. The design facilitates this by making key information accessible and comparable. -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutrals & Deep Ocean Blue -->
+    <!-- Application Structure Plan: The SPA is designed as a narrative journey, guiding the user from foundational concepts to specific disputes and finally to the geopolitical context. The structure is thematic, not linear like the report: 1. **Introduction:** A high-impact opening with key statistics to establish the Arctic's importance. 2. **Legal Foundations:** An interactive section explaining the core legal framework (UNCLOS) and the fundamental difference between the Arctic and Antarctic. This is crucial for understanding subsequent disputes. 3. **Thematic Disputes:** The core of the SPA, divided into two clear, parallel themes: 'The Seabed Race' (resource claims) and 'The Passage Conflict' (navigation rights). This allows users to explore the two main types of conflict independently. 4. **Geopolitical Drivers:** A concluding section that contextualizes the disputes by explaining the macro forces at play (climate, resources, military). This "funnel" structure—broad overview -> foundational knowledge -> specific examples -> broad context—was chosen to make the complex legal and political information digestible for a general audience, rather than requiring a sequential reading of the dense report. -->
     <!-- Visualization & Content Choices: 
-        - Report Info: Arctic vs. Antarctic. Goal: Clarify fundamental differences. Viz: Side-by-side HTML comparison cards. Interaction: Static display. Justification: Immediately corrects a common misconception before delving into details. Library/Method: HTML/Tailwind.
-        - Report Info: UNCLOS Maritime Zones. Goal: Explain layered sovereignty. Viz: Interactive diagram of zones. Interaction: User hovers over a zone to see its definition and associated rights. Justification: More engaging and intuitive than a static table. Library/Method: HTML/Tailwind/JS.
-        - Report Info: Lomonosov Ridge & Beaufort Sea disputes. Goal: Compare competing claims. Viz: Tabbed content with simplified CSS-based maps and side-by-side arguments. Interaction: User clicks tabs to switch between disputes and buttons to compare legal positions. Justification: Allows direct comparison of complex arguments in a constrained space. Library/Method: HTML/Tailwind/JS.
-        - Report Info: Navigational Channel Disputes (NWP/NSR). Goal: Contrast legal statuses. Viz: Comparison cards. Interaction: Static display. Justification: Clearly and concisely presents the core conflict ("Internal Waters" vs. "International Strait"). Library/Method: HTML/Tailwind.
-        - Report Info: Geopolitical Drivers. Goal: Show influencing factors. Viz: Clickable icon-based cards. Interaction: User clicks an icon (Climate, Resources, Military) to reveal explanatory text. Justification: Organizes complex macro-forces into a simple, interactive overview. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Arctic resource potential (oil/gas). Goal: Inform. Viz/Method: "Big Number" display using large text and Unicode characters. Justification: Immediately grabs attention and communicates a key fact effectively. Library/Method: HTML/Tailwind.
+        - Report Info: UNCLOS maritime zones. Goal: Organize/Explain. Viz/Method: An interactive diagram made with HTML/CSS. Users hover over zones to get details. Justification: Transforms a dry table from the report into an engaging learning tool, superior to a static graphic. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Lomonosov/Beaufort disputes. Goal: Compare. Viz/Method: A tabbed interface to switch between the two case studies, each with a simplified CSS-based map and side-by-side arguments. Justification: Allows direct comparison of complex disputes within a compact UI, preventing information overload. Library/Method: HTML/Tailwind/JS.
+        - Report Info: Northwest/Northern Sea Route disputes. Goal: Compare. Viz/Method: Side-by-side comparison cards that distill the core legal conflict ("Internal Waters" vs. "International Strait"). Justification: Highly effective for clarifying the central point of contention for a non-expert audience. Library/Method: HTML/Tailwind.
+        - Report Info: Geopolitical drivers. Goal: Organize. Viz/Method: Clickable icon-based cards. Justification: Neatly categorizes complex drivers, with interaction encouraging user engagement and exploration. Library/Method: HTML/Tailwind/JS.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            background-color: #f8f9fa;
         }
         .nav-link {
-            @apply px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors;
+            @apply px-3 py-2 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition-colors;
         }
         .nav-link.active {
-            @apply bg-slate-900 text-white;
+            @apply bg-slate-800 text-white hover:bg-slate-800 hover:text-white;
         }
         .section-title {
-            @apply text-3xl font-bold text-slate-800 mb-2 text-center;
+            @apply text-3xl md:text-4xl font-extrabold text-slate-800 mb-4 text-center;
         }
         .section-subtitle {
-            @apply text-lg text-slate-600 mb-8 text-center max-w-3xl mx-auto;
+            @apply text-lg text-slate-600 mb-10 text-center max-w-3xl mx-auto;
         }
         .card {
-            @apply bg-white p-6 rounded-xl shadow-lg transition-shadow duration-300 hover:shadow-2xl;
+            @apply bg-white p-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
         }
         .tab-button {
-            @apply px-4 py-2 font-semibold text-slate-600 rounded-t-lg transition-all duration-300 border-b-2 border-transparent;
+            @apply px-5 py-3 font-semibold text-slate-500 rounded-t-lg transition-colors duration-300 border-b-4 border-transparent text-center;
         }
         .tab-button.active {
-            @apply text-blue-600 border-blue-600 bg-blue-50;
+            @apply text-slate-800 border-slate-800;
         }
         .content-block {
             @apply hidden;
@@ -47,13 +49,13 @@
             @apply block;
         }
         .map-container {
-            @apply relative w-full h-64 md:h-80 bg-blue-50 rounded-lg overflow-hidden border-2 border-blue-100;
+            @apply relative w-full h-56 md:h-72 bg-slate-100 rounded-lg overflow-hidden border-2 border-slate-200;
         }
         .map-label {
-            @apply absolute text-xs md:text-sm font-semibold text-white bg-slate-700 bg-opacity-70 px-2 py-1 rounded;
+            @apply absolute text-xs md:text-sm font-semibold text-white bg-slate-800 bg-opacity-75 px-2 py-1 rounded-md;
         }
         .lomonosov-ridge {
-            @apply absolute bg-yellow-400 h-4 transform -skew-y-12;
+            @apply absolute bg-amber-400 h-5 transform -skew-y-12;
             width: 150%;
             left: -25%;
             top: 48%;
@@ -65,185 +67,160 @@
 </head>
 <body class="bg-slate-50 text-slate-700">
 
-    <!-- Header & Navigation -->
-    <header id="header" class="bg-slate-800 text-white shadow-md sticky top-0 z-50">
+    <header id="header" class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
         <nav class="container mx-auto px-4 lg:px-6 py-3">
             <div class="flex items-center justify-between">
-                <div class="text-xl font-bold">
+                <div class="text-xl font-bold text-slate-800">
                     <a href="#home">北極主權解析</a>
                 </div>
-                <div class="hidden md:flex items-center space-x-4">
+                <div class="hidden md:flex items-center space-x-2">
                     <a href="#framework" class="nav-link">法律框架</a>
-                    <a href="#seabed" class="nav-link">海底爭議</a>
-                    <a href="#waterways" class="nav-link">航道衝突</a>
+                    <a href="#disputes" class="nav-link">核心爭議</a>
                     <a href="#geopolitics" class="nav-link">地緣政治</a>
                 </div>
                  <div class="md:hidden">
-                    <button id="mobile-menu-button" class="text-slate-300 hover:text-white focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <button id="mobile-menu-button" class="text-slate-800 focus:outline-none">
+                         <div class="w-6 h-6 flex flex-col justify-around">
+                            <span class="block h-0.5 w-full bg-current rounded-full"></span>
+                            <span class="block h-0.5 w-full bg-current rounded-full"></span>
+                            <span class="block h-0.5 w-full bg-current rounded-full"></span>
+                        </div>
                     </button>
                 </div>
             </div>
              <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
                 <a href="#framework" class="block nav-link text-center">法律框架</a>
-                <a href="#seabed" class="block nav-link text-center">海底爭議</a>
-                <a href="#waterways" class="block nav-link text-center">航道衝突</a>
+                <a href="#disputes" class="block nav-link text-center">核心爭議</a>
                 <a href="#geopolitics" class="block nav-link text-center">地緣政治</a>
             </div>
         </nav>
     </header>
 
-    <main>
-        <!-- Home Section -->
-        <section id="home" class="bg-white">
-            <div class="container mx-auto px-4 lg:px-6 py-20 text-center">
-                <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4">一個受規則管轄的領域</h1>
+    <main class="isolate">
+        <section id="home" class="bg-white pt-16 pb-20">
+            <div class="container mx-auto px-4 lg:px-6 text-center">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-4">一個受規則管轄的海洋</h1>
                 <p class="text-xl text-slate-600 max-w-3xl mx-auto">北極並非無法無天的「狂野西部」，而是一個由國際法約束的複雜地緣政治舞台。本互動指南將為您解構北極主權的核心爭議、法律框架與未來挑戰。</p>
             </div>
         </section>
 
-        <!-- Legal Framework Section -->
-        <section id="framework" class="py-16">
+        <section id="framework" class="py-20">
             <div class="container mx-auto px-4 lg:px-6">
-                <h2 class="section-title">法律框架：海洋的憲章</h2>
-                <p class="section-subtitle">北極的爭議並非源於法律的真空，而是對現有法律（主要是《聯合國海洋法公約》）的解釋與適用存在分歧。首先，我們需要釐清一個關鍵區別。</p>
+                <h2 class="section-title">法律基礎：UNCLOS 的分層主權</h2>
+                <p class="section-subtitle">北極爭議的根源並非法律真空，而是對《聯合國海洋法公約》(UNCLOS) 的解釋與適用存在分歧。國家的權利隨著離岸距離增加而遞減，理解這個「分層主權」模型是掌握所有爭議的鑰匙。</p>
 
-                <div class="grid md:grid-cols-2 gap-8 mb-12">
-                    <div class="card">
-                        <h3 class="text-2xl font-bold mb-4 text-center">🧊 北極</h3>
-                        <p class="text-center text-slate-600 mb-4">一個被主權國家陸地<strong class="text-blue-600">環繞的海洋</strong></p>
-                        <ul class="space-y-2 list-disc list-inside">
-                            <li>陸地主權已確定，屬於八個北極國家。</li>
-                            <li>爭議核心在於如何從海岸線向外劃定海洋權利。</li>
-                            <li>由《聯合國海洋法公約》(UNCLOS) 管轄。</li>
-                        </ul>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-2xl font-bold mb-4 text-center">🐧 南極</h3>
-                        <p class="text-center text-slate-600 mb-4">一個被廣闊海洋<strong class="text-blue-600">環繞的大陸</strong></p>
-                        <ul class="space-y-2 list-disc list-inside">
-                            <li>無既定主權，領土主張被凍結。</li>
-                            <li>專用於和平與科學研究。</li>
-                            <li>由獨特的《南極條約體系》管轄。</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <h3 class="text-2xl font-bold text-slate-800 mb-4 text-center">《聯合國海洋法公約》下的分層主權</h3>
-                <p class="text-lg text-slate-600 mb-8 text-center max-w-3xl mx-auto">國家對海洋的控制權並非一成不變，而是隨著離岸距離的增加而遞減。將滑鼠懸停在下方區域上以了解更多。</p>
-                <div class="w-full max-w-5xl mx-auto bg-white p-4 rounded-xl shadow-lg">
-                    <div id="unclos-diagram" class="relative flex flex-col h-[450px] md:h-64">
-                        <div data-zone="land" class="bg-green-200 w-full md:w-1/6 h-full flex items-center justify-center p-2">
-                            <span class="font-bold text-green-800">陸地領土</span>
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        <div class="card p-8">
+                            <h3 class="text-2xl font-bold mb-4 text-center">🧊 北極</h3>
+                            <p class="text-center text-slate-600 mb-4">由主權國家陸地<strong class="text-blue-700">環繞的海洋</strong></p>
+                            <ul class="space-y-2 list-disc list-inside text-slate-600">
+                                <li>陸地主權已確定，爭議在於海洋權利延伸。</li>
+                                <li>由《聯合國海洋法公約》(UNCLOS) 管轄。</li>
+                            </ul>
                         </div>
-                        <div class="absolute top-0 left-0 w-full h-full flex flex-col md:flex-row">
-                             <div class="w-full md:w-1/6 h-1/6 md:h-full"></div>
-                             <div data-zone="internal" class="zone-slice bg-cyan-200 w-full md:w-1/6 h-1/6 md:h-full flex items-center justify-center p-2 border-l-2 border-dashed border-slate-500">
-                                <span class="font-bold text-cyan-800 text-sm md:text-base">內水</span>
-                             </div>
-                             <div data-zone="territorial" class="zone-slice bg-cyan-300 w-full md:w-1/6 h-1/6 md:h-full flex items-center justify-center p-2 border-l-2 border-dashed border-slate-500">
-                                <span class="font-bold text-cyan-900 text-sm md:text-base">領海 (12 NM)</span>
-                             </div>
-                             <div data-zone="contiguous" class="zone-slice bg-blue-300 w-full md:w-1/6 h-1/6 md:h-full flex items-center justify-center p-2 border-l-2 border-dashed border-slate-500">
-                                <span class="font-bold text-blue-900 text-sm md:text-base">毗連區 (24 NM)</span>
-                             </div>
-                             <div data-zone="eez" class="zone-slice bg-blue-400 w-full md:w-1/6 h-2/6 md:h-full flex items-center justify-center p-2 border-l-2 border-dashed border-slate-500">
-                                <span class="font-bold text-blue-900 text-sm md:text-base">專屬經濟區 (200 NM)</span>
-                             </div>
-                              <div data-zone="highseas" class="zone-slice bg-indigo-400 w-full md:w-1/6 h-1/6 md:h-full flex items-center justify-center p-2 border-l-2 border-dashed border-slate-500">
-                                <span class="font-bold text-indigo-900 text-sm md:text-base">公海</span>
-                             </div>
-                        </div>
-                        <div id="zone-info" class="absolute bottom-0 left-0 md:top-full md:bottom-auto w-full p-4 bg-slate-800 text-white rounded-b-xl md:rounded-b-none md:rounded-t-xl transition-opacity duration-300 opacity-0 md:mt-2">
-                            <h4 id="zone-title" class="font-bold text-lg"></h4>
-                            <p id="zone-desc" class="text-sm"></p>
+                        <div class="card p-8">
+                            <h3 class="text-2xl font-bold mb-4 text-center">🐧 南極</h3>
+                            <p class="text-center text-slate-600 mb-4">由廣闊海洋<strong class="text-blue-700">環繞的大陸</strong></p>
+                            <ul class="space-y-2 list-disc list-inside text-slate-600">
+                                <li>領土主張被凍結，專用於和平與科研。</li>
+                                <li>由獨特的《南極條約體系》管轄。</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
+                <div id="unclos-diagram" class="w-full max-w-5xl mx-auto mt-12 space-y-2">
+                    <div data-zone="internal" class="zone-slice group flex items-center p-4 rounded-lg bg-white shadow-sm border border-transparent hover:border-blue-500 hover:shadow-md transition-all">
+                        <div class="w-24 text-center"><span class="font-mono text-2xl font-bold text-blue-600">I</span></div>
+                        <div>
+                            <h4 class="font-bold text-lg text-slate-800">內水 (Internal Waters)</h4>
+                            <p class="text-sm text-slate-500 transition-all max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 group-hover:mt-1">位於領海基線向陸一側。國家擁有完全主權，外國船隻無當然通行權。</p>
+                        </div>
+                    </div>
+                     <div data-zone="territorial" class="zone-slice group flex items-center p-4 rounded-lg bg-white shadow-sm border border-transparent hover:border-blue-500 hover:shadow-md transition-all">
+                        <div class="w-24 text-center"><span class="font-mono text-2xl font-bold text-blue-600">12</span><span class="text-xs"> NM</span></div>
+                        <div>
+                            <h4 class="font-bold text-lg text-slate-800">領海 (Territorial Sea)</h4>
+                            <p class="text-sm text-slate-500 transition-all max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 group-hover:mt-1">國家擁有完全主權，但外國船隻享有「無害通過權」。</p>
+                        </div>
+                    </div>
+                    <div data-zone="eez" class="zone-slice group flex items-center p-4 rounded-lg bg-white shadow-sm border border-transparent hover:border-blue-500 hover:shadow-md transition-all">
+                        <div class="w-24 text-center"><span class="font-mono text-2xl font-bold text-blue-600">200</span><span class="text-xs"> NM</span></div>
+                        <div>
+                            <h4 class="font-bold text-lg text-slate-800">專屬經濟區 (EEZ)</h4>
+                            <p class="text-sm text-slate-500 transition-all max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 group-hover:mt-1">國家對水域和海床的資源擁有專屬「主權權利」，但其他國家享有航行自由。</p>
+                        </div>
+                    </div>
+                     <div data-zone="ecs" class="zone-slice group flex items-center p-4 rounded-lg bg-white shadow-sm border border-transparent hover:border-blue-500 hover:shadow-md transition-all">
+                        <div class="w-24 text-center"><span class="font-mono text-2xl font-bold text-blue-600">>200</span><span class="text-xs"> NM</span></div>
+                        <div>
+                            <h4 class="font-bold text-lg text-slate-800">延伸大陸棚 (ECS)</h4>
+                            <p class="text-sm text-slate-500 transition-all max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 group-hover:mt-1">若能證明陸地自然延伸，國家可對海床及底土資源主張權利。這是當前爭議的核心。</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Seabed Disputes Section -->
-        <section id="seabed" class="py-16 bg-white">
+        <section id="disputes" class="py-20 bg-white">
             <div class="container mx-auto px-4 lg:px-6">
-                <h2 class="section-title">海底爭奪戰</h2>
-                <p class="section-subtitle">北極競爭最激烈的領域是延伸大陸棚的主張，這關乎對廣闊海床下潛在油氣和礦產資源的控制權。這是一場基於科學證據的法律競賽。</p>
-
-                <div class="max-w-4xl mx-auto">
+                <h2 class="section-title">核心爭議：資源與通道</h2>
+                <p class="section-subtitle">北極的所有法律和外交博弈，最終都圍繞兩個核心問題展開：誰有權開發廣闊的海底資源，以及誰有權控制新開通的戰略航道。</p>
+                
+                <div class="max-w-5xl mx-auto">
                     <div class="border-b border-gray-200">
-                        <nav class="flex -mb-px" id="seabed-tabs">
-                            <button data-target="lomonosov" class="tab-button active">羅蒙諾索夫海脊</button>
-                            <button data-target="beaufort" class="tab-button">波弗特海</button>
+                        <nav class="flex" id="disputes-tabs">
+                            <button data-target="seabed-content" class="tab-button active flex-1">海底競賽</button>
+                            <button data-target="waterways-content" class="tab-button flex-1">航道衝突</button>
                         </nav>
                     </div>
 
-                    <div id="lomonosov" class="content-block active pt-8">
-                        <h3 class="text-xl font-bold mb-2">多方重疊主張：俄羅斯 vs 加拿大 vs 丹麥</h3>
-                        <p class="mb-4 text-slate-600">這條巨大的海底山脈橫跨北極點，三國都主張其為本國大陸的自然延伸。最終邊界將需透過談判劃定，而大陸棚界限委員會(CLCS)負責審核各方提交的科學證據。</p>
-                        <div class="map-container mb-4">
-                            <div class="lomonosov-ridge"><span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-sm">羅蒙諾索夫海脊</span></div>
-                            <div class="absolute top-1/2 left-1/2 w-4 h-4 bg-red-600 rounded-full -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"><span class="text-white text-xs font-bold">NP</span></div>
-                            <div class="map-label" style="top: 10%; left: 45%;">格陵蘭</div>
-                            <div class="map-label" style="bottom: 10%; left: 15%;">加拿大</div>
-                            <div class="map-label" style="bottom: 10%; right: 15%;">俄羅斯</div>
-                            <div class="absolute h-full w-px bg-red-400 bg-opacity-50" style="left: 40%; top: 0; transform: rotate(20deg);"></div>
-                            <div class="absolute h-full w-px bg-green-400 bg-opacity-50" style="left: 50%; top: 0; transform: rotate(-5deg);"></div>
-                            <div class="absolute h-full w-px bg-blue-400 bg-opacity-50" style="left: 60%; top: 0; transform: rotate(-30deg);"></div>
+                    <div id="seabed-content" class="content-block active pt-10">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                            <div class="order-2 lg:order-1">
+                                <h3 class="text-2xl font-bold mb-4">羅蒙諾索夫海脊的重疊主張</h3>
+                                <p class="text-slate-600 mb-4">俄羅斯、加拿大和丹麥都主張這條橫跨北極點的巨大海底山脈是其大陸的自然延伸。這是一場基於地質科學證據的法律競賽，而非武力對抗。CLCS的科學建議將是關鍵，而重疊區的最終劃界需三方談判。</p>
+                                <h3 class="text-2xl font-bold mb-4 mt-8">波弗特海的邊界劃分</h3>
+                                <p class="text-slate-600">加拿大與美國對此處的劃界方式各執一詞。加拿大主張沿用1825年條約的141度經線，美國則主張採用現代海洋法的等距離原則。有趣的「交叉效應」為雙方達成妥協創造了動力。</p>
+                            </div>
+                            <div class="order-1 lg:order-2">
+                                <div class="chart-container h-80 md:h-96">
+                                    <canvas id="claimsChart"></canvas>
+                                </div>
+                            </div>
                         </div>
-                        <p class="text-sm text-slate-500 text-center">示意圖：三國對羅蒙諾索夫海脊的重疊主張區域。</p>
                     </div>
 
-                    <div id="beaufort" class="content-block pt-8">
-                        <h3 class="text-xl font-bold mb-2">雙邊邊界爭議：加拿大 vs 美國</h3>
-                        <p class="mb-4 text-slate-600">爭議源於對1825年一項歷史條約的不同解釋。加拿大主張沿用經線，而美國主張採用現代海洋法的等距離原則。</p>
-                        <div class="map-container mb-4">
-                            <div class="beaufort-line bg-red-500" style="left: 50%; transform: rotate(0deg);"><span class="absolute -top-8 -translate-x-1/2 bg-red-500 text-white px-1 rounded text-xs">加拿大主張 (141° W)</span></div>
-                            <div class="beaufort-line bg-blue-500" style="left: 50%; transform: rotate(15deg);"><span class="absolute -top-8 -translate-x-1/2 bg-blue-500 text-white px-1 rounded text-xs">美國主張 (等距離)</span></div>
-                            <div class="map-label" style="bottom: 5%; left: 20%;">阿拉斯加 (美)</div>
-                            <div class="map-label" style="bottom: 5%; right: 20%;">育空 (加)</div>
-                        </div>
-                        <p class="text-sm text-slate-500 text-center">示意圖：波弗特海的兩條潛在邊界線。</p>
-                        <div class="mt-4 p-4 bg-amber-100 border-l-4 border-amber-500 text-amber-800 rounded">
-                            <h4 class="font-bold">有趣的地理現象</h4>
-                            <p>由於海岸線形狀和遠處島嶼的影響，任何一方若堅持己見，都會在專屬經濟區和延伸大陸棚上各有得失，這為雙方通過談判達成妥協創造了動力。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Waterways Conflicts Section -->
-        <section id="waterways" class="py-16">
-            <div class="container mx-auto px-4 lg:px-6">
-                <h2 class="section-title">通行權之爭</h2>
-                <p class="section-subtitle">隨著海冰融化，新的北極航道正在開通。這引發了沿岸國主權與國際社會航行自由原則之間的法律衝突。</p>
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div class="card">
-                        <h3 class="text-xl font-bold mb-4">西北航道 (NWP)</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <h4 class="font-semibold text-red-700">🇨🇦 加拿大立場：歷史性內水</h4>
-                                <p class="text-sm text-slate-600">航道是加拿大內水，外國船隻（特別是軍艦）通行需獲許可。理由是歷史性使用及保護脆弱環境。</p>
+                    <div id="waterways-content" class="content-block pt-10">
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="card p-8">
+                                <h3 class="text-xl font-bold mb-4 text-center">西北航道 (NWP)</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-semibold text-red-700">🇨🇦 加拿大立場：歷史性內水</h4>
+                                        <p class="text-sm text-slate-600">航道是加拿大內水，外國船隻通行需獲許可，以保護主權與脆弱環境。</p>
+                                    </div>
+                                    <div class="text-center font-bold text-2xl text-slate-300">vs.</div>
+                                    <div>
+                                        <h4 class="font-semibold text-blue-700">🇺🇸 美國立場：國際海峽</h4>
+                                        <p class="text-sm text-slate-600">航道是國際海峽，所有船隻享有「過境通行權」，以維護全球航行自由原則。</p>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-center font-bold text-2xl text-slate-400">vs.</div>
-                            <div>
-                                <h4 class="font-semibold text-blue-700">🇺🇸 美國立場：國際海峽</h4>
-                                <p class="text-sm text-slate-600">航道是國際海峽，所有船隻享有「過境通行權」，無需許可。理由是維護全球航行自由原則。</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3 class="text-xl font-bold mb-4">北方航道 (NSR)</h3>
-                        <div class="space-y-4">
-                             <div>
-                                <h4 class="font-semibold text-red-700">🇷🇺 俄羅斯立場：國家運輸動脈</h4>
-                                <p class="text-sm text-slate-600">航道是歷史形成的國家運輸線，外國船隻通行需遵守俄方規定（申請許可、強制引航等）。</p>
-                            </div>
-                            <div class="text-center font-bold text-2xl text-slate-400">vs.</div>
-                            <div>
-                                <h4 class="font-semibold text-blue-700">🇺🇸 國際社會立場：國際海峽</h4>
-                                <p class="text-sm text-slate-600">航道中的關鍵海峽是國際海峽，應適用更自由的「過境通行權」制度。</p>
+                            <div class="card p-8">
+                                <h3 class="text-xl font-bold mb-4 text-center">北方航道 (NSR)</h3>
+                                <div class="space-y-4">
+                                     <div>
+                                        <h4 class="font-semibold text-red-700">🇷🇺 俄羅斯立場：國家運輸動脈</h4>
+                                        <p class="text-sm text-slate-600">航道是歷史形成的國家運輸線，外國船隻通行需遵守俄方規定。</p>
+                                    </div>
+                                    <div class="text-center font-bold text-2xl text-slate-300">vs.</div>
+                                    <div>
+                                        <h4 class="font-semibold text-blue-700">🌍 國際社會立場：國際海峽</h4>
+                                        <p class="text-sm text-slate-600">關鍵水道是國際海峽，應適用更自由的「過境通行權」制度。</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -251,40 +228,26 @@
             </div>
         </section>
 
-        <!-- Geopolitics Section -->
-        <section id="geopolitics" class="py-16 bg-white">
+        <section id="geopolitics" class="py-20">
             <div class="container mx-auto px-4 lg:px-6">
                 <h2 class="section-title">新大博弈：地緣政治驅動力</h2>
-                <p class="section-subtitle">氣候變化、資源潛力和戰略競爭是重塑北極的三大核心力量，它們正在深刻影響該地區的合作與衝突動態。</p>
+                <p class="section-subtitle">三大宏觀力量正在共同作用，重塑北極的戰略格局，加劇合作與競爭的複雜性。</p>
 
-                <div class="grid md:grid-cols-3 gap-8 mb-12">
-                    <div id="driver-climate" class="card text-center cursor-pointer">
-                        <div class="text-4xl mb-4">🌡️</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card p-8 text-center">
+                        <div class="text-6xl mb-4">🌡️</div>
                         <h3 class="text-xl font-bold">氣候變化</h3>
-                        <p id="info-climate" class="text-slate-600 mt-2 hidden">北極暖化速度是全球平均的數倍，導致海冰融化，從而開通了新的航道，並使資源獲取成為可能。這是所有變革的總催化劑。</p>
+                        <p class="mt-2 text-slate-600">北極暖化速度是全球平均的數倍，是開啟新航道、暴露新資源的根本催化劑。</p>
                     </div>
-                    <div id="driver-resources" class="card text-center cursor-pointer">
-                        <div class="text-4xl mb-4">🛢️</div>
+                    <div class="card p-8 text-center">
+                        <div class="text-6xl mb-4">💎</div>
                         <h3 class="text-xl font-bold">資源潛力</h3>
-                        <p id="info-resources" class="text-slate-600 mt-2 hidden">據估計，北極蘊藏著全球大量未發現的油氣和關鍵礦產資源。這種經濟誘惑是各國法律主張和戰略佈局的主要驅動力。</p>
+                        <p class="mt-2 text-slate-600">巨大的油氣和關鍵礦產儲量，是各國制定北極戰略和提出法律主張的核心經濟驅動。</p>
                     </div>
-                    <div id="driver-military" class="card text-center cursor-pointer">
-                        <div class="text-4xl mb-4">🛡️</div>
-                        <h3 class="text-xl font-bold">軍事化</h3>
-                        <p id="info-military" class="text-slate-600 mt-2 hidden">俄羅斯重啟蘇聯時代基地，北約則因芬蘭和瑞典的加入而擴大存在。雙方都在增加軍事演習和部署，形成「安全困境」。</p>
-                    </div>
-                </div>
-                
-                <div class="card mt-12 bg-slate-100">
-                    <h3 class="text-2xl font-bold mb-4 text-center">治理機制：競爭中的合作</h3>
-                    <div class="grid md:grid-cols-2 gap-6 items-center">
-                        <div>
-                            <h4 class="font-semibold text-lg">北極理事會 (Arctic Council)</h4>
-                            <p class="text-slate-700 mt-2">這是該地區最重要的合作論壇，專注於環境保護和可持續發展。它成功促成了多項國際協議，但其章程<strong class="text-red-600">明確排除了軍事安全問題</strong>，且在烏克蘭戰爭後與俄羅斯的合作已基本暫停，凸顯了其脆弱性。</p>
-                        </div>
-                        <div class="flex justify-center items-center p-4">
-                            <div class="text-6xl">🤝</div>
-                        </div>
+                    <div class="card p-8 text-center">
+                        <div class="text-6xl mb-4">🛡️</div>
+                        <h3 class="text-xl font-bold">戰略競爭</h3>
+                        <p class="mt-2 text-slate-600">俄羅斯的軍事現代化與北約因芬蘭瑞典加入而擴大存在，形成了典型的「安全困境」。</p>
                     </div>
                 </div>
             </div>
@@ -293,10 +256,10 @@
     </main>
 
     <footer class="bg-slate-800 text-white mt-16">
-        <div class="container mx-auto px-4 lg:px-6 py-8 text-center">
-            <h3 class="text-2xl font-bold mb-2">結論：由規則拼接的未來</h3>
+        <div class="container mx-auto px-4 lg:px-6 py-12 text-center">
+            <h3 class="text-2xl font-bold mb-3">結論：由規則拼接的未來</h3>
             <p class="text-slate-300 max-w-3xl mx-auto">北極主權的未來拼圖，將不是由武力或旗幟來決定，而是由科學家、律師和外交官們在現有的國際法框架下，通過艱苦卓絕的工作來拼接完成。</p>
-            <p class="text-xs text-slate-500 mt-6">此互動頁面根據公開報告生成，僅供教育和參考之用。</p>
+            <p class="text-xs text-slate-500 mt-8">此互動頁面根據《主權拼圖》報告生成，僅供教育和參考之用。</p>
         </div>
     </footer>
 
@@ -308,58 +271,23 @@
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
-            
+
             // Close mobile menu when a link is clicked
-            mobileMenu.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') {
-                    mobileMenu.classList.add('hidden');
-                }
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
             });
 
-            // UNCLOS Diagram Interaction
-            const zones = {
-                land: { title: '陸地領土', desc: '國家的主權基礎，所有海洋權利從此處的海岸基線開始延伸。' },
-                internal: { title: '內水', desc: '位於基線向陸一側的水域。國家擁有完全主權，外國船隻無當然通行權。' },
-                territorial: { title: '領海 (最多12海里)', desc: '國家擁有完全主權，但外國船隻享有「無害通過權」。' },
-                contiguous: { title: '毗連區 (12-24海里)', desc: '國家可在此行使海關、財政、移民或衛生等特定管制權。' },
-                eez: { title: '專屬經濟區 (最多200海里)', desc: '國家對勘探和開發自然資源擁有專屬「主權權利」，但其他國家享有航行自由。' },
-                highseas: { title: '公海 / 「區域」', desc: '國家管轄範圍以外的水域，所有國家共享航行、捕魚等自由。其海床資源被視為「人類的共同繼承財產」。' }
-            };
-
-            const diagram = document.getElementById('unclos-diagram');
-            const infoBox = document.getElementById('zone-info');
-            const infoTitle = document.getElementById('zone-title');
-            const infoDesc = document.getElementById('zone-desc');
-
-            diagram.addEventListener('mouseover', (e) => {
-                const slice = e.target.closest('.zone-slice');
-                if (slice) {
-                    const zoneKey = slice.dataset.zone;
-                    if (zones[zoneKey]) {
-                        infoTitle.textContent = zones[zoneKey].title;
-                        infoDesc.textContent = zones[zoneKey].desc;
-                        infoBox.style.opacity = '1';
-                    }
-                }
-            });
-
-            diagram.addEventListener('mouseout', () => {
-                infoBox.style.opacity = '0';
-            });
-
-            // Tabbed Interface for Seabed Disputes
-            const tabsContainer = document.getElementById('seabed-tabs');
-            const contentBlocks = document.querySelectorAll('#seabed .content-block');
+            // Disputes Tabs
+            const tabsContainer = document.getElementById('disputes-tabs');
+            const contentBlocks = document.querySelectorAll('#disputes .content-block');
             
             tabsContainer.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') {
                     const targetId = e.target.dataset.target;
                     
-                    // Update buttons
                     tabsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
                     e.target.classList.add('active');
                     
-                    // Update content
                     contentBlocks.forEach(block => {
                         block.classList.remove('active');
                         if (block.id === targetId) {
@@ -369,42 +297,111 @@
                 }
             });
 
-            // Geopolitics Drivers Interaction
-            const drivers = ['climate', 'resources', 'military'];
-            drivers.forEach(driver => {
-                const driverEl = document.getElementById(`driver-${driver}`);
-                const infoEl = document.getElementById(`info-${driver}`);
-                driverEl.addEventListener('click', () => {
-                     // Hide all others first
-                    drivers.forEach(otherDriver => {
-                        if (otherDriver !== driver) {
-                            document.getElementById(`info-${otherDriver}`).classList.add('hidden');
-                        }
-                    });
-                    // Toggle the clicked one
-                    infoEl.classList.toggle('hidden');
-                });
-            });
-
             // Nav link active state on scroll
             const sections = document.querySelectorAll('section');
             const navLinks = document.querySelectorAll('.nav-link');
 
-            window.addEventListener('scroll', () => {
-                let current = '';
-                sections.forEach(section => {
-                    const sectionTop = section.offsetTop;
-                    if (pageYOffset >= sectionTop - 70) { // 70px offset for sticky header
-                        current = section.getAttribute('id');
-                    }
-                });
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            };
 
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href').includes(current) && current) {
-                        link.classList.add('active');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}` || (id === 'disputes' && (link.getAttribute('href') === '#seabed' || link.getAttribute('href') === '#waterways'))) {
+                                link.classList.add('active');
+                            }
+                        });
                     }
                 });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // Chart.js implementation
+            function wrapLabel(str, maxWidth) {
+                if (!str) return '';
+                const words = str.split(' ');
+                let lines = [];
+                let currentLine = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    if (currentLine.length + words[i].length + 1 < maxWidth) {
+                        currentLine += ' ' + words[i];
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            }
+            
+            const claimsData = {
+                labels: ['俄羅斯', '加拿大', '丹麥 (經格陵蘭)', wrapLabel('美國 (單方面宣布)', 16)],
+                datasets: [{
+                    label: '主張或已提交的延伸大陸棚面積 (萬平方公里)',
+                    data: [120, 120, 90, 100], 
+                    backgroundColor: 'rgba(0, 82, 204, 0.7)',
+                    borderColor: 'rgba(7, 71, 166, 1)',
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                    barPercentage: 0.6,
+                }]
+            };
+
+            const claimsChartCtx = document.getElementById('claimsChart').getContext('2d');
+            const claimsChart = new Chart(claimsChartCtx, {
+                type: 'bar',
+                data: claimsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: '面積 (萬平方公里)', font: { weight: 'bold' } },
+                            grid: { color: '#eef2f9' }
+                        },
+                        y: {
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: '主要國家延伸大陸棚主張面積對比',
+                            font: { size: 16, weight: 'bold' },
+                            padding: { bottom: 20 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#172B4D',
+                            titleFont: { size: 14, weight: 'bold' },
+                            bodyFont: { size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
             });
         });
     </script>
