@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精算的停頓：互動式台海威懾因素分析儀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Strategic Calm -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down narrative dashboard. It starts with a high-level summary (the "Calculated Pause"), then guides the user through the four core pillars of deterrence (Military, Economic, Geopolitical, Domestic) presented in an interactive grid. This structure allows users to grasp the main concept quickly and then dive into the area that interests them most. Following the core analysis, it presents Beijing's alternative — "Gray Zone" tactics — with a timeline chart to show escalation. It concludes with potential "Tipping Points" to summarize the future risks. This thematic, non-linear structure is more intuitive for exploration than the report's linear chapter format, facilitating better understanding of the interconnected factors. -->
+    <!-- Visualization & Content Choices: 
+        - Economic Impact: Report Table 2 data -> Goal: Compare -> Viz: Bar Chart -> Interaction: Hover tooltips -> Justification: A bar chart is more visually impactful for comparing GDP losses across nations than a simple table. Library: Chart.js.
+        - Gray Zone Escalation: Report Table 3 data -> Goal: Show Change -> Viz: Line Chart -> Interaction: Hover tooltips -> Justification: A line chart clearly demonstrates the dramatic increase in PLA incursions over time. Library: Chart.js.
+        - Public Opinion: Report text data -> Goal: Inform/Compare -> Viz: Doughnut Charts -> Interaction: Hover tooltips -> Justification: Doughnut charts provide a quick, clear visual of proportional data like identity and opinion splits. Library: Chart.js.
+        - Strategic Matrix (Table 1): Report table -> Goal: Organize -> Viz: Styled HTML Grid -> Interaction: Static display -> Justification: A styled grid with clear headings is more readable and integrates better into the design than a standard HTML table. Method: HTML/Tailwind.
+        - Core Concepts (e.g., Silicon Shield): Report text -> Goal: Explain -> Viz: Styled HTML cards with icons/borders -> Interaction: Static display -> Justification: Custom styled cards break down complex ideas into digestible visual blocks. Method: HTML/Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 40vh; }
+        .nav-link { transition: all 0.3s ease-in-out; }
+        .deterrent-card { transition: all 0.3s ease-in-out; }
+        .deterrent-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .content-section.hidden { display: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-slate-800 text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold">精算的停頓</h1>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#overview" class="nav-link hover:text-cyan-300">總覽</a>
+                <a href="#deterrents" class="nav-link hover:text-cyan-300">四大威懾</a>
+                <a href="#grayzone" class="nav-link hover:text-cyan-300">灰色地帶</a>
+                <a href="#tipping-points" class="nav-link hover:text-cyan-300">未來引爆點</a>
+            </nav>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden mt-4">
+            <a href="#overview" class="block py-2 px-4 text-sm hover:bg-slate-700">總覽</a>
+            <a href="#deterrents" class="block py-2 px-4 text-sm hover:bg-slate-700">四大威懾</a>
+            <a href="#grayzone" class="block py-2 px-4 text-sm hover:bg-slate-700">灰色地帶</a>
+            <a href="#tipping-points" class="block py-2 px-4 text-sm hover:bg-slate-700">未來引爆點</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="overview" class="text-center mb-16 pt-12">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">精算的停頓</h2>
+            <p class="text-lg md:text-xl text-slate-600 max-w-4xl mx-auto">
+                為何中國迄今未對台灣發動全面軍事入侵？本分析儀揭示，北京的克制並非意圖改變，而是一個基於軍事、經濟、地緣政治及國內政治等多維度成本效益分析後的理性戰略決策。當前，一個複雜且環環相扣的威懾體系，使得入侵成為一場風險過高、代價難以承受的豪賭。
+            </p>
+        </section>
+
+        <section id="deterrents" class="mb-16 pt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">四大威懾：維持和平的支柱</h2>
+                <p class="text-slate-600 max-w-3xl mx-auto">
+                    台海的和平現狀，建立在一個動態的多層次威懾架構之上。點擊下方卡片，深入了解每個阻止戰爭爆發的關鍵因素，以及它們如何共同作用，形成一道令北京望而卻步的屏障。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div id="card-military" class="deterrent-card bg-white p-6 rounded-lg shadow-lg cursor-pointer border-b-4 border-transparent hover:border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🛡️</span>
+                        <h3 class="text-2xl font-bold">軍事威懾</h3>
+                    </div>
+                    <p class="text-slate-600">地理天險、台灣的「刺蝟」戰略，以及解放軍聯合作戰經驗的缺乏，構成了難以逾越的軍事障礙。</p>
+                </div>
+                <div id="card-economic" class="deterrent-card bg-white p-6 rounded-lg shadow-lg cursor-pointer border-b-4 border-transparent hover:border-green-500">
+                     <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">💰</span>
+                        <h3 class="text-2xl font-bold">經濟威懾</h3>
+                    </div>
+                    <p class="text-slate-600">台灣的「矽盾」地位使任何衝突都將引發全球經濟浩劫，並對中國自身造成毀滅性反噬。</p>
+                </div>
+                <div id="card-geopolitical" class="deterrent-card bg-white p-6 rounded-lg shadow-lg cursor-pointer border-b-4 border-transparent hover:border-purple-500">
+                     <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🌍</span>
+                        <h3 class="text-2xl font-bold">地緣政治</h3>
+                    </div>
+                    <p class="text-slate-600">美國及其盟友（特別是日本）的介入風險與國際社會的孤立，構成強大的外部壓力。</p>
+                </div>
+                <div id="card-domestic" class="deterrent-card bg-white p-6 rounded-lg shadow-lg cursor-pointer border-b-4 border-transparent hover:border-red-500">
+                     <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🏛️</span>
+                        <h3 class="text-2xl font-bold">國內政治</h3>
+                    </div>
+                    <p class="text-slate-600">一場失敗的戰爭將摧毀中共的執政合法性，可能引發內部動盪，威脅其政權存續。</p>
+                </div>
+            </div>
+
+            <div id="content-display" class="mt-12">
+                <div id="content-military" class="content-section hidden bg-white p-8 rounded-xl shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4">軍事威懾：難以發動的兩棲突擊</h3>
+                    <p class="text-slate-600 mb-6">解放軍雖在軍力上取得長足進步，但攻台作戰在地理和操作上仍是全球最艱鉅的軍事挑戰之一。台灣海峽的惡劣海象、台灣易守難攻的地形，以及適合登陸的海灘稀少，都構成了天然屏障。更重要的是，台灣正積極發展「刺蝟戰略」，透過部署大量機動、致命的反艦、防空飛彈等不對稱戰力，旨在讓解放軍付出無法承受的慘痛代價，將戰爭拖入持久戰，為國際介入爭取時間。</p>
+                    <div class="bg-slate-100 p-6 rounded-lg">
+                        <h4 class="font-bold mb-2">台灣戰略韌性與脆弱性</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <h5 class="font-semibold text-green-600">✅ 韌性 (優勢)</h5>
+                                <ul class="list-disc list-inside text-slate-700">
+                                    <li>轉向不對稱「刺蝟」戰略</li>
+                                    <li>熟悉防禦地形與作戰環境</li>
+                                    <li>強烈的台灣認同感與抵抗意志</li>
+                                    <li>全球半導體產業的關鍵地位</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-semibold text-red-600">❌ 脆弱性 (劣勢)</h5>
+                                <ul class="list-disc list-inside text-slate-700">
+                                    <li>傳統軍備數量處於劣勢</li>
+                                    <li>後備動員體系仍待強化</li>
+                                    <li>能源與糧食高度依賴進口</li>
+                                    <li>易受認知作戰與假訊息影響</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="content-economic" class="content-section hidden bg-white p-8 rounded-xl shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4">經濟威懾：相互確保的金融毀滅</h3>
+                    <p class="text-slate-600 mb-6">台海衝突的經濟後果是近乎無法逾越的鴻溝。台灣生產全球超過90%的先進晶片，形成了「矽盾」，任何對台攻擊都等同於切斷全球高科技產業的命脈。據估算，一場戰爭將給全球帶來約10兆美元的損失，遠超近年任何危機。同時，中國自身也將面臨國際制裁、資本外逃和供應鏈中斷的迴旋鏢效應，嚴重衝擊其本已脆弱的經濟，動搖中共執政的「績效合法性」。</p>
+                    <div class="chart-container">
+                        <canvas id="economicImpactChart"></canvas>
+                    </div>
+                </div>
+
+                <div id="content-geopolitical" class="content-section hidden bg-white p-8 rounded-xl shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4">地緣政治：國際孤立與聯盟干預</h3>
+                    <p class="text-slate-600 mb-6">入侵台灣將不會是孤立的雙邊衝突。美國基於《台灣關係法》的承諾、日益清晰化的協防意圖，以及在印太地區強化的軍事部署，構成了強大威懾。更關鍵的是，日本已將「台灣有事」視為「日本有事」，極大增加了美日同盟介入的風險。此外，美國已成功將台海議題「國際化」，G7、歐盟等主要經濟體均視台海和平為核心利益。北京若動武，將面臨前所未有的國際孤立，徹底摧毀其大國形象。</p>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 bg-blue-100 p-4 rounded-lg text-center">
+                            <h4 class="font-bold">美國的模糊與清晰</h4>
+                            <p class="text-sm text-blue-800">以《台灣關係法》為基礎，從「戰略模糊」轉向日益清晰的協防信號，增加北京決策的不確定性。</p>
+                        </div>
+                         <div class="flex-1 bg-red-100 p-4 rounded-lg text-center">
+                            <h4 class="font-bold">日本的關鍵角色</h4>
+                            <p class="text-sm text-red-800">「台灣有事即日本有事」的立場，意味著衝突極可能升級為牽動美日安保條約的區域戰爭。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="content-domestic" class="content-section hidden bg-white p-8 rounded-xl shadow-2xl">
+                    <h3 class="text-2xl font-bold mb-4">國內政治：中共的終極豪賭</h3>
+                    <p class="text-slate-600 mb-6">對北京而言，最致命的風險來自內部。中共的執政合法性建立在「績效」與「民族主義」兩大支柱上。一場代價高昂或失敗的戰爭，將同時摧毀這兩者，可能引發政權無法承受的內部動盪。雖然部分觀點認為北京可能發動「轉移視線的戰爭」，但其風險極高，失敗的後果將是民族主義怒火反噬自身。民意也並非鐵板一塊，研究顯示相當比例的中國民眾並不支持武力統一，這構成了潛在的內部制約。</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="chart-container h-64 md:h-auto">
+                            <canvas id="taiwanIdentityChart"></canvas>
+                        </div>
+                        <div class="chart-container h-64 md:h-auto">
+                           <canvas id="chinaOpinionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="grayzone" class="mb-16 pt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">替代方案：灰色地帶作戰</h2>
+                <p class="text-slate-600 max-w-3xl mx-auto">
+                    由於全面入侵的代價過高，北京選擇了成本更低、風險更可控的「灰色地帶」戰術。透過持續的軍事侵擾、經濟脅迫和外交絞殺，試圖在不觸發戰爭的情況下，逐步削弱台灣的實力與意志，以達成「不戰而屈人之兵」的目標。
+                </p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-xl">
+                 <h3 class="text-xl font-bold text-center mb-4">解放軍侵擾台灣防空識別區架次趨勢</h3>
+                <div class="chart-container">
+                    <canvas id="grayzoneChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="tipping-points" class="pt-12">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-2">未來引爆點：改變平衡的變數</h2>
+                <p class="text-slate-600 max-w-3xl mx-auto">
+                    儘管當前的威懾架構相對穩固，但它並非一成不變。任何關鍵變數的重大變化，都可能從根本上改變北京的戰略精算，大幅提高戰爭風險。維持和平的關鍵，在於確保武力改變現狀的代價，永遠高於維持現狀。
+                </p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800">軍事突破</h4>
+                    <p class="text-sm text-yellow-700">解放軍若相信能以極低代價速戰速決，動武誘因將大增。</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800">經濟變局</h4>
+                    <p class="text-sm text-yellow-700">「矽盾」效力減弱，或中國經濟瀕臨崩潰，可能促使北京鋌而走險。</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800">政治誤判</h4>
+                    <p class="text-sm text-yellow-700">美國干預意願被視為崩潰，或盟友關係破裂，將提供戰略窗口。</p>
+                </div>
+                <div class="bg-yellow-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-yellow-800">觸碰紅線</h4>
+                    <p class="text-sm text-yellow-700">台灣若做出法理獨立的舉動，將極可能迫使北京採取軍事行動。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16 p-4 text-center text-sm">
+        <p>本應用程式內容根據公開報告進行分析與視覺化，僅供學術研究與資訊參考。</p>
+    </footer>
+
+    <script>
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        const deterrentCards = {
+            military: document.getElementById('card-military'),
+            economic: document.getElementById('card-economic'),
+            geopolitical: document.getElementById('card-geopolitical'),
+            domestic: document.getElementById('card-domestic'),
+        };
+
+        const contentSections = {
+            military: document.getElementById('content-military'),
+            economic: document.getElementById('content-economic'),
+            geopolitical: document.getElementById('content-geopolitical'),
+            domestic: document.getElementById('content-domestic'),
+        };
+
+        let activeChart = null;
+        let activeCardId = null;
+
+        Object.keys(deterrentCards).forEach(key => {
+            deterrentCards[key].addEventListener('click', () => {
+                const isAlreadyActive = activeCardId === key;
+                
+                Object.values(contentSections).forEach(section => section.classList.add('hidden'));
+                Object.values(deterrentCards).forEach(card => card.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'ring-green-500', 'ring-purple-500', 'ring-red-500'));
+                
+                if (activeChart) {
+                    activeChart.destroy();
+                    activeChart = null;
+                }
+                
+                if (isAlreadyActive) {
+                    activeCardId = null;
+                } else {
+                    contentSections[key].classList.remove('hidden');
+                    
+                    let ringColorClass = '';
+                    if (key === 'military') ringColorClass = 'ring-blue-500';
+                    if (key === 'economic') ringColorClass = 'ring-green-500';
+                    if (key === 'geopolitical') ringColorClass = 'ring-purple-500';
+                    if (key === 'domestic') ringColorClass = 'ring-red-500';
+
+                    deterrentCards[key].classList.add('ring-2', 'ring-offset-2', ringColorClass);
+                    
+                    if (key === 'economic') {
+                        renderEconomicImpactChart();
+                    } else if (key === 'domestic') {
+                        renderDomesticCharts();
+                    }
+                    activeCardId = key;
+                }
+            });
+        });
+
+        const wrapText = (str, len) => {
+            if (str.length <= len) return str;
+            const parts = [];
+            while (str.length > len) {
+                parts.push(str.substring(0, len));
+                str = str.substring(len);
+            }
+            parts.push(str);
+            return parts;
+        };
+
+        function renderEconomicImpactChart() {
+            const ctx = document.getElementById('economicImpactChart').getContext('2d');
+            activeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['全球', '中國', '美國', '台灣', '韓國', '日本'],
+                    datasets: [{
+                        label: '戰爭情境下預估GDP損失 (%)',
+                        data: [10.2, 16.7, 6.7, 40.0, 23.3, 13.5],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(255, 159, 64, 0.6)',
+                            'rgba(255, 205, 86, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(153, 102, 255, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 205, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(153, 102, 255, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '台海戰爭對各國經濟的預估衝擊 (損失10兆美元)',
+                            font: { size: 16 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'GDP損失百分比 (%)' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderDomesticCharts() {
+            const taiwanIdentityCtx = document.getElementById('taiwanIdentityChart').getContext('2d');
+            const chinaOpinionCtx = document.getElementById('chinaOpinionChart').getContext('2d');
+
+            const domesticCharts = [
+                {
+                    ctx: taiwanIdentityCtx,
+                    config: {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['認同為台灣人', '認同為中國人/兩者皆是'],
+                            datasets: [{
+                                data: [67, 33],
+                                backgroundColor: ['#10B981', '#F59E0B'],
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: '台灣民眾身份認同 (Pew)', font: { size: 14 } },
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    }
+                },
+                {
+                    ctx: chinaOpinionCtx,
+                    config: {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['反對動武', '支持/其他'],
+                            datasets: [{
+                                data: [55.1, 44.9],
+                                backgroundColor: ['#3B82F6', '#EF4444'],
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: { display: true, text: '中國民眾對武力統一的態度 (Carter Center)', font: { size: 14 } },
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    }
+                }
+            ];
+            
+            if (activeChart && activeChart.length) {
+                activeChart.forEach(chart => chart.destroy());
+            }
+
+            activeChart = domesticCharts.map(chartData => new Chart(chartData.ctx, chartData.config));
+        }
+
+        function renderGrayzoneChart() {
+            const ctx = document.getElementById('grayzoneChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024 (預測)'],
+                    datasets: [{
+                        label: '侵擾架次',
+                        data: [380, 972, 1737, 1709, 3000],
+                        fill: true,
+                        borderColor: 'rgb(239, 68, 68)',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `侵擾架次: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '架次' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        window.addEventListener('load', () => {
+            renderGrayzoneChart();
+        });
+
+    </script>
+</body>
+</html>
