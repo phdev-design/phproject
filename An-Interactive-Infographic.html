@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="pageTitle">北極融冰的連鎖效應：一份互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #003865;
+            color: #E0F2FE;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .card {
+            background-color: rgba(0, 114, 188, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 186, 222, 0.3);
+        }
+        .stat-number {
+            font-weight: 700;
+            color: #66D5F2;
+            text-shadow: 0 0 10px rgba(102, 213, 242, 0.7);
+        }
+        .flowchart-arrow {
+            position: relative;
+            padding: 1rem;
+        }
+        .flowchart-arrow::after {
+            content: '▼';
+            position: absolute;
+            bottom: -0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #66D5F2;
+            font-size: 1.5rem;
+        }
+        .pyramid-level {
+            clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <!-- Language Switcher -->
+        <div class="text-right mb-4">
+            <button id="lang-switcher" class="bg-cyan-600/50 hover:bg-cyan-500/70 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                English
+            </button>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4" data-translate="headerTitle">氣候的臨界點</h1>
+            <p class="text-xl md:text-2xl text-cyan-200 max-w-4xl mx-auto" data-translate="headerSubtitle">如果北極的冰全部融化，地球會怎樣？這不是一個單一事件，而是一場全球性的連鎖崩潰的開始。</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="introduction">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="card rounded-lg p-6 shadow-2xl">
+                        <h2 class="text-2xl font-bold text-white mb-4" data-translate="introCardTitle">關鍵區別：兩種冰，兩種命運</h2>
+                        <p class="mb-4 text-slate-200" data-translate="introCardParagraph">要理解危機，我們必須先區分北極的兩種冰。它們的融化速度和帶來的直接後果截然不同，但最終都將地球推向一個更危險的未來。</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-cyan-300" data-translate="seaIceTitle">北極海冰 🧊</h3>
+                                <p class="text-slate-300" data-translate="seaIceDesc">漂浮在北冰洋上的冰凍海水。其夏季的完全消失可能在2030年代發生，是觸發極端天氣和全球暖化加速的直接導火線。</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-cyan-300" data-translate="greenlandIceSheetTitle">格陵蘭冰蓋 🏔️</h3>
+                                <p class="text-slate-300" data-translate="greenlandIceSheetDesc">覆蓋在陸地上的巨型冰川。其完全融化雖需數百年，但融化速度正在急劇加快，是海平面上升的主要貢獻者。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-center">
+                        <div class="card rounded-lg p-6 shadow-2xl">
+                            <h3 class="text-lg font-semibold text-cyan-200 mb-2" data-translate="greenlandThreatTitle">格陵蘭的威脅</h3>
+                            <p class="stat-number text-6xl">7<span class="text-3xl ml-2" data-translate="meterUnit">米</span></p>
+                            <p class="text-slate-300 mt-2" data-translate="greenlandThreatStatDesc">格陵蘭冰蓋完全融化將導致的全球海平面上升高度。</p>
+                        </div>
+                        <div class="card rounded-lg p-6 shadow-2xl">
+                            <h3 class="text-lg font-semibold text-cyan-200 mb-2" data-translate="arcticAmpTitle">北極放大效應</h3>
+                             <p class="stat-number text-6xl">4<span class="text-xl ml-2" data-translate="timesUnit">倍</span></p>
+                            <p class="text-slate-300 mt-2" data-translate="arcticAmpStatDesc">北極的暖化速度是全球平均速度的近四倍。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="physical-consequences">
+                 <h2 class="text-3xl font-bold text-center text-white mb-8" data-translate="act1Title">第一幕：物理系統的崩解</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card rounded-lg p-6 shadow-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="seaLevelRiseTitle">世紀洪災：無法逆轉的海平面上升</h3>
+                        <p class="mb-4 text-slate-200" data-translate="seaLevelRiseDesc">冰蓋融化並非遙遠的未來，而是正在加速的現實。下圖展示了在高排放情景下，到2100年主要冰蓋對海平面上升的預測貢獻。這將直接威脅全球數億沿海居民的生存，重塑世界地圖。</p>
+                        <div class="chart-container">
+                            <canvas id="slrChart"></canvas>
+                        </div>
+                        <p class="text-sm text-center mt-4 text-slate-400" data-translate="chartDataSource">數據來源：IPCC, NASA [3, 5, 6, 7]</p>
+                    </div>
+
+                    <div class="card rounded-lg p-6 shadow-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="climateEngineTitle">地球引擎失靈：氣候調節系統的擾動</h3>
+                        <p class="mb-6 text-slate-200" data-translate="climateEngineDesc">來自格陵蘭的大量融冰淡水正在「稀釋」北大西洋，擾亂了兩個關鍵的全球氣候引擎，其後果是全球性的天氣混亂。</p>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-xl font-semibold text-cyan-300 mb-2" data-translate="amocTitle">大西洋經向翻轉環流 (AMOC) 減弱</h4>
+                                <div class="text-sm text-slate-300 space-y-2">
+                                    <div class="flowchart-arrow bg-slate-900/50 rounded-md" data-translate="amocFlow">大量寒冷淡水注入 ➡️ 阻礙海水下沉 ➡️ 海洋「輸送帶」減速</div>
+                                    <p data-translate="amocConsequence"><strong class="text-cyan-400">後果：</strong>北歐嚴寒、全球降雨模式錯亂、海洋生態系統生產力下降。</p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold text-cyan-300 mb-2" data-translate="jetStreamTitle">極地高空急流 (Jet Stream) 不穩定</h4>
+                                <div class="text-sm text-slate-300 space-y-2">
+                                    <div class="flowchart-arrow bg-slate-900/50 rounded-md" data-translate="jetStreamFlow">北極快速增溫 ➡️ 溫差減小 ➡️ 急流減速且更「蜿蜒」</div>
+                                    <p data-translate="jetStreamConsequence"><strong class="text-cyan-400">後果：</strong>北美、歐洲和亞洲出現持續更長的熱浪、乾旱和洪水等極端天氣。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="feedback-loops">
+                <h2 class="text-3xl font-bold text-center text-white mb-8" data-translate="act2Title">第二幕：失控的加速器</h2>
+                <p class="text-lg text-center max-w-3xl mx-auto mb-8 text-slate-200" data-translate="act2Desc">北極不僅在被動融化，它還在主動放大全球暖化。兩個關鍵的自我強化反饋迴路正在將地球推向一個更熱、更不穩定的狀態，一旦大規模觸發，將超出人類的控制。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="card rounded-lg p-6 shadow-2xl text-center">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="albedoEffectTitle">反照率效應：從反射鏡到吸熱器</h3>
+                         <div class="flex justify-around items-center my-6 text-6xl">
+                            <span title="冰雪反射陽光" data-translate="albedoReflect">☀️🧊反射</span>
+                            <span class="text-4xl text-cyan-300">➡️</span>
+                            <span title="海水吸收熱量" data-translate="albedoAbsorb">☀️💧吸收</span>
+                        </div>
+                        <p class="text-slate-200" data-translate="albedoEffectDesc">潔白的冰雪能反射高達80%的太陽光，而深色的海水則會吸收超過90%的熱量。融冰導致海面暴露，吸收更多熱量，從而融化更多冰。這個循環是「北極放大效應」的主要引擎。</p>
+                    </div>
+                    <div class="card rounded-lg p-6 shadow-2xl text-center">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="methaneBombTitle">甲烷定時炸彈：永凍土融化</h3>
+                        <div class="flex justify-around items-center my-6 text-6xl">
+                            <span title="暖化融化永凍土">🔥</span>
+                            <span class="text-4xl text-cyan-300">➡️</span>
+                             <span title="釋放甲烷/二氧化碳">💨(CH₄, CO₂)</span>
+                        </div>
+                        <p class="text-slate-200" data-translate="methaneBombDesc">北極永凍土中儲存的碳可能是大氣中的兩倍。暖化使其融解，釋放出強效溫室氣體甲烷，進一步加劇暖化，形成另一個危險且不可逆轉的反饋迴路。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ecosystem-collapse">
+                <h2 class="text-3xl font-bold text-center text-white mb-8" data-translate="act3Title">第三幕：生物圈的崩潰</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card rounded-lg p-6 shadow-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="foodWebCollapseTitle">北極海洋食物網的瓦解</h3>
+                        <p class="mb-4 text-slate-200" data-translate="foodWebCollapseDesc">整個北極海洋生態的基礎——海冰——正在消失。這引發了一場自下而上的災難性連鎖崩潰，抹去了數百萬年的獨特演化歷史。</p>
+                        <div class="w-full max-w-sm mx-auto space-y-1 text-center font-semibold">
+                            <div class="pyramid-level bg-cyan-800 w-full h-16 flex items-center justify-center" data-translate="mammals">🐻‍❄️ 海洋哺乳動物（北極熊、海豹）</div>
+                            <div class="pyramid-level bg-cyan-700 w-5/6 mx-auto h-16 flex items-center justify-center" data-translate="fish">🐟 魚類和海鳥（北極鱈魚）</div>
+                            <div class="pyramid-level bg-cyan-600 w-4/6 mx-auto h-16 flex items-center justify-center" data-translate="zooplankton">🦐 浮游動物（磷蝦）</div>
+                            <div class="pyramid-level bg-cyan-500 w-3/6 mx-auto h-16 flex items-center justify-center text-black" data-translate="iceAlgae">🌿 冰藻（食物網基石）</div>
+                        </div>
+                         <p class="mt-4 text-slate-300 text-center" data-translate="foodWebSummary">海冰消失 ➡️ 冰藻消失 ➡️ 浮游動物挨餓 ➡️ 魚類下降 ➡️ 哺乳動物受苦。</p>
+                    </div>
+
+                    <div class="card rounded-lg p-6 shadow-2xl">
+                        <h3 class="text-2xl font-bold text-white mb-4" data-translate="globalEcosystemTitle">全球生態系統的動盪</h3>
+                        <p class="mb-4 text-slate-200" data-translate="globalEcosystemDesc">北極的危機並不止於北極。氣候系統的擾動和物種的遷移正在全球範圍內引發連鎖反應，威脅著全球的糧食安全和生物多樣性。</p>
+                        <ul class="space-y-4 list-none text-slate-300">
+                            <li class="flex items-start">
+                                <span class="text-cyan-400 text-2xl mr-3">🎣</span>
+                                <div data-translate="fisheriesDisruption"><strong class="text-white">全球漁業擾動：</strong>AMOC的變化改變了全球營養物質分佈，而海水暖化則擾亂了魚類的洄游路線，威脅著依賴漁業的經濟體。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-cyan-400 text-2xl mr-3">侵</span>
+                                <div data-translate="speciesInvasion"><strong class="text-white">南方物種入侵：</strong>溫暖的海水吸引亞北極物種向北遷移，擠壓了高度適應寒冷且無處可退的北極特有物種的生存空間。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-cyan-400 text-2xl mr-3">🦌</span>
+                                <div data-translate="terrestrialImpact"><strong class="text-white">陸地生態受創：</strong>植被變化和不穩定的天氣影響了馴鹿等陸地動物，對原住民社區的文化和生計構成威脅。</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="societal-collapse">
+                <h2 class="text-3xl font-bold text-center text-white mb-2" data-translate="act4Title">第四幕：人類的代價</h2>
+                 <p class="text-lg text-center max-w-4xl mx-auto mb-8 text-slate-200" data-translate="act4Desc">所有物理和生態的變化最終匯集成對人類文明的系統性衝擊。這是一條從氣候影響通往社會崩潰的清晰路徑。</p>
+                <div class="card rounded-lg p-6 md:p-8 shadow-2xl overflow-x-auto">
+                    <h3 class="text-2xl font-bold text-white mb-6 text-center" data-translate="cascadeRiskTitle">從氣候影響到社會崩潰的連鎖風險</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <div class="text-center p-2">
+                            <h4 class="font-bold text-cyan-300 text-lg mb-3" data-translate="riskCat1">1. 直接氣候影響</h4>
+                            <div class="space-y-3">
+                                <p class="bg-slate-900/50 rounded p-2" data-translate="riskItem1_1">海平面上升</p>
+                                <p class="bg-slate-900/50 rounded p-2" data-translate="riskItem1_2">極端天氣</p>
+                                <p class="bg-slate-900/50 rounded p-2" data-translate="riskItem1_3">環流擾動</p>
+                            </div>
+                        </div>
+                        <div class="text-center p-2">
+                             <h4 class="font-bold text-cyan-300 text-lg mb-3" data-translate="riskCat2">2. 經濟/生態效應</h4>
+                             <div class="space-y-3">
+                                <p class="bg-slate-800/60 rounded p-2" data-translate="riskItem2_1">基礎設施破壞</p>
+                                <p class="bg-slate-800/60 rounded p-2" data-translate="riskItem2_2">農作物歉收、水資源短缺</p>
+                                <p class="bg-slate-800/60 rounded p-2" data-translate="riskItem2_3">漁業崩潰</p>
+                            </div>
+                        </div>
+                        <div class="text-center p-2">
+                             <h4 class="font-bold text-cyan-300 text-lg mb-3" data-translate="riskCat3">3. 社會政治後果</h4>
+                             <div class="space-y-3">
+                                <p class="bg-slate-700/70 rounded p-2" data-translate="riskItem3_1">大規模流離失所</p>
+                                <p class="bg-slate-700/70 rounded p-2" data-translate="riskItem3_2">糧食危機、飢餓</p>
+                                <p class="bg-slate-700/70 rounded p-2" data-translate="riskItem3_3">經濟衰退</p>
+                            </div>
+                        </div>
+                         <div class="text-center p-2">
+                             <h4 class="font-bold text-red-400 text-lg mb-3" data-translate="riskCat4">4. 最終系統性風險</h4>
+                             <div class="space-y-3">
+                                <p class="bg-red-900/60 rounded p-2 border border-red-500" data-translate="riskItem4_1">治理崩潰、政治不穩</p>
+                                <p class="bg-red-900/60 rounded p-2 border border-red-500" data-translate="riskItem4_2">資源戰爭、國際衝突</p>
+                                <p class="bg-red-900/60 rounded p-2 border border-red-500" data-translate="riskItem4_3">全球文明體系崩潰</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <section id="conclusion" class="text-center">
+                <h2 class="text-3xl font-bold text-white mb-8" data-translate="conclusionTitle">最終裁決：我們會滅亡嗎？</h2>
+                <div class="max-w-4xl mx-auto card rounded-lg p-8 shadow-2xl">
+                    <p class="text-lg md:text-xl text-slate-200 mb-6" data-translate="conclusionP1">答案是複雜的。從生物學角度看，智人 (*Homo sapiens*) 作為一個物種極具韌性，不太可能完全滅絕。</p>
+                    <p class="text-lg md:text-xl text-slate-200 mb-6" data-translate="conclusionP2">然而，真正的生存威脅，是 <strong class="text-red-400 text-2xl">全球人類文明的崩潰</strong>。</p>
+                    <p class="text-lg md:text-xl text-slate-200" data-translate="conclusionP3">我們所知的、支撐著80億人口的複雜社會、經濟和技術體系，極有可能在糧食危機、大規模遷徙和資源戰爭的連鎖衝擊下瓦解。倖存者將被還原到一個分裂的、前工業化的生存狀態，在一個充滿敵意的地球上掙扎。</p>
+                    <hr class="my-6 border-cyan-700">
+                    <p class="text-2xl font-bold text-white" data-translate="conclusionP4">因此，儘管北極融冰不會導致人類的「滅絕」，但它極有可能導致我們所知的「文明」的終結。這本身就是一種存在性的失敗。</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- Chart.js setup ---
+        let slrChart; // Make chart variable globally accessible
+        
+        function createOrUpdateChart(lang) {
+            const chartData = translations[lang].chart;
+
+            if (slrChart) {
+                // Update existing chart
+                slrChart.data.labels = chartData.labels;
+                slrChart.data.datasets[0].label = chartData.datasetLow;
+                slrChart.data.datasets[1].label = chartData.datasetHigh;
+                slrChart.options.plugins.title.text = chartData.title;
+                slrChart.options.scales.y.title.text = chartData.yAxisLabel;
+                slrChart.update();
+            } else {
+                // Create new chart
+                const slrCtx = document.getElementById('slrChart').getContext('2d');
+                slrChart = new Chart(slrCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [
+                            {
+                                label: chartData.datasetLow,
+                                data: [3.3, 11.1], 
+                                backgroundColor: '#00BADE',
+                                borderColor: '#66D5F2',
+                                borderWidth: 1
+                            },
+                            {
+                                label: chartData.datasetHigh,
+                                data: [9.0, 11.1],
+                                backgroundColor: '#0072BC',
+                                borderColor: '#00A1E4',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartData.title,
+                                color: '#E0F2FE',
+                                font: { size: 16 }
+                            },
+                            legend: {
+                                labels: { color: '#E0F2FE' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: chartData.yAxisLabel,
+                                    color: '#E0F2FE'
+                                },
+                                ticks: { color: '#E0F2FE' },
+                                grid: { color: 'rgba(102, 213, 242, 0.2)' }
+                            },
+                            x: {
+                                ticks: { color: '#E0F2FE' },
+                                grid: { color: 'rgba(102, 213, 242, 0.2)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // --- Translation Logic ---
+        const translations = {
+            'zh-Hant': {
+                pageTitle: '北極融冰的連鎖效應：一份互動式資訊圖表',
+                headerTitle: '氣候的臨界點',
+                headerSubtitle: '如果北極的冰全部融化，地球會怎樣？這不是一個單一事件，而是一場全球性的連鎖崩潰的開始。',
+                introCardTitle: '關鍵區別：兩種冰，兩種命運',
+                introCardParagraph: '要理解危機，我們必須先區分北極的兩種冰。它們的融化速度和帶來的直接後果截然不同，但最終都將地球推向一個更危險的未來。',
+                seaIceTitle: '北極海冰 🧊',
+                seaIceDesc: '漂浮在北冰洋上的冰凍海水。其夏季的完全消失可能在2030年代發生，是觸發極端天氣和全球暖化加速的直接導火線。',
+                greenlandIceSheetTitle: '格陵蘭冰蓋 🏔️',
+                greenlandIceSheetDesc: '覆蓋在陸地上的巨型冰川。其完全融化雖需數百年，但融化速度正在急劇加快，是海平面上升的主要貢獻者。',
+                greenlandThreatTitle: '格陵蘭的威脅',
+                meterUnit: '米',
+                greenlandThreatStatDesc: '格陵蘭冰蓋完全融化將導致的全球海平面上升高度。',
+                arcticAmpTitle: '北極放大效應',
+                timesUnit: '倍',
+                arcticAmpStatDesc: '北極的暖化速度是全球平均速度的近四倍。',
+                act1Title: '第一幕：物理系統的崩解',
+                seaLevelRiseTitle: '世紀洪災：無法逆轉的海平面上升',
+                seaLevelRiseDesc: '冰蓋融化並非遙遠的未來，而是正在加速的現實。下圖展示了在高排放情景下，到2100年主要冰蓋對海平面上升的預測貢獻。這將直接威脅全球數億沿海居民的生存，重塑世界地圖。',
+                chartDataSource: '數據來源：IPCC, NASA [3, 5, 6, 7]',
+                climateEngineTitle: '地球引擎失靈：氣候調節系統的擾動',
+                climateEngineDesc: '來自格陵蘭的大量融冰淡水正在「稀釋」北大西洋，擾亂了兩個關鍵的全球氣候引擎，其後果是全球性的天氣混亂。',
+                amocTitle: '大西洋經向翻轉環流 (AMOC) 減弱',
+                amocFlow: '大量寒冷淡水注入 ➡️ 阻礙海水下沉 ➡️ 海洋「輸送帶」減速',
+                amocConsequence: '<strong class="text-cyan-400">後果：</strong>北歐嚴寒、全球降雨模式錯亂、海洋生態系統生產力下降。',
+                jetStreamTitle: '極地高空急流 (Jet Stream) 不穩定',
+                jetStreamFlow: '北極快速增溫 ➡️ 溫差減小 ➡️ 急流減速且更「蜿蜒」',
+                jetStreamConsequence: '<strong class="text-cyan-400">後果：</strong>北美、歐洲和亞洲出現持續更長的熱浪、乾旱和洪水等極端天氣。',
+                act2Title: '第二幕：失控的加速器',
+                act2Desc: '北極不僅在被動融化，它還在主動放大全球暖化。兩個關鍵的自我強化反饋迴路正在將地球推向一個更熱、更不穩定的狀態，一旦大規模觸發，將超出人類的控制。',
+                albedoEffectTitle: '反照率效應：從反射鏡到吸熱器',
+                albedoReflect: '☀️🧊反射',
+                albedoAbsorb: '☀️💧吸收',
+                albedoEffectDesc: '潔白的冰雪能反射高達80%的太陽光，而深色的海水則會吸收超過90%的熱量。融冰導致海面暴露，吸收更多熱量，從而融化更多冰。這個循環是「北極放大效應」的主要引擎。',
+                methaneBombTitle: '甲烷定時炸彈：永凍土融化',
+                methaneBombDesc: '北極永凍土中儲存的碳可能是大氣中的兩倍。暖化使其融解，釋放出強效溫室氣體甲烷，進一步加劇暖化，形成另一個危險且不可逆轉的反饋迴路。',
+                act3Title: '第三幕：生物圈的崩潰',
+                foodWebCollapseTitle: '北極海洋食物網的瓦解',
+                foodWebCollapseDesc: '整個北極海洋生態的基礎——海冰——正在消失。這引發了一場自下而上的災難性連鎖崩潰，抹去了數百萬年的獨特演化歷史。',
+                mammals: '🐻‍❄️ 海洋哺乳動物（北極熊、海豹）',
+                fish: '🐟 魚類和海鳥（北極鱈魚）',
+                zooplankton: '🦐 浮游動物（磷蝦）',
+                iceAlgae: '🌿 冰藻（食物網基石）',
+                foodWebSummary: '海冰消失 ➡️ 冰藻消失 ➡️ 浮游動物挨餓 ➡️ 魚類下降 ➡️ 哺乳動物受苦。',
+                globalEcosystemTitle: '全球生態系統的動盪',
+                globalEcosystemDesc: '北極的危機並不止於北極。氣候系統的擾動和物種的遷移正在全球範圍內引發連鎖反應，威脅著全球的糧食安全和生物多樣性。',
+                fisheriesDisruption: '<div><strong class="text-white">全球漁業擾動：</strong>AMOC的變化改變了全球營養物質分佈，而海水暖化則擾亂了魚類的洄游路線，威脅著依賴漁業的經濟體。</div>',
+                speciesInvasion: '<div><strong class="text-white">南方物種入侵：</strong>溫暖的海水吸引亞北極物種向北遷移，擠壓了高度適應寒冷且無處可退的北極特有物種的生存空間。</div>',
+                terrestrialImpact: '<div><strong class="text-white">陸地生態受創：</strong>植被變化和不穩定的天氣影響了馴鹿等陸地動物，對原住民社區的文化和生計構成威脅。</div>',
+                act4Title: '第四幕：人類的代價',
+                act4Desc: '所有物理和生態的變化最終匯集成對人類文明的系統性衝擊。這是一條從氣候影響通往社會崩潰的清晰路徑。',
+                cascadeRiskTitle: '從氣候影響到社會崩潰的連鎖風險',
+                riskCat1: '1. 直接氣候影響',
+                riskItem1_1: '海平面上升',
+                riskItem1_2: '極端天氣',
+                riskItem1_3: '環流擾動',
+                riskCat2: '2. 經濟/生態效應',
+                riskItem2_1: '基礎設施破壞',
+                riskItem2_2: '農作物歉收、水資源短缺',
+                riskItem2_3: '漁業崩潰',
+                riskCat3: '3. 社會政治後果',
+                riskItem3_1: '大規模流離失所',
+                riskItem3_2: '糧食危機、飢餓',
+                riskItem3_3: '經濟衰退',
+                riskCat4: '4. 最終系統性風險',
+                riskItem4_1: '治理崩潰、政治不穩',
+                riskItem4_2: '資源戰爭、國際衝突',
+                riskItem4_3: '全球文明體系崩潰',
+                conclusionTitle: '最終裁決：我們會滅亡嗎？',
+                conclusionP1: '答案是複雜的。從生物學角度看，智人 (*Homo sapiens*) 作為一個物種極具韌性，不太可能完全滅絕。',
+                conclusionP2: '然而，真正的生存威脅，是 <strong class="text-red-400 text-2xl">全球人類文明的崩潰</strong>。',
+                conclusionP3: '我們所知的、支撐著80億人口的複雜社會、經濟和技術體系，極有可能在糧食危機、大規模遷徙和資源戰爭的連鎖衝擊下瓦解。倖存者將被還原到一個分裂的、前工業化的生存狀態，在一個充滿敵意的地球上掙扎。',
+                conclusionP4: '因此，儘管北極融冰不會導致人類的「滅絕」，但它極有可能導致我們所知的「文明」的終結。這本身就是一種存在性的失敗。',
+                chart: {
+                    title: '到2100年冰蓋融化對海平面上升的貢獻預測',
+                    yAxisLabel: '海平面上升 (公分)',
+                    labels: ['格陵蘭冰蓋', '南極洲冰蓋'],
+                    datasetLow: '低排放情景 (公分)',
+                    datasetHigh: '高排放情景 (公分)',
+                }
+            },
+            'en': {
+                pageTitle: 'The Ripple Effect of Arctic Melt: An Interactive Infographic',
+                headerTitle: 'Climate Tipping Point',
+                headerSubtitle: 'What happens if all the Arctic ice melts? It\'s not a single event, but the beginning of a global cascading collapse.',
+                introCardTitle: 'Key Distinction: Two Ices, Two Fates',
+                introCardParagraph: 'To understand the crisis, we must first distinguish between the two types of ice in the Arctic. Their melting rates and immediate consequences differ, but both push the Earth towards a more dangerous future.',
+                seaIceTitle: 'Arctic Sea Ice 🧊',
+                seaIceDesc: 'Frozen seawater floating on the Arctic Ocean. Its complete summer disappearance, possible in the 2030s, is a direct trigger for extreme weather and accelerated global warming.',
+                greenlandIceSheetTitle: 'Greenland Ice Sheet 🏔️',
+                greenlandIceSheetDesc: 'A colossal glacier covering land. Its complete melting will take centuries, but its melt rate is accelerating dramatically, making it a primary contributor to sea-level rise.',
+                greenlandThreatTitle: 'Greenland\'s Threat',
+                meterUnit: 'meters',
+                greenlandThreatStatDesc: 'Global sea level rise if the Greenland Ice Sheet were to melt completely.',
+                arcticAmpTitle: 'Arctic Amplification',
+                timesUnit: 'times',
+                arcticAmpStatDesc: 'The Arctic is warming nearly four times faster than the global average.',
+                act1Title: 'Act I: The Physical Systems Unravel',
+                seaLevelRiseTitle: 'The Deluge: Irreversible Sea Level Rise',
+                seaLevelRiseDesc: 'Ice sheet melt is not a distant future, but a rapidly accelerating reality. The chart below shows the projected contribution to sea level rise from major ice sheets by 2100 under a high-emissions scenario. This directly threatens hundreds of millions of coastal residents and will redraw the world map.',
+                chartDataSource: 'Source: IPCC, NASA [3, 5, 6, 7]',
+                climateEngineTitle: 'Earth\'s Engine Failure: Disruption of Climate Regulation',
+                climateEngineDesc: 'A massive influx of freshwater from Greenland is "diluting" the North Atlantic, disrupting two key global climate engines with worldwide consequences of weather chaos.',
+                amocTitle: 'Weakening of AMOC',
+                amocFlow: 'Massive cold freshwater influx ➡️ Hinders seawater sinking ➡️ Ocean "conveyor belt" slows down',
+                amocConsequence: '<strong class="text-cyan-400">Consequences:</strong> Severe winters in Northern Europe, chaotic global rainfall patterns, decreased ocean ecosystem productivity.',
+                jetStreamTitle: 'Unstable Polar Jet Stream',
+                jetStreamFlow: 'Rapid Arctic warming ➡️ Reduced temperature difference ➡️ Jet stream slows and becomes more "wavy"',
+                jetStreamConsequence: '<strong class="text-cyan-400">Consequences:</strong> More persistent heatwaves, droughts, and floods across North America, Europe, and Asia.',
+                act2Title: 'Act II: The Runaway Accelerators',
+                act2Desc: 'The Arctic is not just passively melting; it is actively amplifying global warming. Two key self-reinforcing feedback loops are pushing the planet to a hotter, more unstable state, which, once triggered on a large scale, will be beyond human control.',
+                albedoEffectTitle: 'Albedo Effect: From Mirror to Heat Sink',
+                albedoReflect: '☀️🧊 Reflects',
+                albedoAbsorb: '☀️💧 Absorbs',
+                albedoEffectDesc: 'White ice and snow reflect up to 80% of sunlight, whereas dark ocean water absorbs over 90% of the heat. As ice melts, more ocean is exposed, absorbing more heat, which melts more ice. This cycle is the main engine of "Arctic Amplification".',
+                methaneBombTitle: 'Methane Time Bomb: Permafrost Thaw',
+                methaneBombDesc: 'Arctic permafrost may store twice as much carbon as the atmosphere. Warming thaws it, releasing the potent greenhouse gas methane, which further accelerates warming, creating another dangerous and irreversible feedback loop.',
+                act3Title: 'Act III: Biosphere Collapse',
+                foodWebCollapseTitle: 'Disintegration of the Arctic Marine Food Web',
+                foodWebCollapseDesc: 'The very foundation of the Arctic marine ecosystem—sea ice—is disappearing. This triggers a catastrophic bottom-up cascading collapse, erasing millions of years of unique evolutionary history.',
+                mammals: '🐻‍❄️ Marine Mammals (Polar bears, Seals)',
+                fish: '🐟 Fish & Seabirds (Arctic Cod)',
+                zooplankton: '🦐 Zooplankton (Krill)',
+                iceAlgae: '🌿 Ice Algae (Base of the food web)',
+                foodWebSummary: 'Ice disappears ➡️ Algae disappears ➡️ Zooplankton starve ➡️ Fish decline ➡️ Mammals suffer.',
+                globalEcosystemTitle: 'Global Ecosystem Turmoil',
+                globalEcosystemDesc: 'The Arctic crisis does not stay in the Arctic. Climate disruptions and species migrations are causing chain reactions worldwide, threatening global food security and biodiversity.',
+                fisheriesDisruption: '<div><strong class="text-white">Global Fisheries Disrupted:</strong> Changes in the AMOC alter nutrient distribution, while warming waters disrupt fish migration routes, threatening fishing-dependent economies.</div>',
+                speciesInvasion: '<div><strong class="text-white">Invasion of Southern Species:</strong> Warmer waters attract sub-Arctic species northward, squeezing out highly-adapted endemic Arctic species with nowhere else to go.</div>',
+                terrestrialImpact: '<div><strong class="text-white">Terrestrial Ecosystems Suffer:</strong> Vegetation changes and unstable weather impact land animals like caribou, threatening the culture and livelihoods of Indigenous communities.</div>',
+                act4Title: 'Act IV: The Human Cost',
+                act4Desc: 'All physical and ecological changes ultimately converge into a systemic shock to human civilization. This is a clear pathway from climate impacts to societal collapse.',
+                cascadeRiskTitle: 'The Cascade of Risk from Climate Impact to Social Collapse',
+                riskCat1: '1. Direct Climate Impacts',
+                riskItem1_1: 'Sea Level Rise',
+                riskItem1_2: 'Extreme Weather',
+                riskItem1_3: 'Circulation Disruption',
+                riskCat2: '2. Economic/Ecological Effects',
+                riskItem2_1: 'Infrastructure Damage',
+                riskItem2_2: 'Crop Failure, Water Scarcity',
+                riskItem2_3: 'Fisheries Collapse',
+                riskCat3: '3. Socio-Political Consequences',
+                riskItem3_1: 'Mass Displacement',
+                riskItem3_2: 'Food Crisis, Famine',
+                riskItem3_3: 'Economic Recession',
+                riskCat4: '4. Final Systemic Risks',
+                riskItem4_1: 'Governance Failure, Political Instability',
+                riskItem4_2: 'Resource Wars, International Conflict',
+                riskItem4_3: 'Global System Collapse',
+                conclusionTitle: 'Final Verdict: Will We Go Extinct?',
+                conclusionP1: 'The answer is complex. Biologically, *Homo sapiens* is a highly resilient species and is unlikely to become completely extinct.',
+                conclusionP2: 'The real existential threat, however, is the <strong class="text-red-400 text-2xl">collapse of global human civilization</strong>.',
+                conclusionP3: 'The complex social, economic, and technological systems we know—which support 8 billion people—are highly likely to disintegrate under the cascading impacts of food crises, mass migration, and resource wars. Survivors would be reduced to a fragmented, pre-industrial state of existence, struggling on a hostile planet.',
+                conclusionP4: 'So while Arctic melting won\'t cause human "extinction," it is very likely to cause the end of "civilization" as we know it. That, in itself, is an existential failure.',
+                chart: {
+                    title: 'Projected Contribution to Sea Level Rise from Ice Sheet Melt by 2100',
+                    yAxisLabel: 'Sea Level Rise (cm)',
+                    labels: ['Greenland Ice Sheet', 'Antarctic Ice Sheet'],
+                    datasetLow: 'Low Emissions Scenario (cm)',
+                    datasetHigh: 'High Emissions Scenario (cm)',
+                }
+            }
+        };
+
+        const langSwitcher = document.getElementById('lang-switcher');
+        
+        function setLanguage(lang) {
+            // Set lang attribute on HTML element
+            document.documentElement.lang = lang;
+            
+            // Update button text
+            langSwitcher.textContent = lang === 'en' ? '中文' : 'English';
+            
+            // Get all elements with data-translate attribute
+            const elements = document.querySelectorAll('[data-translate]');
+            
+            elements.forEach(el => {
+                const key = el.dataset.translate;
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Update chart
+            createOrUpdateChart(lang);
+        }
+
+        langSwitcher.addEventListener('click', () => {
+            const currentLang = document.documentElement.lang;
+            const newLang = currentLang === 'en' ? 'zh-Hant' : 'en';
+            setLanguage(newLang);
+        });
+
+        // Initialize the page with the default language
+        document.addEventListener('DOMContentLoaded', () => {
+            createOrUpdateChart(document.documentElement.lang);
+        });
+
+    </script>
+</body>
+</html>
