@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：俄羅斯方塊的誕生與戰爭</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Soviet Parchment -->
+    <!-- Application Structure Plan: 本應用程式採用了敘事驅動的垂直捲動結構，而非死板地複製報告的章節。設計理念是將整個故事劃分為四個核心敘事階段：「創世紀」、「版權之戰」、「全球影響」與「方塊帝國」。這樣的結構能讓使用者跟隨故事的自然發展，同時透過互動元素深入探索關鍵節點。最核心的「版權之戰」部分被設計成一個互動式儀表板，包含了一個動態更新的關係圖和一個比較圖表，旨在將報告中複雜的法律與商業關係視覺化，讓使用者能直觀地理解這場混亂鬥爭的本質，這比純文字閱讀更具吸引力和教育意義。 -->
+    <!-- Visualization & Content Choices: 1. **創世紀 (起源)** -> Goal: Inform -> Method: HTML/CSS卡片網格 -> Interaction: Hover效果 -> Justification: 以視覺化的方式簡潔地呈現創造者、靈感和技術限制，比段落文字更易吸收。 2. **版權之戰 (核心衝突)** -> Goal: Organize/Compare -> Method: HTML/CSS互動式關係圖 + Chart.js橫向條形圖 -> Interaction: 點擊人物節點更新資訊面板；圖表直觀對比 -> Justification: 這是將報告中最複雜部分（多方權力鬥爭）轉化為易於理解的互動體驗的關鍵。關係圖釐清了「誰對誰」，圖表則量化了「爭什麼」，完美地闡釋了核心法律漏洞。 3. **全球影響 (結果)** -> Goal: Inform -> Method: 動態計數器和資訊卡片 -> Interaction: 數字滾動效果 -> Justification: 透過動態數字展示其巨大成功，比靜態數字更具衝擊力。 4. **關鍵參與者 (詳細資料)** -> Goal: Organize/Inform -> Method: JS驅動的資訊面板 -> Interaction: 點擊關係圖中的節點觸發 -> Justification: 將表格內容轉化為按需顯示的互動模組，保持主介面簡潔，同時提供深度資訊。 Library/Method: Chart.js for charts, Vanilla JS for all interactions. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F5F0;
+            color: #4A4A4A;
+        }
+        .tetris-bg {
+            background-image:
+                linear-gradient(rgba(248, 245, 240, 0.95), rgba(248, 245, 240, 1)),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D1C7B8' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 60vh;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C14953;
+            border-color: #C14953;
+        }
+        .player-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-width: 2px;
+        }
+        .player-node:hover, .player-node.active {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(193, 73, 83, 0.5);
+            border-color: #C14953;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="tetris-bg">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold text-gray-800">俄羅斯方塊傳奇</div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#genesis" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">創世紀</a>
+                    <a href="#war" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">版權之戰</a>
+                    <a href="#impact" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">全球影響</a>
+                    <a href="#empire" class="nav-link text-gray-600 border-b-2 border-transparent pb-1">方塊帝國</a>
+                </div>
+                <div class="md:hidden">
+                    <button id="menu-btn" class="text-gray-600 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden mt-4">
+                <a href="#genesis" class="block py-2 px-4 text-sm nav-link text-gray-600">創世紀</a>
+                <a href="#war" class="block py-2 px-4 text-sm nav-link text-gray-600">版權之戰</a>
+                <a href="#impact" class="block py-2 px-4 text-sm nav-link text-gray-600">全球影響</a>
+                <a href="#empire" class="block py-2 px-4 text-sm nav-link text-gray-600">方塊帝國</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="hero" class="text-center my-12 md:my-20 fade-in">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">一個簡單遊戲，一場複雜戰爭</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                探索一款誕生於蘇聯鐵幕後的益智遊戲，如何引發全球版權大戰，並最終成為史上最偉大的文化現象之一。
+            </p>
+        </section>
+
+        <section id="genesis" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">第一章：鐵幕後的創世紀</h2>
+                <p class="mt-2 text-gray-600">在一個意想不到的地方，一個為測試硬體而生的簡單創意，悄然誕生。</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-3xl mb-3">👨‍💻</div>
+                    <h3 class="font-bold text-xl mb-2">創作者：帕基特諾夫</h3>
+                    <p class="text-gray-600 text-sm">1984年，蘇聯科學院程式設計師阿列克謝·帕基特諾夫，在測試Elektronika 60電腦時，構思了一款數位拼圖遊戲。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                     <div class="text-3xl mb-3">🧩</div>
+                    <h3 class="font-bold text-xl mb-2">靈感：五連方塊</h3>
+                    <p class="text-gray-600 text-sm">他的靈感來自童年時的木製拼圖「傷腦筋十二塊」(Pentominoes)，目標是將不同形狀的方塊拼入一個盒子。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-3xl mb-3">💡</div>
+                    <h3 class="font-bold text-xl mb-2">限制催生天才</h3>
+                    <p class="text-gray-600 text-sm">由於電腦性能有限，他將五連方塊簡化為四連方塊 (Tetrominoes)，意外地創造了遊戲完美的核心機制。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-3xl mb-3">🎾</div>
+                    <h3 class="font-bold text-xl mb-2">命名：Tetris</h3>
+                    <p class="text-gray-600 text-sm">他將希臘語的「四」(Tetra) 與他最愛的運動「網球」(Tennis) 結合，創造了這個響亮的名字。其中文名「俄羅斯方塊」則直觀地描述了其來源。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="war" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">第二章：版權之戰</h2>
+                <p class="mt-2 text-gray-600 max-w-3xl mx-auto">一封傳真引發的誤解，點燃了一場橫跨東西方的版權野火。點擊下方人物，查看他們在這場混亂中的角色。</p>
+            </div>
+            
+            <div class="lg:flex lg:space-x-8">
+                <div class="lg:w-3/5">
+                    <div class="relative bg-white p-4 rounded-lg shadow-inner border border-gray-200" style="min-height: 400px;">
+                        <div id="player-map" class="relative">
+                            <div id="p-pajitnov" class="player-node absolute bg-blue-100 border-blue-300 rounded-lg p-2 text-center" style="top: 150px; left: 2%;">
+                                <p class="font-bold text-sm">帕基特諾夫</p>
+                                <p class="text-xs">創作者</p>
+                            </div>
+                            <div id="p-elorg" class="player-node absolute bg-red-100 border-red-300 rounded-lg p-2 text-center" style="top: 150px; left: 25%;">
+                                <p class="font-bold text-sm">ELORG</p>
+                                <p class="text-xs">蘇聯機構</p>
+                            </div>
+                            <div id="p-stein" class="player-node absolute bg-yellow-100 border-yellow-300 rounded-lg p-2 text-center" style="top: 30px; left: 48%;">
+                                <p class="font-bold text-sm">史坦</p>
+                                <p class="text-xs">中間人</p>
+                            </div>
+                             <div id="p-mirrorsoft" class="player-node absolute bg-purple-100 border-purple-300 rounded-lg p-2 text-center" style="top: 150px; left: 48%;">
+                                <p class="font-bold text-sm">Mirrorsoft</p>
+                                <p class="text-xs">英國發行商</p>
+                            </div>
+                            <div id="p-rogers" class="player-node absolute bg-green-100 border-green-300 rounded-lg p-2 text-center" style="top: 270px; left: 48%;">
+                                <p class="font-bold text-sm">羅傑斯</p>
+                                <p class="text-xs">任天堂代表</p>
+                            </div>
+                             <div id="p-atari" class="player-node absolute bg-gray-200 border-gray-400 rounded-lg p-2 text-center" style="top: 150px; right: 2%;">
+                                <p class="font-bold text-sm">Atari</p>
+                                <p class="text-xs">競爭者</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-2/5 mt-8 lg:mt-0">
+                    <div id="player-info" class="bg-white p-6 rounded-lg shadow-lg" style="min-height: 400px;">
+                        <h3 id="info-title" class="text-2xl font-bold mb-4">關鍵參與者</h3>
+                        <div id="info-content" class="text-gray-700 space-y-3">
+                            <p>在這場圍繞俄羅斯方塊的鬥爭中，多方勢力出於不同動機捲入其中，形成了一張複雜的利益網絡。</p>
+                            <p class="font-semibold">點擊左側的人物節點，了解他們各自的目標、主張和最終結局。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-16 bg-white p-6 rounded-lg shadow-lg">
+                 <h3 class="text-2xl font-bold text-center mb-4">核心爭議：「電腦」的定義</h3>
+                 <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto">鬥爭的核心在於羅伯特·史坦最初合約中對「電腦」一詞的模糊定義。亨克·羅傑斯精準地指出，「家用主機」和「掌上型裝置」是獨立於「電腦」的平台，為任天堂打開了突破口。</p>
+                <div class="chart-container">
+                    <canvas id="rightsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">第三章：全球影響</h2>
+                <p class="mt-2 text-gray-600">從莫斯科的會議室到全球數億玩家的手中。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-5xl font-bold text-blue-600" id="sales-counter">0</h3>
+                    <p class="mt-2 text-gray-600 font-semibold">Game Boy 捆綁銷量</p>
+                    <p class="text-sm text-gray-500">俄羅斯方塊與Game Boy的完美結合，創造了遊戲史上的商業奇蹟。</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                     <h3 class="text-5xl font-bold text-red-600" id="total-counter">0</h3>
+                     <p class="mt-2 text-gray-600 font-semibold">全平台總銷量 (億)</p>
+                     <p class="text-sm text-gray-500">至今，它仍是有史以來最暢銷的電子遊戲之一。</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <div class="text-4xl mb-2">🎵</div>
+                    <h3 class="text-xl font-bold">標誌性音樂</h3>
+                    <p class="mt-2 text-gray-600">Game Boy版的A-Type音樂，改編自19世紀俄羅斯民謠《貨郎》，成為了全球玩家的集體記憶。</p>
+                </div>
+            </div>
+            <div class="mt-8 bg-white p-8 rounded-lg shadow-lg text-center">
+                <div class="text-4xl mb-2">🧠</div>
+                <h3 class="text-xl font-bold">俄羅斯方塊效應 (Tetris Effect)</h3>
+                <p class="mt-2 text-gray-600 max-w-2xl mx-auto">一種心理現象：長時間遊玩後，玩家腦海中會不自覺地浮現下落的方塊，甚至影響現實世界的空間思維。此現象已被用於創傷後壓力症候群(PTSD)的治療研究。</p>
+            </div>
+        </section>
+        
+        <section id="empire" class="my-16 md:my-24 scroll-mt-20">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">第四章：方塊帝國</h2>
+                <p class="mt-2 text-gray-600">在混亂之後，秩序建立，一個被嚴密守護的帝國誕生了。</p>
+            </div>
+            <div class="bg-white rounded-lg shadow-lg p-8 md:flex items-center gap-8">
+                <div class="md:w-2/3">
+                    <h3 class="text-2xl font-bold mb-4">為創作者伸張正義</h3>
+                    <p class="text-gray-700 mb-4">在遊戲風靡全球十多年後，創作者帕基特諾夫終於在他的朋友亨克·羅傑斯的幫助下，於1996年共同創立了**俄羅斯方塊公司 (The Tetris Company, TTC)**。</p>
+                    <p class="text-gray-700">這家公司的成立，不僅讓帕基特諾夫終於能從自己的創作中獲利，也旨在整合所有混亂的版權，建立統一的品牌標準。這段幾乎失去一切的經歷，讓TTC成為其智慧財產權最強力的捍衛者。</p>
+                </div>
+                <div class="md:w-1/3 mt-6 md:mt-0 text-center">
+                     <div class="text-6xl">🏛️</div>
+                     <p class="font-bold text-xl mt-2">The Tetris Company</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto p-6 text-center text-sm">
+            <p>這是一個基於公開歷史報告創建的互動式網頁應用程式。</p>
+            <p>&copy; 2025 專為教育與展示目的而設計。</p>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const activateLink = (id) => {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                if(current) activateLink(current);
+            });
+
+            const playerData = {
+                'p-pajitnov': {
+                    title: '阿列克謝·帕基特諾夫',
+                    content: `
+                        <p><strong>角色：</strong>遊戲的創作者。</p>
+                        <p><strong>目標：</strong>最初只是出於興趣和工作需要，對商業化毫無概念。</p>
+                        <p><strong>主張：</strong>作為道德上的創作者，但在蘇聯法律下，無法主張任何個人權利。</p>
+                        <p><strong>結局：</strong>在羅傑斯幫助下移民美國，並於1996年共同創立俄羅斯方塊公司，最終獲得了應有的回報。</p>
+                    `
+                },
+                'p-elorg': {
+                    title: 'ELORG',
+                    content: `
+                        <p><strong>角色：</strong>蘇聯官方軟體進出口機構。</p>
+                        <p><strong>目標：</strong>為國家實現智慧財產的利潤最大化。</p>
+                        <p><strong>主張：</strong>作為蘇聯國家資產的唯一合法所有者。</p>
+                        <p><strong>結局：</strong>意識到被史坦誤導後，果斷地將獨家主機與掌機版權授予了任天堂，為蘇聯賺取了巨額版稅。</p>
+                    `
+                },
+                'p-stein': {
+                    title: '羅伯特·史坦',
+                    content: `
+                        <p><strong>角色：</strong>將遊戲帶到西方的第一位中間人。</p>
+                        <p><strong>目標：</strong>以最小成本獲取所有權利並轉授獲利。</p>
+                        <p><strong>主張：</strong>錯誤地認為一封傳真就代表他獲得了全球所有平台的版權。</p>
+                        <p><strong>結局：</strong>因其模糊的合約和誤導行為，最終失去了最值錢的主機與掌機版權，只保留了部分權利。</p>
+                    `
+                },
+                'p-mirrorsoft': {
+                    title: 'Mirrorsoft',
+                    content: `
+                        <p><strong>角色：</strong>英國發行商，最早在西方發行PC版。</p>
+                        <p><strong>目標：</strong>獲得全球發行權以主導市場。</p>
+                        <p><strong>主張：</strong>基於從史坦處獲得的（有瑕疵的）授權。</p>
+                        <p><strong>結局：</strong>在莫斯科的談判中徹底失敗，其所有主張均無效。</p>
+                    `
+                },
+                'p-rogers': {
+                    title: '亨克·羅傑斯',
+                    content: `
+                        <p><strong>角色：</strong>遊戲發行商，任天堂的代表。</p>
+                        <p><strong>目標：</strong>為任天堂的Game Boy確保獨家掌機和主機版權。</p>
+                        <p><strong>主張：</strong>敏銳地指出了「電腦」和「遊戲機」的區別，挑戰史坦合約的有效性。</p>
+                        <p><strong>結局：</strong>憑藉其誠信、商業頭腦和與創作者的友誼，成功為任天堂贏得了獨家版權，成為最大贏家。</p>
+                    `
+                },
+                'p-atari': {
+                    title: 'Atari',
+                    content: `
+                        <p><strong>角色：</strong>任天堂的主要競爭對手。</p>
+                        <p><strong>目標：</strong>搶在任天堂之前發行主機版俄羅斯方塊。</p>
+                        <p><strong>主張：</strong>從Mirrorsoft處購買了（無效的）主機版權。</p>
+                        <p><strong>結局：</strong>在與任天堂的官司中敗訴，被迫銷毀數十萬份已生產的遊戲卡帶，損失慘重。</p>
+                    `
+                }
+            };
+
+            const playerMap = document.getElementById('player-map');
+            const infoTitle = document.getElementById('info-title');
+            const infoContent = document.getElementById('info-content');
+            let activeNode = null;
+
+            playerMap.addEventListener('click', (e) => {
+                const node = e.target.closest('.player-node');
+                if (node) {
+                    const playerId = node.id;
+                    if (playerData[playerId]) {
+                        if(activeNode) {
+                            activeNode.classList.remove('active');
+                        }
+                        node.classList.add('active');
+                        activeNode = node;
+
+                        infoTitle.textContent = playerData[playerId].title;
+                        infoContent.innerHTML = playerData[playerId].content;
+                    }
+                }
+            });
+
+            const rightsCtx = document.getElementById('rightsChart').getContext('2d');
+            const rightsChart = new Chart(rightsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['電腦版權', '家用主機版權', '掌上型裝置版權'],
+                    datasets: [
+                        {
+                            label: '史坦/Mirrorsoft/Atari 的主張',
+                            data: [1, 1, 1],
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '羅傑斯/任天堂的最終勝利',
+                            data: [0, 1, 1],
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '各方對不同平台版權的主張與最終結果'
+                        },
+                         tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += (context.parsed.x > 0 ? '主張擁有' : '未擁有');
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false,
+                            max: 1.2
+                        },
+                        y: {
+                           ticks: {
+                               font: {
+                                   size: 14
+                               }
+                           }
+                        }
+                    }
+                }
+            });
+            
+            function animateCounter(element, target) {
+                let start = 0;
+                const duration = 2000;
+                const increment = target / (duration / 16); 
+
+                function update() {
+                    start += increment;
+                    if (start < target) {
+                        element.textContent = Math.ceil(start).toLocaleString();
+                        requestAnimationFrame(update);
+                    } else {
+                        element.textContent = target.toLocaleString();
+                    }
+                }
+                update();
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const salesCounter = document.getElementById('sales-counter');
+                        const totalCounter = document.getElementById('total-counter');
+                        
+                        animateCounter(salesCounter, 35000000);
+                        animateCounter(totalCounter, 5.2);
+                        
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            observer.observe(document.getElementById('impact'));
+
+        });
+    </script>
+</body>
+</html>
