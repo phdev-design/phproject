@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-translate="page_title">資訊圖表：捆綁銷售的藝術與法律</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Brilliant Blues -->
+    <!-- Application Structure Plan: This infographic tells a linear story about bundling, transforming the dense report into a digestible narrative. It starts with a simple hook ("The Basics") using visual cards to define bundling vs. tying. It then explores the core conflict ("The Two Sides of the Coin"), using icons and a donut chart to explain business drivers and legal risks. The narrative expands to a global view ("A Global Minefield") with a comparative bar chart for different legal regimes. A real-world example ("The Microsoft Saga") is presented as a visual timeline. The infographic concludes with actionable advice ("The Compliance Playbook") using checklist-style layouts. This structure prioritizes understanding and engagement over a direct mapping of the report's chapters. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Core definitions (Bundling vs. Tying) -> Goal: Inform -> Viz: Styled cards with Unicode icons (HTML/CSS). Justification: Clear, side-by-side comparison for basic concepts.
+        - Report Info: Market Power concept -> Goal: Inform -> Viz: Donut Chart (Chart.js/Canvas). Justification: Visually represents the abstract concept of a dominant market share.
+        - Report Info: Global legal frameworks (US, EU, TW) -> Goal: Compare -> Viz: Grouped Bar Chart (Chart.js/Canvas). Justification: Effectively compares multiple criteria (market power, coercion, etc.) across different jurisdictions.
+        - Report Info: Microsoft Case History -> Goal: Show Change -> Viz: Horizontal Timeline (HTML/CSS). Justification: Intuitively displays the chronological progression of key legal battles.
+        - Report Info: Harm Theory (Leverage -> Foreclosure) -> Goal: Organize -> Viz: Flowchart (HTML/CSS with Unicode arrows). Justification: Simplifies the complex legal theory into a clear, step-by-step process.
+        - Report Info: Compliance Checklist -> Goal: Organize -> Viz: Styled list with Unicode icons (HTML/CSS). Justification: Presents actionable advice in an easy-to-scan format.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; /* Added Inter for English */
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #7a5195;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 relative">
+
+        <!-- Language Toggle Button -->
+        <div class="absolute top-4 right-4 z-10">
+            <button id="lang-toggle" class="bg-white px-4 py-2 rounded-lg shadow-md text-[#003f5c] font-semibold border hover:bg-slate-100 transition-colors">
+                English
+            </button>
+        </div>
+
+        <header class="text-center mb-12 md:mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#003f5c] mb-4" data-translate="main_title">捆綁銷售的藝術與法律</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-translate="subtitle">一份將複雜商業策略與全球法律風險可視化的指南</p>
+        </header>
+
+        <section class="mb-12 md:mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-translate="section1_title">基本概念：捆綁 vs 搭售</h2>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#ffa600]">
+                    <h3 class="font-bold text-2xl mb-3 text-[#374c80]" data-translate="bundling_title">捆綁銷售 (Bundling) ✅</h3>
+                    <p class="text-gray-600" data-translate="bundling_desc">一種常見的市場策略，將兩件或以上的產品打包成一個具吸引力的「套餐」出售，通常被視為<strong class="text-[#374c80]" data-translate="bundling_highlight">促進競爭</strong>的行為。</p>
+                    <p class="mt-4 font-semibold text-lg" data-translate="bundling_example">例子：麥當勞超值套餐</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-[#ef5675]">
+                    <h3 class="font-bold text-2xl mb-3 text-[#7a5195]" data-translate="tying_title">搭售 (Tying) ⚠️</h3>
+                    <p class="text-gray-600" data-translate="tying_desc">一種具「強制性」的捆綁，購買A產品的前提是<strong class="text-[#7a5195]" data-translate="tying_highlight_1">必須</strong>購買B產品。因可能<strong class="text-[#7a5195]" data-translate="tying_highlight_2">排除競爭</strong>而面臨法律風險。</p>
+                    <p class="mt-4 font-semibold text-lg" data-translate="tying_example">例子：打印機商要求必須使用原廠墨盒</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 md:mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-translate="section2_title">一枚硬幣的兩面：商業利益與法律風險</h2>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-6 text-[#374c80]" data-translate="why_bundle_title">企業為何捆綁？</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start"><span class="text-2xl mr-3">📈</span><div data-translate="why_bundle_1"><strong class="block">提升營收</strong><span>提高平均訂單價值 (AOV)。</span></div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3">📦</span><div data-translate="why_bundle_2"><strong class="block">優化庫存</strong><span>將滯銷品與熱門品捆綁銷售。</span></div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3">📢</span><div data-translate="why_bundle_3"><strong class="block">降低成本</strong><span>集中資源進行營銷與分銷。</span></div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3">🚀</span><div data-translate="why_bundle_4"><strong class="block">推廣新品</strong><span>利用成熟產品帶動新產品。</span></div></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold text-center mb-2 text-[#7a5195]" data-translate="risk_title">風險從何而來？</h3>
+                    <p class="text-center text-gray-600 mb-4" data-translate="risk_subtitle">當擁有「市場支配力」的企業進行搭售時...</p>
+                    <div class="chart-container" style="height:250px; max-width:250px;">
+                        <canvas id="marketPowerChart"></canvas>
+                    </div>
+                     <p class="text-center text-xs text-gray-500 mt-2" data-translate="risk_chart_caption">一個在主產品市場擁有巨大份額的企業，可能具備濫用市場力的前提。</p>
+                </div>
+            </div>
+             <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-6 text-[#7a5195]" data-translate="harm_chain_title">反競爭的損害鏈條</h3>
+                <div class="flex flex-col md:flex-row items-center justify-around text-center">
+                    <div class="p-4">
+                        <div class="text-5xl mb-2">①</div>
+                        <h4 class="font-bold text-lg" data-translate="harm_chain_1_title">市場力槓桿</h4>
+                        <p class="text-sm text-gray-600" data-translate="harm_chain_1_desc">將A產品的優勢<br>延伸到B產品市場</p>
+                    </div>
+                    <div class="flowchart-arrow my-4 md:my-0 md:mx-4">→</div>
+                     <div class="p-4">
+                        <div class="text-5xl mb-2">②</div>
+                        <h4 class="font-bold text-lg" data-translate="harm_chain_2_title">市場封鎖</h4>
+                        <p class="text-sm text-gray-600" data-translate="harm_chain_2_desc">B產品市場的競爭者<br>無法觸及客戶</p>
+                    </div>
+                     <div class="flowchart-arrow my-4 md:my-0 md:mx-4">→</div>
+                     <div class="p-4">
+                        <div class="text-5xl mb-2">③</div>
+                        <h4 class="font-bold text-lg" data-translate="harm_chain_3_title">損害競爭</h4>
+                        <p class="text-sm text-gray-600" data-translate="harm_chain_3_desc">消費者選擇減少<br>價格更高、創新更少</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-12 md:mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-2" data-translate="section3_title">全球法律競技場</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto" data-translate="section3_subtitle">美國、歐盟與台灣對非法搭售的認定標準雖有共同邏輯，但在嚴格程度上各有側重。</p>
+            <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+                <div class="chart-container" style="height:400px; max-width: 800px;">
+                    <canvas id="legalFrameworkChart"></canvas>
+                </div>
+                <p class="text-center text-xs text-gray-500 mt-2" data-translate="legal_chart_caption">此圖表為三大構成要件的法律嚴格度示意性比較（分數越高越嚴格）。</p>
+            </div>
+        </section>
+
+        <section class="mb-12 md:mb-20">
+             <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-translate="section4_title">案例研究：微軟的數十年戰爭</h2>
+            <div class="relative w-full p-4">
+                <div class="absolute left-1/2 top-0 bottom-0 w-1 bg-[#7a5195]/30 hidden md:block"></div>
+                
+                <div class="relative mb-8 flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8 md:text-right">
+                        <div class="bg-white p-4 rounded-lg shadow-lg">
+                            <p class="text-gray-500 text-sm">1990s</p>
+                            <h3 class="font-bold text-xl text-[#374c80]" data-translate="case1_title">Internet Explorer 瀏覽器案</h3>
+                            <p class="text-sm" data-translate="case1_desc">指控：將IE與Windows捆綁，打擊對手Netscape。確立了技術性搭售的判斷標準。</p>
+                        </div>
+                    </div>
+                     <div class="absolute left-1/2 -ml-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#7a5195] rounded-full border-4 border-white hidden md:block"></div>
+                    <div class="md:w-1/2 md:pl-8 mt-4 md:mt-0"></div>
+                </div>
+
+                <div class="relative mb-8 flex flex-col md:flex-row items-center">
+                     <div class="md:w-1/2 md:pr-8 md:text-right mt-4 md:mt-0 order-2 md:order-1"></div>
+                      <div class="absolute left-1/2 -ml-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#7a5195] rounded-full border-4 border-white hidden md:block"></div>
+                    <div class="md:w-1/2 md:pl-8 order-1 md:order-2">
+                         <div class="bg-white p-4 rounded-lg shadow-lg">
+                            <p class="text-gray-500 text-sm">2000s</p>
+                            <h3 class="font-bold text-xl text-[#374c80]" data-translate="case2_title">Windows Media Player 案</h3>
+                            <p class="text-sm" data-translate="case2_desc">歐盟指控微軟捆綁播放器。最終被處以巨額罰款並被要求提供不含WMP的Windows版本。</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="relative flex flex-col md:flex-row items-center">
+                    <div class="md:w-1/2 md:pr-8 md:text-right">
+                         <div class="bg-white p-4 rounded-lg shadow-lg">
+                            <p class="text-gray-500 text-sm">2020s</p>
+                            <h3 class="font-bold text-xl text-[#374c80]" data-translate="case3_title">Microsoft Teams 軟件案</h3>
+                            <p class="text-sm" data-translate="case3_desc">歐盟對Teams與Office 365捆綁展開調查。微軟主動在全球「解綁」以規避處罰。</p>
+                        </div>
+                    </div>
+                     <div class="absolute left-1/2 -ml-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#7a5195] rounded-full border-4 border-white hidden md:block"></div>
+                    <div class="md:w-1/2 md:pl-8 mt-4 md:mt-0"></div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2 class="text-3xl font-bold text-center text-[#003f5c] mb-8" data-translate="section5_title">合規指南：企業的行動清單</h2>
+            <div class="max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <ul class="space-y-4">
+                    <li class="flex items-start text-lg"><span class="text-green-500 mr-3 text-2xl">✔</span><div data-translate="guide1"><strong class="text-[#003f5c]">評估市場地位：</strong>法律風險與市場力量成正比。</div></li>
+                    <li class="flex items-start text-lg"><span class="text-green-500 mr-3 text-2xl">✔</span><div data-translate="guide2"><strong class="text-[#003f5c]">避免強制性：</strong>優先採用「混合捆綁」，給予消費者選擇權。</div></li>
+                    <li class="flex items-start text-lg"><span class="text-green-500 mr-3 text-2xl">✔</span><div data-translate="guide3"><strong class="text-[#003f5c]">記錄正當理由：</strong>證明捆綁是為了提升效率或保障品質，而非排擠對手。</div></li>
+                    <li class="flex items-start text-lg"><span class="text-green-500 mr-3 text-2xl">✔</span><div data-translate="guide4"><strong class="text-[#003f5c]">合理定價：</strong>確保折扣合理，單獨購買的選項在經濟上可行。</div></li>
+                    <li class="flex items-start text-lg"><span class="text-green-500 mr-3 text-2xl">✔</span><div data-translate="guide5"><strong class="text-[#003f5c]">持續監控：</strong>定期審查策略，根據市場地位變化動態調整。</div></li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+
+    <footer class="text-center py-8 text-sm text-gray-500">
+        <p data-translate="footer_text">本資訊圖表基於《捆綁銷售的藝術與法律》報告生成。僅供參考。</p>
+    </footer>
+
+    <script>
+        // Store all translations in one object
+        const translations = {
+            'en': {
+                'page_title': 'Infographic: The Art and Law of Bundling',
+                'main_title': 'The Art & Law of Bundling',
+                'subtitle': 'A Visual Guide to Complex Business Strategies and Global Legal Risks',
+                'section1_title': 'The Basics: Bundling vs. Tying',
+                'bundling_title': 'Bundling ✅',
+                'bundling_desc': 'A common marketing strategy where two or more products are sold together as an attractive package, often considered <strong class="text-[#374c80]">pro-competitive</strong>.',
+                'bundling_example': 'Example: A McDonald\'s Extra Value Meal',
+                'tying_title': 'Tying ⚠️',
+                'tying_desc': 'A "compulsory" bundle where buying product A is conditional on <strong class="text-[#7a5195]">also</strong> buying product B. Faces legal risks for potentially <strong class="text-[#7a5195]">foreclosing competition</strong>.',
+                'tying_example': 'Example: A printer maker requiring use of its own ink cartridges',
+                'section2_title': 'Two Sides of the Coin: Business Benefits vs. Legal Risks',
+                'why_bundle_title': 'Why Do Companies Bundle?',
+                'why_bundle_1': '<strong class="block">Boost Revenue</strong><span>Increase Average Order Value (AOV).</span>',
+                'why_bundle_2': '<strong class="block">Optimize Inventory</strong><span>Bundle slow-moving items with bestsellers.</span>',
+                'why_bundle_3': '<strong class="block">Reduce Costs</strong><span>Consolidate marketing and distribution efforts.</span>',
+                'why_bundle_4': '<strong class="block">Promote New Products</strong><span>Leverage established products to introduce new ones.</span>',
+                'risk_title': 'Where Does the Risk Come From?',
+                'risk_subtitle': 'When a company with "market power" engages in tying...',
+                'risk_chart_caption': 'A company with a large share of the primary product market may have the prerequisite for abuse of market power.',
+                'harm_chain_title': 'The Chain of Anti-competitive Harm',
+                'harm_chain_1_title': 'Leverage Market Power',
+                'harm_chain_1_desc': 'Extend dominance from<br>Product A to Product B\'s market',
+                'harm_chain_2_title': 'Market Foreclosure',
+                'harm_chain_2_desc': 'Competitors in Product B\'s market<br>cannot reach customers',
+                'harm_chain_3_title': 'Harm to Competition',
+                'harm_chain_3_desc': 'Less consumer choice,<br>higher prices, less innovation',
+                'section3_title': 'The Global Legal Arena',
+                'section3_subtitle': 'While the US, EU, and Taiwan share a common logic for defining illegal tying, they differ in the stringency of their standards.',
+                'legal_chart_caption': 'This is a schematic comparison of the legal stringency for the three main elements (higher score means stricter).',
+                'section4_title': 'Case Study: The Decades-Long War of Microsoft',
+                'case1_title': 'Internet Explorer Case',
+                'case1_desc': 'Allegation: Bundling IE with Windows to crush competitor Netscape. Established key standards for technological tying.',
+                'case2_title': 'Windows Media Player Case',
+                'case2_desc': 'The EU accused Microsoft of bundling its media player. Resulted in massive fines and a requirement to offer a version of Windows without WMP.',
+                'case3_title': 'Microsoft Teams Case',
+                'case3_desc': 'The EU opened an investigation into the bundling of Teams with Office 365. Microsoft proactively "unbundled" them globally to avoid penalties.',
+                'section5_title': 'The Compliance Playbook: An Action Checklist for Businesses',
+                'guide1': '<strong class="text-[#003f5c]">Assess Market Position:</strong> Legal risk is proportional to market power.',
+                'guide2': '<strong class="text-[#003f5c]">Avoid Coercion:</strong> Prefer "mixed bundling" that gives consumers a choice.',
+                'guide3': '<strong class="text-[#003f5c]">Document Pro-competitive Justifications:</strong> Prove the bundle enhances efficiency or quality, not just excludes rivals.',
+                'guide4': '<strong class="text-[#003f5c]">Price Reasonably:</strong> Ensure discounts are fair and standalone options are economically viable.',
+                'guide5': '<strong class="text-[#003f5c]">Monitor and Review:</strong> Regularly review the strategy and adjust based on changes in market position.',
+                'footer_text': 'This infographic is generated based on the report "The Art and Law of Bundling." For informational purposes only.',
+                'lang_toggle_button': '中文',
+                'market_power_chart_labels': ['Dominant Firm', 'Other Competitors'],
+                'market_power_chart_title': 'Market Share',
+                'legal_chart_title': 'Comparison of Antitrust Scrutiny in Major Jurisdictions (Schematic)',
+                'legal_chart_labels': ['Market Power Threshold', 'Proof of Coercion', 'Proof of Harm to Competition'],
+                'legal_chart_y_axis_label': 'Stringency Score (1-5)'
+            },
+            'zh-Hant': {
+                'page_title': '資訊圖表：捆綁銷售的藝術與法律',
+                'main_title': '捆綁銷售的藝術與法律',
+                'subtitle': '一份將複雜商業策略與全球法律風險可視化的指南',
+                'section1_title': '基本概念：捆綁 vs 搭售',
+                'bundling_title': '捆綁銷售 (Bundling) ✅',
+                'bundling_desc': '一種常見的市場策略，將兩件或以上的產品打包成一個具吸引力的「套餐」出售，通常被視為<strong class="text-[#374c80]">促進競爭</strong>的行為。',
+                'bundling_example': '例子：麥當勞超值套餐',
+                'tying_title': '搭售 (Tying) ⚠️',
+                'tying_desc': '一種具「強制性」的捆綁，購買A產品的前提是<strong class="text-[#7a5195]">必須</strong>購買B產品。因可能<strong class="text-[#7a5195]">排除競爭</strong>而面臨法律風險。',
+                'tying_example': '例子：打印機商要求必須使用原廠墨盒',
+                'section2_title': '一枚硬幣的兩面：商業利益與法律風險',
+                'why_bundle_title': '企業為何捆綁？',
+                'why_bundle_1': '<strong class="block">提升營收</strong><span>提高平均訂單價值 (AOV)。</span>',
+                'why_bundle_2': '<strong class="block">優化庫存</strong><span>將滯銷品與熱門品捆綁銷售。</span>',
+                'why_bundle_3': '<strong class="block">降低成本</strong><span>集中資源進行營銷與分銷。</span>',
+                'why_bundle_4': '<strong class="block">推廣新品</strong><span>利用成熟產品帶動新產品。</span>',
+                'risk_title': '風險從何而來？',
+                'risk_subtitle': '當擁有「市場支配力」的企業進行搭售時...',
+                'risk_chart_caption': '一個在主產品市場擁有巨大份額的企業，可能具備濫用市場力的前提。',
+                'harm_chain_title': '反競爭的損害鏈條',
+                'harm_chain_1_title': '市場力槓桿',
+                'harm_chain_1_desc': '將A產品的優勢<br>延伸到B產品市場',
+                'harm_chain_2_title': '市場封鎖',
+                'harm_chain_2_desc': 'B產品市場的競爭者<br>無法觸及客戶',
+                'harm_chain_3_title': '損害競爭',
+                'harm_chain_3_desc': '消費者選擇減少<br>價格更高、創新更少',
+                'section3_title': '全球法律競技場',
+                'section3_subtitle': '美國、歐盟與台灣對非法搭售的認定標準雖有共同邏輯，但在嚴格程度上各有側重。',
+                'legal_chart_caption': '此圖表為三大構成要件的法律嚴格度示意性比較（分數越高越嚴格）。',
+                'section4_title': '案例研究：微軟的數十年戰爭',
+                'case1_title': 'Internet Explorer 瀏覽器案',
+                'case1_desc': '指控：將IE與Windows捆綁，打擊對手Netscape。確立了技術性搭售的判斷標準。',
+                'case2_title': 'Windows Media Player 案',
+                'case2_desc': '歐盟指控微軟捆綁播放器。最終被處以巨額罰款並被要求提供不含WMP的Windows版本。',
+                'case3_title': 'Microsoft Teams 軟件案',
+                'case3_desc': '歐盟對Teams與Office 365捆綁展開調查。微軟主動在全球「解綁」以規避處罰。',
+                'section5_title': '合規指南：企業的行動清單',
+                'guide1': '<strong class="text-[#003f5c]">評估市場地位：</strong>法律風險與市場力量成正比。',
+                'guide2': '<strong class="text-[#003f5c]">避免強制性：</strong>優先採用「混合捆綁」，給予消費者選擇權。',
+                'guide3': '<strong class="text-[#003f5c]">記錄正當理由：</strong>證明捆綁是為了提升效率或保障品質，而非排擠對手。',
+                'guide4': '<strong class="text-[#003f5c]">合理定價：</strong>確保折扣合理，單獨購買的選項在經濟上可行。',
+                'guide5': '<strong class="text-[#003f5c]">持續監控：</strong>定期審查策略，根據市場地位變化動態調整。',
+                'footer_text': '本資訊圖表基於《捆綁銷售的藝術與法律》報告生成。僅供參考。',
+                'lang_toggle_button': 'English',
+                'market_power_chart_labels': ['支配地位公司', '其他競爭者'],
+                'market_power_chart_title': '市場份額',
+                'legal_chart_title': '全球主要法域反壟斷審查嚴格度比較 (示意)',
+                'legal_chart_labels': ['市場力門檻', '強制性證明', '競爭損害證明'],
+                'legal_chart_y_axis_label': '嚴格度分數 (1-5)'
+            }
+        };
+
+        // Chart instances
+        let marketPowerChart;
+        let legalFrameworkChart;
+
+        function wrapLabel(str, maxWidth) {
+            if (typeof str !== 'string' || str.length <= maxWidth) {
+                return str;
+            }
+            // Chinese characters don't split by word, so we split by character.
+            const words = /[\u4e00-\u9fa5]/.test(str) ? str.split('') : str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            
+            if (/[\u4e00-\u9fa5]/.test(str)) { // Chinese wrapping logic
+                 words.forEach(word => {
+                    if ((currentLine + word).length > maxWidth) {
+                        lines.push(currentLine.trim());
+                        currentLine = '';
+                    }
+                    currentLine += word;
+                });
+            } else { // English wrapping logic
+                 words.forEach(word => {
+                    if ((currentLine + word).length > maxWidth) {
+                        lines.push(currentLine.trim());
+                        currentLine = word + ' ';
+                    } else {
+                        currentLine += word + ' ';
+                    }
+                });
+            }
+            lines.push(currentLine.trim());
+            return lines.filter(line => line.length > 0);
+        }
+
+        const sharedTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join('');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        function createMarketPowerChart(lang) {
+            if (marketPowerChart) {
+                marketPowerChart.destroy();
+            }
+            const marketPowerCtx = document.getElementById('marketPowerChart').getContext('2d');
+            marketPowerChart = new Chart(marketPowerCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: translations[lang].market_power_chart_labels,
+                    datasets: [{
+                        label: translations[lang].market_power_chart_title,
+                        data: [85, 15],
+                        backgroundColor: ['#7a5195', '#d1d5db'],
+                        borderColor: ['#ffffff'],
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: sharedTooltipOptions.plugins.tooltip
+                    }
+                }
+            });
+        }
+        
+        function createLegalFrameworkChart(lang) {
+            if (legalFrameworkChart) {
+                legalFrameworkChart.destroy();
+            }
+            const legalFrameworkCtx = document.getElementById('legalFrameworkChart').getContext('2d');
+            
+            const labelMaxWidth = lang === 'en' ? 20 : 16;
+            const translatedLabels = translations[lang].legal_chart_labels;
+
+            legalFrameworkChart = new Chart(legalFrameworkCtx, {
+                type: 'bar',
+                data: {
+                    labels: translatedLabels.map(label => wrapLabel(label, labelMaxWidth)),
+                    datasets: [
+                        { label: 'USA', data: [3, 4, 2], backgroundColor: '#374c80' },
+                        { label: 'EU', data: [5, 3, 4], backgroundColor: '#7a5195' },
+                        { label: 'Taiwan', data: [2, 3, 3], backgroundColor: '#ef5675' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: translations[lang].legal_chart_title,
+                            font: { size: 16 },
+                            color: '#003f5c'
+                        },
+                        legend: { position: 'top' },
+                        tooltip: sharedTooltipOptions.plugins.tooltip
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            title: {
+                                display: true,
+                                text: translations[lang].legal_chart_y_axis_label
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchLanguage(lang) {
+            // Set the lang attribute on the HTML tag
+            document.documentElement.lang = lang;
+            
+            // Update all elements with the data-translate attribute
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            
+            // Update charts with new language
+            createMarketPowerChart(lang);
+            createLegalFrameworkChart(lang);
+            
+            // Update the language toggle button text
+            const toggleButton = document.getElementById('lang-toggle');
+            toggleButton.textContent = translations[lang].lang_toggle_button;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentLang = 'zh-Hant'; // Default language
+
+            // Initial setup
+            switchLanguage(currentLang);
+
+            // Setup toggle button
+            const toggleButton = document.getElementById('lang-toggle');
+            toggleButton.addEventListener('click', () => {
+                currentLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                switchLanguage(currentLang);
+            });
+        });
+    </script>
+</body>
+</html>
