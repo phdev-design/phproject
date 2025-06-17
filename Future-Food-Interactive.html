@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="page_title">未來食材互動探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+        此專案是一個單頁式、多區塊佈局的互動網頁，具有固定的導航欄。
+        結構遵循一個敘事邏輯：1. 導論 (吸引)，2. 悖論 (問題)，3. 光譜 (解決方案)，4. 邊界 (挑戰)，5. 結論 (總結)。
+        主要互動功能包括：根據使用者選擇動態更新的圖表，以及可點擊的卡片以顯示詳細資訊，避免資訊過載。
+    -->
+    <style>
+        /* 根據語言設定不同的字體 */
+        body.lang-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.lang-en {
+            font-family: 'Roboto', sans-serif;
+        }
+        .bg-cream { background-color: #FDFBF8; }
+        .bg-light-taupe { background-color: #F3EFEA; }
+        .bg-green-accent { background-color: #A3B18A; }
+        .text-dark-roast { color: #403A3A; }
+        .text-green-deep { color: #588157; }
+        .text-green-accent { color: #A3B18A; }
+        .border-green-accent { border-color: #A3B18A; }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #588157;
+            border-bottom-width: 2px;
+            border-color: #588157;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-cream text-dark-roast">
+
+    <!-- 導航欄 -->
+    <nav class="bg-cream/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-green-deep" data-lang-key="nav_title">食材的未來</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#intro" class="nav-link pb-1" data-lang-key="nav_intro">導論</a>
+                <a href="#paradox" class="nav-link pb-1" data-lang-key="nav_paradox">今日的悖論</a>
+                <a href="#spectrum" class="nav-link pb-1" data-lang-key="nav_spectrum">未來的光譜</a>
+                <a href="#boundaries" class="nav-link pb-1" data-lang-key="nav_boundaries">擴展的邊界</a>
+                <a href="#conclusion" class="nav-link pb-1" data-lang-key="nav_conclusion">我們的選擇</a>
+                <!-- 語言切換按鈕 (桌面版) -->
+                <button id="lang-switcher" class="bg-green-deep text-white text-sm font-semibold py-1 px-3 rounded-full hover:bg-green-accent transition-colors">English</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </div>
+        <!-- 行動版選單 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-cream shadow-lg">
+            <a href="#intro" class="block py-2 px-6 text-center nav-link" data-lang-key="nav_intro_mobile">導論</a>
+            <a href="#paradox" class="block py-2 px-6 text-center nav-link" data-lang-key="nav_paradox_mobile">今日的悖論</a>
+            <a href="#spectrum" class="block py-2 px-6 text-center nav-link" data-lang-key="nav_spectrum_mobile">未來的光譜</a>
+            <a href="#boundaries" class="block py-2 px-6 text-center nav-link" data-lang-key="nav_boundaries_mobile">擴展的邊界</a>
+            <a href="#conclusion" class="block py-2 px-6 text-center nav-link" data-lang-key="nav_conclusion_mobile">我們的選擇</a>
+            <div class="py-2 px-6 text-center">
+                 <!-- 語言切換按鈕 (行動版) -->
+                 <button id="lang-switcher-mobile" class="bg-green-deep text-white text-sm font-semibold py-1 px-3 rounded-full hover:bg-green-accent transition-colors">English</button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- 導論區塊 -->
+        <section id="intro" class="min-h-screen flex items-center bg-light-taupe">
+            <div class="container mx-auto px-6 py-16 text-center fade-in">
+                <h2 class="text-4xl md:text-6xl font-bold text-green-deep mb-4" data-lang-key="intro_title">不斷擴展的菜單</h2>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8" data-lang-key="intro_p">
+                    世界上的食材有多少種類？未來會出現新的食材嗎？我們的食物選擇是否存在上限？本頁將帶您深入探索這個議題，從我們已知的食物宇宙，到透過科技「設計」的未來食物。
+                </p>
+                <a href="#paradox" class="bg-green-accent text-white font-bold py-3 px-8 rounded-full hover:bg-green-deep transition-colors duration-300" data-lang-key="intro_button">
+                    開始探索
+                </a>
+            </div>
+        </section>
+
+        <!-- 悖論區塊 -->
+        <section id="paradox" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-green-deep mb-4" data-lang-key="paradox_title">富足中的匱乏：今日餐桌的悖論</h2>
+                    <p class="max-w-3xl mx-auto text-lg" data-lang-key="paradox_p">
+                        儘管地球擁有驚人的生物多樣性，我們的餐桌卻日益單調。工業化農業追求效率，導致全球糧食生產高度集中於少數幾種作物，創造了一個看似高效卻極其脆弱的系統。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="fade-in">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="paradox_chart1_title">全球作物產量的驚人集中</h3>
+                        <p class="text-center mb-4" data-lang-key="paradox_chart1_p">僅僅9種作物，就佔據了全球作物總產量的66%以上。這種過度依賴使我們的糧食系統面臨巨大風險。</p>
+                        <div class="chart-container">
+                            <canvas id="cropProductionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="fade-in">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="paradox_chart2_title">人類的食物來源</h3>
+                         <p class="text-center mb-4" data-lang-key="paradox_chart2_p">範圍再縮小，大約20種植物就供應了全人類80%的食物。這場「大緊縮」不僅威脅糧食安全，也限制了我們的營養攝取。</p>
+                        <div class="chart-container">
+                            <canvas id="foodSourceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 光譜區塊 -->
+        <section id="spectrum" class="py-16 md:py-24 bg-light-taupe">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-green-deep mb-4" data-lang-key="spectrum_title">未來食材的光譜</h2>
+                    <p class="max-w-3xl mx-auto text-lg" data-lang-key="spectrum_p">
+                        面對挑戰，科學家與企業家正開拓新食材的疆域。從重新發現自然寶庫到在實驗室中設計食物，一場食物革命正在發生。點擊下方按鈕，比較不同蛋白質來源在四大關鍵指標上的表現。
+                    </p>
+                </div>
+                <div class="text-center mb-8 space-x-2 space-y-2">
+                    <button class="spectrum-btn bg-green-accent text-white py-2 px-4 rounded-full" data-source="beef" data-lang-key="spectrum_btn_beef">傳統牛肉</button>
+                    <button class="spectrum-btn bg-gray-300 text-dark-roast py-2 px-4 rounded-full" data-source="insects" data-lang-key="spectrum_btn_insects">昆蟲養殖</button>
+                    <button class="spectrum-btn bg-gray-300 text-dark-roast py-2 px-4 rounded-full" data-source="algae" data-lang-key="spectrum_btn_algae">微藻養殖</button>
+                    <button class="spectrum-btn bg-gray-300 text-dark-roast py-2 px-4 rounded-full" data-source="cultured_meat" data-lang-key="spectrum_btn_cultured_meat">培養肉</button>
+                    <button class="spectrum-btn bg-gray-300 text-dark-roast py-2 px-4 rounded-full" data-source="fermentation" data-lang-key="spectrum_btn_fermentation">精密發酵</button>
+                </div>
+
+                <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                    <div class="w-full lg:w-1/2 fade-in">
+                         <div class="bg-white p-6 rounded-lg shadow-md">
+                            <div class="chart-container h-[350px] md:h-[450px] max-h-[500px]">
+                                <canvas id="spectrumChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="spectrum-details" class="w-full lg:w-1/2 fade-in">
+                        <!-- 動態內容將由 JS 載入 -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 邊界區塊 -->
+        <section id="boundaries" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-green-deep mb-4" data-lang-key="boundaries_title">擴展的邊界：我們的菜單有上限嗎？</h2>
+                    <p class="max-w-3xl mx-auto text-lg" data-lang-key="boundaries_p">
+                        新食材的誕生並非暢行無阻。從人體消化的生物學限制，到法律、倫理與經濟的現實考驗，食材的最終邊界由多重因素共同決定。點擊下方卡片，了解更多。
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="boundary-card bg-light-taupe p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300">
+                        <h3 class="text-xl font-bold mb-2 text-green-deep" data-lang-key="boundary1_title">生物學邊界</h3>
+                        <p class="mb-4" data-lang-key="boundary1_p">人體的消化、代謝與免疫系統是新食材必須跨越的第一道門檻。</p>
+                        <div class="boundary-details hidden" data-lang-key="boundary1_details">
+                            <!-- 英文版內容將由JS填入，此處保留中文版作為預設 -->
+                            <ul class="list-disc list-inside space-y-2 mt-4">
+                                <li><strong>消化與吸收：</strong> 新型蛋白質必須能被人體酶有效分解，否則無營養價值甚至有害。</li>
+                                <li><strong>過敏性與毒性：</strong> 新分子存在引入新型過敏原或未知毒素的風險，需經嚴格評估。</li>
+                                <li><strong>營養完整性：</strong> 新食材若要替代傳統食品，其營養價值不得遜於被替代者。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="boundary-card bg-light-taupe p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300">
+                        <h3 class="text-xl font-bold mb-2 text-green-deep" data-lang-key="boundary2_title">法規倫理邊界</h3>
+                        <p class="mb-4" data-lang-key="boundary2_p">新食材必須穿越由法律、文化與倫理構建的複雜迷宮。</p>
+                         <div class="boundary-details hidden" data-lang-key="boundary2_details">
+                            <ul class="list-disc list-inside space-y-2 mt-4">
+                                <li><strong>全球法規拼圖：</strong> 各國監管標準不一，為企業帶來巨大的不確定性與合規成本。</li>
+                                <li><strong>生物倫理辯論：</strong> 「自然性」、動物福利、社會公正及生態風險等問題引發深刻關切。</li>
+                                <li><strong>消費者信任：</strong> 公眾對「實驗室製造」食物的疑慮和對長期健康的擔憂是最終裁決。</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="boundary-card bg-light-taupe p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300">
+                        <h3 class="text-xl font-bold mb-2 text-green-deep" data-lang-key="boundary3_title">經濟資源邊界</h3>
+                        <p class="mb-4" data-lang-key="boundary3_p">即便通過所有考驗，還必須面對資源與經濟可行性的最終挑戰。</p>
+                         <div class="boundary-details hidden" data-lang-key="boundary3_details">
+                            <ul class="list-disc list-inside space-y-2 mt-4">
+                                <li><strong>能源與投入：</strong> 生物反應器需要大量能源，其原料（如糖）的可持續性也需考量。</li>
+                                <li><strong>經濟可行性：</strong> 生產成本仍遠高於傳統食品，若無法實現「價格平價」則難以普及。</li>
+                                <li><strong>生物多樣性權衡：</strong> 過度依賴少數工程菌株可能創造微觀層面的「單一栽培」風險。</li>
+                            </ul>
+                        </div>
+                    </div>
+                     <div class="boundary-card bg-light-taupe p-6 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300">
+                        <h3 class="text-xl font-bold mb-2 text-green-deep" data-lang-key="boundary4_title">風險的權衡</h3>
+                        <p class="mb-4" data-lang-key="boundary4_p">我們正在用新技術的「未知風險」去應對當前食物系統的「已知風險」。</p>
+                         <div class="boundary-details hidden" data-lang-key="boundary4_details">
+                            <p class="mt-4">
+                                傳統農業對環境、氣候與健康的危害是確鑿且持續的。新型食品技術為解決這些問題提供了希望，但也帶來了關於長期影響和生態後果的不確定性。食材的上限，在某種程度上也是我們集體風險偏好的體現：我們願意承擔多大的未知，來緩解一個已知的巨大危害？
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 結論區塊 -->
+        <section id="conclusion" class="py-16 md:py-24 bg-light-taupe">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-4xl font-bold text-green-deep mb-4" data-lang-key="conclusion_title">未來已來，選擇在手</h2>
+                <p class="max-w-3xl mx-auto text-lg mb-8" data-lang-key="conclusion_p">
+                    食材的上限並非絕對數字，而是由科學、生物、社會與經濟共同塑造的動態邊界。未來，傳統農業與高科技食品將共存互補，構成一個更多元、更具韌性的食物系統。人類面臨的最大挑戰，已不是能否發明新食物，而是如何以智慧、公平和負責任的方式，將它們安全、合乎倫理地融入我們的全球社會。
+                </p>
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="bg-green-accent text-white font-bold py-3 px-8 rounded-full hover:bg-green-deep transition-colors duration-300" data-lang-key="conclusion_button">
+                    回到頂部
+                </button>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-dark-roast text-white py-6">
+        <div class="container mx-auto px-6 text-center">
+            <p data-lang-key="footer_p">&copy; 2024 未來食材互動探索。基於報告《不斷擴展的菜單》創建。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. 翻譯資料庫 ---
+    // 集中管理所有中英文字串
+    const translations = {
+        'zh-TW': {
+            page_title: '未來食材互動探索',
+            html_lang: 'zh-TW',
+            body_class: 'lang-zh',
+            lang_switcher_text: 'English',
+            nav_title: '食材的未來',
+            nav_intro: '導論',
+            nav_paradox: '今日的悖論',
+            nav_spectrum: '未來的光譜',
+            nav_boundaries: '擴展的邊界',
+            nav_conclusion: '我們的選擇',
+            nav_intro_mobile: '導論',
+            nav_paradox_mobile: '今日的悖論',
+            nav_spectrum_mobile: '未來的光譜',
+            nav_boundaries_mobile: '擴展的邊界',
+            nav_conclusion_mobile: '我們的選擇',
+            intro_title: '不斷擴展的菜單',
+            intro_p: '世界上的食材有多少種類？未來會出現新的食材嗎？我們的食物選擇是否存在上限？本頁將帶您深入探索這個議題，從我們已知的食物宇宙，到透過科技「設計」的未來食物。',
+            intro_button: '開始探索',
+            paradox_title: '富足中的匱乏：今日餐桌的悖論',
+            paradox_p: '儘管地球擁有驚人的生物多樣性，我們的餐桌卻日益單調。工業化農業追求效率，導致全球糧食生產高度集中於少數幾種作物，創造了一個看似高效卻極其脆弱的系統。',
+            paradox_chart1_title: '全球作物產量的驚人集中',
+            paradox_chart1_p: '僅僅9種作物，就佔據了全球作物總產量的66%以上。這種過度依賴使我們的糧食系統面臨巨大風險。',
+            paradox_chart2_title: '人類的食物來源',
+            paradox_chart2_p: '範圍再縮小，大約20種植物就供應了全人類80%的食物。這場「大緊縮」不僅威脅糧食安全，也限制了我們的營養攝取。',
+            crop_chart_labels: ['甘蔗、玉米、水稻、小麥、馬鈴薯、大豆、油棕果、甜菜、木薯 (9種作物)', '其他所有作物'],
+            food_source_chart_labels: ['約20種主要植物', '其他食物來源'],
+            spectrum_title: '未來食材的光譜',
+            spectrum_p: '面對挑戰，科學家與企業家正開拓新食材的疆域。從重新發現自然寶庫到在實驗室中設計食物，一場食物革命正在發生。點擊下方按鈕，比較不同蛋白質來源在四大關鍵指標上的表現。',
+            spectrum_btn_beef: '傳統牛肉',
+            spectrum_btn_insects: '昆蟲養殖',
+            spectrum_btn_algae: '微藻養殖',
+            spectrum_btn_cultured_meat: '培養肉',
+            spectrum_btn_fermentation: '精密發酵',
+            spectrum_chart_labels: ['土地利用', '水資源消耗', '溫室氣體排放', '生產週期'],
+            spectrum_tooltip_label: '相對指數',
+            boundaries_title: '擴展的邊界：我們的菜單有上限嗎？',
+            boundaries_p: '新食材的誕生並非暢行無阻。從人體消化的生物學限制，到法律、倫理與經濟的現實考驗，食材的最終邊界由多重因素共同決定。點擊下方卡片，了解更多。',
+            boundary1_title: '生物學邊界',
+            boundary1_p: '人體的消化、代謝與免疫系統是新食材必須跨越的第一道門檻。',
+            boundary1_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>消化與吸收：</strong> 新型蛋白質必須能被人體酶有效分解，否則無營養價值甚至有害。</li><li><strong>過敏性與毒性：</strong> 新分子存在引入新型過敏原或未知毒素的風險，需經嚴格評估。</li><li><strong>營養完整性：</strong> 新食材若要替代傳統食品，其營養價值不得遜於被替代者。</li></ul>`,
+            boundary2_title: '法規倫理邊界',
+            boundary2_p: '新食材必須穿越由法律、文化與倫理構建的複雜迷宮。',
+            boundary2_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>全球法規拼圖：</strong> 各國監管標準不一，為企業帶來巨大的不確定性與合規成本。</li><li><strong>生物倫理辯論：</strong> 「自然性」、動物福利、社會公正及生態風險等問題引發深刻關切。</li><li><strong>消費者信任：</strong> 公眾對「實驗室製造」食物的疑慮和對長期健康的擔憂是最終裁決。</li></ul>`,
+            boundary3_title: '經濟資源邊界',
+            boundary3_p: '即便通過所有考驗，還必須面對資源與經濟可行性的最終挑戰。',
+            boundary3_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>能源與投入：</strong> 生物反應器需要大量能源，其原料（如糖）的可持續性也需考量。</li><li><strong>經濟可行性：</strong> 生產成本仍遠高於傳統食品，若無法實現「價格平價」則難以普及。</li><li><strong>生物多樣性權衡：</strong> 過度依賴少數工程菌株可能創造微觀層面的「單一栽培」風險。</li></ul>`,
+            boundary4_title: '風險的權衡',
+            boundary4_p: '我們正在用新技術的「未知風險」去應對當前食物系統的「已知風險」。',
+            boundary4_details: `<p class="mt-4">傳統農業對環境、氣候與健康的危害是確鑿且持續的。新型食品技術為解決這些問題提供了希望，但也帶來了關於長期影響和生態後果的不確定性。食材的上限，在某種程度上也是我們集體風險偏好的體現：我們願意承擔多大的未知，來緩解一個已知的巨大危害？</p>`,
+            conclusion_title: '未來已來，選擇在手',
+            conclusion_p: '食材的上限並非絕對數字，而是由科學、生物、社會與經濟共同塑造的動態邊界。未來，傳統農業與高科技食品將共存互補，構成一個更多元、更具韌性的食物系統。人類面臨的最大挑戰，已不是能否發明新食物，而是如何以智慧、公平和負責任的方式，將它們安全、合乎倫理地融入我們的全球社會。',
+            conclusion_button: '回到頂部',
+            footer_p: '© 2024 未來食材互動探索。基於報告《不斷擴展的菜單》創建。',
+            spectrum_data: {
+                beef: {
+                    label: '傳統牛肉', values: [100, 100, 100, 100],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">傳統畜牧業 (牛肉)</h3><p class="mb-4">作為比較基準，傳統牛肉生產在土地利用、水資源消耗和溫室氣體排放方面均非常高，且生產週期長達數年。</p><ul class="list-disc list-inside space-y-2"><li><strong>核心挑戰:</strong> 環境永續性、動物福利倫理、高昂的資源投入。</li><li><strong>主要產出:</strong> 肉、奶等傳統動物產品。</li></ul>`
+                },
+                insects: {
+                    label: '昆蟲養殖', values: [8, 15, 18, 10],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">昆蟲養殖 (蟋蟀/黑水虻)</h3><p class="mb-4">昆蟲作為蛋白質來源，效率遠超傳統畜牧業，且環境足跡極小。它們能將農業廢料轉化為高品質蛋白質。</p><ul class="list-disc list-inside space-y-2"><li><strong>核心挑戰:</strong> 西方市場的消費者接受度（恐新症），需要開發易於接受的加工產品（如蛋白粉）。</li><li><strong>主要產出:</strong> 蛋白粉、油脂、完整昆蟲。</li></ul>`
+                },
+                algae: {
+                    label: '微藻養殖', values: [15, 15, -10, 5],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">微藻養殖</h3><p class="mb-4">被譽為「超級食物」，生產效率極高，可在非耕地利用海水培養，並能吸收二氧化碳，具備負碳潛力。</p><ul class="list-disc list-inside space-y-2"><li><strong>核心挑戰:</strong> 去除特有的腥臭味、實現永續的大規模培養。</li><li><strong>主要產出:</strong> 完整生物質、蛋白質提取物、Omega-3脂肪酸。</li></ul>`
+                },
+                cultured_meat: {
+                    label: '培養肉', values: [5, 60, 40, 15],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">細胞農業 (培養肉)</h3><p class="mb-4">在實驗室的生物反應器中直接培育動物細胞，旨在無需屠宰動物即可生產出結構和口感真實的肉類。</p><ul class="list-disc list-inside space-y-2"><li><strong>核心挑戰:</strong> 大幅降低培養基成本、從實驗室走向大規模工業化生產、能源消耗。</li><li><strong>主要產出:</strong> 結構化的肉類組織，如肉排、雞塊、魚柳。</li></ul>`
+                },
+                fermentation: {
+                    label: '精密發酵', values: [2, 50, 30, 2],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">精密發酵</h3><p class="mb-4">利用基因工程改造的微生物（如酵母）作為「微型工廠」，高效生產特定的蛋白質、脂肪或風味分子。</p><ul class="list-disc list-inside space-y-2"><li><strong>核心挑戰:</strong> 降低原料（糖）成本、純化過程的效率、實現大規模生產的經濟性。</li><li><strong>主要產出:</strong> 純化的蛋白質（如乳清、酪蛋白）、功能性脂肪、風味分子（如血紅素）。</li></ul>`
+                }
+            }
+        },
+        'en': {
+            page_title: 'Future Food Interactive',
+            html_lang: 'en',
+            body_class: 'lang-en',
+            lang_switcher_text: '中文',
+            nav_title: 'The Future of Food',
+            nav_intro: 'Introduction',
+            nav_paradox: 'Today\'s Paradox',
+            nav_spectrum: 'The Spectrum',
+            nav_boundaries: 'Expanding Boundaries',
+            nav_conclusion: 'Our Choice',
+            nav_intro_mobile: 'Introduction',
+            nav_paradox_mobile: 'Today\'s Paradox',
+            nav_spectrum_mobile: 'The Spectrum',
+            nav_boundaries_mobile: 'Expanding Boundaries',
+            nav_conclusion_mobile: 'Our Choice',
+            intro_title: 'The Expanding Menu',
+            intro_p: 'How many types of food exist in the world? Will new ingredients emerge in the future? Is there a limit to our food choices? This page will guide you through this topic, from our known food universe to future foods "designed" through technology.',
+            intro_button: 'Start Exploring',
+            paradox_title: 'Scarcity in Abundance: The Paradox of Today\'s Table',
+            paradox_p: 'Despite Earth\'s amazing biodiversity, our diet is becoming increasingly monotonous. Industrial agriculture\'s pursuit of efficiency has led to global food production being highly concentrated in a few crops, creating a system that seems efficient but is extremely fragile.',
+            paradox_chart1_title: 'The Astonishing Concentration of Global Crop Production',
+            paradox_chart1_p: 'Just 9 crops account for over 66% of total global crop production. This over-reliance places our food system at significant risk.',
+            paradox_chart2_title: 'Humanity\'s Food Sources',
+            paradox_chart2_p: 'Narrowing the scope, about 20 plant species supply 80% of all human food. This "Great Contraction" not only threatens food security but also limits our nutritional intake.',
+            crop_chart_labels: ['Sugarcane, Maize, Rice, Wheat, Potatoes, Soybeans, Oil Palm Fruit, Sugar Beet, Cassava (9 Crops)', 'All Other Crops'],
+            food_source_chart_labels: ['About 20 Major Plant Species', 'Other Food Sources'],
+            spectrum_title: 'The Spectrum of Future Foods',
+            spectrum_p: 'Facing these challenges, scientists and entrepreneurs are pioneering new food frontiers. A food revolution is underway, from rediscovering natural treasures to designing food in labs. Click the buttons below to compare different protein sources across four key metrics.',
+            spectrum_btn_beef: 'Conventional Beef',
+            spectrum_btn_insects: 'Insect Farming',
+            spectrum_btn_algae: 'Microalgae Cultivation',
+            spectrum_btn_cultured_meat: 'Cultured Meat',
+            spectrum_btn_fermentation: 'Precision Fermentation',
+            spectrum_chart_labels: ['Land Use', 'Water Consumption', 'GHG Emissions', 'Production Time'],
+            spectrum_tooltip_label: 'Relative Index',
+            boundaries_title: 'Expanding Boundaries: Is There a Limit to Our Menu?',
+            boundaries_p: 'The emergence of new foods is not without obstacles. From the biological limits of human digestion to the practical tests of law, ethics, and economics, the ultimate boundary of our food is determined by multiple factors. Click the cards below to learn more.',
+            boundary1_title: 'Biological Boundaries',
+            boundary1_p: 'The human digestive, metabolic, and immune systems are the first hurdles new ingredients must overcome.',
+            boundary1_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>Digestion & Absorption:</strong> New proteins must be effectively broken down by human enzymes to be nutritious and not harmful.</li><li><strong>Allergenicity & Toxicity:</strong> New molecules risk introducing novel allergens or unknown toxins, requiring rigorous assessment.</li><li><strong>Nutritional Integrity:</strong> If a new ingredient is to replace a traditional food, its nutritional value must be no less than that of the one it replaces.</li></ul>`,
+            boundary2_title: 'Regulatory & Ethical Boundaries',
+            boundary2_p: 'New ingredients must navigate a complex maze of laws, culture, and ethics.',
+            boundary2_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>Global Regulatory Puzzle:</strong> Varying standards across countries create huge uncertainty and compliance costs for companies.</li><li><strong>Bioethical Debates:</strong> Issues like "naturalness," animal welfare, social justice, and ecological risks raise profound concerns.</li><li><strong>Consumer Trust:</strong> Public skepticism about "lab-grown" food and long-term health concerns are the ultimate verdict.</li></ul>`,
+            boundary3_title: 'Economic & Resource Boundaries',
+            boundary3_p: 'Even if all tests are passed, the final challenges of resources and economic viability must be faced.',
+            boundary3_details: `<ul class="list-disc list-inside space-y-2 mt-4"><li><strong>Energy & Inputs:</strong> Bioreactors require significant energy, and the sustainability of their inputs (like sugar) must be considered.</li><li><strong>Economic Viability:</strong> Production costs are still far higher than traditional foods. Without achieving "price parity," widespread adoption is difficult.</li><li><strong>Biodiversity Trade-offs:</strong> Over-reliance on a few engineered microbial strains could create a microscopic "monoculture" risk.</li></ul>`,
+            boundary4_title: 'The Trade-off of Risks',
+            boundary4_p: 'We are using the "unknown risks" of new technology to address the "known risks" of the current food system.',
+            boundary4_details: `<p class="mt-4">The harm of traditional agriculture to the environment, climate, and health is established and ongoing. New food technologies offer hope to solve these problems but also bring uncertainty about long-term impacts and ecological consequences. The limit of our ingredients is, to some extent, a reflection of our collective risk appetite: how much of the unknown are we willing to tolerate to mitigate a known, massive harm?</p>`,
+            conclusion_title: 'The Future is Here, The Choice is Ours',
+            conclusion_p: 'The limit of our food is not an absolute number but a dynamic boundary shaped by science, biology, society, and economics. In the future, traditional agriculture and high-tech foods will coexist and complement each other, forming a more diverse and resilient food system. The greatest challenge for humanity is no longer whether we can invent new foods, but how to integrate them safely and ethically into our global society with wisdom, fairness, and responsibility.',
+            conclusion_button: 'Back to Top',
+            footer_p: '© 2024 Future Food Interactive. Created based on the report "The Expanding Menu".',
+            spectrum_data: {
+                beef: {
+                    label: 'Conventional Beef', values: [100, 100, 100, 100],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">Conventional Livestock (Beef)</h3><p class="mb-4">As a baseline for comparison, conventional beef production is extremely high in land use, water consumption, and greenhouse gas emissions, with a production cycle of several years.</p><ul class="list-disc list-inside space-y-2"><li><strong>Core Challenges:</strong> Environmental sustainability, animal welfare ethics, high resource input.</li><li><strong>Main Outputs:</strong> Traditional animal products like meat and milk.</li></ul>`
+                },
+                insects: {
+                    label: 'Insect Farming', values: [8, 15, 18, 10],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">Insect Farming (Crickets/BSF)</h3><p class="mb-4">As a protein source, insects are far more efficient than traditional livestock with a minimal environmental footprint. They can convert agricultural waste into high-quality protein.</p><ul class="list-disc list-inside space-y-2"><li><strong>Core Challenges:</strong> Consumer acceptance (neophobia) in Western markets; need to develop accessible processed products (e.g., protein powder).</li><li><strong>Main Outputs:</strong> Protein powder, oils, whole insects.</li></ul>`
+                },
+                algae: {
+                    label: 'Microalgae Cultivation', values: [15, 15, -10, 5],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">Microalgae Cultivation</h3><p class="mb-4">Hailed as a "superfood," it is highly productive, can be cultivated on non-arable land using seawater, and can absorb CO2, offering carbon-negative potential.</p><ul class="list-disc list-inside space-y-2"><li><strong>Core Challenges:</strong> Removing the characteristic fishy odor; achieving sustainable, large-scale cultivation.</li><li><strong>Main Outputs:</strong> Whole biomass, protein extracts, Omega-3 fatty acids.</li></ul>`
+                },
+                cultured_meat: {
+                    label: 'Cultured Meat', values: [5, 60, 40, 15],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">Cellular Agriculture (Cultured Meat)</h3><p class="mb-4">Animal cells are grown directly in bioreactors in a lab, aiming to produce real meat with structure and texture without slaughtering animals.</p><ul class="list-disc list-inside space-y-2"><li><strong>Core Challenges:</strong> Drastically reducing culture medium costs; scaling from lab to industrial production; energy consumption.</li><li><strong>Main Outputs:</strong> Structured meat tissues like steaks, nuggets, and fish fillets.</li></ul>`
+                },
+                fermentation: {
+                    label: 'Precision Fermentation', values: [2, 50, 30, 2],
+                    details: `<h3 class="text-2xl font-bold mb-2 text-green-deep">Precision Fermentation</h3><p class="mb-4">Genetically engineered microorganisms (like yeast) are used as "micro-factories" to efficiently produce specific proteins, fats, or flavor molecules.</p><ul class="list-disc list-inside space-y-2"><li><strong>Core Challenges:</strong> Reducing input (sugar) costs; efficiency of the purification process; achieving economic viability at scale.</li><li><strong>Main Outputs:</strong> Purified proteins (e.g., whey, casein), functional fats, flavor molecules (e.g., heme).</li></ul>`
+                }
+            }
+        }
+    };
+    
+    // --- 2. 圖表實例與全域變數 ---
+    let currentLang = 'zh-TW';
+    let cropProductionChart, foodSourceChart, spectrumChart;
+    const chartColors = {
+        main: '#A3B18A',
+        secondary: '#588157',
+        light: '#F3EFEA',
+    };
+
+    // --- 3. 語言切換核心邏輯 ---
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        localStorage.setItem('preferredLanguage', lang); // 儲存語言偏好
+        const content = translations[lang];
+
+        // 更新 HTML 和 body 屬性
+        document.documentElement.lang = content.html_lang;
+        document.body.className = document.body.className.replace(/lang-(en|zh-TW)/g, '').trim();
+        document.body.classList.add(content.body_class);
+
+        // 更新所有帶有 data-lang-key 的元素內容
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (content[key]) {
+                // 對於需要顯示HTML的區塊（如卡片詳情），使用 innerHTML
+                if (key.includes('details')) {
+                    el.innerHTML = content[key];
+                } else {
+                    el.innerText = content[key];
+                }
+            }
+        });
+
+        // 更新切換按鈕的文字
+        document.getElementById('lang-switcher').innerText = content.lang_switcher_text;
+        document.getElementById('lang-switcher-mobile').innerText = content.lang_switcher_text;
+        
+        // 使用新語言資料重新渲染圖表
+        updateAllCharts();
+
+        // 重新整理光譜圖的詳細資訊
+        const activeSource = document.querySelector('.spectrum-btn.bg-green-accent').dataset.source;
+        updateSpectrumChart(activeSource);
+    };
+
+    // --- 4. 圖表創建與更新邏輯 ---
+    function createCharts() {
+        const cropProductionCtx = document.getElementById('cropProductionChart').getContext('2d');
+        cropProductionChart = new Chart(cropProductionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [], // 將由更新函式填充
+                datasets: [{ data: [66, 34], backgroundColor: [chartColors.main, chartColors.light], borderColor: chartColors.secondary, borderWidth: 1 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: false } } }
+        });
+
+        const foodSourceCtx = document.getElementById('foodSourceChart').getContext('2d');
+        foodSourceChart = new Chart(foodSourceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [], // 將由更新函式填充
+                datasets: [{ data: [80, 20], backgroundColor: [chartColors.main, chartColors.light], borderColor: chartColors.secondary, borderWidth: 1 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, title: { display: false } } }
+        });
+        
+        const spectrumCtx = document.getElementById('spectrumChart').getContext('2d');
+        spectrumChart = new Chart(spectrumCtx, {
+            type: 'radar',
+            data: { labels: [], datasets: [{ label: '', data: [], backgroundColor: 'rgba(163, 177, 138, 0.2)', borderColor: 'rgba(163, 177, 138, 1)', pointBackgroundColor: 'rgba(163, 177, 138, 1)', borderWidth: 2 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { r: { angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { size: 14 }, color: '#403A3A' }, suggestedMin: -10, suggestedMax: 100, ticks: { backdropColor: 'rgba(253, 251, 248, 0.75)', color: '#403A3A' } } },
+                plugins: {
+                    legend: { display: true, position: 'top', labels: { font: { size: 16 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.formattedValue !== null) { label += `${translations[currentLang].spectrum_tooltip_label} ${context.formattedValue}`; }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateAllCharts() {
+        const content = translations[currentLang];
+        // 環圈圖
+        cropProductionChart.data.labels = content.crop_chart_labels;
+        cropProductionChart.update();
+        foodSourceChart.data.labels = content.food_source_chart_labels;
+        foodSourceChart.update();
+        // 雷達圖
+        spectrumChart.data.labels = content.spectrum_chart_labels;
+        spectrumChart.update();
+    }
+    
+    function updateSpectrumChart(source) {
+        const data = translations[currentLang].spectrum_data[source];
+        spectrumChart.data.datasets[0].label = data.label;
+        spectrumChart.data.datasets[0].data = data.values;
+        spectrumChart.update();
+        document.getElementById('spectrum-details').innerHTML = data.details;
+        
+        document.querySelectorAll('.spectrum-btn').forEach(btn => {
+            if(btn.dataset.source === source) {
+                btn.classList.remove('bg-gray-300', 'text-dark-roast');
+                btn.classList.add('bg-green-accent', 'text-white');
+            } else {
+                btn.classList.remove('bg-green-accent', 'text-white');
+                btn.classList.add('bg-gray-300', 'text-dark-roast');
+            }
+        });
+    }
+
+    // --- 5. 事件監聽器 ---
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        const newLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+        switchLanguage(newLang);
+    });
+     document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+        const newLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+        switchLanguage(newLang);
+    });
+
+    document.querySelectorAll('.spectrum-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            updateSpectrumChart(button.dataset.source);
+        });
+    });
+
+    document.querySelectorAll('.boundary-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const details = card.querySelector('.boundary-details');
+            const p = card.querySelector('p');
+            const isHidden = details.classList.contains('hidden');
+            
+            // 如果點擊的是已經展開的卡片，則收合它
+            if (!isHidden) {
+                details.classList.add('hidden');
+                p.classList.remove('hidden');
+                card.classList.remove('bg-white', 'scale-105', 'shadow-2xl');
+                card.classList.add('bg-light-taupe');
+            } else {
+                 // 收合所有其他已展開的卡片
+                document.querySelectorAll('.boundary-card').forEach(otherCard => {
+                    otherCard.querySelector('.boundary-details').classList.add('hidden');
+                    otherCard.querySelector('p').classList.remove('hidden');
+                    otherCard.classList.remove('bg-white', 'scale-105', 'shadow-2xl');
+                    otherCard.classList.add('bg-light-taupe');
+                });
+                // 展開被點擊的卡片
+                details.classList.remove('hidden');
+                p.classList.add('hidden');
+                card.classList.add('bg-white', 'scale-105', 'shadow-2xl');
+                card.classList.remove('bg-light-taupe');
+            }
+        });
+    });
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('nav a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (mobileMenu.offsetParent !== null) { 
+                mobileMenu.classList.add('hidden');
+            }
+            if (link.href.includes('#')) {
+                e.preventDefault();
+                document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // 平滑捲動與導航連結高亮
+    const sections = document.querySelectorAll('main section');
+    const navLinksDesktop = document.querySelectorAll('nav .hidden a');
+    window.onscroll = () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 70) { // 為固定導航欄調整偏移量
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinksDesktop.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    };
+    
+    // --- 6. 初始化 ---
+    createCharts();
+    const preferredLang = localStorage.getItem('preferredLanguage') || 'zh-TW';
+    switchLanguage(preferredLang);
+    updateSpectrumChart('beef'); // 初始化光譜圖
+
+});
+</script>
+
+</body>
+</html>
