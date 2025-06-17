@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>波瀾壯闊的成功之路：唐納·川普的分析性傳記</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* 自訂樣式 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9; /* cool-gray-100 */
+            color: #1e293b; /* cool-gray-800 */
+        }
+
+        /* 時間軸活動狀態的樣式 */
+        .timeline-item.active .timeline-dot {
+            background-color: #db2777; /* pink-600 */
+            transform: scale(1.5);
+        }
+        .timeline-item.active .timeline-content h3 {
+            color: #db2777; /* pink-600 */
+        }
+        
+        /* 導航列活動狀態的樣式 */
+        .nav-link.active {
+            color: #db2777; /* pink-600 */
+            font-weight: 700;
+        }
+
+        /* 卡片和表格樣式 */
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+
+        /* 標題漸層效果 */
+        .gradient-text {
+            background-image: linear-gradient(to right, #4f46e5, #db2777);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* 內容區塊 */
+        .content-section {
+            scroll-margin-top: 80px; /* 考慮到固定導航欄的高度 */
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 shadow-md">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold gradient-text">川普：分析性傳記</h1>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
+                <a href="#intro" class="hover:text-pink-600 transition-colors nav-link">引言</a>
+                <a href="#part1" class="hover:text-pink-600 transition-colors nav-link">奠基</a>
+                <a href="#part2" class="hover:text-pink-600 transition-colors nav-link">征服</a>
+                <a href="#part3" class="hover:text-pink-600 transition-colors nav-link">崩潰</a>
+                <a href="#part4" class="hover:text-pink-600 transition-colors nav-link">重生</a>
+                <a href="#part5" class="hover:text-pink-600 transition-colors nav-link">巔峰</a>
+                <a href="#part6" class="hover:text-pink-600 transition-colors nav-link">餘波</a>
+                <a href="#conclusion" class="hover:text-pink-600 transition-colors nav-link">結論</a>
+            </nav>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-slate-700 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+             <a href="#intro" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">引言</a>
+             <a href="#part1" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">奠基 (1946-1979)</a>
+             <a href="#part2" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">征服 (1980-1989)</a>
+             <a href="#part3" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">崩潰 (1990-2003)</a>
+             <a href="#part4" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">重生 (2004-2015)</a>
+             <a href="#part5" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">巔峰 (2016-2021)</a>
+             <a href="#part6" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">餘波 (2021-至今)</a>
+             <a href="#conclusion" class="block py-2 text-slate-600 hover:text-pink-600 nav-link">結論</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 pt-24">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Interactive Timeline (Sticky on Large Screens) -->
+            <aside class="hidden lg:block lg:col-span-3 lg:sticky top-24 self-start">
+                <div class="p-4 card">
+                    <h2 class="font-bold text-lg mb-4">人生軌跡</h2>
+                    <div id="timeline" class="relative">
+                        <!-- Timeline Line -->
+                        <div class="absolute left-2.5 top-0 h-full w-0.5 bg-slate-200"></div>
+                        
+                        <!-- Timeline Items -->
+                        <div id="timeline-intro" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">引言</h3>
+                                <p class="text-xs text-slate-500">動盪的序曲</p>
+                            </div>
+                        </div>
+                         <div id="timeline-part1" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">奠基</h3>
+                                <p class="text-xs text-slate-500">1946 - 1979</p>
+                            </div>
+                        </div>
+                        <div id="timeline-part2" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">征服</h3>
+                                <p class="text-xs text-slate-500">1980 - 1989</p>
+                            </div>
+                        </div>
+                         <div id="timeline-part3" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">崩潰</h3>
+                                <p class="text-xs text-slate-500">1990 - 2003</p>
+                            </div>
+                        </div>
+                         <div id="timeline-part4" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">重生</h3>
+                                <p class="text-xs text-slate-500">2004 - 2015</p>
+                            </div>
+                        </div>
+                         <div id="timeline-part5" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">巔峰</h3>
+                                <p class="text-xs text-slate-500">2016 - 2021</p>
+                            </div>
+                        </div>
+                         <div id="timeline-part6" class="timeline-item mb-8 pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">餘波</h3>
+                                <p class="text-xs text-slate-500">2021 - 至今</p>
+                            </div>
+                        </div>
+                        <div id="timeline-conclusion" class="timeline-item pl-8 relative">
+                            <div class="timeline-dot absolute left-0 top-1 w-5 h-5 rounded-full bg-slate-300 border-4 border-white transition-all duration-300"></div>
+                            <div class="timeline-content">
+                                <h3 class="font-bold text-slate-700 transition-colors duration-300">結論</h3>
+                                <p class="text-xs text-slate-500">混亂與韌性</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-9 space-y-12">
+                
+                <!-- Section: Introduction -->
+                <section id="intro" class="content-section card p-6 md:p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">引言：順遂人生的反面教材</h2>
+                    <p class="mb-4">唐納·川普（Donald J. Trump）的一生，遠非一帆風順，它是一部關於劇烈動盪的經典案例研究。他的人生軌跡由繁榮與蕭條的戲劇性循環所定義，始於巨大的繼承優勢，繼之以近乎災難性的失敗，再憑藉無與倫比的生存、重塑能力，以及利用公眾形象克服那些足以終結大多數公眾人物生涯的挫折。</p>
+                    <blockquote class="border-l-4 border-pink-500 bg-pink-50 text-pink-800 p-4 rounded-r-lg italic">
+                        他的人生是一場關於混亂與韌性的史詩，其間的波折不僅是他個人成功的障礙，更是其成功的催化劑。
+                    </blockquote>
+                </section>
+
+                <!-- Section: Part 1 -->
+                <section id="part1" class="content-section card p-6 md:p-8">
+                    <span class="text-sm font-bold text-pink-600">第一部分 (1946-1979)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">奠基——在皇后區鍛造「殺手」</h2>
+                    <p class="mb-4">川普的早年生活僅在財務意義上堪稱「順遂」。在心理和道德層面，那是一個高壓的訓練場，為他灌輸了一種世界觀和一套行事準則，這也定義了他未來充滿動盪的職業生涯。</p>
+                    <div class="bg-slate-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg mb-2">父親之子：「殺手與輸家」的世界觀</h3>
+                        <p>佛瑞德·川普向他灌輸了一種殘酷的二元世界觀：世界由「殺手」（killers）和「輸家」（losers）組成，人必須成為「殺手」才能獲勝。這種財務緩衝與心理壓力的結合，形成了他不惜一切代價追求「勝利」的無盡驅動力。</p>
+                    </div>
+                </section>
+
+                <!-- Section: Part 2 -->
+                <section id="part2" class="content-section card p-6 md:p-8">
+                    <span class="text-sm font-bold text-pink-600">第二部分 (1980-1989)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">征服——在曼哈頓打造品牌</h2>
+                    <p class="mb-4">這一部分分析了川普如何運用其父親的藍圖——利用人脈和公共資金——轉向高風險、高知名度的曼哈頓地產界。這十年是他輝煌成功的時期，但其所採用的手段也為未來的崩潰埋下了伏筆。</p>
+                    <blockquote class="border-l-4 border-pink-500 bg-pink-50 text-pink-800 p-4 rounded-r-lg italic my-4">
+                        「我迎合人們的幻想……一點誇張從無壞處。」
+                        <cite class="block text-right mt-2 not-italic">— 《交易的藝術》</cite>
+                    </blockquote>
+                    <p>川普在80年代建立的最重要資產並非某棟建築，而是他自己的名字。無休止的自我推銷、書籍的出版、炫耀性的消費——所有這些都是對「川普」這個品牌的投資，使其成為成功的代名詞。</p>
+                </section>
+
+                <!-- Section: Part 3 -->
+                <section id="part3" class="content-section card p-6 md:p-8">
+                    <span class="text-sm font-bold text-pink-600">第三部分 (1990-2003)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">崩潰——在懸崖邊緣的十年</h2>
+                    <p class="mb-4">這一時期是對川普人生「一帆風順」說法最直接的反駁。它詳細記錄了一段深刻的財務危機、多次公司破產，以及一系列失敗的商業冒險，將他推向了個人財務毀滅的邊緣。</p>
+                    <h3 class="font-bold text-lg mb-2">表1：川普公司破產摘要</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-slate-200">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">年份</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">實體／物業</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">結果</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">1991</td>
+                                    <td class="py-2 px-4 border-b text-sm">川普泰姬瑪哈陵</td>
+                                    <td class="py-2 px-4 border-b text-sm">放棄50%股權</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">1992</td>
+                                    <td class="py-2 px-4 border-b text-sm">川普廣場酒店</td>
+                                    <td class="py-2 px-4 border-b text-sm">放棄49%股權</td>
+                                </tr>
+                                 <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">2004</td>
+                                    <td class="py-2 px-4 border-b text-sm">川普酒店及賭場度假村</td>
+                                    <td class="py-2 px-4 border-b text-sm">辭去CEO，持股降至28%</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">2009</td>
+                                    <td class="py-2 px-4 border-b text-sm">川普娛樂度假村</td>
+                                    <td class="py-2 px-4 border-b text-sm">辭去董事長，持股降至10%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Section: Part 4 -->
+                <section id="part4" class="content-section card p-6 md:p-8">
+                     <span class="text-sm font-bold text-pink-600">第四部分 (2004-2015)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">重生——「美國老闆」與通往政壇之路</h2>
+                    <p class="mb-4">這一部分詳細描述了川普最引人注目的東山再起，這並非發生在房地產領域，而是在媒體界。《誰是接班人》是修復其形象並使其政治生涯成為可能的單一最重要事件。</p>
+                    <div class="bg-slate-100 p-4 rounded-lg">
+                        <h3 class="font-bold text-3xl text-center text-pink-600">「你被開除了！」</h3>
+                        <p class="text-center mt-2">這句話成為全國性的口頭禪，鞏固了他作為一個強大、不講情面的領導者形象。然而，這個形象是經過精心建構的幻象。</p>
+                    </div>
+                </section>
+                
+                <!-- Section: Part 5 -->
+                <section id="part5" class="content-section card p-6 md:p-8">
+                    <span class="text-sm font-bold text-pink-600">第五部分 (2016-2021)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">巔峰——總統任期及其風險</h2>
+                    <p class="mb-4">贏得總統大選是他最大的成功，但他的任期卻被持續的衝突、調查和對民主規範前所未有的挑戰所定義，使其成為現代史上最動盪的總統任期之一。</p>
+                     <h3 class="font-bold text-lg mb-2">表2：兩次彈劾的比較分析</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-slate-200">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">特徵</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">第一次彈劾 (2019)</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">第二次彈劾 (2021)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm font-bold">指控</td>
+                                    <td class="py-2 px-4 border-b text-sm">濫用職權；妨礙國會</td>
+                                    <td class="py-2 px-4 border-b text-sm">煽動叛亂</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm font-bold">參議院投票結果</td>
+                                    <td class="py-2 px-4 border-b text-sm">48-52 / 47-53 (宣告無罪)</td>
+                                    <td class="py-2 px-4 border-b text-sm">57-43 (宣告無罪)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Section: Part 6 -->
+                <section id="part6" class="content-section card p-6 md:p-8">
+                    <span class="text-sm font-bold text-pink-600">第六部分 (2021-至今)</span>
+                    <h2 class="text-2xl md:text-3xl font-bold mt-1 mb-4">餘波——前所未有的失敗與前所未有的回歸</h2>
+                     <p class="mb-4">這一部分審視了他一生中最動盪的時期，他面臨著生存性的法律威脅和政治流放，卻同時實現了對其政黨的完全控制，並上演了一場歷史性的東山再起。</p>
+                     <blockquote class="border-l-4 border-pink-500 bg-pink-50 text-pink-800 p-4 rounded-r-lg italic my-4">
+                        他成功地將這些事件重新置於他被腐敗「深層政府」迫害的敘事框架中，將每一次起訴和法律戰都變成了為其支持者籌款和提升民調的機會。
+                    </blockquote>
+                     <h3 class="font-bold text-lg mb-2">表3：重大法律案件追蹤 (2021-2025)</h3>
+                     <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-slate-200">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">案件</th>
+                                    <th class="py-2 px-4 border-b text-left text-sm font-semibold text-slate-600">狀態／結果</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">紐約州 vs. 川普 (封口費)</td>
+                                    <td class="py-2 px-4 border-b text-sm"><span class="font-bold text-red-600">有罪</span> (34項重罪)</td>
+                                </tr>
+                                 <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">紐約州總檢察長 vs. 川普集團</td>
+                                    <td class="py-2 px-4 border-b text-sm">負有責任 (罰款 >4.5億美元)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="py-2 px-4 border-b text-sm">E·珍·卡羅爾 vs. 川普</td>
+                                    <td class="py-2 px-4 border-b text-sm">負有責任 (賠償 >8800萬美元)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                
+                <!-- Section: Conclusion -->
+                <section id="conclusion" class="content-section card p-6 md:p-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-4">結論：一條混亂與韌性的軌跡</h2>
+                    <p class="mb-4">綜合這份傳記的分析，可以明確回答最初的問題：唐納·川普的一生與「一帆風順」截然相反。這是一個生於極度優越環境的人，卻畢生尋求並製造動盪，在衝突中茁壯成長，並在自己造成的危機中航行的故事。</p>
+                    <p>他獨特的韌性在於他控制敘事的能力，將失敗轉化為生存的故事，將法律危機變為殉道的證明。動盪並非他成功的障礙；在許多方面，它正是其成功的引擎。</p>
+                </section>
+
+            </div>
+        </div>
+    </main>
+    
+    <footer class="text-center py-8 mt-12">
+        <p class="text-sm text-slate-500">此分析性傳記網站由 AI 生成，內容基於提供的文本。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 行動裝置選單切換
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // 觀察器用於偵測哪個區塊正在被觀看
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const timelineItems = document.querySelectorAll('.timeline-item');
+
+            const observerOptions = {
+                root: null, // 相對於 viewport
+                rootMargin: '0px',
+                threshold: 0.4 // 區塊可見度達到 40% 時觸發
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        
+                        // 更新導航列連結
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+
+                        // 更新時間軸項目
+                        timelineItems.forEach(item => {
+                            item.classList.remove('active');
+                            if (item.id === `timeline-${id}`) {
+                                item.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // 點擊行動選單連結後關閉選單
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
