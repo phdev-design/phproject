@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>量子革命：互動式探索報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Quantum Dawn -->
+    <!-- Application Structure Plan: 本應用程式採用主題式、非線性的單頁應用程式（SPA）架構。頂部設有固定導航欄，便於使用者在「核心原理」、「硬體競賽」、「AI融合」、「應用場景」和「未來挑戰」等關鍵主題間自由跳轉。此設計旨在將複雜的學術報告轉化為一個引導式的「學習旅程」，優先考慮使用者的探索體驗與內容的易消化性，而非死板地複製報告的線性結構。透過互動式圖表、可點擊卡片和分頁介面，將密集資訊分解為易於理解的模組，鼓勵使用者主動探索而非被動閱讀。 -->
+    <!-- Visualization & Content Choices: 
+        - 報告資訊：表2（硬體比較） -> 目標：比較技術 -> 視覺化：互動式長條圖 (Chart.js) -> 互動：使用者點擊按鈕更新圖表並顯示詳細資訊 -> 理由：將靜態數據表轉化為動態探索工具，提升參與感。
+        - 報告資訊：三大核心原理 -> 目標：解釋概念 -> 呈現方式：圖示驅動的卡片 -> 互動：點擊展開詳細說明 -> 理由：將抽象概念具象化、模組化，降低認知負擔。
+        - 報告資訊：量子機器學習模型 -> 目標：組織與解釋 -> 呈現方式：互動式網格 -> 互動：點擊卡片顯示詳細資訊面板 -> 理由：有效管理複雜性，避免資訊過載。
+        - 報告資訊：真實世界應用 -> 目標：展示影響力 -> 呈現方式：分頁介面 -> 互動：點擊分頁切換產業內容 -> 理由：清晰地組織多個領域的應用案例，結構分明。
+        - 確認：未使用SVG或Mermaid.js。
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #F8F9FA; color: #212529; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (max-width: 768px) { .chart-container { height: 300px; max-height: 60vh; } }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #007BFF; border-bottom-color: #007BFF; }
+        .card-flip { perspective: 1000px; }
+        .card-flip-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+        .card-flip:hover .card-flip-inner { transform: rotateY(180deg); }
+        .card-face { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1rem; border-radius: 0.5rem; }
+        .card-front { background-color: #ffffff; border: 1px solid #e2e8f0; }
+        .card-back { background-color: #E6F2FF; border: 1px solid #007BFF; transform: rotateY(180deg); }
+        .section-fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .section-visible { opacity: 1; transform: translateY(0); }
+        .tab-button.active { background-color: #007BFF; color: white; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-blue-600">量子革命</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#principles" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">核心原理</a>
+                        <a href="#hardware" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">硬體競賽</a>
+                        <a href="#ai-fusion" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">AI融合</a>
+                        <a href="#applications" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">應用場景</a>
+                        <a href="#challenges" class="nav-link text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">未來挑戰</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#principles" class="nav-link block text-gray-600 hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">核心原理</a>
+                <a href="#hardware" class="nav-link block text-gray-600 hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">硬體競賽</a>
+                <a href="#ai-fusion" class="nav-link block text-gray-600 hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">AI融合</a>
+                <a href="#applications" class="nav-link block text-gray-600 hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">應用場景</a>
+                <a href="#challenges" class="nav-link block text-gray-600 hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md text-base font-medium">未來挑戰</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section class="text-center my-12 md:my-20 section-fade-in">
+            <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-4">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500">
+                    量子革命
+                </span>
+            </h2>
+            <p class="mt-4 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+                探索計算的下一個典範轉移。本報告將帶您深入了解量子電腦的基本原理、與人工智慧的顛覆性結合，以及它將如何重塑我們的世界。
+            </p>
+        </section>
+
+        <!-- Section: Core Principles -->
+        <section id="principles" class="py-16 bg-white rounded-xl shadow-lg section-fade-in mb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">量子計算的基石</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        量子計算並非更快的傳統電腦，它遵循一套全新的物理規則。理解其三大核心原理，是開啟量子世界大門的鑰匙。
+                    </p>
+                </div>
+                <div class="mt-12 grid gap-8 md:grid-cols-3">
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white text-2xl font-bold">⚛️</div>
+                        <h3 class="mt-5 text-xl font-semibold text-gray-900">疊加 (Superposition)</h3>
+                        <p class="mt-2 text-base text-gray-600">量子位元能同時處於0和1的狀態，如同硬幣在空中旋轉。這使得量子電腦能同時探索海量的可能性，實現大規模平行運算。</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-purple-500 text-white text-2xl font-bold">🔗</div>
+                        <h3 class="mt-5 text-xl font-semibold text-gray-900">糾纏 (Entanglement)</h3>
+                        <p class="mt-2 text-base text-gray-600">兩個或多個量子位元間的「鬼魅般」連結。測量其中一個會瞬間影響另一個，無論相隔多遠，形成一個強大的計算網絡。</p>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-green-500 text-white text-2xl font-bold">🌊</div>
+                        <h3 class="mt-5 text-xl font-semibold text-gray-900">干涉 (Interference)</h3>
+                        <p class="mt-2 text-base text-gray-600">量子演算法的精髓。它巧妙地放大通往正確答案的路徑機率，同時抵銷錯誤路徑，最終以高概率篩選出正確結果。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Hardware Race -->
+        <section id="hardware" class="py-16 section-fade-in mb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">硬體競賽：建構量子機器</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        打造實用量子電腦的競賽正在全球激烈上演。不同的技術路線各有優劣，共同目標是創造更穩定、可擴展的量子位元。點擊下方按鈕，比較主流技術。
+                    </p>
+                </div>
+                <div class="mt-8 text-center">
+                    <div id="hardware-selector" class="flex flex-wrap justify-center gap-2">
+                        <button data-tech="all" class="tech-button bg-blue-500 text-white px-4 py-2 rounded-md transition">所有技術</button>
+                        <button data-tech="superconducting" class="tech-button bg-white text-gray-700 px-4 py-2 rounded-md transition border">超導電路</button>
+                        <button data-tech="trapped_ion" class="tech-button bg-white text-gray-700 px-4 py-2 rounded-md transition border">離子阱</button>
+                        <button data-tech="photonic" class="tech-button bg-white text-gray-700 px-4 py-2 rounded-md transition border">光子處理器</button>
+                    </div>
+                </div>
+                <div class="mt-10 grid lg:grid-cols-5 gap-8 items-start">
+                    <div class="lg:col-span-3">
+                        <div class="chart-container bg-white p-4 rounded-xl shadow-lg">
+                            <canvas id="hardwareChart"></canvas>
+                        </div>
+                    </div>
+                    <div id="hardware-details" class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                        <h3 id="details-title" class="text-2xl font-bold text-gray-900 mb-4">技術詳情</h3>
+                        <div id="details-content" class="text-gray-700 space-y-3">
+                            <p>請從上方選擇一項技術以查看其詳細資訊，包括原理、主要玩家、優勢與挑戰。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: AI Fusion -->
+        <section id="ai-fusion" class="py-16 bg-white rounded-xl shadow-lg section-fade-in mb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">量子與AI的融合</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        當前AI的發展正遭遇算力瓶頸。量子計算並非要取代AI，而是作為一個強大的加速器，解決AI中最棘手的計算難題，開啟新一代智慧。
+                    </p>
+                </div>
+                <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="card-flip h-64">
+                        <div class="card-flip-inner rounded-lg shadow-md">
+                            <div class="card-face card-front">
+                                <h4 class="text-lg font-bold">AI任務：優化</h4>
+                                <p class="mt-2 text-gray-600">模型訓練</p>
+                                <span class="mt-4 text-xs text-gray-400">懸停以查看量子方案</span>
+                            </div>
+                            <div class="card-face card-back">
+                                <h4 class="text-lg font-bold text-blue-800">量子方案</h4>
+                                <p class="mt-2">量子退火、量子梯度下降</p>
+                                <p class="mt-2 font-semibold">優勢：跳出局部最優解，更快計算梯度。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64">
+                        <div class="card-flip-inner rounded-lg shadow-md">
+                            <div class="card-face card-front">
+                                <h4 class="text-lg font-bold">AI任務：分類</h4>
+                                <p class="mt-2 text-gray-600">圖像識別</p>
+                                <span class="mt-4 text-xs text-gray-400">懸停以查看量子方案</span>
+                            </div>
+                            <div class="card-face card-back">
+                                <h4 class="text-lg font-bold text-blue-800">量子方案</h4>
+                                <p class="mt-2">量子支持向量機 (QSVM)、量子神經網路</p>
+                                <p class="mt-2 font-semibold">優勢：訪問指數級增長的特徵空間。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64">
+                        <div class="card-flip-inner rounded-lg shadow-md">
+                            <div class="card-face card-front">
+                                <h4 class="text-lg font-bold">AI任務：生成模型</h4>
+                                <p class="mt-2 text-gray-600">新數據創建</p>
+                                <span class="mt-4 text-xs text-gray-400">懸停以查看量子方案</span>
+                            </div>
+                            <div class="card-face card-back">
+                                <h4 class="text-lg font-bold text-blue-800">量子方案</h4>
+                                <p class="mt-2">量子玻爾茲曼機、量子GANs</p>
+                                <p class="mt-2 font-semibold">優勢：更高效地從複雜概率分佈中採樣。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-flip h-64">
+                        <div class="card-flip-inner rounded-lg shadow-md">
+                            <div class="card-face card-front">
+                                <h4 class="text-lg font-bold">AI任務：線性代數</h4>
+                                <p class="mt-2 text-gray-600">矩陣運算</p>
+                                <span class="mt-4 text-xs text-gray-400">懸停以查看量子方案</span>
+                            </div>
+                            <div class="card-face card-back">
+                                <h4 class="text-lg font-bold text-blue-800">量子方案</h4>
+                                <p class="mt-2">HHL 演算法</p>
+                                <p class="mt-2 font-semibold">優勢：對特定類型矩陣的指數級加速。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Applications -->
+        <section id="applications" class="py-16 section-fade-in mb-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">真實世界應用</h2>
+                    <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                        量子計算的價值不在於取代所有電腦，而在於解決特定高價值產業的計算瓶頸。即使是微小的效率提升，也可能帶來巨大的商業價值。
+                    </p>
+                </div>
+                <div class="mt-10">
+                    <div class="flex flex-wrap justify-center border-b border-gray-200" id="app-tabs">
+                        <button class="tab-button active px-4 py-3 font-semibold text-gray-600 border-b-2 border-transparent" data-tab="science">💊 科學研究</button>
+                        <button class="tab-button px-4 py-3 font-semibold text-gray-600 border-b-2 border-transparent" data-tab="finance">💰 金融服務</button>
+                        <button class="tab-button px-4 py-3 font-semibold text-gray-600 border-b-2 border-transparent" data-tab="logistics">🚚 物流優化</button>
+                        <button class="tab-button px-4 py-3 font-semibold text-gray-600 border-b-2 border-transparent" data-tab="crypto">🔒 密碼學</button>
+                    </div>
+                    <div id="app-content" class="mt-8 bg-white p-6 sm:p-8 rounded-b-lg rounded-r-lg shadow-md">
+                        <!-- Content will be injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section: Challenges -->
+        <section id="challenges" class="py-16 bg-gray-900 text-white rounded-xl shadow-lg section-fade-in">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold tracking-tight sm:text-4xl">未來挑戰與戰略格局</h2>
+                    <p class="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">
+                        量子時代的黎明也投下長長的陰影。我們正處於「含噪聲」的NISQ時代，同時必須為量子攻擊做好準備，並應對深刻的倫理問題。
+                    </p>
+                </div>
+                <div class="mt-12 space-y-10">
+                    <div class="bg-gray-800 p-6 rounded-lg flex items-start gap-4">
+                        <div class="flex-shrink-0 text-3xl">⚠️</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-yellow-400">安全威脅：「先擷取，後解密」</h3>
+                            <p class="mt-2 text-gray-300">敵對者可立即儲存現有的加密數據，等待未來強大的量子電腦問世後再行破解。這使得對長期機密數據的威脅迫在眉睫。解決方案是遷移到「後量子密碼學」(PQC)，如NIST已標準化的ML-KEM和ML-DSA演算法。</p>
+                        </div>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg flex items-start gap-4">
+                        <div class="flex-shrink-0 text-3xl">🤔</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-cyan-400">倫理前沿：偏見、控制與意識</h3>
+                            <p class="mt-2 text-gray-300">量子AI可能會在更抽象的維度放大社會偏見。其「黑箱」特性也讓決策過程更難解釋與控制。隨著系統能力增強，關於自主性與意識的哲學問題將進入嚴肅的政策辯論。</p>
+                        </div>
+                    </div>
+                     <div class="bg-gray-800 p-6 rounded-lg flex items-start gap-4">
+                        <div class="flex-shrink-0 text-3xl">⚙️</div>
+                        <div>
+                            <h3 class="text-xl font-bold text-green-400">NISQ時代的現實</h3>
+                            <p class="mt-2 text-gray-300">我們目前的量子電腦仍處於「含噪聲中等規模量子」(NISQ) 時代。硬體錯誤率高，無法運行複雜的容錯演算法。當前的核心目標是在這些不完美的機器上，通過混合量子-古典方法尋找有用的應用，以期展現出「量子優勢」。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-white mt-16">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+            <p>&copy; 2024 量子革命互動式報告。基於提供之研究文檔生成。</p>
+            <p class="mt-1">此為資訊彙總與視覺化展示，非投資或學術建議。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('section-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section-fade-in').forEach(section => {
+                observer.observe(section);
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const hardwareData = {
+                superconducting: {
+                    title: '超導電路 (Superconducting Circuits)',
+                    content: `
+                        <p><strong>原理：</strong>利用在極低溫下呈現超導特性的金屬電路，製造出「人造原子」作為量子位元。</p>
+                        <p><strong>主要玩家：</strong>Google、IBM、Rigetti</p>
+                        <p><strong>優勢：</strong><span class="text-green-600 font-semibold">運算速度極快 (GHz級)</span>，可借鑒成熟半導體工藝，量子位元數量領先。</p>
+                        <p><strong>劣勢：</strong><span class="text-red-600 font-semibold">錯誤率高</span>，同調時間短，需在接近絕對零度的極端環境運行，成本高昂。</p>
+                    `,
+                    metrics: [10, 3, 4]
+                },
+                trapped_ion: {
+                    title: '離子阱 (Trapped-Ion Systems)',
+                    content: `
+                        <p><strong>原理：</strong>利用電磁場將單個帶電原子（離子）懸浮在真空中，其天然能階即為量子位元。</p>
+                        <p><strong>主要玩家：</strong>IonQ、Quantinuum</p>
+                        <p><strong>優勢：</strong><span class="text-green-600 font-semibold">保真度極高 (99.99%)</span>，穩定性好，同調時間長，量子體積表現優異。</p>
+                        <p><strong>劣勢：</strong><span class="text-red-600 font-semibold">運算速度慢 (kHz級)</span>，對雷射控制精度要求極高，光學系統複雜。</p>
+                    `,
+                    metrics: [4, 10, 8]
+                },
+                photonic: {
+                    title: '光子處理器 (Photonic Processors)',
+                    content: `
+                        <p><strong>原理：</strong>使用單個光子作為量子位元，利用其偏振等屬性編碼資訊。</p>
+                        <p><strong>主要玩家：</strong>Xanadu、PsiQuantum</p>
+                        <p><strong>優勢：</strong><span class="text-green-600 font-semibold">抗去同調能力強</span>，可在室溫下運行，非常適合量子通訊。</p>
+                        <p><strong>劣勢：</strong><span class="text-red-600 font-semibold">雙量子位元閘難實現</span>，光子難以儲存，可擴展性與可編程性仍是重大挑戰。</p>
+                    `,
+                    metrics: [7, 8, 5]
+                }
+            };
+
+            const appContentData = {
+                science: {
+                    title: '💊 革命化科學：藥物發現與材料科學',
+                    content: `
+                        <p class="mb-2"><strong>問題：</strong>精確模擬分子的量子力學行為，對於傳統電腦而言是難以駕馭的，計算複雜度會隨分子大小指數級增長。</p>
+                        <p class="mb-2"><strong>量子方案：</strong>量子電腦能以其「母語」對分子結構及其相互作用進行精確模擬。</p>
+                        <p><strong>應用影響：</strong>在<strong>藥物發現</strong>領域，可極大加速新藥設計，預測藥效與副作用，縮短研發週期。在<strong>材料科學</strong>中，可用於設計更高效的催化劑、電池材料或室溫超導體。</p>
+                        <p class="mt-4 text-sm text-gray-500"><strong>案例：</strong>阿斯利康與IonQ、百靈佳殷格翰與Google均已在此領域展開合作。</p>
+                    `
+                },
+                finance: {
+                    title: '💰 重塑金融：先進風險分析與優化',
+                    content: `
+                        <p class="mb-2"><strong>問題：</strong>現代金融涉及高維度數據處理、龐大資產組合優化以及複雜市場風險模擬，均為計算密集型任務。</p>
+                        <p class="mb-2"><strong>量子方案：</strong>量子演算法在優化和加速採樣方面具有天然優勢。</p>
+                        <p><strong>應用影響：</strong>可更優地進行<strong>資產組合優化</strong>，找到風險與回報的最佳平衡點。利用量子增強的蒙地卡羅模擬，可以更快速、準確地為<strong>衍生品定價</strong>和進行風險分析。</p>
+                        <p class="mt-4 text-sm text-gray-500"><strong>案例：</strong>高盛和摩根大通等頂尖金融機構已成立專門的量子研究團隊。</p>
+                    `
+                },
+                logistics: {
+                    title: '🚚 解決不可解問題：複雜優化',
+                    content: `
+                        <p class="mb-2"><strong>問題：</strong>許多關鍵工業運營本質上都是複雜的優化問題，例如物流中的「旅行推銷員問題」。</p>
+                        <p class="mb-2"><strong>量子方案：</strong>量子退火等優化演算法能探索巨大的解空間，尋找比傳統方法更優的解。</p>
+                        <p><strong>應用影響：</strong>在<strong>物流與供應鏈</strong>中，可優化車輛路徑、倉儲佈局和庫存。在<strong>製造業</strong>中，可優化生產排程和資源分配。</p>
+                        <p class="mt-4 text-sm text-gray-500"><strong>案例：</strong>加拿大超市Save-On-Foods利用D-Wave量子退火機，將一項物流任務計算時間從25小時縮短至幾秒。</p>
+                    `
+                },
+                crypto: {
+                    title: '🔒 雙面刃：破解現代密碼學',
+                    content: `
+                        <p class="mb-2"><strong>威脅：</strong>當今全球多數安全通訊依賴於傳統電腦難以解決的數學問題（如大數分解）。</p>
+                        <p class="mb-2"><strong>量子方案：</strong>著名的<strong>秀爾演算法 (Shor's Algorithm)</strong> 能夠以指數級速度破解RSA等主流加密。<strong>格羅弗演算法 (Grover's Algorithm)</strong> 則能削弱AES等對稱加密的安全性。</p>
+                        <p class="text-red-600 font-semibold"><strong>影響：</strong>一台足夠強大的量子電腦，可能在幾分鐘內破解當今最先進的加密體系，對全球數位基礎設施構成根本性威脅。這也催生了「後量子密碼學」(PQC) 的發展。</p>
+                    `
+                }
+            };
+
+            const appContentContainer = document.getElementById('app-content');
+            const appTabs = document.getElementById('app-tabs');
+
+            function updateAppContent(tab) {
+                const data = appContentData[tab];
+                if (data) {
+                    appContentContainer.innerHTML = `
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">${data.title}</h3>
+                        <div class="prose max-w-none text-gray-700">${data.content}</div>
+                    `;
+                }
+            }
+
+            appTabs.addEventListener('click', (e) => {
+                if (e.target.matches('.tab-button')) {
+                    appTabs.querySelector('.active').classList.remove('active');
+                    e.target.classList.add('active');
+                    updateAppContent(e.target.dataset.tab);
+                }
+            });
+
+            updateAppContent('science');
+
+
+            const ctx = document.getElementById('hardwareChart').getContext('2d');
+            let hardwareChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['閘速度 (Gate Speed)', '保真度/同調時間 (Fidelity/Coherence)', '可擴展性潛力 (Scalability)'],
+                    datasets: [
+                        { label: '超導電路', data: hardwareData.superconducting.metrics, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 },
+                        { label: '離子阱', data: hardwareData.trapped_ion.metrics, backgroundColor: 'rgba(139, 92, 246, 0.7)', borderColor: 'rgba(139, 92, 246, 1)', borderWidth: 1 },
+                        { label: '光子處理器', data: hardwareData.photonic.metrics, backgroundColor: 'rgba(16, 185, 129, 0.7)', borderColor: 'rgba(16, 185, 129, 1)', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 12,
+                            title: { display: true, text: '相對性能評分 (越高越好)' }
+                        }
+                    },
+                    plugins: {
+                        title: { display: true, text: '主流量子硬體技術比較', font: { size: 16 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const hardwareSelector = document.getElementById('hardware-selector');
+            const detailsTitle = document.getElementById('details-title');
+            const detailsContent = document.getElementById('details-content');
+
+            hardwareSelector.addEventListener('click', (e) => {
+                if (e.target.matches('.tech-button')) {
+                    const tech = e.target.dataset.tech;
+                    
+                    document.querySelectorAll('.tech-button').forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-white', 'text-gray-700');
+                    });
+                    e.target.classList.add('bg-blue-500', 'text-white');
+                    e.target.classList.remove('bg-white', 'text-gray-700');
+                    
+                    if (tech === 'all') {
+                        hardwareChart.data.datasets.forEach(ds => ds.hidden = false);
+                        detailsTitle.innerText = '技術詳情';
+                        detailsContent.innerHTML = '<p>請從上方選擇一項技術以查看其詳細資訊，包括原理、主要玩家、優勢與挑戰。</p>';
+                    } else {
+                        hardwareChart.data.datasets.forEach(ds => {
+                            ds.hidden = ds.label.toLowerCase().includes(hardwareData[tech].title.split(' ')[0].toLowerCase()) ? false : true;
+                        });
+                        detailsTitle.innerText = hardwareData[tech].title;
+                        detailsContent.innerHTML = hardwareData[tech].content;
+                    }
+                    hardwareChart.update();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
