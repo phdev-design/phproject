@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>川普的動盪與韌性：互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', 'Noto Sans JP', sans-serif;
+            background-color: #F8F9FA;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-left: 5px solid #FF3C28;
+        }
+        .section-title {
+            color: #0043A4;
+        }
+        .accent-bg { background-color: #0043A4; }
+        .accent-text { color: #0043A4; }
+        .highlight-yellow { color: #FFD400; }
+        .highlight-red { color: #FF3C28; }
+        .lang-switcher button.active {
+            font-weight: 900;
+            color: #0043A4;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <!-- Language Switcher -->
+    <div class="lang-switcher bg-gray-100 py-2 text-center shadow-inner">
+        <button id="lang-zh" class="px-3 py-1 text-sm font-bold text-gray-600 hover:text-blue-600 active">中文 (繁)</button>
+        <span class="text-gray-400">|</span>
+        <button id="lang-en" class="px-3 py-1 text-sm font-bold text-gray-600 hover:text-blue-600">English</button>
+        <span class="text-gray-400">|</span>
+        <button id="lang-ja" class="px-3 py-1 text-sm font-bold text-gray-600 hover:text-blue-600">日本語</button>
+    </div>
+
+    <header class="bg-white shadow-md p-6 text-center">
+        <h1 class="text-4xl md:text-5xl font-black section-title" data-key="title">川普人生軌跡：動盪與韌性</h1>
+        <p class="mt-2 text-lg text-gray-600 max-w-3xl mx-auto" data-key="subtitle">一份視覺化分析報告，揭示其充滿戲劇性成敗循環的職業生涯</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Section 1: The Hook - Big Numbers -->
+        <section id="hook" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2" data-key="hookTitle">順遂人生的反面教材</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-key="hookDesc">報告核心觀點：川普的一生並非平穩航行，而是由巨大的成功與近乎災難性的失敗交織而成。以下關鍵數據可為其動盪的職業生涯提供註解。</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                <div class="stat-card rounded-lg shadow-lg p-6">
+                    <p class="text-6xl font-black highlight-red">6</p>
+                    <p class="text-xl font-bold mt-2" data-key="stat1Title">次公司破產</p>
+                    <p class="text-sm text-gray-500 mt-1" data-key="stat1Date">(1991-2009)</p>
+                </div>
+                <div class="stat-card rounded-lg shadow-lg p-6" style="border-left-color: #0043A4;">
+                    <p class="text-6xl font-black accent-text">2</p>
+                    <p class="text-xl font-bold mt-2" data-key="stat2Title">次總統彈劾</p>
+                    <p class="text-sm text-gray-500 mt-1" data-key="stat2Date">(2019 & 2021)</p>
+                </div>
+                <div class="stat-card rounded-lg shadow-lg p-6" style="border-left-color: #FFD400;">
+                    <p class="text-6xl font-black" style="color: #E05600;">88</p>
+                    <p class="text-xl font-bold mt-2" data-key="stat3Title">項刑事罪名</p>
+                    <p class="text-sm text-gray-500 mt-1" data-key="stat3Date">(截至2023年)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Core Visualization -->
+        <section id="cycles" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 section-title" data-key="cyclesTitle">危機的循環</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto" data-key="cyclesDesc">川普的職業生涯可按十年劃分為不同的危機階段。從90年代的商業崩潰，到總統任期及之後的政治與法律風暴，動盪是唯一不變的主題。此圖表綜合了報告中的表格數據，展示了這一模式。</p>
+            <div class="bg-white p-4 md:p-8 rounded-xl shadow-2xl">
+                <div class="chart-container">
+                    <canvas id="crisisCycleChart"></canvas>
+                </div>
+                <p class="text-xs text-gray-500 text-center mt-4" data-key="chartNote">此圖表綜合了報告中表1、2、3的數據，將公司破產、彈劾和重大法律案件歸類為商業、政治或法律危機。</p>
+            </div>
+        </section>
+        
+        <!-- Section 3: The Rebranding -->
+        <section id="rebranding" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 section-title" data-key="rebrandingTitle">重生：從破產商人到「美國老闆」</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto" data-key="rebrandingDesc">在2000年代初，川普的商業品牌因多次破產而受損。然而，實境秀《誰是接班人》將他重塑為成功的終極象徵，這一媒體形象成為他日後政治生涯的基石。</p>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                    <div class="text-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                        <p class="text-2xl font-bold highlight-red" data-key="rebrandStep1Title">商業現實</p>
+                        <p class="text-gray-600" data-key="rebrandStep1Desc">賭場公司再次面臨破產</p>
+                        <p class="text-xs text-gray-500" data-key="rebrandStep1Date">(2004)</p>
+                    </div>
+                    <div class="text-4xl font-black accent-text transform rotate-90 md:rotate-0">→</div>
+                    <div class="text-center p-4 bg-gray-800 text-white rounded-lg shadow-2xl">
+                        <p class="text-2xl font-bold highlight-yellow" data-key="rebrandStep2Title">媒體重塑</p>
+                        <p data-key="rebrandStep2Desc">主持《誰是接班人》</p>
+                        <p class="text-xs text-yellow-300" data-key="rebrandStep2Date">(2004-2015)</p>
+                    </div>
+                    <div class="text-4xl font-black accent-text transform rotate-90 md:rotate-0">→</div>
+                    <div class="text-center p-4 border-2 border-solid border-blue-500 rounded-lg">
+                        <p class="text-2xl font-bold accent-text" data-key="rebrandStep3Title">公眾形象</p>
+                        <p class="text-gray-600" data-key="rebrandStep3Desc">果斷、成功的「美國老闆」</p>
+                        <p class="text-xs text-gray-500" data-key="rebrandStep3Date">(2016年競選基礎)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Political Apex & Turmoil -->
+        <section id="politics" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 section-title" data-key="politicsTitle">政治巔峰與動盪</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto" data-key="politicsDesc">贏得總統大選是他最大的成功，但其任期卻被持續的衝突、調查和對民主規範前所未有的挑戰所定義，最終導致兩次彈劾。</p>
+            <div class="bg-white p-4 md:p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold mb-4 text-center" data-key="impeachmentTitle">兩次彈劾對比分析</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-key="tableHeader1">特徵</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-key="tableHeader2">第一次彈劾 (2019)</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-key="tableHeader3">第二次彈劾 (2021)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-bold" data-key="tableRow1Col1">核心指控</td>
+                                <td class="px-6 py-4" data-key="tableRow1Col2">濫用職權；妨礙國會 (施壓烏克蘭調查政治對手)</td>
+                                <td class="px-6 py-4" data-key="tableRow1Col3">煽動叛亂 (在國會山莊事件中的角色)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap font-bold" data-key="tableRow2Col1">眾議院投票</td>
+                                <td class="px-6 py-4" data-key="tableRow2Col2">230-197 通過</td>
+                                <td class="px-6 py-4" data-key="tableRow2Col3">232-197 通過 (含10名共和黨人)</td>
+                            </tr>
+                            <tr class="bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap font-bold" data-key="tableRow3Col1">參議院結果</td>
+                                <td class="px-6 py-4" data-key="tableRow3Col2"><span class="font-bold accent-text">宣告無罪</span> (48-52, 未達定罪門檻)</td>
+                                <td class="px-6 py-4" data-key="tableRow3Col3"><span class="font-bold accent-text">宣告無罪</span> (57-43, 未達定罪門檻)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                 <p class="text-xs text-gray-500 text-center mt-4" data-key="tableNote">資料來源：報告中表2</p>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="accent-bg text-white mt-12 py-10 text-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-black mb-4" data-key="conclusionTitle">結論：混亂即是引擎</h2>
+            <p class="max-w-3xl mx-auto text-gray-200 leading-relaxed" data-key="conclusionDesc">
+                綜合分析，川普的一生與「一帆風順」截然相反。他利用繼承的優勢追求高風險事業，在取得巨大成功後崩潰，再利用對媒體的精通重塑形象並再次崛起。動盪並非他成功的障礙；在許多方面，它正是其成功的引擎。他控制敘事的能力，將失敗轉化為生存的故事，將法律危機變為政治資本，這是他非凡韌性的核心。
+            </p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 翻譯資料 ---
+    const translations = {
+        'zh': {
+            title: '川普人生軌跡：動盪與韌性',
+            subtitle: '一份視覺化分析報告，揭示其充滿戲劇性成敗循環的職業生涯',
+            hookTitle: '順遂人生的反面教材',
+            hookDesc: '報告核心觀點：川普的一生並非平穩航行，而是由巨大的成功與近乎災難性的失敗交織而成。以下關鍵數據可為其動盪的職業生涯提供註解。',
+            stat1Title: '次公司破產',
+            stat1Date: '(1991-2009)',
+            stat2Title: '次總統彈劾',
+            stat2Date: '(2019 & 2021)',
+            stat3Title: '項刑事罪名',
+            stat3Date: '(截至2023年)',
+            cyclesTitle: '危機的循環',
+            cyclesDesc: '川普的職業生涯可按十年劃分為不同的危機階段。從90年代的商業崩潰，到總統任期及之後的政治與法律風暴，動盪是唯一不變的主題。此圖表綜合了報告中的表格數據，展示了這一模式。',
+            chartNote: '此圖表綜合了報告中表1、2、3的數據，將公司破產、彈劾和重大法律案件歸類為商業、政治或法律危機。',
+            rebrandingTitle: '重生：從破產商人到「美國老闆」',
+            rebrandingDesc: '在2000年代初，川普的商業品牌因多次破產而受損。然而，實境秀《誰是接班人》將他重塑為成功的終極象徵，這一媒體形象成為他日後政治生涯的基石。',
+            rebrandStep1Title: '商業現實',
+            rebrandStep1Desc: '賭場公司再次面臨破產',
+            rebrandStep1Date: '(2004)',
+            rebrandStep2Title: '媒體重塑',
+            rebrandStep2Desc: '主持《誰是接班人》',
+            rebrandStep2Date: '(2004-2015)',
+            rebrandStep3Title: '公眾形象',
+            rebrandStep3Desc: '果斷、成功的「美國老闆」',
+            rebrandStep3Date: '(2016年競選基礎)',
+            politicsTitle: '政治巔峰與動盪',
+            politicsDesc: '贏得總統大選是他最大的成功，但其任期卻被持續的衝突、調查和對民主規範前所未有的挑戰所定義，最終導致兩次彈劾。',
+            impeachmentTitle: '兩次彈劾對比分析',
+            tableHeader1: '特徵',
+            tableHeader2: '第一次彈劾 (2019)',
+            tableHeader3: '第二次彈劾 (2021)',
+            tableRow1Col1: '核心指控',
+            tableRow1Col2: '濫用職權；妨礙國會 (施壓烏克蘭調查政治對手)',
+            tableRow1Col3: '煽動叛亂 (在國會山莊事件中的角色)',
+            tableRow2Col1: '眾議院投票',
+            tableRow2Col2: '230-197 通過',
+            tableRow2Col3: '232-197 通過 (含10名共和黨人)',
+            tableRow3Col1: '參議院結果',
+            tableRow3Col2: '<span class="font-bold accent-text">宣告無罪</span> (48-52, 未達定罪門檻)',
+            tableRow3Col3: '<span class="font-bold accent-text">宣告無罪</span> (57-43, 未達定罪門檻)',
+            tableNote: '資料來源：報告中表2',
+            conclusionTitle: '結論：混亂即是引擎',
+            conclusionDesc: '綜合分析，川普的一生與「一帆風順」截然相反。他利用繼承的優勢追求高風險事業，在取得巨大成功後崩潰，再利用對媒體的精通重塑形象並再次崛起。動盪並非他成功的障礙；在許多方面，它正是其成功的引擎。他控制敘事的能力，將失敗轉化為生存的故事，將法律危機變為政治資本，這是他非凡韌性的核心。',
+            // Chart specific
+            chartTitle: '各時期主要危機事件數量',
+            chartYAxis: '事件數量',
+            chartLabelBusiness: '商業危機 (破產)',
+            chartLabelPolitical: '政治危機 (彈劾)',
+            chartLabelLegal: '法律危機 (重大案件)'
+        },
+        'en': {
+            title: 'Trump\'s Trajectory: Turmoil and Resilience',
+            subtitle: 'A visual analysis revealing a career of dramatic boom-and-bust cycles.',
+            hookTitle: 'The Opposite of Smooth Sailing',
+            hookDesc: 'Core thesis of the report: Trump\'s life has not been a steady voyage but a series of immense successes interwoven with near-catastrophic failures. These key numbers annotate his turbulent career.',
+            stat1Title: 'Corporate Bankruptcies',
+            stat1Date: '(1991-2009)',
+            stat2Title: 'Presidential Impeachments',
+            stat2Date: '(2019 & 2021)',
+            stat3Title: 'Criminal Charges',
+            stat3Date: '(As of 2023)',
+            cyclesTitle: 'The Cycles of Crisis',
+            cyclesDesc: 'Trump\'s career can be segmented into decades of distinct crises. From the business collapses of the 90s to the political and legal storms of his presidency and beyond, turmoil has been the one constant. This chart synthesizes data from the report\'s tables to show this pattern.',
+            chartNote: 'This chart combines data from Tables 1, 2, and 3 of the report, categorizing corporate bankruptcies, impeachments, and major legal cases as Business, Political, or Legal crises.',
+            rebrandingTitle: 'Rebirth: From Bankrupt Businessman to "America\'s Boss"',
+            rebrandingDesc: 'In the early 2000s, Trump\'s business brand was damaged by multiple bankruptcies. However, the reality TV show "The Apprentice" remade him into the ultimate symbol of success—a media image that became the bedrock of his future political career.',
+            rebrandStep1Title: 'Business Reality',
+            rebrandStep1Desc: 'Casino companies face another bankruptcy',
+            rebrandStep1Date: '(2004)',
+            rebrandStep2Title: 'Media Reinvention',
+            rebrandStep2Desc: 'Hosts "The Apprentice"',
+            rebrandStep2Date: '(2004-2015)',
+            rebrandStep3Title: 'Public Persona',
+            rebrandStep3Desc: 'The decisive, successful "Boss"',
+            rebrandStep3Date: '(Foundation for 2016 campaign)',
+            politicsTitle: 'Political Apex & Turmoil',
+            politicsDesc: 'Winning the presidency was his greatest success, yet his term was defined by constant conflict, investigations, and unprecedented challenges to democratic norms, culminating in two impeachments.',
+            impeachmentTitle: 'A Tale of Two Impeachments',
+            tableHeader1: 'Feature',
+            tableHeader2: 'First Impeachment (2019)',
+            tableHeader3: 'Second Impeachment (2021)',
+            tableRow1Col1: 'Core Allegation',
+            tableRow1Col2: 'Abuse of Power; Obstruction of Congress (Pressuring Ukraine to investigate a political rival)',
+            tableRow1Col3: 'Incitement of Insurrection (Role in the Jan. 6 Capitol attack)',
+            tableRow2Col1: 'House Vote',
+            tableRow2Col2: 'Passed 230-197',
+            tableRow2Col3: 'Passed 232-197 (with 10 Republicans)',
+            tableRow3Col1: 'Senate Outcome',
+            tableRow3Col2: '<span class="font-bold accent-text">Acquitted</span> (48-52, conviction threshold not met)',
+            tableRow3Col3: '<span class="font-bold accent-text">Acquitted</span> (57-43, conviction threshold not met)',
+            tableNote: 'Source: Table 2 from the report',
+            conclusionTitle: 'Conclusion: Chaos as an Engine',
+            conclusionDesc: 'In summary, Trump’s life is the antithesis of "smooth sailing." He has used inherited advantages to pursue high-risk ventures, crashed after great success, then used media mastery to rebrand and rise again. Turmoil has not been an obstacle to his success; in many ways, it has been its engine. His ability to control narratives, framing failures as stories of survival and legal crises as political capital, is central to his remarkable resilience.',
+            // Chart specific
+            chartTitle: 'Number of Major Crisis Events by Period',
+            chartYAxis: 'Number of Events',
+            chartLabelBusiness: 'Business Crises (Bankruptcies)',
+            chartLabelPolitical: 'Political Crises (Impeachments)',
+            chartLabelLegal: 'Legal Crises (Major Cases)'
+        },
+        'ja': {
+            title: 'トランプの軌跡：激動と強靭さ',
+            subtitle: '劇的な成功と失敗のサイクルに満ちたキャリアを明らかにする視覚的分析',
+            hookTitle: '順風満帆の対極',
+            hookDesc: '報告書の核心：トランプの人生は平穏な航海ではなく、巨大な成功と破滅的な失敗が織りなす連続であった。これらの主要な数字が、彼の激動のキャリアを物語っている。',
+            stat1Title: '回の会社倒産',
+            stat1Date: '(1991-2009)',
+            stat2Title: '回の大統領弾劾',
+            stat2Date: '(2019 & 2021)',
+            stat3Title: '件の刑事告訴',
+            stat3Date: '(2023年時点)',
+            cyclesTitle: '危機のサイクル',
+            cyclesDesc: 'トランプのキャリアは、10年ごとに異なる危機の段階に分けることができる。90年代のビジネスの崩壊から、大統領任期中およびその後の政治的・法的嵐まで、激動は唯一不変のテーマであった。このチャートは報告書のデータを統合し、このパターンを示している。',
+            chartNote: 'このチャートは報告書の表1、2、3のデータを統合し、会社の倒産、弾劾、主要な法的事件をビジネス、政治、または法的危機として分類しています。',
+            rebrandingTitle: '再生：破産した実業家から「アメリカのボス」へ',
+            rebrandingDesc: '2000年代初頭、トランプのビジネスブランドは度重なる倒産で傷ついていた。しかし、リアリティ番組「アプレンティス」が彼を成功の究極の象徴として再創造し、そのメディアイメージが後の政治キャリアの礎となった。',
+            rebrandStep1Title: 'ビジネスの現実',
+            rebrandStep1Desc: 'カジノ会社が再び破産の危機に',
+            rebrandStep1Date: '(2004)',
+            rebrandStep2Title: 'メディアによる再創造',
+            rebrandStep2Desc: '「アプレンティス」の司会を務める',
+            rebrandStep2Date: '(2004-2015)',
+            rebrandStep3Title: 'パブリックイメージ',
+            rebrandStep3Desc: '決断力のある成功した「ボス」',
+            rebrandStep3Date: '(2016年選挙戦の基盤)',
+            politicsTitle: '政治の頂点と激動',
+            politicsDesc: '大統領選挙での勝利は彼の最大の成功だったが、その任期は絶え間ない対立、調査、そして民主主義の規範への前例のない挑戦によって定義され、最終的に2度の弾劾に至った。',
+            impeachmentTitle: '二つの弾劾の比較分析',
+            tableHeader1: '特徴',
+            tableHeader2: '第一次弾劾 (2019)',
+            tableHeader3: '第二次弾劾 (2021)',
+            tableRow1Col1: '核心的な申し立て',
+            tableRow1Col2: '権力乱用、議会妨害（政敵を調査するようウクライナに圧力をかける）',
+            tableRow1Col3: '反乱扇動（1月6日の議事堂襲撃事件での役割）',
+            tableRow2Col1: '下院投票',
+            tableRow2Col2: '230対197で可決',
+            tableRow2Col3: '232対197で可決（共和党員10名を含む）',
+            tableRow3Col1: '上院の結果',
+            tableRow3Col2: '<span class="font-bold accent-text">無罪判決</span> (48-52、有罪評決の閾値に達せず)',
+            tableRow3Col3: '<span class="font-bold accent-text">無罪判決</span> (57-43、有罪評決の閾値に達せず)',
+            tableNote: '出典：報告書の表2',
+            conclusionTitle: '結論：混沌こそがエンジン',
+            conclusionDesc: '要するに、トランプの人生は「順風満帆」とは正反対である。彼は受け継いだ利点を活かしてハイリスクな事業を追求し、大成功の後に破綻し、そしてメディアを巧みに操って再ブランド化し、再び立ち上がってきた。激動は彼の成功の障害ではなく、多くの点でそのエンジンであった。物語をコントロールし、失敗を生存の物語として、法的な危機を政治的資本として描き出す彼の能力が、その驚くべき強靭さの中心にある。',
+            // Chart specific
+            chartTitle: '時期別の主要な危機イベント数',
+            chartYAxis: 'イベント数',
+            chartLabelBusiness: 'ビジネス危機（倒産）',
+            chartLabelPolitical: '政治危機（弾劾）',
+            chartLabelLegal: '法的危機（主要事件）'
+        }
+    };
+
+    // --- 圖表實例和資料 ---
+    let crisisChart;
+    const crisisData = {
+        labels: ['1990s', '2000s', '2010s', '2020s'],
+        datasets: [
+            {
+                label: '商業危機 (破產)', // Will be updated by switchLanguage
+                data: [3, 2, 0, 0], 
+                backgroundColor: '#FF3C28',
+            },
+            {
+                label: '政治危機 (彈劾)', // Will be updated by switchLanguage
+                data: [0, 0, 1, 1],
+                backgroundColor: '#0043A4',
+            },
+            {
+                label: '法律危機 (重大案件)', // Will be updated by switchLanguage
+                data: [0, 0, 0, 4], 
+                backgroundColor: '#FFD400',
+            }
+        ]
+    };
+    
+    // --- 語言切換邏輯 ---
+    const switchLanguage = (lang) => {
+        // 更新所有帶有 data-key 屬性的元素
+        document.querySelectorAll('[data-key]').forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (translations[lang] && translations[lang][key]) {
+                element.innerHTML = translations[lang][key];
+            }
+        });
+
+        // 更新圖表語言
+        if (crisisChart) {
+            const chartLang = translations[lang];
+            crisisChart.options.plugins.title.text = chartLang.chartTitle;
+            crisisChart.options.scales.y.title.text = chartLang.chartYAxis;
+            crisisChart.data.datasets[0].label = chartLang.chartLabelBusiness;
+            crisisChart.data.datasets[1].label = chartLang.chartLabelPolitical;
+            crisisChart.data.datasets[2].label = chartLang.chartLabelLegal;
+            crisisChart.update();
+        }
+        
+        // 更新按鈕的 active 狀態
+        document.querySelectorAll('.lang-switcher button').forEach(button => {
+            button.classList.remove('active');
+        });
+        document.getElementById(`lang-${lang}`).classList.add('active');
+        
+        // 更新 HTML 的 lang 屬性
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang;
+    };
+
+    // --- 初始化圖表 ---
+    const createChart = () => {
+        const ctx = document.getElementById('crisisCycleChart').getContext('2d');
+        crisisChart = new Chart(ctx, {
+            type: 'bar',
+            data: crisisData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '各時期主要危機事件數量', // Initial value
+                        padding: { top: 10, bottom: 20 },
+                        font: { size: 18, weight: 'bold' }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) { if (value % 1 === 0) { return value; }}
+                        },
+                        title: {
+                            display: true,
+                            text: '事件數量' // Initial value
+                        }
+                    }
+                }
+            }
+        });
+        // 初始加載時使用默認語言 (中文) 更新一次圖表
+        switchLanguage('zh');
+    };
+
+    // --- 事件監聽器 ---
+    document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+    document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+    document.getElementById('lang-ja').addEventListener('click', () => switchLanguage('ja'));
+    
+    // --- 啟動 ---
+    createChart();
+});
+</script>
+
+</body>
+</html>
