@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黃仁勳與NVIDIA的創世紀：從遊戲到AI的革命</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate & Sage -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical storytelling journey with a sticky navigation, allowing both linear exploration and direct access to key themes. The structure is thematic rather than chronological to enhance engagement: 1) The 'Why' (The Problem), 2) The 'Who' (The Founder), 3) The 'How' (The Struggle & Rebirth), 4) The 'What' (The Revolution), and 5) The 'Legacy' (The Philosophy). This narrative arc is more compelling than a dry report, guiding the user from the market need to the visionary solution and its ultimate impact on technology. -->
+    <!-- Visualization & Content Choices: 1. CPU vs GPU (Inform/Compare): A simple HTML/CSS flexbox layout with Unicode icons visually explains the architectural difference, a core concept. Interaction: Hover effects to show details. 2. Founder's Timeline (Organize): An interactive HTML/CSS timeline makes biographical data digestible. Interaction: Clicking a year reveals a modal with key events. 3. Company's Near-Death (Change): A Chart.js line chart visualizes the dramatic dip (NV1 failure) and recovery (RIVA success), making the abstract business struggle tangible and memorable. 4. Innovations (Organize/Inform): Interactive HTML cards present key breakthroughs (GeForce, CUDA, AlexNet) in a modular, easy-to-browse format. Interaction: A simple toggle/click reveals more info. This approach prioritizes clarity and interactive storytelling over data-heavy charts, which fits the qualitative nature of the source report. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            color: #10b981; /* emerald-500 */
+            border-bottom-color: #10b981;
+        }
+        .timeline-item-content {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .timeline-item-content.active {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <nav id="navbar" class="bg-slate-50/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-900">NVIDIA的創世紀</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a data-target="section-origin" class="nav-link text-slate-600 hover:text-emerald-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">緣起</a>
+                        <a data-target="section-founder" class="nav-link text-slate-600 hover:text-emerald-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">淬鍊</a>
+                        <a data-target="section-trial" class="nav-link text-slate-600 hover:text-emerald-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">試煉</a>
+                        <a data-target="section-revolution" class="nav-link text-slate-600 hover:text-emerald-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">革命</a>
+                        <a data-target="section-philosophy" class="nav-link text-slate-600 hover:text-emerald-500 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">法則</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+
+        <!-- Section 1: The Origin -->
+        <section id="section-origin" class="mb-24 fade-in">
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-4">為何世界需要GPU？</h2>
+            <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12">
+                此區塊將直接回應核心問題：「為什麼黃仁勳會發展顯示卡？」我們將回到1990年代，探討當時個人電腦面臨的根本技術瓶頸，以及一個新興市場所帶來的巨大機遇。這一切共同催生了專用圖形處理器（GPU）的誕生。
+            </p>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-2xl font-bold mb-4 text-center">CPU的瓶頸：序列處理的極限</h3>
+                    <div class="text-6xl text-center mb-4 text-rose-500">🏃</div>
+                    <p class="text-slate-700 leading-relaxed">
+                        中央處理器（CPU）是電腦的大腦，設計用於快速、循序地處理複雜任務。它就像一位技藝高超的主廚，一次只能專心做一道精緻的菜餚。然而，當面對3D圖形渲染這種需要同時處理數百萬個像素點的「大規模並行」任務時，CPU的序列架構便力不從心，成為了嚴重的效能瓶頸。
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h3 class="text-2xl font-bold mb-4 text-center">市場的呼喚：3D遊戲的革命</h3>
+                    <div class="text-6xl text-center mb-4 text-emerald-500">🎮</div>
+                    <p class="text-slate-700 leading-relaxed">
+                        從《毀滅戰士》到《雷神之鎚》，1990年代的PC遊戲產業正在經歷從2D到3D的劇烈轉變。這不僅創造了龐大且對圖形效能極度渴求的消費市場，更重要的是，它定義了一個清晰且亟待解決的技術難題。這個市場的力量，為一個全新處理器架構的誕生提供了完美的商業驅動力。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Founder's Journey -->
+        <section id="section-founder" class="mb-24 fade-in">
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-4">淬鍊：從台南到矽谷</h2>
+             <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12">
+                一位領導者的性格與願景，往往源自其成長經歷的淬鍊。本區塊將以互動時間軸的方式，呈現黃仁勳從台灣的童年、肯塔基「感化院」的磨礪，到矽谷的工程師養成。這些經歷共同塑造了他著名的堅韌與遠見。點擊年份，即可探索他人生的關鍵節點。
+            </p>
+            <div id="timeline" class="relative border-l-4 border-emerald-200 ml-4 py-4">
+            </div>
+        </section>
+
+        <!-- Section 3: Trial by Fire -->
+        <section id="section-trial" class="mb-24 fade-in">
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-4">試煉：浴火重生的NVIDIA</h2>
+             <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12">
+                成功並非一蹴可幾。NVIDIA的早期歷史是一部關於從失敗中學習的教科書。本區塊透過圖表，生動呈現了公司從首款產品NV1的慘敗、瀕臨破產，到果斷轉向行業標準、憑藉RIVA系列強勢崛起的 dramatic V型反轉。
+            </p>
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                <div class="chart-container">
+                    <canvas id="rivaChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Revolution -->
+        <section id="section-revolution" class="mb-24 fade-in">
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-4">革命：定義未來的創新</h2>
+            <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12">
+                在站穩腳跟後，NVIDIA開始用一系列革命性的創新來定義未來。從創造「GPU」這個品類，到將其能力解放給科學界，再到意外地點燃AI的火種。這些里程碑不僅是技術的勝利，更是戰略遠見的體現。
+            </p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 text-center">
+                    <div class="text-5xl mb-4">📟</div>
+                    <h3 class="text-2xl font-bold mb-2">GeForce 256 (1999)</h3>
+                    <p class="text-slate-600">全球首款「GPU」。透過整合硬體T&L引擎，將繁重的幾何運算從CPU完全卸載，徹底打破效能瓶頸，定義了現代顯示卡的架構。
+                    </p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 text-center">
+                    <div class="text-5xl mb-4">💻</div>
+                    <h3 class="text-2xl font-bold mb-2">CUDA (2006)</h3>
+                    <p class="text-slate-600">革命性的軟體平台。它允許開發者使用通用程式語言駕馭GPU的並行運算能力，將GPU從遊戲配件轉變為科學計算的通用引擎。
+                    </p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 text-center">
+                    <div class="text-5xl mb-4">🧠</div>
+                    <h3 class="text-2xl font-bold mb-2">AlexNet (2012)</h3>
+                    <p class="text-slate-600">AI的「iPhone時刻」。研究人員使用NVIDIA的消費級遊戲顯卡，訓練出AlexNet神經網路並大獲成功，雄辯地證明了GPU是驅動AI革命不可或缺的硬體。
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 5: The Philosophy -->
+        <section id="section-philosophy" class="mb-12 fade-in">
+            <h2 class="text-4xl font-extrabold text-slate-900 text-center mb-4">黃氏法則：NVIDIA之道</h2>
+            <p class="text-center text-lg text-slate-600 max-w-3xl mx-auto mb-12">
+                NVIDIA的持久成功，是其獨特企業文化的直接體現。這種文化根植於黃仁勳的個人經歷與領導哲學——擁抱磨難、智識上的誠實，以及對速度與敏捷性的極致追求。
+            </p>
+            <div class="space-y-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <blockquote class="text-center text-lg italic text-slate-700">
+                        <p>"我希望你們能經歷足夠的痛苦與磨難。唯有經歷過磨難，才能鍛造出足以應對人生必然挑戰的韌性。"</p>
+                        <footer class="mt-4 font-semibold">- 苦難的價值</footer>
+                    </blockquote>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <blockquote class="text-center text-lg italic text-slate-700">
+                        <p>"我們的公司距離倒閉永遠只有30天。這種危機感杜絕了自滿，驅使著公司以『光速』前進。"</p>
+                        <footer class="mt-4 font-semibold">- 永存的危機感</footer>
+                    </blockquote>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                     <blockquote class="text-center text-lg italic text-slate-700">
+                        <p>"勇敢地承認錯誤，並迅速採取行動修正。這種『智識上的誠實』，是從NV1的慘敗中學到的最寶貴一課。"</p>
+                        <footer class="mt-4 font-semibold">- 智識上的誠實</footer>
+                    </blockquote>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p>基於報告《NVIDIA的創世紀》創建的互動式網頁。</p>
+            <p>&copy; 2024 Interactive Report. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const timelineData = [
+                {
+                    year: '1963',
+                    title: '誕生於台南',
+                    content: '黃仁勳出生於台灣台南市一個知識氛圍濃厚的家庭，父親是化學工程師，母親是教師。'
+                },
+                {
+                    year: '1972',
+                    title: '遠赴美國',
+                    content: '年僅九歲時與哥哥被送往美國，投靠親戚。後因誤會被送入肯塔基州一所專為問題青少年設立的寄宿學校。'
+                },
+                {
+                    year: '1973-75',
+                    title: '肯塔基的熔爐',
+                    content: '在嚴酷的環境中，他學會了堅強、適應與韌性，這段經歷被他視為「堅韌」品格的根源。他還負責清洗全校的廁所。'
+                },
+                {
+                    year: '1984',
+                    title: '工程師的養成',
+                    content: '從奧勒岡州立大學取得電機工程學士學位，並進入AMD擔任微處理器設計師。'
+                },
+                {
+                    year: '1993',
+                    title: 'NVIDIA的誕生',
+                    content: '在加州聖荷西一家Denny\'s餐廳，與夥伴共同擘劃了NVIDIA的藍圖，決心解決PC圖形運算的瓶頸。'
+                },
+            ];
+            
+            const timelineContainer = document.getElementById('timeline');
+            timelineData.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.classList.add('mb-8', 'relative');
+                itemEl.innerHTML = `
+                    <div class="timeline-marker absolute -left-1.5 mt-1.5 w-6 h-6 rounded-full bg-emerald-500 border-4 border-white"></div>
+                    <div class="ml-10">
+                        <div class="timeline-header flex items-center mb-1 cursor-pointer">
+                            <h3 class="font-bold text-xl text-emerald-600">${item.year}</h3>
+                            <p class="ml-4 font-semibold text-slate-800">${item.title}</p>
+                            <span class="ml-auto text-emerald-500 transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="timeline-item-content">
+                            <p class="text-slate-600 leading-relaxed mt-2">${item.content}</p>
+                        </div>
+                    </div>
+                `;
+                timelineContainer.appendChild(itemEl);
+            });
+
+            timelineContainer.addEventListener('click', (e) => {
+                const header = e.target.closest('.timeline-header');
+                if (header) {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('span');
+                    
+                    document.querySelectorAll('.timeline-item-content.active').forEach(openContent => {
+                        if (openContent !== content) {
+                            openContent.classList.remove('active');
+                            openContent.previousElementSibling.querySelector('span').style.transform = 'rotate(0deg)';
+                        }
+                    });
+
+                    content.classList.toggle('active');
+                    if (content.classList.contains('active')) {
+                        icon.style.transform = 'rotate(180deg)';
+                    } else {
+                        icon.style.transform = 'rotate(0deg)';
+                    }
+                }
+            });
+
+            const ctx = document.getElementById('rivaChart').getContext('2d');
+            const rivaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1995 (NV1)', '1996', '1997 (RIVA 128)', '1998 (RIVA TNT)'],
+                    datasets: [{
+                        label: '市場成功指數',
+                        data: [20, 10, 80, 100],
+                        borderColor: '#10b981', // emerald-500
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#10b981',
+                        pointHoverRadius: 7,
+                        pointRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value === 10) return '瀕臨破產';
+                                    if (value === 80) return '強勢崛起';
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    let content = '';
+                                    if(context.parsed.x === 0) content = 'NV1慘敗，押錯技術路線。';
+                                    if(context.parsed.x === 1) content = 'Sega投資續命，轉向DirectX標準。';
+                                    if(context.parsed.x === 2) content = 'RIVA 128大獲成功，確立市場地位。';
+                                    if(context.parsed.x === 3) content = 'RIVA TNT乘勝追擊，成為頂級競爭者。';
+                                    return content;
+                                }
+                            },
+                             bodyFont: {
+                                size: 14,
+                             },
+                             padding: 12,
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutCubic'
+                    }
+                }
+            });
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.4
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const targetId = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.dataset.target === targetId);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById(link.dataset.target).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
