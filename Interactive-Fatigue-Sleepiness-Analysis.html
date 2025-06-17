@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="pageTitle">互動式疲勞與睡意分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lato', 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #87A9B6;
+            border-bottom-color: #87A9B6;
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border: 1px solid #EAEAEA;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .tab-btn {
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #87A9B6;
+            color: #FFFFFF;
+        }
+        .lang-btn {
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background-color: #87A9B6;
+            color: white;
+            border-color: #87A9B6;
+        }
+         .lang-btn:not(.active) {
+            background-color: #f0f0f0;
+            color: #555;
+         }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-[#C68B75]" data-key="headerTitle">活力探索</span>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#intro" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-key="navHome">首頁</a>
+                        <a href="#sleepiness" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-key="navSleepiness">睡意之謎</a>
+                        <a href="#fatigue" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-key="navFatigue">疲勞的根源</a>
+                        <a href="#warnings" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-key="navWarnings">健康的警號</a>
+                        <a href="#vitality" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-key="navVitality">活力方程式</a>
+                    </div>
+                    <!-- Language Switcher (Desktop) -->
+                    <div class="ml-4 flex items-center space-x-1 bg-gray-200 p-1 rounded-lg">
+                        <button id="lang-zh-desktop" class="lang-btn active">中</button>
+                        <button id="lang-en-desktop" class="lang-btn">EN</button>
+                    </div>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <!-- Language Switcher (Mobile) -->
+                    <div class="flex items-center space-x-1 bg-gray-200 p-1 rounded-lg mr-2">
+                        <button id="lang-zh-mobile" class="lang-btn active">中</button>
+                        <button id="lang-en-mobile" class="lang-btn">EN</button>
+                    </div>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#intro" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-key="navHomeMobile">首頁</a>
+                <a href="#sleepiness" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-key="navSleepinessMobile">睡意之謎</a>
+                <a href="#fatigue" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-key="navFatigueMobile">疲勞的根源</a>
+                <a href="#warnings" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-key="navWarningsMobile">健康的警號</a>
+                <a href="#vitality" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-key="navVitalityMobile">活力方程式</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="py-12">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl md:text-5xl font-bold text-[#C68B75] mb-4" data-key="introTitle">為何您總是感到疲倦？</h1>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-key="introSubtitle">這是一個我們多數人都問過的問題。然而，「疲倦」的背後，隱藏著兩種截然不同的生理狀態：「睡意」與「疲勞」。準確地區分它們，是找到解決方案、重獲活力的第一步。</p>
+            </div>
+            <div class="section-card p-8">
+                <h2 class="text-2xl font-bold text-center mb-6" data-key="compareTitle">互動比較：我是「眼訓」還是「疲勞」？</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="text-center p-6 bg-[#F8F7F4] rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-3 text-[#87A9B6]" data-key="compareSleepinessTitle">睡意 (Sleepiness)</h3>
+                        <p class="text-gray-600 mb-4" data-key="compareSleepinessDesc">一種強烈的入睡衝動，通常在清醒時間越長時越嚴重。</p>
+                        <p class="text-lg font-bold" data-key="compareSleepinessFeature">核心特徵：能透過睡眠有效緩解。</p>
+                    </div>
+                    <div class="text-center p-6 bg-[#F8F7F4] rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-3 text-[#C68B75]" data-key="compareFatigueTitle">疲勞 (Fatigue)</h3>
+                        <p class="text-gray-600 mb-4" data-key="compareFatigueDesc">一種普遍的身心能量耗竭感，伴隨動機的缺乏。</p>
+                        <p class="text-lg font-bold" data-key="compareFatigueFeature">核心特徵：睡眠也無法可靠地緩解。</p>
+                    </div>
+                </div>
+                <div id="comparison-table" class="mt-8 overflow-x-auto"></div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Mystery of Sleepiness -->
+        <section id="sleepiness" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2" data-key="sleepinessSectionTitle">睡意之謎：大腦的睡眠時鐘</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12" data-key="sleepinessSectionSubtitle">我們的睡意並非隨機出現，而是由兩個互相作用的強大系統所精密調控：不斷累積的「睡眠壓力」和內在的「生理時鐘」。這個互動圖表將揭示它們如何共同決定您何時清醒、何時入眠。</p>
+            <div class="section-card p-8">
+                <h3 class="text-xl font-bold text-center mb-4" data-key="chartTitle">互動模型：睡眠調節的雙過程</h3>
+                <div class="chart-container">
+                    <canvas id="sleepProcessChart"></canvas>
+                </div>
+                <div class="mt-6 text-center">
+                    <label for="timeSlider" class="block text-sm font-medium text-gray-700" data-key="sliderLabel">拖動滑桿查看一天中的變化</label>
+                    <input id="timeSlider" type="range" min="0" max="23" value="8" class="w-full max-w-md mx-auto h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div id="timeDescription" class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 min-h-[80px]"></div>
+                </div>
+                 <div class="mt-8 p-6 bg-[#F8F7F4] rounded-lg">
+                    <h4 class="text-lg font-semibold text-center mb-4" data-key="caffeineTitle">咖啡因效應：提神的真相</h4>
+                    <p class="text-center text-gray-600 mb-4" data-key="caffeineDesc">咖啡因並非提供能量，而是暫時「欺騙」您的大腦，阻止它接收到「睡眠壓力」的信號。</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="drinkCoffeeBtn" class="bg-[#C68B75] text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 transition" data-key="coffeeBtn">模擬飲用咖啡</button>
+                        <button id="resetCoffeeBtn" class="bg-gray-400 text-white font-bold py-2 px-4 rounded-lg hover:bg-opacity-80 transition" data-key="resetBtn">重設</button>
+                    </div>
+                    <div id="caffeine-animation" class="mt-4 text-center text-lg font-medium"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Roots of Fatigue -->
+        <section id="fatigue" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2" data-key="fatigueSectionTitle">疲勞的根源：多面向的耗竭</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12" data-key="fatigueSectionSubtitle">疲勞比睡意複雜得多，它可能源於肌肉的能量危機、大腦的過度負荷，甚至是免疫系統的反應。點擊下方的標籤，探索不同類型疲勞背後的深層原因。</p>
+            <div class="section-card p-8">
+                <div id="fatigue-tabs-container" class="flex justify-center mb-6 border-b">
+                    <!-- Tabs will be rendered here by JS -->
+                </div>
+                <div id="fatigue-content"></div>
+            </div>
+        </section>
+
+        <!-- Section 4: Health Warnings -->
+        <section id="warnings" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2" data-key="warningsSectionTitle">健康的警號：當疲倦成為問題</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12" data-key="warningsSectionSubtitle">當疲勞或睡意變得持續且嚴重時，它們可能是潛在健康問題的信號。這裡列出了一些常見的相關疾病。點擊卡片以了解更多資訊，但請記住，這不能取代專業醫療診斷。</p>
+            <div id="warnings-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+        
+        <!-- Section 5: Vitality Equation -->
+        <section id="vitality" class="py-12">
+            <h2 class="text-3xl font-bold text-center mb-2" data-key="vitalitySectionTitle">活力方程式：您的個人化管理指南</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12" data-key="vitalitySectionSubtitle">提升活力需要一個全面的策略。這份指南整合了睡眠、飲食、運動和生活方式的調整建議。點擊各個主題，展開您的活力提升計畫。</p>
+            <div id="vitality-accordion" class="space-y-4"></div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p data-key="footerDisclaimer">本應用程式資訊僅供參考，不能取代專業醫療建議、診斷或治療。</p>
+            <p class="text-sm text-gray-400 mt-2" data-key="footerCopyright">&copy; 2024 活力探索。基於《人類疲勞與睡意的詳盡分析》報告創建。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // =================================================================
+            // 1. TRANSLATION DATA
+            // All user-facing text is stored here.
+            // =================================================================
+            const translations = {
+                // English Translations
+                en: {
+                    pageTitle: "Interactive Fatigue & Sleepiness Analysis",
+                    headerTitle: "Vitality Explorer",
+                    navHome: "Home",
+                    navSleepiness: "Mystery of Sleepiness",
+                    navFatigue: "Roots of Fatigue",
+                    navWarnings: "Health Warnings",
+                    navVitality: "Vitality Equation",
+                    introTitle: "Why Are You Always Tired?",
+                    introSubtitle: "It's a question most of us have asked. However, behind 'tiredness' lie two distinct physiological states: 'sleepiness' and 'fatigue'. Distinguishing them is the first step toward finding solutions and regaining your vitality.",
+                    compareTitle: "Interactive Comparison: Am I 'Sleepy' or 'Fatigued'?",
+                    compareSleepinessTitle: "Sleepiness",
+                    compareSleepinessDesc: "A strong urge to fall asleep, which typically worsens the longer you are awake.",
+                    compareSleepinessFeature: "Key Feature: Effectively relieved by sleep.",
+                    compareFatigueTitle: "Fatigue",
+                    compareFatigueDesc: "A pervasive feeling of physical and mental exhaustion, accompanied by a lack of motivation.",
+                    compareFatigueFeature: "Key Feature: Not reliably relieved by sleep.",
+                    sleepinessSectionTitle: "The Mystery of Sleepiness: The Brain's Sleep Clock",
+                    sleepinessSectionSubtitle: "Our sleepiness isn't random. It's regulated by two powerful, interacting systems: the accumulating 'sleep pressure' and the internal 'biological clock'. This chart reveals how they determine when you're awake and when you fall asleep.",
+                    chartTitle: "Interactive Model: The Two-Process Model of Sleep Regulation",
+                    sliderLabel: "Drag the slider to see changes throughout the day",
+                    caffeineTitle: "The Caffeine Effect: The Truth About Staying Alert",
+                    caffeineDesc: "Caffeine doesn't provide energy. It temporarily 'tricks' your brain, blocking it from receiving 'sleep pressure' signals.",
+                    coffeeBtn: "Simulate Drinking Coffee",
+                    resetBtn: "Reset",
+                    fatigueSectionTitle: "The Roots of Fatigue: A Multi-Faceted Exhaustion",
+                    fatigueSectionSubtitle: "Fatigue is far more complex than sleepiness. It can stem from an energy crisis in the muscles, an overloaded brain, or even an immune response. Click the tabs to explore the causes behind different types of fatigue.",
+                    warningsSectionTitle: "Health Warnings: When Tiredness Becomes a Problem",
+                    warningsSectionSubtitle: "When fatigue or sleepiness becomes persistent and severe, it may be a sign of an underlying health issue. Here are some common related conditions. Click the cards to learn more, but remember, this cannot replace a professional medical diagnosis.",
+                    vitalitySectionTitle: "The Vitality Equation: Your Personalized Management Guide",
+                    vitalitySectionSubtitle: "Boosting vitality requires a comprehensive strategy. This guide integrates advice on sleep, diet, exercise, and lifestyle adjustments. Click each topic to unfold your vitality-boosting plan.",
+                    footerDisclaimer: "The information in this application is for reference only and cannot replace professional medical advice, diagnosis, or treatment.",
+                    footerCopyright: "© 2024 Vitality Explorer. Created based on the report 'A Detailed Analysis of Human Fatigue and Sleepiness.'",
+                    // Dynamic Content
+                    appData: {
+                        comparison: {
+                            headers: { feature: 'Feature', sleepiness: 'Sleepiness', fatigue: 'Fatigue' },
+                            rows: [
+                                { feature: 'Core Definition', sleepiness: 'A strong physiological urge to fall asleep', fatigue: 'A pervasive lack of physical/mental energy and motivation' },
+                                { feature: 'Primary Sensation', sleepiness: 'Drowsiness, difficulty staying awake', fatigue: 'Exhaustion, weariness, weakness, brain fog' },
+                                { feature: 'Effect of Sleep', sleepiness: '<strong>Effective</strong>, it is the direct solution', fatigue: '<strong>Ineffective</strong> or limited relief' },
+                                { feature: 'Common Causes', sleepiness: 'Sleep deprivation, circadian rhythm disruption', fatigue: 'Chronic illness, stress, inflammation, poor nutrition' },
+                                { feature: 'Typical Behaviors', sleepiness: 'Nodding off, microsleeps, falling asleep during passive activities', fatigue: 'Apathy, avoiding effortful tasks' },
+                            ]
+                        },
+                        chart: {
+                            sleepPressureLabel: 'Sleep Pressure (Process S)',
+                            circadianLabel: 'Circadian Alerting Signal (Process C)',
+                            yAxisLabel: 'Drive Strength',
+                            xAxisLabel: 'Time of Day'
+                        },
+                        timeDescriptions: {
+                            0: "12:00 AM: The circadian alerting signal is at a low point, while sleep pressure, built up over the day, is at its peak. This is the time of the strongest drive to sleep.",
+                            1: "1:00 AM: Deep sleep stage. The body conducts repairs, and the brain clears out adenosine (sleep pressure).",
+                            2: "2:00 AM: Melatonin secretion peaks, and core body temperature is at its lowest. This is the time of deepest sleep.",
+                            3: "3:00 AM: The circadian alerting signal begins its slow climb for the new day, but sleep pressure remains high.",
+                            4: "4:00 AM: The 'forbidden zone' for sleep can occur. Although sleep pressure is high, the rising alerting signal can make it temporarily easier to wake up.",
+                            5: "5:00 AM: The body begins to prepare for waking, and cortisol levels start to rise.",
+                            6: "6:00 AM: Melatonin secretion stops, and the biological clock prepares to wake the body.",
+                            7: "7:00 AM: Wake-up time. The alerting signal rises sharply, suppressing the remaining sleep pressure.",
+                            8: "8:00 AM: Get morning light! This is the best time to calibrate the biological clock and consolidate daytime wakefulness.",
+                            9: "9:00 AM: Alertness reaches a peak, ideal for tasks requiring high concentration.",
+                            10: "10:00 AM: Cognitive performance and coordination are excellent.",
+                            11: "11:00 AM: As waking hours increase, sleep pressure (adenosine) continues its steady accumulation.",
+                            12: "12:00 PM: Lunchtime. Alertness remains high.",
+                            13: "1:00 PM: Post-lunch, blood sugar fluctuations may cause a slight feeling of drowsiness.",
+                            14: "2:00 PM: 'Post-lunch dip'. The circadian alerting signal naturally dips, closing the gap with accumulated sleep pressure, making it easy to feel sleepy.",
+                            15: "3:00 PM: One of the sleepiest times of day. A short nap (about 20 minutes) can be very effective.",
+                            16: "4:00 PM: The alerting signal begins to rise again, and physical strength and coordination improve.",
+                            17: "5:00 PM: Cardiovascular efficiency and muscle strength reach another peak, suitable for exercise.",
+                            18: "6:00 PM: Dinnertime. Sleep pressure continues its steady accumulation.",
+                            19: "7:00 PM: Body temperature begins to drop, preparing for nighttime sleep.",
+                            20: "8:00 PM: Avoid bright light, especially blue light, to prevent suppressing melatonin secretion.",
+                            21: "9:00 PM: The pineal gland begins to secrete melatonin, signaling to the body that 'night is coming'.",
+                            22: "10:00 PM: Sleepiness grows. The alerting signal drops and sleep pressure increases, making it the ideal bedtime.",
+                            23: "11:00 PM: The brain's drive for sleep is very strong. You should be asleep to clear the day's sleep debt.",
+                        },
+                        caffeine: {
+                            drink: '☕️ Caffeine molecules are blocking adenosine receptors... You feel more alert! But the sleep debt is still accumulating...',
+                            reset: 'Caffeine effect wears off. The accumulated adenosine strikes back, causing intense sleepiness!'
+                        },
+                        fatigue: {
+                            tabs: { physical: "Physical", mental: "Mental", inflammatory: "Inflammatory" },
+                            content: {
+                                physical: {
+                                    title: 'Physical Fatigue: The Body\'s Limit',
+                                    content: `
+                                        <p class="mb-4">Primarily refers to the decline in a muscle's ability to generate force and sustain activity, especially after strenuous exercise. This isn't just a feeling; it has a solid physiological basis.</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>Energy Crisis:</strong> Muscle contraction requires energy (ATP). During intense exercise, ATP consumption can outpace regeneration, leading to a drop in force.</li>
+                                            <li><strong>Fuel Depletion:</strong> The exhaustion of muscle energy reserves (glycogen) is the reason marathon runners "hit the wall."</li>
+                                            <li><strong>Metabolite Accumulation:</strong> Previously thought to be lactic acid, research now points to the buildup of inorganic phosphate (Pi) and hydrogen ions (H+), which directly interfere with muscle contraction.</li>
+                                            <li><strong>The Brain's Brake:</strong> The brain actively reduces drive signals to the muscles as a protective mechanism to prevent injury from overexertion.</li>
+                                        </ul>
+                                    `
+                                },
+                                mental: {
+                                    title: 'Mental Fatigue: The Overloaded Brain',
+                                    content: `
+                                        <p class="mb-4">Originates in the brain, particularly the prefrontal cortex, from overuse. We experience "brain fog" after prolonged periods of tasks requiring high concentration, cognitive control, and decision-making.</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>Cognitive Load:</strong> Intense mental effort consumes significant cognitive resources, leading to poor concentration and memory decline.</li>
+                                            <li><strong>Decision Fatigue:</strong> After making a series of decisions, the quality of subsequent decisions deteriorates. The brain tends to take shortcuts (impulsive decisions) or give up (decision avoidance).</li>
+                                            <li><strong>Brain Changes:</strong> Neuroimaging studies show that during mental fatigue, activity in the prefrontal cortex, responsible for executive functions, decreases.</li>
+                                            <li><strong>Glutamate Accumulation Hypothesis:</strong> One theory suggests that after intense mental work, an excess of the excitatory neurotransmitter 'glutamate' builds up, interfering with brain function.</li>
+                                        </ul>
+                                    `
+                                },
+                                inflammatory: {
+                                    title: 'The Inflammatory Link: A Signal of Illness & Stress',
+                                    content: `
+                                        <p class="mb-4">Immune system activity is a powerful driver of fatigue, especially during illness or chronic stress. This explains why we feel so exhausted when we have a cold.</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>Sickness Behavior:</strong> When the body is infected, the immune system releases 'pro-inflammatory cytokines' that act on the brain, triggering a set of responses including fatigue and social withdrawal. This is an evolutionary strategy to force rest and conserve energy to fight pathogens.</li>
+                                            <li><strong>Neuroinflammation:</strong> These cytokines can cause 'neuroinflammation' in the brain, interfering with neurotransmitters related to motivation and mood (like dopamine), leading to a profound sense of fatigue.</li>
+                                            <li><strong>Role of Chronic Stress:</strong> Long-term psychological stress keeps the body in a state of chronic, low-grade inflammation, continuously sending 'fatigue' signals to the brain and increasing the risk of depression and chronic fatigue.</li>
+                                        </ul>
+                                    `
+                                }
+                            }
+                        },
+                        warnings: {
+                            cardLabel: { mechanism: "Mechanism:", clues: "Key Clues:" },
+                            items: [
+                                { title: 'Sleep Apnea', symptom: 'Mainly excessive daytime sleepiness', mechanism: 'Repeated airway obstruction during sleep leads to intermittent hypoxia and sleep fragmentation, making sleep non-restorative.', clues: 'Loud, irregular snoring; choking or gasping at night; morning headaches.' },
+                                { title: 'Hypothyroidism', symptom: 'Pervasive and profound fatigue', mechanism: 'Insufficient thyroid hormone secretion slows down the entire body\'s metabolic rate, reducing cellular energy production.', clues: 'Cold intolerance, unexplained weight gain, constipation, dry skin.' },
+                                { title: 'Anemia', symptom: 'Activity-related fatigue and weakness', mechanism: 'Reduced oxygen-carrying capacity of the blood leads to hypoxia in body tissues, hindering energy (ATP) production.', clues: 'Pale skin, shortness of breath with activity, dizziness, palpitations.' },
+                                { title: 'Depression', symptom: 'Pervasive fatigue, lack of motivation', mechanism: 'Involves complex biological factors including neurotransmitter imbalance, neuroinflammation, and HPA axis dysregulation (stress hormone).', clues: 'Low mood, anhedonia (loss of pleasure), sleep disturbances, low self-worth.' },
+                                { title: 'Chronic Fatigue Syndrome (ME/CFS)', symptom: 'Extreme and unexplained fatigue', mechanism: 'A complex, multi-system disease potentially involving immune dysregulation, neuroinflammation, and cellular energy metabolism impairment.', clues: 'Post-exertional malaise (PEM), where fatigue significantly worsens after minor physical or mental exertion.' }
+                            ]
+                        },
+                        vitality: {
+                           items: [
+                                {
+                                    title: 'Strategic Sleep: Pillars of Modern Sleep Hygiene',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>Consistent Schedule:</strong> Even on weekends! This is the most powerful tool for stabilizing your circadian clock.</li>
+                                            <li><strong>Embrace Morning Light:</strong> Get at least 30 minutes of natural light as soon as possible after waking to reset your clock.</li>
+                                            <li><strong>Create the Right Environment:</strong> Your bedroom should be dark, quiet, and cool.</li>
+                                            <li><strong>Establish a Wind-Down Routine:</strong> In the hour before bed, stay away from electronic screens and engage in relaxing activities like reading, a warm bath, or meditation.</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: 'Vitality Fuel: The Role of Diet & Nutrition',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>Stabilize Blood Sugar:</strong> Avoid high-sugar and refined carbohydrates. Opt for whole grains, quality proteins, and healthy fats.</li>
+                                            <li><strong>Anti-Inflammatory Diet:</strong> Increase intake of Omega-3s (like salmon) and colorful fruits and vegetables. Reduce processed foods.</li>
+                                            <li><strong>Key Nutrients:</strong> Ensure adequate intake of iron, B vitamins, and magnesium.</li>
+                                            <li><strong>Stay Hydrated:</strong> Even mild dehydration can cause fatigue.</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: 'The Exercise Paradox: Fighting Fatigue with Fitness',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>Regular Exercise:</strong> Consistent, moderate-intensity exercise fundamentally raises your energy baseline.</li>
+                                            <li><strong>Avoid Overtraining:</strong> Pushing too hard is counterproductive and can lead to chronic fatigue.</li>
+                                            <li><strong>Time it Right:</strong> Avoid vigorous exercise within 3-4 hours of bedtime, as it can interfere with falling asleep.</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: 'Managing Modern Life: Stress, Light & Environment',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>Master Your Light Exposure:</strong> Get plenty of light during the day, and avoid blue light at night. Use night mode on devices 2-3 hours before bed.</li>
+                                            <li><strong>Manage Stress:</strong> Incorporate mindfulness meditation, yoga, deep breathing, or walks into your daily routine to regulate stress hormones.</li>
+                                        </ul>
+                                    `
+                                }
+                           ]
+                        }
+                    }
+                },
+                // Traditional Chinese Translations
+                zh: {
+                    pageTitle: "互動式疲勞與睡意分析",
+                    headerTitle: "活力探索",
+                    navHome: "首頁",
+                    navSleepiness: "睡意之謎",
+                    navFatigue: "疲勞的根源",
+                    navWarnings: "健康的警號",
+                    navVitality: "活力方程式",
+                    introTitle: "為何您總是感到疲倦？",
+                    introSubtitle: "這是一個我們多數人都問過的問題。然而，「疲倦」的背後，隱藏著兩種截然不同的生理狀態：「睡意」與「疲勞」。準確地區分它們，是找到解決方案、重獲活力的第一步。",
+                    compareTitle: "互動比較：我是「眼訓」還是「疲勞」？",
+                    compareSleepinessTitle: "睡意 (Sleepiness)",
+                    compareSleepinessDesc: "一種強烈的入睡衝動，通常在清醒時間越長時越嚴重。",
+                    compareSleepinessFeature: "核心特徵：能透過睡眠有效緩解。",
+                    compareFatigueTitle: "疲勞 (Fatigue)",
+                    compareFatigueDesc: "一種普遍的身心能量耗竭感，伴隨動機的缺乏。",
+                    compareFatigueFeature: "核心特徵：睡眠也無法可靠地緩解。",
+                    sleepinessSectionTitle: "睡意之謎：大腦的睡眠時鐘",
+                    sleepinessSectionSubtitle: "我們的睡意並非隨機出現，而是由兩個互相作用的強大系統所精密調控：不斷累積的「睡眠壓力」和內在的「生理時鐘」。這個互動圖表將揭示它們如何共同決定您何時清醒、何時入眠。",
+                    chartTitle: "互動模型：睡眠調節的雙過程",
+                    sliderLabel: "拖動滑桿查看一天中的變化",
+                    caffeineTitle: "咖啡因效應：提神的真相",
+                    caffeineDesc: "咖啡因並非提供能量，而是暫時「欺騙」您的大腦，阻止它接收到「睡眠壓力」的信號。",
+                    coffeeBtn: "模擬飲用咖啡",
+                    resetBtn: "重設",
+                    fatigueSectionTitle: "疲勞的根源：多面向的耗竭",
+                    fatigueSectionSubtitle: "疲勞比睡意複雜得多，它可能源於肌肉的能量危機、大腦的過度負荷，甚至是免疫系統的反應。點擊下方的標籤，探索不同類型疲勞背後的深層原因。",
+                    warningsSectionTitle: "健康的警號：當疲倦成為問題",
+                    warningsSectionSubtitle: "當疲勞或睡意變得持續且嚴重時，它們可能是潛在健康問題的信號。這裡列出了一些常見的相關疾病。點擊卡片以了解更多資訊，但請記住，這不能取代專業醫療診斷。",
+                    vitalitySectionTitle: "活力方程式：您的個人化管理指南",
+                    vitalitySectionSubtitle: "提升活力需要一個全面的策略。這份指南整合了睡眠、飲食、運動和生活方式的調整建議。點擊各個主題，展開您的活力提升計畫。",
+                    footerDisclaimer: "本應用程式資訊僅供參考，不能取代專業醫療建議、診斷或治療。",
+                    footerCopyright: "© 2024 活力探索。基於《人類疲勞與睡意的詳盡分析》報告創建。",
+                    // Dynamic Content
+                    appData: {
+                        comparison: {
+                            headers: { feature: '特性', sleepiness: '睡意 (Sleepiness)', fatigue: '疲勞 (Fatigue)' },
+                            rows: [
+                                { feature: '核心定義', sleepiness: '強烈的入睡生理衝動', fatigue: '普遍的身心能量與動機缺乏' },
+                                { feature: '主要感受', sleepiness: '昏昏欲睡、難以保持清醒', fatigue: '耗竭、倦怠、無力、腦霧' },
+                                { feature: '睡眠緩解效果', sleepiness: '<strong>有效</strong>，是直接的解決方案', fatigue: '<strong>無效</strong>或效果有限' },
+                                { feature: '常見生理原因', sleepiness: '睡眠剝奪、晝夜節律紊亂', fatigue: '慢性疾病、壓力、發炎、營養不良' },
+                                { feature: '典型行為', sleepiness: '打盹、微睡眠、在被動活動中睡著', fatigue: '冷漠、迴避需要努力的活動' },
+                            ]
+                        },
+                        chart: {
+                            sleepPressureLabel: '睡眠壓力 (過程S)',
+                            circadianLabel: '晝夜節律清醒信號 (過程C)',
+                            yAxisLabel: '驅動力強度',
+                            xAxisLabel: '一天中的時間'
+                        },
+                        timeDescriptions: {
+                            0: "凌晨0點：晝夜節律的清醒信號處於低點，而睡眠壓力經過一整天累積後達到高峰，這是最強烈的睡眠時間。",
+                            1: "凌晨1點：深度睡眠階段，身體進行修復，大腦清除腺苷（睡眠壓力）。",
+                            2: "凌晨2點：褪黑激素分泌達到頂峰，核心體溫最低，是睡眠最深沉的時刻。",
+                            3: "凌晨3點：晝夜節律的清醒信號開始為新的一天緩慢爬升，但睡眠壓力依然較高。",
+                            4: "凌晨4點：所謂'第二春'可能出現的時刻。睡眠壓力雖高，但清醒信號的回升可能暫時讓人感覺精神些。",
+                            5: "凌晨5點：身體開始為甦醒做準備，皮質醇水平開始上升。",
+                            6: "早上6點：褪黑激素分泌停止，生理時鐘準備喚醒身體。",
+                            7: "早上7點：起床時間。清醒信號快速增強，壓制住殘餘的睡眠壓力。",
+                            8: "早上8點：接觸晨光！這是校準生理時鐘、鞏固白天清醒狀態的最佳時機。",
+                            9: "早上9點：警覺性達到高峰，是進行需要高度專注工作的理想時間。",
+                            10: "早上10點：認知表現和協調性俱佳。",
+                            11: "早上11點：隨著清醒時間變長，睡眠壓力（腺苷）持續穩定累積。",
+                            12: "中午12點：午餐時間。警覺性依然很高。",
+                            13: "下午1點：午餐後，血糖波動可能導致輕微困倦感。",
+                            14: "下午2點：『午後低谷』。晝夜節律的清醒信號自然下降，與累積的睡眠壓力差距縮小，容易感到困倦。",
+                            15: "下午3點：困意最濃的時段之一，短暫的小睡（約20分鐘）可以有效緩解。",
+                            16: "下午4點：清醒信號開始回升，體力與協調性再次提升。",
+                            17: "下午5點：心血管效率和肌肉力量達到另一高峰，適合運動。",
+                            18: "晚上6點：晚餐時間。睡眠壓力持續穩定累積。",
+                            19: "晚上7點：體溫開始下降，為晚間的睡眠做準備。",
+                            20: "晚上8點：避免強光，特別是藍光，以免抑制褪黑激素分泌。",
+                            21: "晚上9點：松果體開始分泌褪黑激素，向身體發出「夜晚來臨」的信號。",
+                            22: "晚上10點：睡意漸濃。清醒信號下降，睡眠壓力增大，是理想的上床時間。",
+                            23: "晚上11點：大腦的睡眠驅力非常強烈，應處於睡眠狀態以清除一天的睡眠債。",
+                        },
+                         caffeine: {
+                            drink: '☕️ 咖啡因分子正在阻斷腺苷受體... 您感覺更清醒了！但睡眠債仍在累積...',
+                            reset: '咖啡因效果消退，累積的腺苷反撲，強烈的睡意來襲！'
+                        },
+                        fatigue: {
+                            tabs: { physical: "身體疲勞", mental: "精神疲勞", inflammatory: "發炎連結" },
+                            content: {
+                                physical: {
+                                    title: '身體疲勞：身體的極限',
+                                    content: `
+                                        <p class="mb-4">主要指肌肉本身產生力量和維持活動的能力下降，在劇烈運動後尤為明顯。這不只是感覺，而是有著堅實的生理基礎。</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>能量危機：</strong>肌肉收縮需要能量（ATP）。劇烈運動時，ATP的消耗可能超過再生速度，導致力量下降。</li>
+                                            <li><strong>燃料耗竭：</strong>肌肉中的能量儲備（肌糖原）耗盡，是馬拉松選手「撞牆」的原因。</li>
+                                            <li><strong>代謝物累積：</strong>過去認為是乳酸，但現在的研究指向無機磷酸鹽（Pi）和氫離子（H+）的累積，它們會直接干擾肌肉收縮。</li>
+                                            <li><strong>大腦的煞車：</strong>大腦會主動降低對肌肉的驅動指令，這是一種保護機制，防止肌肉過度勞損而受傷。</li>
+                                        </ul>
+                                    `
+                                },
+                                mental: {
+                                    title: '精神疲勞：超載的大腦',
+                                    content: `
+                                        <p class="mb-4">源於大腦，特別是前額葉皮質的過度使用。當我們長時間從事需要高度專注、認知控制和決策的活動時，就會感到「腦霧」。</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>認知負荷：</strong>高強度的腦力勞動會消耗大量認知資源，導致注意力不集中、記憶力下降。</li>
+                                            <li><strong>決策疲勞：</strong>連續做決策後，後續決策品質會下降，大腦傾向於走捷徑（衝動決策）或直接放棄（決策迴避）。</li>
+                                            <li><strong>大腦的變化：</strong>神經影像學研究顯示，精神疲勞時，負責執行功能的前額葉皮質活動水平會下降。</li>
+                                            <li><strong>麩胺酸累積假說：</strong>一種理論認為，高強度腦力工作後，大腦中興奮性神經傳導物質「麩胺酸」過量累積，干擾了大腦功能。</li>
+                                        </ul>
+                                    `
+                                },
+                                inflammatory: {
+                                    title: '發炎的連結：疾病與壓力的信號',
+                                    content: `
+                                        <p class="mb-4">免疫系統的活動是疲勞的強力驅動因素，尤其是在生病或長期壓力下。這解釋了為何感冒時我們會感到如此疲憊。</p>
+                                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                            <li><strong>疾病行為：</strong>當身體被感染，免疫系統會釋放「促炎性細胞因子」，作用於大腦，引發一套包括疲勞、社交退縮在內的反應。這是一種演化策略，強迫我們休息以集中能量對抗病原體。</li>
+                                            <li><strong>神經發炎：</strong>這些細胞因子會引發大腦內的「神經發炎」，干擾與動機和情緒相關的神經傳導物質（如多巴胺），導致深度疲勞感。</li>
+                                            <li><strong>慢性壓力的角色：</strong>長期的心理壓力會使身體處於慢性的、低度的發炎狀態，持續向大腦發送「疲勞」信號，增加罹患憂鬱症和慢性疲勞的風險。</li>
+                                        </ul>
+                                    `
+                                }
+                            }
+                        },
+                        warnings: {
+                            cardLabel: { mechanism: "機制：", clues: "關鍵線索：" },
+                            items: [
+                                { title: '睡眠呼吸中止症', symptom: '主要為日間過度嗜睡', mechanism: '睡眠中呼吸道反覆阻塞，導致間歇性缺氧和睡眠碎片化，使睡眠失去恢復功能。', clues: '響亮且不規律的鼾聲、夜間嗆醒、晨起頭痛。' },
+                                { title: '甲狀腺功能低下', symptom: '普遍且深度的疲勞', mechanism: '甲狀腺素分泌不足，導致全身新陳代謝速率減慢，細胞能量產生全面下降。', clues: '畏寒怕冷、體重無故增加、便秘、皮膚乾燥。' },
+                                { title: '貧血', symptom: '活動相關的疲勞和虛弱', mechanism: '血液攜氧能力下降，導致全身組織細胞缺氧，能量（ATP）產生受阻。', clues: '皮膚蒼白、活動後氣喘、頭暈、心悸。' },
+                                { title: '憂鬱症', symptom: '普遍的疲勞、動機缺乏', mechanism: '涉及神經傳導物質失衡、神經發炎、壓力荷爾蒙（HPA軸）失調等多重生物學因素。', clues: '情緒低落、快感缺失、睡眠障礙、自我價值感低落。' },
+                                { title: '慢性疲勞症候群 (ME/CFS)', symptom: '極度且無法解釋的疲勞', mechanism: '複雜的多系統疾病，可能涉及免疫失調、神經發炎和細胞能量代謝障礙。', clues: '勞動後不適（PEM），即輕微活動後疲勞感會顯著加劇。' }
+                            ]
+                        },
+                        vitality: {
+                            items: [
+                                {
+                                    title: '策略性睡眠：現代睡眠衛生的支柱',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>規律作息：</strong>週末也一樣！這是穩定生理時鐘最強大的工具。</li>
+                                            <li><strong>擁抱晨光：</strong>醒來後盡快接觸自然光至少30分鐘，以重置時鐘。</li>
+                                            <li><strong>營造環境：</strong>臥室應保持黑暗、安靜、涼爽。</li>
+                                            <li><strong>建立睡前儀式：</strong>睡前1小時遠離電子螢幕，進行閱讀、溫水澡、冥想等放鬆活動。</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: '活力燃料：飲食與營養的角色',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>穩定血糖：</strong>避免高糖和精緻碳水化合物，選擇全穀物、優質蛋白和健康脂肪。</li>
+                                            <li><strong>抗發炎飲食：</strong>多攝取Omega-3（如三文魚）、多彩蔬果，減少加工食品。</li>
+                                            <li><strong>關鍵營養素：</strong>確保足夠的鐵質、維生素B群、鎂的攝入。</li>
+                                            <li><strong>保持水分：</strong>輕微脫水也會導致疲勞。</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: '運動的悖論：用運動對抗疲勞',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>規律運動：</strong>規律的中等強度運動能從根本上提高能量基準線。</li>
+                                            <li><strong>避免過度：</strong>過度訓練會適得其反，導致慢性疲勞。</li>
+                                            <li><strong>注意時機：</strong>避免在睡前3-4小時內進行劇烈運動，以免干擾入睡。</li>
+                                        </ul>
+                                    `
+                                },
+                                {
+                                    title: '管理現代生活：壓力、光線與環境',
+                                    content: `
+                                        <ul class="list-disc list-inside space-y-2">
+                                            <li><strong>駕馭光線：</strong>白天多照光，夜晚避藍光。睡前2-3小時開啟電子設備的夜間模式。</li>
+                                            <li><strong>管理壓力：</strong>將正念冥想、瑜伽、深呼吸或散步等活動融入日常生活，以調節壓力荷爾蒙。</li>
+                                        </ul>
+                                    `
+                                }
+                           ]
+                        }
+                    }
+                }
+            };
+
+            // =================================================================
+            // 2. GLOBAL STATE & ELEMENTS
+            // =================================================================
+            let currentLang = 'zh';
+            let sleepProcessChart; // To hold the chart instance
+            
+            // UI Elements
+            const elementsToTranslate = document.querySelectorAll('[data-key]');
+            const comparisonTableContainer = document.getElementById('comparison-table');
+            const timeSlider = document.getElementById('timeSlider');
+            const timeDescription = document.getElementById('timeDescription');
+            const caffeineAnimation = document.getElementById('caffeine-animation');
+            const fatigueTabsContainer = document.getElementById('fatigue-tabs-container');
+            const fatigueContent = document.getElementById('fatigue-content');
+            const warningsGrid = document.getElementById('warnings-grid');
+            const vitalityAccordion = document.getElementById('vitality-accordion');
+            
+            // =================================================================
+            // 3. RENDERING FUNCTIONS
+            // These functions build or update parts of the UI.
+            // =================================================================
+
+            // Render Comparison Table
+            function renderComparisonTable(data) {
+                let tableHTML = `<table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-3 font-semibold text-sm text-gray-600 border-b">${data.headers.feature}</th>
+                            <th class="p-3 font-semibold text-sm text-gray-600 border-b">${data.headers.sleepiness}</th>
+                            <th class="p-3 font-semibold text-sm text-gray-600 border-b">${data.headers.fatigue}</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+                data.rows.forEach(row => {
+                    tableHTML += `<tr class="hover:bg-gray-50">
+                        <td class="p-3 border-b border-gray-200 font-medium">${row.feature}</td>
+                        <td class="p-3 border-b border-gray-200">${row.sleepiness}</td>
+                        <td class="p-3 border-b border-gray-200">${row.fatigue}</td>
+                    </tr>`;
+                });
+                tableHTML += '</tbody></table>';
+                comparisonTableContainer.innerHTML = tableHTML;
+            }
+            
+            // Render/Update Sleep Process Chart
+            function renderSleepProcessChart(chartData) {
+                const ctx = document.getElementById('sleepProcessChart').getContext('2d');
+                const timeLabels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+                const sleepPressureData = [8, 9, 10, 11, 12, 13, 14, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17].map(h => (h / 17) * 10);
+                const circadianAlertnessData = [4, 3, 2, 3, 4, 6, 8, 9, 10, 10, 9, 8, 7, 6, 6, 7, 8, 9, 8, 7, 6, 5, 4, 4];
+
+                if (sleepProcessChart) {
+                    // If chart exists, just update labels and redraw
+                    sleepProcessChart.data.datasets[0].label = chartData.sleepPressureLabel;
+                    sleepProcessChart.data.datasets[1].label = chartData.circadianLabel;
+                    sleepProcessChart.options.scales.y.title.text = chartData.yAxisLabel;
+                    sleepProcessChart.options.scales.x.title.text = chartData.xAxisLabel;
+                    sleepProcessChart.update();
+                } else {
+                    // If chart doesn't exist, create it
+                    sleepProcessChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: timeLabels,
+                            datasets: [{
+                                label: chartData.sleepPressureLabel,
+                                data: sleepPressureData,
+                                borderColor: '#C68B75',
+                                backgroundColor: 'rgba(198, 139, 117, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                            }, {
+                                label: chartData.circadianLabel,
+                                data: circadianAlertnessData,
+                                borderColor: '#87A9B6',
+                                backgroundColor: 'rgba(135, 169, 182, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, title: { display: true, text: chartData.yAxisLabel }},
+                                x: { title: { display: true, text: chartData.xAxisLabel }}
+                            },
+                            plugins: {
+                                tooltip: { mode: 'index', intersect: false },
+                                legend: { position: 'top' },
+                                annotation: {
+                                    annotations: {
+                                        line1: {
+                                            type: 'line',
+                                            scaleID: 'x',
+                                            value: 8,
+                                            borderColor: 'rgb(50, 50, 50)',
+                                            borderWidth: 2,
+                                            borderDash: [6, 6],
+                                            label: { enabled: false }
+                                        }
+                                    }
+                                }
+                            },
+                            interaction: { mode: 'index', intersect: false }
+                        }
+                    });
+                }
+            }
+            
+            // Update Time Slider Description
+            function updateTimeDescription(hour, data) {
+                const hourInt = parseInt(hour, 10);
+                timeDescription.innerHTML = `<p><strong class="font-bold">${hourInt}:00:</strong> ${data[hourInt]}</p>`;
+                if (sleepProcessChart) {
+                    sleepProcessChart.options.plugins.annotation.annotations.line1.value = hourInt;
+                    sleepProcessChart.update();
+                }
+            }
+
+            // Render Fatigue Section
+            function renderFatigueSection(data) {
+                // Render tabs
+                fatigueTabsContainer.innerHTML = '';
+                Object.keys(data.tabs).forEach((key, index) => {
+                    const button = document.createElement('button');
+                    button.className = `tab-btn py-2 px-6 text-lg font-medium ${index === 0 ? 'active' : ''}`;
+                    button.dataset.tab = key;
+                    button.textContent = data.tabs[key];
+                    fatigueTabsContainer.appendChild(button);
+                });
+                
+                // Add event listeners to new tabs
+                fatigueTabsContainer.querySelectorAll('.tab-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        fatigueTabsContainer.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        renderFatigueContent(button.dataset.tab, data.content);
+                    });
+                });
+
+                // Render initial content
+                const firstTab = Object.keys(data.tabs)[0];
+                renderFatigueContent(firstTab, data.content);
+            }
+
+            function renderFatigueContent(tabKey, contentData) {
+                const data = contentData[tabKey];
+                fatigueContent.innerHTML = `
+                    <h3 class="text-xl font-bold mb-4">${data.title}</h3>
+                    ${data.content}
+                `;
+            }
+
+            // Render Health Warnings Grid
+            function renderWarningsGrid(data) {
+                warningsGrid.innerHTML = '';
+                data.items.forEach(warning => {
+                    const card = document.createElement('div');
+                    card.className = 'section-card p-6 cursor-pointer';
+                    card.innerHTML = `
+                        <div class="header">
+                            <h3 class="text-xl font-bold text-[#87A9B6]">${warning.title}</h3>
+                            <p class="text-sm font-medium text-gray-500 mt-1">${warning.symptom}</p>
+                        </div>
+                        <div class="details hidden mt-4 text-gray-700 space-y-2">
+                            <p><strong>${data.cardLabel.mechanism}</strong> ${warning.mechanism}</p>
+                            <p><strong>${data.cardLabel.clues}</strong> ${warning.clues}</p>
+                        </div>
+                    `;
+                    warningsGrid.appendChild(card);
+                    
+                    card.addEventListener('click', () => {
+                        card.querySelector('.details').classList.toggle('hidden');
+                    });
+                });
+            }
+
+            // Render Vitality Accordion
+            function renderVitalityAccordion(data) {
+                vitalityAccordion.innerHTML = '';
+                data.items.forEach((item) => {
+                    const accordionItem = document.createElement('div');
+                    accordionItem.className = 'section-card';
+                    accordionItem.innerHTML = `
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-[#A3B899]">${item.title}</h3>
+                            <span class="transform transition-transform text-2xl font-thin">+</span>
+                        </div>
+                        <div class="accordion-content hidden p-6 pt-0 text-gray-700">
+                            ${item.content}
+                        </div>
+                    `;
+                    vitalityAccordion.appendChild(accordionItem);
+
+                    const header = accordionItem.querySelector('.accordion-header');
+                    const content = accordionItem.querySelector('.accordion-content');
+                    const icon = accordionItem.querySelector('span');
+
+                    header.addEventListener('click', () => {
+                        const isHidden = content.classList.contains('hidden');
+                        // Close all others
+                        document.querySelectorAll('#vitality-accordion .accordion-content').forEach(el => el.classList.add('hidden'));
+                        document.querySelectorAll('#vitality-accordion .accordion-header span').forEach(el => {
+                            el.textContent = '+';
+                            el.classList.remove('rotate-45');
+                        });
+                        
+                        // Open clicked one
+                        if (isHidden) {
+                            content.classList.remove('hidden');
+                            icon.textContent = '-';
+                            icon.classList.add('rotate-45');
+                        }
+                    });
+                });
+            }
+
+            // =================================================================
+            // 4. MAIN UI UPDATE FUNCTION
+            // =================================================================
+            function updateUI(lang) {
+                currentLang = lang;
+                const langData = translations[lang];
+                
+                // Update HTML lang attribute for accessibility
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                // Update all static text elements
+                elementsToTranslate.forEach(el => {
+                    const key = el.dataset.key;
+                    if(key && langData[key]) {
+                        // Handle mobile nav links separately if needed
+                         if (key.endsWith('Mobile')) {
+                            const baseKey = key.replace('Mobile', '');
+                            el.textContent = langData[baseKey];
+                        } else {
+                            el.textContent = langData[key];
+                        }
+                    }
+                });
+                
+                // Get the dynamic data for the current language
+                const dynamicData = langData.appData;
+
+                // Re-render all dynamic components with new data
+                renderComparisonTable(dynamicData.comparison);
+                renderSleepProcessChart(dynamicData.chart);
+                updateTimeDescription(timeSlider.value, dynamicData.timeDescriptions);
+                renderFatigueSection(dynamicData.fatigue);
+                renderWarningsGrid(dynamicData.warnings);
+                renderVitalityAccordion(dynamicData.vitality);
+
+                // Clear caffeine animation text
+                caffeineAnimation.innerHTML = '';
+
+                // Update language switcher buttons state
+                document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(`lang-${lang}-desktop`).classList.add('active');
+                document.getElementById(`lang-${lang}-mobile`).classList.add('active');
+            }
+
+            // =================================================================
+            // 5. EVENT LISTENERS
+            // =================================================================
+            
+            // Language switchers
+            ['desktop', 'mobile'].forEach(device => {
+                document.getElementById(`lang-zh-${device}`).addEventListener('click', () => updateUI('zh'));
+                document.getElementById(`lang-en-${device}`).addEventListener('click', () => updateUI('en'));
+            });
+
+            // Mobile menu toggle
+            document.getElementById('mobile-menu-button').addEventListener('click', () => {
+                document.getElementById('mobile-menu').classList.toggle('hidden');
+            });
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                });
+            });
+
+            // Active nav link on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 70) { current = section.getAttribute('id'); }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) { link.classList.add('active'); }
+                });
+            });
+            
+            // Time slider
+            timeSlider.addEventListener('input', (e) => {
+                updateTimeDescription(e.target.value, translations[currentLang].appData.timeDescriptions);
+            });
+
+            // Caffeine buttons
+            document.getElementById('drinkCoffeeBtn').addEventListener('click', () => {
+                caffeineAnimation.innerHTML = translations[currentLang].appData.caffeine.drink;
+                caffeineAnimation.classList.add('text-[#A3B899]');
+                caffeineAnimation.classList.remove('text-red-500');
+            });
+            document.getElementById('resetCoffeeBtn').addEventListener('click', () => {
+                 caffeineAnimation.innerHTML = translations[currentLang].appData.caffeine.reset;
+                 caffeineAnimation.classList.add('text-red-500');
+                 caffeineAnimation.classList.remove('text-[#A3B899]');
+            });
+
+            // =================================================================
+            // 6. INITIALIZATION
+            // =================================================================
+            updateUI('zh'); // Initial render in Chinese
+
+        });
+    </script>
+</body>
+</html>
