@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成式AI革命：互動式報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .timeline-item {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#hero" class="text-xl font-bold text-cyan-600" data-lang-key="headerTitle">生成式AI革命</a>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#definition" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-cyan-600" data-lang-key="navWhatIsAI">AI是什麼</a>
+                        <a href="#timeline" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-cyan-600" data-lang-key="navTimeline">發展時間軸</a>
+                        <a href="#impact" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-cyan-600" data-lang-key="navImpact">產業影響力</a>
+                        <a href="#challenges" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-cyan-600" data-lang-key="navChallenges">核心挑戰</a>
+                        <a href="#future" class="nav-link text-slate-600 hover:text-cyan-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent hover:border-cyan-600" data-lang-key="navFuture">未來展望</a>
+                    </div>
+                    <!-- Language Switcher -->
+                    <div class="ml-6">
+                        <button id="lang-switcher" class="px-3 py-1.5 text-sm font-semibold text-cyan-600 border-2 border-cyan-500 rounded-full hover:bg-cyan-50 transition-colors">English</button>
+                    </div>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <!-- Language Switcher (Mobile) -->
+                    <button id="lang-switcher-mobile" class="px-2 py-1 text-xs font-semibold text-cyan-600 border border-cyan-500 rounded-md hover:bg-cyan-50 transition-colors mr-2">English</button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none">
+                        <span class="sr-only" data-lang-key="srOpenMenu">開啟主選單</span>
+                        <span class="block h-6 w-6" aria-hidden="true">☰</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#definition" class="nav-link text-slate-600 hover:text-cyan-600 block px-3 py-2 rounded-md text-base font-medium" data-lang-key="navWhatIsAI_m">AI是什麼</a>
+                <a href="#timeline" class="nav-link text-slate-600 hover:text-cyan-600 block px-3 py-2 rounded-md text-base font-medium" data-lang-key="navTimeline_m">發展時間軸</a>
+                <a href="#impact" class="nav-link text-slate-600 hover:text-cyan-600 block px-3 py-2 rounded-md text-base font-medium" data-lang-key="navImpact_m">產業影響力</a>
+                <a href="#challenges" class="nav-link text-slate-600 hover:text-cyan-600 block px-3 py-2 rounded-md text-base font-medium" data-lang-key="navChallenges_m">核心挑戰</a>
+                <a href="#future" class="nav-link text-slate-600 hover:text-cyan-600 block px-3 py-2 rounded-md text-base font-medium" data-lang-key="navFuture_m">未來展望</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="relative bg-white py-20 sm:py-28 lg:py-36">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900" data-lang-key="heroTitle">
+                    解構生成式AI革命
+                </h1>
+                <p class="mt-6 text-lg lg:text-xl leading-8 text-slate-600 max-w-3xl mx-auto" data-lang-key="heroSubtitle">
+                    一場深刻的典範轉移，正在從根本上重塑我們的產業、經濟與社會。本報告將帶您深入探索生成式AI的核心、歷史、影響與未來。
+                </p>
+                <div class="mt-10">
+                    <a href="#definition" class="rounded-md bg-cyan-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600" data-lang-key="heroButton">開始探索 ↓</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="definition" class="py-20 sm:py-24 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl" data-lang-key="definitionTitle">什麼是生成式AI？</h2>
+                    <p class="mt-4 text-lg text-slate-600" data-lang-key="definitionSubtitle">生成式AI不僅是技術演進，更是從「分析」到「創造」的根本性變革。它能學習人類語言、藝術、科學等複雜學科，並運用所學知識來解決全新的問題。</p>
+                </div>
+                
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-2xl font-bold text-cyan-700" data-lang-key="genAITitle">生成式 AI (Generative)</h3>
+                        <p class="mt-2 text-slate-500 italic" data-lang-key="genAIQuestion">「這看起來像什麼？」</p>
+                        <p class="mt-4 text-slate-700" data-lang-key="genAIDesc">學習數據的潛在「分佈」，以生成全新的原創內容，如圖像、文字和程式碼。其強項在於創造全新的想法與內容。</p>
+                        <ul class="mt-6 space-y-3 text-slate-600">
+                            <li class="flex items-start"><span class="text-cyan-500 mr-3 mt-1">▶</span><div data-lang-key="genAIPoint1"><strong>核心目標：</strong>學習數據分佈以生成新數據</div></li>
+                            <li class="flex items-start"><span class="text-cyan-500 mr-3 mt-1">▶</span><div data-lang-key="genAIPoint2"><strong>關鍵技術：</strong>Transformer、GANs、擴散模型</div></li>
+                            <li class="flex items-start"><span class="text-cyan-500 mr-3 mt-1">▶</span><div data-lang-key="genAIPoint3"><strong>典型應用：</strong>內容創作、藥物設計、合成數據</div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200">
+                        <h3 class="text-2xl font-bold text-amber-700" data-lang-key="discAITitle">判別式 AI (Discriminative)</h3>
+                        <p class="mt-2 text-slate-500 italic" data-lang-key="discAIQuestion">「這是A還是B？」</p>
+                        <p class="mt-4 text-slate-700" data-lang-key="discAIDesc">學習不同數據類別之間的「邊界」，以執行分類或預測任務。其強項在於基於現有數據進行決策和預測。</p>
+                         <ul class="mt-6 space-y-3 text-slate-600">
+                            <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">▶</span><div data-lang-key="discAIPoint1"><strong>核心目標：</strong>學習決策邊界以分類數據</div></li>
+                            <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">▶</span><div data-lang-key="discAIPoint2"><strong>關鍵技術：</strong>支持向量機、決策樹、邏輯迴歸</div></li>
+                            <li class="flex items-start"><span class="text-amber-500 mr-3 mt-1">▶</span><div data-lang-key="discAIPoint3"><strong>典型應用：</strong>圖像分類、情感分析、風險評估</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl" data-lang-key="timelineTitle">革命的起源：發展時間軸</h2>
+                    <p class="mt-4 text-lg text-slate-600" data-lang-key="timelineSubtitle">生成式AI的「一夜成名」實則是數十年理論與技術突破的積累。其發展並非線性，而是一系列由關鍵創新驅動的非連續性飛躍。</p>
+                </div>
+                <div id="timeline-container" class="mt-16 relative max-w-3xl mx-auto">
+                    <div class="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-slate-200"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-20 sm:py-24 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl" data-lang-key="impactTitle">經濟引擎：產業轉型與價值創造</h2>
+                    <p class="mt-4 text-lg text-slate-600" data-lang-key="impactSubtitle">生成式AI正迅速演變為推動全球經濟成長的核心引擎，每年有望為全球經濟增加數兆美元的價值，其影響力堪比歷史上的通用技術發明。</p>
+                </div>
+
+                <div class="mt-16">
+                    <div class="chart-container bg-white p-4 sm:p-6 rounded-xl shadow-lg border border-slate-200">
+                        <canvas id="economicImpactChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-20">
+                    <h3 class="text-2xl font-bold text-center text-slate-800 mb-2" data-lang-key="industryTitle">特定行業應用</h3>
+                    <p class="text-center text-slate-600 mb-10 max-w-2xl mx-auto" data-lang-key="industrySubtitle">AI的價值正透過具體應用場景在各行各業落地生根。點擊下方頁籤，探索AI在不同領域的革命性應用。</p>
+                    <div id="industry-tabs-container" class="max-w-5xl mx-auto">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="py-20 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl" data-lang-key="challengesTitle">穿越迷宮：關鍵挑戰與社會影響</h2>
+                    <p class="mt-4 text-lg text-slate-600" data-lang-key="challengesSubtitle">巨大的潛力伴隨著同樣巨大的挑戰。要安全、負責任地釋放其價值，必須正視其在技術、倫理、法律和社會層面的複雜風險。</p>
+                </div>
+
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-xl font-bold text-red-600" data-lang-key="challenge1Title">技術與倫理障礙</h4>
+                        <ul class="mt-4 space-y-3 text-slate-600" data-lang-key="challenge1List">
+                            <li><strong>「幻覺」問題：</strong>產生看似合理但完全錯誤的資訊，在高風險領域可能導致災難性後果。</li>
+                            <li><strong>演算法偏見：</strong>模型會反映並放大訓練數據中的社會偏見，導致歧視性結果。</li>
+                             <li><strong>隱私與安全：</strong>海量訓練數據可能包含敏感個資，存在洩漏和濫用風險。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                         <h4 class="text-xl font-bold text-orange-600" data-lang-key="challenge2Title">著作權的困境</h4>
+                        <ul class="mt-4 space-y-3 text-slate-600" data-lang-key="challenge2List">
+                             <li><strong>訓練數據合法性：</strong>在未經授權下使用受版權保護的作品進行訓練，引發大規模侵權訴訟。</li>
+                             <li><strong>生成內容可版權性：</strong>純AI生成的作品因缺乏「人類作者身份」而無法獲得版權保護，引發法律定義的挑戰。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
+                        <h4 class="text-xl font-bold text-blue-600" data-lang-key="challenge3Title">全球監管分歧</h4>
+                        <p class="mt-4 text-slate-600" data-lang-key="challenge3Desc">全球主要經濟體正採取不同的監管路徑，形成複雜且分散的法律環境，為企業帶來巨大的不確定性。</p>
+                        <button id="show-regulation-table" class="mt-4 text-cyan-600 font-semibold hover:text-cyan-500" data-lang-key="challenge3Button">查看各國監管比較 →</button>
+                    </div>
+                </div>
+                
+                <div id="regulation-table-container" class="hidden mt-12 overflow-x-auto">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200 min-w-full">
+                        <h4 class="text-2xl font-bold text-center mb-6" data-lang-key="regTableTitle">全球對AI生成內容與訓練的監管方法比較</h4>
+                        <table class="min-w-full divide-y divide-slate-200">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" data-lang-key="regCol1">司法管轄區</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" data-lang-key="regCol2">對訓練數據的態度</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider" data-lang-key="regCol3">對生成內容的態度</th>
+                                </tr>
+                            </thead>
+                            <tbody id="regulation-table-body" class="bg-white divide-y divide-slate-200">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="future" class="py-20 sm:py-24 bg-slate-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl" data-lang-key="futureTitle">展望未來：發展軌跡與戰略要務</h2>
+                    <p class="mt-4 text-lg text-slate-600" data-lang-key="futureSubtitle">AI革命才剛開始。技術將持續演進，人機關係將更加緊密，這對企業、政策制定者和個人都提出了新的戰略要求。</p>
+                </div>
+                <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center hover:shadow-cyan-100 transition-shadow duration-300">
+                        <div class="text-4xl mb-4">🔮</div>
+                        <h4 class="text-xl font-bold" data-lang-key="future1Title">技術軌跡</h4>
+                        <p class="mt-2 text-slate-600" data-lang-key="future1Desc">從單純內容生成轉向能自主執行任務的AI「代理」，並透過更小、高效的模型，讓AI在個人設備上運行。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center hover:shadow-cyan-100 transition-shadow duration-300">
+                        <div class="text-4xl mb-4">🤝</div>
+                        <h4 class="text-xl font-bold" data-lang-key="future2Title">人機共生關係</h4>
+                        <p class="mt-2 text-slate-600" data-lang-key="future2Desc">AI成為創新的協作者和思考夥伴，「提示工程」成為關鍵技能，但人類的監督與批判性思維仍不可或缺。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 text-center hover:shadow-cyan-100 transition-shadow duration-300">
+                        <div class="text-4xl mb-4">🎯</div>
+                        <h4 class="text-xl font-bold" data-lang-key="future3Title">時代的戰略要務</h4>
+                        <p class="mt-2 text-slate-600" data-lang-key="future3Desc">企業需全面重塑業務，政策需平衡創新與風險，個人需培養終身學習心態與AI素養。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-sm text-slate-400">
+            <p data-lang-key="footerTitle">生成式AI互動式報告</p>
+            <p class="mt-1" data-lang-key="footerSubtitle">基於原始報告內容進行資訊架構重塑與視覺化呈現。</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DATA & TRANSLATIONS ---
+        const translations = {
+            "zh-Hant": {
+                htmlLang: "zh-Hant",
+                switchButton: "English",
+                headerTitle: "生成式AI革命",
+                navWhatIsAI: "AI是什麼",
+                navTimeline: "發展時間軸",
+                navImpact: "產業影響力",
+                navChallenges: "核心挑戰",
+                navFuture: "未來展望",
+                navWhatIsAI_m: "AI是什麼",
+                navTimeline_m: "發展時間軸",
+                navImpact_m: "產業影響力",
+                navChallenges_m: "核心挑戰",
+                navFuture_m: "未來展望",
+                srOpenMenu: "開啟主選單",
+                heroTitle: "解構生成式AI革命",
+                heroSubtitle: "一場深刻的典範轉移，正在從根本上重塑我們的產業、經濟與社會。本報告將帶您深入探索生成式AI的核心、歷史、影響與未來。",
+                heroButton: "開始探索 ↓",
+                definitionTitle: "什麼是生成式AI？",
+                definitionSubtitle: "生成式AI不僅是技術演進，更是從「分析」到「創造」的根本性變革。它能學習人類語言、藝術、科學等複雜學科，並運用所學知識來解決全新的問題。",
+                genAITitle: "生成式 AI (Generative)",
+                genAIQuestion: "「這看起來像什麼？」",
+                genAIDesc: "學習數據的潛在「分佈」，以生成全新的原創內容，如圖像、文字和程式碼。其強項在於創造全新的想法與內容。",
+                genAIPoint1: "<strong>核心目標：</strong>學習數據分佈以生成新數據",
+                genAIPoint2: "<strong>關鍵技術：</strong>Transformer、GANs、擴散模型",
+                genAIPoint3: "<strong>典型應用：</strong>內容創作、藥物設計、合成數據",
+                discAITitle: "判別式 AI (Discriminative)",
+                discAIQuestion: "「這是A還是B？」",
+                discAIDesc: "學習不同數據類別之間的「邊界」，以執行分類或預測任務。其強項在於基於現有數據進行決策和預測。",
+                discAIPoint1: "<strong>核心目標：</strong>學習決策邊界以分類數據",
+                discAIPoint2: "<strong>關鍵技術：</strong>支持向量機、決策樹、邏輯迴歸",
+                discAIPoint3: "<strong>典型應用：</strong>圖像分類、情感分析、風險評估",
+                timelineTitle: "革命的起源：發展時間軸",
+                timelineSubtitle: "生成式AI的「一夜成名」實則是數十年理論與技術突破的積累。其發展並非線性，而是一系列由關鍵創新驅動的非連續性飛躍。",
+                impactTitle: "經濟引擎：產業轉型與價值創造",
+                impactSubtitle: "生成式AI正迅速演變為推動全球經濟成長的核心引擎，每年有望為全球經濟增加數兆美元的價值，其影響力堪比歷史上的通用技術發明。",
+                industryTitle: "特定行業應用",
+                industrySubtitle: "AI的價值正透過具體應用場景在各行各業落地生根。點擊下方頁籤，探索AI在不同領域的革命性應用。",
+                challengesTitle: "穿越迷宮：關鍵挑戰與社會影響",
+                challengesSubtitle: "巨大的潛力伴隨著同樣巨大的挑戰。要安全、負責任地釋放其價值，必須正視其在技術、倫理、法律和社會層面的複雜風險。",
+                challenge1Title: "技術與倫理障礙",
+                challenge1List: `<li><strong>「幻覺」問題：</strong>產生看似合理但完全錯誤的資訊，在高風險領域可能導致災難性後果。</li><li><strong>演算法偏見：</strong>模型會反映並放大訓練數據中的社會偏見，導致歧視性結果。</li><li><strong>隱私與安全：</strong>海量訓練數據可能包含敏感個資，存在洩漏和濫用風險。</li>`,
+                challenge2Title: "著作權的困境",
+                challenge2List: `<li><strong>訓練數據合法性：</strong>在未經授權下使用受版權保護的作品進行訓練，引發大規模侵權訴訟。</li><li><strong>生成內容可版權性：</strong>純AI生成的作品因缺乏「人類作者身份」而無法獲得版權保護，引發法律定義的挑戰。</li>`,
+                challenge3Title: "全球監管分歧",
+                challenge3Desc: "全球主要經濟體正採取不同的監管路徑，形成複雜且分散的法律環境，為企業帶來巨大的不確定性。",
+                challenge3Button: "查看各國監管比較 →",
+                challenge3ButtonHide: "隱藏各國監管比較 ↑",
+                regTableTitle: "全球對AI生成內容與訓練的監管方法比較",
+                regCol1: "司法管轄區",
+                regCol2: "對訓練數據的態度",
+                regCol3: "對生成內容的態度",
+                futureTitle: "展望未來：發展軌跡與戰略要務",
+                futureSubtitle: "AI革命才剛開始。技術將持續演進，人機關係將更加緊密，這對企業、政策制定者和個人都提出了新的戰略要求。",
+                future1Title: "技術軌跡",
+                future1Desc: "從單純內容生成轉向能自主執行任務的AI「代理」，並透過更小、高效的模型，讓AI在個人設備上運行。",
+                future2Title: "人機共生關係",
+                future2Desc: "AI成為創新的協作者和思考夥伴，「提示工程」成為關鍵技能，但人類的監督與批判性思維仍不可或缺。",
+                future3Title: "時代的戰略要務",
+                future3Desc: "企業需全面重塑業務，政策需平衡創新與風險，個人需培養終身學習心態與AI素養。",
+                footerTitle: "生成式AI互動式報告",
+                footerSubtitle: "基於原始報告內容進行資訊架構重塑與視覺化呈現。"
+            },
+            "en": {
+                htmlLang: "en",
+                switchButton: "中文",
+                headerTitle: "The Generative AI Revolution",
+                navWhatIsAI: "What is AI",
+                navTimeline: "Timeline",
+                navImpact: "Impact",
+                navChallenges: "Challenges",
+                navFuture: "Future",
+                navWhatIsAI_m: "What is AI",
+                navTimeline_m: "Timeline",
+                navImpact_m: "Impact",
+                navChallenges_m: "Challenges",
+                navFuture_m: "Future",
+                srOpenMenu: "Open main menu",
+                heroTitle: "Deconstructing the Generative AI Revolution",
+                heroSubtitle: "A profound paradigm shift is fundamentally reshaping our industries, economy, and society. This report explores the core, history, impact, and future of generative AI.",
+                heroButton: "Start Exploring ↓",
+                definitionTitle: "What is Generative AI?",
+                definitionSubtitle: "Generative AI is more than a technical evolution; it's a fundamental shift from 'analyzing' to 'creating.' It learns complex disciplines like human language, art, and science, and applies this knowledge to solve entirely new problems.",
+                genAITitle: "Generative AI",
+                genAIQuestion: "'What could this be?'",
+                genAIDesc: "Learns the underlying distribution of data to generate new, original content like images, text, and code. Its strength lies in creating novel ideas and content.",
+                genAIPoint1: "<strong>Core Goal:</strong> Learn data distribution to generate new data",
+                genAIPoint2: "<strong>Key Technologies:</strong> Transformer, GANs, Diffusion Models",
+                genAIPoint3: "<strong>Typical Applications:</strong> Content creation, drug design, synthetic data",
+                discAITitle: "Discriminative AI",
+                discAIQuestion: "'Is this A or B?'",
+                discAIDesc: "Learns the 'boundaries' between different data classes to perform classification or prediction tasks. Its strength lies in making decisions and predictions based on existing data.",
+                discAIPoint1: "<strong>Core Goal:</strong> Learn decision boundaries to classify data",
+                discAIPoint2: "<strong>Key Technologies:</strong> SVM, Decision Trees, Logistic Regression",
+                discAIPoint3: "<strong>Typical Applications:</strong> Image classification, sentiment analysis, risk assessment",
+                timelineTitle: "The Revolution's Origins: A Timeline",
+                timelineSubtitle: "The 'overnight success' of generative AI is actually the culmination of decades of theoretical and technological breakthroughs. Its development is not linear but a series of discontinuous leaps driven by key innovations.",
+                impactTitle: "The Economic Engine: Industry Transformation & Value Creation",
+                impactSubtitle: "Generative AI is rapidly becoming a core engine for global economic growth, potentially adding trillions of dollars to the global economy annually, with an impact comparable to historical general-purpose technologies.",
+                industryTitle: "Specific Industry Applications",
+                industrySubtitle: "The value of AI is taking root across industries through specific applications. Click the tabs below to explore its revolutionary uses in different sectors.",
+                challengesTitle: "Navigating the Maze: Key Challenges & Societal Impact",
+                challengesSubtitle: "Great potential comes with equally great challenges. To unlock its value safely and responsibly, we must address complex risks at the technical, ethical, legal, and societal levels.",
+                challenge1Title: "Technical & Ethical Hurdles",
+                challenge1List: `<li><strong>"Hallucination" Problem:</strong> Generates plausible but completely false information, which can lead to disastrous consequences in high-stakes domains.</li><li><strong>Algorithmic Bias:</strong> Models reflect and amplify societal biases present in training data, leading to discriminatory outcomes.</li><li><strong>Privacy & Security:</strong> Massive training datasets may contain sensitive personal information, posing risks of leaks and misuse.</li>`,
+                challenge2Title: "The Copyright Conundrum",
+                challenge2List: `<li><strong>Legality of Training Data:</strong> Using copyrighted works for training without authorization has sparked large-scale infringement lawsuits.</li><li><strong>Copyrightability of Generated Content:</strong> Purely AI-generated works often cannot receive copyright protection due to the lack of "human authorship," challenging legal definitions.</li>`,
+                challenge3Title: "Global Regulatory Divergence",
+                challenge3Desc: "Major global economies are taking different regulatory paths, creating a complex and fragmented legal landscape that brings significant uncertainty for businesses.",
+                challenge3Button: "Compare Global Regulations →",
+                challenge3ButtonHide: "Hide Global Regulations ↑",
+                regTableTitle: "Comparison of Global Regulatory Approaches to AI Content & Training",
+                regCol1: "Jurisdiction",
+                regCol2: "Stance on Training Data",
+                regCol3: "Stance on Generated Content",
+                futureTitle: "Looking Ahead: Trajectories & Strategic Imperatives",
+                futureSubtitle: "The AI revolution has just begun. Technology will continue to evolve, and the human-machine relationship will become even closer, posing new strategic demands on businesses, policymakers, and individuals.",
+                future1Title: "Technological Trajectory",
+                future1Desc: "Shifting from simple content generation to AI 'agents' that can autonomously execute tasks, and running AI on personal devices through smaller, efficient models.",
+                future2Title: "Human-Machine Symbiosis",
+                future2Desc: "AI becomes a collaborative partner for innovation and a thinking companion. 'Prompt engineering' emerges as a key skill, but human oversight and critical thinking remain essential.",
+                future3Title: "Strategic Imperatives for Our Time",
+                future3Desc: "Businesses must reinvent their operations, policies must balance innovation with risk, and individuals must cultivate a mindset of lifelong learning and AI literacy.",
+                footerTitle: "Generative AI Interactive Report",
+                footerSubtitle: "Information architecture and visualization based on the original report content."
+            }
+        };
+
+        const dynamicData = {
+            timelineData: [
+                { year: "1950", event: "圖靈測試", desc: "艾倫·圖靈提出衡量機器智慧的標準，奠定AI哲學基礎。", event_en: "Turing Test", desc_en: "Alan Turing proposes a standard for measuring machine intelligence, laying the philosophical foundation for AI." },
+                { year: "1966", event: "ELIZA", desc: "早期聊天機器人問世，展示模擬人類對話的能力。", event_en: "ELIZA", desc_en: "An early chatbot is created, demonstrating the ability to simulate human-like conversation." },
+                { year: "1986", event: "反向傳播", desc: "演算法發展，為訓練複雜神經網路提供了可能。", event_en: "Backpropagation", desc_en: "The development of this algorithm makes it possible to train complex neural networks." },
+                { year: "2014", event: "GANs", desc: "生成對抗網路提出，在圖像生成領域取得革命性突破。", event_en: "GANs", desc_en: "Generative Adversarial Networks are introduced, achieving revolutionary breakthroughs in image generation." },
+                { year: "2017", event: "Transformer", desc: "《Attention Is All You Need》論文發表，為大型語言模型奠定基礎。", event_en: "Transformer", desc_en: "The paper 'Attention Is All You Need' is published, laying the groundwork for large language models." },
+                { year: "2020", event: "GPT-3", desc: "擁有1750億參數的LLM發布，展示驚人的語言能力。", event_en: "GPT-3", desc_en: "An LLM with 175 billion parameters is released, showcasing astonishing language capabilities." },
+                { year: "2022", event: "ChatGPT", desc: "以空前易用性向公眾開放，引發全球AI熱潮。", event_en: "ChatGPT", desc_en: "Released to the public with unprecedented ease of use, sparking a global AI frenzy." },
+                { year: "2023", event: "GPT-4", desc: "多模態模型問世，能同時處理文字和圖像輸入。", event_en: "GPT-4", desc_en: "A multimodal model is released, capable of processing both text and image inputs simultaneously." },
+                { year: "2024", event: "Sora", desc: "影片生成模型發布，展示模擬動態物理世界的驚人潛力。", event_en: "Sora", desc_en: "A video generation model is released, demonstrating astonishing potential to simulate a dynamic physical world." }
+            ],
+            economicChartData: {
+                "zh-Hant": {
+                    title: '生成式AI的宏觀經濟影響力預測',
+                    labels: ['年度潛在經濟價值 (兆美元)', '全球勞動生產力年增長率 (%)'],
+                    datasets: [{ label: '保守估計' }, { label: '樂觀估計' }],
+                    tooltip: { unit: '兆', unit_percent: '%' }
+                },
+                "en": {
+                    title: 'Macroeconomic Impact Forecast of Generative AI',
+                    labels: ['Annual Potential Economic Value ($ Trillion)', 'Global Labor Productivity Annual Growth (%)'],
+                    datasets: [{ label: 'Conservative Estimate' }, { label: 'Optimistic Estimate' }],
+                    tooltip: { unit: ' Trillion', unit_percent: '%' }
+                }
+            },
+            industryData: {
+                "zh-Hant": {
+                    "醫療保健": { icon: "❤️‍🩹", content: ["<strong>藥物探索與設計:</strong> 生成新型蛋白質序列，設計抗體、疫苗，大幅縮短研發週期。","<strong>合成患者數據:</strong> 在不侵犯隱私下進行臨床試驗模擬和罕見病研究。","<strong>個人化治療方案:</strong> 根據個人基因和生活方式提供客製化治療建議。"] },
+                    "金融服務": { icon: "🏦", content: ["<strong>個人化理財建議:</strong> 部署智慧聊天機器人，提供全天候的客製化財務規劃。", "<strong>風險管理:</strong> 利用合成數據進行壓力測試，更準確預測金融風險。", "<strong>詐欺偵測:</strong> 快速分析交易模式，即時偵測可疑的詐欺行為。"] },
+                    "製造與汽車": { icon: "🏭", content: ["<strong>生成式設計:</strong> AI根據性能參數生成新材料、晶片和零件的創新設計方案。", "<strong>流程優化:</strong> 分析感測器數據，提出預測性維護建議，優化生產效率。", "<strong>數位孿生:</strong> 模擬供應鏈和生產線佈局，提升營運韌性。"] },
+                    "媒體娛樂": { icon: "🎬", content: ["<strong>自動化內容創作:</strong> 以極低成本和時間，生成劇本、動畫、音樂等全新內容。", "<strong>個人化推薦:</strong> 根據觀眾偏好提供個人化的內容和廣告，提升用戶參與度。", "<strong>虛擬角色與場景:</strong> 創造逼真的虛擬演員和數位場景，降低拍攝成本。"] },
+                    "零售消費": { icon: "🛍️", content: ["<strong>超個人化行銷:</strong> 生成獨一無二的購物清單、行銷郵件和產品描述。", "<strong>沉浸式體驗:</strong> 透過虛擬試衣間和房間造型師，讓消費者在購買前直觀感受產品。", "<strong>產品創新:</strong> 分析時尚趨勢和材料特性，快速生成新的鞋款或產品設計。"] }
+                },
+                "en": {
+                    "Healthcare": { icon: "❤️‍🩹", content: ["<strong>Drug Discovery & Design:</strong> Generate novel protein sequences, design antibodies and vaccines, significantly shortening R&D cycles.","<strong>Synthetic Patient Data:</strong> Simulate clinical trials and study rare diseases without compromising privacy.","<strong>Personalized Treatment Plans:</strong> Provide customized treatment recommendations based on individual genetics and lifestyle."] },
+                    "Financial Services": { icon: "🏦", content: ["<strong>Personalized Financial Advice:</strong> Deploy intelligent chatbots to provide 24/7 customized financial planning.","<strong>Risk Management:</strong> Use synthetic data for stress testing to more accurately predict financial risks.","<strong>Fraud Detection:</strong> Quickly analyze transaction patterns to detect suspicious fraudulent activities in real-time."] },
+                    "Manufacturing & Automotive": { icon: "🏭", content: ["<strong>Generative Design:</strong> AI generates innovative designs for new materials, chips, and parts based on performance parameters.","<strong>Process Optimization:</strong> Analyze sensor data to suggest predictive maintenance and optimize production efficiency.","<strong>Digital Twins:</strong> Simulate supply chains and production line layouts to enhance operational resilience."] },
+                    "Media & Entertainment": { icon: "🎬", content: ["<strong>Automated Content Creation:</strong> Generate new content such as scripts, animations, and music at extremely low cost and time.","<strong>Personalized Recommendations:</strong> Provide personalized content and advertising based on viewer preferences to increase user engagement.","<strong>Virtual Characters & Scenes:</strong> Create realistic virtual actors and digital scenes, reducing production costs."] },
+                    "Retail & Consumer": { icon: "🛍️", content: ["<strong>Hyper-Personalized Marketing:</strong> Generate unique shopping lists, marketing emails, and product descriptions.","<strong>Immersive Experiences:</strong> Allow consumers to visualize products before buying through virtual try-on rooms and room stylists.","<strong>Product Innovation:</strong> Analyze fashion trends and material properties to quickly generate new shoe or product designs."] }
+                }
+            },
+            regulationData: [
+                { region: "美國", training: "依賴現有「合理使用」原則，由法院透過案例法進行解釋。", content: "拒絕為純AI生成作品提供版權保護，要求「人類作者身份」。", region_en: "United States", training_en: "Relies on the existing 'fair use' doctrine, interpreted by courts through case law.", content_en: "Denies copyright protection for purely AI-generated works, requiring 'human authorship'." },
+                { region: "歐盟", training: "要求AI開發者披露用於訓練的受版權保護材料。", content: "強制要求對所有AI生成的輸出內容進行明確標示。", region_en: "European Union", training_en: "Requires AI developers to disclose copyrighted materials used for training.", content_en: "Mandates clear labeling for all AI-generated output." },
+                { region: "中國", training: "由國家主導監管，對訓練數據和標籤品質有明確規定。", content: "強制要求對生成的圖像或影片添加浮水印，並限制個資收集。", region_en: "China", training_en: "State-led regulation with explicit rules on training data and labeling quality.", content_en: "Mandates watermarks on generated images or videos and restricts personal data collection." },
+                { region: "日本/韓國", training: "日本法律相對寬鬆，允許出於AI訓練目的進行數據探勘。", content: "日本要求標示AI作品來源，韓國在探索「共同作者」等新概念。", region_en: "Japan/South Korea", training_en: "Japanese law is relatively lenient, allowing data mining for AI training purposes.", content_en: "Japan requires source attribution for AI works; South Korea is exploring new concepts like 'co-authorship'." }
+            ]
+        };
+        
+        // --- STATE & GLOBALS ---
+        let currentLang = 'zh-Hant';
+        let economicChart = null; 
+
+        // --- CORE FUNCTIONS ---
+
+        /**
+         * Sets the language for the entire page and triggers UI updates.
+         * @param {string} lang - The language to switch to ('en' or 'zh-Hant').
+         */
+        function setLanguage(lang) {
+            currentLang = lang;
+            const langData = translations[lang];
+            
+            // Update static text elements
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (langData[key]) {
+                    el.innerHTML = langData[key];
+                }
+            });
+
+            // Update HTML lang attribute
+            document.documentElement.lang = langData.htmlLang;
+
+            // Update language switcher button text
+            const newButtonText = lang === 'en' ? translations['en'].switchButton : translations['zh-Hant'].switchButton;
+            document.getElementById('lang-switcher').textContent = newButtonText;
+            document.getElementById('lang-switcher-mobile').textContent = newButtonText;
+            
+            // Re-render dynamic components
+            createTimeline();
+            createEconomicChart();
+            createIndustryTabs();
+            setupRegulationTable();
+        }
+
+        /**
+         * Clears and rebuilds the timeline based on the current language.
+         */
+        function createTimeline() {
+            const container = document.getElementById('timeline-container');
+            // Clear existing timeline items except for the center line
+            container.innerHTML = '<div class="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-slate-200"></div>';
+            
+            dynamicData.timelineData.forEach((item, index) => {
+                const isLeft = index % 2 === 0;
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `timeline-item mb-8 flex justify-between items-center w-full ${isLeft ? 'flex-row-reverse' : ''}`;
+                
+                const eventText = currentLang === 'en' ? item.event_en : item.event;
+                const descText = currentLang === 'en' ? item.desc_en : item.desc;
+
+                itemDiv.innerHTML = `
+                    <div class="order-1 w-5/12"></div>
+                    <div class="z-20 flex items-center order-1 bg-cyan-500 shadow-xl w-12 h-12 rounded-full">
+                        <h1 class="mx-auto font-semibold text-lg text-white">${item.year}</h1>
+                    </div>
+                    <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 border border-slate-200">
+                        <h3 class="mb-2 font-bold text-slate-800 text-lg">${eventText}</h3>
+                        <p class="text-sm leading-snug tracking-wide text-slate-600">${descText}</p>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            // Re-apply intersection observer
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                observer.observe(item);
+            });
+        }
+
+        /**
+         * Creates or updates the economic impact chart with translated data.
+         */
+        function createEconomicChart() {
+            if (economicChart) {
+                economicChart.destroy();
+            }
+            const chartData = dynamicData.economicChartData[currentLang];
+            const ctx = document.getElementById('economicImpactChart').getContext('2d');
+
+            economicChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: chartData.datasets[0].label,
+                        data: [2.6, 0.2],
+                        backgroundColor: 'rgba(56, 189, 248, 0.7)',
+                        borderColor: 'rgba(56, 189, 248, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: chartData.datasets[1].label,
+                        data: [4.4, 3.3],
+                        backgroundColor: 'rgba(14, 165, 233, 0.7)',
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: chartData.title,
+                            font: { size: 18, weight: 'bold' },
+                            color: '#334155',
+                            padding: { top: 10, bottom: 20 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        if(context.label.includes('($') || context.label.includes('(兆美元)')){
+                                           label += context.parsed.y + chartData.tooltip.unit;
+                                        } else {
+                                           label += context.parsed.y + chartData.tooltip.unit_percent;
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: '#475569' }, grid: { color: '#e2e8f0' } },
+                        x: { ticks: { color: '#475569' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+        
+        /**
+         * Clears and rebuilds the industry tabs section.
+         */
+        function createIndustryTabs() {
+            const container = document.getElementById('industry-tabs-container');
+            container.innerHTML = ''; // Clear previous content
+            const tabData = dynamicData.industryData[currentLang];
+            
+            const tabButtons = document.createElement('div');
+            tabButtons.className = "flex flex-wrap justify-center border-b border-slate-200 mb-8";
+
+            const contentPanels = document.createElement('div');
+            
+            Object.keys(tabData).forEach((industry, index) => {
+                const data = tabData[industry];
+                
+                const button = document.createElement('button');
+                button.className = `industry-tab px-4 py-3 font-semibold text-slate-500 border-b-2 transition-colors duration-300 ${index === 0 ? 'border-cyan-500 text-cyan-600' : 'border-transparent'}`;
+                button.textContent = `${data.icon} ${industry}`;
+                button.dataset.target = `panel-${index}`;
+                tabButtons.appendChild(button);
+                
+                const panel = document.createElement('div');
+                panel.id = `panel-${index}`;
+                panel.className = `industry-panel p-6 bg-white rounded-lg shadow-md border border-slate-200 ${index === 0 ? '' : 'hidden'}`;
+                
+                const contentList = document.createElement('ul');
+                contentList.className = "space-y-4";
+                data.content.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = "flex items-start";
+                    li.innerHTML = `<span class="text-cyan-500 mr-3 mt-1 text-xl">✓</span><p class="text-slate-700">${item}</p>`;
+                    contentList.appendChild(li);
+                });
+                panel.appendChild(contentList);
+                contentPanels.appendChild(panel);
+            });
+
+            container.appendChild(tabButtons);
+            container.appendChild(contentPanels);
+        }
+
+        /**
+         * (Re)populates the regulation table based on the current language.
+         */
+        function setupRegulationTable() {
+            const tableBody = document.getElementById('regulation-table-body');
+            tableBody.innerHTML = ''; // Clear existing rows
+            
+            dynamicData.regulationData.forEach(item => {
+                const regionText = currentLang === 'en' ? item.region_en : item.region;
+                const trainingText = currentLang === 'en' ? item.training_en : item.training;
+                const contentText = currentLang === 'en' ? item.content_en : item.content;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">${regionText}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-slate-600">${trainingText}</td>
+                    <td class="px-6 py-4 whitespace-normal text-sm text-slate-600">${contentText}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+
+            const button = document.getElementById('show-regulation-table');
+            const container = document.getElementById('regulation-table-container');
+            // Reset button text based on visibility
+            const isHidden = container.classList.contains('hidden');
+            button.textContent = isHidden 
+                ? translations[currentLang].challenge3Button 
+                : translations[currentLang].challenge3ButtonHide;
+        }
+
+        // --- EVENT LISTENERS ---
+
+        function setupEventListeners() {
+            // Language Switchers
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(newLang);
+            });
+            document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+                const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(newLang);
+            });
+
+            // Mobile Menu
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+            
+            // Industry Tabs (event delegation)
+            document.getElementById('industry-tabs-container').addEventListener('click', (e) => {
+                if(e.target.classList.contains('industry-tab')) {
+                    const targetPanelId = e.target.dataset.target;
+                    const container = document.getElementById('industry-tabs-container');
+
+                    container.querySelectorAll('.industry-tab').forEach(tab => {
+                        tab.classList.remove('border-cyan-500', 'text-cyan-600');
+                        tab.classList.add('border-transparent');
+                    });
+                    
+                    e.target.classList.add('border-cyan-500', 'text-cyan-600');
+                    e.target.classList.remove('border-transparent');
+
+                    container.querySelectorAll('.industry-panel').forEach(panel => {
+                        panel.classList.add('hidden');
+                    });
+
+                    document.getElementById(targetPanelId).classList.remove('hidden');
+                }
+            });
+
+            // Regulation Table Toggle
+            document.getElementById('show-regulation-table').addEventListener('click', (e) => {
+                const container = document.getElementById('regulation-table-container');
+                const isHidden = container.classList.toggle('hidden');
+                e.target.textContent = isHidden 
+                    ? translations[currentLang].challenge3Button 
+                    : translations[currentLang].challenge3ButtonHide;
+            });
+        }
+
+        // --- INITIALIZATION ---
+        setLanguage('zh-Hant'); // Initial page load in Chinese
+        setupEventListeners(); // Setup all event listeners
+
+    });
+    </script>
+</body>
+</html>
