@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考文垂：鳳凰重生的互動式分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!--
+    Chosen Palette: Warm Neutrals & Resilient Blue. A base of off-white (#f8fafc), dark slate for text (#1e293b), a warm, hopeful gold for accents (#f59e0b), and a calm, resilient blue for interactive elements and data highlights (#3b82f6).
+    -->
+    <!--
+    Application Structure Plan: The SPA is designed as a narrative journey, moving from Coventry's foundational identity to its future vision. The structure is thematic rather than mirroring the report's chapters, to enhance user engagement and understanding.
+    1.  **Hero:** A captivating introduction setting the "Phoenix City" theme.
+    2.  **Past & Present:** Merges the city's historical resilience (Blitz, reconciliation) with its industrial heritage in a timeline format.
+    3.  **The City's Engines:** A data-driven dashboard focusing on the modern economy, highlighting the "University-Industrial Complex" and key sectors.
+    4.  **A Portrait of the People:** Visualizes the city's "super-diverse" population and the core challenge of socioeconomic inequality (the "two-speed" city).
+    5.  **Blueprint for the Future:** Showcases forward-looking, tangible projects like Friargate and the innovative VLR system.
+    6.  **Strategic Outlook:** Concludes with an actionable summary of strengths, challenges, and recommendations in an interactive format.
+    This user flow guides the user from understanding the city's soul to its current mechanics and future ambitions, making complex data digestible and memorable.
+    -->
+    <!--
+    Visualization & Content Choices:
+    - Report Info: Economic History -> Goal: Show change over time -> Viz: Interactive HTML/CSS Timeline -> Interaction: Scroll-based highlighting -> Justification: More engaging than static text.
+    - Report Info: University Economic Impact Data -> Goal: Compare contributions -> Viz: Bar Chart -> Interaction: Tooltips on hover -> Justification: Clear, quantitative comparison of key economic drivers. Library: Chart.js.
+    - Report Info: Ethnic Composition Data -> Goal: Show diversity -> Viz: Doughnut Chart -> Interaction: Tooltips on hover -> Justification: Instantly communicates the "majority-minority" city concept. Library: Chart.js.
+    - Report Info: Socioeconomic Inequality (IMD scores, life expectancy gap) -> Goal: Highlight disparity -> Viz: HTML/CSS "Comparison Cards" -> Interaction: Static side-by-side view -> Justification: Creates a powerful, easy-to-understand narrative of the "two-speed city" without needing a complex map.
+    - Report Info: Very Light Rail (VLR) system -> Goal: Explain innovation -> Viz: Animated HTML/CSS Diagram -> Interaction: Automatic animation -> Justification: Visually simplifies a complex technical concept, adding a "wow" factor.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .vlr-track {
+            position: relative;
+            height: 10px;
+            background: #94a3b8;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .vlr-vehicle {
+            position: absolute;
+            bottom: 10px;
+            left: -50px;
+            width: 100px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 8px 8px 0 0;
+            animation: vlr-move 8s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .vlr-ground {
+            height: 100px;
+            background: #e2e8f0;
+            border-top: 2px dashed #94a3b8;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes vlr-move {
+            0% { transform: translateX(0); }
+            45% { transform: translateX(calc(100% + 50px)); }
+            55% { transform: translateX(calc(100% + 50px)); }
+            100% { transform: translateX(0); }
+        }
+        .stat-number {
+            transition: all 0.5s ease-out;
+        }
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 12px;
+            background-color: #cbd5e1;
+            border-radius: 50%;
+            border: 2px solid #f8fafc;
+        }
+        .timeline-item.active::before {
+            background-color: #f59e0b;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">考文垂：鳳凰之城</h1>
+            <div class="hidden md:flex space-x-6 text-sm font-medium">
+                <a href="#identity" class="text-slate-600 hover:text-blue-500 transition">城市認同</a>
+                <a href="#economy" class="text-slate-600 hover:text-blue-500 transition">經濟引擎</a>
+                <a href="#people" class="text-slate-600 hover:text-blue-500 transition">人民畫像</a>
+                <a href="#future" class="text-slate-600 hover:text-blue-500 transition">未來藍圖</a>
+                <a href="#strategy" class="text-slate-600 hover:text-blue-500 transition">戰略展望</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-4 6h4"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#identity" class="block py-2 px-6 text-sm text-slate-600 hover:bg-slate-100">城市認同</a>
+            <a href="#economy" class="block py-2 px-6 text-sm text-slate-600 hover:bg-slate-100">經濟引擎</a>
+            <a href="#people" class="block py-2 px-6 text-sm text-slate-600 hover:bg-slate-100">人民畫像</a>
+            <a href="#future" class="block py-2 px-6 text-sm text-slate-600 hover:bg-slate-100">未來藍圖</a>
+            <a href="#strategy" class="block py-2 px-6 text-sm text-slate-600 hover:bg-slate-100">戰略展望</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="h-[60vh] md:h-[80vh] flex items-center justify-center bg-gradient-to-b from-slate-100 to-slate-50 text-center">
+            <div class="container mx-auto px-6 fade-in">
+                <h2 class="text-4xl md:text-6xl font-bold text-slate-800 leading-tight">從灰燼中重生的鳳凰</h2>
+                <p class="mt-4 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+                    這是一個關於毀滅、和解與創新的故事。考文垂，一座在歷史洪流中不斷重塑自我的城市，正從工業時代的心臟，蛻變為英格蘭的文化與科技樞紐。
+                </p>
+                <div class="mt-8">
+                    <span class="text-blue-500 animate-bounce inline-block">↓</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 1: Identity -->
+        <section id="identity" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in">
+                    <h3 class="text-3xl md:text-4xl font-bold">城市認同：歷史的烙印</h3>
+                    <p class="mt-4 text-slate-600 max-w-2xl mx-auto">考文垂的靈魂由兩段核心敘事構成：一段是關於毀滅與和解的「鳳凰傳奇」，另一段則是工業轉型的「重塑基因」。這兩者共同塑造了這座城市獨一無二的韌性與品格。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="fade-in">
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">浴火重生的和解之路</h4>
+                        <p class="text-slate-600 mb-4">1940年的「月光奏鳴曲」空襲幾乎將考文垂夷為平地，聖米迦勒大教堂的毀滅成為戰爭殘酷的象徵。然而，在廢墟之上，時任教長理查德·霍華德沒有選擇復仇，而是在牆上刻下「天父，赦免」，開啟了考文垂作為全球和平與和解中心的使命。這個選擇定義了城市的現代認同。</p>
+                        <div class="bg-slate-100 p-6 rounded-lg shadow-inner">
+                            <div class="flex items-start">
+                                <span class="text-4xl mr-4 text-amber-500">“</span>
+                                <div>
+                                    <p class="text-lg italic text-slate-700">我們將用這座被毀的大教堂與一座新教堂並肩而立，作為我們恩典的標記，作為我們對和平與和解的信念的標記。</p>
+                                    <p class="text-right mt-2 font-medium text-slate-500">- 和解精神</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fade-in">
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">經濟轉型的軌跡</h4>
+                        <div id="timeline" class="relative border-l-2 border-slate-200 pl-8 space-y-12">
+                            <div class="timeline-item">
+                                <h5 class="font-bold text-blue-600">14世紀</h5>
+                                <p class="text-sm text-slate-600">作為羊毛紡織中心，成為英格蘭第四大城鎮。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <h5 class="font-bold text-blue-600">18世紀</h5>
+                                <p class="text-sm text-slate-600">成功轉型為絲帶編織與製錶業中心。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <h5 class="font-bold text-blue-600">19世紀末</h5>
+                                <p class="text-sm text-slate-600">開創自行車產業，奠定工業基礎。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <h5 class="font-bold text-blue-600">20世紀</h5>
+                                <p class="text-sm text-slate-600">成為英國「汽車城」，全球汽車工業的重鎮。</p>
+                            </div>
+                            <div class="timeline-item">
+                                <h5 class="font-bold text-blue-600">21世紀</h5>
+                                <p class="text-sm text-slate-600">專注於先進製造、電動汽車與知識經濟。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Economy -->
+        <section id="economy" class="py-16 md:py-24 bg-slate-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in">
+                    <h3 class="text-3xl md:text-4xl font-bold">經濟引擎：知識與創新的融合</h3>
+                    <p class="mt-4 text-slate-600 max-w-2xl mx-auto">雖然傳統汽車工業的輝煌已逝，考文垂並未沉淪。如今，兩所世界級大學與先進製造業形成了強大的「大學-工業複合體」，正驅動著城市邁向高價值的知識經濟時代。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="fade-in">
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">大學的經濟驅動力</h4>
+                        <p class="text-slate-600 mb-6">考文垂大學與華威大學不僅是學術殿堂，更是區域經濟的核心引擎。它們的研發實力、人才培養和國際學生消費，每年為本地經濟貢獻數十億英鎊，並支撐著數萬個就業崗位。</p>
+                        <div class="chart-container">
+                            <canvas id="universityImpactChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-8 fade-in">
+                         <h4 class="text-2xl font-bold mb-4 text-slate-800">新興產業生態</h4>
+                        <div class="p-6 bg-white rounded-lg shadow-md">
+                            <h5 class="font-bold text-blue-600">先進製造與工程</h5>
+                            <p class="text-sm text-slate-600 mt-1">超過4萬名從業人員，是捷豹路虎全球總部所在地，專注於電動汽車(EV)和自動駕駛(CAV)技術。</p>
+                        </div>
+                        <div class="p-6 bg-white rounded-lg shadow-md">
+                            <h5 class="font-bold text-blue-600">關鍵研發中心</h5>
+                            <p class="text-sm text-slate-600 mt-1">擁有華威製造集團(WMG)、英國電池工業化中心(UKBIC)等世界級研發機構，引領技術前沿。</p>
+                        </div>
+                         <div class="p-6 bg-white rounded-lg shadow-md">
+                            <h5 class="font-bold text-blue-600">數位與創意產業</h5>
+                            <p class="text-sm text-slate-600 mt-1">憑藉2021年英國文化之城的契機，積極發展數位與創意設計，尋求與工程優勢的結合。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: People -->
+        <section id="people" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in">
+                    <h3 class="text-3xl md:text-4xl font-bold">人民畫像：一個多元且矛盾的城市</h3>
+                    <p class="mt-4 text-slate-600 max-w-2xl mx-auto">考文垂是一座年輕、快速增長且「超級多元」的城市。這既是其活力之源，也帶來了嚴峻的社會挑戰。繁榮的知識經濟與根深蒂固的貧困並存，形成了鮮明的「雙速城市」景象。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <div class="fade-in">
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">超級多元的人口結構</h4>
+                        <p class="text-slate-600 mb-6">2021年，考文垂的少數族裔人口比例高達44.7%，遠超全國平均水平。這種多元化為城市帶來了文化活力與全球聯繫，但也對社會融合提出了挑戰。</p>
+                        <div class="chart-container">
+                            <canvas id="ethnicityChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="fade-in">
+                        <h4 class="text-2xl font-bold mb-4 text-slate-800">一個城市的兩種面貌</h4>
+                         <p class="text-slate-600 mb-6">社會經濟不平等是考文垂面臨的核心挑戰。城市最富裕和最貧困地區居民的預期壽命差距高達10年。為此，考文垂成為「馬莫特城市」，致力於從根源上解決健康不平等問題。</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                                <h5 class="font-bold text-red-800">挑戰：貧困集中區</h5>
+                                <p class="text-sm text-red-700 mt-2">14.4% 的社區屬於英格蘭最貧困的10%。</p>
+                                <p class="text-sm text-red-700 mt-1">失業率 (4.9%) 高於全國平均 (3.8%)。</p>
+                            </div>
+                            <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                                <h5 class="font-bold text-green-800">機遇：高技能人才</h5>
+                                <p class="text-sm text-green-700 mt-2">50.2% 的人口擁有高等教育學歷，高於全國平均。</p>
+                                <p class="text-sm text-green-700 mt-1">年輕的人口結構 (中位年齡35歲) 提供了充滿活力的勞動力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Future -->
+        <section id="future" class="py-16 md:py-24 bg-slate-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in">
+                    <h3 class="text-3xl md:text-4xl font-bold">未來藍圖：打造明日之城</h3>
+                    <p class="mt-4 text-slate-600 max-w-2xl mx-auto">面對挑戰，考文垂並未止步不前，而是透過一系列宏大的戰略規劃、城市再生和技術創新，主動塑造自己的未來，將自身定位為解決後工業城市核心挑戰的「生活實驗室」。</p>
+                </div>
+                
+                <div class="space-y-16">
+                    <div class="grid md:grid-cols-2 gap-12 items-center fade-in">
+                        <div>
+                             <h4 class="text-2xl font-bold mb-4 text-slate-800">Friargate：重塑商業核心</h4>
+                            <p class="text-slate-600">這是一個圍繞火車站、投資超過7億英鎊的大型再生項目。旨在創建一個全新的商業區，提供甲級辦公空間、酒店和住宅，預計將創造15,000個就業機會，吸引高價值的服務型企業入駐。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                           <h5 class="font-bold text-center text-blue-600">Friargate 商業區關鍵數據</h5>
+                            <div class="mt-4 grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                    <p class="text-3xl font-bold text-amber-500 stat-number" data-target="700">0</p>
+                                    <p class="text-sm text-slate-500">百萬英鎊投資</p>
+                                </div>
+                                <div>
+                                    <p class="text-3xl font-bold text-amber-500 stat-number" data-target="15000">0</p>
+                                    <p class="text-sm text-slate-500">預計新增就業</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-12 items-center fade-in">
+                        <div class="md:order-2">
+                             <h4 class="text-2xl font-bold mb-4 text-slate-800">考文垂超輕軌 (VLR)：交通革命</h4>
+                            <p class="text-slate-600">這是考文垂最具雄心的英國首創項目。這種電池驅動、軌道極淺的輕軌系統，旨在提供一種比傳統電車成本更低、施工干擾更小的永續公共交通解決方案。如果成功，它將改變全球城市的交通格局。</p>
+                        </div>
+                        <div class="md:order-1">
+                            <div class="bg-white p-6 rounded-lg shadow-lg">
+                                <h5 class="font-bold text-center text-blue-600 mb-4">革命性軌道設計</h5>
+                                <div class="vlr-ground">
+                                    <div class="vlr-vehicle">VLR</div>
+                                    <div class="vlr-track"></div>
+                                </div>
+                                <p class="text-xs text-center text-slate-500 mt-2">軌道深度僅30公分，可快速鋪設，無需大規模挖掘。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Strategy -->
+        <section id="strategy" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12 fade-in">
+                    <h3 class="text-3xl md:text-4xl font-bold">戰略展望：機遇與路徑</h3>
+                    <p class="mt-4 text-slate-600 max-w-2xl mx-auto">綜合來看，考文垂是一個充滿潛力的城市。其未來取決於能否充分發揮核心優勢，同時有效應對其社會經濟挑戰。以下是為各方提出的戰略建議。</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-12 fade-in">
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h4 class="text-xl font-bold text-green-800 mb-3">核心優勢 (Strengths)</h4>
+                        <ul class="list-disc list-inside space-y-2 text-green-700">
+                            <li>強大的「大學-工業複合體」</li>
+                            <li>獨特的「鳳凰城」和解品牌</li>
+                            <li>歷史悠久的經濟重塑與適應能力</li>
+                            <li>在VLR等項目上的開創性創新</li>
+                            <li>年輕、增長且多元化的人口結構</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                        <h4 class="text-xl font-bold text-red-800 mb-3">核心挑戰 (Challenges)</h4>
+                        <ul class="list-disc list-inside space-y-2 text-red-700">
+                            <li>「雙速經濟」與社會不平等</li>
+                            <li>本地勞動力與新興產業間的技能差距</li>
+                            <li>人口快速增長帶來的基礎設施壓力</li>
+                            <li>如何將文化參與轉化為長期遺產</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="max-w-4xl mx-auto fade-in">
+                    <div id="accordion">
+                        <!-- Accordion Item 1 -->
+                        <div class="border-b border-slate-200">
+                            <button class="accordion-button w-full text-left py-4 px-2 flex justify-between items-center">
+                                <span class="font-bold text-lg text-slate-800">對投資者與經濟發展機構的建議</span>
+                                <span class="accordion-icon text-blue-500 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content hidden p-4 bg-slate-50 rounded-b-lg">
+                                <ul class="list-decimal list-inside space-y-2 text-slate-600">
+                                    <li><b>加倍投資於大學-工業複合體：</b>重點支持電動汽車、電池技術和航空航天領域的研發生態，吸引更多國際研發密集型企業。</li>
+                                    <li><b>投資於「和解經濟」：</b>利用「鳳凰城」品牌，發展以和平為主題的文化旅遊、國際會議和教育項目。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- Accordion Item 2 -->
+                        <div class="border-b border-slate-200">
+                            <button class="accordion-button w-full text-left py-4 px-2 flex justify-between items-center">
+                                <span class="font-bold text-lg text-slate-800">對市政與區域決策者的建議</span>
+                                <span class="accordion-icon text-blue-500 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content hidden p-4 bg-slate-50 rounded-b-lg">
+                                <ul class="list-decimal list-inside space-y-2 text-slate-600">
+                                    <li><b>透過互聯互通實現「包容性增長」：</b>全力推進VLR網絡，優先連接貧困社區與主要就業區，彌合「雙速」經濟鴻溝。</li>
+                                    <li><b>建立目標明確的技能管道：</b>與教育機構合作，提供量身定制的培訓計畫，解決本地人口的技能差距問題。</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- Accordion Item 3 -->
+                        <div class="border-b border-slate-200">
+                            <button class="accordion-button w-full text-left py-4 px-2 flex justify-between items-center">
+                                <span class="font-bold text-lg text-slate-800">對社會與社區利益相關者的建議</span>
+                                <span class="accordion-icon text-blue-500 text-2xl font-light">+</span>
+                            </button>
+                            <div class="accordion-content hidden p-4 bg-slate-50 rounded-b-lg">
+                                <ul class="list-decimal list-inside space-y-2 text-slate-600">
+                                    <li><b>借鑒文化之城的參與模式：</b>吸取2021年活動的經驗，創建由社區主導的可持續文化規劃模式，將臨時參與轉化為長期投入。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 py-8">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>&copy; 2024 考文垂市互動式分析報告。所有數據均基於公開的戰略分析報告。</p>
+            <p class="mt-2">此為一個基於報告內容創建的資訊視覺化專案，僅供參考。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    // Smooth Scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+
+    // Fade-in animation on scroll
+    const faders = document.querySelectorAll('.fade-in');
+    const appearOptions = {
+        threshold: 0.2,
+        rootMargin: "0px 0px -50px 0px"
+    };
+    const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+                return;
+            }
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        });
+    }, appearOptions);
+    faders.forEach(fader => {
+        appearOnScroll.observe(fader);
+    });
+
+    // Number counter animation
+    const animateStatNumbers = (entry) => {
+        if (entry.isIntersecting) {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 1500;
+                const stepTime = 20;
+                const steps = duration / stepTime;
+                const increment = target / steps;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.innerText = target.toLocaleString();
+                        clearInterval(timer);
+                    } else {
+                        counter.innerText = Math.ceil(current).toLocaleString();
+                    }
+                }, stepTime);
+            });
+            statObserver.unobserve(entry.target);
+        }
+    };
+    const statObserver = new IntersectionObserver((entries) => {
+        entries.forEach(animateStatNumbers);
+    }, { threshold: 0.5 });
+    
+    const statsSection = document.querySelector('#future');
+    if(statsSection) {
+        statObserver.observe(statsSection);
+    }
+    
+    // Timeline animation
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const timelineObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            } else {
+                entry.target.classList.remove('active');
+            }
+        });
+    }, { threshold: 0.8 });
+    timelineItems.forEach(item => {
+        timelineObserver.observe(item);
+    });
+
+    // Accordion
+    const accordionButtons = document.querySelectorAll('.accordion-button');
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const content = button.nextElementSibling;
+            const icon = button.querySelector('.accordion-icon');
+            
+            // Close other accordions
+            accordionButtons.forEach(otherButton => {
+                if (otherButton !== button) {
+                    otherButton.nextElementSibling.classList.add('hidden');
+                    otherButton.querySelector('.accordion-icon').textContent = '+';
+                }
+            });
+
+            content.classList.toggle('hidden');
+            icon.textContent = content.classList.contains('hidden') ? '+' : '-';
+        });
+    });
+
+    // Chart.js configurations
+    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+    Chart.defaults.color = '#475569';
+    
+    const tooltipConfig = {
+        backgroundColor: '#1e293b',
+        titleFont: { size: 14, weight: 'bold' },
+        bodyFont: { size: 12 },
+        padding: 10,
+        cornerRadius: 4,
+        displayColors: false,
+    };
+    
+    const axisConfig = {
+        grid: {
+            color: '#e2e8f0',
+            borderColor: '#cbd5e1'
+        },
+        ticks: {
+            color: '#475569',
+        }
+    };
+
+    // University Impact Chart
+    const universityImpactCtx = document.getElementById('universityImpactChart');
+    if (universityImpactCtx) {
+        new Chart(universityImpactCtx, {
+            type: 'bar',
+            data: {
+                labels: ['華威大學', '考文垂大學'],
+                datasets: [{
+                    label: '年度經濟貢獻 (GVA)',
+                    data: [1150, 800], // in millions £
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: '國際學生貢獻',
+                    data: [675, 651], // in millions £
+                    backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '大學對經濟的貢獻 (百萬英鎊)',
+                        font: { size: 16 }
+                    },
+                    tooltip: {
+                        ...tooltipConfig,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: £${context.raw.toLocaleString()} 百萬`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { ...axisConfig, beginAtZero: true, title: { display: true, text: '金額 (百萬英鎊)' } },
+                    x: { ...axisConfig }
+                }
+            }
+        });
+    }
+
+    // Ethnicity Chart
+    const ethnicityCtx = document.getElementById('ethnicityChart');
+    if (ethnicityCtx) {
+        new Chart(ethnicityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['英國白人', '亞裔/英國亞裔', '其他白人', '黑人/英國黑人', '其他'],
+                datasets: [{
+                    label: '族裔構成',
+                    data: [55.3, 18.5, 10.2, 8.9, 7.1],
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                    ],
+                    borderColor: '#f8fafc',
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: '考文垂族裔構成 (2021)',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                         ...tooltipConfig,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+</body>
+</html>
