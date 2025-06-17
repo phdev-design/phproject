@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李飛飛的AI探索之旅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Rose Pink -->
+    <!-- Application Structure Plan: The application is structured as an interactive journey through the "Three Eras of Fei-Fei Li's AI Journey." A top navigation bar allows users to switch between these eras (Vision, Conscience, Being), dynamically revealing the relevant content. This non-linear, thematic structure transforms the dense report into manageable, exploratory sections. It uses interactive components like a Chart.js graph for quantitative data and clickable diagrams for qualitative information, enhancing user engagement and understanding over a simple linear scroll. This design was chosen to make the complex narrative of Dr. Li's career both digestible and compelling. -->
+    <!-- Visualization & Content Choices: 
+        1. ILSVRC Error Rate: Goal: Show dramatic progress. Method: Animated Bar Chart (Chart.js). Interaction: Animate on reveal, hover tooltips. Justification: Clearest way to visualize the "Big Bang" data point.
+        2. Governance Initiatives (Google, HAI, AI4ALL): Goal: Organize related concepts. Method: Clickable HTML/CSS diagram with a dynamic text panel. Interaction: Click updates content. Justification: More engaging and space-efficient than plain text.
+        3. LLM vs. LWM: Goal: Compare concepts. Method: HTML/CSS side-by-side table. Interaction: None. Justification: Direct comparison is best for clarity.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 800px;
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .nav-item.active {
+            color: #881337; /* rose-900 */
+            border-bottom-color: #f43f5e; /* rose-500 */
+        }
+        .content-section {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            will-change: opacity, transform;
+        }
+        .content-section.hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            height: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .diagram-item.active {
+            background-color: #ffe4e6; /* rose-100 */
+            border-color: #f43f5e; /* rose-500 */
+        }
+    </style>
+</head>
+<body class="bg-rose-50 text-slate-700">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-rose-900 mb-2">李飛飛：AI的視覺與良知建構者</h1>
+            <p class="text-lg md:text-xl text-rose-800 max-w-3xl mx-auto">一場從教會機器「看見」，到引導AI「向善」，再到探索「存在」的非凡旅程。</p>
+        </header>
+
+        <nav class="sticky top-0 bg-rose-50/80 backdrop-blur-sm z-10 mb-12 border-b border-rose-200">
+            <ul class="flex justify-center items-center space-x-4 md:space-x-8">
+                <li><button data-target="vision" class="nav-item text-slate-500 hover:text-rose-800 py-4 px-2 md:px-4 border-b-2 border-transparent font-medium text-sm md:text-base active">視覺的建構者</button></li>
+                <li><button data-target="conscience" class="nav-item text-slate-500 hover:text-rose-800 py-4 px-2 md:px-4 border-b-2 border-transparent font-medium text-sm md:text-base">良知的建構者</button></li>
+                <li><button data-target="being" class="nav-item text-slate-500 hover:text-rose-800 py-4 px-2 md:px-4 border-b-2 border-transparent font-medium text-sm md:text-base">存在的建構者</button></li>
+            </ul>
+        </nav>
+
+        <main>
+            <section id="vision" class="content-section">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-rose-900 mb-2">第一章：現代AI的「宇宙大爆炸」</h2>
+                        <p class="text-lg text-slate-600">在AI的「第二次寒冬」期，李飛飛意識到問題不在演算法，而在於缺乏能模擬真實世界的數據。這份洞察催生了ImageNet——一個徹底改變AI研究範式的宏偉計畫。</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-12">
+                        <h3 class="text-2xl font-semibold text-rose-800 mb-4 text-center">ImageNet的創世紀</h3>
+                        <div class="grid md:grid-cols-3 gap-6 text-center">
+                            <div class="bg-rose-100 p-4 rounded-lg">
+                                <div class="text-5xl mb-2">📜</div>
+                                <h4 class="font-bold text-rose-800">理念誕生</h4>
+                                <p class="text-sm">將海量圖片與WordNet的語義網絡映射，建立一個規模空前的結構化資料庫。</p>
+                            </div>
+                            <div class="bg-rose-100 p-4 rounded-lg">
+                                <div class="text-5xl mb-2">👥</div>
+                                <h4 class="font-bold text-rose-800">眾包標註</h4>
+                                <p class="text-sm">利用亞馬遜「土耳其機器人」平台，讓全球數萬名工作者協力完成標註任務。</p>
+                            </div>
+                            <div class="bg-rose-100 p-4 rounded-lg">
+                                <div class="text-5xl mb-2">🏆</div>
+                                <h4 class="font-bold text-rose-800">競賽催化</h4>
+                                <p class="text-sm">發起ILSVRC挑戰賽，提供標準化平台，將AI研究推向實證驅動的科學領域。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                        <h3 class="text-2xl font-semibold text-rose-800 mb-4 text-center">引爆點：2012年ILSVRC競賽</h3>
+                        <p class="text-center text-slate-600 mb-6">AlexNet的出現，以壓倒性優勢證明了深度學習模型的巨大潛力，其錯誤率遠低於傳統方法，震驚了整個領域。下圖展示了自那以後，模型辨識錯誤率的驚人下降。</p>
+                        <div class="chart-container">
+                            <canvas id="ilsvrcChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="conscience" class="content-section hidden">
+                <div class="max-w-4xl mx-auto">
+                     <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-rose-900 mb-2">第二章：為AI建立倫理護欄</h2>
+                        <p class="text-lg text-slate-600">在釋放了AI的巨大力量後，李飛飛將重心轉向為這項技術的發展建立秩序與良知。她投身於AI的民主化、倫理規範和多元化教育，確保科技能真正地以人為本。</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                        <h3 class="text-2xl font-semibold text-rose-800 mb-4 text-center">三大支柱：民主、倫理、多元</h3>
+                        <p class="text-center text-slate-600 mb-8">點擊下方卡片，探索李飛飛為推動負責任的AI發展所建立的關鍵機構與計畫。</p>
+                        
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <div class="md:w-1/3">
+                                <ul class="space-y-4" id="diagram-nav">
+                                    <li><button data-content="google" class="diagram-item w-full text-left p-4 border-2 border-rose-200 rounded-lg hover:bg-rose-50 hover:border-rose-400 active">
+                                        <h4 class="font-bold text-rose-800">在Google：AI民主化</h4>
+                                        <p class="text-sm text-slate-600">將AI變成人人可用的工具。</p>
+                                    </button></li>
+                                    <li><button data-content="hai" class="diagram-item w-full text-left p-4 border-2 border-rose-200 rounded-lg hover:bg-rose-50 hover:border-rose-400">
+                                        <h4 class="font-bold text-rose-800">創立HAI：以人為本</h4>
+                                        <p class="text-sm text-slate-600">從源頭植入倫理與人文關懷。</p>
+                                    </button></li>
+                                    <li><button data-content="ai4all" class="diagram-item w-full text-left p-4 border-2 border-rose-200 rounded-lg hover:bg-rose-50 hover:border-rose-400">
+                                        <h4 class="font-bold text-rose-800">創辦AI4ALL：培育未來</h4>
+                                        <p class="text-sm text-slate-600">增加AI領域的多樣性與包容性。</p>
+                                    </button></li>
+                                </ul>
+                            </div>
+                            <div class="md:w-2/3 bg-rose-50 rounded-lg p-6 min-h-[200px]">
+                                <div id="diagram-content">
+                                    <div id="content-google">
+                                        <h4 class="text-xl font-bold text-rose-800 mb-2">AutoML：降低技術門檻</h4>
+                                        <p class="text-slate-700">在Google Cloud任職期間，李飛飛領導開發了AutoML產品套件。它讓缺乏深厚專業知識的用戶也能輕鬆建構高品質的客製化AI模型，極大推動了「AI民主化」，讓技術能被更廣泛的群體所用。</p>
+                                    </div>
+                                    <div id="content-hai" class="hidden">
+                                        <h4 class="text-xl font-bold text-rose-800 mb-2">史丹佛HAI：跨學科的智慧熔爐</h4>
+                                        <p class="text-slate-700">HAI（以人為本AI研究院）打破學科壁壘，將人文、法律、倫理學家與電腦科學家聚集在一起。其核心理念是AI的開發必須從一開始就尊重人類福祉，將倫理考量內建於設計藍圖之中，而非事後補救。</p>
+                                    </div>
+                                    <div id="content-ai4all" class="hidden">
+                                        <h4 class="text-xl font-bold text-rose-800 mb-2">AI4ALL：從草根改變生態</h4>
+                                        <p class="text-slate-700">這個非營利組織旨在為弱勢群體的年輕人提供學習AI的機會。李飛飛相信，只有當AI的創造者群體是多元的，創造出的技術才能避免偏見，服務於更廣泛的人類社會。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="being" class="content-section hidden">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-rose-900 mb-2">第三章：下一個前沿——空間與存在</h2>
+                        <p class="text-lg text-slate-600">李飛飛的研究從未停歇。她挑戰當前由大型語言模型（LLM）主導的典範，認為真正的智能必須理解並與三維物理世界互動，開創了從「環境智能」到「空間智能」的新紀元。</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                         <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                            <h3 class="text-2xl font-semibold text-rose-800 mb-4">服務於健康的AI：環境智能</h3>
+                            <p class="text-slate-600 mb-4">利用非侵入式感測器對ICU、病房等空間進行智慧監測。這項研究旨在為醫護人員提供不知疲倦的智慧助手，輔助他們進行觀察性工作，從而將更多精力投入到高層次的關懷與治療，直接回應全球醫療系統面臨的挑戰。</p>
+                            <ul class="space-y-2 text-sm">
+                                <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✓</span><span>監測洗手合規率，預防院內感染。</span></li>
+                                <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✓</span><span>即時偵測病患跌倒風險。</span></li>
+                                <li class="flex items-start"><span class="text-rose-500 mr-2 mt-1">✓</span><span>透過步態分析監測神經系統疾病。</span></li>
+                            </ul>
+                        </div>
+                         <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                            <h3 class="text-2xl font-semibold text-rose-800 mb-4">新典範：World Labs與空間智能</h3>
+                            <p class="text-slate-600 mb-4">李飛飛創立的新創公司World Labs，旨在建構「大型世界模型」(LWMs)。她認為語言只是對世界的抽象描述，更高層次的智能必須在三維空間中理解、規劃並行動。</p>
+                             <div class="border-t-2 border-rose-200 mt-4 pt-4">
+                                <h4 class="font-bold text-rose-800">大型語言模型 (LLM) vs. 大型世界模型 (LWM)</h4>
+                                <p class="text-sm text-slate-500 mt-2"><b>LLM:</b> 處理文本、語言等一維抽象數據。</p>
+                                <p class="text-sm text-slate-500 mt-1"><b>LWM:</b> 理解三維物理世界，具備空間推理和互動能力，是通往具身AI的關鍵。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-rose-200">
+            <p class="text-rose-800/70">這份互動報告總結了李飛飛博士對人工智慧領域的深遠影響。</p>
+            <p class="text-sm text-rose-400 mt-1">設計與開發 by Gemini</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navItems = document.querySelectorAll('.nav-item');
+            const contentSections = document.querySelectorAll('.content-section');
+            const diagramNavItems = document.querySelectorAll('.diagram-item');
+            const diagramContentDivs = document.querySelector('#diagram-content').children;
+
+            const ilsvrcData = {
+                labels: ['2011 (傳統方法)', '2012 (AlexNet)', '2013 (ZFNet)', '2014 (GoogLeNet)', '2015 (ResNet)'],
+                datasets: [{
+                    label: 'ILSVRC 冠軍錯誤率 (%)',
+                    data: [26, 16.4, 11.2, 6.7, 3.6],
+                    backgroundColor: [
+                        'rgba(148, 163, 184, 0.6)', // slate-400
+                        'rgba(244, 63, 94, 0.6)',   // rose-500
+                        'rgba(244, 63, 94, 0.7)',
+                        'rgba(244, 63, 94, 0.8)',
+                        'rgba(244, 63, 94, 0.9)',
+                    ],
+                    borderColor: [
+                         'rgba(148, 163, 184, 1)',
+                        'rgba(244, 63, 94, 1)',
+                        'rgba(244, 63, 94, 1)',
+                        'rgba(244, 63, 94, 1)',
+                        'rgba(244, 63, 94, 1)',
+                    ],
+                    borderWidth: 1
+                },
+                {
+                    type: 'line',
+                    label: '人類表現估計',
+                    data: [5, 5, 5, 5, 5],
+                    borderColor: 'rgb(239, 68, 68)', // red-500
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    borderDash: [5, 5],
+                    fill: false,
+                }]
+            };
+
+            const ilsvrcConfig = {
+                type: 'bar',
+                data: ilsvrcData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '錯誤率 (%)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                           display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if (context.dataset.type !== 'line') {
+                                           label += context.parsed.y + '%';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeInOutCubic'
+                    }
+                }
+            };
+            
+            let chart;
+
+            function createChart() {
+                const ctx = document.getElementById('ilsvrcChart').getContext('2d');
+                if(chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(ctx, ilsvrcConfig);
+            }
+
+            function showSection(targetId) {
+                contentSections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                        // Use a timeout to ensure the display property changes before starting the transition
+                        setTimeout(() => {
+                           section.style.height = 'auto';
+                           section.style.opacity = '1';
+                           section.style.transform = 'translateY(0)';
+                        }, 10);
+
+                        if(targetId === 'vision' && !chart) {
+                            setTimeout(createChart, 300); // Delay chart creation for smooth transition
+                        }
+                    } else {
+                        section.style.opacity = '0';
+                        section.style.transform = 'translateY(20px)';
+                        // After transition, hide it completely
+                        setTimeout(() => {
+                           if (section.id !== targetId) {
+                               section.classList.add('hidden');
+                               section.style.height = '0';
+                           }
+                        }, 500);
+                    }
+                });
+            }
+
+            navItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.dataset.target;
+
+                    navItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    showSection(targetId);
+                });
+            });
+
+            diagramNavItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const contentId = `content-${item.dataset.content}`;
+
+                    diagramNavItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+
+                    Array.from(diagramContentDivs).forEach(div => {
+                        if (div.id === contentId) {
+                            div.classList.remove('hidden');
+                        } else {
+                            div.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+            
+            showSection('vision');
+        });
+    </script>
+
+</body>
+</html>
