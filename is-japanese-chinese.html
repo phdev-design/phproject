@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" id="html-lang">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日本人起源之謎：互動式探索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif; /* English font first */
+            background-color: #F8F7F4;
+            color: #3D3B37;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 16px;
+        }
+        .nav-button.active::after, .nav-button:hover::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background-color: #A57C5B;
+            border-radius: 2px;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            border: 1px solid #EAE8E3;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%; /* Ensure cards in a grid have same height */
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .keyword {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            margin: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .jomon-keyword { background-color: #FBEADC; color: #9C5F27; }
+        .yayoi-keyword { background-color: #E2F0D9; color: #376F2D; }
+        .kofun-keyword { background-color: #E0E7FF; color: #3730A3; }
+        .ancestry-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 45vh;
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="app" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-6 relative">
+             <div class="absolute top-0 right-0">
+                <button id="lang-toggle-btn" class="px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 hover:bg-gray-300 transition-colors">
+                    EN / 中文
+                </button>
+            </div>
+            <h1 id="main-title" class="text-4xl md:text-5xl font-bold text-gray-800 mb-2"></h1>
+            <p id="main-subtitle" class="text-xl text-gray-600"></p>
+        </header>
+
+        <nav class="sticky top-0 z-10 bg-[#F8F7F4]/80 backdrop-blur-sm py-3 mb-12 border-b border-gray-200">
+            <div id="nav-container" class="flex justify-center items-center space-x-2 md:space-x-6 text-sm md:text-base font-medium">
+            </div>
+        </nav>
+
+        <main id="content-container">
+        </main>
+    </div>
+
+    <script>
+        let currentLang = 'zh';
+        let currentChart = null;
+
+        const contentData = {
+            zh: {
+                title: "日本人起源之謎",
+                subtitle: "一趟互動的探索之旅",
+                nav: [
+                    { id: 'overview', name: '總覽' },
+                    { id: 'ancestries', name: '三大祖源' },
+                    { id: 'genetics', name: '遺傳地圖' },
+                    { id: 'culture', name: '語言與文化' },
+                    { id: 'conclusion', name: '最終結論' }
+                ],
+                pages: {
+                    overview: {
+                        title: "解開謎題：三重構造模型",
+                        intro: "現代日本人並非單一來源的民族。科學界的共識「三重構造模型」指出，日本人是由三個在不同時期抵達列島的古老祖先群體，經過漫長的融合過程所形成的複合體。本節將為您揭示這個核心概念，開啟探索之旅。",
+                        content: `<div class="grid md:grid-cols-3 gap-6 text-center">
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#FBEADC] text-3xl">⛰️</div><h3 class="text-xl font-bold mb-2 text-[#9C5F27]">第一層：繩文人</h3><p class="text-gray-600 text-sm">日本列島的原生狩獵採集者，遺傳獨特，是日本人基因中不可或缺的古老基石。</p></div>
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#E2F0D9] text-3xl">🌾</div><h3 class="text-xl font-bold mb-2 text-[#376F2D]">第二層：彌生人</h3><p class="text-gray-600 text-sm">帶來水稻農業與金屬器的大陸移民，從根本上改變了日本的社會與經濟結構。</p></div>
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#E0E7FF] text-3xl">🏛️</div><h3 class="text-xl font-bold mb-2 text-[#3730A3]">第三層：古墳人</h3><p class="text-gray-600 text-sm">與國家形成同步的大規模移民，他們奠定了大和政權的基礎，並成為現代日本人基因的主體。</p></div>
+                        </div>`
+                    },
+                    ancestries: {
+                        title: "探尋三大祖源",
+                        intro: "構成日本人的三個祖先群體，各自擁有獨特的文化、技術與歷史。在這裡，您可以點擊下方的按鈕，分別深入了解繩文、彌生與古墳時代的人們，他們如何生活，又留下了什麼遺產。",
+                        buttons: [
+                            { id: 'jomon', name: '繩文人', color: 'bg-[#FBEADC] text-[#9C5F27] hover:bg-[#F8DCC1]' },
+                            { id: 'yayoi', name: '彌生人', color: 'bg-[#E2F0D9] text-[#376F2D] hover:bg-[#D4E8C9]' },
+                            { id: 'kofun', name: '古墳人', color: 'bg-[#E0E7FF] text-[#3730A3] hover:bg-[#C7D2FE]' }
+                        ],
+                        content: {
+                            jomon: { title: '繩文人：原生基石', period: '約公元前16,000年 – 公元前900年', description: '繩文人是日本列島最早的居民，他們發展出世界上最古老的陶器，並在沒有農業的情況下，創造了繁榮且複雜的定居式狩獵採集文化。他們的遺傳譜系在與大陸分離後，獨立演化了上萬年，形成了獨一無二的基因庫。', keywords: ['狩獵採集', '繩文土器', '定居生活', '貝塚', '土偶', '古蒙古人種'] },
+                            yayoi: { title: '彌生人：農業浪潮', period: '約公元前900年 – 公元300年', description: '約三千年前，攜帶著水稻種植與金屬冶煉技術的「渡來人」從亞洲大陸經由朝鮮半島遷入。他們引發了日本史上第一次重大的人口與文化革命，其基因大規模地與繩文人融合，奠定了現代日本人的基礎。', keywords: ['水稻農業', '金屬器', '大陸移民', '環濠聚落', '階級分化', '朝鮮半島'] },
+                            kofun: { title: '古墳人：國家鍛造', period: '約公元300年 – 710年', description: '隨著大和政權的崛起，日本迎來了第三波，也是規模最大的一波大陸移民潮。這些與古代漢族有著緊密遺傳關聯的新移民，帶來了先進的技術與制度，推動了日本中央集權國家的形成，其基因貢獻佔現代日本人總基因庫的70%以上。', keywords: ['國家形成', '前方後圓墳', '大和政權', '漢族相關', '第三波移民', '文字傳入'] }
+                        }
+                    },
+                    genetics: {
+                        title: '現代日本人的遺傳地圖',
+                        intro: '基因科學為我們提供了決定性的量化答案。在本節中，您將透過互動圖表，探索三個祖源如何在現代日本人群中分佈，並透過點擊按鈕，了解「本土」、「琉球」與「愛努」三大群體之間的顯著遺傳差異。',
+                        buttons: { mainland: '本土', ryukyuan: '琉球', ainu: '愛努' },
+                        chartData: {
+                            mainland: { labels: ['大陸移民後裔 (彌生/古墳)', '繩文人後裔'], data: [87, 13], colors: ['#8AA5D1', '#D1A08A'], text: '生活在日本本土的大和民族，其基因約有 <b>87-91%</b> 來自大陸移民（彌生與古墳時代），而古老的繩文人基因則約佔 <b>9-13%</b>。這是構成現代日本人的基本盤。' },
+                            ryukyuan: { labels: ['大陸移民後裔 (彌生/古墳)', '繩文人後裔'], data: [70, 30], colors: ['#8AA5D1', '#D1A08A'], text: '位於日本南端的琉球人（沖繩），保留了更高比例的繩文基因，約佔 <b>28-30%</b>。這反映了大陸移民的影響力由中心向邊緣遞減的歷史過程。' },
+                            ainu: { labels: ['大陸移民後裔 (彌生/古墳)', '繩文人後裔'], data: [30, 70], colors: ['#8AA5D1', '#D1A08A'], text: '居住在北海道的愛努人是繩文人最直接的後裔，其基因中繩文成分高達約 <b>70%</b>。他們是研究繩文人遺傳特徵的珍貴窗口。' }
+                        }
+                    },
+                    culture: {
+                        title: '語言與文化：影響 vs. 祖源',
+                        intro: '遺傳上的祖先與文化上的影響是兩個不同的概念。日本深受中華文明影響，但其核心的語言結構卻揭示了不同的起源。本節將透過直觀的比較，幫助您區分借來的文化外衣與內在的語言核心。',
+                        content: `<div class="grid md:grid-cols-2 gap-8">
+                            <div class="card p-6 flex flex-col"><h3 class="text-xl font-bold mb-4">🗣️ 語言的根本差異</h3><p class="mb-4 text-gray-600">日語與漢語的語法結構完全不同。日語是「主-賓-謂」(SOV) 結構，而漢語是「主-謂-賓」(SVO) 結構。這種核心差異表明，帶來日語的移民群體，其語言與漢語早已分道揚鑣。</p><div class="space-y-4 mt-auto"><div><p class="font-semibold">日語 (SOV):</p><div class="flex flex-wrap gap-2 text-sm"><span class="p-2 rounded bg-sky-200 text-sky-800">私 は (主語)</span><span class="p-2 rounded bg-amber-200 text-amber-800">寿司 を (賓語)</span><span class="p-2 rounded bg-rose-200 text-rose-800">食べる (謂語)</span></div></div><div><p class="font-semibold">漢語 (SVO):</p><div class="flex flex-wrap gap-2 text-sm"><span class="p-2 rounded bg-sky-200 text-sky-800">我 (主語)</span><span class="p-2 rounded bg-rose-200 text-rose-800">吃 (謂語)</span><span class="p-2 rounded bg-amber-200 text-amber-800">壽司 (賓語)</span></div></div></div></div>
+                            <div class="card p-6 flex flex-col"><h3 class="text-xl font-bold mb-4">✍️ 文化的借用與創新</h3><p class="mb-4 text-gray-600">日本大量借用了中國的漢字，但為了適應自身完全不同的語法，他們並非全盤照搬，而是創新地從漢字的草書和楷書中，簡化創造出表音的「平假名」與「片假名」。這是文化適應而非被取代的典範。</p><div class="text-center mt-auto"><span class="text-6xl font-serif">安</span><span class="text-4xl mx-4 text-gray-400">➔</span><span class="text-6xl font-serif">あ</span></div><p class="text-center text-sm text-gray-500 mt-2">漢字「安」的草書演變為平假名「あ」(a)。</p></div></div>
+                        </div>`
+                    },
+                    conclusion: {
+                        title: '最終結論：一個複雜問題的細緻回答',
+                        intro: '綜合所有證據，我們可以對「日本人祖先是否為中國人？」這個問題給出一個科學、嚴謹且細緻的回答。答案既非簡單的是，也非簡單的否。',
+                        content: `<div class="card p-8 bg-white max-w-4xl mx-auto"><p class="text-lg mb-4">現代日本人是一個以來自亞洲大陸的移民後裔為主體，融合了少量古老原住民基因，並在東亞島嶼的獨特環境中最終形成的、具有自身鮮明特徵的東亞民族。</p><ul class="space-y-3 text-gray-700 list-disc list-inside"><li><strong class="font-semibold">主要血脈源於大陸：</strong> 從遺傳學看，約90%的日本人基因來自彌生與古墳時代的兩波大陸移民，其最終源頭可追溯至今日中國境內的不同古代人群。</li><li><strong class="font-semibold">「中國人」標籤不準確：</strong> 用現代國族概念去標籤古代人群是時代錯置。這些移民在抵達日本前，已在朝鮮半島等地經歷了混合與演化，並非現代意義上的「中國人」。</li><li><strong class="font-semibold">獨特的繩文人基石：</strong> 日本列島土著的繩文人貢獻了約10%的基因，這個獨特的遺傳成分是日本人與其他東亞民族區分開來的關鍵之一。</li><li><strong class="font-semibold">日本列島是塑造之地：</strong> 無論祖先來自何方，「日本人」這個民族是在日本列島的土地上，經過獨特的融合與千年演化才最終形成的。</li></ul><div class="mt-6 pt-6 border-t border-gray-200 text-center"><p class="font-bold text-xl text-gray-800">因此，最準確的說法是：日本人的主要祖先來自亞洲大陸，但日本人並非中國人。</p></div></div>`
+                    }
+                }
+            },
+            en: {
+                title: "The Mystery of Japanese Origins",
+                subtitle: "An Interactive Journey of Discovery",
+                nav: [
+                    { id: 'overview', name: 'Overview' },
+                    { id: 'ancestries', name: 'The Three Ancestries' },
+                    { id: 'genetics', name: 'Genetic Map' },
+                    { id: 'culture', name: 'Language & Culture' },
+                    { id: 'conclusion', name: 'Conclusion' }
+                ],
+                pages: {
+                    overview: {
+                        title: "Solving the Puzzle: The Triple Structure Model",
+                        intro: "Modern Japanese people are not of a single origin. The scientific consensus, the 'Triple Structure Model,' indicates that the Japanese are a composite population formed through a long process of admixture between three ancient ancestral groups that arrived on the archipelago at different times. This section unveils this core concept to begin our exploration.",
+                        content: `<div class="grid md:grid-cols-3 gap-6 text-center">
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#FBEADC] text-3xl">⛰️</div><h3 class="text-xl font-bold mb-2 text-[#9C5F27]">First Layer: The Jomon</h3><p class="text-gray-600 text-sm">The indigenous hunter-gatherers of the Japanese archipelago, genetically distinct and an indispensable ancient foundation of the Japanese gene pool.</p></div>
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#E2F0D9] text-3xl">🌾</div><h3 class="text-xl font-bold mb-2 text-[#376F2D]">Second Layer: The Yayoi</h3><p class="text-gray-600 text-sm">Migrants from the continent who brought wet-rice farming and metallurgy, fundamentally transforming Japan's social and economic structure.</p></div>
+                            <div class="card p-6 flex flex-col"><div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-[#E0E7FF] text-3xl">🏛️</div><h3 class="text-xl font-bold mb-2 text-[#3730A3]">Third Layer: The Kofun</h3><p class="text-gray-600 text-sm">Large-scale migrants associated with state formation, who laid the foundation for the Yamato polity and became the primary component of the modern Japanese gene pool.</p></div>
+                        </div>`
+                    },
+                    ancestries: {
+                        title: "Exploring the Three Ancestries",
+                        intro: "Each of the three ancestral groups that constitute the Japanese people had its own unique culture, technology, and history. Here, you can click the buttons below to delve into the lives of the Jomon, Yayoi, and Kofun people, learning how they lived and what legacies they left behind.",
+                        buttons: [
+                            { id: 'jomon', name: 'The Jomon', color: 'bg-[#FBEADC] text-[#9C5F27] hover:bg-[#F8DCC1]' },
+                            { id: 'yayoi', name: 'The Yayoi', color: 'bg-[#E2F0D9] text-[#376F2D] hover:bg-[#D4E8C9]' },
+                            { id: 'kofun', name: 'The Kofun', color: 'bg-[#E0E7FF] text-[#3730A3] hover:bg-[#C7D2FE]' }
+                        ],
+                        content: {
+                            jomon: { title: 'The Jomon: Indigenous Foundation', period: 'c. 16,000 BCE – 900 BCE', description: 'The Jomon were the earliest inhabitants of the Japanese archipelago. They developed some of the world\'s oldest pottery and created a prosperous, complex, sedentary hunter-gatherer culture without agriculture. Their genetic lineage evolved independently for millennia after separation from the continent, forming a unique gene pool.', keywords: ['Hunter-gatherer', 'Jomon Pottery', 'Sedentism', 'Shell Mounds', 'Dogu Figurines', 'Paleo-Mongoloid'] },
+                            yayoi: { title: 'The Yayoi: The Agricultural Wave', period: 'c. 900 BCE – 300 CE', description: 'About 3,000 years ago, "Toraijin" (migrants) from the Asian continent arrived via the Korean peninsula, bringing with them wet-rice cultivation and metallurgy. They triggered the first major demographic and cultural revolution in Japanese history, and their genes extensively mixed with the Jomon, laying the foundation for the modern Japanese people.', keywords: ['Wet-rice Farming', 'Metallurgy', 'Continental Migrants', 'Moated Settlements', 'Social Stratification', 'Korean Peninsula'] },
+                            kofun: { title: 'The Kofun: Forging a State', period: 'c. 300 CE – 710 CE', description: 'With the rise of the Yamato polity, Japan experienced its third and largest wave of continental migration. These new immigrants, who had close genetic ties to ancient Han Chinese populations, brought advanced technology and institutions, driving the formation of a centralized state. Their genetic contribution accounts for over 70% of the modern Japanese gene pool.', keywords: ['State Formation', 'Keyhole Tombs', 'Yamato Polity', 'Han-related', 'Third Wave Migration', 'Writing System'] }
+                        }
+                    },
+                    genetics: {
+                        title: 'Genetic Map of Modern Japanese',
+                        intro: 'Genetic science provides us with decisive, quantitative answers. In this section, explore how the three ancestral sources are distributed among modern Japanese populations through an interactive chart. Click the buttons to understand the significant genetic differences among the "Mainland," "Ryukyuan," and "Ainu" groups.',
+                        buttons: { mainland: 'Mainland', ryukyuan: 'Ryukyuan', ainu: 'Ainu' },
+                        chartData: {
+                            mainland: { labels: ['Continental Migrant Ancestry (Yayoi/Kofun)', 'Jomon Ancestry'], data: [87, 13], colors: ['#8AA5D1', '#D1A08A'], text: 'The Yamato people living on the main islands of Japan have about <b>87-91%</b> of their genes from continental migrants (Yayoi and Kofun periods), while the ancient Jomon genetic component is about <b>9-13%</b>. This is the basic profile of modern Japanese.' },
+                            ryukyuan: { labels: ['Continental Migrant Ancestry (Yayoi/Kofun)', 'Jomon Ancestry'], data: [70, 30], colors: ['#8AA5D1', '#D1A08A'], text: 'The Ryukyuan people (Okinawa) in southern Japan retain a higher proportion of Jomon ancestry, at about <b>28-30%</b>. This reflects the historical process where the influence of continental migrants decreased from the center to the periphery.' },
+                            ainu: { labels: ['Continental Migrant Ancestry (Yayoi/Kofun)', 'Jomon Ancestry'], data: [30, 70], colors: ['#8AA5D1', '#D1A08A'], text: 'The Ainu people of Hokkaido are the most direct descendants of the Jomon, with their Jomon genetic component reaching about <b>70%</b>. They are a precious window into the genetic characteristics of the Jomon people.' }
+                        }
+                    },
+                    culture: {
+                        title: 'Language & Culture: Influence vs. Origin',
+                        intro: 'Genetic ancestry and cultural influence are two different concepts. Japan was heavily influenced by Chinese civilization, but its core linguistic structure reveals a different origin. This section will help you distinguish between the borrowed cultural "clothing" and the inherent linguistic core through direct comparison.',
+                        content: `<div class="grid md:grid-cols-2 gap-8">
+                            <div class="card p-6 flex flex-col"><h3 class="text-xl font-bold mb-4">🗣️ Fundamental Language Difference</h3><p class="mb-4 text-gray-600">The grammatical structures of Japanese and Chinese are completely different. Japanese is a Subject-Object-Verb (SOV) language, while Chinese is Subject-Verb-Object (SVO). This core difference indicates that the language of the migrant groups who brought Japanese had long diverged from Chinese.</p><div class="space-y-4 mt-auto"><div><p class="font-semibold">Japanese (SOV):</p><div class="flex flex-wrap gap-2 text-sm"><span class="p-2 rounded bg-sky-200 text-sky-800">I (Subject)</span><span class="p-2 rounded bg-amber-200 text-amber-800">sushi (Object)</span><span class="p-2 rounded bg-rose-200 text-rose-800">eat (Verb)</span></div></div><div><p class="font-semibold">Chinese (SVO):</p><div class="flex flex-wrap gap-2 text-sm"><span class="p-2 rounded bg-sky-200 text-sky-800">I (Subject)</span><span class="p-2 rounded bg-rose-200 text-rose-800">eat (Verb)</span><span class="p-2 rounded bg-amber-200 text-amber-800">sushi (Object)</span></div></div></div></div>
+                            <div class="card p-6 flex flex-col"><h3 class="text-xl font-bold mb-4">✍️ Cultural Borrowing and Innovation</h3><p class="mb-4 text-gray-600">Japan borrowed Chinese characters (Kanji) extensively. However, to adapt them to their completely different grammar, they didn't just copy them wholesale. Instead, they innovatively simplified the cursive and regular scripts of Kanji to create the phonetic scripts of 'Hiragana' and 'Katakana'. This is a prime example of cultural adaptation, not replacement.</p><div class="text-center mt-auto"><span class="text-6xl font-serif">安</span><span class="text-4xl mx-4 text-gray-400">➔</span><span class="text-6xl font-serif">あ</span></div><p class="text-center text-sm text-gray-500 mt-2">The cursive form of the Kanji '安' (an) evolved into Hiragana 'あ' (a).</p></div></div>
+                        </div>`
+                    },
+                    conclusion: {
+                        title: 'Conclusion: A Nuanced Answer to a Complex Question',
+                        intro: 'Synthesizing all the evidence, we can provide a scientific, rigorous, and nuanced answer to the question, "Are the ancestors of the Japanese people Chinese?" The answer is neither a simple yes nor a simple no.',
+                        content: `<div class="card p-8 bg-white max-w-4xl mx-auto"><p class="text-lg mb-4">The modern Japanese are an East Asian ethnic group, primarily composed of descendants of migrants from the Asian continent, who assimilated a smaller proportion of ancient indigenous genes, and were ultimately forged in the unique environment of the East Asian archipelago, possessing their own distinct characteristics.</p><ul class="space-y-3 text-gray-700 list-disc list-inside"><li><strong class="font-semibold">Main Ancestry from the Continent:</strong> Genetically, about 90% of Japanese genes come from two waves of continental migrants during the Yayoi and Kofun periods, whose ultimate origins can be traced back to various ancient populations within present-day China.</li><li><strong class="font-semibold">"Chinese" Label is Inaccurate:</strong> Labeling ancient peoples with modern national concepts is anachronistic. These migrants had already undergone mixture and evolution on the Korean peninsula and elsewhere before arriving in Japan, and were not "Chinese" in the modern sense.</li><li><strong class="font-semibold">Unique Jomon Foundation:</strong> The indigenous Jomon people of the Japanese archipelago contributed about 10% of the genes, a unique genetic component that is one of the key distinctions between Japanese and other East Asian populations.</li><li><strong class="font-semibold">The Japanese Archipelago as the Crucible:</strong> Regardless of where their ancestors came from, the "Japanese" people were ultimately formed on the land of the Japanese islands through a unique process of fusion and millennia of evolution.</li></ul><div class="mt-6 pt-6 border-t border-gray-200 text-center"><p class="font-bold text-xl text-gray-800">Therefore, the most accurate statement is: The main ancestors of the Japanese people came from the Asian continent, but the Japanese are not Chinese.</p></div></div>`
+                    }
+                }
+            }
+        };
+
+        function renderPage(pageId) {
+            const pageData = contentData[currentLang].pages[pageId];
+            const contentContainer = document.getElementById('content-container');
+            
+            let contentHTML = `
+                <section id="${pageId}" class="py-8 animate-fade-in">
+                    <div class="text-center mb-10">
+                        <h2 class="text-3xl font-bold text-gray-800">${pageData.title}</h2>
+                        <p class="mt-2 text-gray-600 max-w-2xl mx-auto">${pageData.intro}</p>
+                    </div>
+            `;
+
+            if (pageId === 'ancestries') {
+                contentHTML += `<div class="flex justify-center space-x-4 mb-8">`;
+                pageData.buttons.forEach(btn => {
+                    contentHTML += `<button onclick="showAncestryInfo('${btn.id}')" id="btn-${btn.id}" class="ancestry-btn transition-all duration-300 px-6 py-3 rounded-full font-bold text-lg ${btn.color}">${btn.name}</button>`;
+                });
+                contentHTML += `</div><div id="ancestry-content"></div>`;
+            } else if (pageId === 'genetics') {
+                const buttons = pageData.buttons;
+                contentHTML += `
+                    <div class="grid md:grid-cols-5 gap-8 items-center">
+                        <div class="md:col-span-2">
+                            <div class="chart-container">
+                                <canvas id="genetics-chart"></canvas>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3">
+                            <div class="flex justify-center md:justify-start space-x-3 mb-4">
+                                <button onclick="updateChart('mainland')" id="btn-mainland" class="px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 transition">${buttons.mainland}</button>
+                                <button onclick="updateChart('ryukyuan')" id="btn-ryukyuan" class="px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 transition">${buttons.ryukyuan}</button>
+                                <button onclick="updateChart('ainu')" id="btn-ainu" class="px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 transition">${buttons.ainu}</button>
+                            </div>
+                            <div id="genetics-text" class="card p-6"></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                contentHTML += pageData.content;
+            }
+
+            contentHTML += `</section>`;
+            contentContainer.innerHTML = contentHTML;
+
+            // Post-render actions
+            if (pageId === 'ancestries') {
+                showAncestryInfo('jomon');
+            }
+            if (pageId === 'genetics') {
+                initChart();
+            }
+            updateActiveNav(pageId);
+        }
+        
+        function showAncestryInfo(ancestryId) {
+            const content = contentData[currentLang].pages.ancestries.content[ancestryId];
+            const container = document.getElementById('ancestry-content');
+            let keywordsHTML = '';
+            content.keywords.forEach(kw => {
+                keywordsHTML += `<span class="keyword ${ancestryId}-keyword">${kw}</span>`;
+            });
+            container.innerHTML = `
+                <div class="card max-w-2xl mx-auto p-8 animate-fade-in">
+                    <p class="text-sm text-gray-500 mb-2">${content.period}</p>
+                    <h3 class="text-2xl font-bold mb-4">${content.title}</h3>
+                    <p class="text-gray-700 mb-6">${content.description}</p>
+                    <div>${keywordsHTML}</div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.ancestry-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${ancestryId}`).classList.add('active');
+        }
+
+        function initChart() {
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            const ctx = document.getElementById('genetics-chart').getContext('2d');
+            const pageContent = contentData[currentLang].pages.genetics;
+            
+            currentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [], // Will be updated by updateChart
+                    datasets: [{
+                        data: [], // Will be updated by updateChart
+                        backgroundColor: [], // Will be updated by updateChart
+                        borderColor: '#F8F7F4',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: "'Inter', 'Noto Sans TC', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            updateChart('mainland');
+        }
+        
+        function updateChart(regionId) {
+            if (currentChart) {
+                const data = contentData[currentLang].pages.genetics.chartData[regionId];
+                currentChart.data.labels = data.labels;
+                currentChart.data.datasets[0].data = data.data;
+                currentChart.data.datasets[0].backgroundColor = data.colors;
+                currentChart.update();
+                
+                document.getElementById('genetics-text').innerHTML = `<p>${data.text}</p>`;
+                
+                document.querySelectorAll('#genetics button').forEach(b => {
+                    b.classList.remove('bg-gray-800', 'text-white');
+                    b.classList.add('bg-gray-200');
+                });
+                const activeButton = document.getElementById(`btn-${regionId}`);
+                activeButton.classList.add('bg-gray-800', 'text-white');
+                activeButton.classList.remove('bg-gray-200');
+            }
+        }
+        
+        function updateActiveNav(pageId) {
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active', 'text-gray-900', 'font-bold');
+                if(btn.dataset.page === pageId) {
+                    btn.classList.add('active', 'text-gray-900', 'font-bold');
+                }
+            });
+        }
+        
+        function updateGlobalText() {
+            const data = contentData[currentLang];
+            document.getElementById('html-lang').lang = currentLang === 'zh' ? 'zh-Hant' : 'en';
+            document.title = data.title;
+            document.getElementById('main-title').textContent = data.title;
+            document.getElementById('main-subtitle').textContent = data.subtitle;
+        }
+
+        function initNav() {
+            const navContainer = document.getElementById('nav-container');
+            navContainer.innerHTML = ''; // Clear previous nav
+            const navData = contentData[currentLang].nav;
+            navData.forEach(item => {
+                const btn = document.createElement('button');
+                btn.textContent = item.name;
+                btn.dataset.page = item.id;
+                btn.className = 'nav-button';
+                btn.onclick = () => renderPage(item.id);
+                navContainer.appendChild(btn);
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            const activeNavButton = document.querySelector('.nav-button.active');
+            const activePageId = activeNavButton ? activeNavButton.dataset.page : 'overview';
+            
+            // Re-render everything
+            updateGlobalText();
+            initNav();
+            renderPage(activePageId);
+        }
+
+        window.onload = () => {
+            document.getElementById('lang-toggle-btn').addEventListener('click', toggleLanguage);
+            
+            // Initial render
+            updateGlobalText();
+            initNav();
+            renderPage('overview');
+        };
+    </script>
+</body>
+</html>
