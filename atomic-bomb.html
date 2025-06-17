@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原子彈原理：互動式深度解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Noto Sans JP', sans-serif; /* Prioritize TC, then JP, then generic sans-serif */
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            color: #6b7280;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #B85C5C;
+            transform: translateX(5px);
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .btn-primary {
+            background-color: #5C85B8;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #4a6a93;
+        }
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+        .btn-secondary.active {
+            background-color: #B85C5C;
+            color: white;
+        }
+        .gun-piece {
+            transition: transform 1s ease-in-out;
+        }
+        .implosion-segment {
+            transition: all 0.8s ease-in-out;
+        }
+        /* Language selector styling */
+        .lang-selector {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 100;
+        }
+        .lang-selector select {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            -webkit-appearance: none; /* Remove default arrow on select */
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='1.5' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem; /* Make space for custom arrow */
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <!-- Language Selector -->
+    <div class="lang-selector">
+        <select id="language-switcher">
+            <option value="zh-Hant">中文 (繁體)</option>
+            <option value="ja">日本語</option>
+        </select>
+    </div>
+
+    <div class="flex">
+        <!-- Side Navigation -->
+        <nav id="side-nav" class="hidden lg:block fixed top-0 left-0 h-screen w-64 bg-white/80 backdrop-blur-sm p-8 shadow-lg">
+            <h2 class="text-xl font-bold text-gray-800 mb-8" data-i18n="navTitle">導覽</h2>
+            <ul class="space-y-4">
+                <li><a href="#intro" class="nav-link font-medium" data-i18n="navIntro">序章：核心奧秘</a></li>
+                <li><a href="#principle" class="nav-link font-medium" data-i18n="navPrinciple">第一章：核分裂原理</a></li>
+                <li><a href="#chain-reaction" class="nav-link font-medium" data-i18n="navChainReaction">第二章：連鎖反應</a></li>
+                <li><a href="#design" class="nav-link font-medium" data-i18n="navDesign">第三章：工程設計</a></li>
+                <li><a href="#power" class="nav-link font-medium" data-i18n="navPower">第四章：威力之源</a></li>
+                <li><a href="#effects" class="nav-link font-medium" data-i18n="navEffects">第五章：毀滅效應</a></li>
+                <li><a href="#conclusion" class="nav-link font-medium" data-i18n="navConclusion">終章：科學與責任</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="w-full lg:ml-64 p-4 md:p-8 lg:p-12">
+            <div class="max-w-4xl mx-auto">
+
+                <!-- Section: Introduction -->
+                <section id="intro" class="min-h-screen flex flex-col justify-center text-center py-16">
+                    <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4" data-i18n="introTitle">原子彈</h1>
+                    <p class="text-lg md:text-xl text-gray-600 mb-8" data-i18n="introSubtitle">一場改變世界的科學革命，揭示物質深處的巨大能量</p>
+                    <div class="section-card p-8">
+                        <h2 class="text-2xl font-bold text-[#B85C5C] mb-4" data-i18n="introSectionTitle">核心奧秘</h2>
+                        <p class="text-base md:text-lg text-left leading-relaxed" data-i18n="introContent">原子彈，一種利用核分裂連鎖反應在瞬間釋放無窮能量的武器，其誕生不僅是20世紀的科技巔峰，也徹底改變了戰爭形態和國際格局。本互動報告將引導您層層深入，從微觀的原子核到宏觀的毀滅力量，全面解析原子彈的科學原理、工程挑戰及其驚人威力的根源。</p>
+                    </div>
+                </section>
+
+                <!-- Section: Principle of Fission -->
+                <section id="principle" class="py-16 md:py-24">
+                    <h2 class="text-3xl font-bold text-center mb-12" data-i18n="principleTitle">第一章：核分裂原理</h2>
+                    <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-i18n="principleDescription">一切始於原子核的分裂。原子彈的基礎是一種稱為「核分裂」的物理現象：當一個中子撞擊一個重原子核（如鈾-235），該原子核會分裂成兩個較輕的原子，同時釋放出能量和更多的中子，為連鎖反應提供了可能。</p>
+                    <div class="section-card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-center mb-6" data-i18n="principleKeyRawMaterialTitle">關鍵原料：鈾-235 vs 鈾-238</h3>
+                        <p class="text-center text-gray-600 mb-8" data-i18n="principleKeyRawMaterialDescription">並非所有鈾都能輕易分裂。自然界的鈾礦中，絕大部分是穩定的鈾-238，只有約0.7%是易於分裂的鈾-235。製造原子彈需要將鈾-235的濃度提升至90%以上，這是一個極其困難且耗能的過程。</p>
+                        <div class="chart-container">
+                            <canvas id="uraniumPurityChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Chain Reaction -->
+                <section id="chain-reaction" class="py-16 md:py-24">
+                    <h2 class="text-3xl font-bold text-center mb-12" data-i18n="chainReactionTitle">第二章：失控的連鎖反應</h2>
+                    <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-i18n="chainReactionDescription">原子彈威力的秘訣在於「失控」。一次核分裂釋放2到3個中子，每個中子又可能引發新的分裂，形成指數級增長的能量釋放。在短短一微秒內，分裂的原子數量就能翻上百倍，產生天文數字般的能量。</p>
+                    <div class="section-card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold text-center mb-6" data-i18n="chainReactionSimulationTitle">互動模擬：啟動連鎖反應</h3>
+                        <div class="bg-gray-100 rounded-lg h-64 w-full relative mb-4 overflow-hidden">
+                            <canvas id="chainReactionCanvas"></canvas>
+                        </div>
+                        <div class="text-center">
+                            <button id="startReactionBtn" class="btn-primary font-bold py-2 px-6 rounded-lg" data-i18n="startReactionBtn">啟動反應</button>
+                            <p class="mt-4" data-i18n="fissionCountText">已分裂原子核數量: <span id="fission-count" class="font-bold text-xl text-[#B85C5C]">0</span></p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Bomb Design -->
+                <section id="design" class="py-16 md:py-24">
+                    <h2 class="text-3xl font-bold text-center mb-12" data-i18n="designTitle">第三章：兩種工程設計</h2>
+                    <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-i18n="designDescription">為了引發連鎖反應，必須在瞬間將足夠的核材料（達到「臨界質量」）聚集在一起。歷史上主要有兩種實現方式：槍式和內爆式。這兩種設計代表了將物理理論轉化為工程現實的巨大挑戰。</p>
+                    <div class="section-card p-6 md:p-8">
+                        <div class="flex justify-center mb-6 space-x-4">
+                            <button id="gun-btn" class="btn-secondary font-bold py-2 px-6 rounded-lg active" data-i18n="gunBtn">槍式設計</button>
+                            <button id="implosion-btn" class="btn-secondary font-bold py-2 px-6 rounded-lg" data-i18n="implosionBtn">內爆式設計</button>
+                        </div>
+                        
+                        <div id="design-display">
+                            <!-- Content will be injected by JavaScript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Power Source (E=mc^2) -->
+                <section id="power" class="py-16 md:py-24">
+                    <h2 class="text-3xl font-bold text-center mb-12" data-i18n="powerTitle">第四章：威力之源 E=mc²</h2>
+                     <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-i18n="powerDescription">原子彈的驚人威力，最終可追溯至愛因斯坦的質能等價公式 E=mc²。在核分裂中，產物的總質量會比反應前略微減少，這「消失」的微小質量，乘以光速的平方，轉化成了巨大的能量。這也是核反應與化學反應在能量級別上的根本區別。</p>
+                    <div class="section-card p-6 md:p-8">
+                         <h3 class="text-2xl font-bold text-center mb-6" data-i18n="energyComparisonTitle">能量對比：核反應 vs. 化學反應</h3>
+                         <p class="text-center text-gray-600 mb-8" data-i18n="energyComparisonDescription">1公斤的鈾完全裂變所釋放的能量，約等於2萬噸TNT炸藥。下圖直觀地展示了這難以想像的差距。</p>
+                         <div class="chart-container">
+                            <canvas id="energyComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Section: Effects -->
+                <section id="effects" class="py-16 md:py-24">
+                    <h2 class="text-3xl font-bold text-center mb-12" data-i18n="effectsTitle">第五章：多重毀滅效應</h2>
+                    <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-i18n="effectsDescription">原子彈的破壞力是多層次且複合的。爆炸瞬間產生的能量，以多種形式對目標區域造成毀滅性打擊，其影響從即時的物理摧毀延伸到長期的環境與生物危害。</p>
+                    <div class="space-y-4">
+                        <div class="effect-item">
+                            <button class="effect-button w-full text-left p-4 rounded-lg bg-white shadow flex justify-between items-center">
+                                <span class="font-bold text-lg" data-i18n="effectLightRadiationTitle">🔥 光輻射 (熱輻射)</span>
+                                <span class="arrow text-2xl transform">▼</span>
+                            </button>
+                            <div class="effect-content hidden p-4 bg-gray-50 rounded-b-lg">
+                                <p data-i18n="effectLightRadiationContent">約35%能量以熱輻射釋放，以光速傳播。中心溫度可達數十萬度，造成大面積燒傷並引燃一切可燃物。</p>
+                            </div>
+                        </div>
+                        <div class="effect-item">
+                            <button class="effect-button w-full text-left p-4 rounded-lg bg-white shadow flex justify-between items-center">
+                                <span class="font-bold text-lg" data-i18n="effectBlastWaveTitle">💨 衝擊波</span>
+                                <span class="arrow text-2xl transform">▼</span>
+                            </button>
+                            <div class="effect-content hidden p-4 bg-gray-50 rounded-b-lg">
+                                <p data-i18n="effectBlastWaveContent">巨大的氣流超壓以超音速向外擴散，摧毀建築物、橋樑等所有地面設施。一枚3萬噸當量的原子彈，在800米處的衝擊波速度仍高達每秒200米。</p>
+                            </div>
+                        </div>
+                        <div class="effect-item">
+                            <button class="effect-button w-full text-left p-4 rounded-lg bg-white shadow flex justify-between items-center">
+                                <span class="font-bold text-lg" data-i18n="effectEarlyRadiationTitle">☣️ 早期核輻射</span>
+                                <span class="arrow text-2xl transform">▼</span>
+                            </button>
+                            <div class="effect-content hidden p-4 bg-gray-50 rounded-b-lg">
+                                <p data-i18n="effectEarlyRadiationContent">爆炸最初幾十秒釋放的高能中子流和伽馬射線，能穿透人體，破壞DNA，導致急性輻射病甚至死亡。</p>
+                            </div>
+                        </div>
+                        <div class="effect-item">
+                            <button class="effect-button w-full text-left p-4 rounded-lg bg-white shadow flex justify-between items-center">
+                                <span class="font-bold text-lg" data-i18n="effectEMPTitle">⚡ 電磁脈衝 (EMP)</span>
+                                <span class="arrow text-2xl transform">▼</span>
+                            </button>
+                            <div class="effect-content hidden p-4 bg-gray-50 rounded-b-lg">
+                                <p data-i18n="effectEMPContent">強大的電磁脈衝能瞬間摧毀大範圍內的電子設備，導致通訊中斷、電網癱瘓，使現代社會陷入停滯。</p>
+                            </div>
+                        </div>
+                        <div class="effect-item">
+                            <button class="effect-button w-full text-left p-4 rounded-lg bg-white shadow flex justify-between items-center">
+                                <span class="font-bold text-lg" data-i18n="effectFalloutTitle">🌧️ 放射性沾染 (輻射塵)</span>
+                                <span class="arrow text-2xl transform">▼</span>
+                            </button>
+                            <div class="effect-content hidden p-4 bg-gray-50 rounded-b-lg">
+                                <p data-i18n="effectFalloutContent">爆炸產生的放射性微粒隨蕈狀雲飄散，最終落回地面，造成長期環境污染，對生物構成持續的健康威脅。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Section: Conclusion -->
+                <section id="conclusion" class="py-16 md:py-24 text-center">
+                     <h2 class="text-3xl font-bold mb-8" data-i18n="conclusionTitle">終章：科學、力量與責任</h2>
+                     <div class="section-card p-8">
+                        <p class="text-base md:text-lg text-left leading-relaxed" data-i18n="conclusionContent">原子彈是人類智慧的結晶，也是懸於文明頭頂的達摩克利斯之劍。它完美演繹了核分裂連鎖反應與質能轉換的物理原理，但其多重毀滅效應也展示了科學力量失控時的恐怖後果。理解其原理，不僅是為了知識，更是為了體會這份力量背後的沉重責任，並反思人類應如何和平地共存，負責任地運用改變世界的力量。</p>
+                     </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Internationalization (i18n) Logic ---
+    const languageSwitcher = document.getElementById('language-switcher');
+    let currentChartUranium, currentChartEnergy; // Store chart instances to destroy/recreate
+
+    const translations = {
+        'zh-Hant': {
+            // Document Title
+            documentTitle: '原子彈原理：互動式深度解析',
+
+            // Navigation
+            navTitle: '導覽',
+            navIntro: '序章：核心奧秘',
+            navPrinciple: '第一章：核分裂原理',
+            navChainReaction: '第二章：連鎖反應',
+            navDesign: '第三章：工程設計',
+            navPower: '第四章：威力之源',
+            navEffects: '第五章：毀滅效應',
+            navConclusion: '終章：科學與責任',
+
+            // Intro Section
+            introTitle: '原子彈',
+            introSubtitle: '一場改變世界的科學革命，揭示物質深處的巨大能量',
+            introSectionTitle: '核心奧秘',
+            introContent: '原子彈，一種利用核分裂連鎖反應在瞬間釋放無窮能量的武器，其誕生不僅是20世紀的科技巔峰，也徹底改變了戰爭形態和國際格局。本互動報告將引導您層層深入，從微觀的原子核到宏觀的毀滅力量，全面解析原子彈的科學原理、工程挑戰及其驚人威力的根源。',
+
+            // Principle Section
+            principleTitle: '第一章：核分裂原理',
+            principleDescription: '一切始於原子核的分裂。原子彈的基礎是一種稱為「核分裂」的物理現象：當一個中子撞擊一個重原子核（如鈾-235），該原子核會分裂成兩個較輕的原子，同時釋放出能量和更多的中子，為連鎖反應提供了可能。',
+            principleKeyRawMaterialTitle: '關鍵原料：鈾-235 vs 鈾-238',
+            principleKeyRawMaterialDescription: '並非所有鈾都能輕易分裂。自然界的鈾礦中，絕大部分是穩定的鈾-238，只有約0.7%是易於分裂的鈾-235。製造原子彈需要將鈾-235的濃度提升至90%以上，這是一個極其困難且耗能的過程。',
+            uraniumChartTitle: '天然鈾 vs. 武器級鈾',
+            uraniumChartLabelNaturalU238: '鈾-238 (天然占比)',
+            uraniumChartLabelNaturalU235: '鈾-235 (天然占比)',
+            uraniumChartLabelWeaponGrade: '武器級鈾-235所需濃度',
+            uraniumTooltipLabel: (context) => {
+                let label = context.dataset.label || '';
+                if (label) { label += ': '; }
+                if (context.parsed !== null) { label += context.parsed + '%'; }
+                return label;
+            },
+
+
+            // Chain Reaction Section
+            chainReactionTitle: '第二章：失控的連鎖反應',
+            chainReactionDescription: '原子彈威力的秘訣在於「失控」。一次核分裂釋放2到3個中子，每個中子又可能引發新的分裂，形成指數級增長的能量釋放。在短短一微秒內，分裂的原子數量就能翻上百倍，產生天文數字般的能量。',
+            chainReactionSimulationTitle: '互動模擬：啟動連鎖反應',
+            startReactionBtn: '啟動反應',
+            fissionCountText: '已分裂原子核數量:',
+
+            // Design Section
+            designTitle: '第三章：兩種工程設計',
+            designDescription: '為了引發連鎖反應，必須在瞬間將足夠的核材料（達到「臨界質量」）聚集在一起。歷史上主要有兩種實現方式：槍式和內爆式。這兩種設計代表了將物理理論轉化為工程現實的巨大挑戰。',
+            gunBtn: '槍式設計',
+            implosionBtn: '內爆式設計',
+            designGun: {
+                title: '槍式設計 (Gun-Type)',
+                description: '結構相對簡單，類似砲管。將兩塊次臨界質量的鈾-235分開放置，引爆時用常規炸藥將一塊「射向」另一塊，瞬間合併成超臨界質量，引發爆炸。',
+                example: '實例：投擲於廣島的「小男孩」(Little Boy)。',
+                pros: '優點：構造單純，可靠性高。',
+                cons: '缺點：效率低下（燃料利用率僅約2%），安全性較差，且只能使用鈾。',
+                triggerBtn: '觸發模擬'
+            },
+            designImplosion: {
+                title: '內爆式設計 (Implosion-Type)',
+                description: '結構更複雜。將一塊次臨界質量的核材料（鈽或鈾）置於中心，外層包裹球形排列的常規炸藥。引爆時，炸藥同時向內爆炸，產生巨大壓力將核心瞬間壓縮至超臨界密度。',
+                example: '實例：投擲於長崎的「胖子」(Fat Man)。',
+                pros: '優點：效率高得多（燃料利用率約17%），可使用反應更強的鈽。',
+                cons: '缺點：結構複雜，對炸藥同步引爆的要求極高。',
+                triggerBtn: '觸發模擬'
+            },
+
+            // Power Section
+            powerTitle: '第四章：威力之源 E=mc²',
+            powerDescription: '原子彈的驚人威力，最終可追溯至愛因斯坦的質能等價公式 E=mc²。在核分裂中，產物的總質量會比反應前略微減少，這「消失」的微小質量，乘以光速的平方，轉化成了巨大的能量。這也是核反應與化學反應在能量級別上的根本區別。',
+            energyComparisonTitle: '能量對比：核反應 vs. 化學反應',
+            energyComparisonDescription: '1公斤的鈾完全裂變所釋放的能量，約等於2萬噸TNT炸藥。下圖直觀地展示了這難以想像的差距。',
+            energyChartLabel: '釋放能量 (等效噸TNT)',
+            energyChartXAxisTitle: 'TNT當量 (噸) - 對數座標',
+            energyChartLabelsKgTNT: '1公斤 TNT',
+            energyChartLabelsKgU235: '1公斤 鈾-235',
+            energyTooltipLabel: (context) => {
+                return `${context.dataset.label}: ${context.raw.toLocaleString()} 噸 TNT 當量`;
+            },
+
+            // Effects Section
+            effectsTitle: '第五章：多重毀滅效應',
+            effectsDescription: '原子彈的破壞力是多層次且複合的。爆炸瞬間產生的能量，以多種形式對目標區域造成毀滅性打擊，其影響從即時的物理摧毀延伸到長期的環境與生物危害。',
+            effectLightRadiationTitle: '🔥 光輻射 (熱輻射)',
+            effectLightRadiationContent: '約35%能量以熱輻射釋放，以光速傳播。中心溫度可達數十萬度，造成大面積燒傷並引燃一切可燃物。',
+            effectBlastWaveTitle: '💨 衝擊波',
+            effectBlastWaveContent: '巨大的氣流超壓以超音速向外擴散，摧毀建築物、橋樑等所有地面設施。一枚3萬噸當量的原子彈，在800米處的衝擊波速度仍高達每秒200米。',
+            effectEarlyRadiationTitle: '☣️ 早期核輻射',
+            effectEarlyRadiationContent: '爆炸最初幾十秒釋放的高能中子流和伽馬射線，能穿透人體，破壞DNA，導致急性輻射病甚至死亡。',
+            effectEMPTitle: '⚡ 電磁脈衝 (EMP)',
+            effectEMPContent: '強大的電磁脈衝能瞬間摧毀大範圍內的電子設備，導致通訊中斷、電網癱瘓，使現代社會陷入停滯。',
+            effectFalloutTitle: '🌧️ 放射性沾染 (輻射塵)',
+            effectFalloutContent: '爆炸產生的放射性微粒隨蕈狀雲飄散，最終落回地面，造成長期環境污染，對生物構成持續的健康威脅。',
+
+            // Conclusion Section
+            conclusionTitle: '終章：科學、力量與責任',
+            conclusionContent: '原子彈是人類智慧的結晶，也是懸於文明頭頂的達摩克利斯之劍。它完美演繹了核分裂連鎖反應與質能轉換的物理原理，但其多重毀滅效應也展示了科學力量失控時的恐怖後果。理解其原理，不僅是為了知識，更是為了體會這份力量背後的沉重責任，並反思人類應如何和平地共存，負責任地運用改變世界的力量。'
+        },
+        'ja': {
+            // Document Title
+            documentTitle: '原子爆弾の原理：インタラクティブな深層分析',
+
+            // Navigation
+            navTitle: 'ナビゲーション',
+            navIntro: '序章：核心の秘密',
+            navPrinciple: '第一章：核分裂の原理',
+            navChainReaction: '第二章：連鎖反応',
+            navDesign: '第三章：工学的設計',
+            navPower: '第四章：威力源',
+            navEffects: '第五章：破壊的効果',
+            navConclusion: '終章：科学と責任',
+
+            // Intro Section
+            introTitle: '原子爆弾',
+            introSubtitle: '世界を変えた科学革命、物質の奥深くに潜む巨大なエネルギーを解き放つ',
+            introSectionTitle: '核心の秘密',
+            introContent: '原子爆弾は、核分裂連鎖反応を利用して瞬時に莫大なエネルギーを放出する兵器であり、その誕生は20世紀の科学技術の頂点であるだけでなく、戦争の形態と国際情勢を完全に変えました。このインタラクティブなレポートでは、ミクロな原子核からマクロな破壊力まで、原子爆弾の科学的原理、工学的課題、そしてその驚異的な威力の根源を包括的に分析します。',
+
+            // Principle Section
+            principleTitle: '第一章：核分裂の原理',
+            principleDescription: 'すべては原子核の分裂から始まります。原子爆弾の基礎となるのは「核分裂」と呼ばれる物理現象です。中性子が重い原子核（ウラン235など）に衝突すると、その原子核は2つの軽い原子に分裂し、同時にエネルギーとさらなる中性子を放出し、連鎖反応の可能性を生み出します。',
+            principleKeyRawMaterialTitle: '主要原料：ウラン235 vs ウラン238',
+            principleKeyRawMaterialDescription: 'すべてのウランが容易に分裂するわけではありません。自然界のウラン鉱石の大部分は安定したウラン238であり、分裂しやすいウラン235はわずか約0.7%です。原子爆弾を製造するには、ウラン235の濃度を90%以上に高める必要があり、これは非常に困難でエネルギーを消費するプロセスです。',
+            uraniumChartTitle: '天然ウラン vs 兵器級ウラン',
+            uraniumChartLabelNaturalU238: 'ウラン238（天然存在比）',
+            uraniumChartLabelNaturalU235: 'ウラン235（天然存在比）',
+            uraniumChartLabelWeaponGrade: '兵器級ウラン235に要求される濃度',
+            uraniumTooltipLabel: (context) => {
+                let label = context.dataset.label || '';
+                 if (label) { label += ': '; }
+                 if (context.parsed !== null) { label += context.parsed + '%'; }
+                 return label;
+            },
+
+            // Chain Reaction Section
+            chainReactionTitle: '第二章：制御不能な連鎖反応',
+            chainReactionDescription: '原子爆弾の威力の秘訣は「制御不能」にあります。一度の核分裂で2〜3個の中性子が放出され、それぞれの中性子が新たな分裂を引き起こし、指数関数的にエネルギー放出が増大します。わずか1マイクロ秒の間に、分裂する原子の数は数百倍にもなり、天文学的な量のエネルギーが生み出されます。',
+            chainReactionSimulationTitle: 'インタラクティブシミュレーション：連鎖反応を開始',
+            startReactionBtn: '反応を開始',
+            fissionCountText: '分裂した原子核の数:',
+
+            // Design Section
+            designTitle: '第三章：二種類の工学的設計',
+            designDescription: '連鎖反応を引き起こすためには、瞬時に十分な量の核物質（「臨界質量」に達する量）を一つに集める必要があります。歴史上、主に二つの方法が用いられました：ガンバレル型とインプロージョン型です。これら二つの設計は、物理理論を工学的現実へと変換する上での巨大な課題を示しています。',
+            gunBtn: 'ガンバレル型',
+            implosionBtn: 'インプロージョン型',
+            designGun: {
+                title: 'ガンバレル型',
+                description: '構造は比較的単純で、砲身に似ています。二つの亜臨界質量ウラン235を別々に配置し、起爆時に通常爆薬で片方をもう一方に「撃ち込み」、瞬時に超臨界質量を形成して爆発を引き起こします。',
+                example: '例：広島に投下された「リトルボーイ」。',
+                pros: '利点：構造が単純で信頼性が高い。',
+                cons: '欠点：効率が低い（燃料利用率はわずか約2%）、安全性が低く、ウランしか使用できません。',
+                triggerBtn: 'シミュレーションをトリガー'
+            },
+            designImplosion: {
+                title: 'インプロージョン型',
+                description: '構造はより複雑です。亜臨界質量の核物質（プルトニウムまたはウラン）を中央に配置し、その外側を球状に配置された通常爆薬で囲みます。起爆時には、爆薬が同時に内側へ爆発し、巨大な圧力を生み出して核を瞬時に超臨界密度まで圧縮します。',
+                example: '例：長崎に投下された「ファットマン」。',
+                pros: '利点：はるかに高効率（燃料利用率は約17%）、より反応性の高いプルトニウムを使用可能。',
+                cons: '欠点：構造が複雑で、爆薬の同時起爆に対する要求が極めて高い。',
+                triggerBtn: 'シミュレーションをトリガー'
+            },
+
+            // Power Section
+            powerTitle: '第四章：威力源 E=mc²',
+            powerDescription: '原子爆弾の驚くべき威力は、最終的にアインシュタインの質量とエネルギーの等価性を示す公式 E=mc² に帰着します。核分裂では、生成物の総質量が反応前よりわずかに減少します。この「消失した」微小な質量が、光速の二乗を乗じることで巨大なエネルギーに変換されます。これが、核反応と化学反応のエネルギーレベルにおける根本的な違いです。',
+            energyComparisonTitle: 'エネルギー比較：核反応 vs 化学反応',
+            energyComparisonDescription: '1キログラムのウランが完全に分裂して放出されるエネルギーは、約2万トンのTNT爆薬に相当します。下の図は、この想像を絶する差を視覚的に示しています。',
+            energyChartLabel: '放出エネルギー (TNT換算トン)',
+            energyChartXAxisTitle: 'TNT当量 (トン) - 対数スケール',
+            energyChartLabelsKgTNT: '1キログラム TNT',
+            energyChartLabelsKgU235: '1キログラム ウラン235',
+            energyTooltipLabel: (context) => {
+                return `${context.dataset.label}: ${context.raw.toLocaleString()} トン TNT当量`;
+            },
+
+            // Effects Section
+            effectsTitle: '第五章：多重破壊効果',
+            effectsDescription: '原子爆弾の破壊力は多層的かつ複合的です。爆発の瞬間に放出されるエネルギーは、様々な形で目標地域に壊滅的な打撃を与え、その影響は即座の物理的破壊から長期的な環境および生物学的危害にまで及びます。',
+            effectLightRadiationTitle: '🔥 光放射 (熱放射)',
+            effectLightRadiationContent: 'エネルギーの約35%が熱放射として放出され、光速で伝播します。中心部の温度は数十万度に達し、広範囲にわたる火傷を引き起こし、あらゆる可燃物を燃やします。',
+            effectBlastWaveTitle: '💨 衝撃波',
+            effectBlastWaveContent: '巨大な気流の過圧が超音速で外側に拡散し、建物、橋梁などすべての地上施設を破壊します。3万トン級の原子爆弾の場合、800メートル地点でも衝撃波の速度は毎秒200メートルに達します。',
+            effectEarlyRadiationTitle: '☣️ 初期核放射線',
+            effectEarlyRadiationContent: '爆発の最初の数十秒で放出される高エネルギーの中性子流とガンマ線は、人体を透過し、DNAを損傷させ、急性放射線病や死に至らせることがあります。',
+            effectEMPTitle: '⚡ 電磁パルス (EMP)',
+            effectEMPContent: '強力な電磁パルスは、広範囲の電子機器を瞬時に破壊し、通信途絶、電力網の麻痺を引き起こし、現代社会を停止させます。',
+            effectFalloutTitle: '🌧️ 放射性降下物 (放射性塵)',
+            effectFalloutContent: '爆発によって生成された放射性微粒子は、キノコ雲とともに拡散し、最終的に地上に落下して長期的な環境汚染を引き起こし、生物に対して持続的な健康被害をもたらします。',
+
+            // Conclusion Section
+            conclusionTitle: '終章：科学、力、そして責任',
+            conclusionContent: '原子爆弾は人類の知性の結晶であり、文明の頭上に吊るされたダモクレスの剣でもあります。それは核分裂連鎖反応と質量エネルギー変換の物理原理を完璧に具現化していますが、その多重破壊効果は、科学の力が制御を失った時の恐ろしい結果も示しています。その原理を理解することは、知識のためだけでなく、この力の背後にある重い責任を感じ、人類がいかに平和的に共存し、世界を変える力を責任を持って用いるべきかを深く考えるためでもあります。'
+        }
+    };
+
+    // Helper to get translated text
+    function getTranslatedText(key, lang) {
+        return translations[lang][key];
+    }
+
+    // Function to update all text elements
+    function updateTextContent(lang) {
+        // Update document title
+        document.title = getTranslatedText('documentTitle', lang);
+        document.documentElement.lang = lang; // Update html lang attribute
+
+        // Update elements with data-i18n attribute
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+            const key = element.getAttribute('data-i18n');
+            if (translations[lang][key]) {
+                // Special handling for fission count text to preserve the span
+                if (key === 'fissionCountText') {
+                    const countSpan = element.querySelector('#fission-count');
+                    element.innerHTML = getTranslatedText(key, lang) + ` <span id="fission-count" class="font-bold text-xl text-[#B85C5C]">${fissionCount}</span>`;
+                } else {
+                    element.textContent = getTranslatedText(key, lang);
+                }
+            }
+        });
+
+        // Update Chart.js charts
+        updateUraniumPurityChart(lang);
+        updateEnergyComparisonChart(lang);
+
+        // Update Bomb Design section
+        updateDesignView(document.getElementById('gun-btn').classList.contains('active') ? 'gun' : 'implosion', lang);
+    }
+
+    // --- Side Navigation Logic ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.4
+    };
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelector(link.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // --- Chart: Uranium Purity ---
+    function updateUraniumPurityChart(lang) {
+        if (currentChartUranium) {
+            currentChartUranium.destroy();
+        }
+        const uraniumPurityCtx = document.getElementById('uraniumPurityChart').getContext('2d');
+        currentChartUranium = new Chart(uraniumPurityCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    getTranslatedText('uraniumChartLabelNaturalU238', lang),
+                    getTranslatedText('uraniumChartLabelNaturalU235', lang),
+                    getTranslatedText('uraniumChartLabelWeaponGrade', lang)
+                ],
+                datasets: [{
+                    label: getTranslatedText('uraniumChartLabelNaturalU238', lang), // A bit of a hack to make label appear for dataset 0
+                    data: [99.3, 0.7, 0], // Placeholder for visual separation
+                    backgroundColor: ['#a9a9a9', '#5C85B8', 'rgba(0,0,0,0)'],
+                    borderColor: '#F8F7F4',
+                    borderWidth: 2
+                }, {
+                    label: getTranslatedText('uraniumChartLabelWeaponGrade', lang),
+                    data: [10, 90],
+                    backgroundColor: ['#dcdcdc', '#B85C5C'],
+                    borderColor: '#F8F7F4',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: getTranslatedText('uraniumChartTitle', lang), font: { size: 16 } },
+                    tooltip: {
+                        callbacks: {
+                            label: translations[lang].uraniumTooltipLabel
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Animation: Chain Reaction ---
+    const canvas = document.getElementById('chainReactionCanvas');
+    const ctx = canvas.getContext('2d');
+    const startBtn = document.getElementById('startReactionBtn');
+    const fissionCountEl = document.getElementById('fission-count');
+    let animationFrameId;
+    let particles = [];
+    let neutrons = [];
+    let fissionCount = 0;
+
+    function resizeCanvas() {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+    }
+    
+    class Particle {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 5;
+            this.color = '#5C85B8';
+            this.isFissioned = false;
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+        fission() {
+            if (!this.isFissioned) {
+                this.isFissioned = true;
+                this.color = '#B85C5C';
+                fissionCount++;
+                fissionCountEl.textContent = fissionCount;
+                for (let i = 0; i < 2; i++) {
+                    neutrons.push(new Neutron(this.x, this.y));
+                }
+            }
+        }
+    }
+
+    class Neutron {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.radius = 2;
+            this.color = '#333333';
+            this.vx = (Math.random() - 0.5) * 4;
+            this.vy = (Math.random() - 0.5) * 4;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            particles.forEach(p => {
+                const dist = Math.hypot(this.x - p.x, this.y - p.y);
+                if (dist < p.radius + this.radius && !p.isFissioned) {
+                    p.fission();
+                    this.vx = 0; this.vy = 0; // stop this neutron
+                }
+            });
+        }
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+    }
+
+    function initAnimation() {
+        cancelAnimationFrame(animationFrameId);
+        resizeCanvas();
+        particles = [];
+        neutrons = [];
+        fissionCount = 0;
+        fissionCountEl.textContent = 0;
+        const particleCount = Math.floor(canvas.width * canvas.height / 4000);
+        for (let i = 0; i < particleCount; i++) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height;
+            particles.push(new Particle(x, y));
+        }
+        drawAll();
+    }
+
+    function drawAll() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => p.draw());
+        neutrons.forEach(n => n.draw());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => p.draw());
+        neutrons.forEach(n => {
+            n.update();
+            n.draw();
+        });
+        neutrons = neutrons.filter(n => n.x > 0 && n.x < canvas.width && n.y > 0 && n.y < canvas.height && (n.vx !== 0 || n.vy !== 0));
+        if (neutrons.length > 0) {
+            animationFrameId = requestAnimationFrame(animate);
+        }
+    }
+
+    startBtn.addEventListener('click', () => {
+        initAnimation();
+        // Start with one neutron
+        neutrons.push(new Neutron(10, canvas.height / 2));
+        animate();
+    });
+
+    window.addEventListener('resize', initAnimation);
+    initAnimation();
+
+    // --- Bomb Design Toggler ---
+    const gunBtn = document.getElementById('gun-btn');
+    const implosionBtn = document.getElementById('implosion-btn');
+    const display = document.getElementById('design-display');
+
+    function updateDesignView(type, lang) {
+        const content = translations[lang][`design${type.charAt(0).toUpperCase() + type.slice(1)}`]; // e.g., translations[lang].designGun
+        display.innerHTML = `
+            <h4 class="text-xl font-bold text-center mb-2">${content.title}</h4>
+            <p class="text-gray-600 mb-4 text-center">${content.description}</p>
+            <div class="w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center p-4 relative overflow-hidden">
+                ${type === 'gun' ? `
+                    <div class="w-full h-8 bg-gray-400 rounded-full relative flex items-center">
+                       <div id="gun-target" class="gun-piece w-12 h-12 bg-[#5C85B8] rounded-full absolute right-8"></div>
+                       <div id="gun-bullet" class="gun-piece w-12 h-12 bg-[#5C85B8] rounded-full absolute left-8"></div>
+                    </div>
+                ` : `
+                    <div id="implosion-core" class="implosion-segment w-12 h-12 bg-[#B85C5C] rounded-full absolute z-10"></div>
+                    <div id="implosion-lense-1" class="implosion-segment w-24 h-12 bg-gray-400 absolute" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%); top: 1rem;"></div>
+                    <div id="implosion-lense-2" class="implosion-segment w-24 h-12 bg-gray-400 absolute" style="clip-path: polygon(20% 0, 80% 0, 100% 100%, 0% 100%); bottom: 1rem;"></div>
+                    <div id="implosion-lense-3" class="implosion-segment w-12 h-24 bg-gray-400 absolute" style="clip-path: polygon(0 0, 100% 20%, 100% 80%, 0 100%); left: 1rem;"></div>
+                    <div id="implosion-lense-4" class="implosion-segment w-12 h-24 bg-gray-400 absolute" style="clip-path: polygon(100% 0, 0 20%, 0 80%, 100% 100%); right: 1rem;"></div>
+                `}
+            </div>
+            <div class="text-center mt-4">
+                <button id="${type === 'gun' ? 'trigger-gun' : 'trigger-implosion'}" class="btn-primary py-1 px-4 rounded-md text-sm">${content.triggerBtn}</button>
+            </div>
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-blue-50 p-3 rounded-lg"><strong>${translations[lang].exampleLabel || '實例:'}</strong> ${content.example}</div>
+                <div class="bg-green-50 p-3 rounded-lg"><strong>${translations[lang].prosLabel || '優點:'}</strong> ${content.pros}</div>
+                <div class="bg-red-50 p-3 rounded-lg"><strong>${translations[lang].consLabel || '缺點:'}</strong> ${content.cons}</div>
+            </div>
+        `;
+
+        if (type === 'gun') {
+            document.getElementById('trigger-gun').addEventListener('click', () => {
+                const bullet = document.getElementById('gun-bullet');
+                bullet.style.transform = `translateX(${bullet.parentElement.offsetWidth / 2 - bullet.offsetWidth}px)`;
+                setTimeout(() => { bullet.style.transform = 'translateX(0)'; }, 1500);
+            });
+        } else {
+            document.getElementById('trigger-implosion').addEventListener('click', () => {
+                const core = document.getElementById('implosion-core');
+                const lenses = document.querySelectorAll('[id^="implosion-lense"]');
+                core.style.transform = 'scale(0.5)';
+                lenses.forEach(l => l.style.transform = 'scale(1.2)');
+                setTimeout(() => {
+                    core.style.transform = 'scale(1)';
+                    lenses.forEach(l => l.style.transform = 'scale(1)');
+                }, 800);
+            });
+        }
+    }
+
+    gunBtn.addEventListener('click', () => {
+        gunBtn.classList.add('active');
+        implosionBtn.classList.remove('active');
+        updateDesignView('gun', languageSwitcher.value);
+    });
+
+    implosionBtn.addEventListener('click', () => {
+        implosionBtn.classList.add('active');
+        gunBtn.classList.remove('active');
+        updateDesignView('implosion', languageSwitcher.value);
+    });
+    
+    // --- Chart: Energy Comparison ---
+    function updateEnergyComparisonChart(lang) {
+        if (currentChartEnergy) {
+            currentChartEnergy.destroy();
+        }
+        const energyCtx = document.getElementById('energyComparisonChart').getContext('2d');
+        currentChartEnergy = new Chart(energyCtx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    getTranslatedText('energyChartLabelsKgTNT', lang),
+                    getTranslatedText('energyChartLabelsKgU235', lang)
+                ],
+                datasets: [{
+                    label: getTranslatedText('energyChartLabel', lang),
+                    data: [0.001, 20000],
+                    backgroundColor: ['#5C85B8', '#B85C5C'],
+                    borderColor: ['#4a6a93', '#934a4a'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'logarithmic',
+                        title: { display: true, text: getTranslatedText('energyChartXAxisTitle', lang) }
+                    }
+                },
+                plugins: {
+                    title: { display: true, text: getTranslatedText('energyComparisonTitle', lang), font: { size: 16 } },
+                    tooltip: {
+                        callbacks: {
+                            label: translations[lang].energyTooltipLabel
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Accordion for Effects ---
+    const effectItems = document.querySelectorAll('.effect-item');
+    effectItems.forEach(item => {
+        const button = item.querySelector('.effect-button');
+        const content = item.querySelector('.effect-content');
+        const arrow = item.querySelector('.arrow');
+        button.addEventListener('click', () => {
+            const isHidden = content.classList.contains('hidden');
+            // Close all others
+            effectItems.forEach(otherItem => {
+                otherItem.querySelector('.effect-content').classList.add('hidden');
+                otherItem.querySelector('.arrow').classList.remove('rotate-180');
+            });
+            // Toggle current
+            if (isHidden) {
+                content.classList.remove('hidden');
+                arrow.classList.add('rotate-180');
+            }
+        });
+    });
+
+    // Initialize with preferred language from localStorage or default to Traditional Chinese
+    const savedLanguage = localStorage.getItem('appLanguage') || 'zh-Hant';
+    languageSwitcher.value = savedLanguage;
+    updateTextContent(savedLanguage);
+    updateDesignView('gun', savedLanguage); // Ensure initial design view is also translated
+
+    // Event listener for language switcher
+    languageSwitcher.addEventListener('change', (event) => {
+        const newLang = event.target.value;
+        localStorage.setItem('appLanguage', newLang); // Save preference
+        updateTextContent(newLang);
+    });
+});
+</script>
+
+</body>
+</html>
