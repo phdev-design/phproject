@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">解構祖克柏：互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA is designed with a thematic, non-linear structure using a top navigation bar for direct access to key sections: 'Home/Intro', 'The Rise', 'Empire Building', 'Power & Price', and 'Future Bets'. This structure was chosen over a linear report format to empower users to explore topics based on their interest, facilitating better comprehension and engagement. An interactive timeline for his rise, comparative charts for acquisitions, and a doughnut chart for financial bets make complex information digestible and visually compelling, enhancing user understanding of Zuckerberg's multifaceted career. -->
+    <!-- Visualization & Content Choices: 
+        - Success Factors: Goal=Inform, Method=Styled cards with icons (HTML/Tailwind), Interaction=Hover, Justification=Quick scannable summary.
+        - Career Timeline: Goal=Show Change, Method=Vertical timeline (HTML/Tailwind), Justification=Engaging chronological overview.
+        - Acquisition Comparison (Instagram vs. WhatsApp): Goal=Compare, Method=Bar Chart (Chart.js), Interaction=Tooltips, Justification=Clearly visualizes the scale difference in key metrics.
+        - Controversy Timeline: Goal=Organize, Method=Vertical timeline (HTML/Tailwind), Justification=Structures complex historical events clearly.
+        - Reality Labs Investment: Goal=Show Proportion, Method=Doughnut Chart (Chart.js), Interaction=Tooltips, Justification=Dramatically highlights the immense financial commitment and losses.
+        - Image Rebranding: Goal=Compare/Contrast, Method=Side-by-side cards (HTML/Tailwind), Justification=Impactful visual representation of his public persona shift.
+        Library/Method: Chart.js for all charts on Canvas, pure HTML/Tailwind for other visuals. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF6;
+            color: #3C3C3C;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4A90E2;
+            border-bottom-color: #4A90E2;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.75rem;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #D0A98F;
+            border: 4px solid #FDFBF6;
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800" data-lang-key="headerTitle">解構祖克柏</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#intro" class="nav-link" data-lang-key="navIntro">介紹</a>
+                <a href="#rise" class="nav-link" data-lang-key="navRise">崛起之路</a>
+                <a href="#empire" class="nav-link" data-lang-key="navEmpire">帝國擴張</a>
+                <a href="#power" class="nav-link" data-lang-key="navPower">權力與代價</a>
+                <a href="#future" class="nav-link" data-lang-key="navFuture">未來賭注</a>
+                <button id="lang-toggle" class="ml-4 px-3 py-1 text-sm border rounded-md hover:bg-gray-100 transition-colors">English</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                <select id="mobile-nav" onchange="window.location.href=this.value" class="bg-white border border-gray-300 rounded-md p-2">
+                    <option value="#intro" data-lang-key="navIntro">介紹</option>
+                    <option value="#rise" data-lang-key="navRise">崛起之路</option>
+                    <option value="#empire" data-lang-key="navEmpire">帝國擴張</option>
+                    <option value="#power" data-lang-key="navPower">權力與代價</option>
+                    <option value="#future" data-lang-key="navFuture">未來賭注</option>
+                </select>
+                <button id="lang-toggle-mobile" class="ml-4 px-3 py-1 text-sm border rounded-md hover:bg-gray-100 transition-colors">English</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4" data-lang-key="introTitle">解構祖克柏：從程式神童到科技巨擘</h2>
+                <p class="max-w-3xl mx-auto text-gray-600 mb-12" data-lang-key="introSubtitle">
+                    馬克・祖克柏不僅是Meta的執行長，更是一位重塑了全球數十億人溝通方式的架構師。他的成功並非偶然，而是一個由技術天賦、戰略遠見、冷酷決策與無盡爭議構成的複雜方程式。本互動報告將深入剖析其人生軌跡，揭示他成功的核心基因。
+                </p>
+                <div class="grid md:grid-cols-3 lg:grid-cols-6 gap-8">
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">💻</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor1Title">技術天賦</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor1Desc">自幼沉浸程式設計，奠定快速創新的基礎。</p>
+                    </div>
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">🧠</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor2Title">心理洞察</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor2Desc">精準掌握人性需求，打造極具吸引力的社交系統。</p>
+                    </div>
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">⚔️</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor3Title">無情戰略</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor3Desc">「收購或摧毀」，冷酷地消除所有潛在威脅。</p>
+                    </div>
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">🔭</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor4Title">長期願景</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor4Desc">偏執地追逐並主宰下一個計算平台。</p>
+                    </div>
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">🔄</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor5Title">卓越適應</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor5Desc">帶領公司度過生存危機，展現驚人韌性。</p>
+                    </div>
+                    <div class="icon-card bg-gray-50 p-6 rounded-lg shadow-sm transition-all duration-300">
+                        <span class="text-4xl">📈</span>
+                        <h3 class="font-bold mt-4 mb-2" data-lang-key="factor6Title">追求規模</h3>
+                        <p class="text-sm text-gray-500" data-lang-key="factor6Desc">堅信價值源於全球化規模，盈利次之。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rise" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="riseTitle">崛起之路</h2>
+                    <p class="text-gray-600" data-lang-key="riseDesc">祖克柏的成功奠基於卓越的早期技術培養、精英教育的洗禮，以及在哈佛那段關鍵歲月。這段經歷不僅是創業的預演，也預示了他未來無視規則、快速行動的行事風格。此時間軸將展示他從一個程式神童到創立Facebook的關鍵時刻。</p>
+                </div>
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="absolute left-3 top-0 h-full w-0.5 bg-gray-200"></div>
+                    <div class="relative pl-12 mb-8 timeline-item">
+                        <h4 class="font-bold text-lg text-[#4A90E2]">~1995: ZuckNet</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="riseEvent1">約11歲時，創建了名為「ZuckNet」的即時通訊系統，用於連接家中與父親的牙醫診所，首次展現將技術應用於實際通訊需求的本能。</p>
+                    </div>
+                    <div class="relative pl-12 mb-8 timeline-item">
+                        <h4 class="font-bold text-lg text-[#4A90E2]">2002: Synapse 媒體播放器</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="riseEvent2">高中時期開發了利用機器學習分析聽歌習慣的音樂播放器，吸引了微軟等巨頭的注意，但他拒絕了收購和聘用邀約。</p>
+                    </div>
+                     <div class="relative pl-12 mb-8 timeline-item">
+                        <h4 class="font-bold text-lg text-[#4A90E2]">2003: Facemash 事件</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="riseEvent3">在哈佛推出「比辣」網站，駭入學校網路獲取照片。網站迅速爆紅，但也因侵犯隱私而遭校方關閉，此事完美預演了他日後「快速行動，打破陳規」的模式。</p>
+                    </div>
+                    <div class="relative pl-12 mb-8 timeline-item">
+                        <h4 class="font-bold text-lg text-[#4A90E2]">2004年2月: TheFacebook 誕生</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="riseEvent4">在哈佛宿舍與室友們共同推出Thefacebook.com，最初僅限哈佛學生使用。其獨特的精英化擴張策略，使其迅速風靡全美頂尖大學。</p>
+                    </div>
+                    <div class="relative pl-12 timeline-item">
+                        <h4 class="font-bold text-lg text-[#4A90E2]">2004年夏: 遷往矽谷</h4>
+                        <p class="text-sm text-gray-600" data-lang-key="riseEvent5">從哈佛輟學，將公司遷往加州帕羅奧圖。在西恩・帕克和彼得・提爾的幫助下，獲得50萬美元天使投資，正式從校園專案轉型為初創企業。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="empire" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="empireTitle">帝國擴張</h2>
+                    <p class="text-gray-600" data-lang-key="empireDesc">佔領桌面互聯網後，祖克柏面臨著平台轉移的生存危機。他透過一系列果斷的戰略決策，不僅化解了危機，更將Facebook打造成一個無法撼動的科技霸權。本節將聚焦於他最重要的幾次決策：轉向行動優先，以及吞併兩大潛在對手。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="empireChartTitle">關鍵收購案對比</h3>
+                        <p class="text-sm text-gray-500 mb-6 text-center" data-lang-key="empireChartDesc">祖克柏透過兩次驚人的收購，消除了潛在威脅，並主宰了行動社交和通訊領域。下圖直觀比較了這兩筆交易在價格和當時用戶規模上的巨大差異，體現了他對規模化增長的極致追求。</p>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="acquisitionsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6 mt-8 md:mt-0">
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-xl mb-2" data-lang-key="empireInstaTitle">收購 Instagram (2012)</h4>
+                            <p class="text-gray-600" data-lang-key="empireInstaDesc"><strong class="text-gray-800" data-lang-key="price">價格：</strong>約10億美元<br><strong class="text-gray-800" data-lang-key="logic">核心邏輯：</strong>以在當時看來的高價，收購僅有13名員工、尚無營收的Instagram。此舉旨在消除一個在行動視覺化領域快速崛起的競爭威脅，並獲取更年輕的用戶群體。這是一次結合了防禦、進攻與戰略遠見的經典之作。</p>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-xl mb-2" data-lang-key="empireWpTitle">收購 WhatsApp (2014)</h4>
+                            <p class="text-gray-600" data-lang-key="empireWpDesc"><strong class="text-gray-800" data-lang-key="price">價格：</strong>約190億美元<br><strong class="text-gray-800" data-lang-key="logic">核心邏輯：</strong>以20倍於Instagram的天價收購全球通訊巨頭WhatsApp。這次收購完全是為了用戶規模和全球觸及率，尤其是在Facebook相對弱勢的發展中市場。它完美體現了祖克柏「增長優於利潤」的哲學。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="power" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="powerTitle">權力與代價</h2>
+                    <p class="text-gray-600" data-lang-key="powerDesc">巨大的成功也帶來了巨大的爭議。Facebook的歷史，是一部用戶信任不斷被侵蝕的歷史，其商業策略也引發了全球性的監管風暴。面對持續的批評，祖克柏本人也開始了一場精心策劃的形象重塑。本節將探討他所付出的代價以及應對策略。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-12 items-start">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="powerTimelineTitle">重大爭議時間軸</h3>
+                        <div class="relative max-w-2xl mx-auto">
+                            <div class="absolute left-3 top-0 h-full w-0.5 bg-gray-200"></div>
+                            <div class="relative pl-12 mb-8 timeline-item">
+                                <h4 class="font-bold text-lg text-[#D0A98F]">2011: FTC同意令</h4>
+                                <p class="text-sm text-gray-600" data-lang-key="powerEvent1">因欺騙性的隱私政策，首次與美國聯邦貿易委員會達成和解，同意接受20年的隱私審計。</p>
+                            </div>
+                            <div class="relative pl-12 mb-8 timeline-item">
+                                <h4 class="font-bold text-lg text-[#D0A98F]">2016: 選舉假資訊</h4>
+                                <p class="text-sm text-gray-600" data-lang-key="powerEvent2">「假新聞」在平台上氾濫，並被用於干預美國大選，引發公眾對其社會責任的廣泛質疑。</p>
+                            </div>
+                            <div class="relative pl-12 mb-8 timeline-item">
+                                <h4 class="font-bold text-lg text-[#D0A98F]">2018: 劍橋分析醜聞</h4>
+                                <p class="text-sm text-gray-600" data-lang-key="powerEvent3">8700萬用戶數據被不當用於政治目的，事件引爆全球輿論，導致50億美元巨額罰款和祖克柏親赴國會作證。</p>
+                            </div>
+                             <div class="relative pl-12 timeline-item">
+                                <h4 class="font-bold text-lg text-[#D0A98F]">2020至今: 反壟斷訴訟</h4>
+                                <p class="text-sm text-gray-600" data-lang-key="powerEvent4">美國FTC及多個州份提起反壟斷訴訟，直指其對Instagram和WhatsApp的收購為非法壟斷，尋求將其分拆。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="powerImageTitle">「祖克柏復興」</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 p-6 rounded-lg shadow-sm text-center">
+                                <div class="text-5xl mb-4">🤖</div>
+                                <h4 class="font-bold" data-lang-key="powerImagePast">過去：科技宅男</h4>
+                                <p class="text-sm text-gray-500 mt-2" data-lang-key="powerImagePastDesc">身穿灰色T恤，不善言辭，公眾形象僵硬，被比作「機器人」。</p>
+                            </div>
+                             <div class="bg-gray-50 p-6 rounded-lg shadow-sm text-center">
+                                <div class="text-5xl mb-4">🥋</div>
+                                <h4 class="font-bold" data-lang-key="powerImageNow">現在：格鬥CEO</h4>
+                                <p class="text-sm text-gray-500 mt-2" data-lang-key="powerImageNowDesc">練習綜合格鬥，一身肌肉，形象強悍自信，旨在重塑權力話語權。</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-6 text-center" data-lang-key="powerImageDesc">這場精心策劃的形象轉變，旨在將他從一個可以被隨意訓誡的技術官僚，重塑為一個不容輕視的強大領導者，以應對持續的公眾和監管壓力。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="futureTitle">未來賭注</h2>
+                    <p class="text-gray-600" data-lang-key="futureDesc">經歷了輝煌與爭議後，祖克柏將目光投向了更遙遠的未來。他對元宇宙的巨大賭注，反映了他搶佔下一個計算平台的終極野心；而他宏大的慈善事業，則是他運用工程學思維解決社會問題的另一面。這兩者共同揭示了他試圖用技術和資本「駭入」並重塑世界的宏大藍圖。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="futureChartTitle">豪賭元宇宙</h3>
+                        <p class="text-sm text-gray-500 mb-6 text-center" data-lang-key="futureChartDesc">祖克柏將公司的未來押注在元宇宙上，這是一場巨大的財務豪賭。負責研發的「現實實驗室」部門持續巨額虧損。下圖顯示了該部門驚人的虧損狀況，凸顯了這場賭注的風險與規模。</p>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="metaverseChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-8 rounded-lg shadow-sm">
+                        <h4 class="font-bold text-xl mb-2" data-lang-key="futureCZITitle">陳和祖克柏基金會 (CZI)</h4>
+                        <p class="text-gray-600" data-lang-key="futureCZIDesc">2015年，祖克柏夫婦承諾捐出99%的股份成立CZI，旨在「解決社會最艱鉅的挑戰」。其獨特的有限責任公司（LLC）架構，使其既能進行慈善捐贈，也能進行營利性投資和政治遊說，提供了極大靈活性，但也因缺乏透明度而引發爭議。這體現了他將Facebook的規模化增長模式，應用於解決社會問題的雄心。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p data-lang-key="footerNote">這是一份基於公開研究報告創建的互動式分析專案。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footerDisclaimer">僅用於資訊展示與教育目的。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- LANGUAGE SWITCHER ---
+            
+            const translations = {
+                'en': {
+                    pageTitle: "Deconstructing Zuckerberg: An Interactive Analysis",
+                    headerTitle: "Deconstructing Zuckerberg",
+                    navIntro: "Intro",
+                    navRise: "The Rise",
+                    navEmpire: "Empire",
+                    navPower: "Power & Price",
+                    navFuture: "Future Bets",
+                    introTitle: "Deconstructing Zuckerberg: From Prodigy to Tech Titan",
+                    introSubtitle: "Mark Zuckerberg is not just the CEO of Meta; he's an architect who reshaped how billions communicate. His success is no accident but a complex equation of technical genius, strategic foresight, ruthless decisions, and endless controversy. This interactive report delves into his journey to uncover the core DNA of his success.",
+                    factor1Title: "Technical Prowess",
+                    factor1Desc: "Immersed in programming from a young age, laying the foundation for rapid innovation.",
+                    factor2Title: "Psychological Insight",
+                    factor2Desc: "Accurately grasped human needs to build a highly engaging social system.",
+                    factor3Title: "Ruthless Strategy",
+                    factor3Desc: "'Acquire or destroy,' coolly eliminating all potential threats.",
+                    factor4Title: "Long-Term Vision",
+                    factor4Desc: "Obsessively pursues and dominates the next computing platform.",
+                    factor5Title: "Exceptional Adaptability",
+                    factor5Desc: "Led the company through existential crises, showing incredible resilience.",
+                    factor6Title: "Pursuit of Scale",
+                    factor6Desc: "Believes value comes from global scale, with profitability being secondary.",
+                    riseTitle: "The Rise",
+                    riseDesc: "Zuckerberg's success was founded on excellent early technical training, an elite education, and those pivotal years at Harvard. This period was not just a prelude to his startup but also foretold his future style of ignoring rules and moving fast. This timeline shows his key moments from a programming prodigy to the founder of Facebook.",
+                    riseEvent1: "At about age 11, created 'ZuckNet,' an instant messaging system to connect his home with his father's dental office, showing an early instinct for applying tech to real-world communication.",
+                    riseEvent2: "In high school, developed Synapse Media Player, which used machine learning to analyze listening habits. It attracted attention from giants like Microsoft, but he rejected acquisition and job offers.",
+                    riseEvent3: "At Harvard, launched a 'hot or not' site, hacking into the university network for photos. The site went viral but was shut down for privacy violations, perfectly foreshadowing his later 'move fast and break things' mantra.",
+                    riseEvent4: "Launched Thefacebook.com from his Harvard dorm room with roommates. Initially limited to Harvard students, its exclusive expansion strategy quickly made it a hit across top US universities.",
+                    riseEvent5: "Dropped out of Harvard and moved the company to Palo Alto, California. With help from Sean Parker and Peter Thiel, he secured a $500,000 angel investment, officially transforming the campus project into a startup.",
+                    empireTitle: "Empire Building",
+                    empireDesc: "After conquering the desktop internet, Zuckerberg faced an existential crisis with the shift to mobile. Through a series of decisive strategic moves, he not only neutralized the threat but built Facebook into an unshakeable tech empire. This section focuses on his most critical decisions: pivoting to mobile-first and acquiring two major potential rivals.",
+                    empireChartTitle: "Key Acquisitions Compared",
+                    empireChartDesc: "Through two stunning acquisitions, Zuckerberg eliminated potential threats and dominated mobile social and messaging. The chart below visualizes the vast difference in price and user scale of these two deals, reflecting his ultimate pursuit of growth at scale.",
+                    price: "Price:",
+                    logic: "Core Logic:",
+                    empireInstaTitle: "Acquisition of Instagram (2012)",
+                    empireInstaDesc: "Price: ~$1 Billion\nCore Logic: Acquired Instagram, a company with only 13 employees and no revenue, for what was then considered a high price. The move was designed to eliminate a fast-rising competitor in mobile visual sharing and to capture a younger user base. It was a classic move combining defense, offense, and strategic foresight.",
+                    empireWpTitle: "Acquisition of WhatsApp (2014)",
+                    empireWpDesc: "Price: ~$19 Billion\nCore Logic: Acquired global messaging giant WhatsApp for a staggering 20 times the price of Instagram. This acquisition was purely for user scale and global reach, especially in developing markets where Facebook was relatively weak. It perfectly embodies Zuckerberg's 'growth over profit' philosophy.",
+                    powerTitle: "Power & The Price",
+                    powerDesc: "Great success also brought great controversy. Facebook's history is one of eroding user trust, and its business strategies have sparked a global regulatory storm. Facing constant criticism, Zuckerberg himself began a carefully orchestrated image reinvention. This section explores the price he paid and his response strategies.",
+                    powerTimelineTitle: "Major Controversy Timeline",
+                    powerEvent1: "Reached a settlement with the U.S. Federal Trade Commission over deceptive privacy practices, agreeing to 20 years of privacy audits.",
+                    powerEvent2: "'Fake news' proliferated on the platform and was used to interfere in the U.S. election, raising widespread public questions about its social responsibility.",
+                    powerEvent3: "Data of 87 million users was improperly used for political purposes. The incident ignited global public outrage, leading to a $5 billion fine and Zuckerberg's testimony before Congress.",
+                    powerEvent4: "The U.S. FTC and several states filed antitrust lawsuits, alleging that its acquisitions of Instagram and WhatsApp were illegal monopolies, seeking to break them up.",
+                    powerImageTitle: "The 'Zuckerberg Renaissance'",
+                    powerImagePast: "Past: The Tech Nerd",
+                    powerImagePastDesc: "Awkward, robotic public persona in his signature grey t-shirt, often compared to an android.",
+                    powerImageNow: "Present: The Fighter CEO",
+                    powerImageNowDesc: "Practices MMA, muscular and confident, aiming to reshape the narrative of power.",
+                    powerImageDesc: "This calculated image transformation aims to recast him from a tech bureaucrat who can be easily admonished into a formidable leader not to be trifled with, in response to continuous public and regulatory pressure.",
+                    futureTitle: "Future Bets",
+                    futureDesc: "After a journey of brilliance and controversy, Zuckerberg has set his sights on a more distant future. His massive bet on the metaverse reflects his ultimate ambition to seize the next computing platform, while his grand philanthropy represents his other side—using an engineering mindset to solve societal problems. Together, they reveal his grand blueprint to 'hack' and reshape the world with technology and capital.",
+                    futureChartTitle: "The Metaverse Gamble",
+                    futureChartDesc: "Zuckerberg is betting the company's future on the metaverse, a colossal financial gamble. The R&D division, 'Reality Labs,' continues to post massive losses. The chart below shows the department's staggering financial losses, highlighting the risk and scale of this bet.",
+                    futureCZITitle: "Chan Zuckerberg Initiative (CZI)",
+                    futureCZIDesc: "In 2015, the couple pledged to donate 99% of their shares to form CZI, aiming to 'solve society's toughest challenges.' Its unique LLC structure allows for charitable donations, for-profit investments, and political lobbying, offering great flexibility but also drawing criticism for lack of transparency. It reflects his ambition to apply Facebook's scale-and-growth model to solving social problems.",
+                    footerNote: "This is an interactive analysis project based on public research and reporting.",
+                    footerDisclaimer: "For informational and educational purposes only.",
+                    toggleLang: "中文",
+                    charts: {
+                        acquisitions: {
+                            priceLabel: 'Acquisition Price (in Billions USD)',
+                            usersLabel: 'Users at the time (in Millions)',
+                            priceAxis: 'Price (Billions USD)',
+                            usersAxis: 'Users (Millions)'
+                        },
+                        metaverse: {
+                            title: 'Meta Reality Labs Financials 2023 (Billions USD)',
+                            lossLabel: 'Reality Labs 2023 Loss',
+                            revenueLabel: 'Reality Labs 2023 Revenue',
+                            tooltipSuffix: ' Billion USD'
+                        }
+                    }
+                },
+                'zh-Hant': {
+                    pageTitle: "解構祖克柏：互動式分析報告",
+                    headerTitle: "解構祖克柏",
+                    navIntro: "介紹",
+                    navRise: "崛起之路",
+                    navEmpire: "帝國擴張",
+                    navPower: "權力與代價",
+                    navFuture: "未來賭注",
+                    introTitle: "解構祖克柏：從程式神童到科技巨擘",
+                    introSubtitle: "馬克・祖克柏不僅是Meta的執行長，更是一位重塑了全球數十億人溝通方式的架構師。他的成功並非偶然，而是一個由技術天賦、戰略遠見、冷酷決策與無盡爭議構成的複雜方程式。本互動報告將深入剖析其人生軌跡，揭示他成功的核心基因。",
+                    factor1Title: "技術天賦",
+                    factor1Desc: "自幼沉浸程式設計，奠定快速創新的基礎。",
+                    factor2Title: "心理洞察",
+                    factor2Desc: "精準掌握人性需求，打造極具吸引力的社交系統。",
+                    factor3Title: "無情戰略",
+                    factor3Desc: "「收購或摧毀」，冷酷地消除所有潛在威脅。",
+                    factor4Title: "長期願景",
+                    factor4Desc: "偏執地追逐並主宰下一個計算平台。",
+                    factor5Title: "卓越適應",
+                    factor5Desc: "帶領公司度過生存危機，展現驚人韌性。",
+                    factor6Title: "追求規模",
+                    factor6Desc: "堅信價值源於全球化規模，盈利次之。",
+                    riseTitle: "崛起之路",
+                    riseDesc: "祖克柏的成功奠基於卓越的早期技術培養、精英教育的洗禮，以及在哈佛那段關鍵歲月。這段經歷不僅是創業的預演，也預示了他未來無視規則、快速行動的行事風格。此時間軸將展示他從一個程式神童到創立Facebook的關鍵時刻。",
+                    riseEvent1: "約11歲時，創建了名為「ZuckNet」的即時通訊系統，用於連接家中與父親的牙醫診所，首次展現將技術應用於實際通訊需求的本能。",
+                    riseEvent2: "高中時期開發了利用機器學習分析聽歌習慣的音樂播放器，吸引了微軟等巨頭的注意，但他拒絕了收購和聘用邀約。",
+                    riseEvent3: "在哈佛推出「比辣」網站，駭入學校網路獲取照片。網站迅速爆紅，但也因侵犯隱私而遭校方關閉，此事完美預演了他日後「快速行動，打破陳規」的模式。",
+                    riseEvent4: "在哈佛宿舍與室友們共同推出Thefacebook.com，最初僅限哈佛學生使用。其獨特的精英化擴張策略，使其迅速風靡全美頂尖大學。",
+                    riseEvent5: "從哈佛輟學，將公司遷往加州帕羅奧圖。在西恩・帕克和彼得・提爾的幫助下，獲得50萬美元天使投資，正式從校園專案轉型為初創企業。",
+                    empireTitle: "帝國擴張",
+                    empireDesc: "佔領桌面互聯網後，祖克柏面臨著平台轉移的生存危機。他透過一系列果斷的戰略決策，不僅化解了危機，更將Facebook打造成一個無法撼動的科技霸權。本節將聚焦於他最重要的幾次決策：轉向行動優先，以及吞併兩大潛在對手。",
+                    empireChartTitle: "關鍵收購案對比",
+                    empireChartDesc: "祖克柏透過兩次驚人的收購，消除了潛在威脅，並主宰了行動社交和通訊領域。下圖直觀比較了這兩筆交易在價格和當時用戶規模上的巨大差異，體現了他對規模化增長的極致追求。",
+                    price: "價格：",
+                    logic: "核心邏輯：",
+                    empireInstaTitle: "收購 Instagram (2012)",
+                    empireInstaDesc: "價格：約10億美元\n核心邏輯：以在當時看來的高價，收購僅有13名員工、尚無營收的Instagram。此舉旨在消除一個在行動視覺化領域快速崛起的競爭威脅，並獲取更年輕的用戶群體。這是一次結合了防禦、進攻與戰略遠見的經典之作。",
+                    empireWpTitle: "收購 WhatsApp (2014)",
+                    empireWpDesc: "價格：約190億美元\n核心邏輯：以20倍於Instagram的天價收購全球通訊巨頭WhatsApp。這次收購完全是為了用戶規模和全球觸及率，尤其是在Facebook相對弱勢的發展中市場。它完美體現了祖克柏「增長優於利潤」的哲學。",
+                    powerTitle: "權力與代價",
+                    powerDesc: "巨大的成功也帶來了巨大的爭議。Facebook的歷史，是一部用戶信任不斷被侵蝕的歷史，其商業策略也引發了全球性的監管風暴。面對持續的批評，祖克柏本人也開始了一場精心策劃的形象重塑。本節將探討他所付出的代價以及應對策略。",
+                    powerTimelineTitle: "重大爭議時間軸",
+                    powerEvent1: "因欺騙性的隱私政策，首次與美國聯邦貿易委員會達成和解，同意接受20年的隱私審計。",
+                    powerEvent2: "「假新聞」在平台上氾濫，並被用於干預美國大選，引發公眾對其社會責任的廣泛質疑。",
+                    powerEvent3: "8700萬用戶數據被不當用於政治目的，事件引爆全球輿論，導致50億美元巨額罰款和祖克柏親赴國會作證。",
+                    powerEvent4: "美國FTC及多個州份提起反壟斷訴訟，直指其對Instagram和WhatsApp的收購為非法壟斷，尋求將其分拆。",
+                    powerImageTitle: "「祖克柏復興」",
+                    powerImagePast: "過去：科技宅男",
+                    powerImagePastDesc: "身穿灰色T恤，不善言辭，公眾形象僵硬，被比作「機器人」。",
+                    powerImageNow: "現在：格鬥CEO",
+                    powerImageNowDesc: "練習綜合格鬥，一身肌肉，形象強悍自信，旨在重塑權力話語權。",
+                    powerImageDesc: "這場精心策劃的形象轉變，旨在將他從一個可以被隨意訓誡的技術官僚，重塑為一個不容輕視的強大領導者，以應對持續的公眾和監管壓力。",
+                    futureTitle: "未來賭注",
+                    futureDesc: "經歷了輝煌與爭議後，祖克柏將目光投向了更遙遠的未來。他對元宇宙的巨大賭注，反映了他搶佔下一個計算平台的終極野心；而他宏大的慈善事業，則是他運用工程學思維解決社會問題的另一面。這兩者共同揭示了他試圖用技術和資本「駭入」並重塑世界的宏大藍圖。",
+                    futureChartTitle: "豪賭元宇宙",
+                    futureChartDesc: "祖克柏將公司的未來押注在元宇宙上，這是一場巨大的財務豪賭。負責研發的「現實實驗室」部門持續巨額虧損。下圖顯示了該部門驚人的虧損狀況，凸顯了這場賭注的風險與規模。",
+                    futureCZITitle: "陳和祖克柏基金會 (CZI)",
+                    futureCZIDesc: "2015年，祖克柏夫婦承諾捐出99%的股份成立CZI，旨在「解決社會最艱鉅的挑戰」。其獨特的有限責任公司（LLC）架構，使其既能進行慈善捐贈，也能進行營利性投資和政治遊說，提供了極大靈活性，但也因缺乏透明度而引發爭議。這體現了他將Facebook的規模化增長模式，應用於解決社會問題的雄心。",
+                    footerNote: "這是一份基於公開研究報告創建的互動式分析專案。",
+                    footerDisclaimer: "僅用於資訊展示與教育目的。",
+                    toggleLang: "English",
+                    charts: {
+                        acquisitions: {
+                            priceLabel: '收購價格 (億美元)',
+                            usersLabel: '當時用戶數 (百萬)',
+                            priceAxis: '價格 (億美元)',
+                            usersAxis: '用戶數 (百萬)'
+                        },
+                        metaverse: {
+                            title: 'Meta現實實驗室2023年財務狀況 (億美元)',
+                            lossLabel: '現實實驗室2023年虧損',
+                            revenueLabel: '現實實驗室2023年營收',
+                            tooltipSuffix: ' 億美元'
+                        }
+                    }
+                }
+            };
+            
+            let currentLanguage = localStorage.getItem('zuckLang') || 'zh-Hant';
+            let acquisitionsChartInstance;
+            let metaverseChartInstance;
+
+            const langToggleBtn = document.getElementById('lang-toggle');
+            const langToggleBtnMobile = document.getElementById('lang-toggle-mobile');
+            
+            function createAcquisitionsChart(lang) {
+                if (acquisitionsChartInstance) {
+                    acquisitionsChartInstance.destroy();
+                }
+                const acquisitionsCtx = document.getElementById('acquisitionsChart').getContext('2d');
+                const chartData = translations[lang].charts.acquisitions;
+                acquisitionsChartInstance = new Chart(acquisitionsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Instagram (2012)', 'WhatsApp (2014)'],
+                        datasets: [{
+                            label: chartData.priceLabel,
+                            data: [10, 190],
+                            backgroundColor: '#4A90E2',
+                            borderColor: '#4A90E2',
+                            borderWidth: 1,
+                            yAxisID: 'yPrice',
+                        }, {
+                            label: chartData.usersLabel,
+                            data: [30, 450],
+                            backgroundColor: '#D0A98F',
+                            borderColor: '#D0A98F',
+                            borderWidth: 1,
+                            yAxisID: 'yUsers',
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            yPrice: {
+                                type: 'linear',
+                                position: 'left',
+                                title: { display: true, text: chartData.priceAxis }
+                            },
+                            yUsers: {
+                                type: 'linear',
+                                position: 'right',
+                                title: { display: true, text: chartData.usersAxis },
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function createMetaverseChart(lang) {
+                if (metaverseChartInstance) {
+                    metaverseChartInstance.destroy();
+                }
+                const metaverseCtx = document.getElementById('metaverseChart').getContext('2d');
+                const chartData = translations[lang].charts.metaverse;
+                metaverseChartInstance = new Chart(metaverseCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [chartData.lossLabel, chartData.revenueLabel],
+                        datasets: [{
+                            data: [162, 11], 
+                            backgroundColor: ['#E74C3C', '#2ECC71'],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed}${chartData.tooltipSuffix}`;
+                                    }
+                                }
+                            },
+                            title: { display: true, text: chartData.title }
+                        }
+                    }
+                });
+            }
+            
+            function switchLanguage(lang) {
+                currentLanguage = lang;
+                localStorage.setItem('zuckLang', lang);
+                document.documentElement.lang = lang;
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    // Handle special cases like multi-line paragraphs
+                    if (translations[lang][key] && translations[lang][key].includes('\n')) {
+                        el.innerHTML = translations[lang][key].replace(/\n/g, '<br>');
+                    } else if (translations[lang][key]) {
+                        el.innerText = translations[lang][key];
+                    }
+                });
+
+                langToggleBtn.innerText = translations[lang].toggleLang;
+                langToggleBtnMobile.innerText = translations[lang].toggleLang;
+                
+                // Re-create charts with new language
+                createAcquisitionsChart(lang);
+                createMetaverseChart(lang);
+            }
+
+            langToggleBtn.addEventListener('click', () => {
+                const newLang = currentLanguage === 'en' ? 'zh-Hant' : 'en';
+                switchLanguage(newLang);
+            });
+            langToggleBtnMobile.addEventListener('click', () => {
+                const newLang = currentLanguage === 'en' ? 'zh-Hant' : 'en';
+                switchLanguage(newLang);
+            });
+
+
+            // --- SCROLLSPY ---
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-50% 0px -50% 0px', // Center of the viewport
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        // Desktop nav
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                        // Mobile nav
+                        mobileNav.value = `#${id}`;
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // --- INITIALIZE ---
+            switchLanguage(currentLanguage);
+
+        });
+    </script>
+
+</body>
+</html>
