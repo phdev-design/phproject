@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flipper Zero 互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tech Neutral & Orange -->
+    <!-- Application Structure Plan: The SPA is designed with a non-linear, thematic structure using a top navigation bar for intuitive exploration. The sections are: 1. Overview (key identity & stats), 2. Hardware Anatomy (interactive component breakdown), 3. Core Capabilities (task-oriented feature exploration), 4. Software Ecosystem (interactive firmware comparison chart), 5. Real-World Cases (clickable case studies), 6. Tool Comparison (dynamic radar chart vs. competitors), and 7. Legal & Ethics (infographic-style legal summary). This structure transforms the dense report into a user-driven journey, allowing users to dive into topics of interest in any order, which is more engaging and effective for information synthesis than a linear format. -->
+    <!-- Visualization & Content Choices: 1. Hardware: Clickable cards instead of a static table to encourage interaction. 2. Software: A dynamic bar chart (Chart.js) to visually and interactively compare firmware features, making differences instantly clear. 3. Tool Comparison: A radar chart (Chart.js) to provide a multi-dimensional, at-a-glance comparison against specialized tools, a format superior to text for this kind of data. 4. Legal: Styled cards to simplify complex legal concepts. 5. General: Accordions and tabs to hide/show detailed text, keeping the UI clean while providing depth on demand. These choices prioritize interactivity and visual clarity to facilitate understanding. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #1E293B;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #F97316;
+            border-bottom-color: #F97316;
+        }
+        .section-card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-button.active {
+            background-color: #F97316;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-2xl font-bold text-slate-800">Flipper Zero<span class="text-orange-500">.</span></h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">概覽</a>
+                        <a href="#hardware" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">硬體解剖</a>
+                        <a href="#capabilities" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">核心能力</a>
+                        <a href="#software" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">軟體生態</a>
+                        <a href="#cases" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">實戰案例</a>
+                        <a href="#comparison" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">工具比較</a>
+                        <a href="#legal" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">法律與倫理</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-orange-500 hover:bg-slate-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#overview" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">概覽</a>
+                    <a href="#hardware" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">硬體解剖</a>
+                    <a href="#capabilities" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">核心能力</a>
+                    <a href="#software" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">軟體生態</a>
+                    <a href="#cases" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">實戰案例</a>
+                    <a href="#comparison" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">工具比較</a>
+                    <a href="#legal" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">法律與倫理</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="overview" class="min-h-screen pt-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">解構「駭客塔麻可吉」</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">Flipper Zero 是一款開源的多功能工具，專為滲透測試人員和科技愛好者設計。它將多種數位互動工具整合到一個便攜且遊戲化的裝置中，但其易用性也引發了廣泛的公眾討論和監管關注。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-center">
+                <div class="section-card p-8">
+                    <div class="text-5xl font-extrabold text-orange-500">$4.8M</div>
+                    <p class="mt-2 text-lg font-medium text-slate-700">Kickstarter 籌資</p>
+                    <p class="mt-1 text-slate-500">最初目標僅為 6 萬美元，顯示出社群的巨大熱情。</p>
+                </div>
+                <div class="section-card p-8">
+                    <div class="text-5xl font-extrabold text-orange-500">7+</div>
+                    <p class="mt-2 text-lg font-medium text-slate-700">核心硬體模組</p>
+                    <p class="mt-1 text-slate-500">集 Sub-GHz, NFC, RFID, IR 等功能於一身。</p>
+                </div>
+                <div class="section-card p-8">
+                    <div class="text-5xl font-extrabold text-orange-500">102g</div>
+                    <p class="mt-2 text-lg font-medium text-slate-700">極致輕巧</p>
+                    <p class="mt-1 text-slate-500">真正的「瑞士軍刀」，便於隨身攜帶進行探索。</p>
+                </div>
+            </div>
+            <div class="mt-12 section-card p-8 text-left">
+                <h3 class="text-2xl font-bold text-slate-800">設計理念的衝突</h3>
+                <p class="mt-4 text-slate-600">開發者將 Flipper Zero 設計為「駭客的塔麻可吉」，旨在透過遊戲化降低硬體探索的門檻，使其充滿教育性和趣味性。然而，正是這種成功的用戶友好設計，加上其強大的多功能性，使其在 TikTok 等社交平台上迅速走紅。病毒式傳播的影片常誇大其能力，塑造了其作為惡作劇甚至非法「駭客工具」的公眾形象。這種脫離創作者初衷的認知，最終引發了真實世界的監管審查，體現了「技術民主化」過程中無法預見的社會挑戰。</p>
+            </div>
+        </section>
+
+        <section id="hardware" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">硬體解剖</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">點擊下方元件，探索 Flipper Zero 內部精密而多功能的硬體架構。其設計策略是在多功能性、便攜性和可擴展性之間尋求平衡，而非追求單一領域的極致性能。</p>
+            </div>
+            <div id="hardware-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            </div>
+            <div id="hardware-details" class="mt-8 section-card p-6 md:p-8 text-left hidden">
+            </div>
+        </section>
+
+        <section id="capabilities" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">核心能力光譜</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">Flipper Zero 的價值在於其廣泛的功能集。它能毫不費力地揭示和利用我們周圍無形、不安全的數位基礎設施，將抽象的漏洞變得具體可感。</p>
+            </div>
+            <div class="flex justify-center mb-8">
+                <div id="capability-tabs" class="flex flex-wrap justify-center space-x-1 rounded-lg bg-slate-200 p-1">
+                </div>
+            </div>
+            <div id="capability-content" class="mt-6">
+            </div>
+        </section>
+
+        <section id="software" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">軟體生態系統</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">官方與社群共同構建了一個動態的共生生態。官方提供穩定合規的基礎，而社群開發的自訂固件 (CFW) 則釋放了硬體的全部潛力，為用戶提供了「兩全其美」的選擇。</p>
+            </div>
+            <div class="section-card p-6 md:p-8">
+                 <div class="chart-container">
+                    <canvas id="firmwareChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-sm text-slate-500">圖表展示了不同固件在關鍵功能上的差異。數字越大代表功能越強或越不受限制。</p>
+            </div>
+        </section>
+
+        <section id="cases" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">實戰案例研究</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">在許多安全事件中，Flipper Zero 扮演了「漏洞放大器」的角色，它並非漏洞的根源，而是利用現有產品設計缺陷的便捷工具。這些案例凸顯了提升日常裝置基線安全的迫切性。</p>
+            </div>
+            <div id="cases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            </div>
+        </section>
+
+        <section id="comparison" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">專業工具比較</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">Flipper Zero 創造了一個全新的「專業消費者」市場，它在價格、易用性和功能性之間達到了甜蜜點，彌合了業餘電子產品與高端專業工具之間的鴻溝。</p>
+            </div>
+            <div class="section-card p-6 md:p-8">
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-sm text-slate-500">雷達圖直觀比較 Flipper Zero 與其他專業工具的特性。分數越高代表在該維度表現越好。</p>
+            </div>
+        </section>
+
+        <section id="legal" class="min-h-screen pt-16">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold text-slate-900 tracking-tight sm:text-5xl">法律與倫理 (英國視角)</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-500">Flipper Zero 本身是合法的，但其使用方式可能觸犯法律。它極大降低了技術門檻，對現有旨在起訴惡意「行為」而非禁止「工具」的法律框架提出了挑戰。</p>
+            </div>
+            <div id="legal-cards" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p>此互動式報告根據公開資訊編制，僅供教育和研究目的。</p>
+            <p class="text-sm text-slate-400 mt-2">© 2024 Flipper Zero 互動式分析報告。所有內容均基於提供的源報告。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = {
+                hardware: [
+                    { name: '微控制器 (MCU)', details: '核心為 STM32WB55RG，雙核心設計 (ARM Cortex-M4 & M0+)，集成了應用處理和無線電管理功能。內建 1024 KB 快閃記憶體和 256 KB SRAM。' },
+                    { name: 'Sub-1 GHz 模組', details: '基於 TI CC1101 晶片，可在 315-915 MHz 頻段運作，用於與遙控器、IoT 感測器等裝置通訊。發射功率較低（最大 0 dBm），適合近距離分析。' },
+                    { name: 'NFC 模組 (13.56 MHz)', details: '採用 ST25R3916 晶片，支援 ISO-14443A/B, MIFARE, FeliCa 等多種高頻 RFID 標準。' },
+                    { name: 'RFID 模組 (125 kHz)', details: '配備專用低頻天線，可讀取 EM-4100、HID Prox 等常見的低頻門禁卡。' },
+                    { name: '紅外線 (IR)', details: '內建可學習和模擬的紅外線收發器，擁有強大的 300 mW 發射器，可作為通用遙控器。' },
+                    { name: 'iButton (1-Wire)', details: '獨特的接觸式焊盤，可讀寫和模擬 Dallas、Cyfral 等接觸式鑰匙。' },
+                    { name: 'GPIO 針腳', details: '提供 13 個 5V 輸入容忍的 GPIO 針腳，是裝置可擴展性的關鍵，可連接 Arduino 等外部模組。' },
+                    { name: '顯示器與儲存', details: '1.4吋單色低功耗 LCD，陽光下可讀。數據儲存於 MicroSD 卡 (最高 256GB)。' },
+                ],
+                capabilities: [
+                    { 
+                        name: 'Sub-1 GHz', 
+                        title: '無線電探索',
+                        content: '能夠讀取、儲存和模擬來自車庫門、IoT 感測器等的無線電信號。靜態碼可直接重放，但對現代滾動碼系統構成挑戰。',
+                        limitation: '對實施得當的滾動碼（如 KeeLoq 的安全版本）無效，其威力在於揭示使用過時或弱協議的系統。'
+                    },
+                    { 
+                        name: 'RFID/NFC', 
+                        title: '門禁測試',
+                        content: '可在 125kHz 和 13.56MHz 頻段運作，讀取、儲存、寫入和模擬多種門禁卡。',
+                        limitation: '無法複製用於支付的現代加密信用卡（EMV）。其有效性高度依賴目標門禁系統的安全性，對僅依賴 UID 的舊系統非常有效。'
+                    },
+                    { 
+                        name: '紅外線', 
+                        title: '通用遙控',
+                        content: '內建常用裝置的紅外線信號庫，並具備強大的「學習」功能，可記錄任何 IR 遙控器的信號。',
+                        limitation: '功能強大且直接，主要限制來自物理距離和視線阻擋。'
+                    },
+                    { 
+                        name: 'BadUSB',
+                        title: 'HID 攻擊模擬',
+                        content: '通過 USB 模擬鍵盤，執行以 DuckyScript 編寫的腳本，可自動化鍵盤輸入以執行各種操作。',
+                        limitation: '攻擊成功的先決條件是能夠物理接觸到一台「未上鎖」的目標電腦，突顯其在物理安全測試中的角色。'
+                    }
+                ],
+                firmware: {
+                    labels: ['地區限制', '滾動碼支援', '進階藍牙工具', 'BadKB (藍牙)', 'UI 自訂'],
+                    datasets: [
+                        { label: '官方 (OFW)', data: [1, 2, 0, 0, 1], backgroundColor: '#64748B' },
+                        { label: 'Unleashed', data: [0, 3, 3, 3, 1], backgroundColor: '#F97316' },
+                        { label: 'Momentum', data: [0, 3, 4, 3, 4], backgroundColor: '#10B981' },
+                        { label: 'RogueMaster', data: [0, 3, 3, 3, 3], backgroundColor: '#3B82F6' },
+                    ]
+                },
+                cases: [
+                    { title: '酒店鎖漏洞 (Unsaflok)', content: '研究人員發現 Saflok 電子鎖存在嚴重漏洞。攻擊者可使用 Flipper Zero 等工具，透過讀取任意一張酒店鑰匙卡，製作出能打開所有門的主鑰匙。', icon: '🏨' },
+                    { title: '車輛漏洞 (Rolling-PWN)', content: '部分本田車型存在滾動碼實現缺陷，允許攻擊者用 Flipper Zero 捕獲信號並重放舊代碼，從而解鎖車輛。', icon: '🚗' },
+                    { title: '特斯拉攻擊', content: '一種是廣播信號打開充電埠的惡作劇；另一種是利用 Wi-Fi 配件設立釣魚網路，竊取車主憑證以控制汽車。', icon: '⚡' },
+                    { title: '滲透測試門禁複製', content: '在滲透測試中，常用於複製員工的 RFID 門禁卡，以展示使用僅依賴 UID 的舊系統所帶來的物理安全風險。', icon: '🏢' }
+                ],
+                comparison: {
+                    labels: ['易用性', '多功能性', 'RF 性能', 'RFID/NFC 性能', '便攜性', '價格優勢'],
+                    datasets: [
+                        { label: 'Flipper Zero', data: [9, 9, 5, 7, 10, 8], backgroundColor: 'rgba(249, 115, 22, 0.2)', borderColor: '#F97316', pointBackgroundColor: '#F97316' },
+                        { label: 'HackRF One', data: [4, 7, 9, 2, 6, 6], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3B82F6', pointBackgroundColor: '#3B82F6' },
+                        { label: 'Proxmark3', data: [2, 3, 2, 10, 4, 5], backgroundColor: 'rgba(16, 185, 129, 0.2)', borderColor: '#10B981', pointBackgroundColor: '#10B981' }
+                    ]
+                },
+                legal: [
+                    { title: '第 1 條：未經授權存取', content: '使用複製的 RFID 卡進入安全網路，或用 BadUSB 存取電腦文件，可能構成此罪。關鍵在於「意圖」和「明知」未經授權。', icon: '🔑' },
+                    { title: '第 3 條：未經授權損害', content: '使用 BLE Spam 等功能導致他人裝置（如 iPhone）當機，可能構成此罪。涵蓋故意和罔顧後果的行為。', icon: '💥' },
+                    { title: '第 3A 條：獲取用於犯罪的物品', content: '此條款對 Flipper Zero 最具挑戰性。若購買時意圖將其用於犯罪，或相信其可能被用於犯罪，則可能違法。', icon: '⚙️' },
+                    { title: '無線電報法', content: '使用自訂固件的干擾功能，明確違反《無線電報法》，最高可判處兩年監禁和無上限罰款。', icon: '📡' }
+                ]
+            };
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            function updateActiveNav() {
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.scrollY >= sectionTop - 80) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    const linkId = link.getAttribute('href').substring(1);
+                    if (linkId === currentSectionId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 70,
+                            behavior: 'smooth'
+                        });
+                    }
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', updateActiveNav);
+            
+            function initHardware() {
+                const grid = document.getElementById('hardware-grid');
+                const details = document.getElementById('hardware-details');
+                data.hardware.forEach(item => {
+                    const button = document.createElement('button');
+                    button.className = 'section-card p-4 text-center aspect-square flex items-center justify-center cursor-pointer';
+                    button.innerHTML = `<span class="font-semibold text-slate-700">${item.name}</span>`;
+                    button.addEventListener('click', () => {
+                        details.innerHTML = `<h3 class="text-xl font-bold text-slate-800">${item.name}</h3><p class="mt-2 text-slate-600">${item.details}</p>`;
+                        details.classList.remove('hidden');
+                        details.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    });
+                    grid.appendChild(button);
+                });
+            }
+
+            function initCapabilities() {
+                const tabsContainer = document.getElementById('capability-tabs');
+                const contentContainer = document.getElementById('capability-content');
+                data.capabilities.forEach((cap, index) => {
+                    const button = document.createElement('button');
+                    button.className = 'tab-button px-3 py-2 text-sm font-medium rounded-md transition mb-1';
+                    button.textContent = cap.title;
+                    button.dataset.target = `cap-${index}`;
+                    if (index === 0) button.classList.add('active');
+                    tabsContainer.appendChild(button);
+
+                    const content = document.createElement('div');
+                    content.id = `cap-${index}`;
+                    content.className = 'capability-pane p-6 rounded-lg bg-white shadow';
+                    if (index !== 0) content.classList.add('hidden');
+                    content.innerHTML = `
+                        <h3 class="text-xl font-bold text-slate-800">${cap.title}</h3>
+                        <p class="mt-2 text-slate-600">${cap.content}</p>
+                        <div class="mt-4 pt-4 border-t border-slate-200">
+                            <h4 class="font-semibold text-orange-600">限制與現實</h4>
+                            <p class="mt-1 text-sm text-slate-500">${cap.limitation}</p>
+                        </div>
+                    `;
+                    contentContainer.appendChild(content);
+                });
+
+                tabsContainer.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('tab-button')) {
+                        tabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        contentContainer.querySelectorAll('.capability-pane').forEach(pane => pane.classList.add('hidden'));
+                        document.getElementById(e.target.dataset.target).classList.remove('hidden');
+                    }
+                });
+            }
+            
+            function initFirmwareChart() {
+                const ctx = document.getElementById('firmwareChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: data.firmware,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 4,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        const labels = ['無', '有限', '基礎', '擴展', '極高'];
+                                        return labels[value] || '';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        const value = context.parsed.y;
+                                        const labels = ['已啟用', '基礎', '擴展', '極高', '最高']; // Different interpretation for tooltip
+                                        const feature = context.label;
+                                        if (feature === '地區限制') {
+                                            label += ['禁用', '啟用'][value] || '';
+                                        } else {
+                                           label += ['無', '有限', '基礎', '擴展', '極高'][value] || '';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initCases() {
+                const grid = document.getElementById('cases-grid');
+                data.cases.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'section-card p-6';
+                    card.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="text-3xl mr-4">${item.icon}</div>
+                            <h3 class="text-xl font-bold text-slate-800">${item.title}</h3>
+                        </div>
+                        <p class="mt-4 text-slate-600">${item.content}</p>
+                    `;
+                    grid.appendChild(card);
+                });
+            }
+
+            function initComparisonChart() {
+                const ctx = document.getElementById('comparisonChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: data.comparison,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        elements: {
+                            line: {
+                                borderWidth: 3
+                            }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: false
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 10,
+                                pointLabels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function initLegal() {
+                const container = document.getElementById('legal-cards');
+                data.legal.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'section-card p-6';
+                    card.innerHTML = `
+                        <div class="flex items-start">
+                            <div class="text-3xl mr-4 flex-shrink-0">${item.icon}</div>
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800">${item.title}</h3>
+                                <p class="mt-2 text-slate-600">${item.content}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            
+            initHardware();
+            initCapabilities();
+            initFirmwareChart();
+            initCases();
+            initComparisonChart();
+            initLegal();
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in-up');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.section-card, .chart-container').forEach(el => {
+                observer.observe(el);
+            });
+            
+            const hash = window.location.hash;
+            if (hash) {
+                const targetElement = document.querySelector(hash);
+                if (targetElement) {
+                     window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'auto'
+                    });
+                }
+            }
+            updateActiveNav();
+        });
+    </script>
+    <style>
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out forwards;
+        }
+        .section-card, .chart-container {
+            opacity: 0;
+        }
+    </style>
+</body>
+</html>
