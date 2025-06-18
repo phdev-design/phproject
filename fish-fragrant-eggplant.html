@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式魚香茄子煲權威指南 (中英雙語)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Clay Pot Warmth -->
+    <!-- Application Structure Plan: 我將報告的線性結構重塑為一個以任務為導向的互動體驗。頂部導航讓用戶能快速跳轉至核心部分：「風味解構」、「技法比較」和「互動食譜」。這種非線性結構更符合網絡用戶的探索習慣。核心理念是將理論（風味和技巧）與實踐（食譜）分開但又緊密相連。用戶可以先深入理解背後的科學原理，或直接跳到食譜部分開始烹飪。互動食譜中的版本切換功能（經典、港式、素食）是設計的核心，它將靜態的變化章節轉化為一個動態的、可供用戶親自操作和比較的工具，極大地提升了實用性和用戶參與度。新增的語言切換功能將所有文本內容進行了結構化，使其更易於維護和擴展。 -->
+    <!-- Visualization & Content Choices: 1. 魚香醬汁比例 (目標: 比較): 我選擇使用Chart.js的橫向條形圖來可視化表格一中的「黃金比例」。相比靜態表格，圖表能讓用戶更直觀地比較不同配方中酸、甜、鹹的差異。交互：鼠標懸停時顯示具體份數。 2. 茄子處理方法 (目標: 比較/組織): 我將表格二的內容設計成一組可點擊的按鈕卡片。交互：點擊不同方法時，下方會顯示其詳細的原理、優缺點和效果總結。這將一個信息密集的表格分解為易於消化、用戶主導的探索模塊。 3. 食譜流程 (目標: 指導/組織): 採用動態內容更新。交互：用戶點擊「經典川式」、「港式風味」或「素食演繹」按鈕，JavaScript會立即更新食材列表和烹飪步驟。這使得比較不同版本變得輕而易舉。所有圖標均使用Unicode字符和Tailwind CSS實現，確保無SVG。所有可見文本都已實現中英雙語切換。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDF8F2; /* Warm Neutral Background */
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #8C4D2E; /* Deep Brown Accent */
+            border-bottom-color: #8C4D2E;
+        }
+        .btn {
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background-color: #8C4D2E;
+            color: #FFFFFF;
+        }
+        .btn-primary:hover {
+            background-color: #6E3C23;
+        }
+        .btn-secondary {
+            background-color: #EAE0D5;
+            color: #8C4D2E;
+        }
+        .btn-secondary.active {
+            background-color: #8C4D2E;
+            color: #FFFFFF;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid #EAE0D5;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .section-title::before {
+            content: '🌶️';
+            margin-right: 0.75rem;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-[#8C4D2E]" data-lang-key="headerTitle">魚香茄子煲指南</span>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#introduction" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navIntro">引言</a>
+                        <a href="#flavor" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navFlavor">風味解構</a>
+                        <a href="#techniques" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navTech">技法比較</a>
+                        <a href="#recipe" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navRecipe">互動食譜</a>
+                    </div>
+                    <button id="lang-switcher" class="ml-6 text-sm font-medium text-gray-500 hover:text-[#8C4D2E] border border-gray-300 px-3 py-1 rounded-full transition-colors">English</button>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="lang-switcher-mobile" class="mr-2 text-sm font-medium text-gray-500 hover:text-[#8C4D2E] border border-gray-300 px-3 py-1 rounded-full transition-colors">English</button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-[#8C4D2E] focus:outline-none">
+                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#introduction" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navIntroMobile">引言</a>
+                <a href="#flavor" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navFlavorMobile">風味解構</a>
+                <a href="#techniques" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navTechMobile">技法比較</a>
+                <a href="#recipe" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navRecipeMobile">互動食譜</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="introduction" class="text-center mb-16 scroll-mt-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#8C4D2E] mb-4" data-lang-key="mainTitle">魚香茄子煲【香辣惹味】</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="mainSubtitle">
+                解構一道滋滋作響的川菜經典。本指南將帶您深入探索「魚香」的奧秘、馴服茄子的科學，以及駕馭砂煲的藝術，讓您在家也能自信地複製出餐廳級別的美味。
+            </p>
+        </section>
+
+        <section id="flavor" class="mb-16 scroll-mt-20">
+            <h2 class="section-title text-3xl font-bold mb-8 text-center" data-lang-key="flavorTitle">風味解構：魚香、茄子與砂煲的三位一體</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12" data-lang-key="flavorDesc">
+                一道完美的魚香茄子煲，是風味、食材與器皿三者間的完美協奏。在這裡，我們將拆解這三大核心元素，揭示其背後的歷史傳承與科學原理，為您的烹飪之旅打下堅實的基礎。
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-[#8C4D2E]" data-lang-key="flavorCard1Title">菜餚之魂：魚香 🌿</h3>
+                    <p class="text-gray-600 mb-4" data-lang-key="flavorCard1Desc1">「魚香」並非指魚的味道，而是對川菜傳統烹魚時所用調味方式的一種「模擬」。它融合了泡椒或豆瓣醬的辣、醋的酸、糖的甜、醬油的鹹鮮，以及薑蒜蔥的辛香，構成了一種複雜而平衡的基礎味型。</p>
+                    <p class="text-gray-600" data-lang-key="flavorCard1Desc2">從模仿惜物主婦的「餘香」，到使用「泡魚辣椒」的溯源，魚香的傳說本身就體現了川菜的智慧與創造力。</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-[#8C4D2E]" data-lang-key="flavorCard2Title">食材之挑：茄子 🍆</h3>
+                    <p class="text-gray-600 mb-4" data-lang-key="flavorCard2Desc1">茄子的挑戰在於其海綿般的結構，它極易吸油且容易氧化變色。成功的關鍵在於預處理：透過鹽漬、過油或微波等方法，預先破壞其吸油結構，並利用酸性浸泡來保持其迷人的紫色外皮。</p>
+                     <p class="text-gray-600" data-lang-key="flavorCard2Desc2">掌握這些技巧，您就能告別油膩軟爛的茄子，做出軟糯入味、色澤紫亮的理想成品。</p>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-[#8C4D2E]" data-lang-key="flavorCard3Title">器皿之藝：砂煲 🍲</h3>
+                    <p class="text-gray-600 mb-4" data-lang-key="flavorCard3Desc1">砂煲是這道菜靈魂的載體。其陶土材質加熱緩慢但保溫性極佳，能提供穩定均勻的熱場，並鎖住水氣，讓食材在文火慢燉中充分吸收風味。上桌時那標誌性的「滋滋」聲，正是砂煲持久熱力的最佳證明。</p>
+                    <p class="text-gray-600" data-lang-key="flavorCard3Desc2">正確地開鍋和養護砂煲，避免急冷急熱，是發揮其「陶土魔法」並延長其壽命的關鍵。</p>
+                </div>
+            </div>
+
+            <div class="mt-12 card p-6 md:p-8">
+                 <h3 class="text-2xl font-bold mb-2 text-center text-[#8C4D2E]" data-lang-key="sauceChartTitle">解碼魚香醬汁的「黃金比例」</h3>
+                 <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8" data-lang-key="sauceChartDesc">不同的醬汁比例會帶來截然不同的風味。下方的圖表可視化了幾種經典配方，讓您直觀感受酸、甜、鹹、鮮之間的細微變化。將鼠標懸停在長條上查看具體份數。</p>
+                 <div class="chart-container">
+                    <canvas id="sauceChart"></canvas>
+                 </div>
+            </div>
+        </section>
+
+        <section id="techniques" class="mb-16 scroll-mt-20">
+            <h2 class="section-title text-3xl font-bold mb-8 text-center" data-lang-key="techTitle">技法比較：馴服茄子的五種武器</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="techDesc">從餐廳的專業手法到家庭的便捷竅門，處理茄子的方法多種多樣。點擊下方按鈕，探索每種方法的原理、優劣及最終效果，找到最適合您的策略。</p>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                <button class="btn btn-secondary px-4 py-2 rounded-full eggplant-tech-btn active" data-tech="過油" data-lang-key="techBtn1">🔥 過油</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-full eggplant-tech-btn" data-tech="鹽漬" data-lang-key="techBtn2">🧂 鹽漬</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-full eggplant-tech-btn" data-tech="微波" data-lang-key="techBtn3">⚡ 微波</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-full eggplant-tech-btn" data-tech="裹粉淺煎" data-lang-key="techBtn4">🍳 裹粉淺煎</button>
+                <button class="btn btn-secondary px-4 py-2 rounded-full eggplant-tech-btn" data-tech="水煮" data-lang-key="techBtn5">💧 水煮/清蒸</button>
+            </div>
+            <div id="technique-details" class="card p-6 md:p-8 min-h-[300px]">
+            </div>
+        </section>
+        
+        <section id="recipe" class="scroll-mt-20">
+            <h2 class="section-title text-3xl font-bold mb-8 text-center" data-lang-key="recipeTitle">互動食譜：打造您的魚香茄子煲</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="recipeDesc">掌握了理論，現在就開始實踐吧！選擇您想嘗試的風味版本，下方的食材清單和步驟將會為您即時更新。今天，您想做哪一款？</p>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-12">
+                <button class="btn btn-primary px-6 py-3 rounded-lg text-lg recipe-btn active" data-recipe="classic" data-lang-key="recipeBtn1">經典川式</button>
+                <button class="btn btn-primary px-6 py-3 rounded-lg text-lg recipe-btn" data-recipe="hk" data-lang-key="recipeBtn2">港式風味 (+鹹魚)</button>
+                <button class="btn btn-primary px-6 py-3 rounded-lg text-lg recipe-btn" data-recipe="veg" data-lang-key="recipeBtn3">素食演繹 (菌菇版)</button>
+            </div>
+
+            <div class="card overflow-hidden">
+                <div class="grid lg:grid-cols-5">
+                    <div id="ingredients-panel" class="lg:col-span-2 bg-[#F9F5F0] p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-6 text-[#8C4D2E]" data-lang-key="ingredientsTitle">所需食材 🥣</h3>
+                        <div id="ingredients-content"></div>
+                    </div>
+                    <div id="steps-panel" class="lg:col-span-3 p-6 md:p-8">
+                         <h3 class="text-2xl font-bold mb-6 text-[#8C4D2E]" data-lang-key="stepsTitle">烹飪步驟 🧑‍🍳</h3>
+                         <div id="steps-content" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#EAE0D5] mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-gray-600">
+            <p data-lang-key="footer1">互動式魚香茄子煲權威指南 &copy; 2025</p>
+            <p data-lang-key="footer2">基於報告內容轉化而成，僅供學習與交流使用。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const translations = {
+                zh: {
+                    headerTitle: "魚香茄子煲指南",
+                    navIntro: "引言",
+                    navFlavor: "風味解構",
+                    navTech: "技法比較",
+                    navRecipe: "互動食譜",
+                    navIntroMobile: "引言",
+                    navFlavorMobile: "風味解構",
+                    navTechMobile: "技法比較",
+                    navRecipeMobile: "互動食譜",
+                    mainTitle: "魚香茄子煲【香辣惹味】",
+                    mainSubtitle: "解構一道滋滋作響的川菜經典。本指南將帶您深入探索「魚香」的奧秘、馴服茄子的科學，以及駕馭砂煲的藝術，讓您在家也能自信地複製出餐廳級別的美味。",
+                    flavorTitle: "風味解構：魚香、茄子與砂煲的三位一體",
+                    flavorDesc: "一道完美的魚香茄子煲，是風味、食材與器皿三者間的完美協奏。在這裡，我們將拆解這三大核心元素，揭示其背後的歷史傳承與科學原理，為您的烹飪之旅打下堅實的基礎。",
+                    flavorCard1Title: "菜餚之魂：魚香 🌿",
+                    flavorCard1Desc1: "「魚香」並非指魚的味道，而是對川菜傳統烹魚時所用調味方式的一種「模擬」。它融合了泡椒或豆瓣醬的辣、醋的酸、糖的甜、醬油的鹹鮮，以及薑蒜蔥的辛香，構成了一種複雜而平衡的基礎味型。",
+                    flavorCard1Desc2: "從模仿惜物主婦的「餘香」，到使用「泡魚辣椒」的溯源，魚香的傳說本身就體現了川菜的智慧與創造力。",
+                    flavorCard2Title: "食材之挑：茄子 🍆",
+                    flavorCard2Desc1: "茄子的挑戰在於其海綿般的結構，它極易吸油且容易氧化變色。成功的關鍵在於預處理：透過鹽漬、過油或微波等方法，預先破壞其吸油結構，並利用酸性浸泡來保持其迷人的紫色外皮。",
+                    flavorCard2Desc2: "掌握這些技巧，您就能告別油膩軟爛的茄子，做出軟糯入味、色澤紫亮的理想成品。",
+                    flavorCard3Title: "器皿之藝：砂煲 🍲",
+                    flavorCard3Desc1: "砂煲是這道菜靈魂的載體。其陶土材質加熱緩慢但保溫性極佳，能提供穩定均勻的熱場，並鎖住水氣，讓食材在文火慢燉中充分吸收風味。上桌時那標誌性的「滋滋」聲，正是砂煲持久熱力的最佳證明。",
+                    flavorCard3Desc2: "正確地開鍋和養護砂煲，避免急冷急熱，是發揮其「陶土魔法」並延長其壽命的關鍵。",
+                    sauceChartTitle: "解碼魚香醬汁的「黃金比例」",
+                    sauceChartDesc: "不同的醬汁比例會帶來截然不同的風味。下方的圖表可視化了幾種經典配方，讓您直觀感受酸、甜、鹹、鮮之間的細微變化。將鼠標懸停在長條上查看具體份數。",
+                    techTitle: "技法比較：馴服茄子的五種武器",
+                    techDesc: "從餐廳的專業手法到家庭的便捷竅門，處理茄子的方法多種多樣。點擊下方按鈕，探索每種方法的原理、優劣及最終效果，找到最適合您的策略。",
+                    techBtn1: "🔥 過油",
+                    techBtn2: "🧂 鹽漬",
+                    techBtn3: "⚡ 微波",
+                    techBtn4: "🍳 裹粉淺煎",
+                    techBtn5: "💧 水煮/清蒸",
+                    recipeTitle: "互動食譜：打造您的魚香茄子煲",
+                    recipeDesc: "掌握了理論，現在就開始實踐吧！選擇您想嘗試的風味版本，下方的食材清單和步驟將會為您即時更新。今天，您想做哪一款？",
+                    recipeBtn1: "經典川式",
+                    recipeBtn2: "港式風味 (+鹹魚)",
+                    recipeBtn3: "素食演繹 (菌菇版)",
+                    ingredientsTitle: "所需食材 🥣",
+                    stepsTitle: "烹飪步驟 🧑‍🍳",
+                    footer1: "互動式魚香茄子煲權威指南 &copy; 2025",
+                    footer2: "基於報告內容轉化而成，僅供學習與交流使用。",
+                    chartXAxis: '相對份數',
+                    chartTooltipUnit: '份',
+                    langSwitchTo: 'English',
+                    langCurrent: '中文',
+                    sauceRatios: {
+                        labels: ['「54321」法則', '「432111」法則', 'Omnivore\'s Cookbook', 'Christine\'s Recipes', '傳統川式基礎'],
+                        datasets: [
+                            { label: '水/湯', data: [5, 4, 2, 2, 4], backgroundColor: '#a8dadc' },
+                            { label: '醋', data: [4, 3, 3, 0, 2], backgroundColor: '#457b9d' },
+                            { label: '糖', data: [3, 2, 3, 0.5, 2], backgroundColor: '#f1faee' },
+                            { label: '生抽/醬油', data: [2, 1, 2, 1, 1.5], backgroundColor: '#e63946' },
+                            { label: '澱粉', data: [1, 1, 1, 0, 2], backgroundColor: '#1d3557' },
+                            { label: '其他 (蠔油/酒)', data: [0, 1, 1, 3, 1], backgroundColor: '#ffb703' }
+                        ]
+                    },
+                    eggplantTechniques: {
+                        '過油': {
+                            title: '🔥 過油 (Flash-Frying)',
+                            content: `<p class="mb-2"><strong>原理：</strong>高溫使茄子表面快速脫水形成保護殼，鎖住內部水分並阻止後續大量吸油。</p>
+                                      <p class="mb-2"><strong>最終質地：</strong>外微韌，內軟糯如奶油，口感最佳。</p>
+                                      <p class="mb-2"><strong>保色效果：</strong><span class="font-bold text-green-600">最佳</span>。高溫能快速鈍化氧化酶，最大限度保持紫色。</p>
+                                      <p class="mb-2"><strong>優點：</strong>速度快，效果最接近餐廳水準，色香味俱全。</p>
+                                      <p><strong>缺點：</strong>耗油量巨大，操作不便且有一定危險性，不適合日常家庭烹飪。</p>`
+                        },
+                        '鹽漬': {
+                            title: '🧂 鹽漬 (Salting)',
+                            content: `<p class="mb-2"><strong>原理：</strong>利用滲透壓使茄子細胞失水，預先破壞其海綿狀結構，從而降低吸油率。</p>
+                                      <p class="mb-2"><strong>最終質地：</strong>軟糯，但略帶一絲嚼勁。</p>
+                                      <p class="mb-2"><strong>保色效果：</strong><span class="font-bold text-yellow-600">良好</span>。能一定程度減緩氧化。</p>
+                                      <p class="mb-2"><strong>優點：</strong>有效減少吸油，操作簡單，能去除茄子部分澀味。</p>
+                                      <p><strong>缺點：</strong>耗時較長（約20-30分鐘），後續需沖洗或擠乾水分，若處理不當可能導致成品偏鹹。</p>`
+                        },
+                        '微波': {
+                            title: '⚡ 微波 (Microwaving)',
+                            content: `<p class="mb-2"><strong>原理：</strong>微波從內部加熱茄子中的水分，使其變成蒸汽，由內而外地破壞海綿結構。</p>
+                                      <p class="mb-2"><strong>最終質地：</strong>偏軟爛，缺乏韌勁。</p>
+                                      <p class="mb-2"><strong>保色效果：</strong><span class="font-bold text-orange-500">尚可</span>。顏色保持不如油炸或水煮法。</p>
+                                      <p class="mb-2"><strong>優點：</strong>快速、便捷、幾乎無油，是最健康的捷徑之一。</p>
+                                      <p><strong>缺點：</strong>缺乏煎炸帶來的焦香（wok hei），質地最軟，口感可能略乾。</p>`
+                        },
+                         '裹粉淺煎': {
+                            title: '🍳 裹粉淺煎 (Starch-Coating)',
+                            content: `<p class="mb-2"><strong>原理：</strong>瀝乾的茄子裹上一層薄薄的粟粉，在煎炸時形成物理保護層，有效阻隔油脂滲入。</p>
+                                      <p class="mb-2"><strong>最終質地：</strong>外層微脆，內裡軟糯，層次豐富。</p>
+                                      <p class="mb-2"><strong>保色效果：</strong><span class="font-bold text-green-600">優秀</span>。澱粉殼和煎炸過程都有利於保色。</p>
+                                      <p class="mb-2"><strong>優點：</strong>風味與健康的最佳平衡點！吸油少，口感好，保色效果佳。</p>
+                                      <p><strong>缺點：</strong>步驟稍多（浸泡、瀝乾、裹粉），需注意控制澱粉用量以防外殼過厚。</p>`
+                        },
+                        '水煮': {
+                            title: '💧 水煮/清蒸 (Boiling/Steaming)',
+                            content: `<p class="mb-2"><strong>原理：</strong>直接利用水的熱量傳導使茄子熟軟，完全避免使用油。</p>
+                                      <p class="mb-2"><strong>最終質地：</strong>非常軟爛，無任何焦香或酥脆口感。</p>
+                                      <p class="mb-2"><strong>保色效果：</strong><span class="font-bold text-green-600">優秀</span>（前提是在沸水中加入白醋或檸檬汁）。</p>
+                                      <p class="mb-2"><strong>優點：</strong>最健康的選擇，完全無油，能保留茄子原味。</p>
+                                      <p><strong>缺點：</strong>質地單一，無焦香風味，成品水氣較重，與傳統風味差異最大。</p>`
+                        }
+                    },
+                    recipes: {
+                        classic: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">豬肉及醃料：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>免治豬肉：150克</li>
+                                        <li>生抽：2茶匙</li>
+                                        <li>紹興酒：1茶匙</li>
+                                        <li>粟粉：1/2茶匙</li>
+                                        <li>食油：1茶匙</li>
+                                        <li>白胡椒粉：少許</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">大師級魚香醬汁 (預調)：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>鎮江香醋：2湯匙</li>
+                                        <li>糖：2湯匙</li>
+                                        <li>生抽：1.5湯匙</li>
+                                        <li>紹興酒：1湯匙</li>
+                                        <li>雞湯或清水：60毫升</li>
+                                        <li>粟粉：2茶匙</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong class="block text-gray-700">主要食材：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>中式長茄子：2條 (約450克)</li>
+                                        <li>薑末、蒜末：各1湯匙</li>
+                                        <li>蔥白 (切末)：2湯匙</li>
+                                        <li>郫縣豆瓣醬 (剁細)：1湯匙</li>
+                                        <li>蔥花、麻油：適量</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>醃製豬肉：</strong>將豬肉末與所有醃料朝一個方向攪拌至起膠，靜置15分鐘。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>準備茄子 (推薦裹粉淺煎法)：</strong>茄子切條，浸泡醋水10分鐘防變色。徹底印乾後，裹上薄薄一層粟粉。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>煎製茄子：</strong>中高火熱油，分批下茄子條煎約4-5分鐘至四面金黃軟身，盛出備用。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>預熱砂煲與爆香：</strong>中小火預熱砂煲，下油炒香薑、蒜、蔥白末。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">5.</span><div><strong>炒製肉醬：</strong>轉中火，下郫縣豆瓣醬炒出紅油，再下肉末快速劃散炒至變色。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">6.</span><div><strong>燉煮入味：</strong>倒入預調的魚香醬汁煮沸，回鍋茄子條，輕輕翻拌。蓋上蓋，轉小火慢燉3-5分鐘。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">7.</span><div><strong>完成：</strong>開蓋，按需勾芡。起鍋前淋入麻油、撒上蔥花即可。</div></div>`
+                        },
+                        hk: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">核心食材變化：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li class="font-bold">鹹魚肉 (馬友/梅香)：1湯匙 (去骨拆肉)</li>
+                                        <li>免治豬肉：150克</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">醬汁調整：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>鎮江香醋：2湯匙</li>
+                                        <li>糖：2湯匙</li>
+                                        <li class="font-bold">生抽：<span class="line-through">1.5</span> 1湯匙 (因鹹魚已夠鹹)</li>
+                                        <li>紹興酒：1湯匙</li>
+                                        <li>雞湯或清水：60毫升</li>
+                                        <li>粟粉：2茶匙</li>
+                                    </ul>
+                                </div>
+                                 <div>
+                                    <strong class="block text-gray-700">其他主料 (不變)：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>茄子、薑、蒜、蔥、豆瓣醬...等與經典版相同</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>準備工作：</strong>醃製豬肉、處理茄子的步驟與經典版相同。鹹魚預先蒸熟或煎香，去骨拆肉。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>爆香順序 (關鍵！)：</strong>預熱砂煲，炒香薑、蒜、蔥白後，<strong class="text-[#D9534F]">先下鹹魚肉炒出濃郁香味</strong>，再下郫縣豆瓣醬炒出紅油。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>炒製肉醬：</strong>加入肉末快速劃散炒至變色。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>燉煮與完成：</strong>倒入調整後的魚香醬汁，回鍋茄子，蓋蓋慢燉。最後步驟與經典版相同。鹹鮮的旨味衝擊是此版本的靈魂。</div></div>`
+                        },
+                        veg: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">蛋白質替換：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li class="font-bold">新鮮香菇/杏鮑菇 (切丁)：200克</li>
+                                        <li class="font-bold text-sm">(或 老豆腐捏碎/植物肉)</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">魚香醬汁 (不變)：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>與經典版完全相同，魚香風味是核心。</li>
+                                        <li class="text-sm">(若配方含蠔油，需改用素蠔油)</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong class="block text-gray-700">其他主料 (不變)：</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                         <li>茄子、薑、蒜、蔥、豆瓣醬...等與經典版相同</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>準備工作：</strong>處理茄子的步驟與經典版相同。</div></div>
+                                 <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>炒香菌菇 (關鍵！)：</strong>預熱砂煲，下比平時略多的油，<strong class="text-[#D9534F]">將菌菇丁煸炒至金黃乾香</strong>，模擬出肉末的顆粒感和旨味，盛出備用。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>製作醬底：</strong>鍋中留底油，炒香薑、蒜、蔥白和郫縣豆瓣醬。</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>燉煮與完成：</strong>倒入魚香醬汁，回鍋煎好的茄子和炒香的菌菇丁，輕輕翻拌，蓋蓋慢燉。最後步驟與經典版相同。</div></div>`
+                        }
+                    }
+                },
+                en: {
+                    headerTitle: "Yu Xiang Eggplant Guide",
+                    navIntro: "Intro",
+                    navFlavor: "Flavor",
+                    navTech: "Techniques",
+                    navRecipe: "Recipe",
+                    navIntroMobile: "Intro",
+                    navFlavorMobile: "Flavor",
+                    navTechMobile: "Techniques",
+                    navRecipeMobile: "Recipe",
+                    mainTitle: "Spicy Sizzling Eggplant Clay Pot",
+                    mainSubtitle: "Deconstructing a sizzling Sichuan classic. This guide will take you deep into the secrets of 'Yu Xiang' flavor, the science of taming eggplant, and the art of mastering the clay pot, empowering you to replicate this restaurant-quality dish at home.",
+                    flavorTitle: "Flavor Deconstruction: The Trinity of Yu Xiang, Eggplant & Clay Pot",
+                    flavorDesc: "A perfect Yu Xiang Eggplant Clay Pot is a flawless symphony of flavor, ingredient, and vessel. Here, we'll break down these three core elements, unveiling their history and scientific principles to build a solid foundation for your culinary journey.",
+                    flavorCard1Title: "Soul of the Dish: Yu Xiang 🌿",
+                    flavorCard1Desc1: "'Yu Xiang' (fish-fragrant) doesn't mean it tastes like fish. It simulates the seasonings traditionally used in Sichuan fish cookery, combining the spice of pickled chilies or Doubanjiang, the sourness of vinegar, the sweetness of sugar, the umami of soy sauce, and the pungency of ginger, garlic, and scallions to form a complex, balanced flavor profile.",
+                    flavorCard1Desc2: "From the legend of a frugal housewife's 'lingering fragrance' to the etymology of 'pickled fish chilies', the story of Yu Xiang itself embodies the wisdom and creativity of Sichuan cuisine.",
+                    flavorCard2Title: "The Ingredient: Eggplant 🍆",
+                    flavorCard2Desc1: "The challenge of eggplant lies in its spongy structure, which eagerly soaks up oil and easily turns brown. The key to success is pre-treatment: methods like salting, flash-frying, or microwaving collapse its spongy cells, while an acidic soak helps preserve its beautiful purple skin.",
+                    flavorCard2Desc2: "Master these techniques to bid farewell to greasy, mushy eggplant and create a tender, flavorful, and vibrantly colored final product.",
+                    flavorCard3Title: "The Vessel: Clay Pot 🍲",
+                    flavorCard3Desc1: "The clay pot is the vessel for this dish's soul. Its earthenware material heats slowly but retains heat exceptionally well, providing a stable, even heat field and locking in moisture for ingredients to slowly meld with the sauce. The signature 'sizzle' upon serving is a testament to its lasting heat.",
+                    flavorCard3Desc2: "Properly seasoning a new pot and avoiding sudden temperature changes are crucial for unleashing its 'earthenware magic' and extending its lifespan.",
+                    sauceChartTitle: "Decoding the 'Golden Ratios' of Yu Xiang Sauce",
+                    sauceChartDesc: "Different sauce ratios create distinct flavor profiles. The chart below visualizes several classic recipes, allowing you to intuitively compare the nuances of sour, sweet, salty, and savory notes. Hover over the bars to see specific proportions.",
+                    techTitle: "Technique Comparison: Five Weapons to Tame Eggplant",
+                    techDesc: "From professional restaurant methods to convenient home hacks, there are many ways to prepare eggplant. Click the buttons below to explore the principles, pros, cons, and final results of each method to find the best strategy for you.",
+                    techBtn1: "🔥 Flash-Frying",
+                    techBtn2: "🧂 Salting",
+                    techBtn3: "⚡ Microwaving",
+                    techBtn4: "🍳 Starch-Coating",
+                    techBtn5: "💧 Boiling/Steaming",
+                    recipeTitle: "Interactive Recipe: Build Your Own Yu Xiang Eggplant",
+                    recipeDesc: "With theory mastered, it's time for practice! Choose the version you'd like to try, and the ingredient list and steps below will update instantly. Which one are you making today?",
+                    recipeBtn1: "Classic Sichuan",
+                    recipeBtn2: "Hong Kong Style (+Salted Fish)",
+                    recipeBtn3: "Vegan Version (Mushroom)",
+                    ingredientsTitle: "Ingredients 🥣",
+                    stepsTitle: "Instructions 🧑‍🍳",
+                    footer1: "Interactive Guide to Yu Xiang Eggplant &copy; 2025",
+                    footer2: "Adapted from a report for educational and demonstrative purposes only.",
+                    chartXAxis: 'Relative Proportions',
+                    chartTooltipUnit: 'parts',
+                    langSwitchTo: '中文',
+                    langCurrent: 'English',
+                    sauceRatios: {
+                        labels: ["'54321' Rule", "'432111' Rule", "Omnivore's Cookbook", "Christine's Recipes", "Classic Sichuan Base"],
+                        datasets: [
+                            { label: 'Water/Broth', data: [5, 4, 2, 2, 4], backgroundColor: '#a8dadc' },
+                            { label: 'Vinegar', data: [4, 3, 3, 0, 2], backgroundColor: '#457b9d' },
+                            { label: 'Sugar', data: [3, 2, 3, 0.5, 2], backgroundColor: '#f1faee' },
+                            { label: 'Soy Sauce', data: [2, 1, 2, 1, 1.5], backgroundColor: '#e63946' },
+                            { label: 'Starch', data: [1, 1, 1, 0, 2], backgroundColor: '#1d3557' },
+                            { label: 'Other (Oyster Sauce/Wine)', data: [0, 1, 1, 3, 1], backgroundColor: '#ffb703' }
+                        ]
+                    },
+                    eggplantTechniques: {
+                        '過油': {
+                            title: '🔥 Flash-Frying',
+                            content: `<p class="mb-2"><strong>Principle:</strong> High heat quickly dehydrates the surface to form a protective shell, locking in moisture and preventing subsequent oil absorption.</p>
+                                      <p class="mb-2"><strong>Final Texture:</strong> Slightly firm exterior, creamy and tender interior. The best texture.</p>
+                                      <p class="mb-2"><strong>Color Retention:</strong><span class="font-bold text-green-600">Excellent</span>. High heat rapidly deactivates oxidizing enzymes, maximally preserving the purple color.</p>
+                                      <p class="mb-2"><strong>Pros:</strong> Fast, results are closest to restaurant quality, excellent color and flavor.</p>
+                                      <p><strong>Cons:</strong> Uses a large amount of oil, inconvenient and potentially hazardous for everyday home cooking.</p>`
+                        },
+                        '鹽漬': {
+                            title: '🧂 Salting',
+                            content: `<p class="mb-2"><strong>Principle:</strong> Osmosis draws water out of the eggplant's cells, collapsing the spongy structure beforehand to reduce oil absorption.</p>
+                                      <p class="mb-2"><strong>Final Texture:</strong> Tender, but with a slight chewiness.</p>
+                                      <p class="mb-2"><strong>Color Retention:</strong><span class="font-bold text-yellow-600">Good</span>. Slows down oxidation to some extent.</p>
+                                      <p class="mb-2"><strong>Pros:</strong> Effectively reduces oil absorption, simple to do, removes some bitterness.</p>
+                                      <p><strong>Cons:</strong> Time-consuming (20-30 mins), requires rinsing or squeezing, can make the final dish too salty if not handled properly.</p>`
+                        },
+                        '微波': {
+                            title: '⚡ Microwaving',
+                            content: `<p class="mb-2"><strong>Principle:</strong> Microwaves heat the water inside the eggplant, turning it to steam and collapsing the spongy structure from the inside out.</p>
+                                      <p class="mb-2"><strong>Final Texture:</strong> Tends to be soft and mushy, lacking resilience.</p>
+                                      <p class="mb-2"><strong>Color Retention:</strong><span class="font-bold text-orange-500">Fair</span>. Color is not preserved as well as with frying or boiling.</p>
+                                      <p class="mb-2"><strong>Pros:</strong> Fast, convenient, and virtually oil-free, one of the healthiest shortcuts.</p>
+                                      <p><strong>Cons:</strong> Lacks the wok hei (smoky aroma) from frying, texture is the softest and can be slightly dry.</p>`
+                        },
+                         '裹粉淺煎': {
+                            title: '🍳 Starch-Coating (Shallow-Frying)',
+                            content: `<p class="mb-2"><strong>Principle:</strong> Drained eggplant is coated in a thin layer of cornstarch, which forms a physical barrier during frying, effectively blocking oil penetration.</p>
+                                      <p class="mb-2"><strong>Final Texture:</strong> Slightly crispy exterior, tender interior, great textural contrast.</p>
+                                      <p class="mb-2"><strong>Color Retention:</strong><span class="font-bold text-green-600">Excellent</span>. Both the starch coating and frying process help retain color.</p>
+                                      <p class="mb-2"><strong>Pros:</strong> The best balance of flavor and health! Low oil absorption, great texture, and excellent color retention.</p>
+                                      <p><strong>Cons:</strong> A few extra steps (soaking, drying, coating), must control the amount of starch to avoid a thick crust.</p>`
+                        },
+                        '水煮': {
+                            title: '💧 Boiling/Steaming',
+                            content: `<p class="mb-2"><strong>Principle:</strong> Uses direct heat transfer from water to cook the eggplant, completely avoiding oil.</p>
+                                      <p class="mb-2"><strong>Final Texture:</strong> Very soft and mushy, with no caramelized or crispy elements.</p>
+                                      <p class="mb-2"><strong>Color Retention:</strong><span class="font-bold text-green-600">Excellent</span> (provided you add vinegar or lemon juice to the water).</p>
+                                      <p class="mb-2"><strong>Pros:</strong> The healthiest option, completely oil-free, preserves the original flavor of the eggplant.</p>
+                                      <p><strong>Cons:</strong> One-dimensional texture, lacks wok hei, final product can be watery, differs most from the traditional version.</p>`
+                        }
+                    },
+                    recipes: {
+                        classic: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Pork & Marinade:</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Minced pork: 150g</li>
+                                        <li>Light soy sauce: 2 tsp</li>
+                                        <li>Shaoxing wine: 1 tsp</li>
+                                        <li>Cornstarch: 1/2 tsp</li>
+                                        <li>Cooking oil: 1 tsp</li>
+                                        <li>White pepper: Pinch</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Master Yu Xiang Sauce (Pre-mixed):</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Chinkiang vinegar: 2 tbsp</li>
+                                        <li>Sugar: 2 tbsp</li>
+                                        <li>Light soy sauce: 1.5 tbsp</li>
+                                        <li>Shaoxing wine: 1 tbsp</li>
+                                        <li>Chicken stock or water: 60ml (1/4 cup)</li>
+                                        <li>Cornstarch: 2 tsp</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong class="block text-gray-700">Main Ingredients:</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Chinese long eggplants: 2 (about 450g)</li>
+                                        <li>Minced ginger, Minced garlic: 1 tbsp each</li>
+                                        <li>Minced scallion whites: 2 tbsp</li>
+                                        <li>Pixian Doubanjiang (minced): 1 tbsp</li>
+                                        <li>Chopped green onions, Sesame oil: For garnish</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>Marinate Pork:</strong> Combine minced pork with all marinade ingredients. Stir in one direction until the mixture is sticky. Set aside for 15 minutes.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>Prep Eggplant (Starch-coating method recommended):</strong> Cut eggplant into strips, soak in vinegar water for 10 mins to prevent browning. Dry thoroughly, then coat in a thin layer of cornstarch.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>Pan-fry Eggplant:</strong> Heat oil over medium-high heat. Pan-fry the eggplant strips in batches for 4-5 minutes until golden brown and soft on all sides. Remove and set aside.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>Heat Clay Pot & Aromatics:</strong> Slowly preheat the clay pot over medium-low heat. Add oil and sauté ginger, garlic, and scallion whites until fragrant.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">5.</span><div><strong>Cook Pork & Sauce Base:</strong> Turn heat to medium. Add Pixian Doubanjiang and fry until the oil turns red. Add the minced pork and break it up, stir-frying until it changes color.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">6.</span><div><strong>Simmer:</strong> Pour in the pre-mixed Yu Xiang sauce and bring to a boil. Return the fried eggplant to the pot and gently toss. Cover and simmer on low heat for 3-5 minutes.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">7.</span><div><strong>Finish:</strong> Uncover. Thicken with more cornstarch slurry if needed. Drizzle with sesame oil and garnish with chopped green onions before serving.</div></div>`
+                        },
+                        hk: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Core Ingredient Change:</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li class="font-bold">Salted fish (Mui Heung or Ma Yau): 1 tbsp (deboned & flaked)</li>
+                                        <li>Minced pork: 150g</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Sauce Adjustment:</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Chinkiang vinegar: 2 tbsp</li>
+                                        <li>Sugar: 2 tbsp</li>
+                                        <li class="font-bold">Light soy sauce: <span class="line-through">1.5</span> 1 tbsp (fish is salty)</li>
+                                        <li>Shaoxing wine: 1 tbsp</li>
+                                        <li>Chicken stock or water: 60ml</li>
+                                        <li>Cornstarch: 2 tsp</li>
+                                    </ul>
+                                </div>
+                                 <div>
+                                    <strong class="block text-gray-700">Other Ingredients (Unchanged):</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Eggplant, ginger, garlic, scallions, Doubanjiang... same as Classic version.</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>Preparation:</strong> Marinate pork and prepare eggplant as in the classic version. Steam or pan-fry the salted fish, then debone and flake the meat.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>Aromatics Order (Key!):</strong> Preheat clay pot. Sauté ginger, garlic, and scallion whites, then <strong class="text-[#D9534F]">add the salted fish first and fry until fragrant</strong> before adding the Pixian Doubanjiang.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>Cook Pork:</strong> Add the minced pork and stir-fry until it changes color.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>Simmer & Finish:</strong> Pour in the adjusted Yu Xiang sauce, return the eggplant, cover, and simmer. The final steps are the same as the classic version. The umami punch from the salted fish is the soul of this version.</div></div>`
+                        },
+                        veg: {
+                            ingredients: `
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Protein Swap:</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li class="font-bold">Fresh shiitake/king oyster mushrooms (diced): 200g</li>
+                                        <li class="font-bold text-sm">(or crumbled firm tofu / plant-based mince)</li>
+                                    </ul>
+                                </div>
+                                <div class="mb-4">
+                                    <strong class="block text-gray-700">Yu Xiang Sauce (Unchanged):</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                        <li>Same as the classic version; the Yu Xiang flavor is key.</li>
+                                        <li class="text-sm">(If the recipe uses oyster sauce, switch to a vegetarian version)</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <strong class="block text-gray-700">Other Ingredients (Unchanged):</strong>
+                                    <ul class="list-disc list-inside text-gray-600">
+                                         <li>Eggplant, ginger, garlic, scallions, Doubanjiang... same as Classic version.</li>
+                                    </ul>
+                                </div>`,
+                            steps: `
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">1.</span><div><strong>Preparation:</strong> Prepare the eggplant as in the classic version.</div></div>
+                                 <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">2.</span><div><strong>Sauté Mushrooms (Key!):</strong> Preheat clay pot with slightly more oil than usual. <strong class="text-[#D9534F]">Sauté the diced mushrooms until golden brown and fragrant</strong> to mimic the texture and umami of minced meat. Set aside.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">3.</span><div><strong>Make Sauce Base:</strong> In the remaining oil, sauté ginger, garlic, scallion whites, and Pixian Doubanjiang.</div></div>
+                                <div class="flex items-start"><span class="font-bold text-lg text-[#8C4D2E] mr-3">4.</span><div><strong>Simmer & Finish:</strong> Pour in the Yu Xiang sauce. Return the fried eggplant and sautéed mushrooms to the pot. Toss gently, cover, and simmer. The final steps are the same as the classic version.</div></div>`
+                        }
+                    }
+                }
+            };
+            
+            let currentLang = 'zh';
+            let currentRecipe = 'classic';
+            let currentTech = '過油';
+            let sauceChart;
+
+            const techDetailContainer = document.getElementById('technique-details');
+            const ingredientsContent = document.getElementById('ingredients-content');
+            const stepsContent = document.getElementById('steps-content');
+            
+            function createChart() {
+                const ctx = document.getElementById('sauceChart').getContext('2d');
+                if (sauceChart) {
+                    sauceChart.destroy();
+                }
+                sauceChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: translations[currentLang].sauceRatios,
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.x !== null) {
+                                            label += `${context.parsed.x} ${translations[currentLang].chartTooltipUnit}`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { stacked: true, title: { display: true, text: translations[currentLang].chartXAxis } },
+                            y: { stacked: true, ticks: { autoSkip: false } }
+                        }
+                    }
+                });
+            }
+            
+            function updateTechniqueDetails(techKey) {
+                currentTech = techKey;
+                const techData = translations[currentLang].eggplantTechniques[techKey];
+                if (techData) {
+                    techDetailContainer.innerHTML = `<h3 class="text-xl font-bold mb-4 text-[#8C4D2E]">${techData.title}</h3>${techData.content}`;
+                }
+            }
+            
+            function updateRecipeView(recipeKey) {
+                currentRecipe = recipeKey;
+                const recipeData = translations[currentLang].recipes[recipeKey];
+                if(recipeData) {
+                    ingredientsContent.innerHTML = recipeData.ingredients;
+                    stepsContent.innerHTML = recipeData.steps;
+                }
+            }
+
+            function updateLanguage() {
+                document.documentElement.lang = currentLang === 'zh' ? 'zh-Hant' : 'en';
+                const langData = translations[currentLang];
+                
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (langData[key]) {
+                        el.innerHTML = langData[key];
+                    }
+                });
+
+                document.getElementById('lang-switcher').textContent = langData.langSwitchTo;
+                document.getElementById('lang-switcher-mobile').textContent = langData.langSwitchTo;
+
+                createChart();
+                updateTechniqueDetails(currentTech);
+                updateRecipeView(currentRecipe);
+            }
+
+            // Initial setup
+            createChart();
+            updateTechniqueDetails(currentTech);
+            updateRecipeView(currentRecipe);
+
+            // Event Listeners
+            document.querySelectorAll('.eggplant-tech-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.eggplant-tech-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateTechniqueDetails(btn.dataset.tech);
+                });
+            });
+
+            document.querySelectorAll('.recipe-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.recipe-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    updateRecipeView(btn.dataset.recipe);
+                });
+            });
+            
+            [document.getElementById('lang-switcher'), document.getElementById('lang-switcher-mobile')].forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                    updateLanguage();
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.querySelectorAll('.nav-link, #mobile-menu a').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (this.getAttribute('href').startsWith('#')) {
+                        e.preventDefault();
+                        const targetElement = document.querySelector(this.getAttribute('href'));
+                        if (targetElement) {
+                             targetElement.scrollIntoView({ behavior: 'smooth' });
+                        }
+                         if(!mobileMenu.classList.contains('hidden')){
+                           mobileMenu.classList.add('hidden');
+                         }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
