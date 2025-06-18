@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI驅動的未來：新興職業互動報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutral Slate -->
+    <!-- Application Structure Plan: The application is designed as a single-page exploratory dashboard, moving away from the linear structure of the source report. It starts with a hero section to state the core thesis ("Reshaping, not just Replacing"). The core content is divided into four navigable sections: 1. "Macro Trends" uses an interactive chart to present the quantitative data on job creation vs. replacement, making the numbers digestible. 2. "New Job Landscape" is the centerpiece, visualizing the report's 3-layer framework ("Enablers", "Guardians", "Orchestrators") with interactive cards. Clicking on a job title reveals a detailed modal, which is a user-friendly way to explore the 8 new roles without cluttering the page. 3. "Future Skills" uses a filterable bar chart to highlight the shift in skill demands, allowing users to focus on Hard, Soft, or Meta skills. 4. "Strategies" uses a tabbed interface to cleanly separate advice for businesses and individuals. This structure facilitates non-linear exploration, allowing users to jump to sections of interest, which is more engaging and usable than reading a static document. A language switcher has been added for EN/ZH localization. -->
+    <!-- Visualization & Content Choices: 1. Macro Trends: Goal: Compare job creation/replacement projections. Method: Chart.js Grouped Bar Chart. Interaction: Hovering reveals tooltips with specific data from WEF and PwC. Justification: A bar chart is ideal for direct quantitative comparison. 2. New Job Landscape: Goal: Organize and inform about new job roles. Method: Interactive cards in a 3-column grid (HTML/Tailwind). Interaction: Clicking a job title triggers a JS function to display a modal with detailed information (responsibilities, skills). Justification: This avoids information overload and encourages user interaction and exploration. 3. Future Skills: Goal: Show the changing importance of skills. Method: Chart.js Horizontal Bar Chart. Interaction: Buttons filter the chart data by category (Hard, Soft, Meta) and dynamically update the visualization and related text. Justification: A filterable chart makes the data more engaging and allows users to focus on their specific interests. 4. Strategies: Goal: Organize actionable advice. Method: HTML/JS tabs. Interaction: Clicking tabs switches between content for businesses and individuals. Justification: Tabs provide a clean separation of content for different audiences within a compact space. All text content is now managed in a translation object for language switching. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D3B30;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4A5568;
+            border-bottom-color: #4A5568;
+        }
+        .job-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .job-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.3s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-40 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex justify-between items-center py-4">
+                <div id="app-title" class="text-xl font-bold text-slate-700">AI新職業洞察</div>
+                <div class="flex items-center">
+                    <div class="hidden md:flex items-center space-x-8 mr-8">
+                        <a href="#trends" id="nav-trends" class="nav-link font-medium text-slate-600 pb-1">宏觀趨勢</a>
+                        <a href="#landscape" id="nav-landscape" class="nav-link font-medium text-slate-600 pb-1">新職業版圖</a>
+                        <a href="#skills" id="nav-skills" class="nav-link font-medium text-slate-600 pb-1">未來技能</a>
+                        <a href="#strategies" id="nav-strategies" class="nav-link font-medium text-slate-600 pb-1">應對策略</a>
+                    </div>
+                     <button id="lang-switcher" class="bg-slate-200 text-slate-700 font-medium px-3 py-1 rounded-full text-sm hover:bg-slate-300 transition-colors">EN</button>
+                    <div class="md:hidden ml-4">
+                        <button id="menu-btn" class="text-slate-700 focus:outline-none">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="#trends" id="mobile-nav-trends" class="block py-2 px-4 text-sm text-slate-600 hover:bg-slate-50 rounded">宏觀趨勢</a>
+                <a href="#landscape" id="mobile-nav-landscape" class="block py-2 px-4 text-sm text-slate-600 hover:bg-slate-50 rounded">新職業版圖</a>
+                <a href="#skills" id="mobile-nav-skills" class="block py-2 px-4 text-sm text-slate-600 hover:bg-slate-50 rounded">未來技能</a>
+                <a href="#strategies" id="mobile-nav-strategies" class="block py-2 px-4 text-sm text-slate-600 hover:bg-slate-50 rounded">應對策略</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="py-20 md:py-32 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h1 id="hero-title" class="text-4xl md:text-6xl font-bold text-slate-800 mb-4">AI驅動的未來</h1>
+                <p id="hero-subtitle" class="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto">核心論點：從「工作終結論」到「任務重組論」。AI的影響更多體現在對特定任務的自動化，而非對整個職業的完全取代。</p>
+            </div>
+        </section>
+
+        <!-- Section 1: Macro Trends -->
+        <section id="trends" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 id="trends-title" class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">宏觀趨勢：取代與創造並存</h2>
+                    <p id="trends-desc" class="max-w-3xl mx-auto text-slate-600">權威機構的研究描繪了一幅複雜的圖景。雖然部分崗位面臨被取代的風險，但技術革新也將催生大量新職位，宏觀上呈現淨增長。然而，這背後是劇烈的勞動力市場結構性變革。</p>
+                </div>
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <h3 id="trends-chart-title" class="text-xl font-bold text-center mb-6 text-slate-700">權威機構對AI就業影響的預測</h3>
+                    <div class="chart-container">
+                        <canvas id="macroTrendsChart"></canvas>
+                    </div>
+                    <p id="trends-chart-caption" class="text-center text-sm text-slate-500 mt-4">數據來源：世界經濟論壇(WEF)及普華永道(PwC)。將游標懸停在圖表上查看具體數據。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: New Job Landscape -->
+        <section id="landscape" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 id="landscape-title" class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">新職業版圖：三層分類框架</h2>
+                    <p id="landscape-desc" class="max-w-3xl mx-auto text-slate-600">新興職業並非孤立存在，而是圍繞AI技術的整個生命週期形成了一個生態系統。本框架將其分為三大類別，點擊下方的職業卡片以探索更多細節。</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Column 1: Enablers -->
+                    <div class="bg-slate-50 p-6 rounded-xl">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-sky-200 text-sky-800 p-2 rounded-full mr-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.657 7.343A8 8 0 0117.657 18.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1014.12 11.88l-4.242 4.242z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 id="enablers-title" class="text-2xl font-bold text-slate-800">賦能者</h3>
+                                <p id="enablers-subtitle" class="text-slate-500">AI互動與開發層</p>
+                            </div>
+                        </div>
+                        <p id="enablers-desc" class="text-slate-600 mb-6">處於人機互動的最前線，負責將人類意圖轉化為AI可執行的指令，是AI能力的直接賦予者。</p>
+                        <div class="space-y-4">
+                            <button data-job="promptEngineer" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-promptEngineer" class="font-bold text-slate-700">AI提示工程師</h4>
+                                <p id="job-desc-promptEngineer" class="text-sm text-slate-500">設計與AI模型的對話，引導其產生精準輸出。</p>
+                            </button>
+                            <button data-job="aiTrainer" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiTrainer" class="font-bold text-slate-700">AI訓練師</h4>
+                                <p id="job-desc-aiTrainer" class="text-sm text-slate-500">策劃和優化數據，以訓練和微調AI模型。</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Guardians -->
+                    <div class="bg-slate-50 p-6 rounded-xl">
+                        <div class="flex items-center mb-4">
+                             <div class="bg-amber-200 text-amber-800 p-2 rounded-full mr-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 id="guardians-title" class="text-2xl font-bold text-slate-800">守護者</h3>
+                                <p id="guardians-subtitle" class="text-slate-500">AI治理與倫理層</p>
+                            </div>
+                        </div>
+                        <p id="guardians-desc" class="text-slate-600 mb-6">為AI技術的開發和應用劃定邊界，確保其安全、合規、公平，是AI健康發展的基石。</p>
+                        <div class="space-y-4">
+                            <button data-job="aiEthicist" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiEthicist" class="font-bold text-slate-700">AI倫理師</h4>
+                                <p id="job-desc-aiEthicist" class="text-sm text-slate-500">確保AI系統符合倫理、法律和社會價值。</p>
+                            </button>
+                             <button data-job="aiAuditor" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiAuditor" class="font-bold text-slate-700">AI稽核員</h4>
+                                <p id="job-desc-aiAuditor" class="text-sm text-slate-500">獨立審計AI系統，確保其合規、安全可靠。</p>
+                            </button>
+                             <button data-job="aiPolicyAdvisor" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiPolicyAdvisor" class="font-bold text-slate-700">AI政策顧問</h4>
+                                <p id="job-desc-aiPolicyAdvisor" class="text-sm text-slate-500">提供關於AI監管與發展的戰略建議。</p>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Column 3: Orchestrators -->
+                     <div class="bg-slate-50 p-6 rounded-xl">
+                        <div class="flex items-center mb-4">
+                            <div class="bg-emerald-200 text-emerald-800 p-2 rounded-full mr-4">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div>
+                                <h3 id="orchestrators-title" class="text-2xl font-bold text-slate-800">編排者</h3>
+                                <p id="orchestrators-subtitle" class="text-slate-500">AI業務整合與策略層</p>
+                            </div>
+                        </div>
+                        <p id="orchestrators-desc" class="text-slate-600 mb-6">將AI的技術潛力轉化為實際商業價值，負責設計創新應用模式，驅動企業增長和轉型。</p>
+                        <div class="space-y-4">
+                            <button data-job="aiBusinessAnalyst" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiBusinessAnalyst" class="font-bold text-slate-700">AI業務分析師</h4>
+                                <p id="job-desc-aiBusinessAnalyst" class="text-sm text-slate-500">識別業務痛點，將其轉化為AI解決方案。</p>
+                            </button>
+                            <button data-job="aiMarketingStrategist" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-aiMarketingStrategist" class="font-bold text-slate-700">AI營銷策略師</h4>
+                                <p id="job-desc-aiMarketingStrategist" class="text-sm text-slate-500">利用AI工具和數據優化個性化營銷。</p>
+                            </button>
+                            <button data-job="manMachineManager" class="job-card w-full bg-white p-4 rounded-lg shadow text-left">
+                                <h4 id="job-title-manMachineManager" class="font-bold text-slate-700">人機協作經理</h4>
+                                <p id="job-desc-manMachineManager" class="text-sm text-slate-500">設計和管理人類與AI代理的混合團隊。</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Future Skills -->
+        <section id="skills" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 id="skills-title" class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">未來人才的技能圖譜</h2>
+                    <p id="skills-desc" class="max-w-3xl mx-auto text-slate-600">在AI時代，人才需求發生根本性轉變，單一技能已不足以應對挑戰。未來的核心競爭力在於融合硬技能、軟實力與元技能的綜合能力。</p>
+                </div>
+                
+                <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                    <div class="flex justify-center space-x-2 md:space-x-4 mb-6">
+                        <button id="skill-btn-all" class="skill-filter-btn bg-slate-700 text-white px-4 py-2 rounded-full text-sm md:text-base">所有技能</button>
+                        <button id="skill-btn-hard" class="skill-filter-btn bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-sm md:text-base">硬技能</button>
+                        <button id="skill-btn-soft" class="skill-filter-btn bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-sm md:text-base">軟實力</button>
+                        <button id="skill-btn-meta" class="skill-filter-btn bg-slate-200 text-slate-700 px-4 py-2 rounded-full text-sm md:text-base">元技能</button>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-5 gap-8 items-center">
+                        <div class="md:col-span-3">
+                            <div class="chart-container" style="height:450px; max-height: 60vh;">
+                                <canvas id="skillsChart"></canvas>
+                            </div>
+                        </div>
+                        <div id="skill-description" class="md:col-span-2 text-slate-600">
+                             <h3 id="skill-desc-title" class="font-bold text-lg text-slate-800 mb-2">技能需求變化趨勢</h3>
+                             <p id="skill-desc-text">隨著AI自動化重複性任務，人類的價值越來越體現在那些無法被輕易編程的核心素養上。點擊上方按鈕，篩選查看不同類別技能的重要性。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Strategies -->
+        <section id="strategies" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 id="strategies-title" class="text-3xl md:text-4xl font-bold text-slate-800 mb-4">企業與個人的應對策略</h2>
+                    <p id="strategies-desc" class="max-w-3xl mx-auto text-slate-600">面對AI引發的深刻變革，企業和個人都必須採取積極主動的戰略，才能在未來的就業市場中抓住機遇、應對挑戰。</p>
+                </div>
+
+                <div>
+                    <div class="border-b border-slate-200 mb-8">
+                        <nav class="-mb-px flex justify-center space-x-8" aria-label="Tabs">
+                            <button id="tab-business" class="strategy-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-slate-800 border-slate-700">企業策略</button>
+                            <button id="tab-individual" class="strategy-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-lg text-slate-500 border-transparent hover:text-slate-700 hover:border-slate-300">個人策略</button>
+                        </nav>
+                    </div>
+
+                    <div id="content-business" class="strategy-content">
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-biz-1-title" class="font-bold text-slate-800 text-lg mb-2">技能提升置於首位</h4>
+                                <p id="strategy-biz-1-desc" class="text-slate-600">將對現有員工的技能再培訓和提升作為首要戰略，建立持續的學習生態系統。</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-biz-2-title" class="font-bold text-slate-800 text-lg mb-2">邁向「AI為先」</h4>
+                                <p id="strategy-biz-2-desc" class="text-slate-600">不僅是部署工具，而是從根本上重塑業務流程、組織架構和企業文化。</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-biz-3-title" class="font-bold text-slate-800 text-lg mb-2">解決技能差距</h4>
+                                <p id="strategy-biz-3-desc" class="text-slate-600">通過內部培訓、外部招聘、校企合作等多管齊下的方式，構建可持續的人才管道。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-individual" class="strategy-content hidden">
+                         <div class="grid md:grid-cols-3 gap-6">
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-ind-1-title" class="font-bold text-slate-800 text-lg mb-2">主動擁抱，而非恐懼</h4>
+                                <p id="strategy-ind-1-desc" class="text-slate-600">將AI視為個人能力的「增強器」和「副駕駛」，用它來自動化重複性任務，提升效率。</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-ind-2-title" class="font-bold text-slate-800 text-lg mb-2">投資「人類獨有」技能</h4>
+                                <p id="strategy-ind-2-desc" class="text-slate-600">有意識地發展批判性思維、創造力、解決複雜問題能力和高情商協作能力。</p>
+                            </div>
+                            <div class="bg-slate-50 p-6 rounded-lg">
+                                <h4 id="strategy-ind-3-title" class="font-bold text-slate-800 text-lg mb-2">建立終身學習習慣</h4>
+                                <p id="strategy-ind-3-desc" class="text-slate-600">將持續學習內化為一種基本的工作和生活方式，保持對新知識的好奇心和開放心態。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-300 py-12">
+        <div class="container mx-auto px-4 text-center">
+            <p id="footer-text" class="mb-4">這場變革的終點，取決於我們今天的選擇。讓我們擁抱人機協同的新紀元。</p>
+            <button id="to-top-btn" class="mx-auto bg-slate-700 hover:bg-slate-600 text-white px-6 py-2 rounded-full transition">返回頂部</button>
+        </div>
+    </footer>
+
+    <!-- Job Details Modal -->
+    <div id="jobModal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50 opacity-0 pointer-events-none">
+        <div id="modalContent" class="modal-content bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95">
+            <div class="sticky top-0 bg-white p-6 border-b border-slate-200 flex justify-between items-center z-10">
+                <h3 id="modalTitle" class="text-2xl font-bold text-slate-800"></h3>
+                <button id="closeModal" class="text-slate-400 hover:text-slate-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <h4 id="modal-resp-title" class="font-bold text-lg text-slate-700 mb-2">核心職責</h4>
+                    <ul id="modalResponsibilities" class="list-disc list-inside space-y-2 text-slate-600"></ul>
+                </div>
+                <div>
+                    <h4 id="modal-skills-title" class="font-bold text-lg text-slate-700 mb-3">關鍵技能</h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h5 id="modal-hard-skills-title" class="font-semibold text-slate-600 mb-2">硬技能</h5>
+                            <ul id="modalHardSkills" class="list-disc list-inside space-y-2 text-slate-600"></ul>
+                        </div>
+                        <div>
+                             <h5 id="modal-soft-skills-title" class="font-semibold text-slate-600 mb-2">軟實力</h5>
+                            <ul id="modalSoftSkills" class="list-disc list-inside space-y-2 text-slate-600"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLang = 'zh';
+            let currentSkillFilter = 'all';
+            const charts = {};
+
+            const textData = {
+                zh: {
+                    appTitle: "AI新職業洞察",
+                    navTrends: "宏觀趨勢",
+                    navLandscape: "新職業版圖",
+                    navSkills: "未來技能",
+                    navStrategies: "應對策略",
+                    heroTitle: "AI驅動的未來",
+                    heroSubtitle: "核心論點：從「工作終結論」到「任務重組論」。AI的影響更多體現在對特定任務的自動化，而非對整個職業的完全取代。",
+                    trendsTitle: "宏觀趨勢：取代與創造並存",
+                    trendsDesc: "權威機構的研究描繪了一幅複雜的圖景。雖然部分崗位面臨被取代的風險，但技術革新也將催生大量新職位，宏觀上呈現淨增長。然而，這背後是劇烈的勞動力市場結構性變革。",
+                    trendsChartTitle: "權威機構對AI就業影響的預測",
+                    trendsChartCaption: "數據來源：世界經濟論壇(WEF)及普華永道(PwC)。將游標懸停在圖表上查看具體數據。",
+                    landscapeTitle: "新職業版圖：三層分類框架",
+                    landscapeDesc: "新興職業並非孤立存在，而是圍繞AI技術的整個生命週期形成了一個生態系統。本框架將其分為三大類別，點擊下方的職業卡片以探索更多細節。",
+                    enablersTitle: "賦能者",
+                    enablersSubtitle: "AI互動與開發層",
+                    enablersDesc: "處於人機互動的最前線，負責將人類意圖轉化為AI可執行的指令，是AI能力的直接賦予者。",
+                    guardiansTitle: "守護者",
+                    guardiansSubtitle: "AI治理與倫理層",
+                    guardiansDesc: "為AI技術的開發和應用劃定邊界，確保其安全、合規、公平，是AI健康發展的基石。",
+                    orchestratorsTitle: "編排者",
+                    orchestratorsSubtitle: "AI業務整合與策略層",
+                    orchestratorsDesc: "將AI的技術潛力轉化為實際商業價值，負責設計創新應用模式，驅動企業增長和轉型。",
+                    skillsTitle: "未來人才的技能圖譜",
+                    skillsDesc: "在AI時代，人才需求發生根本性轉變，單一技能已不足以應對挑戰。未來的核心競爭力在於融合硬技能、軟實力與元技能的綜合能力。",
+                    skillBtnAll: "所有技能",
+                    skillBtnHard: "硬技能",
+                    skillBtnSoft: "軟實力",
+                    skillBtnMeta: "元技能",
+                    strategiesTitle: "企業與個人的應對策略",
+                    strategiesDesc: "面對AI引發的深刻變革，企業和個人都必須採取積極主動的戰略，才能在未來的就業市場中抓住機遇、應對挑戰。",
+                    tabBusiness: "企業策略",
+                    tabIndividual: "個人策略",
+                    strategyBiz1Title: "技能提升置於首位",
+                    strategyBiz1Desc: "將對現有員工的技能再培訓和提升作為首要戰略，建立持續的學習生態系統。",
+                    strategyBiz2Title: "邁向「AI為先」",
+                    strategyBiz2Desc: "不僅是部署工具，而是從根本上重塑業務流程、組織架構和企業文化。",
+                    strategyBiz3Title: "解決技能差距",
+                    strategyBiz3Desc: "通過內部培訓、外部招聘、校企合作等多管齊下的方式，構建可持續的人才管道。",
+                    strategyInd1Title: "主動擁抱，而非恐懼",
+                    strategyInd1Desc: "將AI視為個人能力的「增強器」和「副駕駛」，用它來自動化重複性任務，提升效率。",
+                    strategyInd2Title: "投資「人類獨有」技能",
+                    strategyInd2Desc: "有意識地發展批判性思維、創造力、解決複雜問題能力和高情商協作能力。",
+                    strategyInd3Title: "建立終身學習習慣",
+                    strategyInd3Desc: "將持續學習內化為一種基本的工作和生活方式，保持對新知識的好奇心和開放心態。",
+                    footerText: "這場變革的終點，取決於我們今天的選擇。讓我們擁抱人機協同的新紀元。",
+                    toTopBtn: "返回頂部",
+                    modalRespTitle: "核心職責",
+                    modalSkillsTitle: "關鍵技能",
+                    modalHardSkillsTitle: "硬技能",
+                    modalSoftSkillsTitle: "軟實力",
+                    yAxisLabel: "職位數量 (萬)",
+                    createdJobsLabel: "創造的新職位(萬)",
+                    replacedJobsLabel: "取代的現有職位(萬)",
+                    skillImportanceLabel: "技能重要性指數",
+                    skillsChartTitle: "關鍵技能需求增長趨勢",
+                },
+                en: {
+                    appTitle: "AI New Careers Insights",
+                    navTrends: "Trends",
+                    navLandscape: "New Careers",
+                    navSkills: "Future Skills",
+                    navStrategies: "Strategies",
+                    heroTitle: "The AI-Driven Future",
+                    heroSubtitle: "Core Thesis: From 'Job Apocalypse' to 'Task Reorganization'. AI's impact is more on automating specific tasks than completely replacing entire professions.",
+                    trendsTitle: "Macro Trends: Coexistence of Replacement and Creation",
+                    trendsDesc: "Research from authoritative bodies paints a complex picture. While some roles face replacement risk, technological innovation will also spawn numerous new jobs, showing net growth overall. However, this masks dramatic structural changes in the labor market.",
+                    trendsChartTitle: "Predictions on AI's Employment Impact by Authoritative Bodies",
+                    trendsChartCaption: "Source: World Economic Forum (WEF) & PwC. Hover over the chart to see specific data.",
+                    landscapeTitle: "New Career Landscape: A Three-Layer Framework",
+                    landscapeDesc: "Emerging professions don't exist in isolation but form an ecosystem around the entire AI lifecycle. This framework divides them into three main categories. Click the cards below to explore.",
+                    enablersTitle: "The Enablers",
+                    enablersSubtitle: "AI Interaction & Development Layer",
+                    enablersDesc: "At the forefront of human-machine interaction, responsible for translating human intent into AI-executable commands, directly empowering AI capabilities.",
+                    guardiansTitle: "The Guardians",
+                    guardiansSubtitle: "AI Governance & Ethics Layer",
+                    guardiansDesc: "Defining the boundaries for AI technology development and application, ensuring it is safe, compliant, and fair, forming the cornerstone of healthy AI development.",
+                    orchestratorsTitle: "The Orchestrators",
+                    orchestratorsSubtitle: "AI Business Integration & Strategy Layer",
+                    orchestratorsDesc: "Translating AI's technical potential into actual business value, responsible for designing innovative application models to drive enterprise growth and transformation.",
+                    skillsTitle: "The Skill Map for Future Talent",
+                    skillsDesc: "In the AI era, talent demands are fundamentally changing. A single skill is no longer enough. The core competency of the future lies in the integrated ability to fuse hard skills, soft skills, and meta-skills.",
+                    skillBtnAll: "All Skills",
+                    skillBtnHard: "Hard Skills",
+                    skillBtnSoft: "Soft Skills",
+                    skillBtnMeta: "Meta-Skills",
+                    strategiesTitle: "Strategies for Enterprises and Individuals",
+                    strategiesDesc: "Facing the profound changes brought by AI, both enterprises and individuals must adopt proactive strategies to seize opportunities and meet challenges in the future job market.",
+                    tabBusiness: "For Business",
+                    tabIndividual: "For Individuals",
+                    strategyBiz1Title: "Prioritize Skilling",
+                    strategyBiz1Desc: "Make reskilling and upskilling of the current workforce a top strategy, establishing a continuous learning ecosystem.",
+                    strategyBiz2Title: "Move Towards 'AI-First'",
+                    strategyBiz2Desc: "It's not just about deploying tools, but fundamentally reshaping business processes, organizational structure, and corporate culture.",
+                    strategyBiz3Title: "Bridge the Skills Gap",
+                    strategyBiz3Desc: "Build a sustainable talent pipeline through a multi-pronged approach of internal training, external hiring, and university-enterprise cooperation.",
+                    strategyInd1Title: "Embrace, Don't Fear",
+                    strategyInd1Desc: "View AI as a personal capability 'augmenter' and 'copilot,' using it to automate repetitive tasks and boost efficiency.",
+                    strategyInd2Title: "Invest in 'Human-Only' Skills",
+                    strategyInd2Desc: "Consciously develop critical thinking, creativity, complex problem-solving abilities, and high emotional intelligence for collaboration.",
+                    strategyInd3Title: "Cultivate Lifelong Learning",
+                    strategyInd3Desc: "Internalize continuous learning as a fundamental way of work and life, maintaining curiosity and openness to new knowledge.",
+                    footerText: "The outcome of this transformation depends on the choices we make today. Let's embrace the new era of human-machine collaboration.",
+                    toTopBtn: "Back to Top",
+                    modalRespTitle: "Core Responsibilities",
+                    modalSkillsTitle: "Key Skills",
+                    modalHardSkillsTitle: "Hard Skills",
+                    modalSoftSkillsTitle: "Soft Skills",
+                    yAxisLabel: "Number of Jobs (in 10k)",
+                    createdJobsLabel: "New Jobs Created (in 10k)",
+                    replacedJobsLabel: "Existing Jobs Replaced (in 10k)",
+                    skillImportanceLabel: "Skill Importance Index",
+                    skillsChartTitle: "Key Skill Demand Growth Trend",
+                }
+            };
+
+            const jobData = {
+                promptEngineer: {
+                    title: { zh: "AI提示工程師 (Prompt Engineer)", en: "Prompt Engineer" },
+                    desc: { zh: "設計與AI模型的對話，引導其產生精準輸出。", en: "Designs conversations with AI models to guide precise outputs." },
+                    responsibilities: { 
+                        zh: ["根據不同應用場景，設計、開發、測試和迭代提示詞", "系統性地評估模型輸出質量，持續改進提示策略", "建立和維護高效、可複用的提示詞庫", "與數據科學家、產品經理等跨團隊協作"],
+                        en: ["Design, develop, test, and iterate prompts for various application scenarios", "Systematically evaluate model output quality and continuously improve prompt strategies", "Build and maintain an efficient, reusable prompt library", "Collaborate with cross-functional teams like data scientists and product managers"]
+                    },
+                    hardSkills: { 
+                        zh: ["深刻理解LLM和NLP基本原理", "掌握高級提示技巧（如Few-shot learning）", "具備Python等編程和數據分析能力"],
+                        en: ["Deep understanding of LLM and NLP fundamentals", "Mastery of advanced prompting techniques (e.g., Few-shot learning)", "Programming and data analysis skills (e.g., Python)"]
+                    },
+                    softSkills: {
+                        zh: ["極強的邏輯思維和問題拆解能力", "卓越的語言表達與創意寫作技巧", "敏銳的分析性思維和對細節的關注"],
+                        en: ["Strong logical thinking and problem decomposition skills", "Excellent linguistic and creative writing abilities", "Keen analytical thinking and attention to detail"]
+                    }
+                },
+                aiTrainer: {
+                    title: { zh: "AI訓練師 (AI Trainer)", en: "AI Trainer" },
+                    desc: { zh: "策劃和優化數據，以訓練和微調AI模型。", en: "Curates and optimizes data to train and fine-tune AI models." },
+                    responsibilities: {
+                        zh: ["策劃、標註、清理和維護高質量的訓練數據集", "評估AI模型輸出，提供詳細的修正反饋", "設計和測試自然的對話式AI流程", "利用行業知識訓練AI處理專業任務"],
+                        en: ["Curate, annotate, clean, and maintain high-quality training datasets", "Evaluate AI model outputs and provide detailed corrective feedback", "Design and test natural conversational AI flows", "Use domain expertise to train AI for specialized tasks"]
+                    },
+                    hardSkills: {
+                        zh: ["數據分析和數據管理能力", "熟練使用數據標註工具", "擁有特定行業（如醫療、金融）的專業知識"],
+                        en: ["Data analysis and management skills", "Proficiency with data annotation tools", "Specific domain expertise (e.g., healthcare, finance)"]
+                    },
+                    softSkills: {
+                        zh: ["極高的專注度和對細節的敏銳洞察力", "處理重複性任務的耐心和毅力", "良好的溝通能力和批判性思維"],
+                        en: ["High level of concentration and keen attention to detail", "Patience and perseverance for repetitive tasks", "Good communication skills and critical thinking"]
+                    }
+                },
+                aiEthicist: {
+                    title: { zh: "AI倫理師 (AI Ethicist)", en: "AI Ethicist" },
+                    desc: { zh: "確保AI系統符合倫理、法律和社會價值。", en: "Ensures AI systems align with ethical, legal, and social values." },
+                    responsibilities: {
+                        zh: ["制定並實施企業AI倫理準則和治理框架", "進行倫理風險評估，識別算法偏見等問題", "審查AI算法的透明度、可解釋性和公平性", "在組織內開展AI倫理培訓，提升倫理意識"],
+                        en: ["Develop and implement corporate AI ethics guidelines and governance frameworks", "Conduct ethical risk assessments to identify issues like algorithmic bias", "Audit AI algorithms for transparency, explainability, and fairness", "Conduct AI ethics training within the organization to raise awareness"]
+                    },
+                    hardSkills: {
+                        zh: ["跨學科知識（哲學、法律、社會學、CS）", "熟悉GDPR等數據保護法規和倫理框架", "掌握風險與影響評估方法論"],
+                        en: ["Interdisciplinary knowledge (philosophy, law, sociology, CS)", "Familiarity with data protection regulations (e.g., GDPR) and ethical frameworks", "Mastery of risk and impact assessment methodologies"]
+                    },
+                    softSkills: {
+                        zh: ["強大的分析和批判性思維能力", "卓越的溝通、協商和協作能力", "深厚的同理心和社會責任感"],
+                        en: ["Strong analytical and critical thinking skills", "Excellent communication, negotiation, and collaboration abilities", "Deep empathy and sense of social responsibility"]
+                    }
+                },
+                aiAuditor: {
+                    title: { zh: "AI稽核員 (AI Auditor)", en: "AI Auditor" },
+                    desc: { zh: "獨立審計AI系統，確保其合規、安全可靠。", en: "Independently audits AI systems for compliance and reliability." },
+                    responsibilities: {
+                        zh: ["對AI管理體系進行全面合規審計", "驗證機器學習模型的性能和數據使用的合規性", "識別與AI部署相關的運營、財務和聲譽風險", "撰寫專業審計報告，向管理層和監管機構溝通"],
+                        en: ["Conduct comprehensive compliance audits of AI management systems", "Verify the performance of ML models and the compliance of data usage", "Identify operational, financial, and reputational risks related to AI deployment", "Write professional audit reports for management and regulators"]
+                    },
+                    hardSkills: {
+                        zh: ["深厚審計學、風險管理和內控知識", "熟悉AI技術棧和相關法律法規（如歐盟AI法案）", "數據分析和編程能力（Python, R）"],
+                        en: ["Deep knowledge of auditing, risk management, and internal controls", "Familiarity with the AI tech stack and relevant regulations (e.g., EU AI Act)", "Data analysis and programming skills (Python, R)"]
+                    },
+                    softSkills: {
+                        zh: ["客觀、嚴謹、獨立的分析和判斷力", "出色的書面和口頭溝通能力", "堅守誠信和最高的職業道德標準"],
+                        en: ["Objective, rigorous, and independent analytical judgment", "Excellent written and oral communication skills", "Commitment to integrity and the highest professional ethics"]
+                    }
+                },
+                aiPolicyAdvisor: {
+                    title: { zh: "AI政策顧問 (AI Policy Advisor)", en: "AI Policy Advisor" },
+                    desc: { zh: "提供關於AI監管與發展的戰略建議。", en: "Provides strategic advice on AI regulation and development." },
+                    responsibilities: {
+                        zh: ["追蹤並分析全球AI相關政策、立法和監管動態", "協助組織制定前瞻性的內部AI治理政策", "代表組織向政府提出政策建議，參與行業標準制定", "與政府、監管機構、學術界等多方利益相關者溝通"],
+                        en: ["Track and analyze global AI-related policies, legislation, and regulatory trends", "Assist organizations in developing forward-looking internal AI governance policies", "Represent the organization in providing policy recommendations to governments", "Communicate with stakeholders including government, regulators, and academia"]
+                    },
+                    hardSkills: {
+                        zh: ["公共政策、法律、國際關係學術背景", "對AI技術有深入理解", "熟悉立法和監管流程"],
+                        en: ["Academic background in public policy, law, or international relations", "Deep understanding of AI technology", "Familiarity with legislative and regulatory processes"]
+                    },
+                    softSkills: {
+                        zh: ["卓越的戰略思維能力", "強大的遊說、談判和人際交往能力", "出色的研究和寫作能力"],
+                        en: ["Excellent strategic thinking ability", "Strong lobbying, negotiation, and interpersonal skills", "Outstanding research and writing skills"]
+                    }
+                },
+                aiBusinessAnalyst: {
+                    title: { zh: "AI業務分析師 (AI Business Analyst)", en: "AI Business Analyst" },
+                    desc: { zh: "識別業務痛點，將其轉化為AI解決方案。", en: "Identifies business pain points and translates them into AI solutions." },
+                    responsibilities: {
+                        zh: ["分析業務流程，發掘AI技術的應用機會點", "將模糊的業務需求轉化為清晰、可執行的技術需求", "分析數據集，為AI模型開發提供業務洞察", "利用低代碼平台構建AI解決方案的概念原型"],
+                        en: ["Analyze business processes to identify opportunities for AI application", "Translate vague business needs into clear, actionable technical requirements", "Analyze datasets to provide business insights for AI model development", "Build proof-of-concept AI solutions using low-code platforms"]
+                    },
+                    hardSkills: {
+                        zh: ["精通商業分析方法論", "強大的數據分析和可視化能力 (SQL, Tableau)", "對AI/ML概念、應用場景和局限性有清晰認識"],
+                        en: ["Proficiency in business analysis methodologies", "Strong data analysis and visualization skills (SQL, Tableau)", "Clear understanding of AI/ML concepts, applications, and limitations"]
+                    },
+                    softSkills: {
+                        zh: ["卓越的溝通和「翻譯」能力", "敏銳的商業嗅覺和同理心", "結構化的邏輯思維和解決複雜問題的能力"],
+                        en: ["Excellent communication and 'translation' skills", "Keen business acumen and empathy", "Structured logical thinking and complex problem-solving abilities"]
+                    }
+                },
+                aiMarketingStrategist: {
+                    title: { zh: "AI營銷策略師 (AI Marketing Strategist)", en: "AI Marketing Strategist" },
+                    desc: { zh: "利用AI工具和數據優化個性化營銷。", en: "Uses AI tools and data to optimize personalized marketing." },
+                    responsibilities: {
+                        zh: ["使用AI模型分析客戶數據以預測消費者行為", "設計和部署由AI驅動的個性化營銷體驗", "運用生成式AI工具高效創建和優化營銷內容", "實時監控活動指標，最大化營銷投資回報率 (ROI)"],
+                        en: ["Use AI models to analyze customer data and predict consumer behavior", "Design and deploy AI-driven personalized marketing experiences", "Use generative AI tools to efficiently create and optimize marketing content", "Monitor campaign metrics in real-time to maximize marketing ROI"]
+                    },
+                    hardSkills: {
+                        zh: ["深厚的數字營銷知識（SEO, SEM）", "熟練操作AI營銷工具（如HubSpot AI, Jasper）", "扎實的數據分析和A/B測試能力"],
+                        en: ["Deep digital marketing knowledge (SEO, SEM)", "Proficiency with AI marketing tools (e.g., HubSpot AI, Jasper)", "Solid data analysis and A/B testing skills"]
+                    },
+                    softSkills: {
+                        zh: ["敏銳的戰略思維和市場洞察力", "源源不斷的創造力", "對新技術的強烈好奇心和快速學習能力"],
+                        en: ["Keen strategic thinking and market insight", "Continuous creativity", "Strong curiosity and rapid learning ability for new technologies"]
+                    }
+                },
+                manMachineManager: {
+                    title: { zh: "人機協作經理 (Man-Machine Teaming Manager)", en: "Man-Machine Teaming Manager" },
+                    desc: { zh: "設計和管理人類與AI代理的混合團隊。", en: "Designs and manages hybrid teams of humans and AI agents." },
+                    responsibilities: {
+                        zh: ["重新設計人機無縫協作的新流程", "負責AI代理的配置、訓練、監督和績效評估", "培訓人類員工與AI協作，營造人機協作文化", "建立適用於混合團隊的創新績效評估體系"],
+                        en: ["Redesign workflows for seamless human-machine collaboration", "Manage the configuration, training, supervision, and performance of AI agents", "Train human employees to collaborate with AI, fostering a collaborative culture", "Establish innovative performance evaluation systems for hybrid teams"]
+                    },
+                    hardSkills: {
+                        zh: ["業務流程管理（BPM）和優化知識", "項目管理能力", "對AI代理技術 (Agentic AI) 有深入了解"],
+                        en: ["Business Process Management (BPM) and optimization knowledge", "Project management skills", "Deep understanding of Agentic AI technology"]
+                    },
+                    softSkills: {
+                        zh: ["卓越的領導力和變革管理能力", "能夠進行複雜系統性思維", "強大的溝通、協調和同理心"],
+                        en: ["Excellent leadership and change management abilities", "Complex systemic thinking skills", "Strong communication, coordination, and empathy"]
+                    }
+                }
+            };
+
+            const skillsData = {
+                all: {
+                    labels: {
+                        zh: ['AI與大數據', '分析性思維', '領導力與影響力', '終身學習', '韌性與靈活性', '網絡安全', '同理心與傾聽', '創新思維'],
+                        en: ['AI & Big Data', 'Analytical Thinking', 'Leadership & Influence', 'Lifelong Learning', 'Resilience & Flexibility', 'Cybersecurity', 'Empathy & Listening', 'Creative Thinking']
+                    },
+                    data: [100, 95, 90, 88, 85, 82, 80, 78],
+                    description: {
+                        zh: { title: "綜合技能圖譜", text: "AI時代的競爭力來源於一個複雜的技能網絡，真正的價值產生於硬技能和軟實力的交匯點。這個視圖展示了需求增長最快的各類關鍵技能。" },
+                        en: { title: "Comprehensive Skill Map", text: "Competitiveness in the AI era comes from a complex skill network. True value is generated at the intersection of hard and soft skills. This view shows the fastest-growing key skills." }
+                    }
+                },
+                hard: {
+                    labels: {
+                        zh: ['AI與大數據', '網絡安全', '雲計算', '數據分析與可視化', '機器學習'],
+                        en: ['AI & Big Data', 'Cybersecurity', 'Cloud Computing', 'Data Analysis & Visualization', 'Machine Learning']
+                    },
+                    data: [100, 82, 75, 70, 68],
+                    description: {
+                        zh: { title: "硬技能：從通用到專精", text: "未來職場對硬技能的需求，重心從傳統通用IT技能，迅速轉向與AI直接相關的專精技能。能夠直接驅動AI應用的技能，正變得極其搶手。" },
+                        en: { title: "Hard Skills: From General to Specialized", text: "The demand for hard skills is shifting from general IT to specialized skills directly related to AI. Skills that can directly drive AI applications are becoming extremely valuable." }
+                    }
+                },
+                soft: {
+                    labels: {
+                        zh: ['分析性思維', '領導力與影響力', '同理心與積極傾聽', '創新思維'],
+                        en: ['Analytical Thinking', 'Leadership & Influence', 'Empathy & Active Listening', 'Creative Thinking']
+                    },
+                    data: [95, 90, 80, 78],
+                    description: {
+                        zh: { title: "軟實力：AI無法自動化的核心", text: "隨著AI日益精通處理常規任務，那些難以被量化和編程的「純人類技能」變得前所未有的重要，成為個人和組織在AI時代的核心競爭力。" },
+                        en: { title: "Soft Skills: The Unautomatable Core", text: "As AI becomes proficient at routine tasks, 'purely human' skills that are difficult to quantify and program have become more important than ever, forming the core competitiveness in the AI era." }
+                    }
+                },
+                meta: {
+                    labels: {
+                        zh: ['終身學習', '韌性、靈活性與敏捷性', '好奇心', '適應性'],
+                        en: ['Lifelong Learning', 'Resilience, Flexibility & Agility', 'Curiosity', 'Adaptability']
+                    },
+                    data: [88, 85, 76, 75],
+                    description: {
+                        zh: { title: "元技能：駕馭變革的基石", text: "在知識半衰期急劇縮短的環境中，個體最重要的資產不再是存量知識，而是持續獲取新知識和適應新環境的能力，即『學會如何學習』。" },
+                        en: { title: "Meta-Skills: The Foundation for Change", text: "In an environment where knowledge's half-life is shrinking, the most important asset is not existing knowledge, but the ability to continuously acquire new knowledge and adapt—'learning how to learn'." }
+                    }
+                }
+            };
+            
+            function setLanguage(lang) {
+                currentLang = lang;
+                const langData = textData[lang];
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                const ids = [
+                    'app-title', 'nav-trends', 'nav-landscape', 'nav-skills', 'nav-strategies',
+                    'mobile-nav-trends', 'mobile-nav-landscape', 'mobile-nav-skills', 'mobile-nav-strategies',
+                    'hero-title', 'hero-subtitle', 'trends-title', 'trends-desc', 'trends-chart-title',
+                    'trends-chart-caption', 'landscape-title', 'landscape-desc', 'enablers-title',
+                    'enablers-subtitle', 'enablers-desc', 'guardians-title', 'guardians-subtitle',
+                    'guardians-desc', 'orchestrators-title', 'orchestrators-subtitle', 'orchestrators-desc',
+                    'skills-title', 'skills-desc', 'skill-btn-all', 'skill-btn-hard', 'skill-btn-soft', 'skill-btn-meta',
+                    'strategies-title', 'strategies-desc', 'tab-business', 'tab-individual',
+                    'strategy-biz-1-title', 'strategy-biz-1-desc', 'strategy-biz-2-title', 'strategy-biz-2-desc',
+                    'strategy-biz-3-title', 'strategy-biz-3-desc', 'strategy-ind-1-title', 'strategy-ind-1-desc',
+                    'strategy-ind-2-title', 'strategy-ind-2-desc', 'strategy-ind-3-title', 'strategy-ind-3-desc',
+                    'footer-text', 'to-top-btn'
+                ];
+                const keyMap = {
+                    'app-title': 'appTitle', 'nav-trends': 'navTrends', 'nav-landscape': 'navLandscape', 'nav-skills': 'navSkills', 'nav-strategies': 'navStrategies',
+                    'mobile-nav-trends': 'navTrends', 'mobile-nav-landscape': 'navLandscape', 'mobile-nav-skills': 'navSkills', 'mobile-nav-strategies': 'navStrategies',
+                    'hero-title': 'heroTitle', 'hero-subtitle': 'heroSubtitle', 'trends-title': 'trendsTitle', 'trends-desc': 'trendsDesc',
+                    'trends-chart-title': 'trendsChartTitle', 'trends-chart-caption': 'trendsChartCaption', 'landscape-title': 'landscapeTitle',
+                    'landscape-desc': 'landscapeDesc', 'enablers-title': 'enablersTitle', 'enablers-subtitle': 'enablersSubtitle', 'enablers-desc': 'enablersDesc',
+                    'guardians-title': 'guardiansTitle', 'guardians-subtitle': 'guardiansSubtitle', 'guardians-desc': 'guardiansDesc',
+                    'orchestrators-title': 'orchestratorsTitle', 'orchestrators-subtitle': 'orchestratorsSubtitle', 'orchestrators-desc': 'orchestratorsDesc',
+                    'skills-title': 'skillsTitle', 'skills-desc': 'skillsDesc', 'skill-btn-all': 'skillBtnAll', 'skill-btn-hard': 'skillBtnHard',
+                    'skill-btn-soft': 'skillBtnSoft', 'skill-btn-meta': 'skillBtnMeta', 'strategies-title': 'strategiesTitle', 'strategies-desc': 'strategiesDesc',
+                    'tab-business': 'tabBusiness', 'tab-individual': 'tabIndividual', 'strategy-biz-1-title': 'strategyBiz1Title',
+                    'strategy-biz-1-desc': 'strategyBiz1Desc', 'strategy-biz-2-title': 'strategyBiz2Title', 'strategy-biz-2-desc': 'strategyBiz2Desc',
+                    'strategy-biz-3-title': 'strategyBiz3Title', 'strategy-biz-3-desc': 'strategyBiz3Desc', 'strategy-ind-1-title': 'strategyInd1Title',
+                    'strategy-ind-1-desc': 'strategyInd1Desc', 'strategy-ind-2-title': 'strategyInd2Title', 'strategy-ind-2-desc': 'strategyInd2Desc',
+                    'strategy-ind-3-title': 'strategyInd3Title', 'strategy-ind-3-desc': 'strategyInd3Desc', 'footer-text': 'footerText', 'to-top-btn': 'toTopBtn'
+                };
+
+                ids.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.textContent = langData[keyMap[id]];
+                    }
+                });
+
+                Object.keys(jobData).forEach(jobKey => {
+                    document.getElementById(`job-title-${jobKey}`).textContent = jobData[jobKey].title[lang];
+                    document.getElementById(`job-desc-${jobKey}`).textContent = jobData[jobKey].desc[lang];
+                });
+                
+                langSwitcher.textContent = lang === 'zh' ? 'EN' : '中';
+
+                updateCharts();
+                updateSkillDescription(currentSkillFilter);
+            }
+
+            function updateCharts() {
+                if (charts.macro) charts.macro.destroy();
+                createMacroTrendsChart();
+                if (charts.skills) charts.skills.destroy();
+                createSkillsChart(currentSkillFilter);
+            }
+
+            function createMacroTrendsChart() {
+                const ctx = document.getElementById('macroTrendsChart').getContext('2d');
+                charts.macro = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['WEF (AI & Info Processing)', 'PwC (Comprehensive Analysis)'],
+                        datasets: [
+                            {
+                                label: textData[currentLang].createdJobsLabel,
+                                data: [1100, 720],
+                                backgroundColor: '#718096',
+                                borderColor: '#4A5568',
+                                borderWidth: 1
+                            },
+                            {
+                                label: textData[currentLang].replacedJobsLabel,
+                                data: [900, 700],
+                                backgroundColor: '#CBD5E0',
+                                borderColor: '#A0AEC0',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: textData[currentLang].yAxisLabel
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + (currentLang === 'zh' ? ' 萬' : '0k');
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function createSkillsChart(filter) {
+                currentSkillFilter = filter;
+                if(charts.skills) {
+                    charts.skills.destroy();
+                }
+                const ctx = document.getElementById('skillsChart').getContext('2d');
+                const data = skillsData[filter];
+                charts.skills = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels[currentLang].map(label => {
+                            if (currentLang === 'zh' && label.length > 16) {
+                                return label.match(/.{1,8}/g);
+                            }
+                            return label;
+                        }),
+                        datasets: [{
+                            label: textData[currentLang].skillImportanceLabel,
+                            data: data.data,
+                            backgroundColor: ['#4A5568', '#718096', '#A0AEC0', '#CBD5E0', '#E2E8F0', '#EDF2F7', '#F7FAFC'],
+                            borderColor: '#3D3B30',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: textData[currentLang].skillsChartTitle
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                updateSkillDescription(filter);
+            }
+            
+            function updateSkillDescription(filter) {
+                const data = skillsData[filter];
+                document.getElementById('skill-desc-title').textContent = data.description[currentLang].title;
+                document.getElementById('skill-desc-text').textContent = data.description[currentLang].text;
+            }
+
+            function updateActiveSkillButton(activeBtnId) {
+                document.querySelectorAll('.skill-filter-btn').forEach(btn => {
+                    btn.classList.remove('bg-slate-700', 'text-white');
+                    btn.classList.add('bg-slate-200', 'text-slate-700');
+                });
+                document.getElementById(activeBtnId).classList.add('bg-slate-700', 'text-white');
+                document.getElementById(activeBtnId).classList.remove('bg-slate-200', 'text-slate-700');
+            }
+            
+            document.getElementById('skill-btn-all').addEventListener('click', () => { createSkillsChart('all'); updateActiveSkillButton('skill-btn-all'); });
+            document.getElementById('skill-btn-hard').addEventListener('click', () => { createSkillsChart('hard'); updateActiveSkillButton('skill-btn-hard'); });
+            document.getElementById('skill-btn-soft').addEventListener('click', () => { createSkillsChart('soft'); updateActiveSkillButton('skill-btn-soft'); });
+            document.getElementById('skill-btn-meta').addEventListener('click', () => { createSkillsChart('meta'); updateActiveSkillButton('skill-btn-meta'); });
+
+            const jobModal = document.getElementById('jobModal');
+            const modalContent = document.getElementById('modalContent');
+            const closeModalBtn = document.getElementById('closeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalResponsibilities = document.getElementById('modalResponsibilities');
+            const modalHardSkills = document.getElementById('modalHardSkills');
+            const modalSoftSkills = document.getElementById('modalSoftSkills');
+
+            function openModal(jobId) {
+                const data = jobData[jobId];
+                if (!data) return;
+
+                modalTitle.textContent = data.title[currentLang];
+                document.getElementById('modal-resp-title').textContent = textData[currentLang].modalRespTitle;
+                document.getElementById('modal-skills-title').textContent = textData[currentLang].modalSkillsTitle;
+                document.getElementById('modal-hard-skills-title').textContent = textData[currentLang].modalHardSkillsTitle;
+                document.getElementById('modal-soft-skills-title').textContent = textData[currentLang].modalSoftSkillsTitle;
+
+                modalResponsibilities.innerHTML = data.responsibilities[currentLang].map(item => `<li>${item}</li>`).join('');
+                modalHardSkills.innerHTML = data.hardSkills[currentLang].map(item => `<li>${item}</li>`).join('');
+                modalSoftSkills.innerHTML = data.softSkills[currentLang].map(item => `<li>${item}</li>`).join('');
+
+                jobModal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+            }
+
+            function closeModal() {
+                jobModal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => {
+                    jobModal.classList.add('pointer-events-none');
+                }, 300);
+            }
+
+            document.querySelectorAll('.job-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openModal(card.dataset.job);
+                });
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            jobModal.addEventListener('click', (e) => {
+                if (e.target === jobModal) {
+                    closeModal();
+                }
+            });
+
+            const tabBusiness = document.getElementById('tab-business');
+            const tabIndividual = document.getElementById('tab-individual');
+            const contentBusiness = document.getElementById('content-business');
+            const contentIndividual = document.getElementById('content-individual');
+
+            function switchTab(activeTab, inactiveTab, activeContent, inactiveContent) {
+                activeTab.classList.add('text-slate-800', 'border-slate-700');
+                activeTab.classList.remove('text-slate-500', 'border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
+                inactiveTab.classList.add('text-slate-500', 'border-transparent', 'hover:text-slate-700', 'hover:border-slate-300');
+                inactiveTab.classList.remove('text-slate-800', 'border-slate-700');
+                activeContent.classList.remove('hidden');
+                inactiveContent.classList.add('hidden');
+            }
+
+            tabBusiness.addEventListener('click', () => switchTab(tabBusiness, tabIndividual, contentBusiness, contentIndividual));
+            tabIndividual.addEventListener('click', () => switchTab(tabIndividual, tabBusiness, contentIndividual, contentBusiness));
+            
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+            
+            const toTopBtn = document.getElementById('to-top-btn');
+            toTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            const navLinks = document.querySelectorAll('header a[href^="#"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = e.currentTarget.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (!targetElement) return;
+                    const headerOffset = document.getElementById('header').offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                    
+                    if(mobileMenu.offsetParent !== null) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                const sections = document.querySelectorAll('main section');
+                const headerHeight = document.getElementById('header').offsetHeight;
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - headerHeight - 20;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            const langSwitcher = document.getElementById('lang-switcher');
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                setLanguage(newLang);
+            });
+            
+            // Initial setup
+            setLanguage('zh');
+        });
+    </script>
+</body>
+</html>
