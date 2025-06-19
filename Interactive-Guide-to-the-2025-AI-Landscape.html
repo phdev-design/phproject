@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 AI 現狀互動指南 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a task-oriented, single-page interactive guide, moving beyond the report's linear structure. It uses a top-level tabbed navigation to switch between four distinct "lenses" for understanding the AI landscape: 1. **Market Overview:** Provides a high-level summary of key players and trends using an interactive diagram. 2. **Model Comparator:** The core interactive tool, featuring a dynamic Chart.js chart and data table to allow users to compare models based on specific performance benchmarks. 3. **Application Frontiers:** Explores AI's impact on generative media and science in a clear, parallel layout. 4. **AI Selector:** An actionable "quiz" that translates the report's final recommendations into personalized guidance. This structure was chosen to guide the user from broad understanding to specific, actionable insights, making the dense report content digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Strategic groups (Closed-Source, Open-Source) -> Goal: Organize/Inform -> Viz/Presentation: Interactive HTML/CSS diagram with clickable cards -> Interaction: Click to reveal details -> Justification: Visually simplifies the complex market structure and strategic positioning of key players, making it easier to grasp than plain text. Library/Method: HTML/Tailwind CSS.
+        - Report Info: Quantitative benchmark data table -> Goal: Compare -> Viz/Presentation: Interactive Bar Chart + full HTML Table -> Interaction: User selects a benchmark via buttons, which dynamically updates the chart -> Justification: Allows for focused, user-driven comparison on specific metrics (e.g., safety vs. coding), which is more effective than a large, static table. The chart provides a quick visual summary, while the table offers detailed data. Library/Method: Chart.js (Canvas), HTML/Tailwind.
+        - Report Info: Final user recommendations -> Goal: Guide/Actionable Advice -> Viz/Presentation: Interactive 'quiz-like' button interface -> Interaction: User clicks a button representing their primary goal, and the corresponding recommendation is displayed -> Justification: Transforms a static list of recommendations into a personalized, engaging tool that helps users quickly find the most relevant information for their needs. Library/Method: HTML/Tailwind, Vanilla JS.
+        - Report Info: Application frontiers (Generative Media, Science) -> Goal: Inform/Explore -> Viz/Presentation: Two-column layout with Unicode icons and summary text -> Interaction: Static display -> Justification: Presents two distinct but related fields in a clear, side-by-side format for easy comparison of progress and challenges. Library/Method: HTML/Tailwind. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body.lang-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.lang-en {
+            font-family: 'Roboto', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 60vh;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            border-color: #1e40af; /* blue-800 */
+            color: #1e40af;
+            background-color: #dbeafe; /* blue-100 */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 lang-zh">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <div class="flex justify-end mb-4">
+            <button id="lang-switcher" class="text-sm font-semibold text-blue-800 hover:text-blue-600 bg-blue-100 py-1 px-3 rounded-full transition-colors">
+                English
+            </button>
+        </div>
+
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-blue-900 mb-3" data-i18n-key="mainTitle">2025 AI 現狀互動指南</h1>
+            <p class="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto" data-i18n-key="mainSubtitle">「哪個AI最先進？」答案比你想像的更複雜。本指南幫助您探索、比較並為您的需求找到最佳模型。</p>
+        </header>
+
+        <nav class="sticky top-0 z-10 bg-stone-50/80 backdrop-blur-sm py-4 mb-8">
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 border-b border-stone-200 pb-4">
+                <button data-target="overview" class="nav-link active font-semibold py-2 px-4 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-800 rounded-md" data-i18n-key="navOverview">📈 市場概覽</button>
+                <button data-target="comparator" class="nav-link font-semibold py-2 px-4 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-800 rounded-md" data-i18n-key="navComparator">📊 模型比較器</button>
+                <button data-target="frontiers" class="nav-link font-semibold py-2 px-4 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-800 rounded-md" data-i18n-key="navFrontiers">🚀 應用前沿</button>
+                <button data-target="selector" class="nav-link font-semibold py-2 px-4 border-b-2 border-transparent hover:border-blue-700 hover:text-blue-800 rounded-md" data-i18n-key="navSelector">💡 AI 選擇器</button>
+            </div>
+        </nav>
+
+        <main>
+            <section id="overview" class="content-section active fade-in">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-2" data-i18n-key="overviewTitle">市場概覽：偉大的趨同時代</h2>
+                    <p class="max-w-4xl mx-auto text-stone-600" data-i18n-key="overviewSubtitle">2025年的AI版圖不再由單一王者主宰。頂尖模型的性能日益接近，形成「趨同」現象。市場的焦點已從單純的性能競賽，轉向性能、效率、安全與專業化等多維度的價值評估。了解主要的戰略陣營是探索這個新時代的第一步。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+                        <h3 class="text-2xl font-bold text-sky-800 mb-3 flex items-center">
+                            <span class="text-3xl mr-3">👑</span> <span data-i18n-key="closedSourceTitle">閉源巨頭</span>
+                        </h3>
+                        <p class="text-stone-600 mb-4" data-i18n-key="closedSourceDesc">由 OpenAI、Google 和 Anthropic 領軍，它們不僅在技術上激烈競爭，更代表三種不同的戰略哲學，旨在建立各自強大的生態系統。</p>
+                        <ul class="space-y-2 text-stone-700">
+                            <li data-i18n-key="closedSourceItem1"><strong>OpenAI (AI界的蘋果):</strong> 專注於極致的多模態用戶體驗與品牌領導力。</li>
+                            <li data-i18n-key="closedSourceItem2"><strong>Google (AI界的微軟):</strong> 憑藉龐大的現有生態系進行深度整合。</li>
+                            <li data-i18n-key="closedSourceItem3"><strong>Anthropic (值得信賴的專家):</strong> 專攻高準確性、高安全性的企業級應用。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+                        <h3 class="text-2xl font-bold text-emerald-800 mb-3 flex items-center">
+                            <span class="text-3xl mr-3">🌍</span> <span data-i18n-key="openSourceTitle">開源旗手</span>
+                        </h3>
+                        <p class="text-stone-600 mb-4" data-i18n-key="openSourceDesc">以 Meta 的 Llama 系列為代表，開源運動正強力挑戰專有模型的地位，為開發者提供前所未有的控制權、客製化潛力與透明度。</p>
+                        <ul class="space-y-2 text-stone-700">
+                             <li data-i18n-key="openSourceItem1"><strong>Meta Llama 系列:</strong> 開源世界的性能標竿，在許多方面已能媲美頂級閉源模型。</li>
+                             <li data-i18n-key="openSourceItem2"><strong>核心價值:</strong> 允許本地部署、深度客製化，並避免被單一供應商鎖定。</li>
+                             <li data-i18n-key="openSourceItem3"><strong>戰略意義:</strong> 當性能趨同時，控制權和隱私成為企業的關鍵決策因素。</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+                        <h3 class="text-2xl font-bold text-amber-800 mb-3 flex items-center">
+                            <span class="text-3xl mr-3">🎯</span> <span data-i18n-key="challengersTitle">專業化挑戰者</span>
+                        </h3>
+                        <p class="text-stone-600 mb-4" data-i18n-key="challengersDesc">除了巨頭之外，一批專注於特定領域（如程式編碼、性價比）的開源模型正在崛起，進一步豐富了AI生態，並在特定賽道上展現出驚人實力。</p>
+                        <ul class="space-y-2 text-stone-700">
+                            <li data-i18n-key="challengersItem1"><strong>DeepSeek AI:</strong> 來自中國的新興力量，在編碼和邏輯方面性價比極高。</li>
+                            <li data-i18n-key="challengersItem2"><strong>Mistral AI:</strong> 來自歐洲的代表，以其高效能、高效率的模型聞名。</li>
+                            <li data-i18n-key="challengersItem3"><strong>趨勢:</strong> 證明了開源模型不僅是廉價替代品，更是創造專業化工具的利器。</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparator" class="content-section fade-in">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-2" data-i18n-key="comparatorTitle">模型比較器：數據驅動的洞察</h2>
+                    <p class="max-w-4xl mx-auto text-stone-600" data-i18n-key="comparatorSubtitle">沒有任何一個模型能在所有維度上獨佔鰲頭。點擊下方按鈕，切換不同性能基準，透過互動圖表和詳細數據，找出在您最關心的領域中，誰是真正的領先者。</p>
+                </div>
+
+                <div class="bg-white p-4 md:p-6 rounded-xl shadow-lg border border-stone-200">
+                    <div id="benchmark-buttons" class="flex flex-wrap justify-center gap-2 mb-6">
+                        <button class="benchmark-btn bg-blue-100 text-blue-800 py-2 px-4 rounded-full font-semibold" data-benchmark="gpqa" data-i18n-key="benchGPQA">通用推理 (GPQA)</button>
+                        <button class="benchmark-btn bg-stone-100 text-stone-700 py-2 px-4 rounded-full font-semibold" data-benchmark="swe" data-i18n-key="benchSWE">代理編碼 (SWE-Bench)</button>
+                        <button class="benchmark-btn bg-stone-100 text-stone-700 py-2 px-4 rounded-full font-semibold" data-benchmark="casi" data-i18n-key="benchCASI">安全性 (CASI Score)</button>
+                        <button class="benchmark-btn bg-stone-100 text-stone-700 py-2 px-4 rounded-full font-semibold" data-benchmark="cost" data-i18n-key="benchCost">成本效益 (Input Cost)</button>
+                    </div>
+
+                    <div class="chart-container mb-8">
+                        <canvas id="benchmarkChart"></canvas>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <h3 class="text-xl font-bold text-center mb-4 text-blue-900" data-i18n-key="tableTitle">詳細性能數據表</h3>
+                        <table class="min-w-full bg-white text-sm text-left">
+                            <thead class="bg-stone-100">
+                                <tr>
+                                    <th class="p-3 font-semibold" data-i18n-key="tableModel">模型</th>
+                                    <th class="p-3 font-semibold text-center" data-i18n-key="tableGPQA">通用推理 (GPQA)</th>
+                                    <th class="p-3 font-semibold text-center" data-i18n-key="tableSWE">代理編碼 (SWE)</th>
+                                    <th class="p-3 font-semibold text-center" data-i18n-key="tableCASI">安全性 (CASI)</th>
+                                    <th class="p-3 font-semibold text-center" data-i18n-key="tableCost">成本 ($/百萬Tok)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-200" id="modelDataTable">
+                            </tbody>
+                        </table>
+                        <p class="text-xs text-stone-500 mt-2 text-center" data-i18n-key="tableNote">*註：'-' 表示數據未公開或不適用。成本為輸入價格，僅供參考。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="frontiers" class="content-section fade-in">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-2" data-i18n-key="frontiersTitle">應用前沿：重塑創意與科學</h2>
+                    <p class="max-w-4xl mx-auto text-stone-600" data-i18n-key="frontiersSubtitle">最先進的AI技術不僅在基準測試中突破，更在生成式媒體和科學發現這兩個變革性領域開闢了新的疆界。AI的影響力正從分析工具演變為創造性夥伴。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+                        <h3 class="text-2xl font-bold text-purple-800 mb-4 flex items-center"><span class="text-3xl mr-3">🎨</span> <span data-i18n-key="genMediaTitle">生成式媒體</span></h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-stone-800" data-i18n-key="imageGenTitle">圖像生成：從品質到控制</h4>
+                                <p class="text-stone-600" data-i18n-key="imageGenDesc">領域已成熟，Midjourney 以藝術品質著稱，GPT-4o 在功能多樣性上領先。目前的關鍵差異在於控制的精細度、風格一致性及與工作流程的整合。</p>
+                            </div>
+                             <div>
+                                <h4 class="font-bold text-lg text-stone-800" data-i18n-key="videoGenTitle">影片生成：神奇但有限</h4>
+                                <p class="text-stone-600" data-i18n-key="videoGenDesc">以 OpenAI 的 Sora 為代表，技術雖令人驚嘆，但仍處於起步階段。生成的短片常缺乏敘事邏輯和元素一致性，存在「最後一哩路」的挑戰。未來的創新將聚焦於提供更精細的控制權給創作者。</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md border border-stone-200">
+                        <h3 class="text-2xl font-bold text-teal-800 mb-4 flex items-center"><span class="text-3xl mr-3">🔬</span> <span data-i18n-key="scienceTitle">科學發現</span></h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-stone-800" data-i18n-key="predictCreateTitle">從預測到創造</h4>
+                                <p class="text-stone-600" data-i18n-key="predictCreateDesc">Google DeepMind 的 AlphaFold 3 已能預測所有生命分子的相互作用，從根本上改變了生物學。其後繼者 AlphaProteo 更能從頭設計全新蛋白質，標誌著AI從分析工具到創造工具的轉變。</p>
+                            </div>
+                             <div>
+                                <h4 class="font-bold text-lg text-stone-800" data-i18n-key="acceleratorTitle">AI 作為「加速器」</h4>
+                                <p class="text-stone-600" data-i18n-key="acceleratorDesc">必須強調，AI 是科學研究的加速器，而非替代品。AI 的預測仍需實驗驗證，且缺乏人類科學家的直覺與偶然發現能力。它被應用於氣候建模、材料科學、生態學等多個前沿領域。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="selector" class="content-section fade-in">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-2" data-i18n-key="selectorTitle">AI 選擇器：為您的目標找到最佳工具</h2>
+                    <p class="max-w-4xl mx-auto text-stone-600" data-i18n-key="selectorSubtitle">不確定從何開始？點擊下方最符合您需求的描述，我們將根據報告的綜合分析，為您推薦最適合的AI模型作為起點。</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                        <button class="selector-btn text-left p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:bg-blue-50 border border-stone-200 transition-all">
+                            <h4 class="font-bold text-blue-800" data-i18n-key="rec1Title">追求最佳全能、多模態體驗</h4>
+                            <p class="text-sm text-stone-600" data-i18n-key="rec1Desc">我需要一個處理通用任務和創意內容生成的萬能工具。</p>
+                        </button>
+                         <button class="selector-btn text-left p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:bg-blue-50 border border-stone-200 transition-all">
+                            <h4 class="font-bold text-blue-800" data-i18n-key="rec2Title">專注於頂級編碼與高風險推理</h4>
+                            <p class="text-sm text-stone-600" data-i18n-key="rec2Desc">我的工作涉及複雜程式設計、數學或科學分析。</p>
+                        </button>
+                         <button class="selector-btn text-left p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:bg-blue-50 border border-stone-200 transition-all">
+                            <h4 class="font-bold text-blue-800" data-i18n-key="rec3Title">要求企業級安全性與信任</h4>
+                            <p class="text-sm text-stone-600" data-i18n-key="rec3Desc">我處於受監管行業，模型的穩健性和可靠性是首要考量。</p>
+                        </button>
+                         <button class="selector-btn text-left p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:bg-blue-50 border border-stone-200 transition-all">
+                            <h4 class="font-bold text-blue-800" data-i18n-key="rec4Title">尋求最大化控制權與客製化</h4>
+                            <p class="text-sm text-stone-600" data-i18n-key="rec4Desc">我需要完全控制模型，進行本地部署或深度微調。</p>
+                        </button>
+                         <button class="selector-btn text-left p-4 bg-white rounded-lg shadow-sm hover:shadow-lg hover:bg-blue-50 border border-stone-200 transition-all col-span-1 sm:col-span-2">
+                            <h4 class="font-bold text-blue-800" data-i18n-key="rec5Title">致力於前沿科學研究</h4>
+                            <p class="text-sm text-stone-600" data-i18n-key="rec5Desc">我的目標是利用AI解決生物、化學或物理學等領域的根本性問題。</p>
+                        </button>
+                    </div>
+
+                    <div id="recommendation-result" class="p-6 bg-blue-50 border-l-4 border-blue-500 rounded-r-lg min-h-[150px] transition-all">
+                        <p class="text-stone-600" data-i18n-key="recDefault">請選擇您的主要目標以查看建議。</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="text-center mt-12 pt-8 border-t border-stone-200">
+            <p class="text-sm text-stone-500" data-i18n-key="footerText">本互動指南基於《2025年人工智慧現狀報告》生成。所有數據和分析僅供參考。</p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 數據 ---
+    const modelData = [
+        { name: 'Gemini 2.5 Pro', developer: 'Google', gpqa: 86.4, swe: null, casi: 63.89, cost: 1.25 },
+        { name: 'OpenAI o3', developer: 'OpenAI', gpqa: 83.3, swe: 69.1, casi: null, cost: 2.00 },
+        { name: 'Claude 4 Opus', developer: 'Anthropic', gpqa: null, swe: 72.5, casi: null, cost: 15.00 },
+        { name: 'Claude 4 Sonnet', developer: 'Anthropic', gpqa: null, swe: 72.7, casi: null, cost: null },
+        { name: 'Claude 3.7 Sonnet', developer: 'Anthropic', gpqa: 83.8, swe: 70.3, casi: 88.11, cost: 3.00 },
+        { name: 'GPT-4o', developer: 'OpenAI', gpqa: null, swe: null, casi: 67.85, cost: 5.00 },
+        { name: 'DeepSeek-R1', developer: 'DeepSeek AI', gpqa: 79.8, swe: 64.3, casi: 52.91, cost: 0.50 },
+        { name: 'Llama 3.1 405B', developer: 'Meta', gpqa: 23.3, swe: null, casi: 65.06, cost: null },
+    ];
+    
+    // --- 翻譯文本 ---
+    const translations = {
+        zh: {
+            mainTitle: "2025 AI 現狀互動指南",
+            mainSubtitle: "「哪個AI最先進？」答案比你想像的更複雜。本指南幫助您探索、比較並為您的需求找到最佳模型。",
+            navOverview: "📈 市場概覽",
+            navComparator: "📊 模型比較器",
+            navFrontiers: "🚀 應用前沿",
+            navSelector: "💡 AI 選擇器",
+            overviewTitle: "市場概覽：偉大的趨同時代",
+            overviewSubtitle: "2025年的AI版圖不再由單一王者主宰。頂尖模型的性能日益接近，形成「趨同」現象。市場的焦點已從單純的性能競賽，轉向性能、效率、安全與專業化等多維度的價值評估。了解主要的戰略陣營是探索這個新時代的第一步。",
+            closedSourceTitle: "閉源巨頭",
+            closedSourceDesc: "由 OpenAI、Google 和 Anthropic 領軍，它們不僅在技術上激烈競爭，更代表三種不同的戰略哲學，旨在建立各自強大的生態系統。",
+            closedSourceItem1: "<strong>OpenAI (AI界的蘋果):</strong> 專注於極致的多模態用戶體驗與品牌領導力。",
+            closedSourceItem2: "<strong>Google (AI界的微軟):</strong> 憑藉龐大的現有生態系進行深度整合。",
+            closedSourceItem3: "<strong>Anthropic (值得信賴的專家):</strong> 專攻高準確性、高安全性的企業級應用。",
+            openSourceTitle: "開源旗手",
+            openSourceDesc: "以 Meta 的 Llama 系列為代表，開源運動正強力挑戰專有模型的地位，為開發者提供前所未有的控制權、客製化潛力與透明度。",
+            openSourceItem1: "<strong>Meta Llama 系列:</strong> 開源世界的性能標竿，在許多方面已能媲美頂級閉源模型。",
+            openSourceItem2: "<strong>核心價值:</strong> 允許本地部署、深度客製化，並避免被單一供應商鎖定。",
+            openSourceItem3: "<strong>戰略意義:</strong> 當性能趨同時，控制權和隱私成為企業的關鍵決策因素。",
+            challengersTitle: "專業化挑戰者",
+            challengersDesc: "除了巨頭之外，一批專注於特定領域（如程式編碼、性價比）的開源模型正在崛起，進一步豐富了AI生態，並在特定賽道上展現出驚人實力。",
+            challengersItem1: "<strong>DeepSeek AI:</strong> 來自中國的新興力量，在編碼和邏輯方面性價比極高。",
+            challengersItem2: "<strong>Mistral AI:</strong> 來自歐洲的代表，以其高效能、高效率的模型聞名。",
+            challengersItem3: "<strong>趨勢:</strong> 證明了開源模型不僅是廉價替代品，更是創造專業化工具的利器。",
+            comparatorTitle: "模型比較器：數據驅動的洞察",
+            comparatorSubtitle: "沒有任何一個模型能在所有維度上獨佔鰲頭。點擊下方按鈕，切換不同性能基準，透過互動圖表和詳細數據，找出在您最關心的領域中，誰是真正的領先者。",
+            benchGPQA: "通用推理 (GPQA)",
+            benchSWE: "代理編碼 (SWE-Bench)",
+            benchCASI: "安全性 (CASI Score)",
+            benchCost: "成本效益 (Input Cost)",
+            tableTitle: "詳細性能數據表",
+            tableModel: "模型",
+            tableGPQA: "通用推理 (GPQA)",
+            tableSWE: "代理編碼 (SWE)",
+            tableCASI: "安全性 (CASI)",
+            tableCost: "成本 ($/百萬Tok)",
+            tableNote: "*註：'-' 表示數據未公開或不適用。成本為輸入價格，僅供參考。",
+            frontiersTitle: "應用前沿：重塑創意與科學",
+            frontiersSubtitle: "最先進的AI技術不僅在基準測試中突破，更在生成式媒體和科學發現這兩個變革性領域開闢了新的疆界。AI的影響力正從分析工具演變為創造性夥伴。",
+            genMediaTitle: "生成式媒體",
+
+            imageGenTitle: "圖像生成：從品質到控制",
+            imageGenDesc: "領域已成熟，Midjourney 以藝術品質著稱，GPT-4o 在功能多樣性上領先。目前的關鍵差異在於控制的精細度、風格一致性及與工作流程的整合。",
+            videoGenTitle: "影片生成：神奇但有限",
+            videoGenDesc: "以 OpenAI 的 Sora 為代表，技術雖令人驚嘆，但仍處於起步階段。生成的短片常缺乏敘事邏輯和元素一致性，存在「最後一哩路」的挑戰。未來的創新將聚焦於提供更精細的控制權給創作者。",
+            scienceTitle: "科學發現",
+            predictCreateTitle: "從預測到創造",
+            predictCreateDesc: "Google DeepMind 的 AlphaFold 3 已能預測所有生命分子的相互作用，從根本上改變了生物學。其後繼者 AlphaProteo 更能從頭設計全新蛋白質，標誌著AI從分析工具到創造工具的轉變。",
+            acceleratorTitle: "AI 作為「加速器」",
+            acceleratorDesc: "必須強調，AI 是科學研究的加速器，而非替代品。AI 的預測仍需實驗驗證，且缺乏人類科學家的直覺與偶然發現能力。它被應用於氣候建模、材料科學、生態學等多個前沿領域。",
+            selectorTitle: "AI 選擇器：為您的目標找到最佳工具",
+            selectorSubtitle: "不確定從何開始？點擊下方最符合您需求的描述，我們將根據報告的綜合分析，為您推薦最適合的AI模型作為起點。",
+            rec1Title: "追求最佳全能、多模態體驗",
+            rec1Desc: "我需要一個處理通用任務和創意內容生成的萬能工具。",
+            rec2Title: "專注於頂級編碼與高風險推理",
+            rec2Desc: "我的工作涉及複雜程式設計、數學或科學分析。",
+            rec3Title: "要求企業級安全性與信任",
+            rec3Desc: "我處於受監管行業，模型的穩健性和可靠性是首要考量。",
+            rec4Title: "尋求最大化控制權與客製化",
+            rec4Desc: "我需要完全控制模型，進行本地部署或深度微調。",
+            rec5Title: "致力於前沿科學研究",
+            rec5Desc: "我的目標是利用AI解決生物、化學或物理學等領域的根本性問題。",
+            recDefault: "請選擇您的主要目標以查看建議。",
+            recResultPrefix: "推薦模型：",
+            footerText: "本互動指南基於《2025年人工智慧現狀報告》生成。所有數據和分析僅供參考。",
+            langSwitcher: "中文",
+        },
+        en: {
+            mainTitle: "Interactive Guide to the 2025 AI Landscape",
+            mainSubtitle: "'Which AI is the most advanced?' The answer is more complex than you think. This guide helps you explore, compare, and find the best model for your needs.",
+            navOverview: "📈 Market Overview",
+            navComparator: "📊 Model Comparator",
+            navFrontiers: "🚀 Application Frontiers",
+            navSelector: "💡 AI Selector",
+            overviewTitle: "Market Overview: The Great Convergence",
+            overviewSubtitle: "The 2025 AI landscape is no longer dominated by a single king. The performance of top models is increasingly converging. The market's focus has shifted from a simple performance race to a multi-dimensional value assessment of performance, efficiency, safety, and specialization. Understanding the main strategic camps is the first step in exploring this new era.",
+            closedSourceTitle: "Closed-Source Giants",
+            closedSourceDesc: "Led by OpenAI, Google, and Anthropic, they not only compete fiercely on technology but also represent three different strategic philosophies aimed at building their own powerful ecosystems.",
+            closedSourceItem1: "<strong>OpenAI (The Apple of AI):</strong> Focuses on ultimate multimodal user experience and brand leadership.",
+            closedSourceItem2: "<strong>Google (The Microsoft of AI):</strong> Leverages its vast existing ecosystem for deep integration.",
+            closedSourceItem3: "<strong>Anthropic (The Trusted Expert):</strong> Specializes in high-accuracy, high-safety enterprise applications.",
+            openSourceTitle: "Open-Source Flag-bearers",
+            openSourceDesc: "Represented by Meta's Llama series, the open-source movement is strongly challenging the position of proprietary models, providing developers with unprecedented control, customization potential, and transparency.",
+            openSourceItem1: "<strong>Meta Llama Series:</strong> The performance benchmark of the open-source world, comparable to top closed-source models in many aspects.",
+            openSourceItem2: "<strong>Core Value:</strong> Allows for local deployment, deep customization, and avoids vendor lock-in.",
+            openSourceItem3: "<strong>Strategic Importance:</strong> When performance converges, control and privacy become key decision factors for enterprises.",
+            challengersTitle: "Specialized Challengers",
+            challengersDesc: "Besides the giants, a batch of open-source models focusing on specific domains (like coding, cost-effectiveness) is emerging, further enriching the AI ecosystem and showing amazing strength in specific tracks.",
+            challengersItem1: "<strong>DeepSeek AI:</strong> An emerging force from China, extremely cost-effective in coding and logic.",
+            challengersItem2: "<strong>Mistral AI:</strong> A representative from Europe, known for its high-performance, high-efficiency models.",
+            challengersItem3: "<strong>The Trend:</strong> Proves that open-source models are not just cheap alternatives, but powerful tools for creating specialized instruments.",
+            comparatorTitle: "Model Comparator: Data-Driven Insights",
+            comparatorSubtitle: "No single model dominates on all dimensions. Click the buttons below to switch between different performance benchmarks. Use the interactive chart and detailed data to find out who the real leader is in the areas you care about most.",
+            benchGPQA: "General Reasoning (GPQA)",
+            benchSWE: "Agentic Coding (SWE-Bench)",
+            benchCASI: "Safety (CASI Score)",
+            benchCost: "Cost-Effectiveness (Input)",
+            tableTitle: "Detailed Performance Data Sheet",
+            tableModel: "Model",
+            tableGPQA: "General Reasoning (GPQA)",
+            tableSWE: "Agentic Coding (SWE)",
+            tableCASI: "Safety (CASI)",
+            tableCost: "Cost ($/M tokens)",
+            tableNote: "*Note: '-' indicates data is not public or not applicable. Costs are for input and for reference only.",
+            frontiersTitle: "Application Frontiers: Reshaping Creativity and Science",
+            frontiersSubtitle: "The most advanced AI technologies are not only breaking through in benchmarks but also opening new frontiers in the transformative fields of generative media and scientific discovery. AI's influence is evolving from an analytical tool to a creative partner.",
+            genMediaTitle: "Generative Media",
+            imageGenTitle: "Image Generation: From Quality to Control",
+            imageGenDesc: "The field is mature, with Midjourney renowned for artistic quality and GPT-4o leading in feature diversity. The key differentiators now are fine-grained control, style consistency, and workflow integration.",
+            videoGenTitle: "Video Generation: Magical but Limited",
+            videoGenDesc: "Led by OpenAI's Sora, the technology is stunning but still nascent. Generated clips often lack narrative logic and element consistency, facing a 'last-mile' challenge. Future innovations will focus on giving creators more granular control.",
+            scienceTitle: "Scientific Discovery",
+            predictCreateTitle: "From Prediction to Creation",
+            predictCreateDesc: "Google DeepMind's AlphaFold 3 can now predict interactions of all life's molecules, fundamentally changing biology. Its successor, AlphaProteo, can even design novel proteins from scratch, marking a shift from AI as an analysis tool to a creation tool.",
+            acceleratorTitle: "AI as an 'Accelerator'",
+            acceleratorDesc: "It's crucial to emphasize that AI is an accelerator for scientific research, not a replacement. AI predictions still require experimental validation and lack the intuition and serendipity of human scientists. It's being applied to climate modeling, materials science, and ecology.",
+            selectorTitle: "AI Selector: Find the Best Tool for Your Goal",
+            selectorSubtitle: "Not sure where to start? Click the description that best fits your needs below, and we'll recommend the most suitable AI model as a starting point, based on the report's comprehensive analysis.",
+            rec1Title: "Seeking the best all-around, multimodal experience",
+            rec1Desc: "I need a versatile tool for general tasks and creative content generation.",
+            rec2Title: "Focusing on top-tier coding and high-stakes reasoning",
+            rec2Desc: "My work involves complex programming, mathematics, or scientific analysis.",
+            rec3Title: "Requiring enterprise-grade safety and trust",
+            rec3Desc: "I'm in a regulated industry where model robustness and reliability are paramount.",
+            rec4Title: "Seeking maximum control and customization",
+            rec4Desc: "I need to fully control the model, for local deployment or deep fine-tuning.",
+            rec5Title: "Dedicated to frontier scientific research",
+            rec5Desc: "My goal is to use AI to solve fundamental problems in fields like biology, chemistry, or physics.",
+            recDefault: "Please select your primary goal to see a recommendation.",
+            recResultPrefix: "Recommended Model: ",
+            footerText: "This interactive guide is generated based on the '2025 State of AI Report'. All data and analysis are for reference only.",
+            langSwitcher: "English",
+        }
+    };
+
+    const recommendations = [
+        {
+            title: {
+                zh: 'OpenAI 的 GPT-4o',
+                en: "OpenAI's GPT-4o"
+            },
+            description: {
+                zh: '它將文字、音訊和視覺能力無縫整合在一個快速、對話流暢的介面中，使其成為處理通用任務和創意內容生成的最多功能、最使用者友好的工具。',
+                en: 'It seamlessly integrates text, audio, and vision capabilities into a fast, conversational interface, making it the most versatile and user-friendly tool for general tasks and creative content generation.'
+            }
+        },
+        {
+            title: {
+                zh: 'Anthropic 的 Claude 4 Opus / 3.7 Sonnet',
+                en: "Anthropic's Claude 4 Opus / 3.7 Sonnet"
+            },
+            description: {
+                zh: '其在自主編碼任務和深度推理方面的卓越表現已得到基準測試的證實，使其成為專業人士在處理複雜、關鍵任務時的首選。',
+                en: 'Its superior performance in agentic coding tasks and deep reasoning has been confirmed by benchmarks, making it the top choice for professionals tackling complex, critical tasks.'
+            }
+        },
+        {
+            title: {
+                zh: 'Anthropic 的 Claude 3.5 Sonnet',
+                en: "Anthropic's Claude 3.5 Sonnet"
+            },
+            description: {
+                zh: '其在安全基準測試中的頂級排名，使其成為在受監管或對安全極度敏感的環境中部署的首選模型，在這些場景中，信任和穩健性至關重要。',
+                en: 'Its top ranking in safety benchmarks makes it the preferred model for deployment in regulated or security-sensitive environments where trust and robustness are paramount.'
+            }
+        },
+        {
+            title: {
+                zh: 'Meta 的 Llama 3.1 / 4 系列',
+                en: "Meta's Llama 3.1 / 4 Series"
+            },
+            description: {
+                zh: '對於那些將控制權、隱私保護和建立高度專業化模型的能力置於首位的開發者和組織而言，Llama生態系統提供了一個最先進的、非專有的強大替代方案。',
+                en: 'For developers and organizations that prioritize control, privacy, and the ability to create highly specialized models, the Llama ecosystem offers a state-of-the-art, non-proprietary, and powerful alternative.'
+            }
+        },
+        {
+            title: {
+                zh: 'Google DeepMind 的專業化模型 (如 AlphaFold 3)',
+                en: "Google DeepMind's specialized models (e.g., AlphaFold 3)"
+            },
+            description: {
+                zh: '在基礎科學研究領域，這些為特定目的而建構的模型自成一格，它們定義了AI應用於解決現實世界根本性問題的絕對前沿。',
+                en: 'In the realm of fundamental scientific research, these purpose-built models are in a class of their own, defining the absolute frontier of AI application to solve real-world problems.'
+            }
+        }
+    ];
+
+    const chartConfigs = {
+        zh: {
+            gpqa: { label: '通用推理 (GPQA Diamond) - 分數越高越好', unit: '%' },
+            swe: { label: '代理編碼 (SWE-Bench) - 分數越高越好', unit: '%' },
+            casi: { label: '安全性 (CASI Score) - 分數越高越好', unit: '' },
+            cost: { label: '成本效益 ($/百萬輸入Tokens) - 費用越低越好', unit: '$' }
+        },
+        en: {
+            gpqa: { label: 'General Reasoning (GPQA Diamond) - Higher is better', unit: '%' },
+            swe: { label: 'Agentic Coding (SWE-Bench) - Higher is better', unit: '%' },
+            casi: { label: 'Safety (CASI Score) - Higher is better', unit: '' },
+            cost: { label: 'Cost-Effectiveness ($/M input tokens) - Lower is better', unit: '$' }
+        }
+    };
+    
+    // --- 狀態和變數 ---
+    let currentLang = 'zh';
+    let benchmarkChart;
+    const ctx = document.getElementById('benchmarkChart').getContext('2d');
+    
+    // --- 函數 ---
+    const setLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.body.className = `bg-stone-50 text-stone-800 lang-${lang}`;
+        
+        const elements = document.querySelectorAll('[data-i18n-key]');
+        elements.forEach(el => {
+            const key = el.dataset.i18nKey;
+            if (translations[lang] && translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        
+        const langSwitcher = document.getElementById('lang-switcher');
+        langSwitcher.textContent = lang === 'zh' ? 'English' : '中文';
+
+        // 更新圖表和推薦
+        const activeBenchmark = document.querySelector('.benchmark-btn.bg-blue-100').dataset.benchmark;
+        updateChart(activeBenchmark);
+        
+        const activeRecButton = document.querySelector('.selector-btn.ring-2');
+        if (activeRecButton) {
+            const index = Array.from(document.querySelectorAll('.selector-btn')).indexOf(activeRecButton);
+            updateRecommendation(index);
+        } else {
+             document.getElementById('recommendation-result').innerHTML = `<p class="text-stone-600" data-i18n-key="recDefault">${translations[currentLang].recDefault}</p>`;
+        }
+    };
+    
+    const updateChart = (benchmark) => {
+        const config = chartConfigs[currentLang][benchmark];
+        const filteredData = modelData
+            .filter(m => m[benchmark] !== null)
+            .sort((a, b) => {
+                if (benchmark === 'cost') return a[benchmark] - b[benchmark];
+                return b[benchmark] - a[benchmark];
+            });
+
+        const labels = filteredData.map(m => m.name);
+        const data = filteredData.map(m => m[benchmark]);
+        const backgroundColor = benchmark === 'cost' 
+            ? 'rgba(239, 68, 68, 0.6)'
+            : 'rgba(59, 130, 246, 0.6)';
+        const borderColor = benchmark === 'cost'
+            ? 'rgba(239, 68, 68, 1)'
+            : 'rgba(59, 130, 246, 1)';
+
+        if (benchmarkChart) {
+            benchmarkChart.destroy();
+        }
+
+        benchmarkChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: config.label,
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label = label.split(' - ')[0]; // 只取標籤前半部分
+                                    label += ': ';
+                                }
+                                if (context.parsed.x !== null) {
+                                    label += context.parsed.x + config.unit;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: config.label
+                        }
+                    },
+                    y: { ticks: { autoSkip: false } }
+                }
+            }
+        });
+    };
+
+    const updateRecommendation = (index) => {
+        const recommendationResult = document.getElementById('recommendation-result');
+        const rec = recommendations[index];
+        recommendationResult.innerHTML = `
+            <h4 class="font-bold text-xl text-blue-900 mb-2">${translations[currentLang].recResultPrefix}${rec.title[currentLang]}</h4>
+            <p class="text-stone-700">${rec.description[currentLang]}</p>
+        `;
+        recommendationResult.classList.add('fade-in');
+        setTimeout(() => recommendationResult.classList.remove('fade-in'), 500);
+    };
+
+    const populateTable = () => {
+        const tableBody = document.getElementById('modelDataTable');
+        let html = '';
+        modelData.forEach(m => {
+            html += `
+                <tr class="hover:bg-stone-50">
+                    <td class="p-3 font-medium">${m.name} <span class="text-xs text-stone-500">(${m.developer})</span></td>
+                    <td class="p-3 text-center">${m.gpqa !== null ? m.gpqa.toFixed(1) + '%' : '-'}</td>
+                    <td class="p-3 text-center">${m.swe !== null ? m.swe.toFixed(1) + '%' : '-'}</td>
+                    <td class="p-3 text-center">${m.casi !== null ? m.casi.toFixed(2) : '-'}</td>
+                    <td class="p-3 text-center">${m.cost !== null ? '$' + m.cost.toFixed(2) : '-'}</td>
+                </tr>
+            `;
+        });
+        tableBody.innerHTML = html;
+    };
+    
+    // --- 事件監聽 ---
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        setLanguage(newLang);
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            const targetId = link.dataset.target;
+            document.querySelectorAll('.nav-link').forEach(nav => nav.classList.remove('active'));
+            link.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+                if (section.id === targetId) {
+                    section.classList.add('active');
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.selector-btn').forEach((btn, index) => {
+        btn.addEventListener('click', () => {
+            updateRecommendation(index);
+            document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('ring-2', 'ring-blue-500'));
+            btn.classList.add('ring-2', 'ring-blue-500');
+        });
+    });
+    
+    document.querySelectorAll('.benchmark-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const benchmark = btn.dataset.benchmark;
+            updateChart(benchmark);
+            document.querySelectorAll('.benchmark-btn').forEach(b => {
+                b.classList.remove('bg-blue-100', 'text-blue-800');
+                b.classList.add('bg-stone-100', 'text-stone-700');
+            });
+            btn.classList.add('bg-blue-100', 'text-blue-800');
+            btn.classList.remove('bg-stone-100', 'text-stone-700');
+        });
+    });
+    
+    // --- 初始化 ---
+    populateTable();
+    setLanguage('zh'); // 預設語言為中文
+});
+</script>
+
+</body>
+</html>
