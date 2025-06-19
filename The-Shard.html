@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">碎片大廈：互動式深度解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A single-page, non-linear, dashboard-style application. The structure begins with a hero section for immediate impact, followed by a sticky navigation bar for easy access to five distinct, thematic sections: 1. Overview (key stats & floor count paradox), 2. Vertical City (interactive floor plan), 3. Comparison (bar chart of UK's tallest buildings), 4. Design & Engineering (dual-column layout), and 5. Impact (summary). This thematic structure, rather than mirroring the report's linear format, allows users to explore topics based on interest, enhancing engagement and comprehension. The interactive elements (clickable cards, hover-activated diagrams, chart tooltips) are designed to turn static data into a discovery process. -->
+    <!-- Visualization & Content Choices: 
+        - Key Stats (Height, Floors, Rank): Goal: Inform. Method: Large-format text cards. Justification: Provides immediate, high-impact information.
+        - Floor Count Paradox (95/87/72): Goal: Clarify. Method: Interactive HTML cards with JS toggle. Justification: Simplifies a complex point into an engaging, user-driven reveal. Library: Vanilla JS.
+        - Vertical City Layout: Goal: Organize/Explore. Method: Interactive vertical diagram using HTML/CSS Flexbox with JS hover/click events. Justification: Visually represents the building's functional zones far more effectively than a static table. Library: Vanilla JS.
+        - UK Building Comparison: Goal: Compare. Method: Horizontal Bar Chart. Justification: Instantly visualizes the significant height difference of The Shard. Library: Chart.js.
+        - Design & Engineering Concepts: Goal: Inform. Method: Two-column text layout with Unicode icons. Justification: Clearly separates artistic vision from technical execution for easy reading.
+        - Impact Summary: Goal: Synthesize. Method: Clean text blocks. Justification: Provides a concise, readable conclusion.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF7;
+            color: #3D3D3D;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #A35709;
+            border-bottom-color: #A35709;
+        }
+        .floor-block {
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        .floor-block:hover {
+            background-color: #EADFCE;
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+        .info-card {
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        #lang-toggle {
+            transition: background-color 0.3s, color 0.3s;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="sticky top-0 bg-white/80 backdrop-blur-lg z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="text-2xl font-bold text-[#A35709]" data-lang-key="mainTitle">
+                    碎片大廈
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:flex space-x-8 mr-8">
+                        <a href="#overview" class="nav-link pb-1" data-lang-key="navOverview">概覽</a>
+                        <a href="#vertical-city" class="nav-link pb-1" data-lang-key="navVerticalCity">垂直城市</a>
+                        <a href="#comparison" class="nav-link pb-1" data-lang-key="navComparison">建築比較</a>
+                        <a href="#design" class="nav-link pb-1" data-lang-key="navDesign">設計與工程</a>
+                        <a href="#impact" class="nav-link pb-1" data-lang-key="navImpact">影響力</a>
+                    </div>
+                    <button id="lang-toggle" class="border border-gray-400 rounded-md px-3 py-1 text-sm font-semibold hover:bg-[#A35709] hover:text-white hover:border-transparent">EN</button>
+                    <div class="md:hidden ml-4">
+                        <select id="mobile-nav" class="bg-transparent border-gray-300 rounded-md">
+                            <option value="#overview" data-lang-key="navOverview">概覽</option>
+                            <option value="#vertical-city" data-lang-key="navVerticalCity">垂直城市</option>
+                            <option value="#comparison" data-lang-key="navComparison">建築比較</option>
+                            <option value="#design" data-lang-key="navDesign">設計與工程</option>
+                            <option value="#impact" data-lang-key="navImpact">影響力</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        
+        <section id="hero" class="text-center mb-16 md:mb-24">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-[#1B1A17]" data-lang-key="heroTitle">碎片大廈：互動式深度解析</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600" data-lang-key="heroSubtitle">探索英國最高建築的奧秘——從設計哲學、工程奇蹟到其在倫敦天際線中不可動搖的地位。</p>
+        </section>
+
+        <section id="overview" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2" data-lang-key="overviewTitle">核心數據一覽</h2>
+                <p class="text-gray-500" data-lang-key="overviewSubtitle">碎片大廈不僅是建築，更是一個紀錄的創造者。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-md transition-all duration-300 stat-card">
+                    <div class="text-5xl font-bold text-[#A35709]">309.6<span class="text-2xl ml-1" data-lang-key="unitMeters">米</span></div>
+                    <p class="mt-2 text-lg font-semibold" data-lang-key="statHeightTitle">建築高度</p>
+                    <p class="text-gray-500" data-lang-key="statHeightDesc">英國及西歐最高建築</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md transition-all duration-300 stat-card">
+                    <div class="text-5xl font-bold text-[#A35709]">2012<span class="text-2xl ml-1" data-lang-key="unitYear">年</span></div>
+                    <p class="mt-2 text-lg font-semibold" data-lang-key="statYearTitle">竣工年份</p>
+                    <p class="text-gray-500" data-lang-key="statYearDesc">倫佐·皮亞諾設計</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-md transition-all duration-300 stat-card">
+                    <div class="text-5xl font-bold text-[#A35709]">3</div>
+                    <p class="mt-2 text-lg font-semibold" data-lang-key="statFocusTitle">倫敦天際線焦點</p>
+                    <p class="text-gray-500" data-lang-key="statFocusDesc">與金融城、金絲雀碼頭並立</p>
+                </div>
+            </div>
+
+            <div class="mt-20">
+                <div class="text-center mb-8">
+                    <h3 class="text-2xl font-bold mb-2" data-lang-key="floorMysteryTitle">樓層數之謎：95、87還是72層？</h3>
+                    <p class="text-gray-500" data-lang-key="floorMysterySubtitle">點擊下方數字，了解不同計算標準背後的含義。</p>
+                </div>
+                <div class="flex justify-center gap-4 mb-4">
+                    <button data-floor="95" class="floor-btn bg-white px-6 py-3 rounded-lg font-bold text-2xl shadow-sm border-2 border-transparent">95</button>
+                    <button data-floor="87" class="floor-btn bg-white px-6 py-3 rounded-lg font-bold text-2xl shadow-sm border-2 border-transparent">87</button>
+                    <button data-floor="72" class="floor-btn bg-white px-6 py-3 rounded-lg font-bold text-2xl shadow-sm border-2 border-transparent">72</button>
+                </div>
+                <div id="floor-explanation" class="bg-white p-6 rounded-lg shadow-inner min-h-[100px] flex items-center justify-center text-center transition-all duration-300">
+                    <p class="text-gray-700" data-lang-key="floorMysteryDefault">選擇一個樓層數查看其定義。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="vertical-city" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2" data-lang-key="verticalCityTitle">垂直城市</h2>
+                <p class="text-gray-500 max-w-2xl mx-auto" data-lang-key="verticalCitySubtitle">碎片大廈將辦公、酒店、住宅、餐飲和觀光融為一體。將滑鼠懸停或點擊下方色塊，探索各樓層的功能分佈。</p>
+            </div>
+            <div class="lg:flex lg:gap-8 lg:items-start">
+                <div id="floor-diagram" class="w-full lg:w-1/3 flex flex-col-reverse rounded-lg overflow-hidden shadow-lg bg-[#F1EBE4]">
+                </div>
+                <div id="floor-info-panel" class="w-full lg:w-2/3 mt-8 lg:mt-0 bg-white p-8 rounded-xl shadow-lg min-h-[300px] flex flex-col justify-center info-card opacity-0 transform -translate-y-4">
+                    <h3 id="info-title" class="text-2xl font-bold mb-2 text-[#A35709]"></h3>
+                    <p id="info-floors" class="text-lg font-semibold mb-4"></p>
+                    <p id="info-description" class="text-gray-600"></p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="comparison" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2" data-lang-key="comparisonTitle">巨人之列：英國建築高度比較</h2>
+                <p class="text-gray-500" data-lang-key="comparisonSubtitle">透過圖表直觀感受碎片大廈在英國建築中的領先地位。</p>
+            </div>
+            <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg">
+                <div class="chart-container">
+                    <canvas id="buildingsChart"></canvas>
+                </div>
+                <p class="text-center mt-6 text-gray-600" data-lang-key="comparisonNote">註：雖然碎片大廈在英國和西歐保持最高紀錄，但在整個歐洲範圍內，其高度已被莫斯科的數座摩天大樓超越。</p>
+            </div>
+        </section>
+
+        <section id="design" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-2" data-lang-key="designTitle">設計與工程</h2>
+                <p class="text-gray-500" data-lang-key="designSubtitle">從詩意構想到工程奇蹟，解構成就碎片大廈的兩大支柱。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center" data-lang-key="designPhilosophyTitle"><span class="text-3xl mr-3">🎨</span>設計哲學</h3>
+                    <p class="font-semibold text-[#A35709]" data-lang-key="designVisionTitle">「玻璃碎片」的願景</p>
+                    <p class="mb-4 text-gray-600" data-lang-key="designVisionDesc">建築師倫佐·皮亞諾希望建築如「玻璃碎片」般從泰晤士河畔拔地而起，其靈感源自倫敦的教堂尖頂和帆船桅杆。</p>
+                    <p class="font-semibold text-[#A35709]" data-lang-key="designFacadeTitle">變幻的光影外牆</p>
+                    <p class="mb-4 text-gray-600" data-lang-key="designFacadeDesc">由11,000片超白玻璃構成，能反射天空光線，使建築外觀隨天氣變幻，營造輕盈感，並以不規則金字塔形態「消失在空氣中」。</p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center" data-lang-key="engineeringTitle"><span class="text-3xl mr-3">🔧</span>工程奇蹟</h3>
+                    <p class="font-semibold text-[#A35709]" data-lang-key="engineeringTopDownTitle">「由上而下」施工法</p>
+                    <p class="mb-4 text-gray-600" data-lang-key="engineeringTopDownDesc">為克服複雜的場地限制並縮短工期，英國首次採用此方法，在建造地上核心筒的同時，向下開挖地下室。</p>
+                    <p class="font-semibold text-[#A35709]" data-lang-key="engineeringTrussTitle">「帽式桁架」抗風設計</p>
+                    <p class="mb-4 text-gray-600" data-lang-key="engineeringTrussDesc">在頂部設計巨型鋼結構，連接核心筒與外部立柱，有效增加建築剛度，將高空擺動控制在舒適範圍內。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="scroll-mt-20 text-center">
+             <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-2" data-lang-key="impactTitle">深遠影響與意義</h2>
+                <p class="text-gray-500 max-w-3xl mx-auto" data-lang-key="impactSubtitle">碎片大廈不僅是倫敦的地標，更是一種成功的城市發展模型。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-left">
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impactIconTitle">即時偶像與城市再生</h4>
+                    <p class="text-gray-600" data-lang-key="impactIconDesc">迅速成為全球公認的倫敦新象徵，其「戰略性孤立」的選址成功催化了倫敦橋區域的經濟與文化再生。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impactModelTitle">韌性的經濟模型</h4>
+                    <p class="text-gray-600" data-lang-key="impactModelDesc">「垂直城市」的混合用途模式分散了單一市場的風險，觀光、酒店、辦公等多樣化的收入來源，使其在經濟波動中更具韌性。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impactBenchmarkTitle">未來建築的標竿</h4>
+                    <p class="text-gray-600" data-lang-key="impactBenchmarkDesc">為未來超高層項目在工程雄心、經濟模型和公眾參與方面樹立了關鍵標竿，證明了大型建築可與城市文化深度融合。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 mt-16 md:mt-24 py-8">
+        <div class="container mx-auto text-center text-gray-500">
+            <p data-lang-key="footerNotice">此互動式報告根據公開資料生成。</p>
+            <p data-lang-key="footerCredit">專為資訊視覺化與使用者體驗設計。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const translations = {
+                zh: {
+                    pageTitle: "碎片大廈：互動式深度解析",
+                    mainTitle: "碎片大廈",
+                    navOverview: "概覽",
+                    navVerticalCity: "垂直城市",
+                    navComparison: "建築比較",
+                    navDesign: "設計與工程",
+                    navImpact: "影響力",
+                    heroTitle: "碎片大廈：互動式深度解析",
+                    heroSubtitle: "探索英國最高建築的奧秘——從設計哲學、工程奇蹟到其在倫敦天際線中不可動搖的地位。",
+                    overviewTitle: "核心數據一覽",
+                    overviewSubtitle: "碎片大廈不僅是建築，更是一個紀錄的創造者。",
+                    unitMeters: "米",
+                    statHeightTitle: "建築高度",
+                    statHeightDesc: "英國及西歐最高建築",
+                    unitYear: "年",
+                    statYearTitle: "竣工年份",
+                    statYearDesc: "倫佐·皮亞諾設計",
+                    statFocusTitle: "倫敦天際線焦點",
+                    statFocusDesc: "與金融城、金絲雀碼頭並立",
+                    floorMysteryTitle: "樓層數之謎：95、87還是72層？",
+                    floorMysterySubtitle: "點擊下方數字，了解不同計算標準背後的含義。",
+                    floorMysteryDefault: "選擇一個樓層數查看其定義。",
+                    floorData: {
+                        '95': { title: '95層：總結構樓層', description: '此數據計入了建築頂部尖塔內的所有結構層和頂部的機械平台。它代表了建築的完整物理結構，但大部分高層空間並非傳統意義上的可使用樓層。' },
+                        '87': { title: '87層：官方記錄樓層', description: '這是根據世界高層建築與都市人居學會（CTBUH）等國際權威機構標準提交的官方數據。它通常包含了主要的機械設備層，是建築排名中使用的標準數字。' },
+                        '72': { title: '72層：主要可使用樓層', description: '代表了建築中人類可實際使用、租賃或居住的主要樓層的頂點。建築的混凝土核心筒在此高度封頂，其上方便是主要由鋼結構組成的觀景台和尖塔。' }
+                    },
+                    verticalCityTitle: "垂直城市",
+                    verticalCitySubtitle: "碎片大廈將辦公、酒店、住宅、餐飲和觀光融為一體。將滑鼠懸停或點擊下方色塊，探索各樓層的功能分佈。",
+                    verticalCityData: [
+                        { floors: '68-72', use: '公共觀景台', description: '包括室內360度觀景廊和位於244米高的露天天空甲板。', color: '#A35709' },
+                        { floors: '53-65', use: '住宅公寓', description: '高端私人住宅，提供無與倫比的城市景觀。', color: '#BE7525' },
+                        { floors: '34-52', use: '五星級酒店', description: '香格里拉酒店，擁有豪華客房、餐廳和空中泳池。', color: '#D99340' },
+                        { floors: '31-33', use: '餐廳與酒吧', description: '包括Aqua Shard、Oblix、Hutong等多家高級餐廳。', color: '#F2B45C' },
+                        { floors: '2-28', use: '辦公空間', description: '出租給多家國際企業的甲級辦公樓層。', color: '#EADFCE' },
+                        { floors: '地面層', use: '零售/餐飲', description: '入口大廳及咖啡館、糕點店等。', color: '#F1EBE4' }
+                    ],
+                    infoFloorsPrefix: "樓層",
+                    comparisonTitle: "巨人之列：英國建築高度比較",
+                    comparisonSubtitle: "透過圖表直觀感受碎片大廈在英國建築中的領先地位。",
+                    comparisonNote: "註：雖然碎片大廈在英國和西歐保持最高紀錄，但在整個歐洲範圍內，其高度已被莫斯科的數座摩天大樓超越。",
+                    chartLabelHeight: "高度 (米)",
+                    chartXAxisTitle: "高度 (米)",
+                    chartBuildings: ['碎片大廈', '主教門22號', '加拿大廣場一號', '地標頂峰公寓', '蒼鷺大廈'],
+                    designTitle: "設計與工程",
+                    designSubtitle: "從詩意構想到工程奇蹟，解構成就碎片大廈的兩大支柱。",
+                    designPhilosophyTitle: "設計哲學",
+                    designVisionTitle: "「玻璃碎片」的願景",
+                    designVisionDesc: "建築師倫佐·皮亞諾希望建築如「玻璃碎片」般從泰晤士河畔拔地而起，其靈感源自倫敦的教堂尖頂和帆船桅杆。",
+                    designFacadeTitle: "變幻的光影外牆",
+                    designFacadeDesc: "由11,000片超白玻璃構成，能反射天空光線，使建築外觀隨天氣變幻，營造輕盈感，並以不規則金字塔形態「消失在空氣中」。",
+                    engineeringTitle: "工程奇蹟",
+                    engineeringTopDownTitle: "「由上而下」施工法",
+                    engineeringTopDownDesc: "為克服複雜的場地限制並縮短工期，英國首次採用此方法，在建造地上核心筒的同時，向下開挖地下室。",
+                    engineeringTrussTitle: "「帽式桁架」抗風設計",
+                    engineeringTrussDesc: "在頂部設計巨型鋼結構，連接核心筒與外部立柱，有效增加建築剛度，將高空擺動控制在舒適範圍內。",
+                    impactTitle: "深遠影響與意義",
+                    impactSubtitle: "碎片大廈不僅是倫敦的地標，更是一種成功的城市發展模型。",
+                    impactIconTitle: "即時偶像與城市再生",
+                    impactIconDesc: "迅速成為全球公認的倫敦新象徵，其「戰略性孤立」的選址成功催化了倫敦橋區域的經濟與文化再生。",
+                    impactModelTitle: "韌性的經濟模型",
+                    impactModelDesc: "「垂直城市」的混合用途模式分散了單一市場的風險，觀光、酒店、辦公等多樣化的收入來源，使其在經濟波動中更具韌性。",
+                    impactBenchmarkTitle: "未來建築的標竿",
+                    impactBenchmarkDesc: "為未來超高層項目在工程雄心、經濟模型和公眾參與方面樹立了關鍵標竿，證明了大型建築可與城市文化深度融合。",
+                    footerNotice: "此互動式報告根據公開資料生成。",
+                    footerCredit: "專為資訊視覺化與使用者體驗設計。"
+                },
+                en: {
+                    pageTitle: "The Shard: An Interactive Deep Dive",
+                    mainTitle: "The Shard",
+                    navOverview: "Overview",
+                    navVerticalCity: "Vertical City",
+                    navComparison: "Comparison",
+                    navDesign: "Design & Engineering",
+                    navImpact: "Impact",
+                    heroTitle: "The Shard: An Interactive Deep Dive",
+                    heroSubtitle: "Explore the mysteries of the UK's tallest building—from its design philosophy and engineering marvels to its unshakable status on the London skyline.",
+                    overviewTitle: "Key Statistics at a Glance",
+                    overviewSubtitle: "The Shard is not just a building; it's a record-breaker.",
+                    unitMeters: "m",
+                    statHeightTitle: "Architectural Height",
+                    statHeightDesc: "Tallest building in the UK & Western Europe",
+                    unitYear: "",
+                    statYearTitle: "Year Completed",
+                    statYearDesc: "Designed by Renzo Piano",
+                    statFocusTitle: "London Skyline Focus",
+                    statFocusDesc: "Stands alongside the City and Canary Wharf",
+                    floorMysteryTitle: "The Floor Count Mystery: 95, 87, or 72?",
+                    floorMysterySubtitle: "Click the numbers below to understand the meaning behind different standards.",
+                    floorMysteryDefault: "Select a floor count to see its definition.",
+                    floorData: {
+                        '95': { title: '95 Floors: Total Structural Floors', description: 'This figure includes all structural levels within the spire and the top plant floors. It represents the full physical structure, though most upper levels are not traditionally habitable.' },
+                        '87': { title: '87 Floors: Official Record', description: 'This is the official figure submitted to authorities like the CTBUH. It typically includes main mechanical floors and is the standard number used for rankings.' },
+                        '72': { title: '72 Floors: Main Habitable Floors', description: 'Represents the peak of the main usable, rentable, or habitable floors. The concrete core stops at this height, above which lies the viewing gallery and spire.' }
+                    },
+                    verticalCityTitle: "The Vertical City",
+                    verticalCitySubtitle: "The Shard integrates offices, a hotel, residences, restaurants, and viewing galleries. Hover or click the blocks below to explore its functional zones.",
+                    verticalCityData: [
+                        { floors: '68-72', use: 'Public Viewing Gallery', description: 'Includes an indoor 360° gallery and an open-air Skydeck at 244m.', color: '#A35709' },
+                        { floors: '53-65', use: 'Residential Apartments', description: 'High-end private residences offering unparalleled city views.', color: '#BE7525' },
+                        { floors: '34-52', use: 'Five-Star Hotel', description: 'The Shangri-La Hotel, featuring luxury rooms, restaurants, and a sky pool.', color: '#D99340' },
+                        { floors: '31-33', use: 'Restaurants & Bars', description: 'Home to several premium restaurants including Aqua Shard, Oblix, and Hutong.', color: '#F2B45C' },
+                        { floors: '2-28', use: 'Office Space', description: 'Grade A office floors leased to various international companies.', color: '#EADFCE' },
+                        { floors: 'Ground', use: 'Retail/Lobby', description: 'Entrance hall and various cafes and patisseries.', color: '#F1EBE4' }
+                    ],
+                    infoFloorsPrefix: "Floors",
+                    comparisonTitle: "A League of Giants: UK Building Height Comparison",
+                    comparisonSubtitle: "Visually grasp The Shard's leading position among UK's tallest buildings with this chart.",
+                    comparisonNote: "Note: While The Shard remains the tallest in the UK and Western Europe, its height has been surpassed by several skyscrapers in Moscow for the European record.",
+                    chartLabelHeight: "Height (m)",
+                    chartXAxisTitle: "Height (m)",
+                    chartBuildings: ['The Shard', '22 Bishopsgate', 'One Canada Square', 'Landmark Pinnacle', 'Heron Tower'],
+                    designTitle: "Design & Engineering",
+                    designSubtitle: "From poetic vision to engineering marvel, deconstructing the two pillars that define The Shard.",
+                    designPhilosophyTitle: "Design Philosophy",
+                    designVisionTitle: "The 'Shard of Glass' Vision",
+                    designVisionDesc: "Architect Renzo Piano envisioned a 'shard of glass' rising from the River Thames, inspired by London's church spires and the masts of ships.",
+                    designFacadeTitle: "A Facade of Shifting Light",
+                    designFacadeDesc: "Comprised of 11,000 panels of ultra-clear glass, it reflects the sky, changing appearance with the weather and creating a sense of lightness, tapering to 'disappear into the air'.",
+                    engineeringTitle: "Engineering Marvels",
+                    engineeringTopDownTitle: "Top-Down Construction",
+                    engineeringTopDownDesc: "A UK-first method used to overcome site constraints and shorten the schedule, building the core up while excavating the basement down simultaneously.",
+                    engineeringTrussTitle: "The 'Hat Truss' Wind Design",
+                    engineeringTrussDesc: "A massive steel structure at the top connects the core to the outer columns, significantly increasing rigidity and controlling sway within comfort limits.",
+                    impactTitle: "Profound Impact & Significance",
+                    impactSubtitle: "The Shard is not just a London landmark; it is a successful model for urban development.",
+                    impactIconTitle: "Instant Icon & Urban Regeneration",
+                    impactIconDesc: "Quickly became a globally recognized symbol of London. Its 'strategic isolation' successfully catalyzed the economic and cultural regeneration of the London Bridge area.",
+                    impactModelTitle: "A Resilient Economic Model",
+                    impactModelDesc: "The 'vertical city' mixed-use model diversifies risk. Varied income from tourism, hospitality, and offices makes it resilient to economic fluctuations.",
+                    impactBenchmarkTitle: "A Benchmark for Future Buildings",
+                    impactBenchmarkDesc: "Sets a key benchmark for future supertall projects in engineering ambition, economic models, and public engagement, proving that large buildings can deeply integrate with city culture.",
+                    footerNotice: "This interactive report was generated based on public data.",
+                    footerCredit: "Designed for information visualization and user experience."
+                }
+            };
+
+            let currentLang = 'zh';
+            let buildingsChart;
+
+            const langToggleBtn = document.getElementById('lang-toggle');
+
+            function switchLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                langToggleBtn.textContent = lang === 'zh' ? 'EN' : '中';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                
+                updateFloorMystery();
+                updateVerticalCity();
+                if (buildingsChart) {
+                    updateChart(lang);
+                } else {
+                    createChart(lang);
+                }
+            }
+            
+            langToggleBtn.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+            
+            const floorBtns = document.querySelectorAll('.floor-btn');
+            const explanationDiv = document.getElementById('floor-explanation');
+            let activeFloorButton = null;
+
+            function updateFloorMystery() {
+                 if(activeFloorButton) {
+                    const floorCount = activeFloorButton.dataset.floor;
+                    const data = translations[currentLang].floorData[floorCount];
+                    explanationDiv.innerHTML = `<h4 class="font-bold text-lg mb-1">${data.title}</h4><p>${data.description}</p>`;
+                } else {
+                    explanationDiv.innerHTML = `<p class="text-gray-700">${translations[currentLang].floorMysteryDefault}</p>`
+                }
+            }
+
+            floorBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    activeFloorButton = btn;
+                    floorBtns.forEach(b => b.classList.remove('bg-[#A35709]', 'text-white', 'border-[#A35709]'));
+                    btn.classList.add('bg-[#A35709]', 'text-white', 'border-[#A35709]');
+                    updateFloorMystery();
+                });
+            });
+
+            const diagramContainer = document.getElementById('floor-diagram');
+            const infoPanel = document.getElementById('floor-info-panel');
+            const infoTitle = document.getElementById('info-title');
+            const infoFloors = document.getElementById('info-floors');
+            const infoDescription = document.getElementById('info-description');
+
+            function updateVerticalCity() {
+                diagramContainer.innerHTML = '';
+                const data = translations[currentLang].verticalCityData;
+                data.forEach(item => {
+                    const block = document.createElement('div');
+                    block.className = 'floor-block p-4 text-center border-t border-white/50';
+                    block.style.backgroundColor = item.color;
+                    block.style.flexGrow = (item.floors.includes('-') ? parseInt(item.floors.split('-')[1]) - parseInt(item.floors.split('-')[0]) : 1) * 0.5 + 1;
+                    block.innerHTML = `<p class="font-bold text-sm md:text-base text-black/70">${item.use}</p><p class="text-xs text-black/60">${item.floors}</p>`;
+                    
+                    const showInfo = () => {
+                        infoTitle.textContent = item.use;
+                        infoFloors.textContent = `${translations[currentLang].infoFloorsPrefix}: ${item.floors}`;
+                        infoDescription.textContent = item.description;
+                        infoPanel.style.opacity = '1';
+                        infoPanel.style.transform = 'translateY(0)';
+                    };
+
+                    block.addEventListener('mouseenter', showInfo);
+                    block.addEventListener('click', showInfo);
+                    diagramContainer.appendChild(block);
+                });
+            }
+            
+            function createChart(lang) {
+                const buildingsData = {
+                    labels: translations[lang].chartBuildings,
+                    heights: [309.6, 278.2, 236, 233.2, 230]
+                };
+                const ctx = document.getElementById('buildingsChart').getContext('2d');
+                buildingsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: buildingsData.labels,
+                        datasets: [{
+                            label: translations[lang].chartLabelHeight,
+                            data: buildingsData.heights,
+                            backgroundColor: ['#A35709', '#BE7525', '#D99340', '#F2B45C', '#EADFCE'],
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) { return `${context.dataset.label}: ${context.raw} ${translations[currentLang].unitMeters}`; }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: translations[lang].chartXAxisTitle, font: { size: 14 } }
+                            },
+                            y: { ticks: { font: { size: 12 } } }
+                        }
+                    }
+                });
+            }
+            
+            function updateChart(lang) {
+                 buildingsChart.data.datasets[0].label = translations[lang].chartLabelHeight;
+                 buildingsChart.data.labels = translations[lang].chartBuildings;
+                 buildingsChart.options.scales.x.title.text = translations[lang].chartXAxisTitle;
+                 buildingsChart.update();
+            }
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            sections.forEach(section => observer.observe(section));
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                const targetId = e.target.value;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+
+            // Initial Load
+            switchLanguage('zh');
+        });
+    </script>
+</body>
+</html>
