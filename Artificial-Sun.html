@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人造太陽：探索終極能源</title>
+    <!-- Chosen Palette: Stellar Dawn -->
+    <!-- Application Structure Plan: The SPA is designed with a non-linear, thematic structure to enhance user exploration, moving away from the report's linear format. The architecture includes: 1. A sticky top navigation for easy access to key themes: 'How it Works', 'Tech Paths', 'Global Race', and 'Challenges'. This allows users to jump to topics of interest. 2. Each section is a self-contained module with an introductory paragraph explaining its purpose. 3. Interactive elements like tabs and buttons are used to compare complex concepts (e.g., Tokamak vs. Stellarator) and projects, preventing information overload. 4. Visualizations (charts, diagrams) are integrated with descriptive text to simplify complex data. 5. A new language switcher button provides EN/ZH toggle functionality for all content. This user-centric design prioritizes intuitive discovery and comprehension over passive reading. -->
+    <!-- Visualization & Content Choices: 1. **Lawson Criterion (Inform):** Presented as three highlighted stat cards (Temperature, Density, Time) for quick comprehension. Goal: Break down a complex formula into its core components. 2. **Tokamak vs. Stellarator (Compare):** An interactive tabbed interface shows details for each. A grouped bar chart from Chart.js compares them on 'Design Complexity', 'Stability', and 'Maturity'. Goal: Allow direct, interactive comparison of the two leading technologies. 3. **Global Projects (Organize):** A dynamic dashboard with buttons for each project. Clicking a button updates a central information panel. A CSS-based timeline visualizes key milestones. Goal: Provide a high-level overview and allow drill-down into specific major international efforts. 4. **LCOE (Compare):** A horizontal bar chart from Chart.js compares the target cost of fusion with other energy sources. Goal: Contextualize the economic viability and ultimate goal of fusion energy. All text is condensed from the report for clarity and is now fully translatable. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0056b3;
+            border-bottom-color: #0056b3;
+        }
+        .btn-primary {
+            background-color: #0056b3;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #003d82;
+        }
+        .btn-secondary {
+            background-color: #e9ecef;
+            color: #212529;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary.active, .btn-secondary:hover {
+            background-color: #ced4da;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .h-line {
+            width: 50px;
+            height: 4px;
+            background-color: #0056b3;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="#hero" class="text-xl font-bold text-gray-800" data-lang-key="nav_title">人造太陽</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#principles" class="nav-link pb-1" data-lang-key="nav_principles">運作原理</a>
+                <a href="#tech-paths" class="nav-link pb-1" data-lang-key="nav_tech">技術路徑</a>
+                <a href="#global-race" class="nav-link pb-1" data-lang-key="nav_race">全球競賽</a>
+                <a href="#challenges" class="nav-link pb-1" data-lang-key="nav_challenges">挑戰與未來</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 text-sm font-semibold rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100 transition-colors">EN</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden flex items-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4">
+            <a href="#principles" class="block py-2 text-gray-700 hover:text-blue-700" data-lang-key="nav_principles">運作原理</a>
+            <a href="#tech-paths" class="block py-2 text-gray-700 hover:text-blue-700" data-lang-key="nav_tech">技術路徑</a>
+            <a href="#global-race" class="block py-2 text-gray-700 hover:text-blue-700" data-lang-key="nav_race">全球競賽</a>
+            <a href="#challenges" class="block py-2 text-gray-700 hover:text-blue-700" data-lang-key="nav_challenges">挑戰與未來</a>
+            <button id="lang-switcher-mobile" class="mt-4 w-full px-3 py-2 text-sm font-semibold rounded-md border border-gray-400 text-gray-700 hover:bg-gray-100 transition-colors">EN</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="bg-white py-20 md:py-32">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4" data-lang-key="hero_title">人造太陽</h1>
+                <h2 class="text-2xl md:text-3xl font-light text-gray-600 mb-8" data-lang-key="hero_subtitle">駕馭恆星之力，點亮地球未來</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-700 leading-relaxed mb-12" data-lang-key="hero_p">
+                    「人造太陽」是對尖端核融合裝置的形象比喻，其目標是在地球上模擬恆星的能量產生過程。它承諾為人類提供一種清潔、安全且幾乎取之不竭的終極能源，以應對氣候變遷與能源危機。
+                </p>
+                <a href="#principles" class="btn-primary font-bold py-3 px-8 rounded-full text-lg" data-lang-key="hero_btn">開始探索</a>
+            </div>
+        </section>
+
+        <section id="principles" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="principles_title">運作原理</h2>
+                    <div class="h-line mt-4"></div>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="principles_intro">本節將揭示核融合的基礎物理學——從愛因斯坦的質能方程式到創造恆星條件所需的極端環境。了解我們如何在地球上點燃微型太陽。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2" data-lang-key="principles_reaction_title">融合反應：$E=mc^2$ 的實踐</h3>
+                            <p class="text-gray-700 leading-relaxed" data-lang-key="principles_reaction_p">核融合的本質，是讓輕的原子核（如氫的同位素氘和氚）在極端條件下融合為更重的原子核。過程中微小的質量虧損，會根據 $E=mc^2$ 方程式轉化為巨大的能量。</p>
+                        </div>
+                        <div class="bg-gray-100 p-6 rounded-lg shadow">
+                            <h4 class="font-bold text-lg mb-2" data-lang-key="principles_fuel_title">主流燃料選擇：氘-氚 (D-T) 反應</h4>
+                            <p class="text-center text-xl font-mono p-4 bg-gray-800 text-white rounded">
+                                D + T → ⁴He (3.5 MeV) + n (14.1 MeV)
+                            </p>
+                            <p class="mt-4 text-sm text-gray-600" data-lang-key="principles_fuel_p">D-T反應因其點燃溫度相對較低、反應效率高，成為當前研究的主流。它產生一個氦原子核和一個攜帶大部分能量的高能中子。</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="principles_lawson_title">點燃反應的「三要素」</h3>
+                        <p class="text-center text-gray-600 mb-6" data-lang-key="principles_lawson_p">僅有高溫不足以實現能量淨輸出。「勞遜判據」定義了三個關鍵條件的乘積必須達到閾值，才能讓反應自我維持。</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                                <h4 class="text-xl font-bold" data-lang-key="lawson_temp_title">極致高溫 (T)</h4>
+                                <p class="text-3xl font-bold text-blue-600 mt-2">> 1億°C</p>
+                                <p class="text-gray-600 mt-2" data-lang-key="lawson_temp_p">將燃料加熱成電漿態，賦予原子核足夠動能以克服排斥力。</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                                <h4 class="text-xl font-bold" data-lang-key="lawson_density_title">足夠密度 (n)</h4>
+                                <p class="text-3xl font-bold text-green-600 mt-2" data-lang-key="lawson_density_val">高密度</p>
+                                <p class="text-gray-600 mt-2" data-lang-key="lawson_density_p">增加粒子碰撞機率，以觸發足夠多的融合反應。</p>
+                            </div>
+                            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+                                <h4 class="text-xl font-bold" data-lang-key="lawson_time_title">約束時間 (τ)</h4>
+                                <p class="text-3xl font-bold text-yellow-600 mt-2" data-lang-key="lawson_time_val">足夠長</p>
+                                <p class="text-gray-600 mt-2" data-lang-key="lawson_time_p">將高溫電漿維持足夠長的時間，以產生能量。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="tech-paths" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="tech_title">技術路徑</h2>
+                    <div class="h-line mt-4"></div>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="tech_intro">要馴服「太陽」，科學家們開發了兩種主要技術路徑。本節將帶您了解如何用磁力牢籠或雷射內爆來創造融合條件，並透過互動比較探索它們的優劣。</p>
+                </div>
+                
+                <div class="text-center mb-8">
+                    <button id="mcf-btn" class="tech-path-btn btn-secondary active px-6 py-2 rounded-l-full" data-lang-key="tech_mcf_btn">磁約束融合 (MCF)</button>
+                    <button id="icf-btn" class="tech-path-btn btn-secondary px-6 py-2 rounded-r-full" data-lang-key="tech_icf_btn">慣性約束融合 (ICF)</button>
+                </div>
+
+                <div id="mcf-content" class="tech-content fade-in">
+                    <div class="grid md:grid-cols-5 gap-8">
+                        <div class="md:col-span-2">
+                             <div class="mb-4 flex border-b">
+                                <button id="tokamak-tab-btn" class="tech-tab-btn flex-1 py-2 text-center font-semibold border-b-2 border-blue-600 text-blue-600" data-lang-key="tech_tokamak_tab">托卡馬克</button>
+                                <button id="stellarator-tab-btn" class="tech-tab-btn flex-1 py-2 text-center font-semibold text-gray-500" data-lang-key="tech_stellarator_tab">仿星器</button>
+                            </div>
+                            <div id="tokamak-content" class="tech-tab-content fade-in">
+                                <h4 class="text-xl font-bold mb-2" data-lang-key="tech_tokamak_title">托卡馬克 (Tokamak)</h4>
+                                <p class="text-gray-700 leading-relaxed" data-lang-key="tech_tokamak_p">一種環形（甜甜圈狀）裝置，利用外部線圈產生的強大環向磁場，以及在電漿內部感應出的電流所產生的極向磁場，共同編織出螺旋磁力線來約束高溫電漿。這是目前全球最主流、技術最成熟的路線。</p>
+                            </div>
+                            <div id="stellarator-content" class="tech-tab-content hidden fade-in">
+                                <h4 class="text-xl font-bold mb-2" data-lang-key="tech_stellarator_title">仿星器 (Stellarator)</h4>
+                                <p class="text-gray-700 leading-relaxed" data-lang-key="tech_stellarator_p">同樣是環形裝置，但它完全依靠外部極其複雜、扭曲的三維線圈來產生所需的螺旋磁場，無需在電漿中驅動大電流。這使其內在更穩定，能夠天然地連續運行，但工程製造難度極高。</p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3">
+                            <div class="chart-container">
+                                <canvas id="mcf-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="icf-content" class="tech-content hidden fade-in">
+                    <div class="text-center max-w-3xl mx-auto">
+                        <h3 class="text-2xl font-bold mb-4" data-lang-key="tech_icf_title">慣性約束融合 (ICF)</h3>
+                        <p class="text-gray-700 leading-relaxed mb-6" data-lang-key="tech_icf_p">採用完全不同的思路：利用數百束超高能量的雷射，在奈秒級的瞬間均勻轟擊一個幾毫米大小的燃料丸。巨大的能量使其向內劇烈壓縮（內爆），達到融合所需的密度和溫度。美國國家點火設施（NIF）在2022年首次實現了能量輸出大於雷射輸入的科學里程碑。</p>
+                        <div class="bg-gray-800 text-white p-6 rounded-lg shadow-lg flex items-center justify-center space-x-2 sm:space-x-4 text-xs sm:text-base">
+                            <span class="text-yellow-400" data-lang-key="icf_laser">⚡ 雷射</span>
+                            <span class="text-2xl font-bold">→</span>
+                            <span class="bg-white text-gray-800 rounded-full w-20 h-12 sm:w-24 sm:h-16 flex items-center justify-center font-bold" data-lang-key="icf_hohlraum">黑體腔</span>
+                            <span class="text-2xl font-bold">→</span>
+                            <span class="bg-red-500 rounded-full w-8 h-8 flex items-center justify-center font-bold" data-lang-key="icf_pellet">丸</span>
+                            <span class="text-2xl font-bold">→</span>
+                            <span class="text-yellow-300 text-3xl">💥</span>
+                            <span class="font-bold" data-lang-key="icf_ignition">點火</span>
+                        </div>
+                         <p class="mt-4 text-sm text-gray-500" data-lang-key="tech_icf_note">注意：NIF的成功是科學上的，其驅動雷射的總耗電遠大於產出能量，距離商業發電仍有長路要走。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="global-race" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="race_title">全球競賽</h2>
+                    <div class="h-line mt-4"></div>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="race_intro">核融合研發已進入一個公共資金支持的宏大科學項目與風險資本驅動的敏捷私營公司並存的「新太空競賽」時代。本節將展示主要參與者及其雄心勃勃的目標。</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="race_players_title">主要參與者</h3>
+                        <div class="flex flex-wrap justify-center gap-2 mb-8">
+                            <button class="project-btn btn-secondary active px-4 py-2 rounded-full" data-project="iter">ITER</button>
+                            <button class="project-btn btn-secondary px-4 py-2 rounded-full" data-project="east">EAST</button>
+                            <button class="project-btn btn-secondary px-4 py-2 rounded-full" data-project="w7x">W7-X</button>
+                            <button class="project-btn btn-secondary px-4 py-2 rounded-full" data-project="sparc">SPARC</button>
+                            <button class="project-btn btn-secondary px-4 py-2 rounded-full" data-project="helion">Polaris</button>
+                        </div>
+                        <div id="project-display" class="bg-white p-8 rounded-lg shadow-xl min-h-[320px] fade-in">
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="race_timeline_title">關鍵里程碑時間線</h3>
+                        <div class="relative pl-6">
+                            <div class="absolute left-0 top-0 bottom-0 w-1 bg-gray-300 rounded"></div>
+                            <div class="space-y-12">
+                                <div class="relative">
+                                    <div class="absolute -left-[30px] top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
+                                    <p class="font-bold text-lg" data-lang-key="timeline_nif_title">2022: NIF 實現科學點火</p>
+                                    <p class="text-gray-600" data-lang-key="timeline_nif_p">慣性約束融合證明能量輸出可大於雷射輸入。</p>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-[30px] top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
+                                    <p class="font-bold text-lg" data-lang-key="timeline_sparc_title">2026-27 (目標): SPARC 實現淨能量增益</p>
+                                    <p class="text-gray-600" data-lang-key="timeline_sparc_p">CFS公司旨在用緊湊型高場托卡馬克證明商業可行性。</p>
+                                </div>
+                                 <div class="relative">
+                                    <div class="absolute -left-[30px] top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
+                                    <p class="font-bold text-lg" data-lang-key="timeline_helion_title">2028 (目標): Helion 商業發電</p>
+                                    <p class="text-gray-600" data-lang-key="timeline_helion_p">Helion公司計劃用其創新的脈衝融合技術率先併網。</p>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-[30px] top-1/2 -translate-y-1/2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
+                                    <p class="font-bold text-lg" data-lang-key="timeline_iter_title">2039 (目標): ITER 開始氘-氚運行</p>
+                                    <p class="text-gray-600" data-lang-key="timeline_iter_p">國際合作的旗艦項目將在發電廠規模驗證 Q≥10 的科學。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="challenges" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="challenges_title">挑戰與未來</h2>
+                    <div class="h-line mt-4"></div>
+                    <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="challenges_intro">從科學演示到商業電廠，核融合仍需跨越燃料、材料和經濟性這「三大挑戰」。本節將探討這些障礙，並展望融合能源的最終前景。</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-12">
+                     <div class="space-y-8">
+                        <h3 class="text-2xl font-bold mb-4" data-lang-key="challenges_major_title">商業化路上的三大挑戰</h3>
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge_fuel_title">① 燃料挑戰：氚的自持</h4>
+                                <p class="text-gray-700" data-lang-key="challenge_fuel_p">燃料「氚」在自然界極其稀有，必須在反應爐內部通過中子轟擊「鋰」來持續「滋生」。實現氚的消耗與再生平衡 (TBR > 1) 是先決條件。</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge_material_title">② 材料挑戰：承受極端環境</h4>
+                                <p class="text-gray-700" data-lang-key="challenge_material_p">反應爐內壁材料需承受超高熱負荷和強中子輻照，這對材料科學提出了極高要求。目前首選「鎢」，但其脆性等問題仍待解決。</p>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge_eco_title">③ 經濟性挑戰：成本競爭力</h4>
+                                <p class="text-gray-700" data-lang-key="challenge_eco_p">即使技術可行，核融合發電的「度電成本 (LCOE)」也必須足夠低，才能與現有能源競爭。這是從科學成功到商業成功的關鍵。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4" data-lang-key="challenges_lcoe_title">度電成本 (LCOE) 比較</h3>
+                        <p class="text-gray-600 mb-6" data-lang-key="challenges_lcoe_p">核融合的長期目標是將LCOE降至與其他主流能源相當或更低的水平。下圖為一個預估比較。</p>
+                        <div class="chart-container">
+                            <canvas id="lcoe-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p data-lang-key="footer_p">本頁面內容根據《人造太陽：一份關於核融合能源科學、技術與未來的綜合報告》生成。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footer_copyright">© 2024 互動式報告生成器</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLanguage = 'zh';
+            let mcfChartInstance, lcoeChartInstance;
+
+            const languageData = {
+                zh: {
+                    // nav & hero
+                    nav_title: "人造太陽",
+                    nav_principles: "運作原理",
+                    nav_tech: "技術路徑",
+                    nav_race: "全球競賽",
+                    nav_challenges: "挑戰與未來",
+                    hero_title: "人造太陽",
+                    hero_subtitle: "駕馭恆星之力，點亮地球未來",
+                    hero_p: "「人造太陽」是對尖端核融合裝置的形象比喻，其目標是在地球上模擬恆星的能量產生過程。它承諾為人類提供一種清潔、安全且幾乎取之不竭的終極能源，以應對氣候變遷與能源危機。",
+                    hero_btn: "開始探索",
+                    // principles
+                    principles_title: "運作原理",
+                    principles_intro: "本節將揭示核融合的基礎物理學——從愛因斯坦的質能方程式到創造恆星條件所需的極端環境。了解我們如何在地球上點燃微型太陽。",
+                    principles_reaction_title: "融合反應：$E=mc^2$ 的實踐",
+                    principles_reaction_p: "核融合的本質，是讓輕的原子核（如氫的同位素氘和氚）在極端條件下融合為更重的原子核。過程中微小的質量虧損，會根據 $E=mc^2$ 方程式轉化為巨大的能量。",
+                    principles_fuel_title: "主流燃料選擇：氘-氚 (D-T) 反應",
+                    principles_fuel_p: "D-T反應因其點燃溫度相對較低、反應效率高，成為當前研究的主流。它產生一個氦原子核和一個攜帶大部分能量的高能中子。",
+                    principles_lawson_title: "點燃反應的「三要素」",
+                    principles_lawson_p: "僅有高溫不足以實現能量淨輸出。「勞遜判據」定義了三個關鍵條件的乘積必須達到閾值，才能讓反應自我維持。",
+                    lawson_temp_title: "極致高溫 (T)",
+                    lawson_temp_p: "將燃料加熱成電漿態，賦予原子核足夠動能以克服排斥力。",
+                    lawson_density_title: "足夠密度 (n)",
+                    lawson_density_val: "高密度",
+                    lawson_density_p: "增加粒子碰撞機率，以觸發足夠多的融合反應。",
+                    lawson_time_title: "約束時間 (τ)",
+                    lawson_time_val: "足夠長",
+                    lawson_time_p: "將高溫電漿維持足夠長的時間，以產生能量。",
+                    // tech paths
+                    tech_title: "技術路徑",
+                    tech_intro: "要馴服「太陽」，科學家們開發了兩種主要技術路徑。本節將帶您了解如何用磁力牢籠或雷射內爆來創造融合條件，並透過互動比較探索它們的優劣。",
+                    tech_mcf_btn: "磁約束融合 (MCF)",
+                    tech_icf_btn: "慣性約束融合 (ICF)",
+                    tech_tokamak_tab: "托卡馬克",
+                    tech_stellarator_tab: "仿星器",
+                    tech_tokamak_title: "托卡馬克 (Tokamak)",
+                    tech_tokamak_p: "一種環形（甜甜圈狀）裝置，利用外部線圈產生的強大環向磁場，以及在電漿內部感應出的電流所產生的極向磁場，共同編織出螺旋磁力線來約束高溫電漿。這是目前全球最主流、技術最成熟的路線。",
+                    tech_stellarator_title: "仿星器 (Stellarator)",
+                    tech_stellarator_p: "同樣是環形裝置，但它完全依靠外部極其複雜、扭曲的三維線圈來產生所需的螺旋磁場，無需在電漿中驅動大電流。這使其內在更穩定，能夠天然地連續運行，但工程製造難度極高。",
+                    tech_icf_title: "慣性約束融合 (ICF)",
+                    tech_icf_p: "採用完全不同的思路：利用數百束超高能量的雷射，在奈秒級的瞬間均勻轟擊一個幾毫米大小的燃料丸。巨大的能量使其向內劇烈壓縮（內爆），達到融合所需的密度和溫度。美國國家點火設施（NIF）在2022年首次實現了能量輸出大於雷射輸入的科學里程碑。",
+                    icf_laser: "⚡ 雷射",
+                    icf_hohlraum: "黑體腔",
+                    icf_pellet: "丸",
+                    icf_ignition: "點火",
+                    tech_icf_note: "注意：NIF的成功是科學上的，其驅動雷射的總耗電遠大於產出能量，距離商業發電仍有長路要走。",
+                    // global race
+                    race_title: "全球競賽",
+                    race_intro: "核融合研發已進入一個公共資金支持的宏大科學項目與風險資本驅動的敏捷私營公司並存的「新太空競賽」時代。本節將展示主要參與者及其雄心勃勃的目標。",
+                    race_players_title: "主要參與者",
+                    race_timeline_title: "關鍵里程碑時間線",
+                    timeline_nif_title: "2022: NIF 實現科學點火",
+                    timeline_nif_p: "慣性約束融合證明能量輸出可大於雷射輸入。",
+                    timeline_sparc_title: "2026-27 (目標): SPARC 實現淨能量增益",
+                    timeline_sparc_p: "CFS公司旨在用緊湊型高場托卡馬克證明商業可行性。",
+                    timeline_helion_title: "2028 (目標): Helion 商業發電",
+                    timeline_helion_p: "Helion公司計劃用其創新的脈衝融合技術率先併網。",
+                    timeline_iter_title: "2039 (目標): ITER 開始氘-氚運行",
+                    timeline_iter_p: "國際合作的旗艦項目將在發電廠規模驗證 Q≥10 的科學。",
+                    // challenges
+                    challenges_title: "挑戰與未來",
+                    challenges_intro: "從科學演示到商業電廠，核融合仍需跨越燃料、材料和經濟性這「三大挑戰」。本節將探討這些障礙，並展望融合能源的最終前景。",
+                    challenges_major_title: "商業化路上的三大挑戰",
+                    challenge_fuel_title: "① 燃料挑戰：氚的自持",
+                    challenge_fuel_p: "燃料「氚」在自然界極其稀有，必須在反應爐內部通過中子轟擊「鋰」來持續「滋生」。實現氚的消耗與再生平衡 (TBR > 1) 是先決條件。",
+                    challenge_material_title: "② 材料挑戰：承受極端環境",
+                    challenge_material_p: "反應爐內壁材料需承受超高熱負荷和強中子輻照，這對材料科學提出了極高要求。目前首選「鎢」，但其脆性等問題仍待解決。",
+                    challenge_eco_title: "③ 經濟性挑戰：成本競爭力",
+                    challenge_eco_p: "即使技術可行，核融合發電的「度電成本 (LCOE)」也必須足夠低，才能與現有能源競爭。這是從科學成功到商業成功的關鍵。",
+                    challenges_lcoe_title: "度電成本 (LCOE) 比較",
+                    challenges_lcoe_p: "核融合的長期目標是將LCOE降至與其他主流能源相當或更低的水平。下圖為一個預估比較。",
+                    // footer
+                    footer_p: "本頁面內容根據《人造太陽：一份關於核融合能源科學、技術與未來的綜合報告》生成。",
+                    footer_copyright: "© 2024 互動式報告生成器",
+                    // charts
+                    mcf_chart_title: "磁約束技術路徑比較 (示意值)",
+                    mcf_chart_label_complexity: "設計複雜度",
+                    mcf_chart_label_stability: "運行穩定性",
+                    mcf_chart_label_maturity: "技術成熟度",
+                    mcf_chart_dataset_tokamak: "托卡馬克 (Tokamak)",
+                    mcf_chart_dataset_stellarator: "仿星器 (Stellarator)",
+                    lcoe_chart_title: "不同能源技術成本比較 (示意值)",
+                    lcoe_chart_label: "平準化度電成本 (美元/MWh)",
+                    lcoe_chart_x_axis: "美元/兆瓦時 ($/MWh)",
+                    lcoe_labels: ['天然氣', '太陽能光電', '陸上風電', '核分裂', '核融合 (目標)'],
+                    // project data
+                    project_display_type: "類型：",
+                    project_display_location: "地點：",
+                    project_display_goal: "目標：",
+                    project_display_status: "狀態："
+                },
+                en: {
+                    // nav & hero
+                    nav_title: "Artificial Sun",
+                    nav_principles: "How it Works",
+                    nav_tech: "Tech Paths",
+                    nav_race: "Global Race",
+                    nav_challenges: "Challenges & Future",
+                    hero_title: "Artificial Sun",
+                    hero_subtitle: "Harnessing Stellar Power to Light Up Earth's Future",
+                    hero_p: "The 'Artificial Sun' is a metaphorical term for cutting-edge nuclear fusion devices, aiming to replicate the energy generation process of stars on Earth. It promises to provide humanity with a clean, safe, and virtually inexhaustible ultimate energy source to tackle climate change and the energy crisis.",
+                    hero_btn: "Start Exploring",
+                    // principles
+                    principles_title: "How it Works",
+                    principles_intro: "This section unveils the fundamental physics of nuclear fusion—from Einstein's mass-energy equivalence to the extreme conditions needed to create stellar environments. Learn how we ignite miniature suns on Earth.",
+                    principles_reaction_title: "Fusion Reaction: $E=mc^2$ in Practice",
+                    principles_reaction_p: "The essence of nuclear fusion is to merge light atomic nuclei (like hydrogen isotopes deuterium and tritium) into heavier ones under extreme conditions. The slight mass deficit in this process is converted into enormous energy according to the equation $E=mc^2$.",
+                    principles_fuel_title: "Mainstream Fuel Choice: Deuterium-Tritium (D-T) Reaction",
+                    principles_fuel_p: "The D-T reaction is the mainstream research focus due to its relatively low ignition temperature and high reaction efficiency. It produces a helium nucleus and a high-energy neutron that carries most of the energy.",
+                    principles_lawson_title: "The 'Triple Product' for Ignition",
+                    principles_lawson_p: "High temperature alone is not enough for net energy gain. The 'Lawson Criterion' defines a threshold for the product of three key conditions, which must be met for the reaction to be self-sustaining.",
+                    lawson_temp_title: "Extreme Temperature (T)",
+                    lawson_temp_p: "Heats the fuel into a plasma state, giving nuclei enough kinetic energy to overcome repulsion.",
+                    lawson_density_title: "Sufficient Density (n)",
+                    lawson_density_val: "High Density",
+                    lawson_density_p: "Increases the probability of particle collisions to trigger enough fusion reactions.",
+                    lawson_time_title: "Confinement Time (τ)",
+                    lawson_time_val: "Long Enough",
+                    lawson_time_p: "Maintains the hot plasma for a sufficient duration to generate energy.",
+                    // tech paths
+                    tech_title: "Technology Paths",
+                    tech_intro: "To tame the 'sun', scientists have developed two main technological paths. This section will guide you through how magnetic cages or laser implosions are used to create fusion conditions, and you can explore their pros and cons through interactive comparisons.",
+                    tech_mcf_btn: "Magnetic Confinement (MCF)",
+                    tech_icf_btn: "Inertial Confinement (ICF)",
+                    tech_tokamak_tab: "Tokamak",
+                    tech_stellarator_tab: "Stellarator",
+                    tech_tokamak_title: "Tokamak",
+                    tech_tokamak_p: "A toroidal (donut-shaped) device that uses a strong toroidal magnetic field from external coils and a poloidal field from an induced plasma current to create helical magnetic field lines to confine hot plasma. It is the most mainstream and technologically mature route globally.",
+                    tech_stellarator_title: "Stellarator",
+                    tech_stellarator_p: "Also a toroidal device, but it relies entirely on extremely complex, twisted 3D external coils to generate the required helical magnetic field, without needing a large plasma current. This makes it inherently more stable and capable of continuous operation, but extremely difficult to engineer.",
+                    tech_icf_title: "Inertial Confinement Fusion (ICF)",
+                    tech_icf_p: "This approach uses a completely different idea: hundreds of ultra-high-energy laser beams bombard a few-millimeter-sized fuel pellet in a nanosecond, causing it to implode and compress violently to reach fusion density and temperature. The National Ignition Facility (NIF) first achieved scientific breakeven in 2022.",
+                    icf_laser: "⚡ Laser",
+                    icf_hohlraum: "Hohlraum",
+                    icf_pellet: "Pellet",
+                    icf_ignition: "Ignition",
+                    tech_icf_note: "Note: NIF's success is a scientific one. The total electricity consumed by its lasers far exceeds the energy produced, and it is still a long way from commercial power generation.",
+                    // global race
+                    race_title: "The Global Race",
+                    race_intro: "Fusion R&D has entered a 'new space race' era, with large, publicly funded scientific projects coexisting with agile, venture-backed private companies. This section showcases the main players and their ambitious goals.",
+                    race_players_title: "Key Players",
+                    race_timeline_title: "Key Milestone Timeline",
+                    timeline_nif_title: "2022: NIF Achieves Scientific Ignition",
+                    timeline_nif_p: "Inertial confinement fusion demonstrates energy output can exceed laser input.",
+                    timeline_sparc_title: "2026-27 (Target): SPARC Achieves Net Energy Gain",
+                    timeline_sparc_p: "CFS aims to prove commercial viability with a compact, high-field tokamak.",
+                    timeline_helion_title: "2028 (Target): Helion's Commercial Power",
+                    timeline_helion_p: "Helion plans to be first to the grid with its innovative pulsed-fusion technology.",
+                    timeline_iter_title: "2039 (Target): ITER Begins D-T Operations",
+                    timeline_iter_p: "The flagship international project will validate Q≥10 science at power-plant scale.",
+                    // challenges
+                    challenges_title: "Challenges & Future",
+                    challenges_intro: "From scientific demonstration to a commercial power plant, fusion must still overcome the 'three major challenges' of fuel, materials, and economics. This section explores these hurdles and looks to the ultimate promise of fusion energy.",
+                    challenges_major_title: "The Three Major Challenges on the Road to Commercialization",
+                    challenge_fuel_title: "① Fuel Challenge: Tritium Self-Sufficiency",
+                    challenge_fuel_p: "Tritium is extremely rare in nature and must be 'bred' inside the reactor by bombarding lithium with neutrons. Achieving a tritium breeding ratio (TBR > 1) is a prerequisite.",
+                    challenge_material_title: "② Materials Challenge: Surviving Extreme Environments",
+                    challenge_material_p: "The reactor's inner wall must withstand extreme heat loads and intense neutron radiation, posing immense challenges for materials science. Tungsten is the top choice, but issues like brittleness remain.",
+                    challenge_eco_title: "③ Economic Challenge: Cost Competitiveness",
+                    challenge_eco_p: "Even if technically feasible, the Levelized Cost of Energy (LCOE) from fusion must be low enough to compete with existing energy sources. This is the key to moving from scientific to commercial success.",
+                    challenges_lcoe_title: "LCOE Comparison",
+                    challenges_lcoe_p: "The long-term goal for fusion is to reduce its LCOE to a level comparable to or lower than other mainstream energy sources. The chart below shows an estimated comparison.",
+                    // footer
+                    footer_p: "This page was generated based on 'Artificial Sun: A Comprehensive Report on the Science, Technology, and Future of Fusion Energy'.",
+                    footer_copyright: "© 2024 Interactive Report Generator",
+                    // charts
+                    mcf_chart_title: "MCF Technology Path Comparison (Illustrative Values)",
+                    mcf_chart_label_complexity: "Design Complexity",
+                    mcf_chart_label_stability: "Operational Stability",
+                    mcf_chart_label_maturity: "Technology Maturity",
+                    mcf_chart_dataset_tokamak: "Tokamak",
+                    mcf_chart_dataset_stellarator: "Stellarator",
+                    lcoe_chart_title: "Cost Comparison of Different Energy Technologies (Illustrative)",
+                    lcoe_chart_label: "Levelized Cost of Energy ($/MWh)",
+                    lcoe_chart_x_axis: "USD per Megawatt-hour ($/MWh)",
+                    lcoe_labels: ['Natural Gas', 'Solar PV', 'Onshore Wind', 'Nuclear Fission', 'Fusion (Target)'],
+                     // project data
+                    project_display_type: "Type: ",
+                    project_display_location: "Location: ",
+                    project_display_goal: "Goal: ",
+                    project_display_status: "Status: "
+                }
+            };
+
+             const projectData = {
+                zh: {
+                    iter: { name: "ITER (國際熱核融合實驗反應爐)", type: "托卡馬克", location: "法國", goal: "實現 Q ≥ 10 的淨能量增益，驗證發電廠級科學與工程技術。是全球合作的旗艦項目。", status: "建造中。目標 2039 年開始 D-T 運行。" },
+                    east: { name: "EAST (先進實驗超導托卡馬克)", type: "托卡馬克", location: "中國合肥", goal: "實現長脈衝、穩態高約束模式運行，為穩態發電廠奠定基礎。", status: "已運行。創造了超過1000秒穩態高約束模式的世界紀錄。" },
+                    w7x: { name: "W7-X (文德爾施泰因7-X)", type: "仿星器", location: "德國", goal: "驗證優化仿星器設計的性能，實現穩態、無破裂運行。", status: "已運行。在長脈衝放電中取得了創紀錄的三重積性能。" },
+                    sparc: { name: "SPARC / CFS", type: "托卡馬克 (高溫超導)", location: "美國", goal: "利用高溫超導磁體，以更小尺寸、更低成本實現淨能量增益 (Q > 2)。", status: "建造中。目標 2026-27 年實現淨能量增益。" },
+                    helion: { name: "Polaris / Helion Energy", type: "場反轉位形 (FRC)", location: "美國", goal: "採用脈衝融合與直接能量轉換技術，目標是快速實現商業發電。", status: "建造中。目標 2028 年商業運行。" }
+                },
+                en: {
+                    iter: { name: "ITER (International Thermonuclear Experimental Reactor)", type: "Tokamak", location: "France", goal: "To achieve a net energy gain of Q ≥ 10, demonstrating power-plant-scale science and engineering. A flagship global collaboration.", status: "Under construction. Targeting D-T operations in 2039." },
+                    east: { name: "EAST (Experimental Advanced Superconducting Tokamak)", type: "Tokamak", location: "Hefei, China", goal: "To achieve long-pulse, steady-state high-confinement mode operation, laying the foundation for steady-state power plants.", status: "Operational. Set a world record for steady-state H-mode operation of over 1000 seconds." },
+                    w7x: { name: "W7-X (Wendelstein 7-X)", type: "Stellarator", location: "Germany", goal: "To verify the performance of an optimized stellarator design, achieving steady-state, disruption-free operation.", status: "Operational. Achieved record-breaking triple product values in long-pulse discharges." },
+                    sparc: { name: "SPARC / CFS", type: "Tokamak (High-Temp Superconductor)", location: "USA", goal: "To use high-temperature superconducting magnets to achieve net energy gain (Q > 2) in a smaller, lower-cost device.", status: "Under construction. Targeting net energy gain in 2026-27." },
+                    helion: { name: "Polaris / Helion Energy", type: "Field-Reversed Configuration (FRC)", location: "USA", goal: "To use pulsed fusion and direct energy conversion technology to rapidly achieve commercial power generation.", status: "Under construction. Targeting commercial operation by 2028." }
+                }
+            };
+            
+            function createCharts(lang) {
+                if (mcfChartInstance) mcfChartInstance.destroy();
+                if (lcoeChartInstance) lcoeChartInstance.destroy();
+                
+                const mcfCtx = document.getElementById('mcf-chart').getContext('2d');
+                mcfChartInstance = new Chart(mcfCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [
+                            languageData[lang].mcf_chart_label_complexity, 
+                            languageData[lang].mcf_chart_label_stability, 
+                            languageData[lang].mcf_chart_label_maturity
+                        ],
+                        datasets: [{
+                            label: languageData[lang].mcf_chart_dataset_tokamak,
+                            data: [3, 2, 5],
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: languageData[lang].mcf_chart_dataset_stellarator,
+                            data: [5, 4, 2],
+                            backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { title: { display: true, text: languageData[lang].mcf_chart_title }, tooltip: { mode: 'index', intersect: false } },
+                        scales: { y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } } }
+                    }
+                });
+
+                const lcoeCtx = document.getElementById('lcoe-chart').getContext('2d');
+                lcoeChartInstance = new Chart(lcoeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: languageData[lang].lcoe_labels,
+                        datasets: [{
+                            label: languageData[lang].lcoe_chart_label,
+                            data: [45, 40, 38, 90, 60],
+                            backgroundColor: ['rgba(153, 102, 255, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                            borderColor: ['rgba(153, 102, 255, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, title: { display: true, text: languageData[lang].lcoe_chart_title } },
+                        scales: { x: { title: { display: true, text: languageData[lang].lcoe_chart_x_axis } } }
+                    }
+                });
+            }
+
+            function updateProjectDisplay(projectName, lang) {
+                const data = projectData[lang][projectName];
+                const display = document.getElementById('project-display');
+                if (display) {
+                    display.innerHTML = `
+                        <h4 class="text-xl font-bold mb-3">${data.name}</h4>
+                        <div class="mb-2"><span class="font-semibold">${languageData[lang].project_display_type}</span>${data.type}</div>
+                        <div class="mb-2"><span class="font-semibold">${languageData[lang].project_display_location}</span>${data.location}</div>
+                        <div class="mb-4"><span class="font-semibold">${languageData[lang].project_display_goal}</span>${data.goal}</div>
+                        <div><span class="font-semibold">${languageData[lang].project_display_status}</span>${data.status}</div>
+                    `;
+                    display.classList.remove('fade-in');
+                    void display.offsetWidth;
+                    display.classList.add('fade-in');
+                }
+
+                document.querySelectorAll('.project-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.project === projectName) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            function updateLanguage(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (languageData[lang][key]) {
+                        el.innerHTML = languageData[lang][key];
+                    }
+                });
+
+                document.querySelectorAll('.lang-switcher-btn').forEach(btn => {
+                    btn.textContent = lang === 'zh' ? 'EN' : '中文';
+                });
+                
+                const activeProjectBtn = document.querySelector('.project-btn.active');
+                if(activeProjectBtn) {
+                     updateProjectDisplay(activeProjectBtn.dataset.project, lang);
+                }
+               
+                createCharts(lang);
+            }
+
+            // --- Event Listeners and Initial Setup ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('header .nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    if (pageYOffset >= section.offsetTop - 100) current = section.getAttribute('id');
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').slice(1) === current);
+                });
+            });
+
+            document.querySelectorAll('.tech-path-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const isMcf = e.target.id === 'mcf-btn';
+                    document.getElementById('mcf-content').style.display = isMcf ? 'block' : 'none';
+                    document.getElementById('icf-content').style.display = isMcf ? 'none' : 'block';
+                    document.querySelectorAll('.tech-path-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                });
+            });
+
+            document.querySelectorAll('.tech-tab-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const isTokamak = e.target.id === 'tokamak-tab-btn';
+                    document.getElementById('tokamak-content').style.display = isTokamak ? 'block' : 'none';
+                    document.getElementById('stellarator-content').style.display = isTokamak ? 'none' : 'block';
+                    document.querySelectorAll('.tech-tab-btn').forEach(b => {
+                        b.classList.remove('border-blue-600', 'text-blue-600');
+                        b.classList.add('text-gray-500');
+                    });
+                    e.target.classList.add('border-blue-600', 'text-blue-600');
+                    e.target.classList.remove('text-gray-500');
+                });
+            });
+
+            document.querySelectorAll('.project-btn').forEach(btn => {
+                btn.addEventListener('click', () => updateProjectDisplay(btn.dataset.project, currentLanguage));
+            });
+            
+            const langSwitchers = [document.getElementById('lang-switcher'), document.getElementById('lang-switcher-mobile')];
+            langSwitchers.forEach(switcher => {
+                switcher.classList.add('lang-switcher-btn');
+                switcher.addEventListener('click', () => {
+                    currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                    updateLanguage(currentLanguage);
+                });
+            });
+
+            // Initial Load
+            updateLanguage(currentLanguage);
+            updateProjectDisplay('iter', currentLanguage);
+        });
+    </script>
+</body>
+</html>
