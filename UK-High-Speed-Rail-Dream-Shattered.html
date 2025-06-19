@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英國高鐵夢碎：一場系統性失敗的互動分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Faded Blueprint -->
+    <!-- Application Structure Plan: The SPA is structured as a narrative, single-page dashboard. It starts with a high-level summary (The Core Problem), then delves into the specific case of HS2 with an interactive timeline and cost-explosion chart (HS2 Deconstructed). It then broadens the perspective to cover the "Why" with interactive tabs for the four main failure categories (The Anatomy of Failure). Following this, it highlights the tangible consequences on nature (The Environmental Cost) and provides crucial context through an international comparison (The European Benchmark). The final section summarizes the lessons learned (Conclusion & Future). This structure guides the user from the "what" to the "why" and "so what," transforming a linear report into an explorable, thematic analysis that prioritizes understanding and impact over report mirroring. -->
+    <!-- Visualization & Content Choices:
+        - HS2 Timeline: Report Info (Table 1 Events) -> Goal: Show change/decay -> Viz: Interactive HTML/CSS Timeline -> Interaction: Click on year to see details -> Justification: More engaging and digestible than a dense table.
+        - Cost & Scope Chart: Report Info (Table 1 Costs/BCR) -> Goal: Compare/Show Change -> Viz: Chart.js combined Bar/Line Chart -> Interaction: Hover for tooltips, buttons to toggle data -> Justification: Visually powerful representation of cost explosion and value destruction.
+        - Anatomy of Failure Tabs: Report Info (Chapters 2, 3, 4 text) -> Goal: Organize/Inform -> Viz: HTML/JS Tab system -> Interaction: Click to switch content -> Justification: Breaks down complex, text-heavy analysis into manageable thematic chunks.
+        - Environmental Impact Cards: Report Info (Chapter 5 stats) -> Goal: Inform/Impact -> Viz: HTML/CSS info-cards -> Interaction: Static -> Justification: Large, clear numbers provide immediate, shocking context of the ecological damage.
+        - Cost Per Km Comparison Chart: Report Info (Chapter 6 & Table 3 stats) -> Goal: Compare -> Viz: Chart.js Horizontal Bar Chart -> Interaction: Hover for tooltips -> Justification: Shows the UK as a stark outlier, a key finding of the report.
+        - European Models Cards: Report Info (Chapter 6 text) -> Goal: Compare/Organize -> Viz: HTML/CSS cards -> Interaction: Static -> Justification: Provides a quick, scannable summary of successful alternatives.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F8F7F4;
+            color: #3C3633;
+        }
+        body.lang-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.lang-en {
+            font-family: 'Lato', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #D97706; /* amber-600 */
+            border-bottom-color: #D97706;
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #4A5568; /* gray-700 */
+            color: #F7FAFC; /* gray-100 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        #lang-switch-btn {
+            border: 1px solid #D1D5DB;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #lang-switch-btn:hover {
+            background-color: #F3F4F6;
+        }
+    </style>
+</head>
+<body class="antialiased lang-zh">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800" data-lang-key="header_title">英國高鐵夢碎</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#problem" class="nav-link pb-1" data-lang-key="nav_problem">核心問題</a>
+                <a href="#hs2" class="nav-link pb-1" data-lang-key="nav_hs2">HS2解構</a>
+                <a href="#failure" class="nav-link pb-1" data-lang-key="nav_failure">失敗剖析</a>
+                <a href="#environment" class="nav-link pb-1" data-lang-key="nav_environment">環境代價</a>
+                <a href="#benchmark" class="nav-link pb-1" data-lang-key="nav_benchmark">歐洲比較</a>
+                <a href="#conclusion" class="nav-link pb-1" data-lang-key="nav_conclusion">未來路徑</a>
+                 <button id="lang-switch-btn">English</button>
+            </div>
+            <div class="md:hidden flex items-center space-x-4">
+                <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-amber-500 focus:border-amber-500 block w-full p-2.5">
+                    <option value="#problem" data-lang-key="nav_problem">核心問題</option>
+                    <option value="#hs2" data-lang-key="nav_hs2">HS2解構</option>
+                    <option value="#failure" data-lang-key="nav_failure">失敗剖析</option>
+                    <option value="#environment" data-lang-key="nav_environment">環境代價</option>
+                    <option value="#benchmark" data-lang-key="nav_benchmark">歐洲比較</option>
+                    <option value="#conclusion" data-lang-key="nav_conclusion">未來路徑</option>
+                </select>
+                <button id="lang-switch-btn-mobile" class="flex-shrink-0">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <!-- Section 1: Core Problem -->
+        <section id="problem" class="text-center mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-800 mb-4" data-lang-key="problem_title">一個國家級的系統性失敗</h2>
+            <p class="max-w-4xl mx-auto text-lg md:text-xl text-gray-600 mb-8" data-lang-key="problem_desc">
+                英國作為鐵路發源地，卻在全球高鐵競賽中遠遠落後。這並非單一因素造成，而是系統性缺陷、管理無能、政治不穩與高成本文化交織的結果。本分析將以災難性的HS2計畫為核心，深入探討英國為何無法交付一個現代化的全國高鐵網絡。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="problem_card1_title">管理與治理災難</h3>
+                    <p class="text-gray-600" data-lang-key="problem_card1_desc">HS2計畫被官方稱為「駭人聽聞的爛攤子」，其管理機構缺乏成功交付所需的能力。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="problem_card2_title">結構性與政治缺陷</h3>
+                    <p class="text-gray-600" data-lang-key="problem_card2_desc">破碎的私有化鐵路系統與短視的政治干預，從根本上破壞了長期計畫的穩定性。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="problem_card3_title">成本與環境失控</h3>
+                    <p class="text-gray-600" data-lang-key="problem_card3_desc">每英里建造成本為歐洲的8.5倍，同時對珍貴的自然棲息地造成了無法彌補的破壞。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: HS2 Deconstructed -->
+        <section id="hs2" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800" data-lang-key="hs2_title">HS2計畫解構：從國家雄心到殘缺服務</h2>
+            <p class="text-lg text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-lang-key="hs2_desc">HS2的歷程是一部從宏大願景到不斷縮水和延誤的悲劇。下面的互動式圖表展示了這個計畫是如何在十多年間逐步崩潰的。</p>
+            
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="hs2_chart_title">成本飆升與範圍縮減 (2010-2025)</h3>
+                <div class="chart-container mb-6">
+                    <canvas id="hs2CostChart"></canvas>
+                </div>
+                <div id="hs2-timeline" class="relative pl-8 border-l-2 border-gray-300">
+                     <!-- Timeline items will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Anatomy of Failure -->
+        <section id="failure" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800" data-lang-key="failure_title">失敗剖析：四大核心病因</h2>
+            <p class="text-lg text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-lang-key="failure_desc">HS2的崩潰並非偶然，而是深層次問題的集中爆發。點擊下方標籤，了解導致這場災難的四個關鍵因素。</p>
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <div class="flex flex-wrap justify-center border-b border-gray-200 mb-6">
+                    <button class="tab-button px-4 py-3 font-semibold text-gray-600 rounded-t-lg active" data-tab="governance" data-lang-key="failure_tab1">治理真空</button>
+                    <button class="tab-button px-4 py-3 font-semibold text-gray-600 rounded-t-lg" data-tab="structure" data-lang-key="failure_tab2">結構性赤字</button>
+                    <button class="tab-button px-4 py-3 font-semibold text-gray-600 rounded-t-lg" data-tab="politics" data-lang-key="failure_tab3">政治泥潭</button>
+                    <button class="tab-button px-4 py-3 font-semibold text-gray-600 rounded-t-lg" data-tab="design" data-lang-key="failure_tab4">有缺陷的藍圖</button>
+                </div>
+                <div id="tab-content" class="text-gray-700 leading-relaxed">
+                    <!-- Tab content will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Environmental Cost -->
+        <section id="environment" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800" data-lang-key="env_title">環境戰場：不可接受的自然代價</h2>
+            <p class="text-lg text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-lang-key="env_desc">HS2不僅是經濟上的災難，更對英國的自然遺產造成了永久性傷害。所謂的「綠色」交通，實際上是以犧牲無法替代的生態系統為代價。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md text-center border-b-4 border-green-600">
+                    <div class="text-5xl font-bold text-green-700 mb-2">108</div>
+                    <h3 class="font-semibold text-lg" data-lang-key="env_card1_title">片古老林地受威脅</h3>
+                    <p class="text-sm text-gray-500" data-lang-key="env_card1_desc">這些是數百年才能形成的珍貴生態系統，一旦破壞便無法恢復。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center border-b-4 border-green-600">
+                    <div class="text-5xl font-bold text-green-700 mb-2">693</div>
+                    <h3 class="font-semibold text-lg" data-lang-key="env_card2_title">個地方野生動物站點</h3>
+                    <p class="text-sm text-gray-500" data-lang-key="env_card2_desc">路線直接衝擊了大量受保護的野生動物棲息地。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center border-b-4 border-green-600">
+                    <div class="text-5xl font-bold text-green-700 mb-2">>20</div>
+                    <h3 class="font-semibold text-lg" data-lang-key="env_card3_title">公頃古老林地被毀</h3>
+                    <p class="text-sm text-gray-500" data-lang-key="env_card3_desc">僅第一階段的建設，就已造成了驚人的直接破壞。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md text-center border-b-4 border-green-600">
+                    <div class="text-5xl font-bold text-green-700 mb-2">100+</div>
+                    <h3 class="font-semibold text-lg" data-lang-key="env_card4_title">年碳排放平衡期</h3>
+                    <p class="text-sm text-gray-500" data-lang-key="env_card4_desc">建設過程的巨量碳排放，可能需要一個多世紀才能被運營節省的碳抵銷。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: European Benchmark -->
+        <section id="benchmark" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800" data-lang-key="benchmark_title">歐洲基準：為何他國成功，英國失敗？</h2>
+            <p class="text-lg text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-lang-key="benchmark_desc">與歐洲大陸的成功案例相比，英國的失敗更顯突出。無論是成本控制、治理模式還是政治意願，英國都處於極端的反面。</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="benchmark_chart_title">每公里建造成本比較</h3>
+                    <div class="chart-container" style="height: 350px;">
+                        <canvas id="costPerKmChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-2 text-blue-700" data-lang-key="benchmark_card1_title">🇫🇷 法國：國家主導模式</h4>
+                        <p class="text-gray-600" data-lang-key="benchmark_card1_desc">由單一國有實體SNCF統一規劃、建設和運營，決策清晰，成本控制得力。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-2 text-yellow-700" data-lang-key="benchmark_card2_title">🇩🇪 德國：網絡整合模式</h4>
+                        <p class="text-gray-600" data-lang-key="benchmark_card2_desc">將新建高鐵線與現有鐵路網深度融合，服務更廣泛的區域，而非僅連接首都。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-xl mb-2 text-red-700" data-lang-key="benchmark_card3_title">🇪🇸 西班牙：政治意願 + 歐盟資金</h4>
+                        <p class="text-gray-600" data-lang-key="benchmark_card3_desc">強大的國家現代化意願，加上歐盟巨額資金支持，建成了歐洲最長的高鐵網。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 6: Conclusion -->
+        <section id="conclusion" class="text-center scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 text-gray-800" data-lang-key="conclusion_title">結論與未來路徑</h2>
+            <p class="text-lg text-center text-gray-600 mb-12 max-w-3xl mx-auto" data-lang-key="conclusion_desc">HS2的失敗是英國多重國家級弱點的致命交集。為避免重蹈覆轍，英國必須進行根本性的制度改革，而不僅是期望「下次做得更好」。</p>
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto">
+                <h3 class="font-bold text-2xl mb-4 text-gray-800" data-lang-key="conclusion_box_title">重建成功框架的關鍵</h3>
+                <ul class="text-left space-y-4 text-gray-700 list-disc list-inside">
+                    <li data-lang-key="conclusion_li1">建立穩定、跨黨派的長期政治共識，避免重大計畫成為政治皮球。</li>
+                    <li data-lang-key="conclusion_li2">從一開始就制定現實、經過嚴格審查的商業案例，而非基於樂觀偏見。</li>
+                    <li data-lang-key="conclusion_li3">創建一個權力獨立、能力稱職的國家級基礎設施機構，擺脫短期政治干預。</li>
+                    <li data-lang-key="conclusion_li4">改革規劃與土地徵收體系，並探索土地增值稅等創新的融資模式。</li>
+                </ul>
+                <p class="mt-6 text-gray-600 font-semibold" data-lang-key="conclusion_final_text">這不僅是對一個計畫的重置，更是對英國建設未來能力的整個模式的根本性重塑。</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p data-lang-key="footer_desc">此互動分析根據公開報告數據創建，旨在提供資訊與教育用途。</p>
+            <p data-lang-key="footer_copy">&copy; 2025 互動數據分析</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const translations = {
+                zh: {
+                    header_title: "英國高鐵夢碎",
+                    nav_problem: "核心問題",
+                    nav_hs2: "HS2解構",
+                    nav_failure: "失敗剖析",
+                    nav_environment: "環境代價",
+                    nav_benchmark: "歐洲比較",
+                    nav_conclusion: "未來路徑",
+                    problem_title: "一個國家級的系統性失敗",
+                    problem_desc: "英國作為鐵路發源地，卻在全球高鐵競賽中遠遠落後。這並非單一因素造成，而是系統性缺陷、管理無能、政治不穩與高成本文化交織的結果。本分析將以災難性的HS2計畫為核心，深入探討英國為何無法交付一個現代化的全國高鐵網絡。",
+                    problem_card1_title: "管理與治理災難",
+                    problem_card1_desc: "HS2計畫被官方稱為「駭人聽聞的爛攤子」，其管理機構缺乏成功交付所需的能力。",
+                    problem_card2_title: "結構性與政治缺陷",
+                    problem_card2_desc: "破碎的私有化鐵路系統與短視的政治干預，從根本上破壞了長期計畫的穩定性。",
+                    problem_card3_title: "成本與環境失控",
+                    problem_card3_desc: "每英里建造成本為歐洲的8.5倍，同時對珍貴的自然棲息地造成了無法彌補的破壞。",
+                    hs2_title: "HS2計畫解構：從國家雄心到殘缺服務",
+                    hs2_desc: "HS2的歷程是一部從宏大願景到不斷縮水和延誤的悲劇。下面的互動式圖表展示了這個計畫是如何在十多年間逐步崩潰的。",
+                    hs2_chart_title: "成本飆升與範圍縮減 (2010-2025)",
+                    failure_title: "失敗剖析：四大核心病因",
+                    failure_desc: "HS2的崩潰並非偶然，而是深層次問題的集中爆發。點擊下方標籤，了解導致這場災難的四個關鍵因素。",
+                    failure_tab1: "治理真空",
+                    failure_tab2: "結構性赤字",
+                    failure_tab3: "政治泥潭",
+                    failure_tab4: "有缺陷的藍圖",
+                    env_title: "環境戰場：不可接受的自然代價",
+                    env_desc: "HS2不僅是經濟上的災難，更對英國的自然遺產造成了永久性傷害。所謂的「綠色」交通，實際上是以犧牲無法替代的生態系統為代價。",
+                    env_card1_title: "片古老林地受威脅",
+                    env_card1_desc: "這些是數百年才能形成的珍貴生態系統，一旦破壞便無法恢復。",
+                    env_card2_title: "個地方野生動物站點",
+                    env_card2_desc: "路線直接衝擊了大量受保護的野生動物棲息地。",
+                    env_card3_title: "公頃古老林地被毀",
+                    env_card3_desc: "僅第一階段的建設，就已造成了驚人的直接破壞。",
+                    env_card4_title: "年碳排放平衡期",
+                    env_card4_desc: "建設過程的巨量碳排放，可能需要一個多世紀才能被運營節省的碳抵銷。",
+                    benchmark_title: "歐洲基準：為何他國成功，英國失敗？",
+                    benchmark_desc: "與歐洲大陸的成功案例相比，英國的失敗更顯突出。無論是成本控制、治理模式還是政治意願，英國都處於極端的反面。",
+                    benchmark_chart_title: "每公里建造成本比較",
+                    benchmark_card1_title: "🇫🇷 法國：國家主導模式",
+                    benchmark_card1_desc: "由單一國有實體SNCF統一規劃、建設和運營，決策清晰，成本控制得力。",
+                    benchmark_card2_title: "🇩🇪 德國：網絡整合模式",
+                    benchmark_card2_desc: "將新建高鐵線與現有鐵路網深度融合，服務更廣泛的區域，而非僅連接首都。",
+                    benchmark_card3_title: "🇪🇸 西班牙：政治意願 + 歐盟資金",
+                    benchmark_card3_desc: "強大的國家現代化意願，加上歐盟巨額資金支持，建成了歐洲最長的高鐵網。",
+                    conclusion_title: "結論與未來路徑",
+                    conclusion_desc: "HS2的失敗是英國多重國家級弱點的致命交集。為避免重蹈覆轍，英國必須進行根本性的制度改革，而不僅是期望「下次做得更好」。",
+                    conclusion_box_title: "重建成功框架的關鍵",
+                    conclusion_li1: "建立穩定、跨黨派的長期政治共識，避免重大計畫成為政治皮球。",
+                    conclusion_li2: "從一開始就制定現實、經過嚴格審查的商業案例，而非基於樂觀偏見。",
+                    conclusion_li3: "創建一個權力獨立、能力稱職的國家級基礎設施機構，擺脫短期政治干預。",
+                    conclusion_li4: "改革規劃與土地徵收體系，並探索土地增值稅等創新的融資模式。",
+                    conclusion_final_text: "這不僅是對一個計畫的重置，更是對英國建設未來能力的整個模式的根本性重塑。",
+                    footer_desc: "此互動分析根據公開報告數據創建，旨在提供資訊與教育用途。",
+                    footer_copy: "© 2025 互動數據分析",
+                    hs2_timeline: [
+                        { year: 2010, cost: '£37.5B', scope: 'Full Y-Network', event: 'Project first proposed', bcr: '2.6', color: 'bg-green-500' },
+                        { year: 2013, cost: '£42.6B', scope: 'Full Y-Network', event: 'Pre-Oakervee Review', bcr: '2.5', color: 'bg-green-500' },
+                        { year: 2020, cost: '£72B-£98B', scope: 'Full Y-Network', event: 'Post-Oakervee, govt approves construction', bcr: '1.5', color: 'bg-yellow-500' },
+                        { year: 2021, cost: 'N/A', scope: 'Leeds branch cancelled', event: 'Govt formally cancels Eastern leg', bcr: 'N/A', color: 'bg-orange-500' },
+                        { year: 2023, cost: 'N/A', scope: 'Manchester branch cancelled', event: 'PM announces cancellation of Northern leg', bcr: '0.8', color: 'bg-red-500' },
+                        { year: 2025, cost: '£49B-£67B (Phase 1 only)', scope: 'London-Birmingham only, and delayed', event: 'New govt confirms cancellation and further delays', bcr: '0.66', color: 'bg-red-600' }
+                    ],
+                    hs2_timeline_cost: "成本",
+                    hs2_timeline_scope: "範圍",
+                    hs2_timeline_event: "事件",
+                    hs2_timeline_bcr: "效益成本比 (BCR)",
+                    failure_tabs: {
+                        governance: {
+                            title: '治理真空：「如何不運營重大計畫的教科書式案例」',
+                            points: ['交通部（DfT）和HS2有限公司在成本、範圍等基本問題上都無法達成一致。','國會報告揭示了「系統性管理問題」和「薄弱的治理結構」。','負責機構缺乏成功交付計畫所需的技能，尤其是在商業管理方面。','採用的合約模式為公共財政提供了極差的價值，HS2有限公司承擔了大部分風險卻未能有效管理。','失敗的常態化削弱了問責制，使取消路線等激進措施看起來像是務實管理，而非治理失敗。']
+                        },
+                        structure: {
+                            title: '結構性赤字：鐵路私有化如何束縛英國',
+                            points: ['1990年代的私有化將統一的鐵路系統拆分成上百家公司，造成責任不清和激勵錯位。','整個系統缺乏一個統一的「指導思想」，無法從國家利益出發進行長期規劃。','為吸引私營公司，軌道通行費被人為壓低，導致基礎設施所有者Network Rail債台高築。','短期的特許經營模式激勵運營商最大化短期利潤，而非投資於長期基礎設施。','私有化創造了從公共到私營的隱蔽補貼，榨乾了系統的自我投資能力，使HS2極度依賴政治上脆弱的政府撥款。']
+                        },
+                        politics: {
+                            title: '政治泥潭：缺乏遠見與過度干預',
+                            points: ['重大計畫的命運隨著政府、部長乃至首相的更迭而搖擺不定，缺乏長期穩定的跨黨派支持。','延期或縮減範圍的決定，往往是出於短期的政治和預算考量，而非計畫的長遠利益。','取消北段路線是首相的單方面政治決定，徹底破壞了計畫的核心戰略目標。','英國的對抗性規劃體系和昂貴的土地徵收制度（希望價值）極大地增加了成本和延誤。','成本飆升與政治干預形成惡性循環，最終摧毀了公眾與政治信任，導致計畫被肢解。']
+                        },
+                        design: {
+                            title: '有缺陷的藍圖：過度設計與破碎的商業案例',
+                            points: ['計畫的戰略理由（解決容量不足）與其經濟合理性（依賴節省旅行時間）之間存在根本脫節。','為追求極高的設計速度（360km/h），採用了未經充分驗證的技術，大幅推高了工程成本。','政治上對武斷通車日期的堅持，導致在設計不成熟的情況下匆忙採購，埋下失控的伏筆。','隨著成本飆升和範圍縮減，計畫的效益成本比（BCR）從「中等價值」（1.5）崩潰至「差劣價值」（0.8）。','倫敦尤斯頓終點站的混亂是整個計畫失敗的縮影：成本飆升、設計廢棄、無限期延誤。']
+                        }
+                    },
+                    charts: {
+                        hs2_cost: {
+                            bcr_label: "效益成本比 (BCR)",
+                            min_cost_label: "最低估算成本 (億英鎊)",
+                            max_cost_label: "最高估算成本 (億英鎊)",
+                            y_axis_cost: "成本 (億英鎊)",
+                            y_axis_bcr: "效益成本比 (BCR)",
+                            tooltip_scope: "範圍",
+                            tooltip_event: "事件"
+                        },
+                        cost_per_km: {
+                            label: "每英里建造成本 (百萬英鎊)",
+                            x_axis: "百萬英鎊 / 每英里",
+                            countries: ['🇬🇧 英國 (HS2)', '🇫🇷 法國', '🇩🇪 德國', '🇪🇸 西班牙']
+                        }
+                    }
+                },
+                en: {
+                    header_title: "UK High-Speed Rail Dream Shattered",
+                    nav_problem: "The Core Problem",
+                    nav_hs2: "HS2 Deconstructed",
+                    nav_failure: "Anatomy of Failure",
+                    nav_environment: "Environmental Cost",
+                    nav_benchmark: "European Benchmark",
+                    nav_conclusion: "Path Forward",
+                    problem_title: "A National Systematic Failure",
+                    problem_desc: "As the birthplace of railways, the UK lags far behind in the global high-speed rail race. This is not due to a single factor, but a convergence of systemic flaws, managerial incompetence, political instability, and a high-cost culture. This analysis, centered on the disastrous HS2 project, explores why Britain has failed to deliver a modern national high-speed network.",
+                    problem_card1_title: "Managerial & Governance Disaster",
+                    problem_card1_desc: "The HS2 project has been officially called an 'appalling mess,' with its management body lacking the capability to succeed.",
+                    problem_card2_title: "Structural & Political Flaws",
+                    problem_card2_desc: "A fragmented privatized rail system and short-sighted political interference have fundamentally undermined long-term planning.",
+                    problem_card3_title: "Runaway Costs & Environmental Damage",
+                    problem_card3_desc: "Construction costs are 8.5 times higher per mile than in Europe, while irreplaceable natural habitats have been destroyed.",
+                    hs2_title: "HS2 Deconstructed: From National Ambition to a Truncated Service",
+                    hs2_desc: "The story of HS2 is a tragedy of dwindling ambition and escalating delays. The interactive charts below illustrate how the project progressively fell apart over more than a decade.",
+                    hs2_chart_title: "Cost Escalation & Scope Reduction (2010-2025)",
+                    failure_title: "Anatomy of Failure: The Four Core Dysfunctions",
+                    failure_desc: "The collapse of HS2 was not an accident but a symptom of deep-seated problems. Click the tabs below to understand the four key factors that led to this catastrophe.",
+                    failure_tab1: "Governance Vacuum",
+                    failure_tab2: "Structural Deficit",
+                    failure_tab3: "Political Quagmire",
+                    failure_tab4: "Flawed Blueprint",
+                    env_title: "The Environmental Battlefield: An Unacceptable Natural Price",
+                    env_desc: "HS2 is not just an economic disaster; it has inflicted permanent damage on Britain's natural heritage. The so-called 'green' transport has come at the cost of irreplaceable ecosystems.",
+                    env_card1_title: "Ancient Woodlands Threatened",
+                    env_card1_desc: "These are precious ecosystems that take centuries to form and cannot be replaced once destroyed.",
+                    env_card2_title: "Local Wildlife Sites Impacted",
+                    env_card2_desc: "The route directly impacts a huge number of protected wildlife habitats.",
+                    env_card3_title: "Hectares of Ancient Woodland Lost",
+                    env_card3_desc: "The construction of Phase 1 alone has already caused staggering direct destruction.",
+                    env_card4_title: "Year Carbon Payback Period",
+                    env_card4_desc: "The massive carbon emissions from construction may take over a century to be offset by operational savings.",
+                    benchmark_title: "European Benchmark: Why Others Succeeded Where Britain Failed",
+                    benchmark_desc: "Compared to successes on the continent, the UK's failure is even more stark. In cost control, governance models, and political will, Britain is an extreme outlier.",
+                    benchmark_chart_title: "Cost Per Km Comparison",
+                    benchmark_card1_title: "🇫🇷 France: The Dirigiste Model",
+                    benchmark_card1_desc: "A single state-owned entity, SNCF, handles planning, construction, and operation, ensuring clear decisions and cost control.",
+                    benchmark_card2_title: "🇩🇪 Germany: The Network Model",
+                    benchmark_card2_desc: "New high-speed lines are deeply integrated with the existing rail network, serving a wider range of areas, not just the capital.",
+                    benchmark_card3_title: "🇪🇸 Spain: Political Will + EU Funding",
+                    benchmark_card3_desc: "Strong national will for modernization, coupled with massive EU funding, has created Europe's longest high-speed network.",
+                    conclusion_title: "Conclusion & Path Forward",
+                    conclusion_desc: "The failure of HS2 is a fatal intersection of multiple national weaknesses. To avoid repeating these mistakes, Britain must undertake fundamental institutional reform, not just hope to 'do better next time'.",
+                    conclusion_box_title: "Keys to Rebuilding a Framework for Success",
+                    conclusion_li1: "Establish stable, cross-party political consensus for long-term projects to avoid them becoming political footballs.",
+                    conclusion_li2: "Develop realistic, rigorously tested business cases from the outset, not ones based on optimism bias.",
+                    conclusion_li3: "Create a politically independent and competent national infrastructure body, free from short-term political interference.",
+                    conclusion_li4: "Reform the planning and land acquisition systems and explore innovative financing models like land value capture.",
+                    conclusion_final_text: "This is not just about resetting a project, but fundamentally reshaping the entire model by which Britain builds its future.",
+                    footer_desc: "This interactive analysis was created based on public report data for informational and educational purposes.",
+                    footer_copy: "© 2025 Interactive Data Analysis",
+                    hs2_timeline: [
+                        { year: 2010, cost: '£37.5B', scope: 'Full Y-Network', event: 'Project first proposed', bcr: '2.6', color: 'bg-green-500' },
+                        { year: 2013, cost: '£42.6B', scope: 'Full Y-Network', event: 'Pre-Oakervee Review', bcr: '2.5', color: 'bg-green-500' },
+                        { year: 2020, cost: '£72B-£98B', scope: 'Full Y-Network', event: 'Post-Oakervee, govt approves construction', bcr: '1.5', color: 'bg-yellow-500' },
+                        { year: 2021, cost: 'N/A', scope: 'Leeds branch cancelled', event: 'Govt formally cancels Eastern leg', bcr: 'N/A', color: 'bg-orange-500' },
+                        { year: 2023, cost: 'N/A', scope: 'Manchester branch cancelled', event: 'PM announces cancellation of Northern leg', bcr: '0.8', color: 'bg-red-500' },
+                        { year: 2025, cost: '£49B-£67B (Phase 1 only)', scope: 'London-Birmingham only, and delayed', event: 'New govt confirms cancellation and further delays', bcr: '0.66', color: 'bg-red-600' }
+                    ],
+                    hs2_timeline_cost: "Cost",
+                    hs2_timeline_scope: "Scope",
+                    hs2_timeline_event: "Event",
+                    hs2_timeline_bcr: "Benefit-Cost Ratio (BCR)",
+                    failure_tabs: {
+                        governance: {
+                            title: 'Governance Vacuum: "A casebook example of how not to run a major project"',
+                            points: ["The Department for Transport (DfT) and HS2 Ltd couldn't even agree on basics like cost and scope.", "Parliamentary reports revealed 'systemic management problems' and 'weak governance structures.'", "The responsible body lacked the necessary skills for successful delivery, especially in commercial management.", "The contracting model used offered 'extremely poor value for public money,' with HS2 Ltd taking most of the risk but failing to manage it.", "The normalization of failure weakened accountability, making drastic measures like cancelling routes seem like pragmatic management rather than governance failure."]
+                        },
+                        structure: {
+                            title: 'Structural Deficit: How Rail Privatisation Hobbled the UK',
+                            points: ["The 1990s privatisation split a unified system into hundreds of companies, creating unclear responsibilities and misaligned incentives.", "The entire system lacks a single 'guiding mind' to plan and deliver for the national interest.", "To make franchises attractive, track access charges were set artificially low, leading to massive debt for infrastructure owner Network Rail.", "Short-term franchise models incentivise operators to maximise short-term profits, not invest in long-term infrastructure.", "Privatisation created a hidden subsidy from public to private, draining the system's ability to self-invest and making HS2 reliant on politically vulnerable government funding."]
+                        },
+                        politics: {
+                            title: 'Political Quagmire: Short-Termism and Over-Interference',
+                            points: ["The project's fate has fluctuated with changing governments, ministers, and prime ministers, lacking stable, long-term cross-party support.", "Decisions to delay or descale were often driven by short-term political and budgetary considerations, not the project's long-term interests.", "The cancellation of the northern leg was a unilateral political decision by the Prime Minister, gutting the project's core strategic purpose.", "The UK's adversarial planning system and expensive land acquisition process ('hope value') massively increased costs and delays.", "A vicious cycle of cost escalation and political interference destroyed public and political trust, leading to the project's dismemberment."]
+                        },
+                        design: {
+                            title: 'Flawed Blueprint: Over-Engineering and a Broken Business Case',
+                            points: ["There was a fundamental disconnect between the project's strategic rationale (solving capacity issues) and its economic justification (reliant on journey time savings).", "The obsession with time savings drove the decision for an extremely high design speed (360km/h), pushing the project into unproven technology and inflating engineering costs.", "Political insistence on an arbitrary opening date led to 'schedule compression,' forcing procurement with immature designs, which baked in future overruns.", "As costs soared and scope shrank, the Benefit-Cost Ratio (BCR) collapsed from 'medium value' (1.5) to 'poor value' (0.8).", "The chaos at the London Euston terminus is a microcosm of the entire project's failure: soaring costs, abandoned designs, and indefinite delays."]
+                        }
+                    },
+                     charts: {
+                        hs2_cost: {
+                            bcr_label: "Benefit-Cost Ratio (BCR)",
+                            min_cost_label: "Min Estimated Cost (£ billions)",
+                            max_cost_label: "Max Estimated Cost (£ billions)",
+                            y_axis_cost: "Cost (£ billions)",
+                            y_axis_bcr: "Benefit-Cost Ratio (BCR)",
+                            tooltip_scope: "Scope",
+                            tooltip_event: "Event"
+                        },
+                        cost_per_km: {
+                            label: "Cost per Mile (£ millions)",
+                            x_axis: "£ millions / per mile",
+                            countries: ['🇬🇧 UK (HS2)', '🇫🇷 France', '🇩🇪 Germany', '🇪🇸 Spain']
+                        }
+                    }
+                }
+            };
+            
+            let currentLanguage = 'zh';
+            let hs2CostChart, costPerKmChart;
+
+            function updateContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.body.className = `antialiased lang-${lang}`;
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.textContent = translations[lang][key];
+                    }
+                });
+                
+                const langBtn = document.getElementById('lang-switch-btn');
+                const langBtnMobile = document.getElementById('lang-switch-btn-mobile');
+                if(lang === 'zh') {
+                    langBtn.textContent = 'English';
+                    langBtnMobile.textContent = 'EN';
+                } else {
+                    langBtn.textContent = '中文';
+                    langBtnMobile.textContent = '中';
+                }
+
+                updateCharts(lang);
+                updateTimeline(lang);
+                updateTabs(lang);
+            }
+
+            function updateTimeline(lang) {
+                const timelineContainer = document.getElementById('hs2-timeline');
+                timelineContainer.innerHTML = ''; // Clear existing
+                const timelineData = lang === 'en' ? translations.en.hs2_timeline : translations.zh.hs2_timeline.map(item => ({...item, cost: item.cost.replace(/B/g,'億')}));
+                
+                timelineData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'mb-8 relative';
+                    div.innerHTML = `
+                        <div class="absolute w-4 h-4 ${item.color} rounded-full -left-[23.5px] mt-1.5 border-2 border-white"></div>
+                        <p class="font-bold text-lg text-gray-800">${item.year}</p>
+                        <p class="text-amber-700 font-semibold">${translations[lang].hs2_timeline_cost}: ${item.cost}</p>
+                        <p class="text-gray-600"><span class="font-semibold">${translations[lang].hs2_timeline_scope}:</span> ${item.scope}</p>
+                        <p class="text-gray-600"><span class="font-semibold">${translations[lang].hs2_timeline_event}:</span> ${item.event}</p>
+                        <p class="text-gray-600"><span class="font-semibold">${translations[lang].hs2_timeline_bcr}:</span> ${item.bcr}</p>
+                    `;
+                    timelineContainer.appendChild(div);
+                });
+            }
+
+            function updateTabs(lang) {
+                const activeTab = document.querySelector('.tab-button.active').dataset.tab;
+                const tabContentContainer = document.getElementById('tab-content');
+                const content = translations[lang].failure_tabs[activeTab];
+                if (content) {
+                    let pointsHtml = content.points.map(point => `<li>${point}</li>`).join('');
+                    tabContentContainer.innerHTML = `
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800">${content.title}</h3>
+                        <ul class="space-y-3 list-disc list-inside text-gray-700">${pointsHtml}</ul>
+                    `;
+                }
+            }
+            
+            function updateCharts(lang) {
+                if(hs2CostChart) hs2CostChart.destroy();
+                if(costPerKmChart) costPerKmChart.destroy();
+
+                const hs2CostCtx = document.getElementById('hs2CostChart').getContext('2d');
+                hs2CostChart = new Chart(hs2CostCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations.en.hs2_timeline.map(d => d.year),
+                        datasets: [
+                            {
+                                label: translations[lang].charts.hs2_cost.bcr_label,
+                                data: translations.en.hs2_timeline.map(d => parseFloat(d.bcr) || null),
+                                type: 'line',
+                                borderColor: '#D97706',
+                                backgroundColor: '#D97706',
+                                yAxisID: 'y1',
+                                tension: 0.1,
+                                borderWidth: 3
+                            },
+                            {
+                                label: translations[lang].charts.hs2_cost.min_cost_label,
+                                data: [37.5, 42.6, 72, null, null, 49],
+                                backgroundColor: '#6B7280',
+                                yAxisID: 'y',
+                            },
+                            {
+                                label: translations[lang].charts.hs2_cost.max_cost_label,
+                                data: [37.5, 42.6, 98, null, null, 67],
+                                backgroundColor: '#EF4444',
+                                yAxisID: 'y',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        stacked: false,
+                        scales: {
+                            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: translations[lang].charts.hs2_cost.y_axis_cost } },
+                            y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: translations[lang].charts.hs2_cost.y_axis_bcr }, grid: { drawOnChartArea: false } }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: function(tooltipItems) {
+                                        const index = tooltipItems[0].dataIndex;
+                                        const data = translations[lang].hs2_timeline[index];
+                                        return `${translations[lang].charts.hs2_cost.tooltip_scope}: ${data.scope}\n${translations[lang].charts.hs2_cost.tooltip_event}: ${data.event}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                const costPerKmCtx = document.getElementById('costPerKmChart').getContext('2d');
+                costPerKmChart = new Chart(costPerKmCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[lang].charts.cost_per_km.countries,
+                        datasets: [{
+                            label: translations[lang].charts.cost_per_km.label,
+                            data: [396, 31, 60, 45],
+                            backgroundColor: ['#EF4444', '#3B82F6', '#F59E0B', '#DC2626'],
+                            borderColor: '#ffffff',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { title: { display: true, text: translations[lang].charts.cost_per_km.x_axis } } },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.x !== null) {
+                                            label += new Intl.NumberFormat(lang === 'zh' ? 'en-GB' : 'en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(context.parsed.x * 1000000);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- Event Listeners ---
+
+            // Language Switcher
+            const langSwitchBtn = document.getElementById('lang-switch-btn');
+            const langSwitchBtnMobile = document.getElementById('lang-switch-btn-mobile');
+            
+            function toggleLanguage() {
+                 currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                 updateContent(currentLanguage);
+            }
+
+            langSwitchBtn.addEventListener('click', toggleLanguage);
+            langSwitchBtnMobile.addEventListener('click', toggleLanguage);
+
+
+            // Tab functionality
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    updateTabs(currentLanguage);
+                });
+            });
+
+            // Mobile nav
+            document.getElementById('mobile-nav').addEventListener('change', (e) => {
+                document.querySelector(e.target.value).scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Smooth scroll for desktop nav links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            // Active nav link on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Initial Load
+            updateContent(currentLanguage);
+        });
+    </script>
+</body>
+</html>
