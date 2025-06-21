@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太空探索的未來：從旅行到殖民的互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cosmic Neutrals -->
+    <!-- Application Structure Plan: The application is designed as a top-down narrative journey, structured into three main thematic sections: 1) The Reality of Space Travel, 2) The Challenge of Colonization, and 3) The Ethical Compass. This structure guides the user from the immediate, tangible topic of space tourism to the more complex, long-term questions of colonization and ethics. A sticky navigation bar allows for non-linear exploration, enabling users to jump to the topic that interests them most. This thematic grouping, rather than a direct copy of the report's chapter structure, is chosen for better user engagement and a more logical interactive flow, answering the core questions of "Can we go?", "How would we do it?", and "Should we do it?". -->
+    <!-- Visualization & Content Choices: Static tables and lists from the report are transformed into interactive elements to enhance understanding and engagement. 
+    1. Info: Commercial provider data (Table 1) -> Goal: Compare -> Viz: Interactive clickable cards. Interaction: Click to reveal details. Justification: More engaging and space-efficient than a static table. Library/Method: HTML/Tailwind/JS.
+    2. Info: Ticket Prices -> Goal: Compare/Inform -> Viz: Bar Chart. Interaction: Visual comparison of vastly different costs. Justification: Immediately highlights the financial inaccessibility. Library/Method: Chart.js.
+    3. Info: Exploration Programs (Table 2) -> Goal: Compare -> Viz: Side-by-side cards. Interaction: Direct comparison of key goals and timelines. Justification: Clear, scannable layout for complex information. Library/Method: HTML/Tailwind.
+    4. Info: 5 Hazards of Spaceflight -> Goal: Organize/Inform -> Viz: Interactive icon grid. Interaction: Hover/click on icons to display details. Justification: Turns a list into an exploratory visual element. Library/Method: HTML/Tailwind/JS.
+    5. Info: Earth vs. Space spending -> Goal: Compare/Inform -> Viz: Donut Chart. Interaction: Visualizing proportions. Justification: Provides powerful context for the resource allocation debate. Library/Method: Chart.js.
+    These choices support the designed structure by making data-heavy sections more digestible and encouraging user interaction throughout the application. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA; /* Light neutral background */
+            color: #212529; /* Dark text for readability */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0c4a6e; /* Darker blue on hover/active */
+            border-bottom-color: #0c4a6e;
+        }
+        .card-active {
+            box-shadow: 0 0 0 2px #0ea5e9; /* Sky blue border for active card */
+            transform: translateY(-4px);
+        }
+        .hazard-icon {
+            transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out;
+        }
+        .hazard-icon:hover {
+            transform: scale(1.1);
+            background-color: #e0f2fe;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .section-intro {
+            max-width: 48rem;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            color: #495057;
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) { 
+            .chart-container { 
+                height: 400px; 
+            } 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-sky-800" data-lang-key="headerTitle">宇宙探索新紀元</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#reality" class="nav-link font-medium text-gray-600 pb-1" data-lang-key="navReality">太空旅行的現況</a>
+                    <a href="#challenge" class="nav-link font-medium text-gray-600 pb-1" data-lang-key="navChallenge">星際殖民的挑戰</a>
+                    <a href="#ethics" class="nav-link font-medium text-gray-600 pb-1" data-lang-key="navEthics">宇宙的道德羅盤</a>
+                    <button id="lang-toggle" class="ml-4 px-3 py-1 border border-gray-300 rounded-full text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">EN / 中文</button>
+                </div>
+                <button id="mobile-menu-button" class="md:hidden text-gray-700 focus:outline-none">
+                    <span class="text-3xl">≡</span>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#reality" class="block py-2 px-4 text-sm text-gray-700 hover:bg-sky-50" data-lang-key="navRealityMobile">太空旅行的現況</a>
+            <a href="#challenge" class="block py-2 px-4 text-sm text-gray-700 hover:bg-sky-50" data-lang-key="navChallengeMobile">星際殖民的挑戰</a>
+            <a href="#ethics" class="block py-2 px-4 text-sm text-gray-700 hover:bg-sky-50" data-lang-key="navEthicsMobile">宇宙的道德羅盤</a>
+             <div class="px-4 py-2">
+                <button id="lang-toggle-mobile" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">EN / 中文</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+        <section id="hero" class="text-center mb-16 md:mb-24">
+            <h2 class="text-4xl md:text-6xl font-extrabold text-sky-900 mb-4" data-lang-key="heroTitle">從商業旅遊到星際殖民</h2>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="heroSubtitle">一份互動指南，剖析人類下一次巨大飛躍的機遇、挑戰與倫理詰問。</p>
+        </section>
+
+        <!-- Section 1: The Reality of Space Travel -->
+        <section id="reality" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-sky-800" data-lang-key="section1Title">第一部分：太空旅行的現況</h3>
+                <p class="section-intro mt-4" data-lang-key="section1Intro">商業力量正以前所未有的速度重塑我們與宇宙的關係，但「普通人」的太空夢距離現實有多遠？本部分將深入剖析當前的市場格局、驚人的價格標籤以及背後的經濟驅動力，為您揭示太空旅行的真實面貌。</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-12 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-sky-600">$1T</p>
+                    <p class="text-gray-500 mt-2" data-lang-key="stat1">2040年預估太空經濟規模</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-sky-600">90%+</p>
+                    <p class="text-gray-500 mt-2" data-lang-key="stat2">可重複使用火箭帶來的成本降幅</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <p class="text-4xl font-bold text-sky-600">40%</p>
+                    <p class="text-gray-500 mt-2" data-lang-key="stat3">太空旅遊市場預估年均複合增長率</p>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-12">
+                <h4 class="text-2xl font-bold text-center mb-6" data-lang-key="providerTitle">太空旅行供應商：三種體驗的比較</h4>
+                 <p class="text-center text-gray-600 mb-8" data-lang-key="providerIntro">目前的市場已分化為兩種截然不同的體驗：短暫的次軌道飛行與準專業的軌道任務。點擊下方卡片以查看不同供應商的詳細資訊。</p>
+                <div class="flex flex-wrap justify-center gap-4 mb-8">
+                    <button data-provider="virgin" class="provider-btn px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 bg-gray-200 text-gray-800" data-lang-key="providerBtnVirgin">維珍銀河</button>
+                    <button data-provider="blue" class="provider-btn px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 bg-gray-200 text-gray-800" data-lang-key="providerBtnBlue">藍色起源</button>
+                    <button data-provider="axiom" class="provider-btn px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300 bg-gray-200 text-gray-800" data-lang-key="providerBtnAxiom">Axiom / SpaceX</button>
+                </div>
+                <div id="provider-details" class="transition-opacity duration-500">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h4 class="text-2xl font-bold text-center mb-2" data-lang-key="priceTitle">夢想的價格</h4>
+                <p class="text-center text-gray-600 mb-8" data-lang-key="priceIntro">天文數字的票價是普通人通往太空最現實的壁壘。下圖直觀地展示了不同太空旅行選項的驚人費用。</p>
+                <div class="chart-container">
+                    <canvas id="priceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: The Challenge of Colonization -->
+        <section id="challenge" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-sky-800" data-lang-key="section2Title">第二部分：星際殖民的挑戰</h3>
+                <p class="section-intro mt-4" data-lang-key="section2Intro">從短暫的旅遊到建立永久的地外家園，是一次複雜性的巨大飛躍。本部分將檢視全球主要參與者的宏偉藍圖，揭示人類在充滿敵意的宇宙環境中生存必須克服的五大危害，並探討「就地取材」技術的關鍵性。</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-12">
+                <h4 class="text-2xl font-bold text-center mb-8" data-lang-key="blueprintTitle">新世界的藍圖：全球雄心比較</h4>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="border border-gray-200 rounded-lg p-6 text-center">
+                        <h5 class="font-bold text-xl mb-2 text-blue-700" data-lang-key="artemisTitle">阿提米絲計畫</h5>
+                        <p class="text-sm text-gray-500 mb-4" data-lang-key="artemisLead">NASA 主導</p>
+                        <p class="text-gray-700" data-lang-key="artemisDesc">目標：可持續月球存在，作為未來火星任務的試驗場與中轉站。</p>
+                    </div>
+                     <div class="border border-gray-200 rounded-lg p-6 text-center">
+                        <h5 class="font-bold text-xl mb-2 text-red-700" data-lang-key="ilrsTitle">國際月球科研站</h5>
+                        <p class="text-sm text-gray-500 mb-4" data-lang-key="ilrsLead">中國、俄羅斯主導</p>
+                        <p class="text-gray-700" data-lang-key="ilrsDesc">目標：在月球南極建立機器人科研站，實現長期自主運行，支持短期載人。</p>
+                    </div>
+                     <div class="border border-gray-200 rounded-lg p-6 text-center">
+                        <h5 class="font-bold text-xl mb-2 text-gray-800" data-lang-key="spacexTitle">SpaceX 火星願景</h5>
+                        <p class="text-sm text-gray-500 mb-4" data-lang-key="spacexLead">私人企業</p>
+                        <p class="text-gray-700" data-lang-key="spacexDesc">目標：利用「星艦」系統實現火星快速殖民，建立自我維持的百萬人口城市。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-12">
+                <h4 class="text-2xl font-bold text-center mb-2" data-lang-key="hazardTitle">克服太空的五大危害</h4>
+                <p class="text-center text-gray-600 mb-8" data-lang-key="hazardIntro">離開地球的保護，人類必須直面宇宙的嚴酷環境。點擊圖標了解更多關於NASA定義的五大危害。</p>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center mb-6">
+                    <div class="hazard-icon p-4 rounded-lg cursor-pointer" data-hazard="radiation">
+                        <span class="text-5xl">☢️</span>
+                        <p class="font-semibold mt-2" data-lang-key="hazard1">太空輻射</p>
+                    </div>
+                    <div class="hazard-icon p-4 rounded-lg cursor-pointer" data-hazard="isolation">
+                        <span class="text-5xl">👥</span>
+                        <p class="font-semibold mt-2" data-lang-key="hazard2">隔離與禁閉</p>
+                    </div>
+                    <div class="hazard-icon p-4 rounded-lg cursor-pointer" data-hazard="distance">
+                        <span class="text-5xl">🌍</span>
+                        <p class="font-semibold mt-2" data-lang-key="hazard3">遠離地球</p>
+                    </div>
+                    <div class="hazard-icon p-4 rounded-lg cursor-pointer" data-hazard="gravity">
+                        <span class="text-5xl">🛰️</span>
+                        <p class="font-semibold mt-2" data-lang-key="hazard4">變化的重力</p>
+                    </div>
+                    <div class="hazard-icon p-4 rounded-lg cursor-pointer" data-hazard="environment">
+                        <span class="text-5xl">🏠</span>
+                        <p class="font-semibold mt-2" data-lang-key="hazard5">敵意封閉環境</p>
+                    </div>
+                </div>
+                <div id="hazard-details" class="bg-sky-50 p-6 rounded-lg min-h-[100px] transition-opacity duration-500">
+                    <p class="text-gray-700 text-center" data-lang-key="hazardDefault">將滑鼠懸停或點擊圖標以查看詳細說明。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Ethical Compass -->
+        <section id="ethics" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl md:text-4xl font-bold text-sky-800" data-lang-key="section3Title">第三部分：宇宙的道德羅盤</h3>
+                <p class="section-intro mt-4" data-lang-key="section3Intro">當我們準備踏上新世界，隨之而來的是一系列深刻的倫理、法律與哲學問題。我們是否有權改造其他星球？巨額的太空投入是否合理？本部分將探討這些定義人類太空時代的根本性詰問。</p>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-12">
+                 <h4 class="text-2xl font-bold text-center mb-8" data-lang-key="governanceTitle">天國的律法：太空治理的對壘</h4>
+                 <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h5 class="font-bold text-xl" data-lang-key="accordsTitle">《阿提米絲協議》</h5>
+                        <p class="text-sm text-gray-500 mb-2" data-lang-key="accordsLead">美國主導</p>
+                        <p class="text-gray-700" data-lang-key="accordsDesc">主張建立「安全區」保護商業活動，並明確支持對太空資源的商業開採。被批評為可能變相地實現領土佔領。</p>
+                    </div>
+                     <div class="border-l-4 border-red-500 pl-4">
+                        <h5 class="font-bold text-xl" data-lang-key="ilrsGovTitle">國際月球科研站</h5>
+                        <p class="text-sm text-gray-500 mb-2" data-lang-key="ilrsGovLead">中俄主導</p>
+                        <p class="text-gray-700" data-lang-key="ilrsGovDesc">作為對《阿提米絲協議》的回應，建立另一套獨立的合作原則與規範體系，形成太空治理的競爭格局。</p>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-12">
+                <h4 class="text-2xl font-bold text-center mb-2" data-lang-key="debateTitle">世紀大辯論：地球 vs. 太空</h4>
+                <p class="text-center text-gray-600 mb-8" data-lang-key="debateIntro">將巨額資金投入太空，而地球仍面臨重重危機，這是否合理？下圖將一次載人火星任務的估計成本與全球其他領域的支出進行了概念性比較。</p>
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h4 class="text-2xl font-bold text-center mb-8" data-lang-key="ultimateQuestionTitle">終極詰問：我們為何要去？</h4>
+                <div class="space-y-6 max-w-3xl mx-auto">
+                    <div class="bg-sky-50/50 p-6 rounded-lg">
+                        <p class="font-semibold text-sky-900" data-lang-key="whyGoArg1Title">作為存在風險的對沖？</p>
+                        <p class="text-gray-700 mt-2" data-lang-key="whyGoArg1Desc">建立地外殖民地是為人類文明創建「異地備份」，以對抗小行星撞擊、全球災難等滅絕性風險。這是一種對未來的道德責任。</p>
+                    </div>
+                    <div class="bg-red-50/50 p-6 rounded-lg">
+                        <p class="font-semibold text-red-900" data-lang-key="whyGoArg2Title">或是加劇風險的賭博？</p>
+                        <p class="text-gray-700 mt-2" data-lang-key="whyGoArg2Desc">太空擴張可能加劇地緣政治衝突，分散應對氣候變化等本土風險的資源，甚至創造新的災難模式。</p>
+                    </div>
+                     <div class="text-center pt-4">
+                         <p class="text-lg text-gray-600 italic" data-lang-key="whyGoConclusion">這是一場關於未來的哲學賭注，迫使我們在當代需求與後代存續之間做出價值權衡。</p>
+                     </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-6 text-center text-sm">
+            <p data-lang-key="footerCopyright">&copy; 2025 互動式報告。基於「商業化的最終邊疆」報告生成。</p>
+            <p class="text-gray-400 mt-1" data-lang-key="footerDisclaimer">此為概念性展示，所有數據與內容僅供參考。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const languageContent = {
+                zh: {
+                    pageTitle: '太空探索的未來：從旅行到殖民的互動指南',
+                    headerTitle: '宇宙探索新紀元',
+                    navReality: '太空旅行的現況',
+                    navChallenge: '星際殖民的挑戰',
+                    navEthics: '宇宙的道德羅盤',
+                    navRealityMobile: '太空旅行的現況',
+                    navChallengeMobile: '星際殖民的挑戰',
+                    navEthicsMobile: '宇宙的道德羅盤',
+                    heroTitle: '從商業旅遊到星際殖民',
+                    heroSubtitle: '一份互動指南，剖析人類下一次巨大飛躍的機遇、挑戰與倫理詰問。',
+                    section1Title: '第一部分：太空旅行的現況',
+                    section1Intro: '商業力量正以前所未有的速度重塑我們與宇宙的關係，但「普通人」的太空夢距離現實有多遠？本部分將深入剖析當前的市場格局、驚人的價格標籤以及背後的經濟驅動力，為您揭示太空旅行的真實面貌。',
+                    stat1: '2040年預估太空經濟規模',
+                    stat2: '可重複使用火箭帶來的成本降幅',
+                    stat3: '太空旅遊市場預估年均複合增長率',
+                    providerTitle: '太空旅行供應商：三種體驗的比較',
+                    providerIntro: '目前的市場已分化為兩種截然不同的體驗：短暫的次軌道飛行與準專業的軌道任務。點擊下方卡片以查看不同供應商的詳細資訊。',
+                    providerBtnVirgin: '維珍銀河',
+                    providerBtnBlue: '藍色起源',
+                    providerBtnAxiom: 'Axiom / SpaceX',
+                    priceTitle: '夢想的價格',
+                    priceIntro: '天文數字的票價是普通人通往太空最現實的壁壘。下圖直觀地展示了不同太空旅行選項的驚人費用。',
+                    priceChartLabel: '票價 (百萬美元)',
+                    priceChartYAxis: '價格 (百萬美元，對數座標)',
+                    priceChartTooltipPrefix: '票價',
+                    section2Title: '第二部分：星際殖民的挑戰',
+                    section2Intro: '從短暫的旅遊到建立永久的地外家園，是一次複雜性的巨大飛躍。本部分將檢視全球主要參與者的宏偉藍圖，揭示人類在充滿敵意的宇宙環境中生存必須克服的五大危害，並探討「就地取材」技術的關鍵性。',
+                    blueprintTitle: '新世界的藍圖：全球雄心比較',
+                    artemisTitle: '阿提米絲計畫',
+                    artemisLead: 'NASA 主導',
+                    artemisDesc: '目標：可持續月球存在，作為未來火星任務的試驗場與中轉站。',
+                    ilrsTitle: '國際月球科研站',
+                    ilrsLead: '中國、俄羅斯主導',
+                    ilrsDesc: '目標：在月球南極建立機器人科研站，實現長期自主運行，支持短期載人。',
+                    spacexTitle: 'SpaceX 火星願景',
+                    spacexLead: '私人企業',
+                    spacexDesc: '目標：利用「星艦」系統實現火星快速殖民，建立自我維持的百萬人口城市。',
+                    hazardTitle: '克服太空的五大危害',
+                    hazardIntro: '離開地球的保護，人類必須直面宇宙的嚴酷環境。點擊圖標了解更多關於NASA定義的五大危害。',
+                    hazard1: '太空輻射',
+                    hazard2: '隔離與禁閉',
+                    hazard3: '遠離地球',
+                    hazard4: '變化的重力',
+                    hazard5: '敵意封閉環境',
+                    hazardDefault: '將滑鼠懸停或點擊圖標以查看詳細說明。',
+                    section3Title: '第三部分：宇宙的道德羅盤',
+                    section3Intro: '當我們準備踏上新世界，隨之而來的是一系列深刻的倫理、法律與哲學問題。我們是否有權改造其他星球？巨額的太空投入是否合理？本部分將探討這些定義人類太空時代的根本性詰問。',
+                    governanceTitle: '天國的律法：太空治理的對壘',
+                    accordsTitle: '《阿提米絲協議》',
+                    accordsLead: '美國主導',
+                    accordsDesc: '主張建立「安全區」保護商業活動，並明確支持對太空資源的商業開採。被批評為可能變相地實現領土佔領。',
+                    ilrsGovTitle: '國際月球科研站',
+                    ilrsGovLead: '中俄主導',
+                    ilrsGovDesc: '作為對《阿提米絲協議》的回應，建立另一套獨立的合作原則與規範體系，形成太空治理的競爭格局。',
+                    debateTitle: '世紀大辯論：地球 vs. 太空',
+                    debateIntro: '將巨額資金投入太空，而地球仍面臨重重危機，這是否合理？下圖將一次載人火星任務的估計成本與全球其他領域的支出進行了概念性比較。',
+                    budgetChartLabel: '資源分配概念比較',
+                    budgetChartLabels: ['火星任務 (估算)', '全球年度氣候融資', '全球年度公共衛生支出', '其他'],
+                    budgetChartTitle: '概念性成本比較 (單位：十億美元)',
+                    budgetChartTooltipPrefix: '概念單位約',
+                    ultimateQuestionTitle: '終極詰問：我們為何要去？',
+                    whyGoArg1Title: '作為存在風險的對沖？',
+                    whyGoArg1Desc: '建立地外殖民地是為人類文明創建「異地備份」，以對抗小行星撞擊、全球災難等滅絕性風險。這是一種對未來的道德責任。',
+                    whyGoArg2Title: '或是加劇風險的賭博？',
+                    whyGoArg2Desc: '太空擴張可能加劇地緣政治衝突，分散應對氣候變化等本土風險的資源，甚至創造新的災難模式。',
+                    whyGoConclusion: '這是一場關於未來的哲學賭注，迫使我們在當代需求與後代存續之間做出價值權衡。',
+                    footerCopyright: '&copy; 2025 互動式報告。基於「商業化的最終邊疆」報告生成。',
+                    footerDisclaimer: '此為概念性展示，所有數據與內容僅供參考。'
+                },
+                en: {
+                    pageTitle: 'Future of Space Exploration: An Interactive Guide from Travel to Colonization',
+                    headerTitle: 'New Era of Space Exploration',
+                    navReality: 'The Reality of Space Travel',
+                    navChallenge: 'The Challenge of Colonization',
+                    navEthics: 'The Ethical Compass',
+                    navRealityMobile: 'The Reality of Space Travel',
+                    navChallengeMobile: 'The Challenge of Colonization',
+                    navEthicsMobile: 'The Ethical Compass',
+                    heroTitle: 'From Commercial Tourism to Interstellar Colonization',
+                    heroSubtitle: 'An interactive guide analyzing the opportunities, challenges, and ethical questions of humanity\'s next great leap.',
+                    section1Title: 'Part 1: The Reality of Space Travel',
+                    section1Intro: 'Commercial forces are reshaping our relationship with the cosmos at an unprecedented rate. But how close is the dream of space for the "ordinary person"? This section dissects the current market, the staggering price tags, and the economic drivers, revealing the true face of space travel.',
+                    stat1: 'Projected Space Economy by 2040',
+                    stat2: 'Cost Reduction from Reusable Rockets',
+                    stat3: 'Projected CAGR of Space Tourism Market',
+                    providerTitle: 'Space Travel Providers: A Comparison of Three Experiences',
+                    providerIntro: 'The current market has bifurcated into two distinct experiences: brief suborbital flights and quasi-professional orbital missions. Click the cards below for details on different providers.',
+                    providerBtnVirgin: 'Virgin Galactic',
+                    providerBtnBlue: 'Blue Origin',
+                    providerBtnAxiom: 'Axiom / SpaceX',
+                    priceTitle: 'The Price of a Dream',
+                    priceIntro: 'The astronomical ticket price is the most realistic barrier for ordinary people to go to space. The chart below visualizes the staggering cost of different space travel options.',
+                    priceChartLabel: 'Ticket Price (in millions USD)',
+                    priceChartYAxis: 'Price (in millions USD, log scale)',
+                    priceChartTooltipPrefix: 'Price',
+                    section2Title: 'Part 2: The Challenge of Colonization',
+                    section2Intro: 'Moving from a short trip to establishing a permanent off-world home is a giant leap in complexity. This section examines the grand blueprints of major global players, reveals the five major hazards humans must overcome to survive in a hostile cosmos, and explores the criticality of "living off the land" technologies.',
+                    blueprintTitle: 'Blueprints for New Worlds: A Comparison of Global Ambitions',
+                    artemisTitle: 'Artemis Program',
+                    artemisLead: 'Led by NASA',
+                    artemisDesc: 'Goal: A sustainable lunar presence, serving as a testbed and waypoint for future Mars missions.',
+                    ilrsTitle: 'International Lunar Research Station',
+                    ilrsLead: 'Led by China, Russia',
+                    ilrsDesc: 'Goal: Establish a robotic research station at the lunar south pole for long-term autonomous operation, supporting short-term human missions.',
+                    spacexTitle: 'SpaceX Mars Vision',
+                    spacexLead: 'Private Enterprise',
+                    spacexDesc: 'Goal: Rapidly colonize Mars using the Starship system to build a self-sustaining city of one million people.',
+                    hazardTitle: 'Overcoming the Five Hazards of Spaceflight',
+                    hazardIntro: 'Leaving Earth\'s protection, humanity must confront the harsh environment of the cosmos. Click the icons to learn more about the five major hazards as defined by NASA.',
+                    hazard1: 'Space Radiation',
+                    hazard2: 'Isolation & Confinement',
+                    hazard3: 'Distance from Earth',
+                    hazard4: 'Altered Gravity',
+                    hazard5: 'Hostile/Closed Environments',
+                    hazardDefault: 'Hover over or click an icon to see the detailed description.',
+                    section3Title: 'Part 3: The Ethical Compass',
+                    section3Intro: 'As we prepare to set foot on new worlds, we are met with a series of profound ethical, legal, and philosophical questions. Do we have the right to alter other planets? Is the immense investment in space justifiable? This section explores the fundamental questions that will define humanity\'s space age.',
+                    governanceTitle: 'Laws of Heaven: The Standoff in Space Governance',
+                    accordsTitle: 'The Artemis Accords',
+                    accordsLead: 'Led by the United States',
+                    accordsDesc: 'Advocates for "safety zones" to protect commercial activities and explicitly supports the commercial exploitation of space resources, criticized as de facto territorial appropriation.',
+                    ilrsGovTitle: 'International Lunar Research Station (ILRS)',
+                    ilrsGovLead: 'Led by China, Russia',
+                    ilrsGovDesc: 'As a response to the Artemis Accords, it establishes an alternative set of independent cooperation principles and norms, creating a competitive landscape for space governance.',
+                    debateTitle: 'The Great Debate: Earth vs. Space',
+                    debateIntro: 'Is it justifiable to invest vast sums in space while Earth faces its own crises? This chart conceptually compares the estimated cost of one crewed Mars mission to other global expenditures.',
+                    budgetChartLabel: 'Conceptual Resource Allocation',
+                    budgetChartLabels: ['Mars Mission (Est.)', 'Global Annual Climate Finance', 'Global Annual Public Health Spending', 'Other'],
+                    budgetChartTitle: 'Conceptual Cost Comparison (in Billions USD)',
+                    budgetChartTooltipPrefix: 'Conceptual Units Approx.',
+                    ultimateQuestionTitle: 'The Ultimate Question: Why Do We Go?',
+                    whyGoArg1Title: 'As an Existential Risk Hedge?',
+                    whyGoArg1Desc: 'Establishing off-world colonies creates an "off-site backup" for human civilization against extinction-level events like asteroid impacts or global catastrophes. It is a moral duty to the future.',
+                    whyGoArg2Title: 'Or a Risk-Multiplying Gamble?',
+                    whyGoArg2Desc: 'Space expansion could exacerbate geopolitical conflicts, divert resources from tackling terrestrial risks like climate change, and even create new modes of disaster.',
+                    whyGoConclusion: 'This is a philosophical bet on the future, forcing a trade-off between the needs of the present and the survival of posterity.',
+                    footerCopyright: '&copy; 2025 Interactive Report. Generated based on "The Commercialized Final Frontier" report.',
+                    footerDisclaimer: 'This is a conceptual demonstration. All data and content are for illustrative purposes only.'
+                }
+            };
+            
+            const providerData = {
+                zh: {
+                    virgin: { title: '飛行類型', value: '次軌道飛行 (Suborbital)' },
+                    blue: { title: '飛行類型', value: '次軌道飛行 (Suborbital)' },
+                    axiom: { title: '飛行類型', value: '軌道飛行 (Orbital)' },
+                    vehicle: { title: '運載工具', zh: { virgin: 'SpaceShipTwo (太空飛機)', blue: 'New Shepard (火箭與太空艙)', axiom: 'Crew Dragon + Falcon 9' } },
+                    experience: { title: '核心體驗', zh: { virgin: '數分鐘失重，觀看地球曲率', blue: '3-4分鐘失重，觀看地球曲率', axiom: '在國際太空站長期生活與工作，進行科學研究' } },
+                    price: { title: '當前票價', zh: { virgin: '$60萬美元以上 (未來Delta級)', blue: '未公開，估計 > $100萬美元', axiom: '$5500萬 - $6000萬美元' } }
+                },
+                en: {
+                    virgin: { title: 'Flight Type', value: 'Suborbital' },
+                    blue: { title: 'Flight Type', value: 'Suborbital' },
+                    axiom: { title: 'Flight Type', value: 'Orbital' },
+                    vehicle: { title: 'Vehicle', en: { virgin: 'SpaceShipTwo (Spaceplane)', blue: 'New Shepard (Rocket & Capsule)', axiom: 'Crew Dragon + Falcon 9' } },
+                    experience: { title: 'Core Experience', en: { virgin: 'Minutes of weightlessness, view of Earth\'s curvature', blue: '3-4 minutes of weightlessness, view of Earth\'s curvature', axiom: 'Long-term living and working on the ISS, conducting science' } },
+                    price: { title: 'Current Ticket Price', en: { virgin: '>$600K (future Delta class)', blue: 'Undisclosed, est. >$1M', axiom: '$55M - $60M' } }
+                }
+            };
+
+            const hazardData = {
+                zh: {
+                    radiation: { title: '太空輻射', text: '離開地球磁場保護後，暴露於銀河宇宙射線(GCRs)和太陽高能粒子(SEPs)中，會顯著增加患癌風險並損害中樞神經系統。這是前往火星最大的健康威脅。' },
+                    isolation: { title: '隔離與禁閉', text: '在長達數月甚至數年的任務中，小團隊被封閉在狹小空間內，會引發抑鬱、焦慮和人際衝突等心理問題，危及任務安全。' },
+                    distance: { title: '遠離地球', text: '通訊延遲長達數十分鐘，意味著地面無法提供即時幫助。太空人必須具備高度自主性，以應對所有緊急情況。' },
+                    gravity: { title: '變化的重力場', text: '微重力或低重力環境會導致骨質流失、肌肉萎縮和心血管功能下降。月球(1/6g)和火星(3/8g)的長期影響仍是未知數。' },
+                    environment: { title: '敵意封閉環境', text: '太空艙是完全依賴機器的封閉生態系統，任何生命保障系統的故障都可能是致命的。同時還需應對火災、微生物交叉感染等風險。' }
+                },
+                en: {
+                    radiation: { title: 'Space Radiation', text: 'Outside Earth\'s magnetic field, exposure to Galactic Cosmic Rays (GCRs) and Solar Energetic Particles (SEPs) significantly increases cancer risk and damages the central nervous system. This is the greatest health threat for a Mars mission.' },
+                    isolation: { title: 'Isolation & Confinement', text: 'Small crews confined in tight quarters for months or years can lead to depression, anxiety, and interpersonal conflicts, jeopardizing mission safety.' },
+                    distance: { title: 'Distance from Earth', text: 'Communication delays of up to 20 minutes each way mean no real-time help from ground control. Astronauts must be highly autonomous to handle all emergencies.' },
+                    gravity: { title: 'Altered Gravity Fields', text: 'Microgravity causes bone loss, muscle atrophy, and cardiovascular deconditioning. The long-term effects of lunar (1/6g) and Martian (3/8g) gravity are still largely unknown.' },
+                    environment: { title: 'Hostile/Closed Environments', text: 'A spacecraft is a machine-dependent closed ecosystem. Any failure in life support is catastrophic. Risks also include fire, microbial cross-contamination, and constant noise.' }
+                }
+            };
+            
+            let currentLang = 'zh';
+            const charts = {};
+
+            const providerBtns = document.querySelectorAll('.provider-btn');
+            const providerDetailsContainer = document.getElementById('provider-details');
+
+            function updateProviderDetails(providerKey) {
+                if (!providerKey) return;
+                const lang = currentLang;
+                const data = providerData[lang];
+                const type = data[providerKey];
+                const vehicle = data.vehicle[lang][providerKey];
+                const experience = data.experience[lang][providerKey];
+                const price = data.price[lang][providerKey];
+
+                providerDetailsContainer.innerHTML = `
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-center p-4 bg-sky-50 rounded-lg">
+                        <div><p class="font-bold text-sky-700">${type.title}</p><p>${type.value}</p></div>
+                        <div><p class="font-bold text-sky-700">${data.vehicle.title}</p><p>${vehicle}</p></div>
+                        <div><p class="font-bold text-sky-700">${data.experience.title}</p><p>${experience}</p></div>
+                        <div><p class="font-bold text-sky-700">${data.price.title}</p><p>${price}</p></div>
+                    </div>
+                `;
+                providerBtns.forEach(btn => {
+                    btn.classList.remove('bg-sky-600', 'text-white');
+                    btn.classList.add('bg-gray-200', 'text-gray-800');
+                });
+                const activeBtn = document.querySelector(`[data-provider="${providerKey}"]`);
+                activeBtn.classList.add('bg-sky-600', 'text-white');
+                activeBtn.classList.remove('bg-gray-200', 'text-gray-800');
+            }
+            
+            providerBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    updateProviderDetails(btn.dataset.provider);
+                });
+            });
+
+            const hazardIcons = document.querySelectorAll('.hazard-icon');
+            const hazardDetailsContainer = document.getElementById('hazard-details');
+            
+            function updateHazardDetails(hazardKey) {
+                 const data = hazardData[currentLang][hazardKey];
+                    hazardDetailsContainer.innerHTML = `
+                        <h5 class="font-bold text-xl text-sky-800 mb-2">${data.title}</h5>
+                        <p class="text-gray-700">${data.text}</p>
+                    `;
+                    hazardIcons.forEach(i => i.classList.remove('bg-sky-100'));
+                    const activeIcon = document.querySelector(`.hazard-icon[data-hazard="${hazardKey}"]`);
+                    if(activeIcon) activeIcon.classList.add('bg-sky-100');
+            }
+
+            hazardIcons.forEach(icon => {
+                icon.addEventListener('click', () => {
+                    updateHazardDetails(icon.dataset.hazard);
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            mobileMenu.addEventListener('click', (e) => {
+                 if(e.target.tagName === 'A'){
+                    mobileMenu.classList.add('hidden');
+                 }
+            });
+
+            const priceCtx = document.getElementById('priceChart').getContext('2d');
+            charts.priceChart = new Chart(priceCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Virgin Galactic (Suborbital)', 'Blue Origin (Suborbital)', 'Axiom/SpaceX (Orbital)'],
+                    datasets: [{
+                        label: '票價 (百萬美元)',
+                        data: [0.6, 1, 55],
+                        backgroundColor: ['rgba(56, 189, 248, 0.6)', 'rgba(14, 165, 233, 0.6)', 'rgba(12, 74, 110, 0.6)'],
+                        borderColor: ['rgba(56, 189, 248, 1)', 'rgba(14, 165, 233, 1)', 'rgba(12, 74, 110, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { type: 'logarithmic', beginAtZero: true, title: { display: true, text: '價格 (百萬美元，對數座標)' } } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = languageContent[currentLang].priceChartTooltipPrefix || 'Price';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) { label += '$' + context.parsed.y + ' Million'; }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const budgetCtx = document.getElementById('budgetChart').getContext('2d');
+            charts.budgetChart = new Chart(budgetCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['火星任務 (估算)', '全球年度氣候融資', '全球年度公共衛生支出', '其他'],
+                    datasets: [{
+                        label: '資源分配概念比較',
+                        data: [1000, 700, 2500, 5000],
+                        backgroundColor: ['#0c4a6e', '#0ea5e9', '#7dd3fc', '#e0f2fe'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${languageContent[currentLang].budgetChartTooltipPrefix} ${context.raw}`;
+                                }
+                            }
+                        },
+                        title: { display: true, text: '概念性成本比較 (單位：十億美元)' }
+                    }
+                }
+            });
+
+            function updateLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.title = languageContent[lang].pageTitle;
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (languageContent[lang][key]) {
+                        el.innerHTML = languageContent[lang][key];
+                    }
+                });
+
+                const activeProviderKey = document.querySelector('.provider-btn.bg-sky-600')?.dataset.provider;
+                updateProviderDetails(activeProviderKey || 'virgin');
+
+                const activeHazardKey = document.querySelector('.hazard-icon.bg-sky-100')?.dataset.hazard;
+                if(activeHazardKey) {
+                    updateHazardDetails(activeHazardKey);
+                }
+
+                // Update Price Chart
+                charts.priceChart.data.datasets[0].label = languageContent[lang].priceChartLabel;
+                charts.priceChart.options.scales.y.title.text = languageContent[lang].priceChartYAxis;
+                charts.priceChart.update();
+                
+                // Update Budget Chart
+                charts.budgetChart.data.labels = languageContent[lang].budgetChartLabels;
+                charts.budgetChart.data.datasets[0].label = languageContent[lang].budgetChartLabel;
+                charts.budgetChart.options.plugins.title.text = languageContent[lang].budgetChartTitle;
+                charts.budgetChart.update();
+            }
+
+            document.getElementById('lang-toggle').addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(newLang);
+            });
+            document.getElementById('lang-toggle-mobile').addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(newLang);
+                mobileMenu.classList.add('hidden');
+            });
+
+            // Set initial state
+            updateLanguage('zh');
+        });
+    </script>
+
+</body>
+</html>
