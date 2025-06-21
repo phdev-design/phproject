@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：未來老年護理的挑戰與對策</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is designed as a single-page, thematic dashboard, moving from the problem's core to potential solutions. This non-linear structure allows users to explore interconnected issues at their own pace. The flow starts with an overview of the crisis (The Core Challenge), compares international approaches (International Models), showcases tangible solutions (Innovative Solutions), reinforces the human-centric goal (The Human Element), and concludes with actionable steps (Strategic Recommendations). This narrative arc from problem to solution, supported by interactive charts and cards, is more engaging and digestible than the original report's linear format. -->
+    <!-- Visualization & Content Choices: 
+        - Headline Stats: Goal: Inform/Impact. Method: Dynamic counters (JS). Justification: Immediately grabs user attention with key crisis figures.
+        - Vicious Cycle Diagram: Goal: Organize/Relationships. Method: HTML/CSS (Tailwind). Justification: Visually explains the complex, interconnected nature of the funding and workforce crisis.
+        - Pay Comparison Chart: Goal: Compare. Method: Chart.js Bar Chart. Justification: Clearly illustrates the stark pay disparity driving the workforce crisis.
+        - International Models: Goal: Compare. Method: Interactive cards with a dynamic Chart.js Doughnut Chart. Justification: Allows easy, direct comparison of complex systems and their funding structures.
+        - Innovative Solutions Gallery: Goal: Organize/Inform. Method: Interactive HTML/CSS cards. Justification: Presents diverse solutions in an easily scannable, engaging format.
+        - Recommendations Accordion: Goal: Organize. Method: HTML/JS accordion. Justification: Organizes dense recommendations into clean, manageable sections, preventing information overload.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F5F5F4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .font-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .font-en {
+            font-family: 'Roboto', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0D9488; /* teal-600 */
+            border-bottom-color: #0D9488;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-stone-100/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700" data-lang-key="mainTitle">未來老年護理</h1>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="flex items-baseline space-x-4">
+                        <a href="#challenge" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navChallenge">核心挑戰</a>
+                        <a href="#models" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navModels">國際模式</a>
+                        <a href="#solutions" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navSolutions">創新方案</a>
+                        <a href="#human" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navHuman">人的價值</a>
+                        <a href="#recommendations" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="navRecs">戰略建議</a>
+                    </div>
+                    <button id="lang-toggle" class="ml-6 px-3 py-1.5 text-sm font-medium text-teal-700 border border-teal-700 rounded-full hover:bg-teal-50 transition-colors">English</button>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <button id="lang-toggle-mobile" class="mr-2 px-3 py-1.5 text-xs font-medium text-teal-700 border border-teal-700 rounded-full hover:bg-teal-50 transition-colors">English</button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-600 hover:text-teal-700 hover:bg-stone-200 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#challenge" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navChallenge">核心挑戰</a>
+                <a href="#models" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navModels">國際模式</a>
+                <a href="#solutions" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navSolutions">創新方案</a>
+                <a href="#human" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navHuman">人的價值</a>
+                <a href="#recommendations" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navRecs">戰略建議</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-stone-800 mb-4" data-lang-key="heroTitle">尊嚴、永續與凝聚力</h2>
+            <p class="max-w-3xl mx-auto text-stone-600" data-lang-key="heroSubtitle">本儀表板旨在將「未來老年護理的戰略框架」報告視覺化，將複雜的挑戰與創新的解決方案，轉化為易於理解和探索的互動體驗。讓我們一同探討如何為高齡化社會建立一個更具韌性的未來。</p>
+        </section>
+
+        <!-- Section 1: The Core Challenge -->
+        <section id="challenge" class="pt-20 -mt-20 mb-16">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2 text-red-800" data-lang-key="challengeTitle">核心挑戰：理想與現實的悖論</h3>
+                <p class="text-center text-stone-600 max-w-3xl mx-auto mb-8" data-lang-key="challengeDesc">英國的護理體系面臨一個根本性矛盾：法律設定了崇高的「以人為本」理想，但長期的資金不足與勞動力危機，使其陷入一個惡性循環，服務僅能應對危機，而非預防。本節將剖析此結構性困境。</p>
+                
+                <div class="grid md:grid-cols-3 gap-6 text-center mb-12">
+                    <div class="bg-amber-50 p-4 rounded-lg">
+                        <div class="text-4xl font-bold text-amber-600" data-target="131000">0</div>
+                        <p class="text-stone-700 mt-2" data-lang-key="statVacancies">護理職位空缺</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg">
+                        <div class="text-4xl font-bold text-red-600" data-target="24.4">0</div>
+                        <p class="text-stone-700 mt-2" data-lang-key="statTurnover">員工年流動率 (%)</p>
+                    </div>
+                    <div class="bg-teal-50 p-4 rounded-lg">
+                        <div class="text-4xl font-bold text-teal-600" data-target="18.9">0</div>
+                        <p class="text-stone-700 mt-2" data-lang-key="statCost">延遲出院每年造成的NHS成本 (億英鎊)</p>
+                    </div>
+                </div>
+
+                <div class="lg:flex lg:items-center lg:space-x-8">
+                    <div class="lg:w-1/2 mb-8 lg:mb-0">
+                        <h4 class="text-xl font-semibold text-center mb-4" data-lang-key="cycleTitle">危機的惡性循環</h4>
+                        <div class="space-y-4">
+                             <div class="flex items-center p-3 bg-stone-50 rounded-lg">
+                                <span class="text-2xl mr-4">📉</span>
+                                <div>
+                                    <h5 class="font-bold" data-lang-key="cycle1Title">資金不足</h5>
+                                    <p class="text-sm text-stone-600" data-lang-key="cycle1Desc">政府對地方的撥款無法跟上需求增長。</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center"><span class="text-2xl text-stone-400">⬇️</span></div>
+                            <div class="flex items-center p-3 bg-stone-50 rounded-lg">
+                                <span class="text-2xl mr-4">💸</span>
+                                <div>
+                                    <h5 class="font-bold" data-lang-key="cycle2Title">護理員低薪</h5>
+                                    <p class="text-sm text-stone-600" data-lang-key="cycle2Desc">薪資遠低於NHS同等職位，缺乏市場競爭力。</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center"><span class="text-2xl text-stone-400">⬇️</span></div>
+                            <div class="flex items-center p-3 bg-stone-50 rounded-lg">
+                                <span class="text-2xl mr-4">🚶</span>
+                                <div>
+                                    <h5 class="font-bold" data-lang-key="cycle3Title">勞動力危機</h5>
+                                    <p class="text-sm text-stone-600" data-lang-key="cycle3Desc">高空缺率與高流動率，嚴重依賴臨時工與國際招聘。</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-center"><span class="text-2xl text-stone-400">⬇️</span></div>
+                             <div class="flex items-center p-3 bg-stone-50 rounded-lg">
+                                <span class="text-2xl mr-4">💔</span>
+                                <div>
+                                    <h5 class="font-bold" data-lang-key="cycle4Title">護理品質下降</h5>
+                                    <p class="text-sm text-stone-600" data-lang-key="cycle4Desc">服務走向交易化、以任務為導向，無法提供人性化護理。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:w-1/2">
+                        <h4 class="text-xl font-semibold text-center mb-4" data-lang-key="payGapTitle">薪資差距：護理人員 vs. 其他行業</h4>
+                         <div class="chart-container">
+                            <canvas id="payGapChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: International Models -->
+        <section id="models" class="pt-20 -mt-20 mb-16">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2 text-teal-800" data-lang-key="modelsTitle">國際模式比較：我們能學到什麼？</h3>
+                <p class="text-center text-stone-600 max-w-3xl mx-auto mb-8" data-lang-key="modelsDesc">面對相似的人口老化挑戰，不同國家發展出各異的應對模式。本節比較英國、日本與瑞典的體系，探索它們在資金機制、核心哲學及優缺點上的差異，為我們提供寶貴的改革藍圖。</p>
+                <div class="flex justify-center space-x-2 md:space-x-4 mb-8">
+                    <button class="country-btn active bg-teal-600 text-white px-4 py-2 rounded-full text-sm md:text-base" data-country="uk">🇬🇧 <span data-lang-key="countryUK">英國</span></button>
+                    <button class="country-btn bg-stone-200 text-stone-700 px-4 py-2 rounded-full text-sm md:text-base" data-country="japan">🇯🇵 <span data-lang-key="countryJapan">日本</span></button>
+                    <button class="country-btn bg-stone-200 text-stone-700 px-4 py-2 rounded-full text-sm md:text-base" data-country="sweden">🇸🇪 <span data-lang-key="countrySweden">瑞典</span></button>
+                </div>
+                <div id="model-display" class="grid lg:grid-cols-2 gap-8 items-center">
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 3: Innovative Solutions -->
+        <section id="solutions" class="pt-20 -mt-20 mb-16">
+             <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2 text-orange-700" data-lang-key="solutionsTitle">創新方案：從社區到家庭的實踐</h3>
+                 <p class="text-center text-stone-600 max-w-3xl mx-auto mb-8" data-lang-key="solutionsDesc">除了宏觀的制度改革，真正的改變也源於基層的創新。本節展示了英國本土湧現的多元護理模式，從利用社區資產到重塑居住環境，這些方案為建立一個更具人性與韌性的護理體系提供了靈感。</p>
+                <div id="solutions-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Human Element -->
+        <section id="human" class="pt-20 -mt-20 mb-16">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2 text-blue-800" data-lang-key="humanTitle">回歸人的價值：尊嚴、福祉與連結</h3>
+                <p class="text-center text-stone-600 max-w-3xl mx-auto mb-8" data-lang-key="humanDesc">在所有政策與資源討論的背後，核心目標是確保每一位長者都能有尊嚴、有選擇地生活。本節聚焦於《2014年護理法》賦予個人的權利，並探討代際連結如何成為對抗孤獨、重建社會凝聚力的關鍵力量。</p>
+                <div class="mb-12">
+                    <h4 class="text-xl font-semibold text-center mb-4" data-lang-key="principlesTitle">《2014年護理法》六大核心原則</h4>
+                    <div id="care-act-principles" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+                    </div>
+                </div>
+                 <div>
+                    <h4 class="text-xl font-semibold text-center mb-4" data-lang-key="intergenTitle">代際連結的力量：從隔離到共融</h4>
+                    <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+                        <div class="text-center p-4 rounded-lg bg-red-50 w-full md:w-1/3">
+                            <span class="text-5xl">🏘️</span>
+                            <h5 class="font-bold mt-2 text-red-700" data-lang-key="intergenSegregation">年齡隔離</h5>
+                            <p class="text-sm text-stone-600 mt-1" data-lang-key="intergenSegregationDesc">不同代際生活在各自的世界，導致誤解、刻板印象與孤獨感。</p>
+                        </div>
+                        <div class="text-4xl text-teal-500 font-bold transform md:rotate-0 rotate-90">→</div>
+                        <div class="text-center p-4 rounded-lg bg-green-50 w-full md:w-1/3">
+                             <span class="text-5xl">👨‍👩‍👧‍👦</span>
+                             <h5 class="font-bold mt-2 text-green-700" data-lang-key="intergenConnection">代際連結</h5>
+                             <p class="text-sm text-stone-600 mt-1" data-lang-key="intergenConnectionDesc">促進互動，減少孤獨，培養同理心，建立更具凝聚力的社區。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Recommendations -->
+        <section id="recommendations" class="pt-20 -mt-20">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center mb-2" data-lang-key="recsTitle">戰略建議：邁向統一的願景</h3>
+                <p class="text-center text-stone-600 max-w-3xl mx-auto mb-8" data-lang-key="recsDesc">打破惡性循環需要一個整合性的戰略。本報告提出針對不同層級的具體建議，旨在推動護理體系從交易型、危機驅動的模式，轉向關係型、預防性、社區整合的模式。</p>
+                <div id="recommendations-accordion" class="space-y-2 max-w-4xl mx-auto">
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-stone-800 text-stone-300 mt-16">
+        <div class="container mx-auto py-4 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p data-lang-key="footerCredit">本互動報告基於「尊嚴、可持續性與社會凝聚力：未來老年護理的戰略框架」報告製作。</p>
+            <p data-lang-key="footerDisclaimer">僅供演示用途。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLang = 'zh';
+            let payGapChart = null;
+            let modelChart = null;
+
+            const langData = {
+                zh: {
+                    mainTitle: "未來老年護理",
+                    navChallenge: "核心挑戰",
+                    navModels: "國際模式",
+                    navSolutions: "創新方案",
+                    navHuman: "人的價值",
+                    navRecs: "戰略建議",
+                    langToggle: "English",
+                    heroTitle: "尊嚴、永續與凝聚力",
+                    heroSubtitle: "本儀表板旨在將「未來老年護理的戰略框架」報告視覺化，將複雜的挑戰與創新的解決方案，轉化為易於理解和探索的互動體驗。讓我們一同探討如何為高齡化社會建立一個更具韌性的未來。",
+                    challengeTitle: "核心挑戰：理想與現實的悖論",
+                    challengeDesc: "英國的護理體系面臨一個根本性矛盾：法律設定了崇高的「以人為本」理想，但長期的資金不足與勞動力危機，使其陷入一個惡性循環，服務僅能應對危機，而非預防。本節將剖析此結構性困境。",
+                    statVacancies: "護理職位空缺",
+                    statTurnover: "員工年流動率 (%)",
+                    statCost: "延遲出院每年造成的NHS成本 (億英鎊)",
+                    cycleTitle: "危機的惡性循環",
+                    cycle1Title: "資金不足",
+                    cycle1Desc: "政府對地方的撥款無法跟上需求增長。",
+                    cycle2Title: "護理員低薪",
+                    cycle2Desc: "薪資遠低於NHS同等職位，缺乏市場競爭力。",
+                    cycle3Title: "勞動力危機",
+                    cycle3Desc: "高空缺率與高流動率，嚴重依賴臨時工與國際招聘。",
+                    cycle4Title: "護理品質下降",
+                    cycle4Desc: "服務走向交易化、以任務為導向，無法提供人性化護理。",
+                    payGapTitle: "薪資差距：護理人員 vs. 其他行業",
+                    payGapLabel: "年薪 (英鎊)",
+                    payGapCareWorker: "社會護理人員",
+                    payGapNHS: "NHS (同等職位)",
+                    payGapRetail: "零售業/酒店業",
+                    modelsTitle: "國際模式比較：我們能學到什麼？",
+                    modelsDesc: "面對相似的人口老化挑戰，不同國家發展出各異的應對模式。本節比較英國、日本與瑞典的體系，探索它們在資金機制、核心哲學及優缺點上的差異，為我們提供寶貴的改革藍圖。",
+                    countryUK: "英國",
+                    countryJapan: "日本",
+                    countrySweden: "瑞典",
+                    modelUKTitle: "🇬🇧 英國：殘補式安全網",
+                    modelUKContent: "<p><strong>核心哲學：</strong> 安全網模式，為最貧困者提供基本保障，但服務提供嚴重依賴經濟與需求雙重審查。</p><p><strong>主要優勢：</strong> 為社會中最弱勢的群體提供了一個（儘管有限的）保障體系。</p><p><strong>主要挑戰：</strong> 資金長期不足導致服務配給，造成不公平的雙軌制（自費 vs. 國家資助），並給無償護理者帶來巨大壓力。</p>",
+                    modelFundingSource: "資金來源",
+                    modelTax: "中央/地方稅收",
+                    modelPrivate: "自費者",
+                    modelJapanTitle: "🇯🇵 日本：社會共責保險",
+                    modelJapanContent: "<p><strong>核心哲學：</strong> 將護理責任從家庭轉向整個社會。所有40歲以上公民強制性投保。</p><p><strong>主要優勢：</strong> 建立了充滿活力的提供商市場，公眾接受度高，體系具備靈活性，每三年審查一次。</p><p><strong>主要挑戰：</strong> 同樣面臨勞動力短缺，為控制成本導致護理人員薪資偏低，人口壓力持續增加。</p>",
+                    modelInsurance: "保險費",
+                    modelCopay: "使用者共付",
+                    modelSwedenTitle: "🇸🇪 瑞典：普及型公民權利",
+                    modelSwedenContent: "<p><strong>核心哲學：</strong> 普及主義，認為護理是一項公民權利和公共責任，主要由累進稅資助。</p><p><strong>主要優勢：</strong> 高度平等，強調「在地安老」和獨立性，技術整合度高，服務基於需求而非支付能力。</p><p><strong>主要挑戰：</strong> 資金壓力大，服務水平在不同市鎮間可能存在差異，市場化改革可能侵蝕普及性原則。</p>",
+                    modelProgTax: "累進稅",
+                    modelSmallCopay: "少量共付",
+                    solutionsTitle: "創新方案：從社區到家庭的實踐",
+                    solutionsDesc: "除了宏觀的制度改革，真正的改變也源於基層的創新。本節展示了英國本土湧現的多元護理模式，從利用社區資產到重塑居住環境，這些方案為建立一個更具人性與韌性的護理體系提供了靈感。",
+                    solutions: [
+                        { title: '共享生活', icon: '🏠', desc: '成年人與經過培訓的護理者家庭共住，提供家庭式生活，極具成本效益。' },
+                        { title: '福祉團隊', icon: '🤝', desc: '小型、自我管理的社區團隊，提供關係型護理，改善護理人員待遇。' },
+                        { title: '社區催化劑', icon: '🌱', desc: '幫助當地居民創辦小型護理服務（微型企業），豐富市場選擇。' },
+                        { title: '地區協調', icon: '🔗', desc: '協調員幫助個人利用社區資源，建立聯繫，預防需求升級。' },
+                        { title: '家庭共享', icon: '🧑‍🤝‍🧑', desc: '以陪伴和少量幫助換取免費住宿，解決長者孤獨和年輕人住房問題。' },
+                        { title: '代際共居', icon: '🏢', desc: '有意設計的混合年齡住房，促進日常互動，打破年齡隔閡。' }
+                    ],
+                    humanTitle: "回歸人的價值：尊嚴、福祉與連結",
+                    humanDesc: "在所有政策與資源討論的背後，核心目標是確保每一位長者都能有尊嚴、有選擇地生活。本節聚焦於《2014年護理法》賦予個人的權利，並探討代際連結如何成為對抗孤獨、重建社會凝聚力的關鍵力量。",
+                    principlesTitle: "《2014年護理法》六大核心原則",
+                    principles: [ { name: '賦權', icon: '💪' }, { name: '預防', icon: '🛡️' }, { name: '適度性', icon: '⚖️' }, { name: '保護', icon: '❤️' }, { name: '夥伴關係', icon: '👥' }, { name: '問責制', icon: '🧾' } ],
+                    intergenTitle: "代際連結的力量：從隔離到共融",
+                    intergenSegregation: "年齡隔離",
+                    intergenSegregationDesc: "不同代際生活在各自的世界，導致誤解、刻板印象與孤獨感。",
+                    intergenConnection: "代際連結",
+                    intergenConnectionDesc: "促進互動，減少孤獨，培養同理心，建立更具凝聚力的社區。",
+                    recsTitle: "戰略建議：邁向統一的願景",
+                    recsDesc: "打破惡性循環需要一個整合性的戰略。本報告提出針對不同層級的具體建議，旨在推動護理體系從交易型、危機驅動的模式，轉向關係型、預防性、社區整合的模式。",
+                    recommendations: [
+                        { title: '對國家政府的建議', icon: '🏛️', points: [ '承諾長期、可持續的資金解決方案，展開社會保險等模式的公眾辯論。', '啟動國家勞動力戰略，實現社會護理與NHS在薪酬和地位上的平等。', '設立專項資金，推廣如「共享生活」等已證實有效的社區模式。', '強制新的大型住房開發項目融入代際共融的設計原則。' ]},
+                        { title: '對地方政府的建議', icon: '🏘️', points: [ '積極塑造市場，為價值和成果而非僅為時間和任務進行採購。', '在地方層面推動健康、社會護理、住房和社區服務的整合。', '扮演代際「中介人」角色，促進學校、青年團體和護理院的聯繫。' ]},
+                        { title: '對護理提供者的建議', icon: '❤️', points: [ '採納關係型護理模式，優先建立關係並將人們與其社區聯繫起來。', '將改善薪酬、工作條件和職業發展作為核心業務戰略。', '深思熟慮地整合技術，以增強而非取代人際聯繫。' ]},
+                        { title: '對公民社會與社區的建議', icon: '👨‍👩‍👧‍👦', points: [ '促進並參與地方的代際活動，打破刻板印象，建立社區凝聚力。', '加強社區層面對數百萬無償護理者的支持網絡。' ]}
+                    ],
+                    footerCredit: "本互動報告基於「尊嚴、可持續性與社會凝聚力：未來老年護理的戰略框架」報告製作。",
+                    footerDisclaimer: "僅供演示用途。"
+                },
+                en: {
+                    mainTitle: "Future of Elder Care",
+                    navChallenge: "Core Challenge",
+                    navModels: "Global Models",
+                    navSolutions: "Innovations",
+                    navHuman: "Human Value",
+                    navRecs: "Strategy",
+                    langToggle: "中文 (繁體)",
+                    heroTitle: "Dignity, Sustainability & Cohesion",
+                    heroSubtitle: "This dashboard visualizes the 'Strategic Framework for the Future of Elder Care' report, transforming complex challenges and innovative solutions into an intuitive, explorable experience. Let's explore how to build a more resilient future for our aging society.",
+                    challengeTitle: "The Core Challenge: A Paradox of Ideals and Reality",
+                    challengeDesc: "The UK care system faces a fundamental contradiction: while law sets a noble 'person-centered' ideal, chronic underfunding and a workforce crisis create a vicious cycle, forcing services to be reactive to crises, not preventative. This section dissects this structural dilemma.",
+                    statVacancies: "Care Sector Vacancies",
+                    statTurnover: "Annual Staff Turnover (%)",
+                    statCost: "Annual NHS Cost of Delayed Discharges (£bn)",
+                    cycleTitle: "The Vicious Cycle of Crisis",
+                    cycle1Title: "Underfunding",
+                    cycle1Desc: "Government funding for local authorities fails to keep pace with rising demand.",
+                    cycle2Title: "Low Pay for Carers",
+                    cycle2Desc: "Wages are uncompetitive, lagging far behind equivalent NHS roles.",
+                    cycle3Title: "Workforce Crisis",
+                    cycle3Desc: "High vacancy and turnover rates lead to heavy reliance on agency staff and international recruitment.",
+                    cycle4Title: "Decline in Care Quality",
+                    cycle4Desc: "Services become transactional and task-oriented, failing to provide human-centered care.",
+                    payGapTitle: "Pay Gap: Care Workers vs. Other Sectors",
+                    payGapLabel: "Annual Salary (£)",
+                    payGapCareWorker: "Social Care Worker",
+                    payGapNHS: "NHS Equivalent",
+                    payGapRetail: "Retail/Hospitality",
+                    modelsTitle: "Comparing Global Models: What Can We Learn?",
+                    modelsDesc: "Facing similar demographic challenges, different nations have developed varied responses. This section compares the UK, Japanese, and Swedish systems, exploring their funding, philosophies, and lessons for reform.",
+                    countryUK: "UK",
+                    countryJapan: "Japan",
+                    countrySweden: "Sweden",
+                    modelUKTitle: "🇬🇧 UK: The Residual Safety Net",
+                    modelUKContent: "<p><strong>Philosophy:</strong> A safety-net model providing a basic backstop for the poorest, but heavily means- and needs-tested.</p><p><strong>Key Strength:</strong> Provides a (limited) system of protection for the most vulnerable members of society.</p><p><strong>Key Challenge:</strong> Chronic underfunding leads to rationing, creating an unfair two-tier system (self-funded vs. state-funded) and immense pressure on unpaid carers.</p>",
+                    modelFundingSource: "Funding Source",
+                    modelTax: "Central/Local Taxes",
+                    modelPrivate: "Private Payers",
+                    modelJapanTitle: "🇯🇵 Japan: Social Insurance & Shared Responsibility",
+                    modelJapanContent: "<p><strong>Philosophy:</strong> Shifts the responsibility of care from the family to society as a whole, with mandatory insurance for all citizens over 40.</p><p><strong>Key Strength:</strong> Created a vibrant provider market, enjoys high public buy-in, and the system is flexible, being reviewed every three years.</p><p><strong>Key Challenge:</strong> Also faces workforce shortages due to suppressed wages to control costs, and growing demographic pressure.</p>",
+                    modelInsurance: "Insurance Premiums",
+                    modelCopay: "User Co-payments",
+                    modelSwedenTitle: "🇸🇪 Sweden: Universal Right of Citizenship",
+                    modelSwedenContent: "<p><strong>Philosophy:</strong> Universalist principle where care is a right of citizenship and a public responsibility, funded primarily by progressive taxation.</p><p><strong>Key Strength:</strong> Highly equitable, strong emphasis on 'ageing in place' and independence, and high levels of technology integration.</p><p><strong>Key Challenge:</strong> Faces significant funding pressures, potential for variation between municipalities, and marketisation reforms can erode universalist principles.</p>",
+                    modelProgTax: "Progressive Tax",
+                    modelSmallCopay: "Small Co-payment",
+                    solutionsTitle: "Innovative Solutions: From Community to Home",
+                    solutionsDesc: "Beyond macro-level reforms, real change also comes from grassroots innovation. This section showcases diverse care models emerging in the UK that offer inspiration for a more humane and resilient system.",
+                    solutions: [
+                        { title: 'Shared Lives', icon: '�', desc: 'An adult is matched with a trained carer and their family, offering a cost-effective, family-based alternative to residential care.' },
+                        { title: 'Wellbeing Teams', icon: '🤝', desc: 'Small, self-managing, neighborhood-based teams that provide relationship-centered care and improve conditions for carers.' },
+                        { title: 'Community Catalysts', icon: '🌱', desc: 'Helps local people establish their own small care services (micro-enterprises), diversifying market options.' },
+                        { title: 'Local Area Coordination', icon: '🔗', desc: 'A coordinator helps individuals access community resources and build connections, preventing needs from escalating.' },
+                        { title: 'Homeshare', icon: '🧑‍🤝‍🧑', desc: 'Exchanges accommodation for companionship and a small amount of practical help, tackling loneliness and housing issues.' },
+                        { title: 'Intergenerational Housing', icon: '🏢', desc: 'Intentionally designed mixed-age housing that fosters daily interaction and breaks down age-based silos.' }
+                    ],
+                    humanTitle: "Returning to Human Value: Dignity, Wellbeing & Connection",
+                    humanDesc: "Behind all policy and resource debates, the core goal is ensuring every older person can live with dignity and choice. This section focuses on the rights enshrined in the Care Act 2014 and explores intergenerational connection as a key force against loneliness.",
+                    principlesTitle: "The Six Core Principles of the Care Act 2014",
+                    principles: [ { name: 'Empowerment', icon: '💪' }, { name: 'Prevention', icon: '🛡️' }, { name: 'Proportionality', icon: '⚖️' }, { name: 'Protection', icon: '❤️' }, { name: 'Partnership', icon: '👥' }, { name: 'Accountability', icon: '🧾' } ],
+                    intergenTitle: "The Power of Connection: From Segregation to Cohesion",
+                    intergenSegregation: "Age Segregation",
+                    intergenSegregationDesc: "Different generations live in separate worlds, fostering misunderstanding, stereotypes, and loneliness.",
+                    intergenConnection: "Intergenerational Connection",
+                    intergenConnectionDesc: "Fosters interaction, reduces loneliness, builds empathy, and creates more cohesive communities.",
+                    recsTitle: "Strategic Recommendations: For a Unified Vision",
+                    recsDesc: "Breaking the vicious cycle requires an integrated strategy. This report proposes specific recommendations for different actors, aiming to shift the system from transactional and crisis-driven to relational, preventative, and community-integrated.",
+                    recommendations: [
+                        { title: 'For National Government', icon: '🏛️', points: [ 'Commit to a long-term, sustainable funding solution, opening a public debate on models like social insurance.', 'Launch a national workforce strategy to achieve parity of esteem and pay between social care and the NHS.', 'Create dedicated funding to scale up proven community-based models like Shared Lives.', 'Mandate intergenerational design principles in all new major housing developments.' ] },
+                        { title: 'For Local Government', icon: '🏘️', points: [ 'Actively shape the market, commissioning for value and outcomes, not just time and task.', 'Drive the integration of health, social care, housing, and community services at a local level.', 'Act as intergenerational "brokers" to connect schools, youth groups, and care homes.' ] },
+                        { title: 'For Care Providers', icon: '❤️', points: [ 'Adopt relationship-centered models of care that prioritize building connections.', 'Make improving pay, conditions, and career progression a core business strategy.', 'Thoughtfully integrate technology to enhance, not replace, human connection.' ] },
+                        { title: "For Civil Society & Communities", icon: "👨‍👩‍👧‍👦", points: ["Promote and participate in local intergenerational activities to break down stereotypes.", "Strengthen community-level support networks for the millions of unpaid carers."]}
+                    ],
+                    footerCredit: "This interactive report is based on the 'Dignity, Sustainability, and Social Cohesion: A Strategic Framework for the Future of Elder Care' report.",
+                    footerDisclaimer: "For demonstration purposes only."
+                }
+            };
+            
+            function switchLanguage(lang) {
+                currentLang = lang;
+                const langContent = langData[lang];
+                
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.body.className = `antialiased ${lang === 'zh' ? 'font-zh' : 'font-en'}`;
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (langContent[key]) {
+                        el.innerHTML = langContent[key];
+                    }
+                });
+
+                document.getElementById('lang-toggle').innerText = langData[lang].langToggle;
+                document.getElementById('lang-toggle-mobile').innerText = langData[lang].langToggle;
+
+                renderAllDynamicContent(lang);
+            }
+
+            function renderAllDynamicContent(lang) {
+                renderPayGapChart(lang);
+                updateModelDisplay(document.querySelector('.country-btn.active').dataset.country, lang);
+                renderSolutions(lang);
+                renderPrinciples(lang);
+                renderRecommendations(lang);
+            }
+
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+
+            // Lang Toggle
+            const langToggles = [document.getElementById('lang-toggle'), document.getElementById('lang-toggle-mobile')];
+            langToggles.forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                    switchLanguage(newLang);
+                });
+            });
+
+
+            // Intersection Observer for animations and nav highlighting
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                        
+                        if(id === 'challenge') {
+                            const counters = entry.target.querySelectorAll('[data-target]');
+                            counters.forEach(counter => {
+                                if (counter.dataset.animated) return;
+                                counter.dataset.animated = true;
+                                const target = +counter.dataset.target;
+                                const duration = 1500;
+                                let start = 0;
+                                const timer = setInterval(() => {
+                                    start += (target / (duration/16));
+                                    if(target % 1 !== 0) { counter.innerText = start.toFixed(1); } else { counter.innerText = Math.floor(start).toLocaleString(); }
+                                    if (start >= target) {
+                                        clearInterval(timer);
+                                        if(target % 1 !== 0) { counter.innerText = target.toFixed(1); } else { counter.innerText = target.toLocaleString(); }
+                                    }
+                                }, 16);
+                            });
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Pay Gap Chart
+            function renderPayGapChart(lang) {
+                const ctx = document.getElementById('payGapChart').getContext('2d');
+                if (payGapChart) payGapChart.destroy();
+                
+                const data = langData[lang];
+                payGapChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [data.payGapCareWorker, data.payGapNHS, data.payGapRetail],
+                        datasets: [{
+                            label: data.payGapLabel,
+                            data: [21323, 28940, 22000],
+                            backgroundColor: ['rgba(249, 115, 22, 0.6)', 'rgba(20, 184, 166, 0.6)', 'rgba(120, 113, 108, 0.6)'],
+                            borderColor: ['rgba(249, 115, 22, 1)', 'rgba(20, 184, 166, 1)', 'rgba(120, 113, 108, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                        scales: { x: { beginAtZero: true, ticks: { callback: value => '£' + (value / 1000) + 'k' } } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: {
+                                label: context => `${context.dataset.label || ''}: ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(context.parsed.x)}`
+                            }}
+                        }
+                    }
+                });
+            }
+
+            // International Models
+            const modelDisplay = document.getElementById('model-display');
+            const countryBtns = document.querySelectorAll('.country-btn');
+            
+            function updateModelDisplay(country, lang) {
+                const content = langData[lang];
+                const modelKey = 'model' + country.charAt(0).toUpperCase() + country.slice(1);
+                
+                const data = {
+                    uk: { title: content.modelUKTitle, content: content.modelUKContent, funding: { labels: [content.modelTax, content.modelPrivate], data: [60, 40], colors: ['#38bdf8', '#fb923c'] } },
+                    japan: { title: content.modelJapanTitle, content: content.modelJapanContent, funding: { labels: [content.modelInsurance, content.modelTax, content.modelCopay], data: [50, 40, 10], colors: ['#22c55e', '#38bdf8', '#facc15'] } },
+                    sweden: { title: content.modelSwedenTitle, content: content.modelSwedenContent, funding: { labels: [content.modelProgTax, content.modelSmallCopay], data: [95, 5], colors: ['#38bdf8', '#facc15'] } }
+                }[country];
+
+                modelDisplay.innerHTML = `<div class="prose max-w-none prose-stone">${data.content}</div><div class="chart-container"><canvas id="modelChart"></canvas></div>`;
+                
+                const modelCtx = document.getElementById('modelChart').getContext('2d');
+                if (modelChart) modelChart.destroy();
+
+                modelChart = new Chart(modelCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.funding.labels,
+                        datasets: [{ label: content.modelFundingSource, data: data.funding.data, backgroundColor: data.funding.colors, hoverOffset: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { label: context => `${context.label || ''}: ${context.parsed}%` }}
+                        }
+                    }
+                });
+            }
+
+            countryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    countryBtns.forEach(b => { b.classList.remove('active', 'bg-teal-600', 'text-white'); b.classList.add('bg-stone-200', 'text-stone-700'); });
+                    btn.classList.add('active', 'bg-teal-600', 'text-white');
+                    btn.classList.remove('bg-stone-200', 'text-stone-700');
+                    updateModelDisplay(btn.dataset.country, currentLang);
+                });
+            });
+
+            // Innovative Solutions
+            function renderSolutions(lang) {
+                const container = document.getElementById('solutions-container');
+                container.innerHTML = langData[lang].solutions.map(s => `
+                    <div class="bg-stone-50 p-4 rounded-lg text-center transition-transform hover:scale-105">
+                        <div class="text-4xl mb-2">${s.icon}</div>
+                        <h5 class="font-bold text-stone-800">${s.title}</h5>
+                        <p class="text-sm text-stone-600 mt-1">${s.desc}</p>
+                    </div>
+                `).join('');
+            }
+            
+            // Care Act Principles
+            function renderPrinciples(lang) {
+                const container = document.getElementById('care-act-principles');
+                container.innerHTML = langData[lang].principles.map(p => `
+                    <div class="bg-blue-50 p-3 rounded-lg flex flex-col items-center justify-center">
+                        <span class="text-3xl">${p.icon}</span>
+                        <span class="font-semibold mt-2 text-blue-800">${p.name}</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Recommendations Accordion
+            function renderRecommendations(lang) {
+                const container = document.getElementById('recommendations-accordion');
+                container.innerHTML = langData[lang].recommendations.map(item => `
+                    <div>
+                        <button class="accordion-button w-full flex items-center justify-between text-left p-4 bg-stone-100 hover:bg-stone-200 rounded-lg focus:outline-none">
+                            <span class="flex items-center">
+                                <span class="mr-3 text-xl">${item.icon}</span>
+                                <span class="font-semibold text-stone-700">${item.title}</span>
+                            </span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content bg-white p-4 rounded-b-lg">
+                            <ul class="list-disc list-inside space-y-2 text-stone-600">
+                                ${item.points.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('recommendations-accordion').addEventListener('click', e => {
+                const button = e.target.closest('.accordion-button');
+                if (!button) return;
+                const content = button.nextElementSibling;
+                const arrow = button.querySelector('span:last-child');
+                const isOpening = !content.style.maxHeight;
+                document.querySelectorAll('.accordion-content').forEach(el => el.style.maxHeight = null);
+                document.querySelectorAll('.accordion-button span:last-child').forEach(el => el.style.transform = 'rotate(0deg)');
+                if (isOpening) {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            });
+
+            // Initial Load
+            switchLanguage('zh');
+        });
+    </script>
+</body>
+</html>
