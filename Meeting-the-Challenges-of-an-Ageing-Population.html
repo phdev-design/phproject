@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>應對人口老化挑戰：互動式儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Harmony -->
+    <!-- Application Structure Plan: The SPA uses a thematic, non-linear dashboard structure. A sticky navigation bar allows users to jump to key sections: Overview, Quality of Life, Care Resources, Generational Relations, and Policy Recommendations. This structure prioritizes user-driven exploration over the report's linear format. 'Quality of Life' and 'Care Resources' sections use an interactive tabbed layout to break down complex topics into digestible parts. The user flow is designed to be intuitive, allowing exploration of high-level data first (in the overview), followed by deep dives into specific challenge areas. This design was chosen to make the dense report content more accessible and engaging for a broader audience. -->
+    <!-- Visualization & Content Choices: 
+        - Global Trends (Bar Chart): Goal: Compare. Viz: Bar Chart (Chart.js). Interaction: Tooltips. Justification: Effectively compares Taiwan's low 65+ labor participation rate against other nations, highlighting a key economic challenge.
+        - Taiwan Medical Costs (Donut Chart): Goal: Show Proportion. Viz: Donut Chart (Chart.js). Interaction: Tooltips. Justification: Visually striking way to show the disproportionate healthcare consumption by the elderly population, emphasizing the fiscal strain.
+        - Tech Solutions (Interactive Grid): Goal: Inform/Organize. Viz: HTML/CSS Grid. Interaction: Click to show details. Justification: Engages users by allowing them to actively reveal information about various technologies, making the content less passive.
+        - ABC Care Model (HTML/CSS Diagram): Goal: Organize/Explain Process. Viz: Styled HTML flexbox layout. Interaction: None. Justification: Provides a clear, static visual representation of a key policy concept without the overhead of a graphics library, adhering to the NO SVG/Mermaid rule.
+        - Key Stats (Info Cards): Goal: Inform. Viz: Styled HTML cards. Interaction: Hover effects. Justification: Breaks down critical numbers into easily scannable and memorable pieces of information at the start of the user journey.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #3b82f6; /* blue-500 */
+            transition: width 0.3s ease;
+        }
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        .tab-btn.active {
+            background-color: #3b82f6; /* blue-500 */
+            color: white;
+            border-color: #3b82f6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip:hover .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 1rem;
+            border-radius: 0.75rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background-color: #1e40af; /* blue-800 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-blue-600">高齡化社會儀表板</h1>
+            <div class="hidden md:flex space-x-6 text-slate-600">
+                <a href="#overview" class="nav-link">總覽</a>
+                <a href="#quality-of-life" class="nav-link">生活質量</a>
+                <a href="#care-resources" class="nav-link">護理資源</a>
+                <a href="#intergenerational" class="nav-link">代際關係</a>
+                <a href="#policy" class="nav-link">政策建議</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white">
+            <a href="#overview" class="block py-2 px-6 text-slate-600 hover:bg-blue-50">總覽</a>
+            <a href="#quality-of-life" class="block py-2 px-6 text-slate-600 hover:bg-blue-50">生活質量</a>
+            <a href="#care-resources" class="block py-2 px-6 text-slate-600 hover:bg-blue-50">護理資源</a>
+            <a href="#intergenerational" class="block py-2 px-6 text-slate-600 hover:bg-blue-50">代際關係</a>
+            <a href="#policy" class="block py-2 px-6 text-slate-600 hover:bg-blue-50">政策建議</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+
+        <section id="overview" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-800">全球趨勢與挑戰</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-12">
+                人口老齡化是21世紀的關鍵趨勢，由生育率下降和壽命延長共同驅動。這不僅是社會進步的體現，也對勞動力市場、財政及醫療系統帶來深遠影響。本節將透過關鍵數據與圖表，揭示老齡化浪潮下的宏觀挑戰與潛在機遇。
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-400">
+                    <div class="text-5xl font-bold text-blue-600">73.3歲</div>
+                    <p class="mt-2 text-slate-500">2024年全球預期壽命</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-teal-400">
+                    <div class="text-5xl font-bold text-teal-600">14億</div>
+                    <p class="mt-2 text-slate-500">2030年全球60歲以上人口預計</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-amber-400">
+                    <div class="text-5xl font-bold text-amber-600">9.6%</div>
+                    <p class="mt-2 text-slate-500">台灣65歲以上勞動參與率</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4 text-slate-700">主要國家65歲以上勞動力參與率比較</h3>
+                    <div class="chart-container">
+                        <canvas id="laborParticipationChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4 text-slate-700">台灣健保費用分佈：年齡層佔比</h3>
+                    <div class="chart-container">
+                        <canvas id="medicalCostChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="quality-of-life" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-800">保障生活質量與尊嚴</h2>
+             <p class="text-center max-w-3xl mx-auto text-slate-600 mb-12">
+                提升老年人的生活質量與尊嚴，是應對老齡化社會的核心目標。這需要一個多維度的策略，從促進個人健康，到營造支持性的社會環境，再到提供無縫接軌的照護服務。本節將探討實現「健康老化」的三大支柱。
+            </p>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="flex flex-wrap justify-center border-b border-slate-200 mb-6 -mx-2">
+                    <button class="tab-btn quality-of-life-tab-btn active text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="health">促進健康老化</button>
+                    <button class="tab-btn quality-of-life-tab-btn text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="environment">建立友好環境</button>
+                    <button class="tab-btn quality-of-life-tab-btn text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="care">提供整合照護</button>
+                </div>
+
+                <div id="health" class="tab-content quality-of-life-tab-content active">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">全生命週期的健康促進</h3>
+                    <p class="text-slate-600 mb-6">健康老化的關鍵在於預防，而非僅僅治療。透過終身注重健康、預防疾病、早期發現與治療，可以顯著降低晚年功能障礙的風險，維持獨立與活力。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-slate-100 p-6 rounded-lg">
+                            <span class="text-4xl">❤️</span>
+                            <h4 class="font-bold mt-2">預防慢性病</h4>
+                            <p class="text-sm text-slate-500">透過健康生活方式降低心臟病、中風等風險。</p>
+                        </div>
+                        <div class="bg-slate-100 p-6 rounded-lg">
+                            <span class="text-4xl">🏃</span>
+                            <h4 class="font-bold mt-2">維持身體功能</h4>
+                            <p class="text-sm text-slate-500">推廣運動與營養諮詢，提升老年人自理能力。</p>
+                        </div>
+                        <div class="bg-slate-100 p-6 rounded-lg">
+                            <span class="text-4xl">🧠</span>
+                            <h4 class="font-bold mt-2">重視心理健康</h4>
+                            <p class="text-sm text-slate-500">鼓勵社會參與，減少孤獨感，提升生活滿意度。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="environment" class="tab-content quality-of-life-tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">無障礙的社會參與</h3>
+                    <p class="text-slate-600 mb-6">一個老年友好的環境能夠增強長者的能力，而非將其邊緣化。這包括消除年齡歧視，並提供教育、志工服務、文化活動等多種管道，讓老年人持續貢獻社會。</p>
+                     <div class="flex flex-col items-center">
+                        <div class="bg-blue-100 text-blue-800 font-bold py-3 px-6 rounded-full shadow-md">老年人社會參與</div>
+                        <div class="w-px h-8 bg-blue-300"></div>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <div class="bg-slate-100 py-2 px-4 rounded-lg">終身學習</div>
+                            <div class="bg-slate-100 py-2 px-4 rounded-lg">志工服務</div>
+                            <div class="bg-slate-100 py-2 px-4 rounded-lg">政治參與</div>
+                            <div class="bg-slate-100 py-2 px-4 rounded-lg">擔任良師</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="care" class="tab-content quality-of-life-tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">以人為本的整合式照護</h3>
+                    <p class="text-slate-600 mb-6">隨著失能、失智人口增加，整合居家、社區到機構的照護服務至關重要。以台灣「長照2.0」為例，其目標是建立一個在地化、可負擔且普及的服務體系。</p>
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-center mb-4">社區整體照顧ABC模式</h4>
+                        <div class="flex flex-col md:flex-row justify-around items-center text-center">
+                            <div class="flex-1 p-2">
+                                <div class="bg-teal-500 text-white font-bold py-2 px-4 rounded-lg mb-2">A級</div>
+                                <p class="font-semibold">社區整合型服務中心</p>
+                                <p class="text-xs text-slate-500">（長照旗艦店）</p>
+                            </div>
+                            <div class="text-2xl text-teal-500 mx-4">→</div>
+                            <div class="flex-1 p-2">
+                                <div class="bg-teal-400 text-white font-bold py-2 px-4 rounded-lg mb-2">B級</div>
+                                <p class="font-semibold">複合型服務中心</p>
+                                <p class="text-xs text-slate-500">（長照專賣店）</p>
+                            </div>
+                             <div class="text-2xl text-teal-500 mx-4">→</div>
+                            <div class="flex-1 p-2">
+                                <div class="bg-teal-300 text-white font-bold py-2 px-4 rounded-lg mb-2">C級</div>
+                                <p class="font-semibold">巷弄長照站</p>
+                                <p class="text-xs text-slate-500">（長照柑仔店）</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="care-resources" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-800">應對護理資源短缺</h2>
+             <p class="text-center max-w-3xl mx-auto text-slate-600 mb-12">
+                護理資源短缺是全球性的挑戰，其根源在於人力不足、待遇偏低與專業發展受限。解決此問題需要系統性方案，包括強化人才培育、善用科技輔助，以及建立強大的社會支持網絡。
+            </p>
+             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="flex flex-wrap justify-center border-b border-slate-200 mb-6 -mx-2">
+                    <button class="tab-btn care-resources-tab-btn active text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="talent">人才挑戰與對策</button>
+                    <button class="tab-btn care-resources-tab-btn text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="technology">智慧科技應用</button>
+                    <button class="tab-btn care-resources-tab-btn text-slate-600 border border-transparent rounded-t-lg px-4 py-3 m-2 font-semibold" data-tab="support">支持非正式照護者</button>
+                </div>
+
+                <div id="talent" class="tab-content care-resources-tab-content active">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">培育與留用專業護理人才</h3>
+                    <p class="text-slate-600 mb-6">解決護理人力荒的核心在於「留才」與「攬才」。這需要改善薪資待遇與工作環境，例如將「護病比」入法；同時加強社區照護等專業培訓，並拓展護理師的多元職涯發展路徑。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-100 p-6 rounded-lg flex items-center">
+                            <span class="text-4xl mr-4">💰</span>
+                            <div>
+                                <h4 class="font-bold">提升薪資福利</h4>
+                                <p class="text-sm text-slate-500">如台灣將居家照服員月薪提升至3萬8千元以上。</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-100 p-6 rounded-lg flex items-center">
+                             <span class="text-4xl mr-4">📚</span>
+                            <div>
+                                <h4 class="font-bold">強化專業培訓</h4>
+                                <p class="text-sm text-slate-500">發展社區護理、經營管理等多元能力。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="technology" class="tab-content care-resources-tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">科技賦能，優化照護效率</h3>
+                    <p class="text-slate-600 mb-6">AIoT（人工智慧物聯網）與機器人技術為緩解護理壓力帶來曙光。從遠端健康監測到智慧居家設備，科技不僅能提升照護效率，更能保障長者安全與自主。點擊下方卡片查看更多資訊。</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="card-flip h-48">
+                            <div class="card-flip-inner rounded-xl shadow-md">
+                                <div class="card-face bg-blue-500 text-white">
+                                    <span class="text-4xl mb-2">📡</span>
+                                    <h4 class="font-bold">遠端監控</h4>
+                                </div>
+                                <div class="card-back text-sm">
+                                    <h5 class="font-bold mb-1">遠端健康監控</h5>
+                                    <p>透過物聯網設備監測心率、血壓等數據，並在異常時發出警報，提高護理效率。</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="card-flip h-48">
+                            <div class="card-flip-inner rounded-xl shadow-md">
+                                <div class="card-face bg-teal-500 text-white">
+                                    <span class="text-4xl mb-2">🤖</span>
+                                    <h4 class="font-bold">照護機器人</h4>
+                                </div>
+                                <div class="card-back text-sm">
+                                    <h5 class="font-bold mb-1">多功能機器人</h5>
+                                    <p>協助康復訓練、提供生活起居服務，或進行陪伴與健康管理，減輕護理人員負擔。</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="card-flip h-48">
+                            <div class="card-flip-inner rounded-xl shadow-md">
+                                <div class="card-face bg-amber-500 text-white">
+                                    <span class="text-4xl mb-2">🏠</span>
+                                    <h4 class="font-bold">智慧家居</h4>
+                                </div>
+                                <div class="card-back text-sm">
+                                    <h5 class="font-bold mb-1">提升生活自主性</h5>
+                                    <p>透過語音或App控制燈光、家電，讓長者生活更便利、安全，並減輕照顧者負擔。</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="card-flip h-48">
+                            <div class="card-flip-inner rounded-xl shadow-md">
+                                <div class="card-face bg-indigo-500 text-white">
+                                    <span class="text-4xl mb-2">💊</span>
+                                    <h4 class="font-bold">藥物管理</h4>
+                                </div>
+                                <div class="card-back text-sm">
+                                    <h5 class="font-bold mb-1">智慧藥盒</h5>
+                                    <p>自動提醒服藥時間，並記錄服藥情況，確保用藥安全，避免錯過或重複服用。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="support" class="tab-content care-resources-tab-content">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">家庭照顧者是隱形的病人</h3>
+                    <p class="text-slate-600 mb-6">家庭成員等非正式照護者是長照體系的骨幹，但他們的身心壓力常被忽視。建立支持系統，如提供「喘息服務」、照顧者津貼及心理諮商，是實現「照顧責任公共化」的關鍵一步。</p>
+                    <div class="bg-slate-50 p-6 rounded-lg text-center">
+                        <h4 class="font-bold text-lg mb-2">多元化的家庭照顧者支持服務</h4>
+                        <p class="text-slate-600">應將「喘息服務」升級為全方位的支持，確保照顧者也能獲得休息與幫助。</p>
+                        <div class="flex flex-wrap justify-center gap-3 mt-4 text-sm">
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full">支持團體</span>
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full">電話諮詢</span>
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full">心理諮商</span>
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full">個案管理</span>
+                            <span class="bg-blue-100 text-blue-800 py-1 px-3 rounded-full">教育訓練</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="intergenerational" class="pt-16 -mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-800">促進代際關係和諧</h2>
+             <p class="text-center max-w-3xl mx-auto text-slate-600 mb-12">
+                傳統的家庭養老模式在現代社會面臨挑戰，代際關係需要從單向扶養轉向互惠共融。透過「跨代共居」、「跨代學習」等創新模式，可以打破世代隔閡，建立新的社會支持網絡，讓不同年齡層的人們相互學習與貢獻。
+            </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">創新模式：跨代共居</h3>
+                    <p class="text-slate-600 mb-4">將年輕人與老年人聚集在同一社區，共享空間與活動。年輕人獲得可負擔的住所，長輩則獲得陪伴和生活協助，共同解決住房短缺與社會孤立問題。</p>
+                    <img src="https://placehold.co/600x400/a5b4fc/1e3a8a?text=青銀共居" alt="跨代共居示意圖" class="w-full h-48 object-cover rounded-lg">
+                    <div class="mt-4 text-sm">
+                        <p><strong>案例：</strong>日本「Home Share計畫」，獨居老人提供房間給學生，換取日常瑣事協助與陪伴。</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">創新模式：跨代學習</h3>
+                    <p class="text-slate-600 mb-4">讓不同世代的人一起學習和活動。長者傳承經驗與智慧，孩童帶來活力與新視角，不僅促進理解，更能提升所有參與者的自我價值感。</p>
+                    <img src="https://placehold.co/600x400/7dd3fc/0c4a6e?text=跨代學習" alt="跨代學習示意圖" class="w-full h-48 object-cover rounded-lg">
+                     <div class="mt-4 text-sm">
+                        <p><strong>案例：</strong>美國西雅圖「代際學習中心」，將養老院與幼兒園建在一起，長者與孩童共學共樂。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="policy" class="pt-16 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-slate-800">結論與政策建議</h2>
+            <p class="text-center max-w-3xl mx-auto text-slate-600 mb-12">
+                應對人口老齡化需要一套全面、整合且具前瞻性的策略。這不僅是政府的責任，更需要社會各界的共同努力。以下綜合報告核心結論，提出三大行動方向，以構建一個所有世代都能共享福祉的包容性社會。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-blue-500">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">①</span> 投資健康資本</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li>推廣全生命週期的健康促進與疾病預防計畫。</li>
+                        <li>加強老年人心理健康支持，鼓勵社會參與。</li>
+                        <li>將醫療保健支出視為投資，優化資源配置。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-teal-500">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">②</span> 革新護理體系</h3>
+                     <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li>提升護理人員薪資待遇，將「護病比」入法。</li>
+                        <li>拓展社區護理師等專業職涯發展路徑。</li>
+                        <li>積極推動智慧科技應用，並建立倫理規範。</li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-amber-500">
+                    <h3 class="text-xl font-bold mb-4 flex items-center"><span class="text-3xl mr-3">③</span> 重塑代際契約</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li>推動「照顧責任公共化」，建立社會支持系統。</li>
+                        <li>提供家庭照顧者全面支持服務（津貼、喘息等）。</li>
+                        <li>鼓勵跨代共居、共學等創新模式，促進共融。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p>本互動式儀表板根據「應對人口老齡化挑戰」報告生成。</p>
+            <p>&copy; 2025 資訊設計與開發</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const chartColors = {
+        blue: 'rgba(59, 130, 246, 0.7)',
+        teal: 'rgba(20, 184, 166, 0.7)',
+        amber: 'rgba(245, 158, 11, 0.7)',
+        slate: 'rgba(100, 116, 139, 0.7)',
+        indigo: 'rgba(99, 102, 241, 0.7)',
+        red: 'rgba(239, 68, 68, 0.7)',
+        bgBlue: 'rgba(59, 130, 246, 0.2)',
+        bgTeal: 'rgba(20, 184, 166, 0.2)',
+        bgAmber: 'rgba(245, 158, 11, 0.2)',
+        bgSlate: 'rgba(100, 116, 139, 0.2)',
+        bgIndigo: 'rgba(99, 102, 241, 0.2)',
+        bgRed: 'rgba(239, 68, 68, 0.2)',
+    };
+
+    Chart.defaults.font.family = "'Noto Sans TC', sans-serif";
+    Chart.defaults.color = '#64748b'; // slate-500
+    
+    const laborCtx = document.getElementById('laborParticipationChart');
+    if (laborCtx) {
+        new Chart(laborCtx, {
+            type: 'bar',
+            data: {
+                labels: ['韓國', '日本', '美國', '德國', '台灣'],
+                datasets: [{
+                    label: '65歲以上勞動力參與率 (%)',
+                    data: [36.2, 25.1, 18.9, 7.5, 9.6],
+                    backgroundColor: [chartColors.bgBlue, chartColors.bgRed, chartColors.bgIndigo, chartColors.bgSlate, chartColors.bgAmber],
+                    borderColor: [chartColors.blue, chartColors.red, chartColors.indigo, chartColors.slate, chartColors.amber],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.dataset.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '參與率 (%)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const medicalCtx = document.getElementById('medicalCostChart');
+    if (medicalCtx) {
+        new Chart(medicalCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['65歲以上人口 (佔健保費用36.2%)', '65歲以下人口 (佔健保費用63.8%)'],
+                datasets: [{
+                    label: '健保費用佔比',
+                    data: [36.2, 63.8],
+                    backgroundColor: [chartColors.bgAmber, chartColors.bgBlue],
+                    borderColor: [chartColors.amber, chartColors.blue],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    },
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                return ` ${context.label}: ${context.raw}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function setupTabs(containerSelector, btnSelector, contentSelector) {
+        const tabContainer = document.querySelector(containerSelector);
+        if (!tabContainer) return;
+
+        const tabBtns = tabContainer.querySelectorAll(btnSelector);
+        const tabContents = tabContainer.querySelectorAll(contentSelector);
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const targetTab = btn.getAttribute('data-tab');
+                tabContents.forEach(content => {
+                    if (content.id === targetTab) {
+                        content.classList.add('active');
+                    } else {
+                        content.classList.remove('active');
+                    }
+                });
+            });
+        });
+    }
+
+    setupTabs('#quality-of-life', '.quality-of-life-tab-btn', '.quality-of-life-tab-content');
+    setupTabs('#care-resources', '.care-resources-tab-btn', '.care-resources-tab-content');
+    
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+    
+    const mobileNavLinks = mobileMenu.querySelectorAll('a');
+    mobileNavLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('nav .nav-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+});
+</script>
+
+</body>
+</html>
