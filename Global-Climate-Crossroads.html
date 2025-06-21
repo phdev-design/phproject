@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球氣候十字路口：互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA uses a top-down, thematic dashboard structure with a sticky navigation bar for non-linear exploration. It begins with the most critical finding (the ambition gap), then allows users to compare the four major emitters side-by-side. It subsequently delves into the key economic mechanisms (ETS & CBAM) using interactive diagrams and charts. The final sections address forward-looking challenges like finance and just transition. This structure was chosen to transform the dense report into an intuitive, story-driven experience, guiding the user from the core problem to comparative analysis, key mechanisms, and finally, future solutions, enhancing usability and comprehension over a linear text format. -->
+    <!-- Visualization & Content Choices: 
+        - Ambition Gap: Goal: Inform. Method: Gauge-like donut chart and KPI cards to starkly visualize the gap between the 1.5°C goal and reality. Interaction: Hover tooltips. Justification: Immediately grabs user attention with the core problem. Library: Chart.js.
+        - Major Emitters: Goal: Compare. Method: A tabbed interface with standardized cards (donut charts for energy mix, stat cards for goals). Interaction: Clicking tabs reveals country-specific data. Justification: Facilitates direct, apples-to-apples comparison which is difficult in a text format. Library: Chart.js.
+        - ETS Comparison: Goal: Compare. Method: A simple bar chart showing the dramatic price difference between EU and China ETS. Interaction: Buttons to toggle context text. Justification: The price difference is the key story, best told visually. Library: Chart.js.
+        - CBAM Impact: Goal: Organize & Inform. Method: An interactive diagram made of HTML/CSS divs instead of a static table or map. Interaction: Clicking a region reveals its specific impact and response. Justification: More engaging and less overwhelming than a dense table. Library: Vanilla JS.
+        - Finance Gap: Goal: Inform. Method: A stacked bar chart showing the massive disparity between pledged and needed funds. Interaction: None. Justification: The scale difference is self-explanatory and impactful. Library: Chart.js.
+        - Just Transition: Goal: Inform. Method: Interactive cards for case studies. Interaction: Clicking a card shows details. Justification: Organizes qualitative information neatly. Library: Vanilla JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f8f7f4;
+            color: #044343;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E49B5A;
+            border-bottom-color: #E49B5A;
+        }
+        .country-tab.active {
+            background-color: #5C8374;
+            color: #f8f7f4;
+        }
+        .country-tab {
+            transition: all 0.3s ease;
+        }
+        .cbam-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .cbam-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 id="header-title" class="text-xl font-bold text-[#044343]"></h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#gap" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-translate="nav_gap"></a>
+                            <a href="#powers" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-translate="nav_powers"></a>
+                            <a href="#levers" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-translate="nav_levers"></a>
+                            <a href="#future" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-translate="nav_future"></a>
+                        </div>
+                    </div>
+                    <button id="lang-switcher" class="ml-4 px-3 py-1.5 rounded-md text-sm font-medium bg-gray-200 text-[#044343] hover:bg-gray-300 transition-colors">English</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <section id="gap" class="text-center mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold mb-4 text-[#044343]" data-translate="gap_title"></h2>
+            <p class="max-w-3xl mx-auto mb-10 text-gray-600" data-translate="gap_intro"></p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-semibold mb-2" data-translate="gap_card1_title"></h3>
+                    <div class="chart-container h-48 sm:h-56">
+                        <canvas id="warmingTrajectoryChart"></canvas>
+                    </div>
+                    <p id="gap_card1_text" class="mt-4 text-sm text-gray-500"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-semibold mb-2" data-translate="gap_card2_title"></h3>
+                     <p class="text-6xl font-bold text-[#E49B5A] my-4">42%</p>
+                    <p class="text-sm text-gray-500" data-translate="gap_card2_text"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col items-center justify-center">
+                    <h3 class="text-lg font-semibold mb-2" data-translate="gap_card3_title"></h3>
+                     <p class="text-6xl font-bold text-[#044343] my-4" data-translate="gap_card3_value"></p>
+                    <p class="text-sm text-gray-500" data-translate="gap_card3_text"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="powers" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-[#044343]" data-translate="powers_title"></h2>
+            <p class="max-w-3xl mx-auto text-center mb-10 text-gray-600" data-translate="powers_intro"></p>
+            
+            <div class="mb-6 flex justify-center space-x-2 sm:space-x-4 border-b-2 border-gray-200">
+                <button data-country="eu" class="country-tab px-3 py-2 sm:px-6 sm:py-3 font-semibold rounded-t-lg active" data-translate="tab_eu"></button>
+                <button data-country="us" class="country-tab px-3 py-2 sm:px-6 sm:py-3 font-semibold rounded-t-lg" data-translate="tab_us"></button>
+                <button data-country="cn" class="country-tab px-3 py-2 sm:px-6 sm:py-3 font-semibold rounded-t-lg" data-translate="tab_cn"></button>
+                <button data-country="in" class="country-tab px-3 py-2 sm:px-6 sm:py-3 font-semibold rounded-t-lg" data-translate="tab_in"></button>
+            </div>
+
+            <div id="country-details" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg transition-all duration-500"></div>
+        </section>
+
+        <section id="levers" class="mb-20 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-[#044343]" data-translate="levers_title"></h2>
+            <p class="max-w-3xl mx-auto text-center mb-10 text-gray-600" data-translate="levers_intro"></p>
+            <div class="grid lg:grid-cols-2 gap-12">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4" data-translate="levers_ets_title"></h3>
+                    <p class="text-center text-sm text-gray-500 mb-6" data-translate="levers_ets_intro"></p>
+                    <div class="chart-container h-64 sm:h-80 max-w-lg">
+                        <canvas id="etsComparisonChart"></canvas>
+                    </div>
+                    <div id="ets-info" class="mt-6 p-4 bg-gray-50 rounded-lg text-sm"></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4" data-translate="levers_cbam_title"></h3>
+                    <p class="text-center text-sm text-gray-500 mb-6" data-translate="levers_cbam_intro"></p>
+                    <div class="relative flex flex-col items-center justify-center min-h-[360px]">
+                        <div id="cbam-center" class="absolute bg-[#5C8374] text-white p-4 rounded-full w-32 h-32 flex items-center justify-center text-center font-bold"></div>
+                        <div data-cbam="af" class="cbam-node absolute bg-white shadow-md p-3 rounded-lg border border-gray-200" style="top: 0; left: 50%; transform: translateX(-50%) translateY(-20px);" data-translate="cbam_af"></div>
+                        <div data-cbam="in" class="cbam-node absolute bg-white shadow-md p-3 rounded-lg border border-gray-200" style="top: 50%; right: 0; transform: translateX(20px) translateY(-50%);" data-translate="cbam_in"></div>
+                        <div data-cbam="cn" class="cbam-node absolute bg-white shadow-md p-3 rounded-lg border border-gray-200" style="bottom: 0; left: 50%; transform: translateX(-50%) translateY(20px);" data-translate="cbam_cn"></div>
+                        <div data-cbam="vn" class="cbam-node absolute bg-white shadow-md p-3 rounded-lg border border-gray-200" style="top: 50%; left: 0; transform: translateX(-20px) translateY(-50%);" data-translate="cbam_vn"></div>
+                        <div data-cbam="gb" class="cbam-node absolute bg-white shadow-md p-3 rounded-lg border border-gray-200" style="top: 20%; right: 10%; transform: translateX(10px) translateY(-10px);" data-translate="cbam_gb"></div>
+                    </div>
+                    <div id="cbam-info" class="mt-6 p-4 bg-gray-50 rounded-lg text-sm min-h-[100px]"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-center mb-4 text-[#044343]" data-translate="future_title"></h2>
+            <p class="max-w-3xl mx-auto text-center mb-10 text-gray-600" data-translate="future_intro"></p>
+            <div class="grid lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-4" data-translate="future_finance_title"></h3>
+                    <p class="text-sm text-gray-500 mb-6" data-translate="future_finance_intro"></p>
+                    <div class="chart-container h-80 max-w-2xl">
+                        <canvas id="financeGapChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                     <h3 class="text-xl font-bold mb-4" data-translate="future_just_title"></h3>
+                     <p class="text-sm text-gray-500 mb-6" data-translate="future_just_intro"></p>
+                     <ul id="just-transition-list" class="space-y-3 text-sm"></ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-white mt-20">
+        <div class="container mx-auto px-8 py-4 text-center text-gray-500 text-sm">
+            <p data-translate="footer_text"></p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const translations = {
+                'zh-Hant': {
+                    page_title: '全球氣候十字路口：互動式分析報告',
+                    header_title: '全球氣候十字路口',
+                    lang_switcher: 'English',
+                    nav_gap: '承諾 v.s. 現實',
+                    nav_powers: '主要國家策略',
+                    nav_levers: '經濟槓桿',
+                    nav_future: '邁向未來',
+                    gap_title: '承諾與現實的鴻溝',
+                    gap_intro: '全球氣候行動的核心矛盾在於各國的集體承諾與科學要求的減排路徑之間存在巨大鴻溝。本節將量化此差距，並展示實現《巴黎協定》目標的緊迫性。',
+                    gap_card1_title: '全球升溫預測路徑',
+                    gap_card1_text: '當前政策將導致全球升溫 <strong class="text-[#E49B5A]">2.6°C 至 3.1°C</strong>，遠超《巴黎協定》的 <strong class="text-[#5C8374]">1.5°C</strong> 目標。',
+                    gap_card2_title: '2030年減排目標差距',
+                    gap_card2_text: '為達1.5°C目標，2030年前全球溫室氣體排放量需較2019年削減42%。',
+                    gap_card3_title: '年排放量趨勢',
+                    gap_card3_value: '571億噸',
+                    gap_card3_text: '2023年全球溫室氣體排放再創新高，達到571億噸二氧化碳當量，與所需減排路徑背道而馳。',
+                    powers_title: '主要國家的策略分野',
+                    powers_intro: '全球四大排放經濟體正沿著不同路徑應對氣候變遷，形成了多元甚至相互競爭的氣候經濟模型。點擊下方頁籤，探索各國的承諾、政策與挑戰。',
+                    tab_eu: '歐盟',
+                    tab_us: '美國',
+                    tab_cn: '中國',
+                    tab_in: '印度',
+                    levers_title: '重塑全球貿易的經濟槓桿',
+                    levers_intro: '碳定價機制，特別是碳市場和邊境調整機制，正成為推動氣候行動和影響國際貿易的關鍵工具。本節剖析其運作模式與全球影響。',
+                    levers_ets_title: '碳市場比較：歐盟 vs. 中國',
+                    levers_ets_intro: '兩大碳市場在設計理念與價格信號上存在巨大差異，反映了其背後不同的政策目標。',
+                    levers_cbam_title: 'CBAM 的全球漣漪',
+                    levers_cbam_intro: '歐盟的碳邊境調整機制(CBAM)正迫使全球貿易夥伴應對，點擊節點查看各國的反應與影響。',
+                    cbam_center: '歐盟 CBAM',
+                    cbam_af: '非洲',
+                    cbam_in: '印度',
+                    cbam_cn: '中國',
+                    cbam_vn: '越南',
+                    cbam_gb: '英國',
+                    cbam_info_default: '點擊一個國家/地區查看詳細資訊。',
+                    future_title: '邁向公正與可行的未來',
+                    future_intro: '實現全球氣候目標不僅需要技術和政策，更依賴於充足的資金支持和確保社會公平的「公正轉型」。這兩者是氣候政策能否持續推行的關鍵瓶頸。',
+                    future_finance_title: '氣候金融的巨大缺口',
+                    future_finance_intro: '已開發國家承諾的資金遠未達到所需規模，且資金的獲取機制複雜，加劇了開發中國家的不信任感。',
+                    future_just_title: '公正轉型的挑戰',
+                    future_just_intro: '在淘汰化石燃料的過程中，若無全面且資金充足的轉型支持計畫，任何激進的氣候政策都可能因巨大的社會經濟衝擊而遭遇強烈政治阻力。',
+                    just_transition_item1: '<strong class="text-[#044343]">煤炭依賴地區：</strong>中國、印度、南非等地面臨巨大的就業和經濟轉型壓力。',
+                    just_transition_item2: '<strong class="text-[#044343]">社會對話：</strong>必須確保受影響的工人和社區在決策過程中有意義地參與。',
+                    just_transition_item3: '<strong class="text-[#044343]">資金與政策：</strong>需要設立專項資金，並將公正轉型原則融入所有氣候政策的核心。',
+                    just_transition_item4: '<strong class="text-[#044343]">政治可行性：</strong>一項被認為不公正的政策，最終在政治上是不可持續的。',
+                    footer_text: '本互動式報告根據《全球氣候十字路口：國家承諾、經濟機制與可行轉型路徑之分析》報告內容製作。',
+                    country_details: {
+                        card_title: '關鍵承諾與政策',
+                        energy_title: '能源結構 (發電)',
+                        labels: {
+                            net_zero: '淨零目標',
+                            ndc_2030: '2030 NDC',
+                            policy: '主要政策',
+                            fossil: '化石燃料',
+                            renewables: '再生能源',
+                            other: '其他'
+                        }
+                    },
+                    countryData: {
+                        eu: { name: '歐盟', model: '監管先鋒模型', description: '歐盟在全球氣候治理中扮演領導者角色，其政策框架全面且具法律約束力。透過「歐洲綠色政綱」和 EU ETS，以法規和市場機制驅動系統性轉型。', stats: [ { label: 'net_zero', value: '2050年 (法律約束)' }, { label: 'ndc_2030', value: '較1990年減排55%' }, { label: 'policy', value: '歐洲綠色政綱, CBAM' } ], challenge: '<strong>挑戰：</strong>政治碎片化、執行落差以及日益加劇的氣候適應壓力，正侵蝕其領導地位。', energy: { renewables: 41, fossil: 39, other: 20 } },
+                        us: { name: '美國', model: '激勵驅動型產業政策模型', description: '美國的氣候政策呈現「鐘擺效應」，深受政治週期影響。當前的《降低通膨法案》(IRA) 主要透過大規模補貼來激勵清潔能源發展，而非強制性規定。', stats: [ { label: 'net_zero', value: '2050年 (政策立場)' }, { label: 'ndc_2030', value: '較2005年減排50-52%' }, { label: 'policy', value: '降低通膨法案 (IRA)' } ], challenge: '<strong>挑戰：</strong>極端的政治易變性是最大風險。若政府更迭，現有氣候政策可能被推翻，嚴重破壞國際信任。', energy: { renewables: 18, fossil: 81, other: 1 } },
+                        cn: { name: '中國', model: '國家主導的戰略性供應鏈模型', description: '中國既是全球最大排放國，也是清潔能源技術的絕對領導者。其政策旨在控制全球綠色技術供應鏈，同時利用煤炭作為保障能源安全的戰略緩衝。', stats: [ { label: 'net_zero', value: '2060年 (承諾)' }, { label: 'ndc_2030', value: '2030年前碳達峰' }, { label: 'policy', value: '全國碳市場, 新三樣產業' } ], challenge: '<strong>挑戰：</strong>「煤炭悖論」是核心矛盾。為保能源安全仍在新建燃煤電廠，造成巨大的碳鎖定風險。', energy: { renewables: 30, fossil: 68, other: 2 } },
+                        in: { name: '印度', model: '發展優先的轉型模型', description: '印度代表了開發中大國的典型困境：如何在滿足發展需求、保障能源安全的同時履行氣候承諾。氣候行動被置於能源安全和減貧的框架內考量。', stats: [ { label: 'net_zero', value: '2070年 (承諾)' }, { label: 'ndc_2030', value: 'GDP排放強度降低45%' }, { label: 'policy', value: '國家氣候變遷行動計畫' } ], challenge: '<strong>挑戰：</strong>對煤炭的極度依賴（佔發電77%）是最大障礙。出於能源安全考量，仍在增加煤炭產量。', energy: { renewables: 22, fossil: 77, other: 1 } }
+                    },
+                    cbamData: {
+                        af: { title: '非洲', text: '<strong>預計影響：</strong>受影響最嚴重的地區，GDP可能減少高達0.5%。被視為不公平的經濟負擔。' },
+                        in: { title: '印度', text: '<strong>應對：</strong>認為CBAM是歧視性貿易壁壘，計畫在WTO提出挑戰，拒絕歐盟提高國內碳稅的建議。' },
+                        cn: { title: '中國', text: '<strong>應對：</strong>視CBAM為保護主義，並擴大其全國碳市場以覆蓋相關行業作為戰略應對。' },
+                        vn: { title: '越南', text: '<strong>預計影響：</strong>GDP損失約0.6%，約1萬個工作崗位面臨風險。<strong>應對：</strong>計畫啟動試點ETS。' },
+                        gb: { title: '英國', text: '<strong>應對：</strong>將於2027年推出自己的CBAM，模式與歐盟類似，顯示出政策擴散效應。' },
+                    },
+                    etsInfoData: {
+                        eu: '<strong>歐盟ETS：</strong>採用絕對總量上限，價格高且波動大，旨在透過市場發現成本效益最高的減排路徑。主要挑戰是碳洩漏風險（由CBAM應對）。',
+                        cn: '<strong>中國ETS：</strong>採用基於強度的目標，碳價低且穩定。主要目標是提升產業能效，而非驅動絕對減排。面臨數據質量和市場活躍度不足的挑戰。'
+                    },
+                    charts: {
+                        warming: { labels: ['目標', '危險路徑', '剩餘'] },
+                        ets: { label: '平均碳價 (€/噸, 約)', x_axis: '價格 (€/噸)', labels: ['歐盟 ETS', '中國 ETS'] },
+                        finance: { title: '年度承諾 vs. 實際需求 (單位：十億美元)', y_axis: '資金 (十億美元，對數尺度)', dataset1: '年度承諾目標', dataset2: '年度實際需求 (估算下限)', tooltip_trillion: '兆美元', tooltip_billion: '十億美元' }
+                    }
+                },
+                'en': {
+                    page_title: 'Global Climate Crossroads: Interactive Analysis Report',
+                    header_title: 'Global Climate Crossroads',
+                    lang_switcher: '中文',
+                    nav_gap: 'Pledge vs. Reality',
+                    nav_powers: 'Major Power Strategies',
+                    nav_levers: 'Economic Levers',
+                    nav_future: 'The Path Forward',
+                    gap_title: 'The Chasm Between Pledges and Reality',
+                    gap_intro: 'The core paradox of global climate action is the vast chasm between countries\' collective pledges and the emissions reduction pathway required by science. This section quantifies this gap and demonstrates the urgency of achieving the Paris Agreement goals.',
+                    gap_card1_title: 'Global Warming Trajectory',
+                    gap_card1_text: 'Current policies will lead to <strong class="text-[#E49B5A]">2.6°C to 3.1°C</strong> of global warming, far exceeding the <strong class="text-[#5C8374]">1.5°C</strong> Paris Agreement target.',
+                    gap_card2_title: '2030 Emissions Reduction Gap',
+                    gap_card2_text: 'To meet the 1.5°C target, global greenhouse gas emissions must be cut by 42% from 2019 levels by 2030.',
+                    gap_card3_title: 'Annual Emissions Trend',
+                    gap_card3_value: '57.1 GtCO₂e',
+                    gap_card3_text: 'Global GHG emissions hit a new high of 57.1 GtCO₂e in 2023, moving in the opposite direction of the required reduction path.',
+                    powers_title: 'Divergent Strategies of Major Powers',
+                    powers_intro: 'The world\'s four largest emitting economies are tackling climate change on different paths, creating diverse and sometimes competing climate-economic models. Click the tabs below to explore each country\'s commitments, policies, and challenges.',
+                    tab_eu: 'EU',
+                    tab_us: 'USA',
+                    tab_cn: 'China',
+                    tab_in: 'India',
+                    levers_title: 'Economic Levers Reshaping Global Trade',
+                    levers_intro: 'Carbon pricing mechanisms, especially carbon markets and border adjustments, are becoming key tools for driving climate action and influencing international trade. This section analyzes their operational models and global impacts.',
+                    levers_ets_title: 'Carbon Market Comparison: EU vs. China',
+                    levers_ets_intro: 'The two major carbon markets differ vastly in design philosophy and price signals, reflecting their underlying policy objectives.',
+                    levers_cbam_title: 'The Global Ripple Effect of CBAM',
+                    levers_cbam_intro: 'The EU\'s Carbon Border Adjustment Mechanism (CBAM) is forcing global trading partners to respond. Click on a node to see the reactions and impacts.',
+                    cbam_center: 'EU CBAM',
+                    cbam_af: 'Africa',
+                    cbam_in: 'India',
+                    cbam_cn: 'China',
+                    cbam_vn: 'Vietnam',
+                    cbam_gb: 'UK',
+                    cbam_info_default: 'Click a country/region to view details.',
+                    future_title: 'Towards a Just and Feasible Future',
+                    future_intro: 'Achieving global climate goals requires not only technology and policy but also sufficient financial support and a "Just Transition" that ensures social equity. These two factors are critical bottlenecks for the sustainability of climate policies.',
+                    future_finance_title: 'The Enormous Climate Finance Gap',
+                    future_finance_intro: 'Pledged funds from developed countries fall far short of the required scale, and complex access mechanisms exacerbate distrust from developing nations.',
+                    future_just_title: 'The Challenge of a Just Transition',
+                    future_just_intro: 'Without comprehensive and well-funded support programs during the phase-out of fossil fuels, any radical climate policy could face strong political resistance due to significant socio-economic impacts.',
+                    just_transition_item1: '<strong class="text-[#044343]">Coal-dependent regions:</strong> China, India, and South Africa face immense employment and economic transition pressures.',
+                    just_transition_item2: '<strong class="text-[#044343]">Social dialogue:</strong> It\'s essential to ensure meaningful participation of affected workers and communities in decision-making.',
+                    just_transition_item3: '<strong class="text-[#044343]">Funding and policy:</strong> Dedicated funds are needed, and just transition principles must be integrated into all climate policies.',
+                    just_transition_item4: '<strong class="text-[#044343]">Political feasibility:</strong> A policy perceived as unjust is ultimately politically unsustainable.',
+                    footer_text: 'This interactive report is based on the analysis from "Global Climate Crossroads: An Analysis of National Commitments, Economic Mechanisms, and Feasible Transition Pathways".',
+                    country_details: {
+                        card_title: 'Key Commitments & Policies',
+                        energy_title: 'Energy Mix (Power Generation)',
+                        labels: {
+                            net_zero: 'Net-Zero Target',
+                            ndc_2030: '2030 NDC',
+                            policy: 'Key Policies',
+                            fossil: 'Fossil Fuels',
+                            renewables: 'Renewables',
+                            other: 'Other'
+                        }
+                    },
+                    countryData: {
+                        eu: { name: 'European Union', model: 'Regulatory Pioneer Model', description: 'The EU acts as a leader in global climate governance, with a comprehensive and legally binding policy framework. It drives systemic transformation through the European Green Deal and the EU ETS.', stats: [ { label: 'net_zero', value: '2050 (Legally Binding)' }, { label: 'ndc_2030', value: '55% cut from 1990' }, { label: 'policy', value: 'Green Deal, CBAM' } ], challenge: '<strong>Challenge:</strong> Political fragmentation, implementation gaps, and growing climate adaptation pressures are eroding its leadership position.', energy: { renewables: 41, fossil: 39, other: 20 } },
+                        us: { name: 'United States', model: 'Incentive-Driven Industrial Policy', description: 'U.S. climate policy exhibits a "pendulum effect," heavily influenced by political cycles. The current Inflation Reduction Act (IRA) primarily incentivizes clean energy through massive subsidies rather than mandates.', stats: [ { label: 'net_zero', value: '2050 (Policy Goal)' }, { label: 'ndc_2030', value: '50-52% cut from 2005' }, { label: 'policy', value: 'Inflation Reduction Act (IRA)' } ], challenge: '<strong>Challenge:</strong> Extreme political volatility is the greatest risk. A change in administration could reverse existing climate policies, severely damaging international trust.', energy: { renewables: 18, fossil: 81, other: 1 } },
+                        cn: { name: 'China', model: 'State-Led Strategic Supply Chain', description: 'China is both the world\'s largest emitter and the undisputed leader in clean energy technology. Its policy aims to control the global green tech supply chain while using coal as a strategic buffer for energy security.', stats: [ { label: 'net_zero', value: '2060 (Pledged)' }, { label: 'ndc_2030', value: 'Peak CO₂ before 2030' }, { label: 'policy', value: 'National ETS, "New Three"' } ], challenge: '<strong>Challenge:</strong> The "coal paradox" is the core contradiction. New coal plants are still being built for energy security, creating huge carbon lock-in risks.', energy: { renewables: 30, fossil: 68, other: 2 } },
+                        in: { name: 'India', model: 'Development-First Transition Model', description: 'India represents the classic dilemma of a large developing nation: balancing development needs and energy security with climate commitments. Climate action is framed within energy security and poverty alleviation.', stats: [ { label: 'net_zero', value: '2070 (Pledged)' }, { label: 'ndc_2030', value: '45% lower emissions intensity' }, { label: 'policy', value: 'National Action Plan (NAPCC)' } ], challenge: '<strong>Challenge:</strong> Extreme dependence on coal (77% of power generation) is the biggest hurdle. Coal production is still increasing for energy security reasons.', energy: { renewables: 22, fossil: 77, other: 1 } }
+                    },
+                    cbamData: {
+                        af: { title: 'Africa', text: '<strong>Expected Impact:</strong> Most affected region, with potential GDP reduction up to 0.5%. Seen as an unfair economic burden.' },
+                        in: { title: 'India', text: '<strong>Response:</strong> Views CBAM as a discriminatory trade barrier, plans to challenge it at the WTO, and rejects EU suggestions to raise domestic carbon taxes.' },
+                        cn: { title: 'China', text: '<strong>Response:</strong> Sees CBAM as protectionism and is expanding its national ETS to cover relevant sectors as a strategic response.' },
+                        vn: { title: 'Vietnam', text: '<strong>Expected Impact:</strong> GDP loss of ~0.6%, with ~10,000 jobs at risk. <strong>Response:</strong> Plans to launch a pilot ETS.' },
+                        gb: { title: 'UK', text: '<strong>Response:</strong> Will introduce its own CBAM in 2027, similar to the EU\'s, showing a policy diffusion effect.' },
+                    },
+                    etsInfoData: {
+                        eu: '<strong>EU ETS:</strong> Uses an absolute cap, with high and volatile prices, aiming to find the most cost-effective reduction pathways via the market. Key challenge is carbon leakage (addressed by CBAM).',
+                        cn: '<strong>China ETS:</strong> Uses an intensity-based target, with low and stable carbon prices. Main goal is to improve industrial efficiency, not drive absolute reductions. Faces challenges with data quality and market liquidity.'
+                    },
+                    charts: {
+                        warming: { labels: ['Target', 'Danger Path', 'Remaining'] },
+                        ets: { label: 'Avg. Carbon Price (€/ton, approx.)', x_axis: 'Price (€/ton)', labels: ['EU ETS', 'China National ETS'] },
+                        finance: { title: 'Annual Pledge vs. Actual Need (in Billion USD)', y_axis: 'Funding (Billion USD, log scale)', dataset1: 'Annual Pledged Goal', dataset2: 'Annual Actual Need (est. min)', tooltip_trillion: 'Trillion USD', tooltip_billion: 'Billion USD' }
+                    }
+                }
+            };
+            
+            let currentLang = 'zh-Hant';
+            let activeCountry = 'eu';
+            let charts = {};
+
+            const langSwitcher = document.getElementById('lang-switcher');
+            const countryDetailsContainer = document.getElementById('country-details');
+            const countryTabs = document.querySelectorAll('.country-tab');
+            const cbamNodes = document.querySelectorAll('.cbam-node');
+            const cbamInfoContainer = document.getElementById('cbam-info');
+
+            function updateAllText(lang) {
+                const langData = translations[lang];
+                document.title = langData.page_title;
+                document.getElementById('header-title').textContent = langData.header_title;
+                langSwitcher.textContent = langData.lang_switcher;
+
+                document.querySelectorAll('[data-translate]').forEach(el => {
+                    const key = el.dataset.translate;
+                    if (langData[key]) {
+                        el.innerHTML = langData[key];
+                    }
+                });
+
+                document.getElementById('gap_card1_text').innerHTML = langData.gap_card1_text;
+                document.getElementById('cbam-center').textContent = langData.cbam_center;
+
+                const justTransitionList = document.getElementById('just-transition-list');
+                justTransitionList.innerHTML = `
+                    <li class="p-3 bg-gray-50 rounded-lg">${langData.just_transition_item1}</li>
+                    <li class="p-3 bg-gray-50 rounded-lg">${langData.just_transition_item2}</li>
+                    <li class="p-3 bg-gray-50 rounded-lg">${langData.just_transition_item3}</li>
+                    <li class="p-3 bg-gray-50 rounded-lg">${langData.just_transition_item4}</li>
+                `;
+                
+                updateCountryDetails(activeCountry, lang);
+                updateCbamInfo(null, lang); 
+                updateEtsInfo('eu', lang);
+                renderAllCharts(lang);
+            }
+
+            function updateCountryDetails(countryCode, lang) {
+                activeCountry = countryCode;
+                const langData = translations[lang];
+                const data = langData.countryData[countryCode];
+                const detailsData = langData.country_details;
+
+                countryDetailsContainer.innerHTML = `
+                    <div class="grid md:grid-cols-3 gap-8 items-center">
+                        <div class="md:col-span-1">
+                            <h4 class="text-2xl font-bold mb-2">${data.name}</h4>
+                            <p class="font-semibold text-[#5C8374] mb-4">${data.model}</p>
+                            <p class="text-sm text-gray-600 mb-4">${data.description}</p>
+                            <p class="text-sm text-gray-800 bg-yellow-100/50 p-3 rounded-lg">${data.challenge}</p>
+                        </div>
+                        <div class="md:col-span-2 grid sm:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-3 text-center">${detailsData.card_title}</h5>
+                                <ul class="space-y-2 text-sm">
+                                    ${data.stats.map(stat => `<li class="flex justify-between"><strong>${detailsData.labels[stat.label]}</strong> <span>${stat.value}</span></li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg flex flex-col items-center">
+                                <h5 class="font-semibold mb-3 text-center">${detailsData.energy_title}</h5>
+                                <div class="chart-container h-40 w-40">
+                                    <canvas id="countryEnergyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                if (charts.countryEnergy) charts.countryEnergy.destroy();
+                const ctx = document.getElementById('countryEnergyChart').getContext('2d');
+                charts.countryEnergy = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [detailsData.labels.fossil, detailsData.labels.renewables, detailsData.labels.other],
+                        datasets: [{ data: [data.energy.fossil, data.energy.renewables, data.energy.other], backgroundColor: ['#044343', '#5C8374', '#cccccc'], borderColor: '#ffffff', borderWidth: 2 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}%` } } }, cutout: '60%' }
+                });
+
+                countryTabs.forEach(t => t.classList.remove('active'));
+                document.querySelector(`.country-tab[data-country="${countryCode}"]`).classList.add('active');
+            }
+            
+            function updateEtsInfo(key, lang) {
+                const etsInfoContainer = document.getElementById('ets-info');
+                const info = translations[lang].etsInfoData[key];
+                etsInfoContainer.innerHTML = `<p>${info}</p>`;
+            }
+
+            function updateCbamInfo(cbamCode, lang) {
+                if (cbamCode) {
+                    const data = translations[lang].cbamData[cbamCode];
+                    cbamInfoContainer.innerHTML = `<h5 class="font-bold mb-2">${data.title}</h5><p>${data.text}</p>`;
+                } else {
+                    cbamInfoContainer.innerHTML = `<p class="text-gray-400">${translations[lang].cbam_info_default}</p>`;
+                }
+            }
+            
+            function renderAllCharts(lang) {
+                const chartData = translations[lang].charts;
+                Object.values(charts).forEach(chart => { if(chart.destroy && chart.canvas.id !== 'countryEnergyChart') chart.destroy(); });
+
+                charts.warming = new Chart(document.getElementById('warmingTrajectoryChart').getContext('2d'), { type: 'doughnut', data: { labels: chartData.warming.labels, datasets: [{ data: [1.5, 1.6, 6 - 3.1], backgroundColor: ['#5C8374', '#E49B5A', '#E0E0E0'], borderColor: '#f8f7f4', borderWidth: 4, circumference: 180, rotation: 270 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: true } }, cutout: '65%' } });
+                charts.ets = new Chart(document.getElementById('etsComparisonChart').getContext('2d'), { type: 'bar', data: { labels: chartData.ets.labels, datasets: [{ label: chartData.ets.label, data: [72, 13], backgroundColor: ['#5C8374', '#044343'] }] }, options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, title: { display: true, text: chartData.ets.x_axis } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw} €` } } }, onClick: (e, els) => { if(els.length > 0) updateEtsInfo(els[0].index === 0 ? 'eu' : 'cn', currentLang); } } });
+                charts.finance = new Chart(document.getElementById('financeGapChart').getContext('2d'), { type: 'bar', data: { labels: [translations[lang].future_finance_title], datasets: [ { label: chartData.finance.dataset1, data: [100], backgroundColor: '#5C8374' }, { label: chartData.finance.dataset2, data: [1600], backgroundColor: '#E49B5A' } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: chartData.finance.title }, tooltip: { callbacks: { label: function(c) { let v = c.raw; return v >= 1000 ? `${c.dataset.label}: ${v/1000} ${chartData.finance.tooltip_trillion}` : `${c.dataset.label}: ${v} ${chartData.finance.tooltip_billion}`; } } } }, scales: { y: { beginAtZero: true, type: 'logarithmic', title: { display: true, text: chartData.finance.y_axis } }, x: { stacked: true } } } });
+            }
+
+            langSwitcher.addEventListener('click', () => {
+                currentLang = (currentLang === 'zh-Hant') ? 'en' : 'zh-Hant';
+                updateAllText(currentLang);
+            });
+            countryTabs.forEach(tab => tab.addEventListener('click', () => updateCountryDetails(tab.dataset.country, currentLang)));
+            cbamNodes.forEach(node => node.addEventListener('click', () => updateCbamInfo(node.dataset.cbam, currentLang)));
+
+            updateAllText(currentLang);
+        });
+    </script>
+</body>
+</html>
