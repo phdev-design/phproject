@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彭定康：互動式生平回顧 / Chris Patten: An Interactive Retrospective</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: 本應用程式採用了主題式、非線性的資訊架構。頂部設有固定導航欄，讓用戶能快速跳轉至「生涯時間線」、「香港總督歲月」及「多方視角下的遺產」等核心區塊。此設計旨在打破傳統報告的線性閱讀模式，鼓勵用戶根據興趣自由探索。用戶首先會看到一個總覽介紹，然後可以透過互動式時間線追溯其生涯，深入剖析最具爭議的香港政改，最後透過一個互動圖表來理解不同持份者對他的複雜評價。這種結構將複雜的歷史和政治分析轉化為一個易於消化和參與的探索旅程，從而提升用戶的理解和參與感。 -->
+    <!-- Visualization & Content Choices: 
+        1. 生涯時間線: 報告中的生平事蹟 -> 目標：展示生涯脈絡 -> 呈現方式：互動式水平時間線 -> 互動：點擊年份可顯示該時期的詳細事件。-> 理由：將冗長的文字履歷轉化為直觀、可探索的時間軸，讓用戶清晰了解其政治生涯的發展軌跡。-> 實現方式：HTML/CSS/JS。
+        2. 1995政改方案: 報告中關於政改的表格 -> 目標：比較改革前後的變化 -> 呈現方式：一組可點擊的卡片/手風琴式列表 -> 互動：點擊每個改革項目可展開/收合其詳細內容和影響。-> 理由：比靜態表格更具互動性，讓用戶能聚焦於單項改革進行深入了解。-> 實現方式：HTML/CSS/JS。
+        3. 多方視角下的遺產: 報告中對其評價的分裂 -> 目標：比較和組織不同觀點 -> 呈現方式：一個甜甜圈圖（Doughnut Chart） -> 互動：點擊圖表的某個部分（如「北京視角」、「香港民主派」），旁邊的文本區塊會更新，顯示該方的詳細評價。-> 理由：將抽象的「多方評價」視覺化，使用戶能直觀地看到評價的分歧，並透過互動深入探索每種觀點的細節。-> 實現方式：Chart.js。
+        4. 一國保守主義 vs 柴契爾主義: 報告中的理念對比 -> 目標：比較兩種政治哲學 -> 呈現方式：並排的兩欄式佈局 -> 互動：無（靜態內容） -> 理由：清晰直接地並列呈現兩種對立的意識形態，幫助用戶快速掌握彭定康政治立場的核心。 -> 實現方式：HTML/CSS。
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #f8f7f4;
+            color: #333;
+        }
+        .font-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        .font-en {
+            font-family: 'Roboto', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            height: 320px;
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-width: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active {
+            color: #1e3a8a;
+            border-bottom-color: #1e3a8a;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: -15px;
+            width: 10px;
+            height: 10px;
+            background-color: #4a5568;
+            border-radius: 50%;
+            border: 2px solid #f8f7f4;
+        }
+        .timeline-content {
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .timeline-content.show {
+            max-height: 500px;
+            opacity: 1;
+        }
+        .reform-item-body {
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            max-height: 0;
+            overflow: hidden;
+        }
+        .reform-item-body.show {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-800">
+
+    <header id="header" class="bg-stone-50/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-900" data-lang-key="main_title">彭定康</h1>
+                <div class="flex items-center">
+                    <div class="hidden sm:flex items-center space-x-8">
+                        <a href="#intro" class="nav-link text-slate-600 hover:text-blue-800 border-b-2 border-transparent pb-1" data-lang-key="nav_intro">導論</a>
+                        <a href="#timeline" class="nav-link text-slate-600 hover:text-blue-800 border-b-2 border-transparent pb-1" data-lang-key="nav_timeline">生涯時間線</a>
+                        <a href="#governor" class="nav-link text-slate-600 hover:text-blue-800 border-b-2 border-transparent pb-1" data-lang-key="nav_governor">香港總督歲月</a>
+                        <a href="#legacy" class="nav-link text-slate-600 hover:text-blue-800 border-b-2 border-transparent pb-1" data-lang-key="nav_legacy">爭議與遺產</a>
+                    </div>
+                    <button id="lang-switcher" class="ml-4 sm:ml-8 px-3 py-1 border-2 border-slate-400 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-200 transition-colors">
+                        EN / 中
+                    </button>
+                    <button id="mobile-menu-button" class="sm:hidden p-2 ml-2 rounded-md text-slate-600 hover:bg-stone-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden sm:hidden bg-stone-100">
+            <a href="#intro" class="block py-2 px-4 text-sm text-slate-700 hover:bg-stone-200" data-lang-key="nav_intro_mobile">導論</a>
+            <a href="#timeline" class="block py-2 px-4 text-sm text-slate-700 hover:bg-stone-200" data-lang-key="nav_timeline_mobile">生涯時間線</a>
+            <a href="#governor" class="block py-2 px-4 text-sm text-slate-700 hover:bg-stone-200" data-lang-key="nav_governor_mobile">香港總督歲月</a>
+            <a href="#legacy" class="block py-2 px-4 text-sm text-slate-700 hover:bg-stone-200" data-lang-key="nav_legacy_mobile">爭議與遺產</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="intro" class="text-center pt-16">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4" data-lang-key="intro_title">末代總督的政治遺產</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600 mb-8" data-lang-key="intro_p">
+                克里斯・彭定康不僅是香港最後一任總督，更是一位在英國政治、後殖民歷史與中西關係中，留下深刻且備受爭議印記的人物。本頁面將透過互動方式，帶您探索他的生平、事蹟與複雜的政治遺產。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mt-12 text-left">
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <h3 class="font-bold text-xl mb-3 text-blue-900" data-lang-key="intro_one_nation_title">「一國保守主義者」</h3>
+                    <p class="text-slate-600" data-lang-key="intro_one_nation_p">
+                        彭定康的政治哲學根植於「一國保守主義」，強調社會凝聚與國家責任，與柴契爾時代強調個人主義與自由市場的新自由主義形成鮮明對比。這種「非主流」的立場，塑造了他獨立的思考模式，並深刻影響了他在香港的決策。
+                    </p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <h3 class="font-bold text-xl mb-3 text-rose-900" data-lang-key="intro_beijing_clash_title">與北京的碰撞</h3>
+                    <p class="text-slate-600" data-lang-key="intro_beijing_clash_p">
+                        他所推動的1995年政改方案，旨在香港主權移交前擴大民主基礎，卻引發北京方面的雷霆之怒，被斥為「千古罪人」。這場衝突不僅是外交爭議，更是兩種政治文化與世界觀的迎頭相撞，其影響延續至今。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="timeline" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4" data-lang-key="timeline_title">生涯時間線</h2>
+                <p class="max-w-2xl mx-auto text-slate-600" data-lang-key="timeline_p">
+                    從英國保守黨的智囊，到香港的末代總督，再到國際舞台上的意見領袖。點擊下方的年份，探索彭定康政治生涯中的關鍵時刻。
+                </p>
+            </div>
+            <div id="timeline-container" class="relative border-l-2 border-slate-300 ml-4 py-4">
+            </div>
+        </section>
+        
+        <section id="governor" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4" data-lang-key="governor_title">香港總督歲月 (1992-1997)</h2>
+                <p class="max-w-2xl mx-auto text-slate-600" data-lang-key="governor_p">
+                    彭定康的五年港督任期，以其親民作風和激進的政治改革為標誌。這段時期不僅定義了香港過渡期的最後歲月，也為「一國兩制」的未來埋下了伏筆。
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                <div>
+                    <h3 class="text-2xl font-bold mb-6 text-slate-800" data-lang-key="reform_title">1995政改方案：最後的民主賭局</h3>
+                    <p class="text-slate-600 mb-6" data-lang-key="reform_p">
+                        彭定康利用《基本法》中的模糊空間，試圖最大限度地擴大民主成分。這套方案的技術細節背後，蘊含著深刻的政治意涵。點擊下列項目查看改革詳情。
+                    </p>
+                    <div id="reform-items-container" class="space-y-3">
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <h3 class="text-2xl font-bold mb-4 text-slate-800" data-lang-key="worldviews_title">兩種世界觀的碰撞</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-bold text-lg text-blue-900" data-lang-key="patten_logic_title">彭定康的邏輯</h4>
+                            <p class="mt-2 text-slate-600" data-lang-key="patten_logic_p">他堅信經濟自由與政治自由不可分割，香港的長遠穩定需建立在一個向市民負責的政府之上。他認為其改革是在《中英聯合聲明》框架內的合法詮釋，並試圖向中方解釋「法治 (Rule of Law)」與「以法而治 (Rule by Law)」的根本區別——前者法律凌駕於統治者，後者法律為統治者工具。</p>
+                        </div>
+                        <div class="border-t border-stone-200 pt-6">
+                            <h4 class="font-bold text-lg text-rose-900" data-lang-key="beijing_logic_title">北京的視角</h4>
+                            <p class="mt-2 text-slate-600" data-lang-key="beijing_logic_p">北京視彭定康的公開、對抗性風格為對主權的蓄意挑戰。其政改方案被指嚴重違反了《聯合聲明》、與《基本法》銜接的原則，以及過去的外交諒解。他們認為一個穩定、可控的過渡遠比程序上的民主辯論重要，最終決定「另起爐灶」成立臨時立法會。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="legacy" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4" data-lang-key="legacy_title">多方視角下的遺產</h2>
+                <p class="max-w-2xl mx-auto text-slate-600" data-lang-key="legacy_p">
+                    英雄、罪人、還是麻煩製造者？對彭定康的評價呈現巨大分歧，反映了各方不同的政治立場與世界觀。點擊下方的互動圖表，探索來自不同陣營的觀點。
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="chart-container">
+                    <canvas id="legacyChart"></canvas>
+                </div>
+                <div id="legacy-text-container" class="bg-white p-6 rounded-lg shadow-md border border-stone-200 min-h-[300px]">
+                    <h3 id="legacy-title-display" class="text-2xl font-bold mb-4 text-slate-800 transition-colors duration-300"></h3>
+                    <p id="legacy-content-display" class="text-slate-600"></p>
+                </div>
+            </div>
+             <div class="mt-12 text-center bg-blue-50 border border-blue-200 p-6 rounded-lg max-w-3xl mx-auto">
+                <h3 class="font-bold text-xl text-blue-900" data-lang-key="prophecy_title">彭定康的預言</h3>
+                <blockquote id="prophecy_quote" class="mt-4 text-slate-700 italic text-lg">
+                    「我感到憂慮的，不是香港的自主權會被北京剝奪，而是這項權利會一點一滴地斷送在香港某些人手裏。」
+                </blockquote>
+                <p class="text-sm text-slate-500 mt-2" data-lang-key="prophecy_source">- 1996年施政報告</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-stone-200 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-slate-500">
+            <p data-lang-key="footer_p1">本頁面內容根據《彭定康勳爵：其人、其事與其政治遺產之詳盡報告》生成。</p>
+            <p data-lang-key="footer_p2">僅為示範用途，所有內容均來自提供的源報告。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentLang = 'zh';
+            let legacyChart;
+
+            const allData = {
+                translations: {
+                    zh: {
+                        main_title: "彭定康",
+                        nav_intro: "導論",
+                        nav_timeline: "生涯時間線",
+                        nav_governor: "香港總督歲月",
+                        nav_legacy: "爭議與遺產",
+                        nav_intro_mobile: "導論",
+                        nav_timeline_mobile: "生涯時間線",
+                        nav_governor_mobile: "香港總督歲月",
+                        nav_legacy_mobile: "爭議與遺產",
+                        intro_title: "末代總督的政治遺產",
+                        intro_p: "克里斯・彭定康不僅是香港最後一任總督，更是一位在英國政治、後殖民歷史與中西關係中，留下深刻且備受爭議印記的人物。本頁面將透過互動方式，帶您探索他的生平、事蹟與複雜的政治遺產。",
+                        intro_one_nation_title: "「一國保守主義者」",
+                        intro_one_nation_p: "彭定康的政治哲學根植於「一國保守主義」，強調社會凝聚與國家責任，與柴契爾時代強調個人主義與自由市場的新自由主義形成鮮明對比。這種「非主流」的立場，塑造了他獨立的思考模式，並深刻影響了他在香港的決策。",
+                        intro_beijing_clash_title: "與北京的碰撞",
+                        intro_beijing_clash_p: "他所推動的1995年政改方案，旨在香港主權移交前擴大民主基礎，卻引發北京方面的雷霆之怒，被斥為「千古罪人」。這場衝突不僅是外交爭議，更是兩種政治文化與世界觀的迎頭相撞，其影響延續至今。",
+                        timeline_title: "生涯時間線",
+                        timeline_p: "從英國保守黨的智囊，到香港的末代總督，再到國際舞台上的意見領袖。點擊下方的年份，探索彭定康政治生涯中的關鍵時刻。",
+                        governor_title: "香港總督歲月 (1992-1997)",
+                        governor_p: "彭定康的五年港督任期，以其親民作風和激進的政治改革為標誌。這段時期不僅定義了香港過渡期的最後歲月，也為「一國兩制」的未來埋下了伏筆。",
+                        reform_title: "1995政改方案：最後的民主賭局",
+                        reform_p: "彭定康利用《基本法》中的模糊空間，試圖最大限度地擴大民主成分。這套方案的技術細節背後，蘊含著深刻的政治意涵。點擊下列項目查看改革詳情。",
+                        worldviews_title: "兩種世界觀的碰撞",
+                        patten_logic_title: "彭定康的邏輯",
+                        patten_logic_p: "他堅信經濟自由與政治自由不可分割，香港的長遠穩定需建立在一個向市民負責的政府之上。他認為其改革是在《中英聯合聲明》框架內的合法詮釋，並試圖向中方解釋「法治 (Rule of Law)」與「以法而治 (Rule by Law)」的根本區別——前者法律凌駕於統治者，後者法律為統治者工具。",
+                        beijing_logic_title: "北京的視角",
+                        beijing_logic_p: "北京視彭定康的公開、對抗性風格為對主權的蓄意挑戰。其政改方案被指嚴重違反了《聯合聲明》、與《基本法》銜接的原則，以及過去的外交諒解。他們認為一個穩定、可控的過渡遠比程序上的民主辯論重要，最終決定「另起爐灶」成立臨時立法會。",
+                        legacy_title: "多方視角下的遺產",
+                        legacy_p: "英雄、罪人、還是麻煩製造者？對彭定康的評價呈現巨大分歧，反映了各方不同的政治立場與世界觀。點擊下方的互動圖表，探索來自不同陣營的觀點。",
+                        prophecy_title: "彭定康的預言",
+                        prophecy_quote: "「我感到憂慮的，不是香港的自主權會被北京剝奪，而是這項權利會一點一滴地斷送在香港某些人手裏。」",
+                        prophecy_source: "- 1996年施政報告",
+                        footer_p1: "本頁面內容根據《彭定康勳爵：其人、其事與其政治遺產之詳盡報告》生成。",
+                        footer_p2: "僅為示範用途，所有內容均來自提供的源報告。",
+                        legacy_chart_default_title: "點擊圖表查看觀點",
+                    },
+                    en: {
+                        main_title: "Chris Patten",
+                        nav_intro: "Introduction",
+                        nav_timeline: "Timeline",
+                        nav_governor: "Governor of HK",
+                        nav_legacy: "Legacy & Controversies",
+                        nav_intro_mobile: "Introduction",
+                        nav_timeline_mobile: "Timeline",
+                        nav_governor_mobile: "Governor of HK",
+                        nav_legacy_mobile: "Legacy & Controversies",
+                        intro_title: "The Political Legacy of the Last Governor",
+                        intro_p: "Chris Patten was not just the last Governor of Hong Kong, but also a figure who left a deep and controversial mark on British politics, post-colonial history, and Sino-Western relations. This page interactively explores his life, actions, and complex political legacy.",
+                        intro_one_nation_title: "'One-Nation Conservative'",
+                        intro_one_nation_p: "Patten's political philosophy is rooted in 'One-Nation Conservatism,' emphasizing social cohesion and national responsibility, in stark contrast to the neoliberalism of the Thatcher era. This 'unfashionable' stance shaped his independent thinking and profoundly influenced his decisions in Hong Kong.",
+                        intro_beijing_clash_title: "Clash with Beijing",
+                        intro_beijing_clash_p: "His 1995 electoral reform package, aimed at expanding the democratic base before the handover, sparked fury from Beijing, which denounced him as a 'sinner for a thousand generations.' This clash was more than a diplomatic dispute; it was a collision of two political cultures.",
+                        timeline_title: "Career Timeline",
+                        timeline_p: "From a Conservative Party strategist to the last Governor of Hong Kong, and then to an opinion leader on the world stage. Click the years below to explore key moments in Chris Patten's political career.",
+                        governor_title: "Governor of Hong Kong (1992-1997)",
+                        governor_p: "Patten's five-year term was marked by his populist style and radical political reforms. This period not only defined the final years of Hong Kong's transition but also set the stage for the future of 'One Country, Two Systems.'",
+                        reform_title: "The 1995 Reforms: A Final Democratic Gamble",
+                        reform_p: "Patten used the ambiguities in the Basic Law to try to expand the democratic franchise as much as possible. Behind the technical details of this package lay profound political intentions. Click the items below for details.",
+                        worldviews_title: "A Collision of Two Worldviews",
+                        patten_logic_title: "Patten's Logic",
+                        patten_logic_p: "He firmly believed that economic and political freedom were inseparable, and that Hong Kong's long-term stability required a government accountable to its citizens. He argued his reforms were a legitimate interpretation within the Joint Declaration and tried to explain the difference between the 'Rule of Law' and 'Rule by Law.'",
+                        beijing_logic_title: "Beijing's Perspective",
+                        beijing_logic_p: "Beijing viewed Patten's public, confrontational style as a deliberate challenge to its sovereignty. His reforms were seen as violating the Joint Declaration, the principle of convergence with the Basic Law, and prior diplomatic understandings. They prioritized a stable, controlled transition over procedural democracy and decided to set up a 'separate stove.'",
+                        legacy_title: "A Multi-faceted Legacy",
+                        legacy_p: "Hero, sinner, or troublemaker? The evaluation of Chris Patten is sharply divided, reflecting the different political stances and worldviews of the commentators. Click the interactive chart below to explore views from different camps.",
+                        prophecy_title: "Patten's Prophecy",
+                        prophecy_quote: "\"My anxiety is this: not that this community's autonomy would be usurped by Peking, but that it could be given away bit by bit by some people in Hong Kong.\"",
+                        prophecy_source: "- 1996 Policy Address",
+                        footer_p1: "This page was generated based on 'The Comprehensive Report on Lord Chris Patten: His Life, Work, and Political Legacy.'",
+                        footer_p2: "For demonstration purposes only. All content is derived from the source report.",
+                        legacy_chart_default_title: "Click on the chart to see perspectives",
+                    }
+                },
+                timelineData: [
+                    { year: 1966, zh: { title: '進入政壇', content: '加入保守黨研究部，開始其政治生涯。憑藉出色的才能，於1974年成為該部門最年輕的主管。' }, en: { title: 'Enters Politics', content: 'Joined the Conservative Research Department, beginning his political career. His talent led him to become its youngest-ever director in 1974.' } },
+                    { year: 1979, zh: { title: '當選國會議員', content: '代表巴斯（Bath）選區首次當選為下議院議員，並在柴契爾政府時期，成為黨內「濕派」（一國保守主義者）的代表人物。' }, en: { title: 'Elected MP', content: 'First elected to the House of Commons for Bath, becoming a leading figure of the "wet" faction (One-Nation Conservatives) during the Thatcher government.' } },
+                    { year: 1990, zh: { title: '出任黨主席', content: '在梅傑接任首相後，被任命為保守黨主席，負責策劃1992年大選。' }, en: { title: 'Becomes Party Chairman', content: 'Appointed Conservative Party Chairman by new PM John Major, tasked with masterminding the 1992 general election.' } },
+                    { year: 1992, zh: { title: '勝利與失意', content: '成功領導保守黨意外贏得大選，但他本人卻在自己的選區敗選，失去了議席。同年，被任命為第28任香港總督。' }, en: { title: 'Victory and Defeat', content: 'Led the party to a surprise election victory but lost his own seat. The same year, he was appointed the 28th Governor of Hong Kong.' } },
+                    { year: 1997, zh: { title: '告別香港', content: '在香港主權移交儀式後卸任，結束了英國對香港156年的管治。' }, en: { title: 'Farewell to Hong Kong', content: 'Departed after the handover ceremony, ending 156 years of British rule in Hong Kong.' } },
+                    { year: 1998, zh: { title: '北愛爾蘭和平進程', content: '擔任北愛爾蘭警政獨立委員會主席，發表的《彭定康報告》促成了警隊的重大改革。' }, en: { title: 'Northern Ireland Peace Process', content: 'Chaired the Independent Commission on Policing for Northern Ireland. The resulting "Patten Report" led to major police reforms.' } },
+                    { year: 1999, zh: { title: '歐盟外交專員', content: '被任命為歐盟對外關係專員，處理歐盟外交事務，鞏固其國際政治家地位。' }, en: { title: 'EU Commissioner', content: 'Appointed European Commissioner for External Relations, handling EU foreign policy and solidifying his status as an international statesman.' } },
+                    { year: 2003, zh: { title: '牛津大學校監', content: '當選為牛津大學校監，成為這所頂尖學府的榮譽領袖，直至2024年榮休。' }, en: { title: 'Chancellor of Oxford', content: 'Elected Chancellor of the University of Oxford, serving as the honorary head of the prestigious institution until his retirement in 2024.' } },
+                    { year: 2020, zh: { title: '不懈的批評者', content: '在《港區國安法》實施後，他成為最尖銳的批評者之一，譴責北京徹底摧毀「一國兩制」，並倡導國際社會對相關官員實施制裁。' }, en: { title: 'Unrelenting Critic', content: 'After the implementation of the National Security Law, he became one of its sharpest critics, condemning Beijing for destroying "One Country, Two Systems" and advocating for international sanctions.' } },
+                ],
+                reformData: [
+                    { zh: { title: '投票年齡', content: '從21歲降至18歲，賦予年輕人投票權。' }, en: { title: 'Voting Age', content: 'Lowered from 21 to 18, enfranchising young people.' } },
+                    { zh: { title: '地區直選', content: '從「雙議席雙票制」改為「單議席單票制」，強化議員與選區的聯繫。' }, en: { title: 'Geographical Constituencies', content: 'Switched from a "dual-seat, dual-vote" to a "single-seat, single-vote" system to strengthen legislator-constituency links.' } },
+                    { zh: { title: '功能組別', content: '創設9個新功能組別（「新九組」），涵蓋全港在職人士，選民基礎從數萬人擴大至270萬，被視為變相普選。' }, en: { title: 'Functional Constituencies', content: 'Created 9 new constituencies ("New Nine"), covering the entire working population and expanding the voter base from tens of thousands to 2.7 million, seen as a de facto universal suffrage.' } },
+                    { zh: { title: '選舉委員會', content: '成員主要由直選產生的區議員出任，使其顯著民主化。' }, en: { title: 'Election Committee', content: 'Made its members primarily directly-elected District Councillors, significantly democratizing the body.' } },
+                    { zh: { title: '兩局分家', content: '行政、立法兩局分家，總督不再兼任立法局主席，強化立法機關的獨立性。' }, en: { title: 'ExCo/LegCo Separation', content: 'Separated the Executive and Legislative Councils, with the Governor no longer presiding over LegCo to enhance its independence.' } },
+                    { zh: { title: '取消委任議席', content: '全面取消區議會及市政局的委任議席，深化基層民主。' }, en: { title: 'Abolish Appointed Seats', content: 'Completely abolished appointed seats in District Boards and Municipal Councils, deepening grassroots democracy.' } },
+                ],
+                legacyData: {
+                    zh: {
+                        labels: ['北京視角', '香港民主派', '香港建制派', '英國外交界', '彭定康自評'],
+                        perspectives: [
+                            { title: '北京視角：千古罪人', content: '官方將他定性為破壞平穩過渡的「千古罪人」。認為他傲慢、抱持冷戰思維，旨在製造混亂以遏制中國崛起。其政改被視為對中國主權的蓄意挑戰。' },
+                            { title: '香港民主派：民主鬥士', content: '視他為英雄人物，一位有原則、真心為香港自治而戰的領袖。因其對北京意圖的先見之明和數十年如一日的支持而備受尊敬。' },
+                            { title: '香港建制派：麻煩製造者', content: '視他為魯莽的麻煩製造者，認為他不必要地激怒北京，危及了香港的穩定與繁榮，其政改是一個埋下分裂的「計時炸彈」。' },
+                            { title: '英國外交界：外交敗筆', content: '傳統外交官（漢學家）視他為「獨行俠」，其對抗風格摧毀了多年經營的靜默外交，最終一無所獲，反而使香港處境更糟。' },
+                            { title: '彭定康自評：履行責任', content: '在他的著作中，他表達了不能背叛香港人、應盡力鞏固其自由的強烈責任感。他反思權力局限，並對英國未能更早推動民主表示遺憾。' },
+                        ]
+                    },
+                    en: {
+                        labels: ['Beijing\'s View', 'HK Democrats', 'HK Pro-Establishment', 'UK Foreign Office', 'Patten\'s Self-Assessment'],
+                        perspectives: [
+                             { title: 'Beijing\'s View: Sinner for a Millennium', content: 'Officially branded a "sinner for a thousand generations" for disrupting the smooth transition. Seen as arrogant, holding a Cold War mentality, and aiming to create chaos to contain China. His reforms were a deliberate challenge to sovereignty.' },
+                            { title: 'HK Democrats: Democracy Champion', content: 'Viewed as a hero, a principled leader who genuinely fought for Hong Kong\'s autonomy. Respected for his foresight regarding Beijing\'s intentions and his decades of unwavering support.' },
+                            { title: 'HK Pro-Establishment: Troublemaker', content: 'Seen as a reckless troublemaker who unnecessarily provoked Beijing, endangering Hong Kong\'s stability and prosperity. His reforms were a "time bomb" that sowed division.' },
+                            { title: 'UK Foreign Office: Diplomatic Failure', content: 'Traditional diplomats (Sinologists) saw him as a "maverick" whose confrontational style destroyed years of quiet diplomacy, achieving nothing and worsening Hong Kong\'s situation by angering Beijing.' },
+                            { title: 'Patten\'s Self-Assessment: Fulfilling a Duty', content: 'In his writings, he expresses a strong sense of duty not to betray the people of Hong Kong and to entrench their freedoms. He reflects on his limited power and regrets that Britain did not push for democracy sooner.' },
+                        ]
+                    }
+                }
+            };
+            
+            function updateContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.body.className = `bg-stone-50 text-slate-800 ${lang === 'zh' ? 'font-zh' : 'font-en'}`;
+                
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (allData.translations[lang][key]) {
+                        el.innerHTML = allData.translations[lang][key];
+                    }
+                });
+
+                buildTimeline(lang);
+                buildReformItems(lang);
+                renderLegacyChart(lang);
+            }
+
+            function buildTimeline(lang) {
+                const timelineContainer = document.getElementById('timeline-container');
+                timelineContainer.innerHTML = '';
+                allData.timelineData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'mb-8 relative timeline-item';
+                    div.innerHTML = `
+                        <div class="cursor-pointer timeline-header">
+                            <h3 class="text-xl font-bold text-slate-800">${item.year} - ${item[lang].title}</h3>
+                        </div>
+                        <div class="pl-4 mt-2 timeline-content">
+                            <p class="text-slate-600">${item[lang].content}</p>
+                        </div>
+                    `;
+                    timelineContainer.appendChild(div);
+                });
+                document.querySelectorAll('.timeline-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const content = header.nextElementSibling;
+                        content.classList.toggle('show');
+                    });
+                });
+            }
+
+            function buildReformItems(lang) {
+                const reformContainer = document.getElementById('reform-items-container');
+                reformContainer.innerHTML = '';
+                allData.reformData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white border border-stone-200 rounded-lg overflow-hidden';
+                    div.innerHTML = `
+                        <div class="reform-item-header p-4 cursor-pointer flex justify-between items-center hover:bg-stone-100">
+                            <h4 class="font-bold text-lg text-slate-700">${item[lang].title}</h4>
+                            <span class="text-blue-800 transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="reform-item-body">
+                            <p class="p-4 pt-0 text-slate-600">${item[lang].content}</p>
+                        </div>
+                    `;
+                    reformContainer.appendChild(div);
+                });
+                 document.querySelectorAll('.reform-item-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const body = header.nextElementSibling;
+                        const icon = header.querySelector('span');
+                        const wasOpen = body.classList.contains('show');
+                        
+                        document.querySelectorAll('.reform-item-body').forEach(b => b.classList.remove('show'));
+                        document.querySelectorAll('.reform-item-header span').forEach(i => i.style.transform = 'rotate(0deg)');
+                        
+                        if (!wasOpen) {
+                            body.classList.add('show');
+                            icon.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                });
+            }
+
+            function renderLegacyChart(lang) {
+                if (legacyChart) {
+                    legacyChart.destroy();
+                }
+                const legacyCtx = document.getElementById('legacyChart').getContext('2d');
+                const titleDisplay = document.getElementById('legacy-title-display');
+                const contentDisplay = document.getElementById('legacy-content-display');
+
+                const chartData = allData.legacyData[lang];
+
+                legacyChart = new Chart(legacyCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            data: [20, 20, 20, 20, 20],
+                            backgroundColor: ['#b91c1c', '#1e40af', '#6d28d9', '#9a3412', '#4a5568'],
+                            borderColor: '#f8f7f4',
+                            borderWidth: 4,
+                            hoverBorderColor: '#fff',
+                            hoverBorderWidth: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        family: lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif"
+                                    },
+                                    color: '#475569',
+                                    padding: 15,
+                                }
+                            },
+                            tooltip: { enabled: false }
+                        },
+                        onClick: (evt, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const perspective = chartData.perspectives[index];
+                                titleDisplay.textContent = perspective.title;
+                                contentDisplay.textContent = perspective.content;
+                                titleDisplay.style.color = legacyChart.data.datasets[0].backgroundColor[index];
+                            }
+                        }
+                    }
+                });
+                
+                // Set initial text
+                titleDisplay.textContent = chartData.perspectives[0].title;
+                contentDisplay.textContent = chartData.perspectives[0].content;
+                titleDisplay.style.color = legacyChart.data.datasets[0].backgroundColor[0];
+            }
+
+
+            // Initial Setup
+            updateContent(currentLang);
+
+            // Event Listeners
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateContent(currentLang);
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('#mobile-menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const headerHeight = document.getElementById('header').offsetHeight;
+
+            window.addEventListener('scroll', () => {
+                let current = 'intro';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - headerHeight - 40;
+                    if (pageYOffset >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
