@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">接住掉落的方塊</title>
+    <style>
+        /* 基本頁面樣式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1a; /* 深色背景 */
+            color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden; /* 隱藏滾動條 */
+        }
+
+        /* 遊戲標題 */
+        h1 {
+            color: #4d90fe;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        /* 遊戲畫布 */
+        canvas {
+            background-color: #000;
+            border: 3px solid #4d90fe;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(77, 144, 254, 0.5);
+            max-width: 100%; /* 響應式寬度 */
+            cursor: none; /* 在畫布上隱藏滑鼠指針 */
+        }
+
+        /* 遊戲資訊和控制按鈕的容器 */
+        .controls-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px; /* 按鈕間距 */
+            width: 600px;
+            max-width: 90%;
+            margin-top: 15px;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-size: 1.2rem;
+        }
+        
+        /* 按鈕通用樣式 */
+        button {
+            background: linear-gradient(145deg, #4d90fe, #4784e8);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+            border-bottom: 3px solid #3b6ab2;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 語言切換按鈕的特殊樣式 */
+        #langButton {
+            background: #555;
+            border-bottom-color: #333;
+        }
+
+        /* 遊戲說明 */
+        .instructions {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1 id="gameTitle">接住掉落的方塊</h1>
+
+    <!-- 遊戲畫布元素 -->
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+    
+    <div class="controls-container">
+        <div class="game-controls">
+            <span id="score">分數: 0</span>
+            <button id="startButton">開始遊戲</button>
+        </div>
+        <button id="langButton">English</button>
+    </div>
+
+
+    <div class="instructions" id="instructionsText">
+        使用 ← → 方向鍵或滑鼠移動平台
+    </div>
+
+    <script>
+        // --- 語言翻譯物件 ---
+        const translations = {
+            en: {
+                pageTitle: 'Catch the Falling Blocks',
+                gameTitle: 'Catch the Falling Blocks',
+                score: 'Score: ',
+                startButton: 'Start Game',
+                restartButton: 'Restart',
+                instructions: 'Use ← → keys or mouse to move the platform',
+                gameOver: 'GAME OVER',
+                finalScore: 'Final Score: ',
+                initialMessage: 'Click "Start Game" to begin',
+                langButton: '中文'
+            },
+            zh: {
+                pageTitle: '接住掉落的方塊',
+                gameTitle: '接住掉落的方塊',
+                score: '分數: ',
+                startButton: '開始遊戲',
+                restartButton: '重新開始',
+                instructions: '使用 ← → 方向鍵或滑鼠移動平台',
+                gameOver: '遊戲結束',
+                finalScore: '最終分數: ',
+                initialMessage: '點擊「開始遊戲」按鈕來啟動',
+                langButton: 'English'
+            }
+        };
+        let currentLang = 'zh'; // 預設語言為繁體中文
+
+        // --- 變數初始化 ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 取得所有需要翻譯的 DOM 元素
+        const pageTitle = document.getElementById('pageTitle');
+        const gameTitle = document.getElementById('gameTitle');
+        const scoreElement = document.getElementById('score');
+        const startButton = document.getElementById('startButton');
+        const langButton = document.getElementById('langButton');
+        const instructionsText = document.getElementById('instructionsText');
+
+        let score = 0;
+        let gameOver = true;
+        let animationFrameId;
+
+        // --- 玩家設定 ---
+        const player = {
+            x: canvas.width / 2 - 40,
+            y: canvas.height - 20,
+            width: 80,
+            height: 10,
+            speed: 15,
+            dx: 0
+        };
+
+        // --- 方塊設定 ---
+        const blocks = [];
+        const blockSettings = {
+            width: 30,
+            height: 30,
+            speed: 2,
+            spawnRate: 1000 
+        };
+        let lastSpawn = -1;
+
+        // --- 控制 ---
+        let rightPressed = false;
+        let leftPressed = false;
+
+        document.addEventListener('keydown', keyDownHandler, false);
+        document.addEventListener('keyup', keyUpHandler, false);
+        document.addEventListener('mousemove', mouseMoveHandler, false);
+
+        function keyDownHandler(e) {
+            if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
+            else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
+        }
+
+        function keyUpHandler(e) {
+            if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
+            else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
+        }
+
+        function mouseMoveHandler(e) {
+            const rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left - player.width / 2;
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        }
+        
+        // --- 語言更新函式 ---
+        function updateLanguage() {
+            const lang = translations[currentLang];
+            pageTitle.innerText = lang.pageTitle;
+            gameTitle.innerText = lang.gameTitle;
+            scoreElement.innerText = lang.score + score;
+            instructionsText.innerText = lang.instructions;
+            langButton.innerText = lang.langButton;
+            
+            // 根據遊戲狀態更新按鈕文字和畫面
+            if (gameOver) {
+                startButton.innerText = lang.restartButton;
+                if (score > 0 || blocks.length > 0) {
+                     drawGameOver(); // 如果是遊戲結束狀態，重繪結束畫面
+                } else {
+                     drawInitialScreen(); // 如果是初始狀態，重繪初始畫面
+                }
+            } else {
+                startButton.innerText = lang.startButton;
+            }
+        }
+        
+        // --- 繪圖函式 ---
+        
+        function drawPlayer() {
+            ctx.beginPath();
+            ctx.rect(player.x, player.y, player.width, player.height);
+            ctx.fillStyle = '#4d90fe';
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBlocks() {
+            blocks.forEach(block => {
+                ctx.beginPath();
+                ctx.rect(block.x, block.y, block.width, block.height);
+                ctx.fillStyle = '#f0f0f0';
+                ctx.fill();
+                ctx.closePath();
+            });
+        }
+        
+        function drawGameOver() {
+            const lang = translations[currentLang];
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '40px Arial';
+            ctx.fillStyle = '#ff4136';
+            ctx.textAlign = 'center';
+            ctx.fillText(lang.gameOver, canvas.width / 2, canvas.height / 2 - 20);
+            ctx.font = '20px Arial';
+            ctx.fillStyle = 'white';
+            ctx.fillText(`${lang.finalScore}${score}`, canvas.width / 2, canvas.height / 2 + 20);
+        }
+
+        // --- 遊戲邏輯 ---
+
+        function movePlayerByKey() {
+            if (rightPressed && player.x < canvas.width - player.width) player.x += player.speed;
+            else if (leftPressed && player.x > 0) player.x -= player.speed;
+        }
+        
+        function spawnBlock(time) {
+            if (time > (lastSpawn + blockSettings.spawnRate)) {
+                lastSpawn = time;
+                blocks.push({
+                    x: Math.random() * (canvas.width - blockSettings.width),
+                    y: 0 - blockSettings.height,
+                    width: blockSettings.width,
+                    height: blockSettings.height,
+                    speed: blockSettings.speed + Math.random() * 2 
+                });
+            }
+        }
+        
+        function updateBlocks() {
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                const block = blocks[i];
+                block.y += block.speed;
+
+                if (block.y > canvas.height) {
+                    gameOver = true;
+                    return;
+                }
+
+                if (
+                    block.x < player.x + player.width &&
+                    block.x + block.width > player.x &&
+                    block.y < player.y + player.height &&
+                    block.y + block.height > player.y
+                ) {
+                    blocks.splice(i, 1);
+                    score++;
+                    scoreElement.innerText = translations[currentLang].score + score;
+                }
+            }
+        }
+        
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function update(time = 0) {
+            if (gameOver) {
+                drawGameOver();
+                startButton.innerText = translations[currentLang].restartButton;
+                cancelAnimationFrame(animationFrameId);
+                return;
+            }
+            
+            clearCanvas();
+            spawnBlock(time);
+            drawPlayer();
+            drawBlocks();
+            movePlayerByKey();
+            updateBlocks();
+            
+            animationFrameId = requestAnimationFrame(update);
+        }
+        
+        function resetGame() {
+            score = 0;
+            scoreElement.innerText = translations[currentLang].score + score;
+            player.x = canvas.width / 2 - 40;
+            blocks.length = 0; 
+            gameOver = false;
+        }
+
+        function startGame() {
+            if (gameOver) {
+                resetGame();
+                startButton.innerText = translations[currentLang].startButton;
+                update();
+            }
+        }
+        
+        // --- 事件監聽 ---
+        startButton.addEventListener('click', startGame);
+
+        langButton.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage();
+        });
+
+        // --- 初始繪製 ---
+        function drawInitialScreen() {
+             clearCanvas();
+             const lang = translations[currentLang];
+             ctx.font = '24px Arial';
+             ctx.fillStyle = 'white';
+             ctx.textAlign = 'center';
+             ctx.fillText(lang.initialMessage, canvas.width / 2, canvas.height / 2);
+             drawPlayer();
+        }
+
+        window.onload = () => {
+            updateLanguage(); // 在頁面載入時設定初始語言文字
+        };
+        
+    </script>
+</body>
+</html>
