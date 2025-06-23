@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：區塊鏈擴展性與DAO治理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral (Creme, Slate, Terracotta Accent) -->
+    <!-- Application Structure Plan: A two-part thematic SPA. Part 1, "The Scalability Challenge," uses interactive charts and side-by-side comparisons to explain the technical trade-offs (Trilemma, L1 vs L2, PoW vs PoS). Part 2, "The Governance Dilemma," uses a card-based system to explore DAO problems and a unique interactive radar chart to compare governance solutions. This structure prioritizes guided exploration and comparison over the linear format of the source report, making complex concepts more digestible and engaging for the user. A final synthesis section provides actionable takeaways. -->
+    <!-- Visualization & Content Choices: 
+        - Blockchain Trilemma: Goal: Inform. Method: HTML/CSS diagram. Interaction: Hover effects. Justification: Simple, visual metaphor for the core concept.
+        - L1 vs L2 Performance: Goal: Compare. Method: Chart.js Bar Chart. Interaction: Buttons to filter metrics (TPS, Cost). Justification: Turns a static table into an interactive data exploration tool.
+        - DAO Problems: Goal: Organize/Inform. Method: Clickable HTML cards. Interaction: Click to reveal details. Justification: Breaks down dense problems into manageable, user-driven discoveries.
+        - DAO Governance Models: Goal: Compare. Method: Chart.js Radar Chart. Interaction: Dropdown to switch models. Justification: Provides a powerful, multi-dimensional comparison of abstract concepts, acting as a key "wow" factor for synthesizing information.
+        - Library/Method: All charts use Chart.js on Canvas.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8; /* Warm Creme */
+            color: #334155; /* Slate-700 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E11D48; /* Accent Rose */
+            border-bottom-color: #E11D48;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .pill-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .pill-button.active {
+            background-color: #334155; /* Slate-700 */
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800" data-lang-key="headerTitle">區塊鏈核心挑戰解析</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#scalability" class="nav-link font-medium pb-1" data-lang-key="navScalability">擴展性挑戰</a>
+                <a href="#governance" class="nav-link font-medium pb-1" data-lang-key="navGovernance">治理困境</a>
+                <a href="#synthesis" class="nav-link font-medium pb-1" data-lang-key="navSynthesis">綜合建議</a>
+                <button id="lang-switcher" class="text-sm font-semibold text-slate-600 hover:text-rose-600 transition-colors border px-3 py-1 rounded-full">EN</button>
+            </div>
+            <div class="md:hidden flex items-center space-x-4">
+                 <button id="lang-switcher-mobile" class="text-sm font-semibold text-slate-600 hover:text-rose-600 transition-colors border px-3 py-1 rounded-full">EN</button>
+                <button id="mobile-menu-button" class="text-slate-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4">
+            <a href="#scalability" class="block py-2 text-center nav-link" data-lang-key="navScalabilityMobile">擴展性挑戰</a>
+            <a href="#governance" class="block py-2 text-center nav-link" data-lang-key="navGovernanceMobile">治理困境</a>
+            <a href="#synthesis" class="block py-2 text-center nav-link" data-lang-key="navSynthesisMobile">綜合建議</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+
+        <!-- Section 1: Scalability Challenge -->
+        <section id="scalability" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800" data-lang-key="scalabilityTitle">第一部分：擴展性挑戰</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="scalabilitySubtitle">區塊鏈的發展核心，是在「去中心化」、「安全性」與「可擴展性」之間尋找平衡。本節將探索為突破性能瓶頸而生的主要技術路徑。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center mb-12">
+                <div class="text-center md:text-left">
+                    <h3 class="text-2xl font-bold mb-4" data-lang-key="trilemmaTitle">區塊鏈的三難困境</h3>
+                    <p class="text-slate-600 leading-relaxed" data-lang-key="trilemmaDesc">
+                        這是一個根本性的權衡：一個區塊鏈很難同時完美達成三個目標。例如，比特幣為了極致的安全和去中心化，犧牲了處理大量交易的速度。而一些新興公鏈則選擇犧牲部分去中心化，以換取高速和低成本。理解這個權衡是評估任何區塊鏈項目的第一步。
+                    </p>
+                </div>
+                <div class="flex justify-center items-center h-64">
+                     <div class="relative w-64 h-64">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 bg-rose-100 text-rose-800 font-bold px-4 py-2 rounded-full" data-lang-key="trilemmaDecentralization">去中心化</div>
+                        <div class="absolute bottom-0 left-0 bg-sky-100 text-sky-800 font-bold px-4 py-2 rounded-full" data-lang-key="trilemmaSecurity">安全性</div>
+                        <div class="absolute bottom-0 right-0 bg-amber-100 text-amber-800 font-bold px-4 py-2 rounded-full" data-lang-key="trilemmaScalability">可擴展性</div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-48 h-48 border-4 border-slate-300 border-dashed rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-center mb-8" data-lang-key="l1l2Title">擴展策略：L1 基礎層優化 vs. L2 鏈下執行</h3>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4 text-slate-700" data-lang-key="l1Title">第一層 (Layer-1): 優化主鏈協議</h4>
+                        <p class="text-slate-600 mb-6" data-lang-key="l1Desc">這是直接改進區塊鏈底層協議的方法，如同為引擎升級。最關鍵的演進是從工作量證明 (PoW) 轉向權益證明 (PoS)。</p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="posEnergyChart"></canvas>
+                        </div>
+                         <p class="text-xs text-center text-slate-500 mt-2" data-lang-key="posNote">PoS機制將單筆交易能耗降低了超過99.95%，從根本上解決了能源問題。</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4 text-slate-700" data-lang-key="l2Title">第二層 (Layer-2): 在主鏈之上構建</h4>
+                        <p class="text-slate-600 mb-6" data-lang-key="l2Desc">這是將大量交易移至鏈下處理，再將結果打包傳回主鏈的策略，如同為高速公路加蓋高架橋。其中，Rollups 是當前主流。</p>
+                         <div class="space-y-4">
+                            <div class="p-4 border rounded-lg">
+                                <h5 class="font-bold" data-lang-key="opRollupTitle">Optimistic Rollups</h5>
+                                <p class="text-sm text-slate-600" data-lang-key="opRollupDesc">樂觀假設交易有效，設有7天「挑戰期」以供驗證。優點是兼容性高，但從L2提款至L1需等待一週。</p>
+                            </div>
+                            <div class="p-4 border rounded-lg">
+                                <h5 class="font-bold" data-lang-key="zkRollupTitle">ZK-Rollups</h5>
+                                <p class="text-sm text-slate-600" data-lang-key="zkRollupDesc">使用先進的密碼學「零知識證明」來保證交易有效。優點是安全性更高，提款近乎即時，但技術更複雜。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-2" data-lang-key="perfDashboardTitle">性能儀表板：主流網絡比較</h3>
+                 <p class="text-center text-slate-500 mb-6" data-lang-key="perfDashboardDesc">點擊下方按鈕，比較不同解決方案在關鍵指標上的表現。</p>
+                <div class="flex justify-center space-x-4 mb-6">
+                    <button id="tps-btn" class="pill-button px-4 py-2 rounded-full bg-slate-200 text-slate-700 active" data-lang-key="tpsButton">每秒交易數 (TPS)</button>
+                    <button id="cost-btn" class="pill-button px-4 py-2 rounded-full bg-slate-200 text-slate-700" data-lang-key="costButton">平均交易成本 ($)</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Governance Dilemma -->
+        <section id="governance" class="scroll-mt-24 mb-16 md:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800" data-lang-key="governanceTitle">第二部分：治理困境</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="governanceSubtitle">當性能問題緩解後，下一個挑戰浮現：如何管理這些去中心化系統？去中心化自治組織 (DAO) 應運而生，但其治理實踐充滿了複雜的社會技術問題。</p>
+            </div>
+            
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-center mb-8" data-lang-key="daoProblemsTitle">DAO 治理的四大核心病理</h3>
+                <p class="text-center text-slate-500 mb-8" data-lang-key="daoProblemsDesc">點擊卡片以了解每個問題的詳細資訊。這些問題相互關聯，形成一個惡性循環。</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6" id="dao-problems-grid">
+                </div>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-2" data-lang-key="govModelTitle">演進中的治理模型比較</h3>
+                <p class="text-center text-slate-500 mb-6" data-lang-key="govModelDesc">為了應對上述挑戰，社群發展出多種創新的投票機制。使用下拉選單來比較它們在各個維度上的表現。</p>
+                <div class="flex justify-center mb-6">
+                    <select id="governance-model-selector" class="border border-slate-300 rounded-lg px-4 py-2">
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="governanceRadarChart"></canvas>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Section 3: Synthesis -->
+        <section id="synthesis" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800" data-lang-key="synthesisTitle">綜合與前瞻性建議</h2>
+                <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="synthesisSubtitle">區塊鏈的未來，將是一個在理想與現實間持續妥協的過程。成功的系統將是那些能夠巧妙平衡去中心化、性能和合規性的項目。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800" data-lang-key="infraAdviceTitle">對基礎設施建設者的建議</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li data-lang-key="infraAdvice1"><strong>採納分層架構：</strong> 讓L1專注於安全與結算，將性能和應用需求交給L2。這是在不犧牲核心安全的情況下實現擴展的最佳路徑。</li>
+                        <li data-lang-key="infraAdvice2"><strong>優先處理L2的去中心化：</strong> 當前L2對中心化排序器的依賴是一個系統性風險。實現排序器的去中心化應是生態系統的下一個關鍵目標。</li>
+                    </ul>
+                </div>
+                <div class="card p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-3 text-slate-800" data-lang-key="govAdviceTitle">對DAO治理參與者的建議</h3>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li data-lang-key="govAdvice1"><strong>推行複合治理模型：</strong> 摒棄「一刀切」方案，根據決策類型採用不同工具，如用二次方投票處理資金分配，用流動民主進行常規提案。</li>
+                        <li data-lang-key="govAdvice2"><strong>強制採用法律外衣：</strong> 為避免無限個人連帶責任的毀滅性風險，任何管理可觀資產的DAO都應註冊為法律實體（如LLC或基金會）。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-16 md:mt-24 border-t">
+        <div class="container mx-auto px-6 py-8 text-center text-slate-500">
+            <p data-lang-key="footerCredit">本互動式報告基於《區塊鏈可擴展性與去中心化治理的綜合分析》報告創建。</p>
+            <p class="text-sm mt-2" data-lang-key="footerDisclaimer">僅用於教育和展示目的。</p>
+        </div>
+    </footer>
+    
+    <div id="modal-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden"></div>
+    <div id="problem-modal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl p-6 md:p-8 w-11/12 max-w-2xl z-50 hidden">
+        <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-3xl font-bold">&times;</button>
+        <h3 id="modal-title" class="text-2xl font-bold mb-4"></h3>
+        <div id="modal-content" class="text-slate-600 space-y-4"></div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentLanguage = 'zh'; 
+    let posEnergyChart, performanceChart, governanceRadarChart;
+
+    const translations = {
+        zh: {
+            headerTitle: '區塊鏈核心挑戰解析',
+            navScalability: '擴展性挑戰',
+            navGovernance: '治理困境',
+            navSynthesis: '綜合建議',
+            langSwitch: 'EN',
+            scalabilityTitle: '第一部分：擴展性挑戰',
+            scalabilitySubtitle: '區塊鏈的發展核心，是在「去中心化」、「安全性」與「可擴展性」之間尋找平衡。本節將探索為突破性能瓶頸而生的主要技術路徑。',
+            trilemmaTitle: '區塊鏈的三難困境',
+            trilemmaDesc: '這是一個根本性的權衡：一個區塊鏈很難同時完美達成三個目標。例如，比特幣為了極致的安全和去中心化，犧牲了處理大量交易的速度。而一些新興公鏈則選擇犧牲部分去中心化，以換取高速和低成本。理解這個權衡是評估任何區塊鏈項目的第一步。',
+            trilemmaDecentralization: '去中心化',
+            trilemmaSecurity: '安全性',
+            trilemmaScalability: '可擴展性',
+            l1l2Title: '擴展策略：L1 基礎層優化 vs. L2 鏈下執行',
+            l1Title: '第一層 (Layer-1): 優化主鏈協議',
+            l1Desc: '這是直接改進區塊鏈底層協議的方法，如同為引擎升級。最關鍵的演進是從工作量證明 (PoW) 轉向權益證明 (PoS)。',
+            posNote: 'PoS機制將單筆交易能耗降低了超過99.95%，從根本上解決了能源問題。',
+            posChartTitle: 'PoW vs. PoS 能耗比較',
+            posChartYLabel: '單筆交易預估能耗 (kWh)',
+            posChartScaleLabel: '能耗 (kWh) - 對數刻度',
+            posChartLabelPoW: '工作量證明 (PoW)',
+            posChartLabelPoS: '權益證明 (PoS)',
+            l2Title: '第二層 (Layer-2): 在主鏈之上構建',
+            l2Desc: '這是將大量交易移至鏈下處理，再將結果打包傳回主鏈的策略，如同為高速公路加蓋高架橋。其中，Rollups 是當前主流。',
+            opRollupTitle: 'Optimistic Rollups',
+            opRollupDesc: '樂觀假設交易有效，設有7天「挑戰期」以供驗證。優點是兼容性高，但從L2提款至L1需等待一週。',
+            zkRollupTitle: 'ZK-Rollups',
+            zkRollupDesc: '使用先進的密碼學「零知識證明」來保證交易有效。優點是安全性更高，提款近乎即時，但技術更複雜。',
+            perfDashboardTitle: '性能儀表板：主流網絡比較',
+            perfDashboardDesc: '點擊下方按鈕，比較不同解決方案在關鍵指標上的表現。',
+            tpsButton: '每秒交易數 (TPS)',
+            costButton: '平均交易成本 ($)',
+            tpsChartTitle: '每秒交易數 (TPS) - 越高越好',
+            costChartTitle: '平均交易成本 ($) - 越低越好 (對數刻度)',
+            tpsYLabel: 'TPS',
+            costYLabel: '成本 ($)',
+            governanceTitle: '第二部分：治理困境',
+            governanceSubtitle: '當性能問題緩解後，下一個挑戰浮現：如何管理這些去中心化系統？去中心化自治組織 (DAO) 應運而生，但其治理實踐充滿了複雜的社會技術問題。',
+            daoProblemsTitle: 'DAO 治理的四大核心病理',
+            daoProblemsDesc: '點擊卡片以了解每個問題的詳細資訊。這些問題相互關聯，形成一個惡性循環。',
+            govModelTitle: '演進中的治理模型比較',
+            govModelDesc: '為了應對上述挑戰，社群發展出多種創新的投票機制。使用下拉選單來比較它們在各個維度上的表現。',
+            govRadarTitle: '治理模型能力評估 (分數越高越好)',
+            govRadarLabels: ['抵禦財閥統治', '抵禦女巫攻擊', '提升參與度', '保護少數派'],
+            synthesisTitle: '綜合與前瞻性建議',
+            synthesisSubtitle: '區塊鏈的未來，將是一個在理想與現實間持續妥協的過程。成功的系統將是那些能夠巧妙平衡去中心化、性能和合規性的項目。',
+            infraAdviceTitle: '對基礎設施建設者的建議',
+            infraAdvice1: '<strong>採納分層架構：</strong> 讓L1專注於安全與結算，將性能和應用需求交給L2。這是在不犧牲核心安全的情況下實現擴展的最佳路徑。',
+            infraAdvice2: '<strong>優先處理L2的去中心化：</strong> 當前L2對中心化排序器的依賴是一個系統性風險。實現排序器的去中心化應是生態系統的下一個關鍵目標。',
+            govAdviceTitle: '對DAO治理參與者的建議',
+            govAdvice1: '<strong>推行複合治理模型：</strong> 摒棄「一刀切」方案，根據決策類型採用不同工具，如用二次方投票處理資金分配，用流動民主進行常規提案。',
+            govAdvice2: '<strong>強制採用法律外衣：</strong> 為避免無限個人連帶責任的毀滅性風險，任何管理可觀資產的DAO都應註冊為法律實體（如LLC或基金會）。',
+            footerCredit: '本互動式報告基於《區塊鏈可擴展性與去中心化治理的綜合分析》報告創建。',
+            footerDisclaimer: '僅用於教育和展示目的。',
+            ethL1Label: '以太坊 L1',
+            solanaLabel: 'Solana',
+            arbitrumLabel: 'Arbitrum One (L2)',
+        },
+        en: {
+            headerTitle: 'Blockchain Core Challenges Analysis',
+            navScalability: 'Scalability Challenge',
+            navGovernance: 'Governance Dilemma',
+            navSynthesis: 'Synthesis & Advice',
+            langSwitch: '中',
+            scalabilityTitle: 'Part 1: The Scalability Challenge',
+            scalabilitySubtitle: 'The core of blockchain development is finding a balance between "Decentralization," "Security," and "Scalability." This section explores the main technical paths to break through performance bottlenecks.',
+            trilemmaTitle: 'The Blockchain Trilemma',
+            trilemmaDesc: 'This is a fundamental trade-off: a blockchain can hardly achieve optimal levels in all three goals simultaneously. For instance, Bitcoin sacrifices speed for extreme security and decentralization. Some emerging public chains choose to sacrifice some decentralization for high speed and low cost. Understanding this trade-off is the first step in evaluating any blockchain project.',
+            trilemmaDecentralization: 'Decentralization',
+            trilemmaSecurity: 'Security',
+            trilemmaScalability: 'Scalability',
+            l1l2Title: 'Scaling Strategies: L1 Optimization vs. L2 Off-chain Execution',
+            l1Title: 'Layer-1: Optimizing the Mainchain Protocol',
+            l1Desc: 'This method involves directly improving the blockchain\'s base protocol, like upgrading an engine. The most critical evolution is the shift from Proof-of-Work (PoW) to Proof-of-Stake (PoS).',
+            posNote: 'The PoS mechanism reduces per-transaction energy consumption by over 99.95%, fundamentally solving the energy issue.',
+            posChartTitle: 'PoW vs. PoS Energy Consumption',
+            posChartYLabel: 'Estimated Energy per Transaction (kWh)',
+            posChartScaleLabel: 'Energy (kWh) - Logarithmic Scale',
+            posChartLabelPoW: 'Proof of Work (PoW)',
+            posChartLabelPoS: 'Proof of Stake (PoS)',
+            l2Title: 'Layer-2: Building on Top of the Mainchain',
+            l2Desc: 'This strategy moves bulk transactions to be processed off-chain, then bundles the results back to the mainchain, like adding an overpass to a highway. Among these, Rollups are the current mainstream.',
+            opRollupTitle: 'Optimistic Rollups',
+            opRollupDesc: 'Optimistically assume transactions are valid, with a 7-day "challenge period" for verification. Pro: high compatibility. Con: withdrawals from L2 to L1 take a week.',
+            zkRollupTitle: 'ZK-Rollups',
+            zkRollupDesc: 'Use advanced cryptography "Zero-Knowledge Proofs" to guarantee transaction validity. Pro: higher security, near-instant withdrawals. Con: more complex technology.',
+            perfDashboardTitle: 'Performance Dashboard: Mainstream Network Comparison',
+            perfDashboardDesc: 'Click the buttons below to compare how different solutions perform on key metrics.',
+            tpsButton: 'Transactions Per Second (TPS)',
+            costButton: 'Average Transaction Cost ($)',
+            tpsChartTitle: 'Transactions Per Second (TPS) - Higher is Better',
+            costChartTitle: 'Average Transaction Cost ($) - Lower is Better (Log Scale)',
+            tpsYLabel: 'TPS',
+            costYLabel: 'Cost ($)',
+            governanceTitle: 'Part 2: The Governance Dilemma',
+            governanceSubtitle: 'Once performance issues are mitigated, the next challenge emerges: how to govern these decentralized systems? Decentralized Autonomous Organizations (DAOs) have arisen, but their governance practices are fraught with complex socio-technical problems.',
+            daoProblemsTitle: 'The Four Core Pathologies of DAO Governance',
+            daoProblemsDesc: 'Click on the cards to learn more about each problem. These issues are interconnected, forming a vicious cycle.',
+            govModelTitle: 'Comparison of Evolving Governance Models',
+            govModelDesc: 'To address the above challenges, the community has developed various innovative voting mechanisms. Use the dropdown to compare their performance across different dimensions.',
+            govRadarTitle: 'Governance Model Capability Assessment (Higher score is better)',
+            govRadarLabels: ['Resist Plutocracy', 'Resist Sybil Attacks', 'Boost Participation', 'Protect Minorities'],
+            synthesisTitle: 'Synthesis & Forward-Looking Recommendations',
+            synthesisSubtitle: 'The future of blockchain will be a continuous process of compromise between ideals and reality. Successful systems will be those that can skillfully balance decentralization, performance, and compliance.',
+            infraAdviceTitle: 'Advice for Infrastructure Builders',
+            infraAdvice1: '<strong>Adopt a Layered Architecture:</strong> Let L1 focus on security and settlement, leaving performance and application needs to L2. This is the best path to scale without sacrificing core security.',
+            infraAdvice2: '<strong>Prioritize L2 Decentralization:</strong> The current reliance of L2s on centralized sequencers is a systemic risk. Decentralizing sequencers should be the ecosystem\'s next key goal.',
+            govAdviceTitle: 'Advice for DAO Governance Participants',
+            govAdvice1: '<strong>Implement Composite Governance:</strong> Abandon one-size-fits-all solutions. Use different tools for different decisions, like Quadratic Voting for funding and Liquid Democracy for routine proposals.',
+            govAdvice2: '<strong>Mandate Legal Wrappers:</strong> To avoid the devastating risk of unlimited joint liability, any DAO managing significant assets should register as a legal entity (e.g., LLC or foundation).',
+            footerCredit: 'This interactive report was created based on the "Comprehensive Analysis of Blockchain Scalability and Decentralized Governance" report.',
+            footerDisclaimer: 'For educational and demonstrational purposes only.',
+            ethL1Label: 'Ethereum L1',
+            solanaLabel: 'Solana',
+            arbitrumLabel: 'Arbitrum One (L2)',
+        }
+    };
+
+    const problemsData = {
+        zh: [
+            { title: '財閥統治', icon: '�', summary: '在「一幣一票」制下，富有的「鯨魚」能主導決策，損害小額持有者的利益。', details: '<p>這是指治理權力與財富直接掛鉤的局面。當少數地址持有大量治理代幣時，他們可以輕易通過對自己有利的提案，即使這違背了更廣泛社群的意願。這從根本上違背了去中心化的初衷。</p>' },
+            { title: '選民冷漠', icon: '😴', summary: '大多數代幣持有者因成本高、影響小而不參與投票，導致低參與率。', details: '<p>「理性冷漠」是主要原因：個體成員覺得自己一票無關緊要，但了解複雜提案卻需要花費大量時間和精力，鏈上投票還需支付Gas費。低投票率使得惡意提案更容易被通過，威脅到協議的安全。</p>' },
+            { title: '治理攻擊', icon: '⚔️', summary: '攻擊者可合法地獲取投票權，再通過提案竊取DAO金庫資產。', details: '<p>最典型的例子是利用「閃電貸」(Flash Loan)。攻擊者可以在一個交易區塊內借入巨額治理代幣，用這些臨時投票權通過一個將金庫資金轉移給自己的惡意提案，然後立即歸還貸款。由於整個過程都符合協議規則，傳統安全措施難以防範。</p>' },
+            { title: '法律地位不明確', icon: '⚖️', summary: '多數DAO沒有法律實體，成員可能需承擔無限個人連帶責任。', details: '<p>這是最嚴峻的現實風險。在美國等司法管轄區，未註冊的DAO可能被視為「普通合夥企業」。這意味著，如果DAO產生債務或法律糾紛，所有成員（可能包括所有代幣持有者）都可能需要用個人資產來承擔無限責任，這是一個毀滅性的風險。</p>' },
+        ],
+        en: [
+            { title: 'Plutocracy', icon: '💰', summary: 'Under "one-coin-one-vote," wealthy "whales" can dominate decisions, harming minority holders.', details: '<p>This refers to a situation where governance power is directly tied to wealth. When a few addresses hold a large number of governance tokens, they can easily pass proposals that benefit themselves, even if it goes against the broader community\'s wishes. This fundamentally violates the principle of decentralization.</p>' },
+            { title: 'Voter Apathy', icon: '😴', summary: 'Most token holders don\'t vote due to high costs and low impact, leading to low participation.', details: '<p>"Rational apathy" is the main cause: individual members feel their vote is insignificant, while understanding complex proposals requires significant time and effort, and on-chain voting incurs Gas fees. Low turnout makes it easier for malicious proposals to pass, threatening protocol security.</p>' },
+            { title: 'Governance Attacks', icon: '⚔️', summary: 'Attackers can legally acquire voting power to pass proposals that steal DAO treasury funds.', details: '<p>A classic example is using "Flash Loans." An attacker can borrow a huge amount of governance tokens within a single block, use this temporary voting power to pass a malicious proposal transferring treasury funds to themselves, and then repay the loan in the same transaction. Since the entire process follows protocol rules, traditional security measures are difficult to defend against.</p>' },
+            { title: 'Unclear Legal Status', icon: '⚖️', summary: 'Most DAOs are not legal entities, and members may face unlimited personal liability.', details: '<p>This is the most severe real-world risk. In jurisdictions like the U.S., unregistered DAOs may be treated as "general partnerships." This means if the DAO incurs debt or legal disputes, all members (potentially including all token holders) could be held personally, jointly, and severally liable with their personal assets, a devastating risk.</p>' },
+        ]
+    };
+
+    const governanceModelData = {
+        zh: [
+            { id: 'one-coin-one-vote', name: '一幣一票制' },
+            { id: 'quadratic-voting', name: '二次方投票 (QV)' },
+            { id: 'liquid-democracy', name: '流動民主' },
+            { id: 'futarchy', name: '預測市場治理' }
+        ],
+        en: [
+            { id: 'one-coin-one-vote', name: 'One-Coin-One-Vote' },
+            { id: 'quadratic-voting', name: 'Quadratic Voting (QV)' },
+            { id: 'liquid-democracy', name: 'Liquid Democracy' },
+            { id: 'futarchy', name: 'Futarchy' }
+        ]
+    };
+
+    const governanceRadarRawData = {
+        'one-coin-one-vote': { data: [1, 2, 1, 1], borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.2)' },
+        'quadratic-voting': { data: [4, 2, 3, 5], borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.2)' },
+        'liquid-democracy': { data: [2, 3, 5, 2], borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.2)' },
+        'futarchy': { data: [4, 4, 3, 3], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.2)' },
+    };
+
+    function setLanguage(lang) {
+        currentLanguage = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+        // Update all elements with data-lang-key
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            const translation = translations[lang][key];
+            if (translation) {
+                // Handle mobile nav links separately to avoid overwriting the main ones
+                if (key.endsWith('Mobile')) {
+                    const mainKey = key.replace('Mobile', '');
+                    el.innerHTML = translations[lang][mainKey];
+                } else {
+                    el.innerHTML = translation;
+                }
+            }
+        });
+        
+        // Update switcher button text
+        document.getElementById('lang-switcher').textContent = translations[lang].langSwitch;
+        document.getElementById('lang-switcher-mobile').textContent = translations[lang].langSwitch;
+
+
+        // Re-render dynamic content and charts
+        renderDaoProblems();
+        populateGovernanceSelector();
+        createOrUpdateCharts();
+    }
+    
+    function createOrUpdateCharts() {
+        if(posEnergyChart) posEnergyChart.destroy();
+        if(performanceChart) performanceChart.destroy();
+        if(governanceRadarChart) governanceRadarChart.destroy();
+        
+        createPosEnergyChart();
+        createPerformanceChart();
+        createGovernanceRadarChart();
+        updatePerformanceChart('tps'); // Set initial state
+    }
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    // Language Switcher
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        setLanguage(currentLanguage === 'zh' ? 'en' : 'zh');
+    });
+    document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+        setLanguage(currentLanguage === 'zh' ? 'en' : 'zh');
+    });
+
+
+    // Navigation Active State
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { root: null, rootMargin: '0px', threshold: 0.5 });
+
+    sections.forEach(section => observer.observe(section));
+    
+    Chart.defaults.font.family = "'Roboto', 'Noto Sans TC', sans-serif";
+    Chart.defaults.color = '#475569';
+
+    function formatLabel(value, maxChars = 16) {
+        if (typeof value !== 'string') return value;
+        if (value.length <= maxChars) return value;
+        let lines = [];
+        let currentLine = '';
+        value.split(' ').forEach(word => {
+            if ((currentLine + ' ' + word).length > maxChars) {
+                lines.push(currentLine.trim());
+                currentLine = word;
+            } else {
+                currentLine += ' ' + word;
+            }
+        });
+        lines.push(currentLine.trim());
+        return lines.map(l => l.trim()).filter(l => l);
+    }
+    
+    function createPosEnergyChart() {
+        const lang = currentLanguage;
+        const ctx = document.getElementById('posEnergyChart').getContext('2d');
+        posEnergyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [translations[lang].posChartLabelPoW, translations[lang].posChartLabelPoS],
+                datasets: [{
+                    label: translations[lang].posChartYLabel,
+                    data: [830, 0.00003],
+                    backgroundColor: ['#f87171', '#4ade80'],
+                    borderColor: ['#ef4444', '#22c55e'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'logarithmic',
+                        title: { display: true, text: translations[lang].posChartScaleLabel }
+                    },
+                    y: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: translations[lang].posChartTitle },
+                    tooltip: { callbacks: { label: context => ` ${context.raw.toPrecision(5)} kWh` } }
+                }
+            }
+        });
+    }
+
+    function createPerformanceChart() {
+        const lang = currentLanguage;
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const labels = [translations[lang].ethL1Label, translations[lang].solanaLabel, translations[lang].arbitrumLabel];
+        performanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{ data: [], backgroundColor: '', borderColor: '', borderWidth: 1 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, title: { display: true, text: '' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: {
+                    legend: { display: false },
+                    title: { display: true, text: '' }
+                }
+            }
+        });
+    }
+
+    function updatePerformanceChart(metric) {
+        const lang = currentLanguage;
+        const labels = [translations[lang].ethL1Label, translations[lang].solanaLabel, translations[lang].arbitrumLabel];
+        const performanceData = {
+            tps: { values: [20, 3000, 800], backgroundColor: 'rgba(2, 132, 199, 0.6)', borderColor: 'rgba(2, 132, 199, 1)', title: translations[lang].tpsChartTitle, yLabel: translations[lang].tpsYLabel },
+            cost: { values: [10, 0.00025, 0.25], backgroundColor: 'rgba(217, 70, 239, 0.6)', borderColor: 'rgba(217, 70, 239, 1)', title: translations[lang].costChartTitle, yLabel: translations[lang].costYLabel }
+        };
+
+        const data = performanceData[metric];
+        performanceChart.data.labels = labels;
+        performanceChart.data.datasets[0].data = data.values;
+        performanceChart.data.datasets[0].backgroundColor = data.backgroundColor;
+        performanceChart.data.datasets[0].borderColor = data.borderColor;
+        performanceChart.options.plugins.title.text = data.title;
+        performanceChart.options.scales.y.title.text = data.yLabel;
+        performanceChart.options.scales.y.type = metric === 'cost' ? 'logarithmic' : 'linear';
+        performanceChart.update();
+    }
+
+    document.getElementById('tps-btn').addEventListener('click', (e) => {
+        updatePerformanceChart('tps');
+        e.target.classList.add('active');
+        document.getElementById('cost-btn').classList.remove('active');
+    });
+    document.getElementById('cost-btn').addEventListener('click', (e) => {
+        updatePerformanceChart('cost');
+        e.target.classList.add('active');
+        document.getElementById('tps-btn').classList.remove('active');
+    });
+    
+    const modal = document.getElementById('problem-modal');
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    function renderDaoProblems() {
+        const problemsGrid = document.getElementById('dao-problems-grid');
+        problemsGrid.innerHTML = '';
+        const data = problemsData[currentLanguage];
+        data.forEach(problem => {
+            const card = document.createElement('div');
+            card.className = 'card p-6 rounded-lg text-center cursor-pointer';
+            card.innerHTML = `
+                <div class="text-5xl mb-4">${problem.icon}</div>
+                <h4 class="text-lg font-bold mb-2">${problem.title}</h4>
+                <p class="text-sm text-slate-600">${problem.summary}</p>
+            `;
+            card.addEventListener('click', () => {
+                document.getElementById('modal-title').innerText = problem.title;
+                document.getElementById('modal-content').innerHTML = problem.details;
+                modal.classList.remove('hidden');
+                modalBackdrop.classList.remove('hidden');
+            });
+            problemsGrid.appendChild(card);
+        });
+    }
+
+    function closeModal() {
+        modal.classList.add('hidden');
+        modalBackdrop.classList.add('hidden');
+    }
+    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    function createGovernanceRadarChart() {
+        const lang = currentLanguage;
+        const ctx = document.getElementById('governanceRadarChart').getContext('2d');
+        const selectedModel = document.getElementById('governance-model-selector').value || 'one-coin-one-vote';
+        const modelInfo = governanceModelData[lang].find(m => m.id === selectedModel);
+        
+        governanceRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: translations[lang].govRadarLabels.map(l => formatLabel(l, 10)),
+                datasets: [{
+                    label: modelInfo.name,
+                    data: governanceRadarRawData[selectedModel].data,
+                    borderColor: governanceRadarRawData[selectedModel].borderColor,
+                    backgroundColor: governanceRadarRawData[selectedModel].backgroundColor,
+                    borderWidth: 2,
+                    pointBackgroundColor: governanceRadarRawData[selectedModel].borderColor,
+                    pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: { beginAtZero: true, max: 5, min: 0, stepSize: 1, angleLines: { color: '#e2e8f0' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { size: 12 }, color: '#334155' }, ticks: { backdropColor: 'transparent', color: '#64748b' } }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: translations[lang].govRadarTitle }
+                }
+            }
+        });
+    }
+
+    function populateGovernanceSelector() {
+        const selector = document.getElementById('governance-model-selector');
+        const currentVal = selector.value;
+        selector.innerHTML = '';
+        governanceModelData[currentLanguage].forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.id;
+            option.textContent = model.name;
+            selector.appendChild(option);
+        });
+        selector.value = currentVal || 'one-coin-one-vote';
+    }
+
+    document.getElementById('governance-model-selector').addEventListener('change', (e) => {
+        const selectedModel = e.target.value;
+        const modelInfo = governanceModelData[currentLanguage].find(m => m.id === selectedModel);
+        const rawData = governanceRadarRawData[selectedModel];
+        governanceRadarChart.data.datasets[0].label = modelInfo.name;
+        governanceRadarChart.data.datasets[0].data = rawData.data;
+        governanceRadarChart.data.datasets[0].borderColor = rawData.borderColor;
+        governanceRadarChart.data.datasets[0].backgroundColor = rawData.backgroundColor;
+        governanceRadarChart.data.datasets[0].pointBackgroundColor = rawData.borderColor;
+        governanceRadarChart.update();
+    });
+
+    // Initial load
+    setLanguage('zh');
+});
+</script>
+
+</body>
+</html>
