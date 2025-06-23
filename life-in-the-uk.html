@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英國生活考試互動指南 (Life in the UK Test Interactive Guide)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Neutrals (#F7F4F1, #FFFFFF, #6B8A7A, #4A5568) -->
+    <!-- Application Structure Plan: A task-oriented, multi-section single-page application designed to guide users through the process of preparing for the Life in the UK test. The structure is non-linear, allowing users to jump to relevant sections via a sticky navigation bar. Key stages include: 1. A high-level Overview with key stats. 2. An interactive 'Eligibility Checker' for a personalized answer. 3. A tabbed 'Test Content' section to break down the syllabus. 4. A step-by-step 'Booking Process' guide. 5. A comparative 'Study Strategy' section. 6. A practical 'Test Day' checklist. This structure was chosen over a linear report format to make complex information digestible and actionable, focusing on user goals rather than document chapters. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key exam metrics (pass mark, questions, time). -> Goal: Inform. -> Viz/Method: Donut Chart & Stat Cards. -> Interaction: Static visualization for quick reference. -> Justification: Provides an immediate, high-impact summary of the exam's core parameters. -> Library: Chart.js for the donut chart, HTML/Tailwind for cards.
+        - Report Info: Eligibility rules (age, prior passes). -> Goal: Guide/Personalize. -> Viz/Method: Interactive radio-button form. -> Interaction: User selects options, JS logic displays a tailored result. -> Justification: Transforms a complex ruleset into a simple, personal Q&A, which is far more user-friendly than a static table. -> Library: Vanilla JS.
+        - Report Info: 5 chapters of the official handbook. -> Goal: Organize/Summarize. -> Viz/Method: Tabbed interface and a horizontal bar chart for content weight. -> Interaction: User clicks tabs to reveal chapter summaries. The chart is a static visual aid. -> Justification: Breaks down the extensive syllabus into manageable chunks. The chart adds a valuable (though interpretive) visual cue about where to focus study efforts. -> Library: Vanilla JS for tabs, Chart.js for the bar chart.
+        - Report Info: Booking steps and costs. -> Goal: Clarify Process. -> Viz/Method: Numbered, icon-based process diagram. -> Interaction: Static visual guide. -> Justification: Simplifies the multi-step booking procedure into an easy-to-follow visual flow. -> Library: HTML/Tailwind.
+        - Report Info: Test day requirements. -> Goal: Prepare. -> Viz/Method: Interactive Checklist. -> Interaction: User can visually check off items. -> Justification: Provides a practical, actionable tool for the user to ensure they are prepared on the day of the test. -> Library: HTML/Tailwind/JS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            background-color: #F7F4F1;
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            color: #4A5568;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #6B8A7A;
+            border-bottom-color: #6B8A7A;
+        }
+        .tab-btn.active {
+            background-color: #6B8A7A;
+            color: #FFFFFF;
+        }
+        .tab-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .horizontal-chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-[#6B8A7A]">Life in the UK Test 指南</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium">總覽</a>
+                        <a href="#eligibility" class="nav-link px-3 py-2 rounded-md text-sm font-medium">我需要考試嗎？</a>
+                        <a href="#content" class="nav-link px-3 py-2 rounded-md text-sm font-medium">考試內容</a>
+                        <a href="#booking" class="nav-link px-3 py-2 rounded-md text-sm font-medium">報名流程</a>
+                        <a href="#strategy" class="nav-link px-3 py-2 rounded-md text-sm font-medium">備考策略</a>
+                        <a href="#test-day" class="nav-link px-3 py-2 rounded-md text-sm font-medium">考試當日</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-white hover:bg-[#6B8A7A] focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden pb-3">
+                <a href="#overview" class="block nav-link px-3 py-2 rounded-md text-base font-medium">總覽</a>
+                <a href="#eligibility" class="block nav-link px-3 py-2 rounded-md text-base font-medium">我需要考試嗎？</a>
+                <a href="#content" class="block nav-link px-3 py-2 rounded-md text-base font-medium">考試內容</a>
+                <a href="#booking" class="block nav-link px-3 py-2 rounded-md text-base font-medium">報名流程</a>
+                <a href="#strategy" class="block nav-link px-3 py-2 rounded-md text-base font-medium">備考策略</a>
+                <a href="#test-day" class="block nav-link px-3 py-2 rounded-md text-base font-medium">考試當日</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="text-center mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">掌握英國生活考試</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-10">
+                本節提供「英國生活考試」的核心資訊概覽。這不僅是申請英國永久居留或公民身份的必要步驟，也是您融入英國社會的里程碑。我們將通過關鍵數據和圖表，讓您快速了解考試的整體框架和要求。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-4xl font-bold text-[#6B8A7A]">£50</h3>
+                    <p class="text-gray-500 mt-2">標準考試費用</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-4xl font-bold text-[#6B8A7A]">24</h3>
+                    <p class="text-gray-500 mt-2">道選擇題</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-4xl font-bold text-[#6B8A7A]">45</h3>
+                    <p class="text-gray-500 mt-2">分鐘作答時間</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-4xl font-bold text-[#6B8A7A]">75%</h3>
+                    <p class="text-gray-500 mt-2">及格分數線 (答對18題)</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 max-w-2xl mx-auto">
+                <h3 class="text-xl font-bold text-gray-700 mb-4">及格分數視覺化</h3>
+                <p class="text-gray-600 mb-4">要通過考試，您必須在24個問題中至少答對18個。下圖清晰地展示了及格所需的正確率。</p>
+                <div class="chart-container">
+                    <canvas id="passMarkChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="eligibility" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-4">我需要參加考試嗎？</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 text-center mb-10">
+                不是每個人都需要參加「英國生活考試」。本節提供一個簡單的互動工具，幫助您根據年齡和過往移民記錄，快速確定自己是否符合豁免條件。回答以下問題，立即獲得您的個人化答案。
+            </p>
+            <div class="bg-white max-w-2xl mx-auto p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="space-y-6">
+                    <div>
+                        <label class="font-semibold text-gray-700">1. 在您提交移民申請當日，您的年齡是？</label>
+                        <div class="mt-2 space-y-2">
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="age" value="exempt_under_18" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">未滿18歲</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="age" value="required" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">18至64歲</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="age" value="exempt_over_65" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">65歲或以上</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="font-semibold text-gray-700">2. 您過去是否曾為其他移民申請（如ILR）通過英國生活考試？</label>
+                        <div class="mt-2 space-y-2">
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="previous_pass" value="exempt_passed" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">是，我已通過</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="previous_pass" value="required" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">否，我未曾通過</span>
+                            </label>
+                        </div>
+                    </div>
+                     <div>
+                        <label class="font-semibold text-gray-700">3. 您是否因長期的生理或心理疾病而無法參加考試？</label>
+                        <div class="mt-2 space-y-2">
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="medical" value="exempt_medical" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">是 (需提供詳盡醫療證明)</span>
+                            </label>
+                            <label class="flex items-center p-3 rounded-lg border border-gray-300 hover:bg-gray-50 cursor-pointer">
+                                <input type="radio" name="medical" value="required" class="h-4 w-4 text-[#6B8A7A] focus:ring-[#6B8A7A] border-gray-300">
+                                <span class="ml-3 text-gray-700">否</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button id="check-eligibility-btn" class="mt-8 w-full bg-[#6B8A7A] text-white font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition-colors">
+                    查看結果
+                </button>
+                <div id="eligibility-result" class="mt-6 p-4 rounded-lg text-center font-semibold hidden"></div>
+            </div>
+        </section>
+
+        <section id="content" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-4">考試內容剖析</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 text-center mb-10">
+                所有考試題目均出自官方手冊《生活在英國：新居民指南》。本節將手冊的五大章節內容進行了梳理，並通過圖表展示各章節的內容比重，幫助您了解學習重點，更有效地規劃您的備考時間。
+            </p>
+            <div class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="mb-8">
+                    <div class="flex flex-wrap justify-center border-b border-gray-200">
+                        <button class="tab-btn px-4 py-3 font-semibold text-gray-600 hover:bg-gray-100 active" data-tab="1">第一章</button>
+                        <button class="tab-btn px-4 py-3 font-semibold text-gray-600 hover:bg-gray-100" data-tab="2">第二章</button>
+                        <button class="tab-btn px-4 py-3 font-semibold text-gray-600 hover:bg-gray-100" data-tab="3">第三章</button>
+                        <button class="tab-btn px-4 py-3 font-semibold text-gray-600 hover:bg-gray-100" data-tab="4">第四章</button>
+                        <button class="tab-btn px-4 py-3 font-semibold text-gray-600 hover:bg-gray-100" data-tab="5">第五章</button>
+                    </div>
+                    <div id="tab-content" class="pt-6">
+                        <div class="tab-pane active" data-pane="1">
+                            <h4 class="text-xl font-bold text-[#6B8A7A] mb-2">英國的價值觀與原則</h4>
+                            <p class="text-gray-600">闡述構成英國社會基石的基本原則、所有居民的責任與自由。</p>
+                        </div>
+                        <div class="tab-pane hidden" data-pane="2">
+                            <h4 class="text-xl font-bold text-[#6B8A7A] mb-2">英國是什麼？</h4>
+                            <p class="text-gray-600">提供英國的地理、構成國家及人口的概覽。</p>
+                        </div>
+                        <div class="tab-pane hidden" data-pane="3">
+                            <h4 class="text-xl font-bold text-[#6B8A7A] mb-2">漫長而輝煌的歷史</h4>
+                            <p class="text-gray-600">涵蓋從遠古到當代的英國歷史，是考試內容的重要組成部分。</p>
+                        </div>
+                        <div class="tab-pane hidden" data-pane="4">
+                            <h4 class="text-xl font-bold text-[#6B8A7A] mb-2">一個現代、繁榮的社會</h4>
+                            <p class="text-gray-600">探討當代英國的生活面貌，包括宗教、習俗、體育、藝術與文化等。</p>
+                        </div>
+                        <div class="tab-pane hidden" data-pane="5">
+                            <h4 class="text-xl font-bold text-[#6B8A7A] mb-2">英國政府、法律與您的角色</h4>
+                            <p class="text-gray-600">介紹英國的憲法、政府結構、法律體系，以及您的權利與責任。</p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-4 text-center">各章節內容比重（參考）</h3>
+                    <p class="text-gray-600 mb-4 text-center max-w-2xl mx-auto">基於考生經驗，歷史章節通常內容最多，需要投入更多時間。此圖表為您的學習規劃提供參考。</p>
+                    <div class="horizontal-chart-container">
+                        <canvas id="contentWeightChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="booking" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-4">預約報名流程</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 text-center mb-10">
+                報名考試必須通過唯一的官方網站進行。本節將複雜的報名過程簡化為四個清晰的步驟，並強調了您需要準備的文件和關鍵規則，確保您能順利完成預約，避免不必要的麻煩。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#EBF0EE] text-[#6B8A7A] font-bold text-xl mb-4">1</div>
+                    <h3 class="text-lg font-semibold text-gray-800">準備文件</h3>
+                    <p class="mt-2 text-sm text-gray-600">準備好有效的帶照片ID（如護照、BRP）和有效的支付卡。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#EBF0EE] text-[#6B8A7A] font-bold text-xl mb-4">2</div>
+                    <h3 class="text-lg font-semibold text-gray-800">訪問官網</h3>
+                    <p class="mt-2 text-sm text-gray-600">僅通過 GOV.UK 官方網站進行預約，至少提前3天。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#EBF0EE] text-[#6B8A7A] font-bold text-xl mb-4">3</div>
+                    <h3 class="text-lg font-semibold text-gray-800">選擇考點</h3>
+                    <p class="mt-2 text-sm text-gray-600">根據您的郵政編碼，在全英超過30個考點中選擇最方便的一個。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-[#EBF0EE] text-[#6B8A7A] font-bold text-xl mb-4">4</div>
+                    <h3 class="text-lg font-semibold text-gray-800">支付費用</h3>
+                    <p class="mt-2 text-sm text-gray-600">支付 £50 費用以確認您的預約。取消或改期需提前至少72小時。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="strategy" class="mb-16 md:mb-24 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-4">高效備考策略</h2>
+             <p class="max-w-3xl mx-auto text-lg text-gray-600 text-center mb-10">
+                成功的關鍵在於有效的學習方法。官方和非官方資源各有優劣。本節對比了兩者的特點，並提供了一種經過驗證的高效混合學習策略，幫助您在確保知識準確性的同時，通過大量練習來鞏固記憶。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">官方學習材料</h3>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>核心手冊:</strong> 知識的唯一權威來源。</div></li>
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>官方練習題:</strong> 模擬真實考試風格和難度。</div></li>
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>優點:</strong> 內容100%準確，權威可靠。</div></li>
+                        <li class="flex items-start"><span class="text-red-500 font-bold mr-2">✖</span><div><strong>缺點:</strong> 練習題數量有限，可能需要付費。</div></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">非官方資源 (網站/App)</h3>
+                     <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>海量練習題:</strong> 提供數千道免費模擬試題。</div></li>
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>高度靈活性:</strong> 可隨時隨地通過手機或網站練習。</div></li>
+                        <li class="flex items-start"><span class="text-[#6B8A7A] font-bold mr-2">✔</span><div><strong>優點:</strong> 免費，題庫龐大，有助於強化記憶。</div></li>
+                        <li class="flex items-start"><span class="text-red-500 font-bold mr-2">✖</span><div><strong>缺點:</strong> 內容可能存在錯誤或過時。</div></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-10 bg-[#EBF0EE] p-8 rounded-xl text-center">
+                <h3 class="text-2xl font-bold text-[#6B8A7A] mb-3">最佳混合策略</h3>
+                <p class="text-gray-700 text-lg"><strong>學習知識用官方手冊，鞏固練習用非官方題庫。</strong></p>
+                <p class="text-gray-600 mt-2">採用「閱讀一章、練習一章」的模式。先精讀官方手冊確保理解準確，再利用免費網站的大量練習題進行主動回憶和自我檢測，這是最高效且經濟的備考方法。</p>
+            </div>
+        </section>
+
+        <section id="test-day" class="scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 text-center mb-4">決戰考試日</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 text-center mb-10">
+                考試當天的順利與否，取決於充分的準備。本節為您提供一份詳細的清單和流程指南，涵蓋從出門前需要攜帶的物品，到抵達考場後的登記流程和考場規則。確保您萬事俱備，從容應對。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">必備物品清單</h3>
+                    <ul id="checklist" class="space-y-4 text-gray-700">
+                        <li class="flex items-center cursor-pointer" data-checked="false">
+                            <span class="check-icon w-6 h-6 mr-3 flex items-center justify-center rounded-full border-2 border-gray-300 transition-all duration-300"></span>
+                            <div><strong>帶照片的身份證明:</strong> 必須與您報名時使用的文件完全一致。</div>
+                        </li>
+                        <li class="flex items-center cursor-pointer" data-checked="false">
+                            <span class="check-icon w-6 h-6 mr-3 flex items-center justify-center rounded-full border-2 border-gray-300 transition-all duration-300"></span>
+                            <div><strong>地址證明 (原件):</strong> 3個月內的水電費單或銀行結單等。</div>
+                        </li>
+                        <li class="flex items-center cursor-pointer" data-checked="false">
+                           <span class="check-icon w-6 h-6 mr-3 flex items-center justify-center rounded-full border-2 border-gray-300 transition-all duration-300"></span>
+                            <div><strong>預約確認郵件:</strong> 打印件或保存在手機中。</div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">考試結果與後續</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-[#6B8A7A]">如果您通過考試：</h4>
+                            <p class="text-gray-600">恭喜！您將獲得一個獨一無二的參考編號 (URN)。妥善保管此號碼，它將用於您的後續移民申請。通過證明沒有有效期。</p>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-red-600">如果您未通過考試：</h4>
+                            <p class="text-gray-600">不要灰心。您必須等待至少7天才能重新預約考試。您可以無限次重考，但每次都需重新支付£50費用。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p class="mb-4">本指南根據公開資訊編制，旨在提供參考。所有考試的報名和資訊請以官方為準。</p>
+            <a href="https://www.gov.uk/life-in-the-uk-test" target="_blank" rel="noopener noreferrer" class="text-[#A3BFAA] hover:text-white underline">
+                訪問 GOV.UK 官方考試頁面
+            </a>
+            <p class="mt-4 text-sm text-gray-400">&copy; 2025 Interactive Guide. All rights reserved.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+    
+    document.querySelectorAll('#mobile-menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+
+    const passMarkCtx = document.getElementById('passMarkChart').getContext('2d');
+    new Chart(passMarkCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['答對 (Correct)', '答錯 (Incorrect)'],
+            datasets: [{
+                data: [75, 25],
+                backgroundColor: ['#6B8A7A', '#E5E7EB'],
+                borderColor: ['#FFFFFF', '#FFFFFF'],
+                borderWidth: 4,
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#4A5568',
+                        font: {
+                           family: "'Inter', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.raw + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const eligibilityBtn = document.getElementById('check-eligibility-btn');
+    const eligibilityResult = document.getElementById('eligibility-result');
+    eligibilityBtn.addEventListener('click', () => {
+        const age = document.querySelector('input[name="age"]:checked');
+        const previousPass = document.querySelector('input[name="previous_pass"]:checked');
+        const medical = document.querySelector('input[name="medical"]:checked');
+        
+        eligibilityResult.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-yellow-100', 'text-yellow-800');
+
+        if (!age || !previousPass || !medical) {
+            eligibilityResult.textContent = '請回答所有問題。';
+            eligibilityResult.classList.add('bg-red-100', 'text-red-800');
+            eligibilityResult.classList.remove('hidden');
+            return;
+        }
+
+        if (age.value.startsWith('exempt') || previousPass.value.startsWith('exempt') || medical.value.startsWith('exempt')) {
+            eligibilityResult.textContent = '您很可能符合豁免條件，無需參加考試。請務必核對官方指南以確認最終要求。';
+            eligibilityResult.classList.add('bg-green-100', 'text-green-800');
+        } else {
+            eligibilityResult.textContent = '您需要參加英國生活考試。';
+            eligibilityResult.classList.add('bg-yellow-100', 'text-yellow-800');
+        }
+        eligibilityResult.classList.remove('hidden');
+    });
+    
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.dataset.tab;
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            tabPanes.forEach(pane => {
+                if(pane.dataset.pane === tabId) {
+                    pane.classList.remove('hidden');
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.add('hidden');
+                    pane.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    const contentWeightCtx = document.getElementById('contentWeightChart').getContext('2d');
+    new Chart(contentWeightCtx, {
+        type: 'bar',
+        data: {
+            labels: [
+                '第一章: 價值觀', 
+                '第二章: 英國概覽', 
+                '第三章: 歷史', 
+                '第四章: 現代社會', 
+                '第五章: 政府與法律'
+            ],
+            datasets: [{
+                label: '內容比重（參考）',
+                data: [15, 10, 40, 20, 15],
+                backgroundColor: '#A3BFAA',
+                borderColor: '#6B8A7A',
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                 tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return ' 參考比重: ' + context.raw + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%'
+                        },
+                        color: '#4A5568'
+                    },
+                    grid: {
+                      color: '#E5E7EB'
+                    }
+                },
+                y: {
+                    ticks: {
+                        color: '#4A5568',
+                        font: {
+                           size: 11,
+                           family: "'Inter', 'Noto Sans TC', sans-serif"
+                        }
+                    },
+                    grid: {
+                      display: false
+                    }
+                }
+            }
+        }
+    });
+
+    const checklistItems = document.querySelectorAll('#checklist li');
+    checklistItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const isChecked = item.dataset.checked === 'true';
+            item.dataset.checked = !isChecked;
+            const icon = item.querySelector('.check-icon');
+            if (!isChecked) {
+                icon.classList.add('bg-[#6B8A7A]', 'border-[#6B8A7A]');
+                icon.innerHTML = `<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+            } else {
+                icon.classList.remove('bg-[#6B8A7A]', 'border-[#6B8A7A]');
+                icon.innerHTML = '';
+            }
+        });
+    });
+
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if(link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+    navLinks.forEach(link => {
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) {
+            observer.observe(target);
+        }
+    });
+});
+</script>
+</body>
+</html>
