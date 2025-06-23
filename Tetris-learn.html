@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄羅斯方塊遊戲 - 運作原理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #111827; /* Dark Gray */
+            color: #d1d5db; /* Light Gray */
+        }
+        h1, h2, h3 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 700;
+            color: #f9fafb; /* White */
+            border-left: 4px solid #3b82f6; /* Blue */
+            padding-left: 1rem;
+        }
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1f2937; /* Darker Gray */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            border: 1px solid #374151;
+        }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .highlight {
+            color: #60a5fa; /* Light Blue */
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container px-6 py-12 md:py-20">
+
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2">俄羅斯方塊遊戲：運作原理揭秘</h1>
+            <p class="text-lg text-gray-400">一個基於純粹 JavaScript 的網頁版俄羅斯方塊是如何誕生的？</p>
+        </header>
+
+        <main class="space-y-12">
+            
+            <!-- 介紹 -->
+            <section>
+                <h2 class="text-3xl mb-4">前言</h2>
+                <p class="text-lg leading-relaxed">
+                    這是一款完全使用 HTML、CSS 和 JavaScript 打造的經典俄羅斯方塊遊戲。它不僅包含了完整的遊戲邏輯，還加入了暫停、中英切換等現代化功能。本頁面將帶您深入了解其背後的核心技術與設計思路。
+                </p>
+            </section>
+
+            <!-- 1. 遊戲的基礎 -->
+            <section>
+                <h2 class="text-3xl mb-4">1. 遊戲的基礎：網格系統</h2>
+                <p class="mb-4 leading-relaxed">
+                    遊戲的核心是一個二維陣列（Array of Arrays），我們稱之為 <code class="highlight">board</code>。這個網格代表了整個遊戲區域。我們透過幾個常數來定義這個網格的大小以及每個方塊在畫面上的像素尺寸。
+                </p>
+                <pre><code class="language-javascript">// 遊戲常數設定
+const COLS = 10; // 遊戲區塊寬度 (10個方塊寬)
+const ROWS = 20; // 遊戲區塊高度 (20個方塊高)
+const BLOCK_SIZE = 30; // 每個方塊的大小 (30x30 像素)
+
+// 建立遊戲板，一個充滿 0 的二維陣列
+// 0 代表空格，其他數字代表不同顏色的方塊
+let board = createBoard(COLS, ROWS);
+                </code></pre>
+            </section>
+
+            <!-- 2. 方塊的形狀與顏色 -->
+            <section>
+                <h2 class="text-3xl mb-4">2. 方塊的形狀與顏色</h2>
+                <p class="mb-4 leading-relaxed">
+                    遊戲中的七種方塊（Tetrominoes）是怎麼來的？我們使用兩個陣列來儲存它們的資訊：<code class="highlight">COLORS</code> 陣列定義顏色，而 <code class="highlight">SHAPES</code> 是一個更複雜的四維陣列，用來定義每種方塊的四種旋轉形態。
+                </p>
+                <pre><code class="language-javascript">// 方塊形狀 (以 T 形方塊為例)
+// 陣列的第一層：方塊種類 (T 是第 6 種)
+// 陣列的第二層：旋轉狀態 (0, 1, 2, 3)
+// 陣列的第三、四層：方塊本身的 2D 形狀
+const SHAPES = [
+    // ... 其他方塊
+    [ // T 形方塊
+        [[0,6,0],[6,6,6]], // 旋轉 0 度
+        [[6,0],[6,6],[6,0]], // 旋轉 90 度
+        [[6,6,6],[0,6,0]], // 旋轉 180 度
+        [[0,6],[6,6],[0,6]]  // 旋轉 270 度
+    ],
+    // ...
+];
+                </code></pre>
+                <p class="mt-4 leading-relaxed">
+                    透過存取 <code class="highlight">SHAPES[shapeId][rotation]</code>，我們就能輕易獲得任意方塊在任意旋轉角度下的形狀。
+                </p>
+            </section>
+
+            <!-- 3. 遊戲主循環 -->
+            <section>
+                <h2 class="text-3xl mb-4">3. 遊戲主循環 (The Game Loop)</h2>
+                <p class="mb-4 leading-relaxed">
+                    遊戲的動畫是透過 <code class="highlight">requestAnimationFrame</code> 實現的，這比傳統的 <code class="highlight">setInterval</code> 更高效、更流暢。在每一幀（frame），遊戲都會：
+                </p>
+                <ul class="list-disc list-inside space-y-2 mb-4 pl-4">
+                    <li>計算時間差，以固定的間隔讓方塊自動下落。</li>
+                    <li>重新繪製整個遊戲版圖和當前的方塊。</li>
+                    <li>檢查玩家的輸入（如移動、旋轉）。</li>
+                </ul>
+                <pre><code class="language-javascript">let lastTime = 0;
+let dropCounter = 0;
+let dropInterval = 1000; // 每 1000 毫秒 (1秒) 下落一次
+
+function gameLoop(time = 0) {
+    if (isPaused || !gameRunning) return;
+
+    const deltaTime = time - lastTime;
+    lastTime = time;
+    dropCounter += deltaTime;
+
+    if (dropCounter > dropInterval) {
+        // ... 讓方塊下落的邏輯 ...
+        dropCounter = 0;
+    }
+    
+    drawBoard(); // 繪製背景
+    drawPiece(); // 繪製正在移動的方塊
+    
+    requestAnimationFrame(gameLoop);
+}
+                </code></pre>
+            </section>
+
+            <!-- 4. 核心邏輯：碰撞檢測 -->
+            <section>
+                <h2 class="text-3xl mb-4">4. 核心邏輯：碰撞檢測</h2>
+                <p class="mb-4 leading-relaxed">
+                    遊戲的靈魂在於判斷「可不可以這樣動？」。<code class="highlight">isColliding</code> 函式負責這個重任。在方塊的每一次移動或旋轉前，它都會模擬執行後的結果，並檢查是否滿足以下任一條件：
+                </p>
+                <ul class="list-disc list-inside space-y-2 pl-4">
+                    <li>方塊的任何一部分是否超出了遊戲邊界（左、右、下）。</li>
+                    <li>方塊的任何一部分是否與已經固定的方塊重疊。</li>
+                </ul>
+                <p class="mt-4 leading-relaxed">
+                    如果檢測到碰撞，該次操作（移動或旋轉）就會被取消。如果下落時發生碰撞，則方塊會被固定在當前位置。
+                </p>
+            </section>
+
+            <!-- 5. 消除與計分 -->
+            <section>
+                <h2 class="text-3xl mb-4">5. 消除與計分</h2>
+                <p class="mb-4 leading-relaxed">
+                    當一個方塊被固定後，遊戲會從下到上檢查每一行是否被完全填滿。
+                </p>
+                <pre><code class="language-javascript">function clearLines() {
+    let linesCleared = 0;
+    // 從下往上遍歷每一行
+    for (let y = ROWS - 1; y >= 0; y--) {
+        // 檢查該行是否所有格子都不是 0
+        if (board[y].every(value => value > 0)) {
+            linesCleared++;
+            // 從 board 中移除這一行
+            board.splice(y, 1); 
+            // 在 board 頂部加入一個新的空行
+            board.unshift(Array(COLS).fill(0));
+            // 因為 y 被移除了，所以要重新檢查同一個 y
+            y++; 
+        }
+    }
+    // ... 根據 linesCleared 計算分數 ...
+}
+                </code></pre>
+            </section>
+            
+            <!-- 6. 中英互換功能 -->
+            <section>
+                <h2 class="text-3xl mb-4">6. 額外功能：中英互換</h2>
+                <p class="mb-4 leading-relaxed">
+                    為了實現多國語言，我們利用了 HTML 的 <code class="highlight">data-*</code> 屬性。首先，定義一個包含所有翻譯文字的物件。
+                </p>
+                 <pre><code class="language-javascript">const translations = {
+    en: { score: 'Score', startGame: 'Start Game', ... },
+    zh: { score: '分數', startGame: '開始遊戲', ... }
+};
+                </code></pre>
+                <p class="mt-4 mb-4 leading-relaxed">
+                    接著，在 HTML 元素上加上 <code class="highlight">data-lang-key</code> 標籤。
+                </p>
+                 <pre><code class="language-html">&lt;h2 data-lang-key="score"&gt;分數&lt;/h2&gt;
+&lt;button id="start-button" data-lang-key="startGame"&gt;開始遊戲&lt;/button&gt;
+                </code></pre>
+                <p class="mt-4 leading-relaxed">
+                    最後，一個簡單的函式就能遍歷所有帶有此標籤的元素，並根據當前選擇的語言更新它們的文字內容，實現動態切換。
+                </p>
+            </section>
+
+            <!-- 7. 遊戲架構圖 -->
+            <section>
+                <h2 class="text-3xl mb-6">7. 遊戲架構圖</h2>
+                <p class="mb-8 leading-relaxed">
+                    為了更清晰地理解各個模組之間的協作關係，以下是一個簡化的遊戲架構流程圖。它展示了從使用者輸入到畫面更新的完整流程。
+                </p>
+                <!-- Diagram using Tailwind CSS -->
+                <div class="space-y-4 text-center">
+                    <!-- Row 1: Input -->
+                    <div class="flex justify-center">
+                        <div class="bg-sky-900/50 border border-sky-700 p-4 rounded-lg shadow-lg inline-block">使用者輸入<br>(鍵盤 / 觸控)</div>
+                    </div>
+
+                    <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                    </div>
+
+                    <!-- Row 2: Game Loop Box -->
+                    <div class="flex justify-center">
+                        <div class="bg-gray-800 border-2 border-blue-500 p-6 rounded-xl shadow-2xl w-full max-w-md">
+                            <h3 class="text-xl font-bold text-blue-300 mb-4">遊戲主循環 (Game Loop)</h3>
+                            <p class="text-sm text-gray-400 mb-4">requestAnimationFrame</p>
+                            
+                            <!-- Internal Flow -->
+                            <div class="space-y-4 text-left relative pl-6">
+                                <div class="absolute left-2 top-2 bottom-2 w-0.5 bg-gray-600"></div>
+                                <div class="relative">
+                                    <div class="absolute -left-8 top-1 h-5 w-5 flex items-center justify-center rounded-full bg-blue-500 text-xs">1</div>
+                                    <div class="bg-gray-700 p-3 rounded-md">處理玩家操作 (移動/旋轉)</div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-8 top-1 h-5 w-5 flex items-center justify-center rounded-full bg-blue-500 text-xs">2</div>
+                                    <div class="bg-gray-700 p-3 rounded-md">判斷是否自動下落 & 碰撞</div>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute -left-8 top-1 h-5 w-5 flex items-center justify-center rounded-full bg-blue-500 text-xs">3</div>
+                                    <div class="bg-gray-700 p-3 rounded-md">繪製所有畫面元素</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                     <!-- Arrow Down -->
+                    <div class="flex justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                    </div>
+
+                    <!-- Row 3: Logic Branches -->
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-indigo-900/50 border border-indigo-700 p-4 rounded-lg shadow-lg">
+                            <h3 class="font-bold text-indigo-300 mb-2">遊戲狀態管理</h3>
+                            <p class="text-sm">更新分數、行數、等級<br>固定方塊、產生新方塊</p>
+                        </div>
+                         <div class="bg-teal-900/50 border border-teal-700 p-4 rounded-lg shadow-lg">
+                            <h3 class="font-bold text-teal-300 mb-2">畫面渲染</h3>
+                            <p class="text-sm">使用 Canvas API 繪製<br>board 和 currentPiece</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-gray-700">
+            <p class="text-gray-400">&copy; 2025 | 一個為了展示而生的專案</p>
+        </footer>
+
+    </div>
+</body>
+</html>
