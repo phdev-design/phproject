@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web3.0 悖論：互動式探索報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Serene Teal and Slate -->
+    <!-- Application Structure Plan: 我設計了一個以主題為導向的單頁應用程式，而非複製報告的線性結構。頂部的固定導航欄（願景、隱私、言論、NFT、未來）讓用戶可以自由探索他們最感興趣的核心悖論。這種非線性結構鼓勵探索，並將複雜的報告內容分解為易於理解的主題區塊。例如，「隱私的雙面刃」和「言論的自由與真空」部分採用了並排對比的卡片式佈局，直觀地展示了Web3.0的核心矛盾。NFT部分則設計為標籤頁（Tabs），將技術、文化和市場三個層面清晰地分開，其中市場泡沫圖表是互動的核心，旨在給用戶留下深刻印象。整體流程從宏觀願景開始，深入探討核心衝突，以NFT作為具體案例分析，最後總結未來展望，引導用戶進行全面的思考。 -->
+    <!-- Visualization & Content Choices: 1. Web演進 (目標: 比較): 從靜態表格改為互動式卡片，點擊顯示詳情，提升用戶參與感。使用HTML/CSS/JS實現。 2. 數據模型比較 (目標: 比較): 使用Tailwind CSS構建的響應式表格，清晰對比Web2與Web3的關鍵屬性。 3. NFT市場趨勢 (目標: 呈現變化): 使用Chart.js繪製柱狀圖，展示2020-2023年NFT市場交易額的劇烈波動（從8200萬美元到170億美元再到崩盤），這是報告中最強烈的量化故事，圖表化能帶來巨大視覺衝擊。圖表被放置在有最大寬度和高度限制的容器中，確保在所有設備上都保持良好比例。 4. NFT標準比較 (目標: 比較): 設計了兩個並排的卡片來對比ERC-721和ERC-1155，比表格更具視覺吸引力。 5. 核心悖論 (隱私/言論) (目標: 組織/比較): 採用「承諾vs風險」的雙欄佈局，用簡潔的圖標（Unicode字符）和文字，將抽象概念具象化，幫助用戶快速抓住核心矛盾。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) body { font-family: 'Noto Sans TC', sans-serif; }
+        :lang(en) body { font-family: 'Inter', sans-serif; }
+        body {
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0d9488; /* teal-600 */
+            border-bottom-color: #0d9488; /* teal-600 */
+        }
+        .tab-button.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+        .tab-button {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <h1 data-lang="main_title" class="text-xl font-bold text-slate-800">Web3.0 悖論</h1>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#vision" data-lang="nav_vision" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">願景與架構</a>
+                        <a href="#privacy" data-lang="nav_privacy" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">隱私的雙面刃</a>
+                        <a href="#speech" data-lang="nav_speech" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">言論的自由與真空</a>
+                        <a href="#nft" data-lang="nav_nft" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">NFT：文化與泡沫</a>
+                        <a href="#future" data-lang="nav_future" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">未來展望</a>
+                    </div>
+                     <button id="lang-switch" class="ml-6 px-3 py-1 border border-slate-300 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">EN</button>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm">
+                        <option value="#vision" data-lang="nav_vision_mob">願景與架構</option>
+                        <option value="#privacy" data-lang="nav_privacy_mob">隱私的雙面刃</option>
+                        <option value="#speech" data-lang="nav_speech_mob">言論的自由與真空</option>
+                        <option value="#nft" data-lang="nav_nft_mob">NFT：文化與泡沫</option>
+                        <option value="#future" data-lang="nav_future_mob">未來展望</option>
+                    </select>
+                    <button id="lang-switch-mob" class="ml-4 flex-shrink-0 px-3 py-1 border border-slate-300 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">EN</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="home" class="text-center py-16">
+            <h2 data-lang="home_title" class="text-4xl md:text-5xl font-bold text-teal-700 mb-4">去中心化悖論</h2>
+            <p data-lang="home_subtitle" class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">導航Web3.0時代的隱私、言論與價值。這不僅是一次技術升級，更是一場關於權力、自由與信任的深刻變革。讓我們一起探索這個充滿機遇與挑戰的新世界。</p>
+        </section>
+
+        <section id="vision" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 data-lang="vision_title" class="text-3xl font-bold text-slate-800">網際網路的演進：從Web 1.0到Web3.0</h2>
+                <p data-lang="vision_subtitle" class="mt-4 text-slate-600 max-w-2xl mx-auto">Web3.0旨在結合Web 1.0的去中心化精神與Web 2.0的豐富互動性，建立一個用戶真正擁有數據的「讀-寫-擁有」網路。這不僅是技術迭代，更是對Web 2.0權力壟斷的回應。</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-2xl font-semibold mb-2">Web 1.0</h3>
+                    <p data-lang="vision_web1_tag" class="text-slate-500">唯讀網路 (約1990-2004)</p>
+                    <p data-lang="vision_web1_desc" class="mt-4 text-slate-600">靜態、單向的資訊傳遞，用戶是被動的內容消費者。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-2xl font-semibold mb-2">Web 2.0</h3>
+                    <p data-lang="vision_web2_tag" class="text-slate-500">讀寫/社交網路 (約2004-至今)</p>
+                    <p data-lang="vision_web2_desc" class="mt-4 text-slate-600">互動性強，用戶生成內容，但數據由中心化平台控制與營利。</p>
+                </div>
+                <div class="card bg-white p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-2xl font-semibold mb-2">Web3.0</h3>
+                    <p data-lang="vision_web3_tag" class="text-slate-500">讀-寫-擁有網路 (未來)</p>
+                    <p data-lang="vision_web3_desc" class="mt-4 text-slate-600">基於區塊鏈，強調去中心化、數據主權與用戶所有權。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="privacy" class="py-16 scroll-mt-16 bg-white rounded-lg p-8">
+             <div class="text-center mb-12">
+                <h2 data-lang="privacy_title" class="text-3xl font-bold text-slate-800">隱私的雙面刃：數據主權及其風險</h2>
+                <p data-lang="privacy_subtitle" class="mt-4 text-slate-600 max-w-2xl mx-auto">Web3.0承諾透過「去中心化身份（DID）」將數據控制權還給用戶，但其底層的區塊鏈技術，卻因其公開透明和不可篡改的特性，帶來了前所未有的隱私挑戰。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-l-4 border-green-500 p-6 bg-green-50 rounded-r-lg">
+                    <h3 data-lang="privacy_promise_title" class="text-2xl font-semibold text-green-800 mb-3">🟢 承諾：透過所有權賦權</h3>
+                    <ul class="space-y-3 text-slate-700">
+                        <li data-lang="privacy_promise_1"><strong>自我主權身份:</strong> 用戶完全控制自己的數位身份，無需依賴Google或Facebook。</li>
+                        <li data-lang="privacy_promise_2"><strong>選擇性揭露:</strong> 只分享必要的資訊，例如僅證明年滿18歲，而不透露具體生日。</li>
+                        <li data-lang="privacy_promise_3"><strong>增強安全性:</strong> 數據分散儲存，避免中心化數據庫成為駭客攻擊的單點目標。</li>
+                    </ul>
+                </div>
+                <div class="border-l-4 border-red-500 p-6 bg-red-50 rounded-r-lg">
+                    <h3 data-lang="privacy_risk_title" class="text-2xl font-semibold text-red-800 mb-3">🔴 風險：帳本的凝視</h3>
+                     <ul class="space-y-3 text-slate-700">
+                        <li data-lang="privacy_risk_1"><strong>永久的公共記錄:</strong> 交易歷史在公共區塊鏈上永久可見，假名可能被破解。</li>
+                        <li data-lang="privacy_risk_2"><strong>無法被遺忘:</strong> 數據一旦上鏈便無法刪除，與GDPR的「被遺忘權」根本上衝突。</li>
+                        <li data-lang="privacy_risk_3"><strong>隱私成為奢侈品:</strong> 真正的隱私保護需要複雜技術（如零知識證明），可能只為少數技術精英所用。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="speech" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 data-lang="speech_title" class="text-3xl font-bold text-slate-800">言論的自由與真空：無人監管的公共廣場</h2>
+                <p data-lang="speech_subtitle" class="mt-4 text-slate-600 max-w-2xl mx-auto">Web3.0的抗審查特性為言論自由提供了強大保障，如保護受威脅的新聞業。但這也創造了一個治理真空，使得有害內容（如仇恨言論、假新聞）難以被有效管理。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-l-4 border-blue-500 p-6 bg-blue-50 rounded-r-lg">
+                    <h3 data-lang="speech_ideal_title" class="text-2xl font-semibold text-blue-800 mb-3">🔵 理想：抗審查的核心特性</h3>
+                    <ul class="space-y-3 text-slate-700">
+                        <li data-lang="speech_ideal_1"><strong>資訊韌性:</strong> 內容分散儲存在全球節點，難以被單一實體刪除或審查。</li>
+                        <li data-lang="speech_ideal_2"><strong>保護異議者:</strong> 為記者、活動家和威權國家的公民提供了安全的發聲渠道。</li>
+                        <li data-lang="speech_ideal_3"><strong>案例:</strong> 香港《蘋果日報》的檔案被永久保存在去中心化儲存平台Arweave上。</li>
+                    </ul>
+                </div>
+                <div class="border-l-4 border-yellow-500 p-6 bg-yellow-50 rounded-r-lg">
+                    <h3 data-lang="speech_challenge_title" class="text-2xl font-semibold text-yellow-800 mb-3">🟡 挑戰：治理的真空</h3>
+                     <ul class="space-y-3 text-slate-700">
+                        <li data-lang="speech_challenge_1"><strong>責任歸屬困難:</strong> 在去中心化系統中，沒有CEO或公司來為有害內容負責。</li>
+                        <li data-lang="speech_challenge_2"><strong>永久的有害內容:</strong> 非法或有害內容一旦上鏈，可能永遠無法被移除。</li>
+                        <li data-lang="speech_challenge_3"><strong>DAO的困境:</strong> 社群治理（DAO）是潛在方案，但面臨效率低下和「巨鯨」操縱的風險。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="nft" class="py-16 scroll-mt-16 bg-white rounded-lg p-8">
+            <div class="text-center mb-12">
+                <h2 data-lang="nft_title" class="text-3xl font-bold text-slate-800">NFT：數位稀缺性的文化與泡沫</h2>
+                <p data-lang="nft_subtitle" class="mt-4 text-slate-600 max-w-2xl mx-auto">非同質化代幣（NFT）是Web3.0最引人注目的應用。它不僅為數位藝術帶來革命，重塑了創作者經濟，其市場也經歷了從狂熱到崩盤的經典泡沫週期。</p>
+            </div>
+            
+            <div class="mb-8 border-b border-gray-200">
+                <nav class="-mb-px flex space-x-4 justify-center" aria-label="Tabs">
+                    <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-teal-600 hover:border-gray-300 active" data-tab="tech" data-lang="nft_tab_tech">技術與文化</button>
+                    <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-teal-600 hover:border-gray-300" data-tab="market" data-lang="nft_tab_market">市場與泡沫</button>
+                    <button class="tab-button whitespace-nowrap py-3 px-4 border-b-2 font-medium text-sm border-transparent text-slate-500 hover:text-teal-600 hover:border-gray-300" data-tab="future-use" data-lang="nft_tab_future">未來應用</button>
+                </nav>
+            </div>
+
+            <div id="tab-content">
+                <div id="tech" class="tab-pane active">
+                    <p data-lang="nft_tech_desc" class="text-center text-slate-600 mb-8">NFT的核心是「非同質化」，即每個代幣都是獨一無二的數位所有權證書。它解決了數位資產的來源驗證問題，並催生了新的創作者經濟模式。</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-slate-50 p-6 rounded-lg">
+                            <h4 data-lang="nft_tech_erc721_title" class="font-bold text-lg text-slate-700 mb-2">ERC-721：獨一無二</h4>
+                            <p data-lang="nft_tech_erc721_desc" class="text-slate-600">以太坊上首個NFT標準。每個代幣都是獨立合約，非常適合獨一無二的藝術品，但批量轉移成本高。</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-lg">
+                            <h4 data-lang="nft_tech_erc1155_title" class="font-bold text-lg text-slate-700 mb-2">ERC-1155：多功能與高效</h4>
+                            <p data-lang="nft_tech_erc1155_desc" class="text-slate-600">更先進的標準，單一合約可管理多種代幣（同質化/非同質化）。支持批量轉移，顯著降低成本，適用於遊戲道具和大規模收藏。</p>
+                        </div>
+                    </div>
+                     <div class="mt-8 bg-teal-50 border-l-4 border-teal-500 text-teal-800 p-4 rounded-r-lg">
+                        <p data-lang="nft_tech_royalty_title" class="font-semibold">關鍵創新：自動化版稅</p>
+                        <p data-lang="nft_tech_royalty_desc">NFT可將版稅規則寫入智能合約，每次二級市場轉售，原創作者都能自動收到分潤，這為創作者提供了可持續的收入來源。</p>
+                    </div>
+                </div>
+
+                <div id="market" class="tab-pane hidden">
+                    <p data-lang="nft_market_desc" class="text-center text-slate-600 mb-8">NFT市場在2021年經歷了爆炸性增長，隨後在2022-2023年劇烈崩盤。這場泡沫由市場情緒、加密貨幣聯動和宏觀經濟壓力共同驅動。</p>
+                    <div class="chart-container">
+                        <canvas id="nftMarketChart"></canvas>
+                    </div>
+                     <p data-lang="nft_market_source" class="text-center text-sm text-slate-500 mt-4">數據來源：報告綜合分析。*圖表為示意，反映市場趨勢。</p>
+                    <div class="mt-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg">
+                      <p data-lang="nft_market_warning">一份2023年9月的報告指出，超過 <strong>95%</strong> 的NFT收藏品市值已歸零，凸顯了市場的巨大風險和投機性。</p>
+                    </div>
+                </div>
+
+                <div id="future-use" class="tab-pane hidden">
+                    <p data-lang="nft_future_desc" class="text-center text-slate-600 mb-8">經歷泡沫洗禮後，市場焦點正從純粹投機轉向具備實際效用的NFT。其潛力遠不止藝術品，正向各領域擴展。</p>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_1_title" class="font-semibold text-slate-700">🕹️ 遊戲資產</h4>
+                            <p data-lang="nft_future_use_1_desc" class="text-sm text-slate-600">玩家真正擁有遊戲內的道具、角色，並可在不同遊戲間交易或使用。</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_2_title" class="font-semibold text-slate-700">🎟️ 數位憑證</h4>
+                            <p data-lang="nft_future_use_2_desc" class="text-sm text-slate-600">可作為防偽的門票、會員卡、學位證書等。</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_3_title" class="font-semibold text-slate-700">🎭 社交身份</h4>
+                            <p data-lang="nft_future_use_3_desc" class="text-sm text-slate-600">PFP（個人頭像）成為進入特定社群的會員卡和社交信號。</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_4_title" class="font-semibold text-slate-700">🏠 現實世界資產 (RWA)</h4>
+                            <p data-lang="nft_future_use_4_desc" class="text-sm text-slate-600">將房地產、藝術品等實體資產代幣化，提高流動性。</p>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_5_title" class="font-semibold text-slate-700">🎵 音樂與媒體</h4>
+                            <p data-lang="nft_future_use_5_desc" class="text-sm text-slate-600">音樂人可發行限量版歌曲NFT，與粉絲共享版權收入。</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 data-lang="nft_future_use_6_title" class="font-semibold text-slate-700">🗳️ 社群治理</h4>
+                            <p data-lang="nft_future_use_6_desc" class="text-sm text-slate-600">持有特定NFT可獲得在DAO（去中心化自治組織）中的投票權。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 data-lang="future_title" class="text-3xl font-bold text-slate-800">未來展望：導航前行之路</h2>
+                <p data-lang="future_subtitle" class="mt-4 text-slate-600 max-w-2xl mx-auto">Web3.0的發展並非坦途，仍面臨可擴展性、用戶體驗和監管不確定性等挑戰。然而，其核心理念預示著網際網路的長期變革。成功與否，取決於能否解決內在矛盾，兌現其更公平、開放的承諾。</p>
+            </div>
+             <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h4 data-lang="future_advice1_title" class="font-semibold text-lg text-slate-700 mb-3">對投資者 & 創作者的建議</h4>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li data-lang="future_advice1_item1"><strong>投資者:</strong> 強調盡職調查，優先考慮有明確效用和強大社群的項目，規避炒作。</li>
+                        <li data-lang="future_advice1_item2"><strong>創作者:</strong> 利用NFT建立真實社群價值，而非專注投機。明確智慧財產權歸屬。</li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow">
+                    <h4 data-lang="future_advice2_title" class="font-semibold text-lg text-slate-700 mb-3">對開發者 & 政策制定者的建議</h4>
+                    <ul class="list-disc list-inside space-y-2 text-slate-600">
+                        <li data-lang="future_advice2_item1"><strong>開發者:</strong> 將用戶體驗(UX)、安全性和「設計即隱私」作為首要原則。</li>
+                        <li data-lang="future_advice2_item2"><strong>政策制定者:</strong> 制定清晰、技術中立的監管框架，在保護消費者的同時鼓勵創新。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-slate-400">
+            <p data-lang="footer_credit">此互動式報告根據「去中心化悖論：導航Web3.0時代的隱私、言論與價值」報告生成。</p>
+            <p data-lang="footer_disclaimer">僅供教育與展示目的。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let nftChart;
+            let currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+
+            const translations = {
+                zh: {
+                    main_title: "Web3.0 悖論",
+                    nav_vision: "願景與架構",
+                    nav_privacy: "隱私的雙面刃",
+                    nav_speech: "言論的自由與真空",
+                    nav_nft: "NFT：文化與泡沫",
+                    nav_future: "未來展望",
+                    nav_vision_mob: "願景與架構",
+                    nav_privacy_mob: "隱私的雙面刃",
+                    nav_speech_mob: "言論的自由與真空",
+                    nav_nft_mob: "NFT：文化與泡沫",
+                    nav_future_mob: "未來展望",
+                    home_title: "去中心化悖論",
+                    home_subtitle: "導航Web3.0時代的隱私、言論與價值。這不僅是一次技術升級，更是一場關於權力、自由與信任的深刻變革。讓我們一起探索這個充滿機遇與挑戰的新世界。",
+                    vision_title: "網際網路的演進：從Web 1.0到Web3.0",
+                    vision_subtitle: "Web3.0旨在結合Web 1.0的去中心化精神與Web 2.0的豐富互動性，建立一個用戶真正擁有數據的「讀-寫-擁有」網路。這不僅是技術迭代，更是對Web 2.0權力壟斷的回應。",
+                    vision_web1_tag: "唯讀網路 (約1990-2004)",
+                    vision_web1_desc: "靜態、單向的資訊傳遞，用戶是被動的內容消費者。",
+                    vision_web2_tag: "讀寫/社交網路 (約2004-至今)",
+                    vision_web2_desc: "互動性強，用戶生成內容，但數據由中心化平台控制與營利。",
+                    vision_web3_tag: "讀-寫-擁有網路 (未來)",
+                    vision_web3_desc: "基於區塊鏈，強調去中心化、數據主權與用戶所有權。",
+                    privacy_title: "隱私的雙面刃：數據主權及其風險",
+                    privacy_subtitle: "Web3.0承諾透過「去中心化身份（DID）」將數據控制權還給用戶，但其底層的區塊鏈技術，卻因其公開透明和不可篡改的特性，帶來了前所未有的隱私挑戰。",
+                    privacy_promise_title: "🟢 承諾：透過所有權賦權",
+                    privacy_promise_1: "<strong>自我主權身份:</strong> 用戶完全控制自己的數位身份，無需依賴Google或Facebook。",
+                    privacy_promise_2: "<strong>選擇性揭露:</strong> 只分享必要的資訊，例如僅證明年滿18歲，而不透露具體生日。",
+                    privacy_promise_3: "<strong>增強安全性:</strong> 數據分散儲存，避免中心化數據庫成為駭客攻擊的單點目標。",
+                    privacy_risk_title: "🔴 風險：帳本的凝視",
+                    privacy_risk_1: "<strong>永久的公共記錄:</strong> 交易歷史在公共區塊鏈上永久可見，假名可能被破解。",
+                    privacy_risk_2: "<strong>無法被遺忘:</strong> 數據一旦上鏈便無法刪除，與GDPR的「被遺忘權」根本上衝突。",
+                    privacy_risk_3: "<strong>隱私成為奢侈品:</strong> 真正的隱私保護需要複雜技術（如零知識證明），可能只為少數技術精英所用。",
+                    speech_title: "言論的自由與真空：無人監管的公共廣場",
+                    speech_subtitle: "Web3.0的抗審查特性為言論自由提供了強大保障，如保護受威脅的新聞業。但這也創造了一個治理真空，使得有害內容（如仇恨言論、假新聞）難以被有效管理。",
+                    speech_ideal_title: "🔵 理想：抗審查的核心特性",
+                    speech_ideal_1: "<strong>資訊韌性:</strong> 內容分散儲存在全球節點，難以被單一實體刪除或審查。",
+                    speech_ideal_2: "<strong>保護異議者:</strong> 為記者、活動家和威權國家的公民提供了安全的發聲渠道。",
+                    speech_ideal_3: "<strong>案例:</strong> 香港《蘋果日報》的檔案被永久保存在去中心化儲存平台Arweave上。",
+                    speech_challenge_title: "🟡 挑戰：治理的真空",
+                    speech_challenge_1: "<strong>責任歸屬困難:</strong> 在去中心化系統中，沒有CEO或公司來為有害內容負責。",
+                    speech_challenge_2: "<strong>永久的有害內容:</strong> 非法或有害內容一旦上鏈，可能永遠無法被移除。",
+                    speech_challenge_3: "<strong>DAO的困境:</strong> 社群治理（DAO）是潛在方案，但面臨效率低下和「巨鯨」操縱的風險。",
+                    nft_title: "NFT：數位稀缺性的文化與泡沫",
+                    nft_subtitle: "非同質化代幣（NFT）是Web3.0最引人注目的應用。它不僅為數位藝術帶來革命，重塑了創作者經濟，其市場也經歷了從狂熱到崩盤的經典泡沫週期。",
+                    nft_tab_tech: "技術與文化",
+                    nft_tab_market: "市場與泡沫",
+                    nft_tab_future: "未來應用",
+                    nft_tech_desc: "NFT的核心是「非同質化」，即每個代幣都是獨一無二的數位所有權證書。它解決了數位資產的來源驗證問題，並催生了新的創作者經濟模式。",
+                    nft_tech_erc721_title: "ERC-721：獨一無二",
+                    nft_tech_erc721_desc: "以太坊上首個NFT標準。每個代幣都是獨立合約，非常適合獨一無二的藝術品，但批量轉移成本高。",
+                    nft_tech_erc1155_title: "ERC-1155：多功能與高效",
+                    nft_tech_erc1155_desc: "更先進的標準，單一合約可管理多種代幣（同質化/非同質化）。支持批量轉移，顯著降低成本，適用於遊戲道具和大規模收藏。",
+                    nft_tech_royalty_title: "關鍵創新：自動化版稅",
+                    nft_tech_royalty_desc: "NFT可將版稅規則寫入智能合約，每次二級市場轉售，原創作者都能自動收到分潤，這為創作者提供了可持續的收入來源。",
+                    nft_market_desc: "NFT市場在2021年經歷了爆炸性增長，隨後在2022-2023年劇烈崩盤。這場泡沫由市場情緒、加密貨幣聯動和宏觀經濟壓力共同驅動。",
+                    chart_title: "NFT 市場交易額變化 (2020-2023)",
+                    chart_label: "NFT市場年交易額 (美元)",
+                    nft_market_source: "數據來源：報告綜合分析。*圖表為示意，反映市場趨勢。",
+                    nft_market_warning: "一份2023年9月的報告指出，超過 <strong>95%</strong> 的NFT收藏品市值已歸零，凸顯了市場的巨大風險和投機性。",
+                    nft_future_desc: "經歷泡沫洗禮後，市場焦點正從純粹投機轉向具備實際效用的NFT。其潛力遠不止藝術品，正向各領域擴展。",
+                    nft_future_use_1_title: "🕹️ 遊戲資產",
+                    nft_future_use_1_desc: "玩家真正擁有遊戲內的道具、角色，並可在不同遊戲間交易或使用。",
+                    nft_future_use_2_title: "🎟️ 數位憑證",
+                    nft_future_use_2_desc: "可作為防偽的門票、會員卡、學位證書等。",
+                    nft_future_use_3_title: "🎭 社交身份",
+                    nft_future_use_3_desc: "PFP（個人頭像）成為進入特定社群的會員卡和社交信號。",
+                    nft_future_use_4_title: "🏠 現實世界資產 (RWA)",
+                    nft_future_use_4_desc: "將房地產、藝術品等實體資產代幣化，提高流動性。",
+                    nft_future_use_5_title: "🎵 音樂與媒體",
+                    nft_future_use_5_desc: "音樂人可發行限量版歌曲NFT，與粉絲共享版權收入。",
+                    nft_future_use_6_title: "🗳️ 社群治理",
+                    nft_future_use_6_desc: "持有特定NFT可獲得在DAO（去中心化自治組織）中的投票權。",
+                    future_title: "未來展望：導航前行之路",
+                    future_subtitle: "Web3.0的發展並非坦途，仍面臨可擴展性、用戶體驗和監管不確定性等挑戰。然而，其核心理念預示著網際網路的長期變革。成功與否，取決於能否解決內在矛盾，兌現其更公平、開放的承諾。",
+                    future_advice1_title: "對投資者 & 創作者的建議",
+                    future_advice1_item1: "<strong>投資者:</strong> 強調盡職調查，優先考慮有明確效用和強大社群的項目，規避炒作。",
+                    future_advice1_item2: "<strong>創作者:</strong> 利用NFT建立真實社群價值，而非專注投機。明確智慧財產權歸屬。",
+                    future_advice2_title: "對開發者 & 政策制定者的建議",
+                    future_advice2_item1: "<strong>開發者:</strong> 將用戶體驗(UX)、安全性和「設計即隱私」作為首要原則。",
+                    future_advice2_item2: "<strong>政策制定者:</strong> 制定清晰、技術中立的監管框架，在保護消費者的同時鼓勵創新。",
+                    footer_credit: "此互動式報告根據「去中心化悖論：導航Web3.0時代的隱私、言論與價值」報告生成。",
+                    footer_disclaimer: "僅供教育與展示目的。"
+                },
+                en: {
+                    main_title: "The Web3.0 Paradox",
+                    nav_vision: "Vision & Architecture",
+                    nav_privacy: "The Privacy Dilemma",
+                    nav_speech: "Freedom & Vacuum",
+                    nav_nft: "NFTs: Culture & Bubble",
+                    nav_future: "The Path Forward",
+                    nav_vision_mob: "Vision & Architecture",
+                    nav_privacy_mob: "The Privacy Dilemma",
+                    nav_speech_mob: "Freedom & Vacuum",
+                    nav_nft_mob: "NFTs: Culture & Bubble",
+                    nav_future_mob: "The Path Forward",
+                    home_title: "The Decentralization Paradox",
+                    home_subtitle: "Navigating Privacy, Speech, and Value in the Web3.0 Era. This isn't just a technological upgrade; it's a profound shift in power, freedom, and trust. Let's explore this world of opportunity and challenge together.",
+                    vision_title: "The Evolution of the Web: From Web 1.0 to Web3.0",
+                    vision_subtitle: "Web3.0 aims to combine the decentralized spirit of Web 1.0 with the rich interactivity of Web 2.0, creating a 'Read-Write-Own' internet where users truly own their data. This is not just a technical iteration, but a response to the power monopolies of Web 2.0.",
+                    vision_web1_tag: "Read-Only Web (c. 1990-2004)",
+                    vision_web1_desc: "Static, one-way information delivery. Users were passive consumers of content.",
+                    vision_web2_tag: "Read-Write / Social Web (c. 2004-Present)",
+                    vision_web2_desc: "Highly interactive and user-generated, but data is controlled and monetized by centralized platforms.",
+                    vision_web3_tag: "Read-Write-Own Web (The Future)",
+                    vision_web3_desc: "Built on blockchain, emphasizing decentralization, data sovereignty, and user ownership.",
+                    privacy_title: "The Privacy Dilemma: Data Sovereignty and Its Risks",
+                    privacy_subtitle: "Web3.0 promises to return data control to users through Decentralized Identity (DID), yet its underlying blockchain technology, with its public transparency and immutability, introduces unprecedented privacy challenges.",
+                    privacy_promise_title: "🟢 The Promise: Empowerment Through Ownership",
+                    privacy_promise_1: "<strong>Self-Sovereign Identity:</strong> Users fully control their digital identity, independent of Google or Facebook.",
+                    privacy_promise_2: "<strong>Selective Disclosure:</strong> Share only necessary information, e.g., proving you are over 18 without revealing your birthdate.",
+                    privacy_promise_3: "<strong>Enhanced Security:</strong> Data is stored decentrally, avoiding single points of failure for hackers.",
+                    privacy_risk_title: "🔴 The Risk: The Gaze of the Ledger",
+                    privacy_risk_1: "<strong>Permanent Public Record:</strong> Transaction histories are permanently visible on public blockchains; pseudonymity can be broken.",
+                    privacy_risk_2: "<strong>The Right to Be Forgotten Is Gone:</strong> Data on-chain cannot be deleted, fundamentally conflicting with regulations like GDPR.",
+                    privacy_risk_3: "<strong>Privacy as a Luxury:</strong> True privacy requires complex tech (e.g., ZKPs), potentially available only to a tech-savvy elite.",
+                    speech_title: "Freedom & Vacuum: The Unmoderated Public Square",
+                    speech_subtitle: "Web3.0's censorship resistance offers powerful protection for free speech, such as for threatened journalism. But this also creates a governance vacuum, making it hard to manage harmful content like hate speech and disinformation.",
+                    speech_ideal_title: "🔵 The Ideal: Censorship Resistance by Design",
+                    speech_ideal_1: "<strong>Information Resilience:</strong> Content is distributed across global nodes, making it difficult for any single entity to delete or censor.",
+                    speech_ideal_2: "<strong>Protection for Dissent:</strong> Provides a secure channel for journalists, activists, and citizens in authoritarian states.",
+                    speech_ideal_3: "<strong>Case in Point:</strong> The archives of Hong Kong's Apple Daily were permanently saved on the decentralized platform Arweave.",
+                    speech_challenge_title: "🟡 The Challenge: The Governance Vacuum",
+                    speech_challenge_1: "<strong>Accountability Problem:</strong> In a decentralized system, there is no CEO or company to hold responsible for harmful content.",
+                    speech_challenge_2: "<strong>Permanent Harmful Content:</strong> Illegal or harmful content, once on-chain, may be impossible to remove.",
+                    speech_challenge_3: "<strong>The DAO Dilemma:</strong> Community governance (DAOs) is a potential solution but faces inefficiency and manipulation risks by 'whales'.",
+                    nft_title: "NFTs: Digital Scarcity, Culture, and Bubbles",
+                    nft_subtitle: "Non-Fungible Tokens (NFTs) are Web3.0's most high-profile application. They've not only revolutionized digital art and the creator economy but also experienced a classic bubble cycle, from mania to crash.",
+                    nft_tab_tech: "Tech & Culture",
+                    nft_tab_market: "Market & Bubble",
+                    nft_tab_future: "Future Applications",
+                    nft_tech_desc: "The core of an NFT is 'non-fungibility'—each token is a unique certificate of digital ownership. It solves the problem of provenance for digital assets and has spawned new creator economy models.",
+                    nft_tech_erc721_title: "ERC-721: One of a Kind",
+                    nft_tech_erc721_desc: "The first NFT standard on Ethereum. Each token is a separate contract, ideal for unique artworks but costly for batch transfers.",
+                    nft_tech_erc1155_title: "ERC-1155: Multi-Functional & Efficient",
+                    nft_tech_erc1155_desc: "A more advanced standard. A single contract can manage multiple token types (fungible/non-fungible), enabling cheap batch transfers, perfect for game items.",
+                    nft_tech_royalty_title: "Key Innovation: Automated Royalties",
+                    nft_tech_royalty_desc: "NFTs can encode royalty rules into the smart contract. Every time the NFT is resold, the original creator automatically receives a cut, providing a sustainable income stream.",
+                    nft_market_desc: "The NFT market saw explosive growth in 2021, followed by a dramatic crash in 2022-2023. The bubble was driven by market sentiment, crypto correlation, and macroeconomic pressures.",
+                    chart_title: "NFT Market Volume Fluctuation (2020-2023)",
+                    chart_label: "Annual NFT Market Volume (USD)",
+                    nft_market_source: "Source: Report synthesis. *Chart is illustrative of market trends.",
+                    nft_market_warning: "A September 2023 report indicated that over <strong>95%</strong> of NFT collections have a market cap of zero, highlighting the market's immense risk and speculation.",
+                    nft_future_desc: "After the bubble, the market focus is shifting from pure speculation to NFTs with real utility. The potential extends far beyond art into various sectors.",
+                    nft_future_use_1_title: "🕹️ Gaming Assets",
+                    nft_future_use_1_desc: "Players truly own their in-game items and characters, with the ability to trade or use them across different games.",
+                    nft_future_use_2_title: "🎟️ Digital Credentials",
+                    nft_future_use_2_desc: "Can serve as verifiable, counterfeit-proof tickets, membership passes, or academic degrees.",
+                    nft_future_use_3_title: "🎭 Social Identity",
+                    nft_future_use_3_desc: "PFPs (Profile Pictures) act as membership cards to exclusive communities and as social signals.",
+                    nft_future_use_4_title: "🏠 Real-World Assets (RWA)",
+                    nft_future_use_4_desc: "Tokenizing physical assets like real estate or fine art to increase their liquidity.",
+                    nft_future_use_5_title: "🎵 Music & Media",
+                    nft_future_use_5_desc: "Musicians can release limited-edition tracks as NFTs, sharing royalty rights with fans.",
+                    nft_future_use_6_title: "🗳️ Community Governance",
+                    nft_future_use_6_desc: "Holding a specific NFT can grant voting rights in a DAO (Decentralized Autonomous Organization).",
+                    future_title: "The Path Forward: Navigating What's Next",
+                    future_subtitle: "The development of Web3.0 is not a smooth ride. It still faces challenges in scalability, user experience, and regulatory uncertainty. However, its core ideas signal a long-term shift in the internet's architecture.",
+                    future_advice1_title: "Advice for Investors & Creators",
+                    future_advice1_item1: "<strong>Investors:</strong> Emphasize due diligence. Prioritize projects with clear utility and strong communities to avoid hype.",
+                    future_advice1_item2: "<strong>Creators:</strong> Use NFTs to build real community value, not just for speculation. Clarify IP rights.",
+                    future_advice2_title: "Advice for Developers & Policymakers",
+                    future_advice2_item1: "<strong>Developers:</strong> Make user experience (UX), security, and privacy-by-design top priorities.",
+                    future_advice2_item2: "<strong>Policymakers:</strong> Create clear, tech-neutral regulations that protect consumers while encouraging innovation.",
+                    footer_credit: "This interactive report was generated based on 'The Decentralization Paradox: Navigating Privacy, Speech, and Value in the Web3.0 Era' report.",
+                    footer_disclaimer: "For educational and demonstrative purposes only."
+                }
+            };
+
+            function setLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                document.querySelectorAll('[data-lang]').forEach(el => {
+                    const key = el.getAttribute('data-lang');
+                    if (translations[lang] && translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+
+                document.querySelectorAll('#lang-switch, #lang-switch-mob').forEach(btn => {
+                    btn.textContent = lang === 'zh' ? 'EN' : '中';
+                });
+
+                if (nftChart) {
+                    nftChart.options.plugins.title.text = translations[lang].chart_title;
+                    nftChart.data.datasets[0].label = translations[lang].chart_label;
+                    nftChart.update();
+                }
+
+                localStorage.setItem('preferredLanguage', lang);
+            }
+
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                        });
+                        if (mobileNav.value !== `#${id}`) {
+                           mobileNav.value = `#${id}`;
+                        }
+                    }
+                });
+            }, { rootMargin: '0px', threshold: 0.5 });
+
+            sections.forEach(section => observer.observe(section));
+            
+            mobileNav.addEventListener('change', (e) => {
+                const element = document.querySelector(e.target.value);
+                if(element) element.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active', 'bg-teal-600', 'text-white'));
+                    tab.classList.add('active', 'bg-teal-600', 'text-white');
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('hidden', pane.id !== target);
+                    });
+                });
+            });
+
+            const nftMarketData = {
+                labels: ['2020', '2021', '2022-2023'],
+                datasets: [{
+                    label: translations[currentLang].chart_label,
+                    data: [82000000, 17000000000, 1500000000], 
+                    backgroundColor: ['rgba(56, 189, 248, 0.6)', 'rgba(13, 148, 136, 0.6)', 'rgba(249, 115, 22, 0.6)'],
+                    borderColor: ['rgba(56, 189, 248, 1)', 'rgba(13, 148, 136, 1)', 'rgba(249, 115, 22, 1)'],
+                    borderWidth: 1
+                }]
+            };
+
+            const config = {
+                type: 'bar',
+                data: nftMarketData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => (v >= 1e9) ? `${v / 1e9}B` : (v >= 1e6) ? `${v / 1e6}M` : v } } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => `${c.dataset.label || ''}: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(c.parsed.y)}` } },
+                        title: { display: true, text: translations[currentLang].chart_title }
+                    }
+                }
+            };
+
+            const nftMarketChartCtx = document.getElementById('nftMarketChart')?.getContext('2d');
+            if (nftMarketChartCtx) {
+                nftChart = new Chart(nftMarketChartCtx, config);
+            }
+            
+            document.querySelectorAll('#lang-switch, #lang-switch-mob').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                    setLanguage(newLang);
+                });
+            });
+
+            setLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
