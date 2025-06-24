@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式探索：十四世紀法國的黑死病</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Somber Neutrals (Tailwind Stone) with a Muted Amber Accent -->
+    <!-- Application Structure Plan: A single-page, vertical scrolling narrative structure is used to guide the user through a cohesive story, from cause to long-term effect. A sticky navigation bar allows non-linear exploration of the key themes: Origin, Spread, Impact, Response, and Transformation. This structure is more engaging than a simple report format, using interactive elements like charts and diagrams to break down complex information and reveal insights at the user's pace, thus maximizing understanding and retention. -->
+    <!-- Visualization & Content Choices: 
+        - Goal: Inform/Organize -> Transmission Chain -> HTML/CSS Diagram -> Interaction: Hover to reveal details -> Justification: Visually simplifies a complex biological/historical process.
+        - Goal: Inform/Change -> Spread Timeline -> HTML/CSS Timeline -> Interaction: None (static visual) -> Justification: Clearly shows the chronological progression of the plague's arrival in Europe.
+        - Goal: Compare/Inform -> Mortality Rate Chart -> Bar Chart (Chart.js) -> Interaction: Hover for tooltips -> Justification: Effectively compares the devastating impact across different regions, providing a stark quantitative view.
+        - Goal: Organize/Compare -> Societal Responses -> Tabbed Interface (JS) -> Interaction: Click tabs to switch content -> Justification: Organizes diverse reactions into clear, digestible categories (Medical, Public Health, Religion, Scapegoating), allowing focused comparison.
+        - Goal: Compare/Change -> Economic Transformation -> Side-by-Side Cards & Line Chart (Chart.js) -> Interaction: Hover on chart -> Justification: The "Before/After" cards clearly illustrate the economic shift, while the line chart provides a powerful visual of the resulting wage increase, demonstrating the plague's revolutionary economic consequences.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lora', serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #292524; /* stone-800 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #B45309; /* amber-700 */
+            border-bottom-color: #B45309; /* amber-700 */
+        }
+        .transmission-item:hover .transmission-info {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tab-button.active {
+            background-color: #B45309; /* amber-700 */
+            color: white;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-stone-100 text-stone-800">
+
+    <header class="sticky top-0 bg-stone-100/80 backdrop-blur-md z-50 shadow-md">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 data-lang-key="headerTitle" class="text-xl font-bold text-stone-900">大死亡</h1>
+                <div class="flex items-center space-x-8">
+                    <div class="hidden md:flex space-x-8">
+                        <a href="#origin" data-lang-key="navOrigin" class="nav-link text-stone-600 font-semibold border-b-2 border-transparent pb-1">起源</a>
+                        <a href="#spread" data-lang-key="navSpread" class="nav-link text-stone-600 font-semibold border-b-2 border-transparent pb-1">擴散</a>
+                        <a href="#impact" data-lang-key="navImpact" class="nav-link text-stone-600 font-semibold border-b-2 border-transparent pb-1">衝擊</a>
+                        <a href="#response" data-lang-key="navResponse" class="nav-link text-stone-600 font-semibold border-b-2 border-transparent pb-1">應對</a>
+                        <a href="#transformation" data-lang-key="navTransformation" class="nav-link text-stone-600 font-semibold border-b-2 border-transparent pb-1">變革</a>
+                    </div>
+                    <button id="lang-toggle" class="px-3 py-1 text-sm font-semibold text-amber-700 border border-amber-700 rounded-full hover:bg-amber-700 hover:text-white transition-colors duration-300">English</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16">
+
+        <section class="text-center mb-24">
+            <h2 data-lang-key="mainTitle" class="text-4xl md:text-6xl font-extrabold text-stone-900 mb-4">大死亡</h2>
+            <p data-lang-key="mainSubtitle" class="text-lg md:text-xl text-amber-700 font-semibold mb-8">對十四世紀法國黑死病起源、傳播及其變革性影響的互動式分析</p>
+            <p data-lang-key="mainIntro" class="max-w-3xl mx-auto text-stone-600">
+                十四世紀中葉，一場史無前例的災難席捲歐亞大陸，在法國留下了不可磨滅的印記。這不僅是一場人口悲劇，更是一股強大的變革力量，從根本上重塑了社會的根基。本應用程式將引導您探索這場瘟疫的起源，追蹤其在法國的致命路徑，審視當時社會的反應，並揭示其深遠的歷史後果。
+            </p>
+        </section>
+
+        <section id="origin" class="mb-24 scroll-mt-20">
+            <h3 data-lang-key="originTitle" class="text-3xl font-bold text-center mb-4 text-stone-900">第一章：瘟疫的誕生</h3>
+            <p data-lang-key="originIntro" class="text-center max-w-3xl mx-auto text-stone-600 mb-12">
+                一切始於一種微小的細菌和一個日益緊密相連的世界。現代科學揭示，黑死病的罪魁禍首是鼠疫桿菌（$Yersinia\ pestis$），其起源可追溯至中亞的山脈。本節將探討病原體的特性，並展示其如何通過一個複雜的生態鏈，從野生動物傳播到人類社會。
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h4 data-lang-key="originChainTitle" class="text-2xl font-bold mb-6 text-center">致命的傳播鏈</h4>
+                    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                        <div class="relative transmission-item">
+                            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-stone-200">
+                                <span class="text-4xl">🐿️</span>
+                            </div>
+                            <p data-lang-key="chainMarmot" class="mt-2 font-bold">旱獺</p>
+                            <div data-lang-key="chainMarmotInfo" class="transmission-info absolute bottom-full mb-2 w-48 p-2 bg-stone-800 text-white text-sm rounded-lg shadow-xl opacity-0 transition-all duration-300 transform translate-y-2">天然宿主，攜帶鼠疫桿菌的野生囓齒動物。</div>
+                        </div>
+                        <div class="text-3xl text-amber-600 font-bold mx-2">→</div>
+                        <div class="relative transmission-item">
+                            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-stone-200">
+                                <span class="text-4xl">🦟</span>
+                            </div>
+                            <p data-lang-key="chainFlea" class="mt-2 font-bold">跳蚤</p>
+                            <div data-lang-key="chainFleaInfo" class="transmission-info absolute bottom-full mb-2 w-48 p-2 bg-stone-800 text-white text-sm rounded-lg shadow-xl opacity-0 transition-all duration-300 transform translate-y-2">叮咬受感染的旱獺後，成為傳播媒介。</div>
+                        </div>
+                        <div class="text-3xl text-amber-600 font-bold mx-2">→</div>
+                        <div class="relative transmission-item">
+                            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-stone-200">
+                                <span class="text-4xl">🐀</span>
+                            </div>
+                            <p data-lang-key="chainRat" class="mt-2 font-bold">黑鼠</p>
+                            <div data-lang-key="chainRatInfo" class="transmission-info absolute bottom-full mb-2 w-48 p-2 bg-stone-800 text-white text-sm rounded-lg shadow-xl opacity-0 transition-all duration-300 transform translate-y-2">與人類共存，搭乘商隊和船隻，成為關鍵的橋樑媒介。</div>
+                        </div>
+                        <div class="text-3xl text-amber-600 font-bold mx-2">→</div>
+                         <div class="relative transmission-item">
+                            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-stone-200">
+                                <span class="text-4xl">🧍</span>
+                            </div>
+                            <p data-lang-key="chainHuman" class="mt-2 font-bold">人類</p>
+                            <div data-lang-key="chainHumanInfo" class="transmission-info absolute bottom-full mb-2 w-48 p-2 bg-stone-800 text-white text-sm rounded-lg shadow-xl opacity-0 transition-all duration-300 transform translate-y-2">被攜帶病菌的跳蚤叮咬後，人類疫情爆發。</div>
+                        </div>
+                    </div>
+                     <p data-lang-key="hoverInstruction" class="text-sm text-center mt-4 text-stone-500">將滑鼠懸停在圖示上以查看更多資訊。</p>
+                </div>
+                <div>
+                    <h4 data-lang-key="originFormsTitle" class="text-2xl font-bold mb-4 text-center">三種致命形式</h4>
+                    <div class="space-y-4">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h5 data-lang-key="formBubonic" class="font-bold text-lg">腺鼠疫 (Bubonic)</h5>
+                            <p data-lang-key="formBubonicInfo" class="text-sm text-stone-600">最常見，通過跳蚤叮咬傳播。特徵為淋巴腺腫，死亡率高達 <span class="font-bold text-red-700">30-75%</span>。</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h5 data-lang-key="formPneumonic" class="font-bold text-lg">肺鼠疫 (Pneumonic)</h5>
+                            <p data-lang-key="formPneumonicInfo" class="text-sm text-stone-600">影響肺部，可通過飛沫在人際間傳播。未經治療死亡率接近 <span class="font-bold text-red-700">100%</span>。</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h5 data-lang-key="formSepticemic" class="font-bold text-lg">敗血性鼠疫 (Septicemic)</h5>
+                            <p data-lang-key="formSepticemicInfo" class="text-sm text-stone-600">細菌直接感染血液，在當時幾乎無可避免地導致死亡，死亡率高達 <span class="font-bold text-red-700">99-100%</span>。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="spread" class="mb-24 scroll-mt-20">
+            <h3 data-lang-key="spreadTitle" class="text-3xl font-bold text-center mb-4 text-stone-900">第二章：絲路上的災禍</h3>
+            <p data-lang-key="spreadIntro" class="text-center max-w-3xl mx-auto text-stone-600 mb-12">
+                「蒙古治下的和平」促進了絲綢之路的空前繁榮，但也為疾病的快速蔓延鋪平了道路。一個原本局限於中亞的動物間流行病，藉由全球化的貿易網絡，踏上了通往歐洲的旅程。卡法城的圍城戰成為一個關鍵的轉折點，無論是通過生物戰還是商業接觸，瘟疫最終登上了駛往歐洲的船隻。
+            </p>
+
+            <div class="relative w-full max-w-5xl mx-auto py-8">
+                <div class="absolute left-0 top-1/2 w-full h-1 bg-stone-300" style="transform: translateY(-50%);"></div>
+                <div class="relative flex justify-between items-start">
+                    <div class="text-center w-1/4">
+                        <div class="relative z-10 mx-auto w-8 h-8 bg-amber-600 rounded-full border-4 border-white flex items-center justify-center"></div>
+                        <p class="mt-2 font-bold">1338-39</p>
+                        <p data-lang-key="timelineBigBang" class="text-sm text-stone-600">中亞「大爆炸」</p>
+                        <p data-lang-key="timelineBigBangInfo" class="text-xs text-stone-500">吉爾吉斯斯坦發現死於「瘟疫」的墓碑，被視為起源地。</p>
+                    </div>
+                    <div class="text-center w-1/4">
+                        <div class="relative z-10 mx-auto w-8 h-8 bg-amber-600 rounded-full border-4 border-white flex items-center justify-center"></div>
+                        <p class="mt-2 font-bold">1346-47</p>
+                        <p data-lang-key="timelineCaffa" class="text-sm text-stone-600">卡法圍城戰</p>
+                        <p data-lang-key="timelineCaffaInfo" class="text-xs text-stone-500">位於黑海的熱那亞貿易港口，成為瘟疫傳入歐洲的跳板。</p>
+                    </div>
+                    <div class="text-center w-1/4">
+                        <div class="relative z-10 mx-auto w-8 h-8 bg-amber-600 rounded-full border-4 border-white flex items-center justify-center"></div>
+                        <p class="mt-2 font-bold">1347年10月</p>
+                        <p data-lang-key="timelineMessina" class="text-sm text-stone-600">登陸墨西拿</p>
+                         <p data-lang-key="timelineMessinaInfo" class="text-xs text-stone-500">「死亡之船」抵達西西里，瘟疫正式進入歐洲心臟地帶。</p>
+                    </div>
+                     <div class="text-center w-1/4">
+                        <div class="relative z-10 mx-auto w-8 h-8 bg-amber-600 rounded-full border-4 border-white flex items-center justify-center"></div>
+                        <p class="mt-2 font-bold">1348年1月</p>
+                        <p data-lang-key="timelineMarseille" class="text-sm text-stone-600">入侵法國馬賽</p>
+                        <p data-lang-key="timelineMarseilleInfo" class="text-xs text-stone-500">瘟疫通過主要貿易港口進入法蘭西王國，開始其致命的征程。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="mb-24 scroll-mt-20">
+            <h3 data-lang-key="impactTitle" class="text-3xl font-bold text-center mb-4 text-stone-900">第三章：法國的淪陷</h3>
+            <p data-lang-key="impactIntro" class="text-center max-w-3xl mx-auto text-stone-600 mb-12">
+                黑死病對法國造成了毀滅性的打擊，其人口規模在歐洲首屈一指，這使得損失尤為慘重。從南部的馬賽到教皇所在的亞維農，再到北方的巴黎，沒有任何地方能夠倖免。死亡的規模之大，速度之快，徹底摧毀了社會結構，恐懼撕裂了家庭與社區的紐帶。
+            </p>
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="text-center md:text-left">
+                    <h4 data-lang-key="impactScaleTitle" class="text-2xl font-bold mb-4">災難的規模</h4>
+                    <p data-lang-key="impactScaleInfo" class="text-stone-600 mb-6">法國損失了約 <span class="text-4xl font-bold text-red-700">30%</span> 到 <span class="text-4xl font-bold text-red-700">60%</span> 的人口。在某些地區，如諾曼第，死亡率可能高達駭人聽聞的 <span class="text-3xl font-bold text-red-700">70-80%</span>。當時的編年史家讓·傅華薩估計「世界三分之一的人死了」，這個數字令人不寒而慄。</p>
+                    <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-amber-600">
+                        <p data-lang-key="impactQuote" class="text-lg italic text-stone-700">「父親不探望兒子，兒子不探望父親；仁愛已死，希望殆盡。」</p>
+                        <p data-lang-key="impactQuoteAuthor" class="text-right mt-2 font-semibold text-stone-500">- 薄伽丘對社會崩潰的描述</p>
+                    </div>
+                </div>
+                <div>
+                    <h4 data-lang-key="mortalityChartTitle" class="text-2xl font-bold mb-4 text-center">法國主要地區死亡率估計</h4>
+                    <div class="chart-container bg-white p-4 rounded-lg shadow-lg">
+                        <canvas id="mortalityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="response" class="mb-24 scroll-mt-20">
+            <h3 data-lang-key="responseTitle" class="text-3xl font-bold text-center mb-4 text-stone-900">第四章：危機中的社會反應</h3>
+            <p data-lang-key="responseIntro" class="text-center max-w-3xl mx-auto text-stone-600 mb-12">
+                面對一場無法理解的災難，十四世紀的法國社會在絕望中掙扎。從基於錯誤理論的醫療嘗試，到催生現代公共衛生雛形的制度創新；從尋求神蹟的宗教狂熱，到將恐懼轉化為暴力的替罪羊行為。這些反應共同勾勒出一幅處於崩潰邊緣的社會圖景。
+            </p>
+
+            <div>
+                <div class="mb-4 flex flex-wrap justify-center border-b border-stone-300">
+                    <button data-lang-key="tabMedical" class="tab-button px-4 py-2 font-semibold text-stone-600 transition duration-300" data-tab="medical">醫療應對</button>
+                    <button data-lang-key="tabPublicHealth" class="tab-button px-4 py-2 font-semibold text-stone-600 transition duration-300" data-tab="public-health">公共衛生</button>
+                    <button data-lang-key="tabReligion" class="tab-button px-4 py-2 font-semibold text-stone-600 transition duration-300" data-tab="religion">宗教狂熱</button>
+                    <button data-lang-key="tabScapegoating" class="tab-button px-4 py-2 font-semibold text-stone-600 transition duration-300" data-tab="scapegoating">尋找替罪羊</button>
+                </div>
+                <div id="tab-content" class="bg-white p-8 rounded-lg shadow-inner">
+                    <div id="medical-content" class="tab-pane">
+                        <h4 data-lang-key="medicalTitle" class="text-xl font-bold mb-2">傳統與觀察</h4>
+                        <p data-lang-key="medicalInfo" class="text-stone-600">中世紀醫學受「瘴氣理論」主導，認為疾病由污濁空氣引起。治療方法包括放血、催瀉和使用芳香草藥，但收效甚微。然而，像教皇醫師居伊·德·肖利亞克這樣的醫生，堅守崗位並詳細記錄病情，首次明確區分了腺鼠疫和肺鼠疫，展現了臨床觀察的重要性。</p>
+                    </div>
+                    <div id="public-health-content" class="tab-pane hidden">
+                        <h4 data-lang-key="publicHealthTitle" class="text-xl font-bold mb-2">公共衛生的誕生</h4>
+                        <p data-lang-key="publicHealthInfo" class="text-stone-600">儘管醫療失敗，但瘟疫催生了制度性的公共衛生措施。意大利和法國的城市開始實施<span class="font-bold">隔離檢疫（Quarantine）</span>，隔離入境船隻40天。此外，還建立了專門的<span class="font-bold">隔離醫院（Lazarettos）</span>來照顧鼠疫患者，並設立衛生委員會來管理防疫。這些措施代表了國家級公共衛生管理的開端。</p>
+                    </div>
+                    <div id="religion-content" class="tab-pane hidden">
+                        <h4 data-lang-key="religionTitle" class="text-xl font-bold mb-2">信仰、恐懼與狂熱</h4>
+                        <p data-lang-key="religionInfo" class="text-stone-600">瘟疫被普遍視為上帝的懲罰。教會無力解釋和應對，導致了深刻的信仰危機。作為回應，出現了<span class="font-bold">鞭笞派運動</span>，懺悔者公開鞭打自己以平息神怒。這種極端行為最終被教皇譴責為異端。同時，新的藝術主題<span class="font-bold">「死亡之舞」</span>出現，強調死亡面前人人平等。</p>
+                    </div>
+                    <div id="scapegoating-content" class="tab-pane hidden">
+                        <h4 data-lang-key="scapegoatingTitle" class="text-xl font-bold mb-2">斯特拉斯堡大屠殺</h4>
+                        <p data-lang-key="scapegoatingInfo" class="text-stone-600">在恐懼和無知中，人們瘋狂尋找代罪羔羊，猶太社區成為主要目標。謠言稱他們在水井投毒。這引發了歐洲範圍內的大屠殺。其中最慘烈的是<span class="font-bold">1349年2月14日的斯特拉斯堡大屠殺</span>，在瘟疫到達該城之前，數千名猶太人就在民眾的狂熱中被活活燒死，其背後也交織著經濟動機。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="transformation" class="scroll-mt-20">
+            <h3 data-lang-key="transformationTitle" class="text-3xl font-bold text-center mb-4 text-stone-900">第五章：革命性的餘波</h3>
+            <p data-lang-key="transformationIntro" class="text-center max-w-3xl mx-auto text-stone-600 mb-12">
+                黑死病不僅是一場災難，更是一個強大的歷史催化劑。巨大的人口損失從根本上改變了歐洲的經濟和社會結構。勞動力短缺顛覆了封建制度，賦予了底層民眾前所未有的議價能力，並為一個更具流動性和活力的社會奠定了基礎，無意中敲響了通往現代世界的大門。
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                     <h4 data-lang-key="transformationOrderTitle" class="text-2xl font-bold mb-6 text-center">舊秩序的終結</h4>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-lg shadow text-center">
+                            <p data-lang-key="orderBefore" class="text-stone-500 text-sm">瘟疫前</p>
+                            <p data-lang-key="orderBeforeState" class="text-xl font-bold my-2">勞動力過剩</p>
+                            <p data-lang-key="orderBeforeInfo" class="text-stone-600">農奴被束縛在土地上，工資低廉。</p>
+                        </div>
+                        <div class="bg-amber-100 p-6 rounded-lg shadow text-center">
+                            <p data-lang-key="orderAfter" class="text-amber-800 text-sm">瘟疫後</p>
+                            <p data-lang-key="orderAfterState" class="text-xl font-bold my-2 text-amber-900">勞動力短缺</p>
+                            <p data-lang-key="orderAfterInfo" class="text-amber-800">倖存者擁有議價能力，社會流動性增加。</p>
+                        </div>
+                     </div>
+                     <div class="mt-8">
+                        <p data-lang-key="transformationRevoltInfo" class="text-stone-600">這種轉變引發了貴族的抵制和農民的反抗，最著名的是1358年的<span class="font-bold">扎克雷起義（Jacquerie）</span>。儘管起義被殘酷鎮壓，但它標誌著下層階級拒絕回到舊秩序的決心。</p>
+                     </div>
+                </div>
+                <div>
+                    <h4 data-lang-key="wagesChartTitle" class="text-2xl font-bold mb-4 text-center">瘟疫後工資變化趨勢</h4>
+                    <div class="chart-container bg-white p-4 rounded-lg shadow-lg">
+                        <canvas id="wagesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-800 text-stone-300 py-8 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p data-lang-key="footerNotice">此互動式應用程式根據歷史報告生成，旨在提供教育性概覽。</p>
+            <p data-lang-key="footerCredit" class="text-sm text-stone-400 mt-2">設計與開發 by Gemini AI</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            let currentLanguage = 'zh';
+            let mortalityChartInstance;
+            let wagesChartInstance;
+
+            const translations = {
+                zh: {
+                    // Header & Nav
+                    headerTitle: '大死亡',
+                    navOrigin: '起源',
+                    navSpread: '擴散',
+                    navImpact: '衝擊',
+                    navResponse: '應對',
+                    navTransformation: '變革',
+                    toggleButton: 'English',
+
+                    // Hero Section
+                    mainTitle: '大死亡',
+                    mainSubtitle: '對十四世紀法國黑死病起源、傳播及其變革性影響的互動式分析',
+                    mainIntro: '十四世紀中葉，一場史無前例的災難席捲歐亞大陸，在法國留下了不可磨滅的印記。這不僅是一場人口悲劇，更是一股強大的變革力量，從根本上重塑了社會的根基。本應用程式將引導您探索這場瘟疫的起源，追蹤其在法國的致命路徑，審視當時社會的反應，並揭示其深遠的歷史後果。',
+
+                    // Origin Section
+                    originTitle: '第一章：瘟疫的誕生',
+                    originIntro: '一切始於一種微小的細菌和一個日益緊密相連的世界。現代科學揭示，黑死病的罪魁禍首是鼠疫桿菌（$Yersinia\ pestis$），其起源可追溯至中亞的山脈。本節將探討病原體的特性，並展示其如何通過一個複雜的生態鏈，從野生動物傳播到人類社會。',
+                    originChainTitle: '致命的傳播鏈',
+                    chainMarmot: '旱獺',
+                    chainMarmotInfo: '天然宿主，攜帶鼠疫桿菌的野生囓齒動物。',
+                    chainFlea: '跳蚤',
+                    chainFleaInfo: '叮咬受感染的旱獺後，成為傳播媒介。',
+                    chainRat: '黑鼠',
+                    chainRatInfo: '與人類共存，搭乘商隊和船隻，成為關鍵的橋樑媒介。',
+                    chainHuman: '人類',
+                    chainHumanInfo: '被攜帶病菌的跳蚤叮咬後，人類疫情爆發。',
+                    hoverInstruction: '將滑鼠懸停在圖示上以查看更多資訊。',
+                    originFormsTitle: '三種致命形式',
+                    formBubonic: '腺鼠疫 (Bubonic)',
+                    formBubonicInfo: '最常見，通過跳蚤叮咬傳播。特徵為淋巴腺腫，死亡率高達 <span class="font-bold text-red-700">30-75%</span>。',
+                    formPneumonic: '肺鼠疫 (Pneumonic)',
+                    formPneumonicInfo: '影響肺部，可通過飛沫在人際間傳播。未經治療死亡率接近 <span class="font-bold text-red-700">100%</span>。',
+                    formSepticemic: '敗血性鼠疫 (Septicemic)',
+                    formSepticemicInfo: '細菌直接感染血液，在當時幾乎無可避免地導致死亡，死亡率高達 <span class="font-bold text-red-700">99-100%</span>。',
+
+                    // Spread Section
+                    spreadTitle: '第二章：絲路上的災禍',
+                    spreadIntro: '「蒙古治下的和平」促進了絲綢之路的空前繁榮，但也為疾病的快速蔓延鋪平了道路。一個原本局限於中亞的動物間流行病，藉由全球化的貿易網絡，踏上了通往歐洲的旅程。卡法城的圍城戰成為一個關鍵的轉折點，無論是通過生物戰還是商業接觸，瘟疫最終登上了駛往歐洲的船隻。',
+                    timelineBigBang: '中亞「大爆炸」',
+                    timelineBigBangInfo: '吉爾吉斯斯坦發現死於「瘟疫」的墓碑，被視為起源地。',
+                    timelineCaffa: '卡法圍城戰',
+                    timelineCaffaInfo: '位於黑海的熱那亞貿易港口，成為瘟疫傳入歐洲的跳板。',
+                    timelineMessina: '登陸墨西拿',
+                    timelineMessinaInfo: '「死亡之船」抵達西西里，瘟疫正式進入歐洲心臟地帶。',
+                    timelineMarseille: '入侵法國馬賽',
+                    timelineMarseilleInfo: '瘟疫通過主要貿易港口進入法蘭西王國，開始其致命的征程。',
+                    
+                    // Impact Section
+                    impactTitle: '第三章：法國的淪陷',
+                    impactIntro: '黑死病對法國造成了毀滅性的打擊，其人口規模在歐洲首屈一指，這使得損失尤為慘重。從南部的馬賽到教皇所在的亞維農，再到北方的巴黎，沒有任何地方能夠倖免。死亡的規模之大，速度之快，徹底摧毀了社會結構，恐懼撕裂了家庭與社區的紐帶。',
+                    impactScaleTitle: '災難的規模',
+                    impactScaleInfo: '法國損失了約 <span class="text-4xl font-bold text-red-700">30%</span> 到 <span class="text-4xl font-bold text-red-700">60%</span> 的人口。在某些地區，如諾曼第，死亡率可能高達駭人聽聞的 <span class="text-3xl font-bold text-red-700">70-80%</span>。當時的編年史家讓·傅華薩估計「世界三分之一的人死了」，這個數字令人不寒而慄。',
+                    impactQuote: '「父親不探望兒子，兒子不探望父親；仁愛已死，希望殆盡。」',
+                    impactQuoteAuthor: '- 薄伽丘對社會崩潰的描述',
+                    mortalityChartTitle: '法國主要地區死亡率估計',
+                    mortalityChartLabel: '估計最高死亡率 (%)',
+                    mortalityChartDataLabels: ['諾曼第', '巴黎', '勃艮第 (日夫里)', '朗格多克', '歐洲平均'],
+                    mortalityTooltip: ' 估計死亡率',
+
+                    // Response Section
+                    responseTitle: '第四章：危機中的社會反應',
+                    responseIntro: '面對一場無法理解的災難，十四世紀的法國社會在絕望中掙扎。從基於錯誤理論的醫療嘗試，到催生現代公共衛生雛形的制度創新；從尋求神蹟的宗教狂熱，到將恐懼轉化為暴力的替罪羊行為。這些反應共同勾勒出一幅處於崩潰邊緣的社會圖景。',
+                    tabMedical: '醫療應對',
+                    tabPublicHealth: '公共衛生',
+                    tabReligion: '宗教狂熱',
+                    tabScapegoating: '尋找替罪羊',
+                    medicalTitle: '傳統與觀察',
+                    medicalInfo: '中世紀醫學受「瘴氣理論」主導，認為疾病由污濁空氣引起。治療方法包括放血、催瀉和使用芳香草藥，但收效甚微。然而，像教皇醫師居伊·德·肖利亞克這樣的醫生，堅守崗位並詳細記錄病情，首次明確區分了腺鼠疫和肺鼠疫，展現了臨床觀察的重要性。',
+                    publicHealthTitle: '公共衛生的誕生',
+                    publicHealthInfo: '儘管醫療失敗，但瘟疫催生了制度性的公共衛生措施。意大利和法國的城市開始實施<span class="font-bold">隔離檢疫（Quarantine）</span>，隔離入境船隻40天。此外，還建立了專門的<span class="font-bold">隔離醫院（Lazarettos）</span>來照顧鼠疫患者，並設立衛生委員會來管理防疫。這些措施代表了國家級公共衛生管理的開端。',
+                    religionTitle: '信仰、恐懼與狂熱',
+                    religionInfo: '瘟疫被普遍視為上帝的懲罰。教會無力解釋和應對，導致了深刻的信仰危機。作為回應，出現了<span class="font-bold">鞭笞派運動</span>，懺悔者公開鞭打自己以平息神怒。這種極端行為最終被教皇譴責為異端。同時，新的藝術主題<span class="font-bold">「死亡之舞」</span>出現，強調死亡面前人人平等。',
+                    scapegoatingTitle: '斯特拉斯堡大屠殺',
+                    scapegoatingInfo: '在恐懼和無知中，人們瘋狂尋找代罪羔羊，猶太社區成為主要目標。謠言稱他們在水井投毒。這引發了歐洲範圍內的大屠殺。其中最慘烈的是<span class="font-bold">1349年2月14日的斯特拉斯堡大屠殺</span>，在瘟疫到達該城之前，數千名猶太人就在民眾的狂熱中被活活燒死，其背後也交織著經濟動機。',
+
+                    // Transformation Section
+                    transformationTitle: '第五章：革命性的餘波',
+                    transformationIntro: '黑死病不僅是一場災難，更是一個強大的歷史催化劑。巨大的人口損失從根本上改變了歐洲的經濟和社會結構。勞動力短缺顛覆了封建制度，賦予了底層民眾前所未有的議價能力，並為一個更具流動性和活力的社會奠定了基礎，無意中敲響了通往現代世界的大門。',
+                    transformationOrderTitle: '舊秩序的終結',
+                    orderBefore: '瘟疫前',
+                    orderBeforeState: '勞動力過剩',
+                    orderBeforeInfo: '農奴被束縛在土地上，工資低廉。',
+                    orderAfter: '瘟疫後',
+                    orderAfterState: '勞動力短缺',
+                    orderAfterInfo: '倖存者擁有議價能力，社會流動性增加。',
+                    transformationRevoltInfo: '這種轉變引發了貴族的抵制和農民的反抗，最著名的是1358年的<span class="font-bold">扎克雷起義（Jacquerie）</span>。儘管起義被殘酷鎮壓，但它標誌著下層階級拒絕回到舊秩序的決心。',
+                    wagesChartTitle: '瘟疫後工資變化趨勢',
+                    wagesChartLabel: '技術工人名目工資指數',
+                    wagesChartDataLabels: ['1340', '1347 (瘟疫前)', '1350 (瘟疫後)', '1360', '1380'],
+                    wagesChartFootnote: '概念性展示，非精確歷史數據',
+                    
+                    // Footer
+                    footerNotice: '此互動式應用程式根據歷史報告生成，旨在提供教育性概覽。',
+                    footerCredit: '設計與開發 by Gemini AI',
+                },
+                en: {
+                    // Header & Nav
+                    headerTitle: 'The Great Mortality',
+                    navOrigin: 'Origin',
+                    navSpread: 'Spread',
+                    navImpact: 'Impact',
+                    navResponse: 'Response',
+                    navTransformation: 'Transformation',
+                    toggleButton: '中文',
+
+                    // Hero Section
+                    mainTitle: 'The Great Mortality',
+                    mainSubtitle: 'An Interactive Analysis of the Origin, Spread, and Transformative Impact of the Black Death in 14th-Century France',
+                    mainIntro: 'In the mid-14th century, an unprecedented catastrophe swept across Eurasia, leaving an indelible mark on France. It was not merely a demographic tragedy but a potent force of change that fundamentally reshaped the foundations of society. This application will guide you through the plague\'s origins, trace its deadly path through France, examine societal responses, and unveil its profound historical consequences.',
+                    
+                    // Origin Section
+                    originTitle: 'Chapter I: The Birth of a Plague',
+                    originIntro: 'It all began with a tiny bacterium and an increasingly connected world. Modern science reveals the culprit of the Black Death to be $Yersinia\ pestis$, with origins tracing back to the mountains of Central Asia. This section explores the pathogen\'s characteristics and shows how it spread from wildlife to human society through a complex ecological chain.',
+                    originChainTitle: 'The Deadly Transmission Chain',
+                    chainMarmot: 'Marmot',
+                    chainMarmotInfo: 'The natural reservoir, a wild rodent carrying $Yersinia\ pestis$.',
+                    chainFlea: 'Flea',
+                    chainFleaInfo: 'Becomes a vector after biting an infected marmot.',
+                    chainRat: 'Black Rat',
+                    chainRatInfo: 'Living alongside humans, it becomes a key bridge vector by traveling on caravans and ships.',
+                    chainHuman: 'Human',
+                    chainHumanInfo: 'The human epidemic begins when people are bitten by infected fleas.',
+                    hoverInstruction: 'Hover over the icons for more information.',
+                    originFormsTitle: 'Three Deadly Forms',
+                    formBubonic: 'Bubonic Plague',
+                    formBubonicInfo: 'The most common form, spread by flea bites. Characterized by swollen lymph nodes (buboes), with a mortality rate of <span class="font-bold text-red-700">30-75%</span>.',
+                    formPneumonic: 'Pneumonic Plague',
+                    formPneumonicInfo: 'Affecting the lungs, it could be transmitted person-to-person via respiratory droplets. Untreated, mortality approached <span class="font-bold text-red-700">100%</span>.',
+                    formSepticemic: 'Septicemic Plague',
+                    formSepticemicInfo: 'The bacteria directly infects the bloodstream, leading to almost certain death in that era, with mortality rates of <span class="font-bold text-red-700">99-100%</span>.',
+
+                    // Spread Section
+                    spreadTitle: 'Chapter II: Catastrophe on the Silk Road',
+                    spreadIntro: 'The "Pax Mongolica" fostered unprecedented prosperity on the Silk Road but also paved the way for the rapid spread of disease. A zoonotic disease once confined to Central Asia embarked on a journey to Europe via globalized trade networks. The siege of Caffa became a pivotal turning point; whether through biological warfare or commercial contact, the plague ultimately boarded ships bound for Europe.',
+                    timelineBigBang: 'Central Asian "Big Bang"',
+                    timelineBigBangInfo: 'Tombstones in Kyrgyzstan from 1338-39, inscribed with "pestilence," are considered the origin point.',
+                    timelineCaffa: 'Siege of Caffa',
+                    timelineCaffaInfo: 'The Genoese trading port on the Black Sea became the springboard for the plague into Europe.',
+                    timelineMessina: 'Arrival in Messina',
+                    timelineMessinaInfo: 'The "death ships" reached Sicily, marking the plague\'s official entry into the heart of Europe.',
+                    timelineMarseille: 'Invasion of Marseille, France',
+                    timelineMarseilleInfo: 'The plague entered the Kingdom of France through its main trading port, beginning its deadly conquest.',
+
+                    // Impact Section
+                    impactTitle: 'Chapter III: The Fall of France',
+                    impactIntro: 'The Black Death dealt a devastating blow to France, whose large population made the losses particularly severe. From Marseille in the south to the papal seat at Avignon and Paris in the north, no place was spared. The sheer scale and speed of death shattered the social fabric, as fear tore apart families and communities.',
+                    impactScaleTitle: 'The Scale of the Disaster',
+                    impactScaleInfo: 'France lost an estimated <span class="text-4xl font-bold text-red-700">30%</span> to <span class="text-4xl font-bold text-red-700">60%</span> of its population. In some regions, like Normandy, the death toll may have reached a staggering <span class="text-3xl font-bold text-red-700">70-80%</span>. The chronicler Jean Froissart estimated that "a third of the world died," a chilling figure.',
+                    impactQuote: '"The father did not visit the son, nor the son the father. Charity was dead and hope was gone."',
+                    impactQuoteAuthor: '- Boccaccio on the societal breakdown',
+                    mortalityChartTitle: 'Estimated Mortality Rates in Key French Regions',
+                    mortalityChartLabel: 'Estimated Peak Mortality Rate (%)',
+                    mortalityChartDataLabels: ['Normandy', 'Paris', 'Burgundy (Givry)', 'Languedoc', 'European Average'],
+                    mortalityTooltip: ' Est. Mortality',
+                    
+                    // Response Section
+                    responseTitle: 'Chapter IV: Societal Responses to Crisis',
+                    responseIntro: 'Faced with an incomprehensible disaster, 14th-century French society struggled in desperation. From medical attempts based on flawed theories to institutional innovations that birthed modern public health; from religious fanaticism seeking miracles to the violent scapegoating that channeled fear. These responses paint a picture of a society on the brink of collapse.',
+                    tabMedical: 'Medical Response',
+                    tabPublicHealth: 'Public Health',
+                    tabReligion: 'Religious Fervor',
+                    tabScapegoating: 'Scapegoating',
+                    medicalTitle: 'Tradition and Observation',
+                    medicalInfo: 'Medieval medicine was dominated by the "miasma theory," believing disease was caused by corrupt air. Treatments like bloodletting, purging, and using aromatic herbs were ineffective. However, physicians like Guy de Chauliac, a papal doctor, stayed at their posts, documenting the illness and making the first clear distinction between bubonic and pneumonic plague, showing the importance of clinical observation.',
+                    publicHealthTitle: 'The Birth of Public Health',
+                    publicHealthInfo: 'Despite medical failures, the plague spurred institutional public health measures. Cities in Italy and France began implementing the <span class="font-bold">quarantine</span>, isolating incoming ships for 40 days. Specialized <span class="font-bold">lazarettos</span> (plague hospitals) were established, and health boards were created to manage the response. These measures represented the dawn of state-level public health management.',
+                    religionTitle: 'Faith, Fear, and Fanaticism',
+                    religionInfo: 'The plague was widely seen as divine punishment. The Church\'s inability to explain or stop it led to a profound crisis of faith. In response, the <span class="font-bold">Flagellant movement</span> arose, where penitents publicly whipped themselves to appease God\'s wrath. This extremism was eventually condemned as heresy. The artistic theme of the <span class="font-bold">"Danse Macabre"</span> (Dance of Death) emerged, emphasizing that death equalizes all.',
+                    scapegoatingTitle: 'The Strasbourg Massacre',
+                    scapegoatingInfo: 'In fear and ignorance, people desperately sought scapegoats, and Jewish communities were the primary target, accused of poisoning wells. This led to massacres across Europe. One of the most horrific was in <span class="font-bold">Strasbourg on Feb 14, 1349</span>, where thousands of Jews were burned alive by a frenzied populace, often before the plague even arrived, driven also by economic motives.',
+
+                    // Transformation Section
+                    transformationTitle: 'Chapter V: The Revolutionary Aftermath',
+                    transformationIntro: 'The Black Death was not just a catastrophe but a powerful historical catalyst. The massive population loss fundamentally altered Europe\'s economic and social structure. Labor shortages upended the feudal system, giving unprecedented bargaining power to the lower classes and paving the way for a more fluid and dynamic society, inadvertently opening the door to the modern world.',
+                    transformationOrderTitle: 'The End of the Old Order',
+                    orderBefore: 'Before the Plague',
+                    orderBeforeState: 'Labor Surplus',
+                    orderBeforeInfo: 'Serfs were tied to the land with low wages.',
+                    orderAfter: 'After the Plague',
+                    orderAfterState: 'Labor Shortage',
+                    orderAfterInfo: 'Survivors had bargaining power, increasing social mobility.',
+                    transformationRevoltInfo: 'This shift prompted resistance from the nobility and revolts from the peasantry, most famously the <span class="font-bold">Jacquerie</span> in 1358. Though brutally suppressed, it signaled the lower classes\' refusal to return to the old order.',
+                    wagesChartTitle: 'Post-Plague Wage Trend',
+                    wagesChartLabel: 'Nominal Wage Index for Skilled Laborers',
+                    wagesChartDataLabels: ['1340', '1347 (Pre-Plague)', '1350 (Post-Plague)', '1360', '1380'],
+                    wagesChartFootnote: 'Conceptual representation, not precise historical data',
+                    
+                    // Footer
+                    footerNotice: 'This interactive application was generated from historical reports for educational purposes.',
+                    footerCredit: 'Designed & Developed by Gemini AI',
+                }
+            };
+            
+            const langToggleButton = document.getElementById('lang-toggle');
+
+            function switchLanguage(lang) {
+                currentLanguage = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+                const elements = document.querySelectorAll('[data-lang-key]');
+                elements.forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+
+                langToggleButton.textContent = translations[lang].toggleButton;
+                
+                // Re-create charts with translated labels
+                createMortalityChart(lang);
+                createWagesChart(lang);
+            }
+
+            function createMortalityChart(lang) {
+                if (mortalityChartInstance) {
+                    mortalityChartInstance.destroy();
+                }
+                const mortalityCtx = document.getElementById('mortalityChart').getContext('2d');
+                mortalityChartInstance = new Chart(mortalityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[lang].mortalityChartDataLabels,
+                        datasets: [{
+                            label: translations[lang].mortalityChartLabel,
+                            data: [80, 50, 50, 60, 60],
+                            backgroundColor: 'rgba(180, 83, 9, 0.6)',
+                            borderColor: 'rgba(180, 83, 9, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: context => `${translations[lang].mortalityTooltip}: ${context.raw}%`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function createWagesChart(lang) {
+                if (wagesChartInstance) {
+                    wagesChartInstance.destroy();
+                }
+                const wagesCtx = document.getElementById('wagesChart').getContext('2d');
+                wagesChartInstance = new Chart(wagesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: translations[lang].wagesChartDataLabels,
+                        datasets: [{
+                            label: translations[lang].wagesChartLabel,
+                            data: [100, 105, 180, 220, 250],
+                            fill: true,
+                            backgroundColor: 'rgba(252, 211, 77, 0.2)',
+                            borderColor: 'rgba(180, 83, 9, 1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: translations[lang].wagesChartFootnote }
+                        }
+                    }
+                });
+            }
+
+            langToggleButton.addEventListener('click', () => {
+                const newLang = currentLanguage === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+            
+            // Setup intersection observer for nav highlighting
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: '-30% 0px -70% 0px' });
+            sections.forEach(section => observer.observe(section));
+
+            // Setup tabs
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('hidden', pane.id !== `${tabId}-content`);
+                    });
+                });
+            });
+
+            // Initial load
+            switchLanguage('zh'); // Default language
+            document.querySelector('.tab-button[data-tab="medical"]').click();
+        });
+    </script>
+</body>
+</html>
