@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA 互動歷史瀏覽器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Black, White & Basketball Orange -->
+    <!-- Application Structure Plan: The SPA uses a thematic, non-linear dashboard structure. A sticky top navigation allows users to jump to key themes. This structure is chosen for superior usability, allowing users to explore topics of interest in any order. The visual theme has been updated to a black, white, and basketball-orange palette to match the user's request, enhancing the thematic focus. -->
+    <!-- Visualization & Content Choices: Visualizations and content remain the same but are re-skinned to fit the new black, white, and orange theme. Chart.js colors are updated to use shades of orange and grey for a cohesive look. Interactive elements like buttons and links now use orange as an accent color for highlights and active states. This creates a strong, modern, and theme-appropriate visual identity. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #111827;
+        }
+        .lang-zh { font-family: 'Noto Sans TC', sans-serif; }
+        .lang-en { font-family: 'Roboto', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #F97316;
+            border-bottom-color: #F97316;
+        }
+        .dynasty-selector-btn {
+            transition: all 0.2s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .dynasty-selector-btn:hover {
+            transform: translateY(-3px);
+            border-color: #F97316;
+        }
+        .dynasty-selector-btn.active {
+            transform: translateY(-2px);
+            background-color: #F97316;
+            color: #ffffff;
+            box-shadow: 0 0 0 3px #f9731640;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-black/90 backdrop-blur-lg shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <ul class="flex justify-center items-center space-x-4 md:space-x-8 text-sm md:text-base font-bold text-gray-300 flex-grow">
+                <li><a href="#birth" class="nav-link py-2 border-b-2 border-transparent lang-zh">誕生與生存</a><a href="#birth" class="nav-link py-2 border-b-2 border-transparent lang-en hidden">Birth & Survival</a></li>
+                <li><a href="#revolution" class="nav-link py-2 border-b-2 border-transparent lang-zh">賽局革命</a><a href="#revolution" class="nav-link py-2 border-b-2 border-transparent lang-en hidden">Game Changers</a></li>
+                <li><a href="#dynasties" class="nav-link py-2 border-b-2 border-transparent lang-zh">王朝傳奇</a><a href="#dynasties" class="nav-link py-2 border-b-2 border-transparent lang-en hidden">Dynasties</a></li>
+                <li><a href="#icons" class="nav-link py-2 border-b-2 border-transparent lang-zh">巨星時代</a><a href="#icons" class="nav-link py-2 border-b-2 border-transparent lang-en hidden">Age of Icons</a></li>
+                <li><a href="#culture" class="nav-link py-2 border-b-2 border-transparent lang-zh">全球文化</a><a href="#culture" class="nav-link py-2 border-b-2 border-transparent lang-en hidden">Global Culture</a></li>
+            </ul>
+            <button id="lang-toggle" class="font-semibold text-sm text-white bg-gray-700 px-3 py-1 rounded-full hover:bg-orange-600 transition-colors">EN / 繁</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="text-center py-20 px-4 bg-white">
+            <h1 class="text-5xl md:text-7xl font-extrabold text-black mb-4"><span class="lang-zh">NBA 演化全史</span><span class="lang-en hidden">The Complete Evolution of the NBA</span></h1>
+            <p class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
+                <span class="lang-zh">從一個填補冰球館空檔的商業策略，到全球文化與經濟的巨擘。這不僅是籃球的歷史，更是一部關於創新、競爭與文化融合的現代史詩。</span>
+                <span class="lang-en hidden">From a business strategy to fill empty arenas to a global cultural and economic giant. This is not just the history of basketball, but a modern epic of innovation, competition, and cultural fusion.</span>
+            </p>
+        </section>
+
+        <section id="birth" class="py-16 md:py-24 px-4 bg-gray-100">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 text-black">🏀 <span class="lang-zh">誕生與生存</span><span class="lang-en hidden">Birth & Survival</span></h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    <span class="lang-zh">NBA的起源並非出於對籃球的熱情，而是一個務實的商業問題。這段動盪的草創時期，揭示了聯盟如何透過整合與淘汰，在生存危機中奠定未來的基石。</span>
+                    <span class="lang-en hidden">The NBA's origin wasn't born from a passion for basketball, but from a pragmatic business problem. This turbulent founding period reveals how the league laid its foundation through consolidation and elimination amidst a survival crisis.</span>
+                </p>
+                
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6 text-center text-gray-800"><span class="lang-zh">關鍵里程碑 (1946-1956)</span><span class="lang-en hidden">Key Milestones (1946-1956)</span></h3>
+                        <div class="relative pl-8 border-l-2 border-orange-400 space-y-10">
+                            <div class="absolute w-4 h-4 bg-orange-500 rounded-full -left-2 top-1 ring-4 ring-orange-200"></div>
+                            <div>
+                                <h4 class="font-bold text-lg text-orange-600">1946: <span class="lang-zh">BAA 成立</span><span class="lang-en hidden">BAA is Founded</span></h4>
+                                <p class="text-gray-700">
+                                    <span class="lang-zh">為填補冰球館的閒置夜晚，美國籃球協會 (BAA) 成立，將目標鎖定在大城市市場。</span>
+                                    <span class="lang-en hidden">To fill empty arenas on off-nights for hockey, the Basketball Association of America (BAA) was formed, targeting major city markets.</span>
+                                </p>
+                            </div>
+                             <div class="absolute w-4 h-4 bg-orange-500 rounded-full -left-2 ring-4 ring-orange-200" style="top: 33.33%"></div>
+                            <div>
+                                <h4 class="font-bold text-lg text-orange-600">1949: <span class="lang-zh">合併成 NBA</span><span class="lang-en hidden">Merger Forms the NBA</span></h4>
+                                <p class="text-gray-700">
+                                    <span class="lang-zh">經過與對手 NBL 的三年消耗戰，雙方合併成立國家籃球協會 (NBA)，共有17支球隊。</span>
+                                    <span class="lang-en hidden">After a three-year war of attrition with the rival NBL, the two leagues merged to form the NBA with 17 teams.</span>
+                                </p>
+                            </div>
+                             <div class="absolute w-4 h-4 bg-orange-500 rounded-full -left-2 ring-4 ring-orange-200" style="top: 66.66%"></div>
+                            <div>
+                                <h4 class="font-bold text-lg text-orange-600">1954: <span class="lang-zh">生存之戰</span><span class="lang-en hidden">The Fight for Survival</span></h4>
+                                <p class="text-gray-700">
+                                    <span class="lang-zh">經歷殘酷的市場淘汰，聯盟縮減至史上最穩固的8支球隊，為日後發展奠定基礎。</span>
+                                    <span class="lang-en hidden">After a brutal market shakedown, the league consolidated to a stable core of 8 teams, setting the stage for future growth.</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="text-2xl font-bold mb-6 text-center text-gray-800"><span class="lang-zh">聯盟的緊縮</span><span class="lang-en hidden">The League Consolidation</span></h3>
+                        <div class="chart-container">
+                            <canvas id="teamConsolidationChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2">
+                            <span class="lang-zh">從最初混亂的17隊到穩定的8隊核心。</span>
+                            <span class="lang-en hidden">From a chaotic 17 teams to a stable core of 8.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="revolution" class="py-16 md:py-24 px-4 bg-white">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 text-black">🏀 <span class="lang-zh">賽局革命</span><span class="lang-en hidden">Game Changers</span></h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                     <span class="lang-zh">兩項關鍵的規則革新與一場數據分析的浪潮，徹底改變了籃球的玩法，將其從沉悶的運動轉變為我們今天所知的、充滿活力的全球性娛樂產品。</span>
+                     <span class="lang-en hidden">Two key rule changes and a wave of data analytics completely altered how basketball is played, transforming it from a sluggish sport into the dynamic, global entertainment product we know today.</span>
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                        <h3 class="text-xl font-bold mb-4 text-center text-gray-800"><span class="lang-zh">24秒革命 (1954)</span><span class="lang-en hidden">The 24-Second Revolution (1954)</span></h3>
+                        <div class="chart-container h-64 md:h-72">
+                            <canvas id="shotClockImpactChart"></canvas>
+                        </div>
+                        <p class="mt-4 text-gray-700">
+                            <span class="lang-zh">進攻計時器的引入，迫使比賽節奏加快，得分飆升，從根本上拯救了比賽的觀賞性，挽救了聯盟的商業前景。</span>
+                            <span class="lang-en hidden">The shot clock forced a faster pace and higher scores, fundamentally saving the game's watchability and the league's commercial future.</span>
+                        </p>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                        <h3 class="text-xl font-bold mb-4 text-center text-gray-800"><span class="lang-zh">三分線的興起 (1979至今)</span><span class="lang-en hidden">Rise of the 3-Pointer (1979-Present)</span></h3>
+                        <div class="chart-container h-64 md:h-72">
+                            <canvas id="threePointRevolutionChart"></canvas>
+                        </div>
+                        <p class="mt-4 text-gray-700">
+                            <span class="lang-zh">最初被視為噱頭，三分球如今已成為現代進攻的核心，徹底重塑了戰術哲學與球員技能要求。</span>
+                            <span class="lang-en hidden">Initially seen as a gimmick, the three-pointer is now the centerpiece of modern offense, reshaping tactics and player skills.</span>
+                        </p>
+                    </div>
+                    <div class="bg-gray-100 p-6 rounded-lg shadow-sm">
+                        <h3 class="text-xl font-bold mb-4 text-center text-gray-800"><span class="lang-zh">數據分析的統治</span><span class="lang-en hidden">The Analytics Takeover</span></h3>
+                         <div class="relative w-full h-64 md:h-72 bg-orange-100 rounded-lg p-4 flex flex-col justify-center items-center border-2 border-orange-200">
+                            <div class="z-10 text-center">
+                                <p class="bg-black text-white font-bold py-1 px-3 rounded-full mb-4"><span class="lang-zh">高效率區域</span><span class="lang-en hidden">High-Efficiency Zones</span></p>
+                                <p class="font-semibold text-lg text-orange-800">🏀 <span class="lang-zh">籃下 & 三分線</span><span class="lang-en hidden">At the Rim & 3-Pointers</span> 🎯</p>
+                                <hr class="my-3 border-orange-300">
+                                <p class="bg-gray-400 text-white font-bold py-1 px-3 rounded-full mt-4"><span class="lang-zh">低效率區域</span><span class="lang-en hidden">Low-Efficiency Zone</span></p>
+                                <p class="font-semibold text-lg text-gray-600">🚫 <span class="lang-zh">中距離跳投</span><span class="lang-en hidden">Mid-Range Jumper</span> 🚫</p>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-gray-700">
+                            <span class="lang-zh">數據分析證明了籃下與三分球是最高效的得分方式，導致中距離出手銳減，聯盟打法趨於同質化。</span>
+                            <span class="lang-en hidden">Analytics proved shots at the rim and from three are most efficient, leading to the decline of the mid-range shot and a more uniform style of play.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="dynasties" class="py-16 md:py-24 px-4 bg-gray-100">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 text-black">🏀 <span class="lang-zh">王朝傳奇</span><span class="lang-en hidden">Legendary Dynasties</span></h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    <span class="lang-zh">NBA的歷史由一個個偉大的王朝所定義。他們不僅贏得了冠軍，更以其獨特的風格和核心人物，塑造了各自的時代。點擊下方標誌，探索他們的輝煌歲月。</span>
+                    <span class="lang-en hidden">The history of the NBA is defined by its great dynasties. They didn't just win championships; they shaped their eras with unique styles and iconic figures. Click a logo below to explore their reigns.</span>
+                </p>
+
+                <div id="dynasty-selector" class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8"></div>
+
+                <div id="dynasty-display" class="bg-white p-8 rounded-xl shadow-lg transition-all duration-500 min-h-[400px] flex flex-col md:flex-row items-center gap-8 border border-gray-200">
+                    <div class="md:w-1/2">
+                        <h3 id="dynasty-name" class="text-3xl font-bold mb-2 text-gray-900"></h3>
+                        <p id="dynasty-years" class="text-gray-500 font-semibold mb-4"></p>
+                        <p id="dynasty-description" class="text-gray-700 mb-4"></p>
+                        <p id="dynasty-players" class="text-sm font-semibold text-orange-600"></p>
+                    </div>
+                    <div class="md:w-1/2 w-full">
+                        <div class="chart-container h-72">
+                            <canvas id="dynastyChampionshipsChart"></canvas>
+                        </div>
+                        <p id="dynasty-chart-title" class="text-center text-sm text-gray-500 mt-2"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="icons" class="py-16 md:py-24 px-4 bg-white">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 text-black">🏀 <span class="lang-zh">巨星時代的經濟蛻變</span><span class="lang-en hidden">The Economic Boom of the Icon Era</span></h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    <span class="lang-zh">從早期的幾千美元到如今的數千萬美元，頂級球員薪資的爆炸性增長，是聯盟商業模式、明星效應和全球化成功的最佳縮影。</span>
+                    <span class="lang-en hidden">From a few thousand dollars in the early days to tens of millions today, the explosive growth in top player salaries reflects the success of the league's business model, star power, and globalization.</span>
+                </p>
+                <div class="chart-container h-96">
+                    <canvas id="salaryEvolutionChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="py-16 md:py-24 px-4 bg-gray-100">
+            <div class="container mx-auto">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-4 text-black">🏀 <span class="lang-zh">超越賽場：作為文化機構的NBA</span><span class="lang-en hidden">Beyond the Court: The NBA as a Cultural Institution</span></h2>
+                <p class="text-center text-gray-600 max-w-2xl mx-auto mb-12">
+                    <span class="lang-zh">NBA的影響力早已超越籃球。它深刻地融入並塑造了現代流行文化，成為音樂、時尚與社會對話中不可或缺的一部分。</span>
+                    <span class="lang-en hidden">The NBA's influence extends far beyond basketball. It has deeply integrated into and shaped modern pop culture, becoming an essential part of music, fashion, and social discourse.</span>
+                </p>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-5xl mb-4">🎵</div>
+                        <h3 class="text-xl font-bold mb-2 text-gray-800"><span class="lang-zh">與嘻哈文化的共生</span><span class="lang-en hidden">Symbiosis with Hip-Hop</span></h3>
+                        <p class="text-gray-600">
+                            <span class="lang-zh">從街頭球場到全球舞台，籃球與嘻哈的共同草根起源，創造了獨特的文化反饋迴路，賦予彼此真實的魅力與英雄形象。</span>
+                            <span class="lang-en hidden">From street courts to the global stage, the shared grassroots origins of basketball and hip-hop have created a unique cultural feedback loop, giving each other authentic appeal and heroic figures.</span>
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-5xl mb-4">👟</div>
+                        <h3 class="text-xl font-bold mb-2 text-gray-800"><span class="lang-zh">球員通道即伸展台</span><span class="lang-en hidden">The Tunnel as a Runway</span></h3>
+                        <p class="text-gray-600">
+                            <span class="lang-zh">在著裝令的意外催化與球鞋文化的推動下，NBA球員已成為全球時尚偶像，其穿搭影響著全球潮流。</span>
+                            <span class="lang-en hidden">Catalyzed by the dress code and sneaker culture, NBA players have become global fashion icons, with their style influencing trends worldwide.</span>
+                        </p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
+                        <div class="text-5xl mb-4">📣</div>
+                        <h3 class="text-xl font-bold mb-2 text-gray-800"><span class="lang-zh">進步的平台</span><span class="lang-en hidden">A Platform for Progress</span></h3>
+                        <p class="text-gray-600">
+                            <span class="lang-zh">從民權運動先驅到當代球星，NBA球員利用其巨大影響力為社會議題發聲，使聯盟成為重要的公共對話平台。</span>
+                            <span class="lang-en hidden">From Civil Rights pioneers to modern-day stars, NBA players use their immense influence to speak on social issues, making the league a vital platform for public discourse.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-black text-white text-center py-6 px-4">
+        <p>
+            <span class="lang-zh">基於《從球館到電波：美國國家籃球協會權威全史》報告製作的互動式體驗。</span>
+            <span class="lang-en hidden">An interactive experience based on the report "From Arenas to Airwaves: The Definitive History of the NBA."</span>
+        </p>
+        <p class="text-sm text-gray-400 mt-1">
+            <span class="lang-zh">2025年，為教學與展示目的而設計。</span>
+            <span class="lang-en hidden">Designed for educational and demonstration purposes, 2025.</span>
+        </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const data = {
+                teamConsolidation: {
+                    labels: { zh: ['1949 (合併)', '1950', '1954'], en: ['1949 (Merger)', '1950', '1954'] },
+                    data: [17, 11, 8],
+                    label: { zh: '球隊數量', en: 'Number of Teams' }
+                },
+                shotClockImpact: {
+                    labels: { zh: ['1953-54 (前)', '1954-55 (後)'], en: ['1953-54 (Pre)', '1954-55 (Post)'] },
+                    data: [79.5, 93.1],
+                    label: { zh: '平均每場得分', en: 'Average Points Per Game' }
+                },
+                threePointRevolution: {
+                    labels: ['1980', '1990', '2000', '2010', '2020', '2024'],
+                    data: [2.8, 7.6, 13.7, 18.0, 34.6, 35.2],
+                    label: { zh: '場均三分出手次數', en: '3-Point Attempts Per Game' }
+                },
+                dynasties: [
+                    {
+                        id: 'celtics',
+                        name: { zh: '波士頓塞爾提克', en: 'Boston Celtics' },
+                        years: '1957–1969',
+                        logo: '🍀',
+                        description: { 
+                            zh: '由比爾·羅素與瑞德·奧拜克帶領，以窒息的團隊防守和快攻體系，創下了空前的八連霸及13年11冠紀錄，定義了「王朝」的概念。',
+                            en: 'Led by Bill Russell and Red Auerbach, they established the concept of a dynasty with suffocating team defense and a fast-break system, winning an unprecedented 8 consecutive titles and 11 in 13 years.'
+                        },
+                        players: { 
+                            zh: '核心人物: 比爾·羅素, 鮑伯·庫西, 約翰·哈維契克, 瑞德·奧拜克 (教練)',
+                            en: 'Key Figures: Bill Russell, Bob Cousy, John Havlicek, Red Auerbach (Coach)'
+                        },
+                        championships: { wins: 11, totalSeasons: 13, era: { zh: '1957-1969 期間的冠軍分佈', en: 'Championship Distribution during 1957-1969'}},
+                        otherLabel: { zh: '其他球隊', en: 'Other Teams' }
+                    },
+                    {
+                        id: 'lakers',
+                        name: { zh: '洛杉磯湖人 (Showtime)', en: 'Los Angeles Lakers (Showtime)' },
+                        years: '1980–1988',
+                        logo: 'Showtime',
+                        description: { 
+                            zh: '魔術·強森領軍，以華麗奔放的「Showtime」球風席捲聯盟，將籃球與好萊塢娛樂完美結合，與塞爾提克的史詩對決拯救了NBA。',
+                            en: 'Led by Magic Johnson, their exciting "Showtime" style took the league by storm, blending basketball with Hollywood entertainment. Their epic rivalry with the Celtics saved the NBA.'
+                        },
+                        players: { 
+                            zh: '核心人物: 魔術·強森, 卡里姆·阿布都-賈霸, 派特·萊里 (教練)',
+                            en: 'Key Figures: Magic Johnson, Kareem Abdul-Jabbar, Pat Riley (Coach)'
+                        },
+                        championships: { wins: 5, totalSeasons: 9, era: { zh: '1980年代的冠軍分佈', en: 'Championship Distribution in the 1980s'}},
+                        otherLabel: { zh: '其他球隊', en: 'Other Teams' }
+                    },
+                    {
+                        id: 'bulls',
+                        name: { zh: '芝加哥公牛', en: 'Chicago Bulls' },
+                        years: '1991–1998',
+                        logo: 'Bulls',
+                        description: { 
+                            zh: '在麥可·喬丹的帶領下，公牛隊以「三角進攻」和喬丹無解的個人能力，完成了兩次三連霸偉業，將NBA推向全球，塑造了史上最偉大的體育偶像。',
+                            en: 'Led by Michael Jordan, the Bulls completed two "three-peats" with the Triangle Offense and Jordan\'s unstoppable skill, launching the NBA globally and creating the greatest sports icon ever.'
+                        },
+                        players: { 
+                            zh: '核心人物: 麥可·喬丹, 史考提·皮朋, 菲爾·傑克森 (教練)',
+                            en: 'Key Figures: Michael Jordan, Scottie Pippen, Phil Jackson (Coach)'
+                        },
+                        championships: { wins: 6, totalSeasons: 8, era: { zh: '1990年代的冠軍分佈', en: 'Championship Distribution in the 1990s'}},
+                        otherLabel: { zh: '其他球隊', en: 'Other Teams' }
+                    },
+                    {
+                        id: 'spurs',
+                        name: { zh: '聖安東尼奧馬刺', en: 'San Antonio Spurs' },
+                        years: '1999–2014',
+                        logo: 'Spurs',
+                        description: { 
+                            zh: '以提姆·鄧肯的沉穩和波波維奇的執教哲學為基石，馬刺隊憑藉紀律、無私的團隊籃球和國際球員的成功運用，成為了持續卓越的典範。',
+                            en: 'Built on the foundation of Tim Duncan\'s stability and Gregg Popovich\'s coaching, the Spurs became a model of sustained excellence through discipline, selfless team basketball, and pioneering use of international players.'
+                        },
+                        players: { 
+                            zh: '核心人物: 提姆·鄧肯, 東尼·帕克, 馬努·吉諾比利, 葛瑞格·波波維奇 (教練)',
+                            en: 'Key Figures: Tim Duncan, Tony Parker, Manu Ginóbili, Gregg Popovich (Coach)'
+                        },
+                        championships: { wins: 5, totalSeasons: 16, era: { zh: '1999-2014 期間的冠軍分佈', en: 'Championship Distribution during 1999-2014'}},
+                        otherLabel: { zh: '其他球隊', en: 'Other Teams' }
+                    },
+                    {
+                        id: 'warriors',
+                        name: { zh: '金州勇士', en: 'Golden State Warriors' },
+                        years: '2015–2022',
+                        logo: 'Warriors',
+                        description: { 
+                            zh: '由史蒂芬·柯瑞引領的三分球革命，以水銀瀉地的「空間換節奏」打法徹底改變了現代籃球的進攻戰術，證明了投射也能贏得總冠軍。',
+                            en: 'Led by Stephen Curry\'s three-point revolution, their "Pace and Space" offense completely changed modern basketball tactics, proving that shooting could win championships.'
+                        },
+                        players: { 
+                            zh: '核心人物: 史蒂芬·柯瑞, 克雷·湯普森, 德雷蒙·格林, 史蒂夫·科爾 (教練)',
+                            en: 'Key Figures: Stephen Curry, Klay Thompson, Draymond Green, Steve Kerr (Coach)'
+                        },
+                        championships: { wins: 4, totalSeasons: 8, era: { zh: '2015-2022 期間的冠軍分佈', en: 'Championship Distribution during 2015-2022'}},
+                        otherLabel: { zh: '其他球隊', en: 'Other Teams' }
+                    }
+                ],
+                salaryEvolution: {
+                    labels: { 
+                        zh: ['喬治·麥肯 (1949)', '張伯倫 (1966)', '麥可·喬丹 (1998)', '史蒂芬·柯瑞 (2022)'],
+                        en: ['George Mikan (1949)', 'Wilt Chamberlain (1966)', 'Michael Jordan (1998)', 'Stephen Curry (2022)']
+                    },
+                    data: [15000, 100000, 33140000, 45780966],
+                    label: { zh: '最高年薪 (美元)', en: 'Highest Annual Salary (USD)' }
+                }
+            };
+
+            let currentLang = 'zh';
+            let activeCharts = {};
+
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111827',
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 4,
+                        displayColors: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#374151', font: { size: 12 } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#374151', font: { size: 12 } },
+                        grid: { color: '#e5e7eb' }
+                    }
+                }
+            };
+            
+            function createTeamConsolidationChart(lang) {
+                if (activeCharts.teamConsolidation) activeCharts.teamConsolidation.destroy();
+                const chartData = data.teamConsolidation;
+                activeCharts.teamConsolidation = new Chart(document.getElementById('teamConsolidationChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels[lang],
+                        datasets: [{ label: chartData.label[lang], data: chartData.data, backgroundColor: '#F97316', hoverBackgroundColor: '#EA580C', borderWidth: 0 }]
+                    },
+                    options: commonChartOptions
+                });
+            }
+
+            function createShotClockImpactChart(lang) {
+                if (activeCharts.shotClockImpact) activeCharts.shotClockImpact.destroy();
+                const chartData = data.shotClockImpact;
+                activeCharts.shotClockImpact = new Chart(document.getElementById('shotClockImpactChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels[lang],
+                        datasets: [{ label: chartData.label[lang], data: chartData.data, backgroundColor: ['#9ca3af', '#4b5563'], hoverBackgroundColor: '#374151', borderWidth: 0 }]
+                    },
+                    options: commonChartOptions
+                });
+            }
+
+            function createThreePointRevolutionChart(lang) {
+                if (activeCharts.threePointRevolution) activeCharts.threePointRevolution.destroy();
+                const chartData = data.threePointRevolution;
+                activeCharts.threePointRevolution = new Chart(document.getElementById('threePointRevolutionChart'), {
+                    type: 'line',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{ label: chartData.label[lang], data: chartData.data, fill: true, borderColor: '#F97316', backgroundColor: '#FDBA7433', tension: 0.1, pointBackgroundColor: '#F97316' }]
+                    },
+                    options: commonChartOptions
+                });
+            }
+            
+            function createSalaryEvolutionChart(lang) {
+                if (activeCharts.salaryEvolution) activeCharts.salaryEvolution.destroy();
+                const chartData = data.salaryEvolution;
+                activeCharts.salaryEvolution = new Chart(document.getElementById('salaryEvolutionChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartData.labels[lang],
+                        datasets: [{ label: chartData.label[lang], data: chartData.data, backgroundColor: ['#fbbf24', '#f59e0b', '#d97706', '#b45309'], hoverBackgroundColor: '#92400e', borderWidth: 0 }]
+                    },
+                    options: { ...commonChartOptions, scales: { y: { type: 'logarithmic', ticks: { color: '#374151', font: { size: 12 }, callback: (v) => (v === 10000 || v === 100000 || v === 1000000 || v === 10000000 || v === 100000000) ? '$' + v.toLocaleString() : null }, grid: { color: '#e5e7eb' } }, x: { ...commonChartOptions.scales.x } } }
+                });
+            }
+
+            const dynastySelector = document.getElementById('dynasty-selector');
+            const dynastyName = document.getElementById('dynasty-name');
+            const dynastyYears = document.getElementById('dynasty-years');
+            const dynastyDescription = document.getElementById('dynasty-description');
+            const dynastyPlayers = document.getElementById('dynasty-players');
+            const dynastyChartTitle = document.getElementById('dynasty-chart-title');
+
+            function updateDynastyDisplay(dynastyId, lang) {
+                const dynasty = data.dynasties.find(d => d.id === dynastyId);
+                if (!dynasty) return;
+
+                dynastyName.textContent = dynasty.name[lang];
+                dynastyYears.textContent = dynasty.years;
+                dynastyDescription.textContent = dynasty.description[lang];
+                dynastyPlayers.textContent = dynasty.players[lang];
+                dynastyChartTitle.textContent = dynasty.championships.era[lang];
+                
+                document.querySelectorAll('.dynasty-selector-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.id === dynastyId);
+                });
+
+                if (activeCharts.dynasty) activeCharts.dynasty.destroy();
+                
+                activeCharts.dynasty = new Chart(document.getElementById('dynastyChampionshipsChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: [dynasty.name[lang], dynasty.otherLabel[lang]],
+                        datasets: [{
+                            data: [dynasty.championships.wins, dynasty.championships.totalSeasons - dynasty.championships.wins],
+                            backgroundColor: ['#F97316', '#e5e7eb'], hoverBackgroundColor: ['#EA580C', '#d1d5db'], borderColor: '#ffffff', borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '60%',
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: '#4b5563', font: { size: 14 }}},
+                            tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw} ${lang === 'zh' ? '次冠軍' : 'Championships'}` } }
+                        }
+                    }
+                });
+            }
+
+            function initializeDynasties() {
+                 data.dynasties.forEach(dynasty => {
+                    const button = document.createElement('button');
+                    button.className = 'dynasty-selector-btn bg-gray-200 text-gray-800 py-2 px-4 rounded-lg shadow-sm text-sm md:text-base font-semibold';
+                    button.textContent = dynasty.logo;
+                    button.dataset.id = dynasty.id;
+                    button.addEventListener('click', () => updateDynastyDisplay(dynasty.id, currentLang));
+                    dynastySelector.appendChild(button);
+                });
+            }
+
+            function updateAllContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                const elementsZh = document.querySelectorAll('.lang-zh');
+                const elementsEn = document.querySelectorAll('.lang-en');
+                
+                if (lang === 'zh') {
+                    elementsZh.forEach(el => el.classList.remove('hidden'));
+                    elementsEn.forEach(el => el.classList.add('hidden'));
+                } else {
+                    elementsZh.forEach(el => el.classList.add('hidden'));
+                    elementsEn.forEach(el => el.classList.remove('hidden'));
+                }
+                
+                createTeamConsolidationChart(lang);
+                createShotClockImpactChart(lang);
+                createThreePointRevolutionChart(lang);
+                createSalaryEvolutionChart(lang);
+                const activeDynastyBtn = document.querySelector('.dynasty-selector-btn.active');
+                if (activeDynastyBtn) {
+                   updateDynastyDisplay(activeDynastyBtn.dataset.id, lang);
+                }
+            }
+
+            document.getElementById('lang-toggle').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateAllContent(currentLang);
+            });
+            
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('nav a');
+            window.addEventListener('scroll', () => {
+                let currentSectionId = '';
+                sections.forEach(section => {
+                    if (pageYOffset >= section.offsetTop - 70) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(currentSectionId)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Initial Load
+            initializeDynasties();
+            updateAllContent(currentLang);
+            updateDynastyDisplay(data.dynasties[0].id, currentLang);
+        });
+    </script>
+</body>
+</html>
