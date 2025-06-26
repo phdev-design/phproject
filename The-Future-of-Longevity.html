@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索長壽科學：對抗老年疾病與延長健康壽命的未來</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Background: #F8F7F4, Text: #4A4A4A, Primary: #4A6C6F, Secondary: #B4C5C6, Accent: #D7A78A) -->
+    <!-- Application Structure Plan: The application is designed as a thematic, non-linear journey, diverging from the report's four-part structure to enhance usability. A sticky top navigation allows users to jump to core concepts: 1) The Alzheimer's Battle, 2) Targeting Aging, 3) Bio-engineering, and 4) The Future of Longevity. This structure groups related content logically (e.g., all AD content under one hub) and empowers users to explore topics based on interest rather than a fixed order. Key interactions include tabbed content for AD, clickable cards for emerging therapies and aging hallmarks, and interactive charts for comparing data, making dense information digestible and engaging. This user-centric architecture prioritizes discovery and comprehension over linear reading. A language switcher has been added for bilingual support. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Alzheimer's Pathology -> Goal: Organize/Explain -> Viz: Interactive HTML/CSS diagram of the "Vicious Cycle" -> Interaction: Click to reveal details on Aβ, Tau, Neuroinflammation. Justification: Visually represents the complex feedback loop more effectively than text. Library/Method: Tailwind CSS Grid.
+        - Report Info: Lecanemab vs. Donanemab data -> Goal: Compare -> Viz: Grouped Bar Chart -> Interaction: Hover for tooltips with precise data, toggle to switch between efficacy (CDR-SB) and safety (ARIA) views. Justification: Allows direct, quantitative comparison of drug performance and risks. Library/Method: Chart.js.
+        - Report Info: Longevity Forecasts (WHO vs. Futurist) -> Goal: Compare/Contrast -> Viz: Line Chart -> Interaction: Hover to see data points. Justification: Clearly illustrates the diverging predictions and the widening gap between lifespan and healthspan. Library/Method: Chart.js.
+        - Report Info: 12 Hallmarks of Aging -> Goal: Organize/Inform -> Viz: Interactive Grid of Cards -> Interaction: Click on a hallmark to expand and read its description. Justification: Breaks down a long list into a more engaging, explorable format. Library/Method: HTML/CSS with JS for toggling.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #F8F7F4;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #4A6C6F;
+            border-bottom-color: #4A6C6F;
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #4A6C6F;
+            color: #F8F7F4;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .hallmark-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .hallmark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#F8F7F4]/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-[#4A6C6F]" data-lang-key="headerTitle">長壽科學前沿</h1>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#intro" class="nav-link active" data-section-id="intro" data-lang-key="navIntro">導覽</a>
+                <a href="#alzheimers" class="nav-link" data-section-id="alzheimers" data-lang-key="navAlzheimers">對抗阿茲海默症</a>
+                <a href="#geroscience" class="nav-link" data-section-id="geroscience" data-lang-key="navGeroscience">靶向衰老</a>
+                <a href="#bioengineering" class="nav-link" data-section-id="bioengineering" data-lang-key="navBioengineering">生命工程</a>
+                <a href="#future" class="nav-link" data-section-id="future" data-lang-key="navFuture">長壽的未來</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 border border-[#4A6C6F] rounded-full text-[#4A6C6F] text-sm hover:bg-[#4A6C6F] hover:text-white transition-colors">English</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-[#F8F7F4] p-4">
+            <a href="#intro" class="block py-2 text-center nav-link" data-section-id="intro" data-lang-key="navIntroMobile">導覽</a>
+            <a href="#alzheimers" class="block py-2 text-center nav-link" data-section-id="alzheimers" data-lang-key="navAlzheimersMobile">對抗阿茲海默症</a>
+            <a href="#geroscience" class="block py-2 text-center nav-link" data-section-id="geroscience" data-lang-key="navGeroscienceMobile">靶向衰老</a>
+            <a href="#bioengineering" class="block py-2 text-center nav-link" data-section-id="bioengineering" data-lang-key="navBioengineeringMobile">生命工程</a>
+            <a href="#future" class="block py-2 text-center nav-link" data-section-id="future" data-lang-key="navFutureMobile">長壽的未來</a>
+             <button id="lang-switcher-mobile" class="mt-4 w-full px-3 py-2 border border-[#4A6C6F] rounded-full text-[#4A6C6F] hover:bg-[#4A6C6F] hover:text-white transition-colors">English</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="intro" class="content-section active">
+            <div class="text-center py-12">
+                <h2 class="text-4xl md:text-5xl font-bold text-[#4A6C6F] mb-4" data-lang-key="introH2">雙重前沿：對抗神經退化與構建長壽</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600" data-lang-key="introP1">人類正處於一個關鍵的十字路口：一方面要應對阿茲海默症等年齡相關疾病的巨大挑戰，另一方面正在開發前所未有的生物技術，有望從根本上延長我們的健康壽命（Healthspan）。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                     <h3 class="text-2xl font-bold text-[#4A6C6F] mb-4" data-lang-key="introH3A">全球人口結構的轉變</h3>
+                     <p class="mb-4" data-lang-key="introP2">全球人口正在迅速老化。這不僅為社會經濟帶來壓力，也使得尋找有效治療老年疾病的方法變得刻不容緩。</p>
+                     <div class="space-y-4">
+                        <div class="text-center">
+                            <p class="text-4xl font-bold text-[#D7A78A]" id="seniors-2050">2.1 Billion</p>
+                            <p class="text-gray-500" data-lang-key="introStat1">預計到2050年全球60歲以上人口</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-4xl font-bold text-[#D7A78A]" id="ad-patients-2050">~13 Million</p>
+                            <p class="text-gray-500" data-lang-key="introStat2">預計到2050年美國阿茲海默症患者</p>
+                        </div>
+                     </div>
+                </div>
+                <div class="bg-[#B4C5C6] p-6 rounded-lg text-[#4A4A4A]">
+                    <h3 class="text-2xl font-bold mb-4" data-lang-key="introH3B">老年科學假說 (Geroscience Hypothesis)</h3>
+                    <p class="mb-2" data-lang-key="introP3">一個革命性的策略：與其被動地治療一種又一種老年病，不如主動出擊，直接干預導致這些疾病的共同根源——衰老本身。</p>
+                    <p data-lang-key="introP4">本互動報告將帶您探索：</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li data-lang-key="introL1">對抗阿茲海默症的最新武器。</li>
+                        <li data-lang-key="introL2">靶向衰老標誌的藥物與療法。</li>
+                        <li data-lang-key="introL3">用生物技術修復與再生人體。</li>
+                        <li data-lang-key="introL4">長壽時代的倫理與社會挑戰。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="alzheimers" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#4A6C6F]" data-lang-key="adH2">對抗阿茲海默症之戰</h2>
+                <p class="max-w-3xl mx-auto mt-2 text-gray-600" data-lang-key="adP1">從單一靶點到多因素的複雜網絡，我們對阿茲海默症的理解正在發生革命性轉變，催生了診斷和治療領域的新曙光。</p>
+            </div>
+            <div class="w-full max-w-4xl mx-auto">
+                <div class="flex justify-center border-b-2 border-gray-200 mb-8">
+                    <button class="tab-button py-2 px-6 font-semibold text-gray-600 active" data-tab="ad-pathology" data-lang-key="adTab1">病理學</button>
+                    <button class="tab-button py-2 px-6 font-semibold text-gray-600" data-tab="ad-diagnosis" data-lang-key="adTab2">診斷革命</button>
+                    <button class="tab-button py-2 px-6 font-semibold text-gray-600" data-tab="ad-treatment" data-lang-key="adTab3">治療前沿</button>
+                </div>
+
+                <div id="ad-pathology" class="tab-content active">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-[#4A6C6F]" data-lang-key="adPathH3">病理學的「惡性循環」</h3>
+                    <p class="text-center mb-8 max-w-2xl mx-auto" data-lang-key="adPathP1">阿茲海默症並非單一因素造成，而是Aβ蛋白、Tau蛋白、神經炎症和粒線體功能障礙等多個病理通路相互作用形成的惡性循環。點擊下方各個元素以了解更多。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                        <div class="pathology-card p-4 bg-white rounded-lg shadow-md cursor-pointer" data-path="abeta">
+                            <span class="text-3xl">β</span>
+                            <h4 class="font-bold mt-2" data-lang-key="adPathCard1Title">類澱粉蛋白 (Aβ)</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="adPathCard1Desc">異常積聚形成老年斑塊</p>
+                        </div>
+                        <div class="pathology-card p-4 bg-white rounded-lg shadow-md cursor-pointer" data-path="tau">
+                            <span class="text-3xl">τ</span>
+                            <h4 class="font-bold mt-2" data-lang-key="adPathCard2Title">Tau 蛋白</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="adPathCard2Desc">過度磷酸化形成神經纖維纏結</p>
+                        </div>
+                        <div class="pathology-card p-4 bg-white rounded-lg shadow-md cursor-pointer" data-path="inflammation">
+                            <span class="text-3xl">🔥</span>
+                            <h4 class="font-bold mt-2" data-lang-key="adPathCard3Title">神經炎症</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="adPathCard3Desc">微膠細胞失調，釋放炎性因子</p>
+                        </div>
+                        <div class="pathology-card p-4 bg-white rounded-lg shadow-md cursor-pointer" data-path="mitochondria">
+                            <span class="text-3xl">⚡</span>
+                            <h4 class="font-bold mt-2" data-lang-key="adPathCard4Title">粒線體功能障礙</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="adPathCard4Desc">能量危機與氧化壓力</p>
+                        </div>
+                    </div>
+                    <div id="pathology-details" class="mt-8 p-6 bg-[#B4C5C6] rounded-lg text-[#4A4A4A] hidden"></div>
+                </div>
+
+                <div id="ad-diagnosis" class="tab-content hidden">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-[#4A6C6F]" data-lang-key="adDiagH3">從症狀到信號：診斷革命</h3>
+                     <p class="text-center mb-8 max-w-2xl mx-auto" data-lang-key="adDiagP1">診斷正從依賴晚期症狀轉向依賴早期生物標記，其中血液檢測的突破最具革命性，有望將診斷等待時間從數年縮短至數月。</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="font-bold text-xl mb-2" data-lang-key="adDiagCard1Title">🩸 血液生物標記的力量</h4>
+                            <p data-lang-key="adDiagCard1Desc">僅需抽血即可檢測p-tau217等關鍵蛋白，準確性媲美傳統的腰椎穿刺和昂貴的PET掃描。這極大地降低了篩查門檻，加速了臨床試驗，並有望解決醫療不平等問題。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h4 class="font-bold text-xl mb-2" data-lang-key="adDiagCard2Title">🧠 神經影像學的互補作用</h4>
+                            <p data-lang-key="adDiagCard2Desc">PET掃描可將斑塊和纏結「可視化」，提供確鑿證據。MRI則用於評估腦萎縮，並在治療中監測ARIA（類澱粉蛋白相關影像學異常）等副作用，確保用藥安全。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ad-treatment" class="tab-content hidden">
+                     <h3 class="text-2xl font-bold mb-4 text-center text-[#4A6C6F]" data-lang-key="adTreatH3">治療前沿：新武器庫</h3>
+                     <p class="text-center mb-8 max-w-2xl mx-auto" data-lang-key="adTreatP1">首批疾病修飾藥物已獲批准，標誌著抗Aβ時代的來臨。同時，研究焦點正擴展到更多元的靶點，預示著個人化精準醫療時代的到來。</p>
+                    <div>
+                        <h4 class="text-xl font-bold text-center mb-4" data-lang-key="adTreatChartTitle">抗類澱粉蛋白藥物比較</h4>
+                        <div class="chart-container">
+                            <canvas id="adTreatmentChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="adTreatChartCaption">數據源自 Clarity AD 和 TRAILBLAZER-ALZ 2 試驗。ARIA 指類澱粉蛋白相關影像學異常（包括水腫和微出血）。</p>
+                    </div>
+                    <div class="mt-12">
+                         <h4 class="text-xl font-bold text-center mb-4" data-lang-key="adTreatNextWave">下一波浪潮：超越類澱粉蛋白</h4>
+                         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                             <div class="bg-white p-4 rounded-lg shadow-md">
+                                 <h5 class="font-bold text-[#4A6C6F]" data-lang-key="adTreatCard1Title">細胞療法 (Lomecel-B)</h5>
+                                 <p class="text-sm" data-lang-key="adTreatCard1Desc">利用間質幹細胞調節免疫與炎症，IIa期試驗顯示其能延緩認知衰退且安全性良好，未報告ARIA事件。</p>
+                             </div>
+                             <div class="bg-white p-4 rounded-lg shadow-md">
+                                 <h5 class="font-bold text-[#4A6C6F]" data-lang-key="adTreatCard2Title">藥物再利用 (GLP-1促效劑)</h5>
+                                 <p class="text-sm" data-lang-key="adTreatCard2Desc">原用於治療糖尿病的藥物，如利拉魯肽，II期試驗顯示其可能減緩腦萎縮和認知衰退。</p>
+                             </div>
+                             <div class="bg-white p-4 rounded-lg shadow-md">
+                                 <h5 class="font-bold text-[#4A6C6F]" data-lang-key="adTreatCard3Title">創新機制 (Buntanetap)</h5>
+                                 <p class="text-sm" data-lang-key="adTreatCard3Desc">旨在改善神經元內軸突運輸，II期研究顯示其能同時改善認知和功能。</p>
+                             </div>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="geroscience" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#4A6C6F]" data-lang-key="geroH2">靶向衰老：老年科學假說</h2>
+                <p class="max-w-3xl mx-auto mt-2 text-gray-600" data-lang-key="geroP1">與其治療單一疾病，不如干預衰老的根本生物學過程。這一革命性理念旨在通過靶向「衰老標誌」來延長健康壽命。</p>
+            </div>
+             <h3 class="text-2xl font-bold mb-4 text-center text-[#4A6C6F]" data-lang-key="geroH3">衰老的十二個標誌</h3>
+             <p class="text-center mb-8 max-w-2xl mx-auto" data-lang-key="geroP2">科學家識別出十二個相互關聯的、構成衰老過程的分子和細胞基礎。靶向干預這些標誌，有望同時預防多種年齡相關疾病。</p>
+             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="hallmarks-container">
+             </div>
+             <div id="hallmark-details" class="mt-8 p-6 bg-[#B4C5C6] rounded-lg text-[#4A4A4A] hidden"></div>
+        </section>
+        
+        <section id="bioengineering" class="content-section">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#4A6C6F]" data-lang-key="bioH2">生命工程：修復與再生</h2>
+                <p class="max-w-3xl mx-auto mt-2 text-gray-600" data-lang-key="bioP1">再生醫學和基因編輯等尖端技術不僅旨在減緩衰老，更要主動修復損傷，甚至從根本上改寫生命的藍圖，延長健康壽命。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-[#4A6C6F]" data-lang-key="bioH3A">再生醫學：修復不可修復之物</h3>
+                    <p class="mb-4" data-lang-key="bioP2">利用身體自身的潛力恢復受損組織和器官功能。目前，幹細胞療法已顯示出潛力，其主要作用並非直接替換細胞，而是作為「生物藥廠」，通過分泌抗炎和免疫調節分子來對抗慢性炎症（Inflammaging）。</p>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li data-lang-key="bioL1"><strong>幹細胞療法 (MSCs):</strong> 臨床試驗顯示其在治療虛弱症方面有潛力，可改善身體機能並降低炎症標記物。</li>
+                        <li data-lang-key="bioL2"><strong>3D生物列印:</strong> 雖已成功列印簡單組織如耳朵，但製造包含複雜血管網絡的心臟、腎臟等器官仍面臨巨大挑戰，可能還需數十年。</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                     <h3 class="text-2xl font-bold mb-4 text-[#4A6C6F]" data-lang-key="bioH3B">基因編輯：改寫生命腳本</h3>
+                     <p class="mb-4" data-lang-key="bioP3">CRISPR等技術提供了精確修改基因組的能力，為從根本上治療遺傳性和年齡相關疾病打開了大門。這代表了一種從「慢性病管理」到「永久性疾病預防」的範式轉變。</p>
+                     <ul class="list-disc list-inside space-y-2">
+                        <li data-lang-key="bioL3"><strong>心血管疾病:</strong> Verve Therapeutics正利用鹼基編輯技術，旨在通過一次性治療永久性「關閉」導致高膽固醇的基因（如PCSK9）。</li>
+                        <li data-lang-key="bioL4"><strong>神經退化性疾病:</strong> 臨床前研究探索將高風險的APOE4基因編輯為風險中性的APOE3。</li>
+                         <li data-lang-key="bioL5"><strong>首個獲批療法:</strong> FDA已批准首個基於CRISPR的療法Casgevy，用於治療鐮狀細胞病。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="content-section">
+             <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-[#4A6C6F]" data-lang-key="futureH2">長壽的未來：承諾與詰問</h2>
+                <p class="max-w-3xl mx-auto mt-2 text-gray-600" data-lang-key="futureP1">科學的飛速發展迫使我們不僅要評估技術的可行性，更要審視其對社會、倫理和生命意義的深遠影響。</p>
+            </div>
+            
+            <div>
+                <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="futureH3A">壽命預測：審慎 vs. 激進</h3>
+                <p class="text-center mb-8 max-w-2xl mx-auto" data-lang-key="futureP2">關於人類壽命的未來，存在兩種截然不同的觀點。主流觀點基於現有數據進行線性外推，而未來學家則相信技術的指數級發展將帶來顛覆性突破。</p>
+                <div class="chart-container">
+                    <canvas id="longevityForecastChart"></canvas>
+                </div>
+                 <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="futureChartCaption">此圖表概念性地展示了兩種預測趨勢，以及壽命（Lifespan）與健康壽命（Healthspan）之間可能擴大的差距。</p>
+            </div>
+
+            <div class="mt-16">
+                 <h3 class="text-2xl font-bold text-center mb-8" data-lang-key="futureH3B">倫理與社會的熔爐：我們準備好了嗎？</h3>
+                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div class="bg-[#D7A78A] p-6 rounded-lg text-white">
+                         <h4 class="font-bold text-xl mb-2" data-lang-key="futureCard1Title">長壽鴻溝</h4>
+                         <p data-lang-key="futureCard1Desc">昂貴的尖端療法是否會加劇不平等，創造出一個富人能用金錢購買更長健康生命的新階級？</p>
+                     </div>
+                     <div class="bg-[#B4C5C6] p-6 rounded-lg text-[#4A4A4A]">
+                         <h4 class="font-bold text-xl mb-2" data-lang-key="futureCard2Title">社會壓力</h4>
+                         <p data-lang-key="futureCard2Desc">人口結構的轉變將如何衝擊養老金、醫療保健和代際關係？一個「長生者」主導的社會會不會陷入停滯？</p>
+                     </div>
+                     <div class="bg-[#4A6C6F] p-6 rounded-lg text-white">
+                         <h4 class="font-bold text-xl mb-2" data-lang-key="futureCard3Title">生命的意義</h4>
+                         <p data-lang-key="futureCard3Desc">如果生命可以無限延長，我們還會做出選擇和承諾嗎？有限性是否是賦予生命緊迫感和意義的必要條件？</p>
+                     </div>
+                 </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#4A4A4A] text-white mt-16">
+        <div class="container mx-auto p-6 text-center">
+            <p data-lang-key="footerP1">本互動報告基於《雙重前沿：在21世紀對抗神經退化與構建長壽》報告生成。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footerP2">僅供演示與教育目的。</p>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const translations = {
+                'zh-Hant': {
+                    headerTitle: '長壽科學前沿',
+                    navIntro: '導覽',
+                    navAlzheimers: '對抗阿茲海默症',
+                    navGeroscience: '靶向衰老',
+                    navBioengineering: '生命工程',
+                    navFuture: '長壽的未來',
+                    langSwitch: 'English',
+                    introH2: '雙重前沿：對抗神經退化與構建長壽',
+                    introP1: '人類正處於一個關鍵的十字路口：一方面要應對阿茲海默症等年齡相關疾病的巨大挑戰，另一方面正在開發前所未有的生物技術，有望從根本上延長我們的健康壽命（Healthspan）。',
+                    introH3A: '全球人口結構的轉變',
+                    introP2: '全球人口正在迅速老化。這不僅為社會經濟帶來壓力，也使得尋找有效治療老年疾病的方法變得刻不容緩。',
+                    introStat1: '預計到2050年全球60歲以上人口',
+                    introStat2: '預計到2050年美國阿茲海默症患者',
+                    introH3B: '老年科學假說 (Geroscience Hypothesis)',
+                    introP3: '一個革命性的策略：與其被動地治療一種又一種老年病，不如主動出擊，直接干預導致這些疾病的共同根源——衰老本身。',
+                    introP4: '本互動報告將帶您探索：',
+                    introL1: '對抗阿茲海默症的最新武器。',
+                    introL2: '靶向衰老標誌的藥物與療法。',
+                    introL3: '用生物技術修復與再生人體。',
+                    introL4: '長壽時代的倫理與社會挑戰。',
+                    adH2: '對抗阿茲海默症之戰',
+                    adP1: '從單一靶點到多因素的複雜網絡，我們對阿茲海默症的理解正在發生革命性轉變，催生了診斷和治療領域的新曙光。',
+                    adTab1: '病理學',
+                    adTab2: '診斷革命',
+                    adTab3: '治療前沿',
+                    adPathH3: '病理學的「惡性循環」',
+                    adPathP1: '阿茲海默症並非單一因素造成，而是Aβ蛋白、Tau蛋白、神經炎症和粒線體功能障礙等多個病理通路相互作用形成的惡性循環。點擊下方各個元素以了解更多。',
+                    adPathCard1Title: '類澱粉蛋白 (Aβ)',
+                    adPathCard1Desc: '異常積聚形成老年斑塊',
+                    adPathCard2Title: 'Tau 蛋白',
+                    adPathCard2Desc: '過度磷酸化形成神經纖維纏結',
+                    adPathCard3Title: '神經炎症',
+                    adPathCard3Desc: '微膠細胞失調，釋放炎性因子',
+                    adPathCard4Title: '粒線體功能障礙',
+                    adPathCard4Desc: '能量危機與氧化壓力',
+                    adDiagH3: '從症狀到信號：診斷革命',
+                    adDiagP1: '診斷正從依賴晚期症狀轉向依賴早期生物標記，其中血液檢測的突破最具革命性，有望將診斷等待時間從數年縮短至數月。',
+                    adDiagCard1Title: '🩸 血液生物標記的力量',
+                    adDiagCard1Desc: '僅需抽血即可檢測p-tau217等關鍵蛋白，準確性媲美傳統的腰椎穿刺和昂貴的PET掃描。這極大地降低了篩查門檻，加速了臨床試驗，並有望解決醫療不平等問題。',
+                    adDiagCard2Title: '🧠 神經影像學的互補作用',
+                    adDiagCard2Desc: 'PET掃描可將斑塊和纏結「可視化」，提供確鑿證據。MRI則用於評估腦萎縮，並在治療中監測ARIA（類澱粉蛋白相關影像學異常）等副作用，確保用藥安全。',
+                    adTreatH3: '治療前沿：新武器庫',
+                    adTreatP1: '首批疾病修飾藥物已獲批准，標誌著抗Aβ時代的來臨。同時，研究焦點正擴展到更多元的靶點，預示著個人化精準醫療時代的到來。',
+                    adTreatChartTitle: '抗類澱粉蛋白藥物比較',
+                    adTreatChartCaption: '數據源自 Clarity AD 和 TRAILBLAZER-ALZ 2 試驗。ARIA 指類澱粉蛋白相關影像學異常（包括水腫和微出血）。',
+                    adTreatNextWave: '下一波浪潮：超越類澱粉蛋白',
+                    adTreatCard1Title: '細胞療法 (Lomecel-B)',
+                    adTreatCard1Desc: '利用間質幹細胞調節免疫與炎症，IIa期試驗顯示其能延緩認知衰退且安全性良好，未報告ARIA事件。',
+                    adTreatCard2Title: '藥物再利用 (GLP-1促效劑)',
+                    adTreatCard2Desc: '原用於治療糖尿病的藥物，如利拉魯肽，II期試驗顯示其可能減緩腦萎縮和認知衰退。',
+                    adTreatCard3Title: '創新機制 (Buntanetap)',
+                    adTreatCard3Desc: '旨在改善神經元內軸突運輸，II期研究顯示其能同時改善認知和功能。',
+                    adChartTitle: '抗Aβ藥物療效與風險比較',
+                    adChartYAxis: '百分比 (%)',
+                    adChartLabel1: '延緩衰退 (CDR-SB, %)',
+                    adChartLabel2: 'ARIA-E (腦水腫) 風險 (%)',
+                    adChartLabel3: 'ARIA-H (微出血) 風險 (%)',
+                    geroH2: '靶向衰老：老年科學假說',
+                    geroP1: '與其治療單一疾病，不如干預衰老的根本生物學過程。這一革命性理念旨在通過靶向「衰老標誌」來延長健康壽命。',
+                    geroH3: '衰老的十二個標誌',
+                    geroP2: '科學家識別出十二個相互關聯的、構成衰老過程的分子和細胞基礎。靶向干預這些標誌，有望同時預防多種年齡相關疾病。',
+                    bioH2: '生命工程：修復與再生',
+                    bioP1: '再生醫學和基因編輯等尖端技術不僅旨在減緩衰老，更要主動修復損傷，甚至從根本上改寫生命的藍圖，延長健康壽命。',
+                    bioH3A: '再生醫學：修復不可修復之物',
+                    bioP2: '利用身體自身的潛力恢復受損組織和器官功能。目前，幹細胞療法已顯示出潛力，其主要作用並非直接替換細胞，而是作為「生物藥廠」，通過分泌抗炎和免疫調節分子來對抗慢性炎症（Inflammaging）。',
+                    bioL1: '<strong>幹細胞療法 (MSCs):</strong> 臨床試驗顯示其在治療虛弱症方面有潛力，可改善身體機能並降低炎症標記物。',
+                    bioL2: '<strong>3D生物列印:</strong> 雖已成功列印簡單組織如耳朵，但製造包含複雜血管網絡的心臟、腎臟等器官仍面臨巨大挑戰，可能還需數十年。',
+                    bioH3B: '基因編輯：改寫生命腳本',
+                    bioP3: 'CRISPR等技術提供了精確修改基因組的能力，為從根本上治療遺傳性和年齡相關疾病打開了大門。這代表了一種從「慢性病管理」到「永久性疾病預防」的範式轉變。',
+                    bioL3: '<strong>心血管疾病:</strong> Verve Therapeutics正利用鹼基編輯技術，旨在通過一次性治療永久性「關閉」導致高膽固醇的基因（如PCSK9）。',
+                    bioL4: '<strong>神經退化性疾病:</strong> 臨床前研究探索將高風險的APOE4基因編輯為風險中性的APOE3。',
+                    bioL5: '<strong>首個獲批療法:</strong> FDA已批准首個基於CRISPR的療法Casgevy，用於治療鐮狀細胞病。',
+                    futureH2: '長壽的未來：承諾與詰問',
+                    futureP1: '科學的飛速發展迫使我們不僅要評估技術的可行性，更要審視其對社會、倫理和生命意義的深遠影響。',
+                    futureH3A: '壽命預測：審慎 vs. 激進',
+                    futureP2: '關於人類壽命的未來，存在兩種截然不同的觀點。主流觀點基於現有數據進行線性外推，而未來學家則相信技術的指數級發展將帶來顛覆性突破。',
+                    futureChartCaption: '此圖表概念性地展示了兩種預測趨勢，以及壽命（Lifespan）與健康壽命（Healthspan）之間可能擴大的差距。',
+                    futureH3B: '倫理與社會的熔爐：我們準備好了嗎？',
+                    futureCard1Title: '長壽鴻溝',
+                    futureCard1Desc: '昂貴的尖端療法是否會加劇不平等，創造出一個富人能用金錢購買更長健康生命的新階級？',
+                    futureCard2Title: '社會壓力',
+                    futureCard2Desc: '人口結構的轉變將如何衝擊養老金、醫療保健和代際關係？一個「長生者」主導的社會會不會陷入停滯？',
+                    futureCard3Title: '生命的意義',
+                    futureCard3Desc: '如果生命可以無限延長，我們還會做出選擇和承諾嗎？有限性是否是賦予生命緊迫感和意義的必要條件？',
+                    longevityChartTitle: '壽命預測趨勢對比',
+                    longevityChartYAxis: '歲數',
+                    longevityLabel1: '預期壽命 (主流預測)',
+                    longevityLabel2: '健康預期壽命 (主流預測)',
+                    longevityLabel3: '預期壽命 (未來學家預測)',
+                    footerP1: '本互動報告基於《雙重前沿：在21世紀對抗神經退化與構建長壽》報告生成。',
+                    footerP2: '僅供演示與教育目的。',
+                    pathologyData: {
+                        abeta: { title: '類澱粉蛋白 (Aβ) 瀑布假說', text: '該假說認為，大腦中β-類澱粉蛋白（Aβ）肽的異常積聚和形成老年斑塊是觸發所有病理變化的核心事件。然而，許多專注於清除Aβ的藥物試驗失敗，迫使科學界重新審視這一線性模型。' },
+                        tau: { title: 'Tau 蛋白假說', text: '該假說強調Tau蛋白的過度磷酸化及其聚集成神經纖維纏結（NFTs），是導致神經元功能障礙和死亡的關鍵驅動因素。它與Aβ共同構成AD的兩大核心病理標誌。' },
+                        inflammation: { title: '神經炎症', text: '大腦中的免疫細胞（微膠細胞）在持續刺激下從保護性轉為有害性，釋放大量促炎因子，加劇神經元損傷，形成自我維持的破壞循環。它已從被動後果轉變為核心致病機制。' },
+                        mitochondria: { title: '粒線體功能障礙', text: '作為細胞的「能量工廠」，粒線體功能受損會導致能量供應危機和嚴重的氧化壓力，進一步損害神經元並觸發細胞凋亡。' }
+                    },
+                    hallmarkData: [
+                        { id: 'genomic-instability', title: '基因組不穩定性' },
+                        { id: 'telomere-attrition', title: '端粒損耗' },
+                        { id: 'epigenetic-alterations', title: '表觀遺傳學改變' },
+                        { id: 'loss-of-proteostasis', title: '蛋白質穩態喪失' },
+                        { id: 'disabled-macroautophagy', title: '巨自噬功能障礙' },
+                        { id: 'deregulated-nutrient-sensing', title: '營養感應失調' },
+                        { id: 'mitochondrial-dysfunction', title: '粒線體功能障礙' },
+                        { id: 'cellular-senescence', title: '細胞衰老' },
+                        { id: 'stem-cell-exhaustion', title: '幹細胞耗竭' },
+                        { id: 'altered-intercellular-communication', title: '細胞間通訊改變' },
+                        { id: 'chronic-inflammation', title: '慢性炎症' },
+                        { id: 'dysbiosis', title: '生態失調' }
+                    ],
+                    hallmarkDetailsData: {
+                        'genomic-instability': 'DNA損傷的積累，是衰老和癌症的核心驅動因素之一。',
+                        'telomere-attrition': '染色體末端的保護帽（端粒）隨著細胞分裂而縮短，最終導致細胞停止分裂或死亡。',
+                        'epigenetic-alterations': '對DNA的化學修飾發生改變，影響基因的表達模式，擾亂細胞功能。',
+                        'loss-of-proteostasis': '細胞維持蛋白質正常折疊和功能的能力下降，導致有毒蛋白質聚集（如在阿茲海默症中）。',
+                        'disabled-macroautophagy': '細胞清除受損組件和廢物的「回收系統」效率降低。',
+                        'deregulated-nutrient-sensing': '細胞對營養物質的感應和反應通路失調（如mTOR和AMPK），影響代謝和壽命。',
+                        'mitochondrial-dysfunction': '細胞能量工廠的功能下降，導致能量危機和氧化壓力增加。',
+                'cellular-senescence': '「殭屍細胞」的積累，它們停止分裂但持續釋放有害的炎性分子。',
+                'stem-cell-exhaustion': '組織再生和修復所依賴的幹細胞池耗盡或功能下降。',
+                'altered-intercellular-communication': '細胞間的信號傳遞變得混亂，特別是炎性信號增多。',
+                'chronic-inflammation': '一種低度的、慢性的、全身性的炎症狀態，被稱為「炎症衰老」（Inflammaging），是多種老年病的共同土壤。',
+                'dysbiosis': '腸道等微生物群落的平衡被破壞，影響免疫、代謝和炎症。'
+                    }
+                },
+                'en': {
+                    headerTitle: 'Longevity Science Frontiers',
+                    navIntro: 'Introduction',
+                    navAlzheimers: 'Alzheimer\'s Battle',
+                    navGeroscience: 'Targeting Aging',
+                    navBioengineering: 'Bio-engineering',
+                    navFuture: 'Future of Longevity',
+                    langSwitch: '繁體中文',
+                    introH2: 'Dual Frontiers: Combating Neurodegeneration & Building Longevity',
+                    introP1: 'Humanity is at a pivotal crossroads: facing the immense challenge of age-related diseases like Alzheimer\'s, while developing unprecedented biotechnologies that promise to radically extend our healthspan.',
+                    introH3A: 'A Shifting Global Demography',
+                    introP2: 'The world\'s population is aging rapidly. This puts enormous pressure on socio-economic systems and makes finding effective treatments for diseases of aging an urgent imperative.',
+                    introStat1: 'Global population over 60 by 2050 (est.)',
+                    introStat2: 'Alzheimer\'s patients in the US by 2050 (est.)',
+                    introH3B: 'The Geroscience Hypothesis',
+                    introP3: 'A revolutionary strategy: instead of treating age-related diseases one by one, we can proactively intervene in the root cause of them all—the aging process itself.',
+                    introP4: 'This interactive report explores:',
+                    introL1: 'The latest weapons in the fight against Alzheimer\'s.',
+                    introL2: 'Drugs and therapies that target the hallmarks of aging.',
+                    introL3: 'Using biotechnology to repair and regenerate the human body.',
+                    introL4: 'The ethical and societal challenges of an era of longevity.',
+                    adH2: 'The Battle Against Alzheimer\'s Disease',
+                    adP1: 'Our understanding of Alzheimer\'s is undergoing a revolutionary shift from a single-target focus to a complex, multi-factorial network, heralding a new dawn in diagnostics and treatment.',
+                    adTab1: 'Pathology',
+                    adTab2: 'Diagnostic Revolution',
+                    adTab3: 'Treatment Frontiers',
+                    adPathH3: 'The "Vicious Cycle" of Pathology',
+                    adPathP1: 'Alzheimer\'s is not caused by a single factor, but a vicious cycle of interacting pathological pathways, including Aβ protein, Tau protein, neuroinflammation, and mitochondrial dysfunction. Click elements below to learn more.',
+                    adPathCard1Title: 'Amyloid-Beta (Aβ)',
+                    adPathCard1Desc: 'Abnormal accumulation forms senile plaques',
+                    adPathCard2Title: 'Tau Protein',
+                    adPathCard2Desc: 'Hyperphosphorylation forms neurofibrillary tangles',
+                    adPathCard3Title: 'Neuroinflammation',
+                    adPathCard3Desc: 'Microglial dysregulation releases inflammatory factors',
+                    adPathCard4Title: 'Mitochondrial Dysfunction',
+                    adPathCard4Desc: 'Energy crisis and oxidative stress',
+                    adDiagH3: 'From Symptoms to Signals: The Diagnostic Revolution',
+                    adDiagP1: 'Diagnosis is shifting from reliance on late-stage symptoms to early biomarkers. The breakthrough in blood tests is the most revolutionary, promising to shorten diagnostic wait times from years to months.',
+                    adDiagCard1Title: '🩸 The Power of Blood-Based Biomarkers',
+                    adDiagCard1Desc: 'A simple blood draw can detect key proteins like p-tau217 with accuracy rivaling traditional lumbar punctures and expensive PET scans. This dramatically lowers screening barriers, accelerates clinical trials, and promises to address healthcare disparities.',
+                    adDiagCard2Title: '🧠 The Complementary Role of Neuroimaging',
+                    adDiagCard2Desc: 'PET scans can "visualize" plaques and tangles, providing definitive evidence. MRI is used to assess brain atrophy and monitor for side effects like ARIA (Amyloid-Related Imaging Abnormalities) during treatment, ensuring safety.',
+                    adTreatH3: 'Treatment Frontiers: The New Arsenal',
+                    adTreatP1: 'The first disease-modifying drugs have been approved, marking the dawn of the anti-Aβ era. Concurrently, research is expanding to more diverse targets, heralding an age of personalized medicine.',
+                    adTreatChartTitle: 'Anti-Amyloid Drug Comparison',
+                    adTreatChartCaption: 'Data sourced from Clarity AD and TRAILBLAZER-ALZ 2 trials. ARIA refers to Amyloid-Related Imaging Abnormalities (including edema and microhemorrhages).',
+                    adTreatNextWave: 'The Next Wave: Beyond Amyloid',
+                    adTreatCard1Title: 'Cell Therapy (Lomecel-B)',
+                    adTreatCard1Desc: 'Uses mesenchymal stem cells to modulate immunity and inflammation. A Phase IIa trial showed it can slow cognitive decline with a good safety profile, with no ARIA events reported.',
+                    adTreatCard2Title: 'Drug Repurposing (GLP-1 Agonists)',
+                    adTreatCard2Desc: 'Originally for diabetes, drugs like liraglutide showed in a Phase II trial they may slow brain atrophy and cognitive decline.',
+                    adTreatCard3Title: 'Novel Mechanisms (Buntanetap)',
+                    adTreatCard3Desc: 'Aims to improve axonal transport within neurons. A Phase II study showed it improved both cognition and function.',
+                    adChartTitle: 'Anti-Aβ Drug Efficacy vs. Risk',
+                    adChartYAxis: 'Percentage (%)',
+                    adChartLabel1: 'Slowing of Decline (CDR-SB, %)',
+                    adChartLabel2: 'Risk of ARIA-E (Edema) (%)',
+                    adChartLabel3: 'Risk of ARIA-H (Microhemorrhage) (%)',
+                    geroH2: 'Targeting Aging: The Geroscience Hypothesis',
+                    geroP1: 'Instead of treating single diseases, intervening in the fundamental biological processes of aging. This revolutionary idea aims to extend healthspan by targeting the "Hallmarks of Aging".',
+                    geroH3: 'The Twelve Hallmarks of Aging',
+                    geroP2: 'Scientists have identified twelve interconnected molecular and cellular underpinnings of the aging process. Targeting these hallmarks may simultaneously prevent multiple age-related diseases.',
+                    bioH2: 'Bio-engineering: Repair and Regeneration',
+                    bioP1: 'Cutting-edge technologies like regenerative medicine and gene editing aim not just to slow aging, but to actively repair damage and rewrite the blueprint of life to extend healthspan.',
+                    bioH3A: 'Regenerative Medicine: Fixing the Unfixable',
+                    bioP2: 'Harnessing the body\'s own potential to restore damaged tissues and organs. Stem cell therapy shows promise, not by replacing cells, but acting as "bio-factories" to secrete anti-inflammatory molecules.',
+                    bioL1: '<strong>Stem Cell Therapy (MSCs):</strong> Clinical trials show potential in treating frailty, improving physical function and lowering inflammatory markers.',
+                    bioL2: '<strong>3D Bioprinting:</strong> While simple tissues like ears have been printed, complex vascularized organs like hearts and kidneys remain a huge challenge, likely decades away.',
+                    bioH3B: 'Gene Editing: Rewriting the Script of Life',
+                    bioP3: 'Technologies like CRISPR provide the ability to precisely modify the genome, opening the door to fundamentally curing genetic and age-related diseases, shifting the paradigm from "chronic management" to "permanent prevention".',
+                    bioL3: '<strong>Cardiovascular Disease:</strong> Verve Therapeutics is using base editing to permanently "turn off" genes causing high cholesterol (like PCSK9) with a one-time treatment.',
+                    bioL4: '<strong>Neurodegenerative Disease:</strong> Preclinical research is exploring editing the high-risk APOE4 gene to the risk-neutral APOE3.',
+                    bioL5: '<strong>First Approved Therapy:</strong> The FDA has approved Casgevy, the first CRISPR-based therapy, for treating sickle cell disease.',
+                    futureH2: 'The Future of Longevity: Promises and Profound Questions',
+                    futureP1: 'The rapid pace of science forces us to evaluate not only technical feasibility but also the profound impacts on society, ethics, and the meaning of life.',
+                    futureH3A: 'Forecasting Lifespan: The Prudent vs. The Radical',
+                    futureP2: 'Two distinct views exist on the future of human longevity. The mainstream view projects linear progress based on existing data, while futurists believe exponential technological growth will bring disruptive breakthroughs.',
+                    futureChartCaption: 'This chart conceptually illustrates the two forecast trends and the potential widening gap between Lifespan and Healthspan.',
+                    futureH3B: 'The Ethical and Social Crucible: Are We Ready?',
+                    futureCard1Title: 'The Longevity Divide',
+                    futureCard1Desc: 'Will expensive, cutting-edge therapies exacerbate inequality, creating a new class of wealthy individuals who can buy longer, healthier lives?',
+                    futureCard2Title: 'Societal Pressure',
+                    futureCard2Desc: 'How will demographic shifts impact pensions, healthcare, and intergenerational relationships? Could a society dominated by the "long-lived" stagnate?',
+                    futureCard3Title: 'The Meaning of Life',
+                    futureCard3Desc: 'If life can be extended indefinitely, would we still make choices and commitments? Is finitude a necessary condition for urgency and meaning?',
+                    longevityChartTitle: 'Longevity Forecast Trend Comparison',
+                    longevityChartYAxis: 'Age',
+                    longevityLabel1: 'Life Expectancy (Mainstream Forecast)',
+                    longevityLabel2: 'Healthy Life Expectancy (Mainstream Forecast)',
+                    longevityLabel3: 'Life Expectancy (Futurist Forecast)',
+                    footerP1: 'This interactive report is generated based on the report "The Dual Frontier: Combating Neurodegeneration and Building Longevity in the 21st Century".',
+                    footerP2: 'For demonstration and educational purposes only.',
+                    pathologyData: {
+                        abeta: { title: 'Amyloid Cascade Hypothesis', text: 'This hypothesis posits that the abnormal accumulation of amyloid-beta (Aβ) peptides and the formation of senile plaques in the brain are the central events that trigger all pathological changes. However, the failure of many Aβ-clearing drug trials has forced a re-evaluation of this linear model.' },
+                        tau: { title: 'Tau Hypothesis', text: 'This hypothesis emphasizes that the hyperphosphorylation of Tau protein and its aggregation into neurofibrillary tangles (NFTs) are key drivers of neuronal dysfunction and death. It constitutes the second core pathological hallmark of AD alongside Aβ.' },
+                        inflammation: { title: 'Neuroinflammation', text: 'The brain\'s immune cells (microglia), under constant stimulation, can turn from protective to harmful, releasing a flood of pro-inflammatory factors that exacerbate neuronal damage, creating a self-sustaining cycle of destruction. It has evolved from a passive consequence to a core pathogenic mechanism.' },
+                        mitochondria: { title: 'Mitochondrial Dysfunction', text: 'As the cell\'s "power plants," impaired mitochondrial function leads to an energy supply crisis and severe oxidative stress, further damaging neurons and triggering apoptosis.' }
+                    },
+                    hallmarkData: [
+                        { id: 'genomic-instability', title: 'Genomic Instability' },
+                        { id: 'telomere-attrition', title: 'Telomere Attrition' },
+                        { id: 'epigenetic-alterations', title: 'Epigenetic Alterations' },
+                        { id: 'loss-of-proteostasis', title: 'Loss of Proteostasis' },
+                        { id: 'disabled-macroautophagy', title: 'Disabled Macroautophagy' },
+                        { id: 'deregulated-nutrient-sensing', title: 'Deregulated Nutrient Sensing' },
+                        { id: 'mitochondrial-dysfunction', title: 'Mitochondrial Dysfunction' },
+                        { id: 'cellular-senescence', title: 'Cellular Senescence' },
+                        { id: 'stem-cell-exhaustion', title: 'Stem Cell Exhaustion' },
+                        { id: 'altered-intercellular-communication', title: 'Altered Intercellular Communication' },
+                        { id: 'chronic-inflammation', title: 'Chronic Inflammation' },
+                        { id: 'dysbiosis', title: 'Dysbiosis' }
+                    ],
+                    hallmarkDetailsData: {
+                        'genomic-instability': 'The accumulation of DNA damage, a core driver of aging and cancer.',
+                        'telomere-attrition': 'The protective caps at the ends of chromosomes shorten with each cell division, eventually leading to cell cycle arrest or death.',
+                        'epigenetic-alterations': 'Changes to the chemical modifications on DNA that alter gene expression patterns and disrupt cellular function.',
+                        'loss-of-proteostasis': 'The decline in the cell\'s ability to maintain properly folded and functional proteins, leading to toxic protein aggregation (as in Alzheimer\'s).',
+                        'disabled-macroautophagy': 'Reduced efficiency of the cell\'s "recycling system" for clearing damaged components and waste.',
+                        'deregulated-nutrient-sensing': 'Dysregulation of pathways that sense and respond to nutrients (like mTOR and AMPK), affecting metabolism and lifespan.',
+                        'mitochondrial-dysfunction': 'A decline in the function of the cell\'s energy factories, leading to an energy crisis and increased oxidative stress.',
+                        'cellular-senescence': 'The accumulation of "zombie cells" that stop dividing but continuously release harmful inflammatory molecules.',
+                        'stem-cell-exhaustion': 'Depletion or functional decline of the stem cell pools required for tissue regeneration and repair.',
+                        'altered-intercellular-communication': 'Signaling between cells becomes disordered, particularly with an increase in inflammatory signals.',
+                        'chronic-inflammation': 'A low-grade, chronic, systemic inflammatory state, known as "inflammaging," which is a common soil for many age-related diseases.',
+                        'dysbiosis': 'The disruption of the balance of microbial communities, such as in the gut, affecting immunity, metabolism, and inflammation.'
+                    }
+                }
+            };
+
+            let currentLang = 'zh-Hant';
+            let adChart, longevityChart;
+            const staticElementsToTranslate = document.querySelectorAll('[data-lang-key]');
+
+            function setLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang;
+                
+                staticElementsToTranslate.forEach(el => {
+                    const key = el.dataset.langKey;
+                    let translation = translations[lang][key] || '';
+                    if (key.startsWith('nav') && key.endsWith('Mobile')) {
+                        const baseKey = key.replace('Mobile', '');
+                        translation = translations[lang][baseKey];
+                    }
+                    if (translation) {
+                        el.innerHTML = translation;
+                    }
+                });
+
+                document.getElementById('lang-switcher').textContent = translations[lang].langSwitch;
+                document.getElementById('lang-switcher-mobile').textContent = translations[lang].langSwitch;
+
+                updateDynamicContent();
+            }
+
+            function updateDynamicContent() {
+                const activePathologyCard = document.querySelector('.pathology-card.active');
+                if (activePathologyCard) {
+                    showPathologyDetails(activePathologyCard.dataset.path);
+                }
+
+                const activeHallmarkCard = document.querySelector('.hallmark-card.active');
+                 if (activeHallmarkCard) {
+                    showHallmarkDetails(activeHallmarkCard.dataset.hallmarkId);
+                }
+
+                buildHallmarkCards();
+                if(document.getElementById('adTreatmentChart').offsetParent !== null) renderAdTreatmentChart();
+                if(document.getElementById('longevityForecastChart').offsetParent !== null) renderLongevityForecastChart();
+            }
+
+            function toggleLanguage() {
+                const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(newLang);
+            }
+            
+            document.getElementById('lang-switcher').addEventListener('click', toggleLanguage);
+            document.getElementById('lang-switcher-mobile').addEventListener('click', toggleLanguage);
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            function switchSection(sectionId) {
+                sections.forEach(section => {
+                    section.classList.toggle('active', section.id === sectionId);
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.sectionId === sectionId);
+                });
+                mobileMenu.classList.add('hidden');
+                
+                if (sectionId === 'alzheimers' && !adChart) renderAdTreatmentChart();
+                if (sectionId === 'future' && !longevityChart) renderLongevityForecastChart();
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = e.target.dataset.sectionId;
+                    switchSection(sectionId);
+                    window.history.pushState(null, '', `#${sectionId}`);
+                });
+            });
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const adTabs = document.querySelectorAll('#alzheimers .tab-button');
+            const adTabContents = document.querySelectorAll('#alzheimers .tab-content');
+
+            adTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    adTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const tabId = tab.dataset.tab;
+                    adTabContents.forEach(content => {
+                        content.classList.toggle('active', content.id === tabId);
+                        content.classList.toggle('hidden', content.id !== tabId);
+                    });
+                });
+            });
+            
+            const pathologyDetailsEl = document.getElementById('pathology-details');
+            function showPathologyDetails(pathId) {
+                 const data = translations[currentLang].pathologyData[pathId];
+                 pathologyDetailsEl.innerHTML = `<h4 class="font-bold text-xl mb-2">${data.title}</h4><p>${data.text}</p>`;
+                 pathologyDetailsEl.classList.remove('hidden');
+            }
+
+            document.querySelectorAll('.pathology-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.pathology-card').forEach(c => c.classList.remove('active', 'ring-2', 'ring-[#D7A78A]'));
+                    card.classList.add('active', 'ring-2', 'ring-[#D7A78A]');
+                    showPathologyDetails(card.dataset.path);
+                });
+            });
+
+
+            const hallmarksContainer = document.getElementById('hallmarks-container');
+            const hallmarkDetailsEl = document.getElementById('hallmark-details');
+
+            function showHallmarkDetails(hallmarkId) {
+                const title = translations[currentLang].hallmarkData.find(h => h.id === hallmarkId).title;
+                const detailText = translations[currentLang].hallmarkDetailsData[hallmarkId];
+                hallmarkDetailsEl.innerHTML = `<h4 class="font-bold text-xl mb-2">${title}</h4><p>${detailText}</p>`;
+                hallmarkDetailsEl.classList.remove('hidden');
+            }
+
+            function buildHallmarkCards() {
+                hallmarksContainer.innerHTML = '';
+                const hallmarkData = translations[currentLang].hallmarkData;
+                hallmarkData.forEach(hallmark => {
+                    const card = document.createElement('div');
+                    card.className = 'hallmark-card p-4 bg-white rounded-lg shadow-md cursor-pointer text-center';
+                    card.dataset.hallmarkId = hallmark.id;
+                    card.innerHTML = `<h4 class="font-semibold text-base text-[#4A6C6F]">${hallmark.title}</h4>`;
+                    card.addEventListener('click', () => {
+                        document.querySelectorAll('.hallmark-card').forEach(c => c.classList.remove('active', 'ring-2', 'ring-[#D7A78A]'));
+                        card.classList.add('active', 'ring-2', 'ring-[#D7A78A]');
+                        showHallmarkDetails(hallmark.id);
+                    });
+                    hallmarksContainer.appendChild(card);
+                });
+            }
+
+            function renderAdTreatmentChart() {
+                const ctx = document.getElementById('adTreatmentChart').getContext('2d');
+                if (adChart) adChart.destroy();
+                adChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Lecanemab (Clarity AD)', 'Donanemab (TRAILBLAZER-ALZ 2)'],
+                        datasets: [{
+                            label: translations[currentLang].adChartLabel1,
+                            data: [27, 35], 
+                            backgroundColor: '#4A6C6F'
+                        }, {
+                            label: translations[currentLang].adChartLabel2,
+                            data: [12.6, 24.0],
+                            backgroundColor: '#D7A78A'
+                        }, {
+                            label: translations[currentLang].adChartLabel3,
+                            data: [17.3, 31.4],
+                            backgroundColor: '#B4C5C6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, title: { display: true, text: translations[currentLang].adChartYAxis } } },
+                        plugins: {
+                            title: { display: true, text: translations[currentLang].adChartTitle },
+                            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}%` } }
+                        }
+                    }
+                });
+            }
+
+            function renderLongevityForecastChart() {
+                const ctx = document.getElementById('longevityForecastChart').getContext('2d');
+                if (longevityChart) longevityChart.destroy();
+                longevityChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['2020', '2030', '2040', '2050'],
+                        datasets: [
+                        {
+                            label: translations[currentLang].longevityLabel1,
+                            data: [73, 75, 77, 78.1],
+                            borderColor: '#4A6C6F',
+                            tension: 0.1, fill: false
+                        }, {
+                            label: translations[currentLang].longevityLabel2,
+                            data: [64, 65.5, 66.5, 67.4],
+                            borderColor: '#D7A78A',
+                            tension: 0.1, fill: false
+                        }, {
+                            label: translations[currentLang].longevityLabel3,
+                            data: [73, 78, 85, 95],
+                            borderColor: '#4A6C6F',
+                            tension: 0.2, borderDash: [5, 5], fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: false, title: { display: true, text: translations[currentLang].longevityChartYAxis } } },
+                        plugins: {
+                            title: { display: true, text: translations[currentLang].longevityChartTitle },
+                            tooltip: { mode: 'index', intersect: false }
+                        }
+                    }
+                });
+            }
+            
+            const initialSection = window.location.hash.substring(1) || 'intro';
+            setLanguage('zh-Hant'); 
+            switchSection(initialSection);
+
+        });
+    </script>
+</body>
+</html>
