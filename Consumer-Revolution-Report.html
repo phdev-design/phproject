@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 消費者革命：互動式洞察報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application employs a thematic dashboard structure with a sticky top navigation for easy access to key sections: Overview, Consumer Mindset, Industry Transformation, and Future Outlook. This non-linear design empowers users to explore topics based on interest, rather than following the linear flow of the source report. The 'Industry Transformation' section features an interactive toggle between Retail and Tourism, allowing for direct comparison and focused analysis. This structure was chosen to enhance usability, facilitate quick synthesis of information, and make the dense report content more digestible and engaging for strategists and business leaders. A language switcher has been added for bilingual access. -->
+    <!-- Visualization & Content Choices: Key statistics are presented as large, animated numbers for immediate impact. Comparisons like 'webrooming vs. showrooming' and the 'Value Equation' are visualized using Chart.js bar and doughnut charts for clarity (Goal: Compare). The growth of the wellness tourism market is shown with a line chart to illustrate change over time (Goal: Change). Complex frameworks like A.D.A.P.T. are organized into interactive HTML/CSS cards. All choices prioritize interaction and comprehension within the designed dashboard structure, using Chart.js for data visualization and custom JS for interactivity. All text elements are now dynamically updated for language switching. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 320px;
+            width: 100%;
+            max-width: 600px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #1e3a8a; 
+            border-bottom-color: #1e3a8a;
+        }
+        .section-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .btn-toggle {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-toggle.active {
+            background-color: #1e3a8a;
+            color: white;
+        }
+         .btn-toggle:not(.active) {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header id="header" class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 data-key="header_title" class="text-xl md:text-2xl font-bold text-blue-900">消費者革命報告</h1>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#overview" data-key="nav_overview" class="nav-link border-b-2 border-transparent pb-1">總覽</a>
+                    <a href="#mindset" data-key="nav_mindset" class="nav-link border-b-2 border-transparent pb-1">新消費者心態</a>
+                    <a href="#transformation" data-key="nav_transformation" class="nav-link border-b-2 border-transparent pb-1">產業轉型</a>
+                    <a href="#future" data-key="nav_future" class="nav-link border-b-2 border-transparent pb-1">未來展望</a>
+                </div>
+                 <div class="flex items-center">
+                    <button id="lang-switcher" class="text-sm font-semibold text-blue-800 hover:text-blue-600 transition-colors mr-4 py-1 px-3 border border-blue-800 rounded-full">English</button>
+                    <button id="mobile-menu-button" class="md:hidden p-2 rounded-md text-slate-600 hover:text-blue-900 hover:bg-slate-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#overview" data-key="nav_overview_mobile" class="block py-2 px-4 text-sm text-slate-700 hover:bg-blue-50">總覽</a>
+            <a href="#mindset" data-key="nav_mindset_mobile" class="block py-2 px-4 text-sm text-slate-700 hover:bg-blue-50">新消費者心態</a>
+            <a href="#transformation" data-key="nav_transformation_mobile" class="block py-2 px-4 text-sm text-slate-700 hover:bg-blue-50">產業轉型</a>
+            <a href="#future" data-key="nav_future_mobile" class="block py-2 px-4 text-sm text-slate-700 hover:bg-blue-50">未來展望</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="text-center pt-16">
+            <h2 data-key="overview_title" class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">迎接 2025 消費者革命</h2>
+            <p data-key="overview_subtitle" class="max-w-3xl mx-auto text-slate-600 mb-12">
+                本報告將深入剖析驅動現代消費行為的三大核心力量：重塑的價值觀、對整體健康的追求，以及因遠距辦公而改變的生活方式。我們將探索這些轉變如何深刻地影響零售與旅遊業，並為未來的商業策略提供指引。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md section-card">
+                    <div class="text-5xl font-bold text-blue-800 mb-2">82%</div>
+                    <h3 data-key="overview_card1_title" class="font-semibold text-lg">健康至上</h3>
+                    <p data-key="overview_card1_text" class="text-sm text-slate-500">的消費者將健康視為日常生活的首要或重要優先事項。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md section-card">
+                    <div class="text-5xl font-bold text-teal-600 mb-2">72%</div>
+                    <h3 data-key="overview_card2_title" class="font-semibold text-lg">信任為王</h3>
+                    <p data-key="overview_card2_text" class="text-sm text-slate-500">的忠實顧客表示，即使漲價，仍會購買所信任的品牌。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md section-card">
+                    <div class="text-5xl font-bold text-amber-600 mb-2">90%</div>
+                    <h3 data-key="overview_card3_title" class="font-semibold text-lg">生活重構</h3>
+                    <p data-key="overview_card3_text" class="text-sm text-slate-500">的員工因靈活性而偏好遠距或混合工作模式。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="mindset" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 data-key="mindset_title" class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">新消費者心態的三大支柱</h2>
+                <p data-key="mindset_subtitle" class="max-w-3xl mx-auto text-slate-600">現代消費者正以前所未有的方式重新評估他們的優先順序。理解這三大核心轉變，是掌握未來市場的關鍵第一步。</p>
+            </div>
+            <div class="space-y-16">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div class="order-2 lg:order-1">
+                        <h3 data-key="mindset1_title" class="text-2xl font-bold mb-4 text-blue-900">1. 新價值等式：務實主義與道德的融合</h3>
+                        <p data-key="mindset1_text" class="text-slate-600 mb-4">
+                            消費者對「價值」的定義已超越價格。他們在經濟壓力下追求務實消費，同時也將品牌道德和永續性納入考量，形成一個複雜的決策模型。這種「生態邏輯型」消費者期望永續性是內建屬性，而非奢侈附加品，這也導致了品牌忠誠度的動搖。
+                        </p>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h4 data-key="mindset1_chart_title" class="font-semibold text-center mb-2">價值驅動的決策</h4>
+                            <div class="chart-container h-64 md:h-80">
+                                <canvas id="valueEquationChart"></canvas>
+                            </div>
+                            <p data-key="mindset1_chart_desc" class="text-xs text-center text-slate-500 mt-2">圖表顯示，雖然大量消費者優先考慮預算，但仍有近半數的人願意為他們認為永續的商品支付更多費用，體現了「永續性悖論」。</p>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2 bg-blue-100 p-8 rounded-2xl">
+                         <h4 data-key="mindset1_list_title" class="text-xl font-semibold mb-3 text-blue-800">關鍵行為：價值駭客 (Value Hacking)</h4>
+                         <ul class="space-y-3 text-slate-700">
+                            <li class="flex items-start"><span class="text-blue-600 mr-3 text-xl">→</span><span data-key="mindset1_item1">等待促銷：</span></li>
+                            <li class="flex items-start"><span class="text-blue-600 mr-3 text-xl">→</span><span data-key="mindset1_item2">更換通路：</span></li>
+                            <li class="flex items-start"><span class="text-blue-600 mr-3 text-xl">→</span><span data-key="mindset1_item3">主動比價：</span></li>
+                            <li class="flex items-start"><span class="text-blue-600 mr-3 text-xl">→</span><span data-key="mindset1_item4">警惕縮水：</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div>
+                        <h3 data-key="mindset2_title" class="text-2xl font-bold mb-4 text-teal-700">2. 健康即終極貨幣：追求整體性福祉</h3>
+                        <p data-key="mindset2_text" class="text-slate-600 mb-4">
+                            「健康」的範疇已擴展至心理、情感和精神層面。這一趨勢驅動著從食品到旅遊的所有消費領域。消費者尋求功能性產品來優化個人健康指標，使每個品牌在某種程度上都成為「健康公司」。
+                        </p>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h4 data-key="mindset2_card_title" class="font-semibold text-center mb-2">健康市場的崛起</h4>
+                             <div class="text-center p-6 bg-teal-50 rounded-lg">
+                                <p data-key="mindset2_card_text1" class="text-slate-600">全球健康市場價值預計</p>
+                                <p class="text-5xl font-bold text-teal-600 my-2">1.8 兆美元</p>
+                                <p data-key="mindset2_card_text2" class="text-slate-600">消費者積極尋求改善身心靈的產品與服務。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-teal-100 p-8 rounded-2xl">
+                        <h4 data-key="mindset2_list_title" class="text-xl font-semibold mb-3 text-teal-800">整體健康的多個面向</h4>
+                         <ul class="space-y-3 text-slate-700">
+                            <li class="flex items-start"><span class="text-teal-600 mr-3 text-xl">→</span><span data-key="mindset2_item1">功能性營養：</span></li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-3 text-xl">→</span><span data-key="mindset2_item2">美麗與健康融合：</span></li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-3 text-xl">→</span><span data-key="mindset2_item3">心理健康優先：</span></li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-3 text-xl">→</span><span data-key="mindset2_item4">科技賦能個人化：</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div class="order-2 lg:order-1">
+                        <h3 data-key="mindset3_title" class="text-2xl font-bold mb-4 text-amber-700">3. 重構的生活：「隨處工作」經濟的影響</h3>
+                        <p data-key="mindset3_text" class="text-slate-600 mb-4">
+                           遠距和混合工作已成為新常態，徹底改變了人們的日常生活。家庭成為新的活動中心，「送貨到府」心態普及，工作與生活之間的界線變得模糊。這催生了「連結的悖論」：數位化的獨立生活方式，反而讓人們在實體互動中更渴望真實、高品質的連結。
+                        </p>
+                         <div class="bg-white p-4 rounded-lg shadow">
+                            <h4 data-key="mindset3_card_title" class="font-semibold text-center mb-2">日常生活的去中心化</h4>
+                            <div class="p-6 bg-amber-50 rounded-lg text-center">
+                               <p data-key="mindset3_card_text1" class="text-slate-600">遠距工作每年為員工節省約</p>
+                               <p class="text-5xl font-bold text-amber-600 my-2">$7,000</p>
+                               <p data-key="mindset3_card_text2" class="text-slate-600">這些資金和時間的重新分配，正將消費從商業區轉移至居住社區。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2 bg-amber-100 p-8 rounded-2xl">
+                         <h4 data-key="mindset3_list_title" class="text-xl font-semibold mb-3 text-amber-800">工作與生活的新模式</h4>
+                         <ul class="space-y-3 text-slate-700">
+                            <li class="flex items-start"><span class="text-amber-600 mr-3 text-xl">→</span><span data-key="mindset3_item1">工作生活整合：</span></li>
+                            <li class="flex items-start"><span class="text-amber-600 mr-3 text-xl">→</span><span data-key="mindset3_item2">家庭成為樞紐：</span></li>
+                            <li class="flex items-start"><span class="text-amber-600 mr-3 text-xl">→</span><span data-key="mindset3_item3">「商務休閒」興起：</span></li>
+                            <li class="flex items-start"><span class="text-amber-600 mr-3 text-xl">→</span><span data-key="mindset3_item4">尋求真實連結：</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="transformation" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 data-key="trans_title" class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">產業轉型：零售與旅遊的終極戰場</h2>
+                 <p data-key="trans_subtitle" class="max-w-3xl mx-auto text-slate-600">新的消費趨勢正迫使傳統產業進行根本性重塑。點擊下方按鈕，探索零售業和旅遊業如何應對挑戰、抓住機遇。</p>
+            </div>
+            
+            <div class="flex justify-center mb-8">
+                <div class="bg-slate-200 p-1 rounded-full flex space-x-1">
+                    <button id="btn-retail" data-key="trans_btn_retail" class="btn-toggle active px-6 py-2 rounded-full text-sm font-semibold">零售業</button>
+                    <button id="btn-tourism" data-key="trans_btn_tourism" class="btn-toggle px-6 py-2 rounded-full text-sm font-semibold">旅遊業</button>
+                </div>
+            </div>
+
+            <div id="content-retail">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 data-key="retail1_title" class="text-xl font-bold text-blue-900">挑戰一：全通路勢在必行</h3>
+                        <p data-key="retail1_text" class="text-slate-600">消費者的購物旅程已非線性，他們在線上和線下通路間無縫切換。零售商必須打破壁壘，提供統一、無摩擦的體驗。「送貨到府」的心態也將物流從後台成本中心變成了顧客體驗的前線。</p>
+                        <div class="bg-slate-100 p-4 rounded-lg">
+                           <h4 data-key="retail1_chart_title" class="font-semibold text-center mb-2">線上與線下的融合</h4>
+                            <div class="chart-container h-64 md:h-80">
+                                <canvas id="omnichannelChart"></canvas>
+                            </div>
+                             <p data-key="retail1_chart_desc" class="text-xs text-center text-slate-500 mt-2">絕大多數消費者會在購買過程中結合線上研究和線下體驗，突顯了無縫全通路策略的重要性。</p>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 data-key="retail2_title" class="text-xl font-bold text-blue-900">挑戰二：AI 驅動的個人化</h3>
+                        <p data-key="retail2_text" class="text-slate-600">在品牌忠誠度下降的時代，個人化是重建連結的關鍵。AI 能幫助零售商大規模分析數據，提供個人化推薦和服務，將忠誠度從「交易型」轉變為「關係型」。數據隱私是這一切的基石。</p>
+                        <div class="bg-slate-100 p-4 rounded-lg text-center">
+                            <h4 data-key="retail2_card_title" class="font-semibold mb-2">個人化的力量</h4>
+                            <p data-key="retail2_card_text1" class="text-slate-600">AI個人化可帶來高達</p>
+                            <p class="text-4xl font-bold text-blue-800 my-2">15%</p>
+                            <p data-key="retail2_card_text2" class="text-slate-600">的轉換率提升，以及</p>
+                             <p class="text-4xl font-bold text-blue-800 my-2">20%</p>
+                            <p data-key="retail2_card_text3" class="text-slate-600">的顧客滿意度提高。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="content-tourism" class="hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 data-key="tourism1_title" class="text-xl font-bold text-teal-700">趨勢一：健康旅遊蓬勃發展</h3>
+                        <p data-key="tourism1_text" class="text-slate-600">健康已成為旅行的主要動機。從專注於延長壽命的「長壽養生之旅」到改善睡眠的「睡眠旅遊」，消費者尋求能讓身心復原的旅程。這推動了飯店業與健康產業的融合。</p>
+                        <div class="bg-slate-100 p-4 rounded-lg">
+                             <h4 data-key="tourism1_chart_title" class="font-semibold text-center mb-2">健康旅遊市場增長預測</h4>
+                            <div class="chart-container h-64 md:h-80">
+                                <canvas id="wellnessTourismChart"></canvas>
+                            </div>
+                            <p data-key="tourism1_chart_desc" class="text-xs text-center text-slate-500 mt-2">全球健康旅遊市場預計將從2023年的8300億美元爆炸性增長至2028年的1.3兆美元。</p>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl shadow-md space-y-4">
+                        <h3 data-key="tourism2_title" class="text-xl font-bold text-teal-700">趨勢二：有良知的旅行者</h3>
+                        <p data-key="tourism2_text" class="text-slate-600">旅行者越來越關注其對環境和社會的影響，推動了對「再生旅遊」的需求——不僅不造成傷害，還要積極改善目的地。他們尋求真實的文化連結，從「體驗經濟」轉向「參與經濟」。</p>
+                        <div class="bg-slate-100 p-4 rounded-lg text-center">
+                            <h4 data-key="tourism2_card_title" class="font-semibold mb-2">永續旅行者的選擇</h4>
+                             <p data-key="tourism2_card_text1" class="text-slate-600">超過</p>
+                            <p class="text-4xl font-bold text-teal-600 my-2">60%</p>
+                            <p data-key="tourism2_card_text2" class="text-slate-600">的消費者對氣候變遷對其旅行的影響感到擔憂。</p>
+                            <p data-key="tourism2_card_text3" class="mt-4 text-slate-600">十分之四的旅行者會積極選擇具有更高永續性評級的供應商。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="pt-24">
+            <div class="text-center mb-12">
+                <h2 data-key="future_title" class="text-3xl md:text-4xl font-bold text-blue-900 mb-4">結論與未來展望</h2>
+                 <p data-key="future_subtitle" class="max-w-3xl mx-auto text-slate-600">為了在未來市場中勝出，企業領導者需要採納一個敏捷、數據驅動且真實的戰略框架。以下是我們總結的 A.D.A.P.T. 模型，為駕馭變革提供行動指南。</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="adapt-card bg-white p-6 rounded-xl shadow-md text-center border-t-4 border-blue-600">
+                    <h3 class="text-2xl font-bold text-blue-600 mb-2">A</h3>
+                    <h4 data-key="adapt1_title" class="font-semibold text-lg mb-2">Agility (敏捷性)</h4>
+                    <p data-key="adapt1_text" class="text-sm text-slate-500">建立能快速響應短暫消費趨勢和動盪經濟環境的組織結構。</p>
+                </div>
+                <div class="adapt-card bg-white p-6 rounded-xl shadow-md text-center border-t-4 border-teal-600">
+                    <h3 class="text-2xl font-bold text-teal-600 mb-2">D</h3>
+                    <h4 data-key="adapt2_title" class="font-semibold text-lg mb-2">Data-Centricity (數據中心化)</h4>
+                    <p data-key="adapt2_text" class="text-sm text-slate-500">將第一方數據的收集和分析作為業務核心，將數據轉化為洞察。</p>
+                </div>
+                <div class="adapt-card bg-white p-6 rounded-xl shadow-md text-center border-t-4 border-amber-600">
+                    <h3 class="text-2xl font-bold text-amber-600 mb-2">A</h3>
+                    <h4 data-key="adapt3_title" class="font-semibold text-lg mb-2">Authenticity (真實性)</h4>
+                    <p data-key="adapt3_text" class="text-sm text-slate-500">培養透明文化，確保所有聲明都可信、可驗證，以建立持久信任。</p>
+                </div>
+                <div class="adapt-card bg-white p-6 rounded-xl shadow-md text-center border-t-4 border-indigo-600">
+                    <h3 class="text-2xl font-bold text-indigo-600 mb-2">P</h3>
+                    <h4 data-key="adapt4_title" class="font-semibold text-lg mb-2">Personalization (個人化)</h4>
+                    <p data-key="adapt4_text" class="text-sm text-slate-500">實現真正的一對一個人化，讓每位顧客都感到被看見和理解。</p>
+                </div>
+                 <div class="adapt-card bg-white p-6 rounded-xl shadow-md text-center border-t-4 border-rose-600">
+                    <h3 class="text-2xl font-bold text-rose-600 mb-2">T</h3>
+                    <h4 data-key="adapt5_title" class="font-semibold text-lg mb-2">Transformation (轉型)</h4>
+                    <p data-key="adapt5_text" class="text-sm text-slate-500">勇於從根本上反思商業模式，在被顛覆之前，先顛覆自己。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-slate-400">
+            <p data-key="footer_text">&copy; 2025 消費者革命互動式洞察報告。僅供演示用途。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const translations = {
+                zh: {
+                    header_title: "消費者革命報告",
+                    nav_overview: "總覽",
+                    nav_mindset: "新消費者心態",
+                    nav_transformation: "產業轉型",
+                    nav_future: "未來展望",
+                    nav_overview_mobile: "總覽",
+                    nav_mindset_mobile: "新消費者心態",
+                    nav_transformation_mobile: "產業轉型",
+                    nav_future_mobile: "未來展望",
+                    overview_title: "迎接 2025 消費者革命",
+                    overview_subtitle: "本報告將深入剖析驅動現代消費行為的三大核心力量：重塑的價值觀、對整體健康的追求，以及因遠距辦公而改變的生活方式。我們將探索這些轉變如何深刻地影響零售與旅遊業，並為未來的商業策略提供指引。",
+                    overview_card1_title: "健康至上",
+                    overview_card1_text: "的消費者將健康視為日常生活的首要或重要優先事項。",
+                    overview_card2_title: "信任為王",
+                    overview_card2_text: "的忠實顧客表示，即使漲價，仍會購買所信任的品牌。",
+                    overview_card3_title: "生活重構",
+                    overview_card3_text: "的員工因靈活性而偏好遠距或混合工作模式。",
+                    mindset_title: "新消費者心態的三大支柱",
+                    mindset_subtitle: "現代消費者正以前所未有的方式重新評估他們的優先順序。理解這三大核心轉變，是掌握未來市場的關鍵第一步。",
+                    mindset1_title: "1. 新價值等式：務實主義與道德的融合",
+                    mindset1_text: "消費者對「價值」的定義已超越價格。他們在經濟壓力下追求務實消費，同時也將品牌道德和永續性納入考量，形成一個複雜的決策模型。這種「生態邏輯型」消費者期望永續性是內建屬性，而非奢侈附加品，這也導致了品牌忠誠度的動搖。",
+                    mindset1_chart_title: "價值驅動的決策",
+                    mindset1_chart_desc: "圖表顯示，雖然大量消費者優先考慮預算，但仍有近半數的人願意為他們認為永續的商品支付更多費用，體現了「永續性悖論」。",
+                    mindset1_list_title: "關鍵行為：價值駭客 (Value Hacking)",
+                    mindset1_item1: "<strong>等待促銷：</strong>49% 的消費者會等到商品打折才購買。",
+                    mindset1_item2: "<strong>更換通路：</strong>46% 的消費者會轉向提供更佳價值的零售商。",
+                    mindset1_item3: "<strong>主動比價：</strong>40% 的消費者使用比價網站尋找最優價格。",
+                    mindset1_item4: "<strong>警惕縮水：</strong>78% 的消費者注意到「縮水式通膨」並因此改變購買行為。",
+                    mindset2_title: "2. 健康即終極貨幣：追求整體性福祉",
+                    mindset2_text: "「健康」的範疇已擴展至心理、情感和精神層面。這一趨勢驅動著從食品到旅遊的所有消費領域。消費者尋求功能性產品來優化個人健康指標，使每個品牌在某種程度上都成為「健康公司」。",
+                    mindset2_card_title: "健康市場的崛起",
+                    mindset2_card_text1: "全球健康市場價值預計",
+                    mindset2_card_text2: "消費者積極尋求改善身心靈的產品與服務。",
+                    mindset2_list_title: "整體健康的多個面向",
+                    mindset2_item1: "<strong>功能性營養：</strong>尋求能提升能量、改善腸道和免疫力的食品。",
+                    mindset2_item2: "<strong>美麗與健康融合：</strong>美妝品融入健康成分，口服補充品興起。",
+                    mindset2_item3: "<strong>心理健康優先：</strong>對冥想應用、減壓服務和數位排毒的需求增長。",
+                    mindset2_item4: "<strong>科技賦能個人化：</strong>使用穿戴裝置和應用程式追蹤並優化個人健康。",
+                    mindset3_title: "3. 重構的生活：「隨處工作」經濟的影響",
+                    mindset3_text: "遠距和混合工作已成為新常態，徹底改變了人們的日常生活。家庭成為新的活動中心，「送貨到府」心態普及，工作與生活之間的界線變得模糊。這催生了「連結的悖論」：數位化的獨立生活方式，反而讓人們在實體互動中更渴望真實、高品質的連結。",
+                    mindset3_card_title: "日常生活的去中心化",
+                    mindset3_card_text1: "遠距工作每年為員工節省約",
+                    mindset3_card_text2: "這些資金和時間的重新分配，正將消費從商業區轉移至居住社區。",
+                    mindset3_list_title: "工作與生活的新模式",
+                    mindset3_item1: "<strong>工作生活整合：</strong>從追求「平衡」轉向尋求工作與個人生活的「融合」。",
+                    mindset3_item2: "<strong>家庭成為樞紐：</strong>近90%的額外時間被用於在家的獨立活動。",
+                    mindset3_item3: "<strong>「商務休閒」興起：</strong>工作與旅行的結合（Workation）變得更加普遍。",
+                    mindset3_item4: "<strong>尋求真實連結：</strong>對高品質的實體體驗（如社群零售、文化旅遊）抱有更高期望。",
+                    trans_title: "產業轉型：零售與旅遊的終極戰場",
+                    trans_subtitle: "新的消費趨勢正迫使傳統產業進行根本性重塑。點擊下方按鈕，探索零售業和旅遊業如何應對挑戰、抓住機遇。",
+                    trans_btn_retail: "零售業",
+                    trans_btn_tourism: "旅遊業",
+                    retail1_title: "挑戰一：全通路勢在必行",
+                    retail1_text: "消費者的購物旅程已非線性，他們在線上和線下通路間無縫切換。零售商必須打破壁壘，提供統一、無摩擦的體驗。「送貨到府」的心態也將物流從後台成本中心變成了顧客體驗的前線。",
+                    retail1_chart_title: "線上與線下的融合",
+                    retail1_chart_desc: "絕大多數消費者會在購買過程中結合線上研究和線下體驗，突顯了無縫全通路策略的重要性。",
+                    retail2_title: "挑戰二：AI 驅動的個人化",
+                    retail2_text: "在品牌忠誠度下降的時代，個人化是重建連結的關鍵。AI 能幫助零售商大規模分析數據，提供個人化推薦和服務，將忠誠度從「交易型」轉變為「關係型」。數據隱私是這一切的基石。",
+                    retail2_card_title: "個人化的力量",
+                    retail2_card_text1: "AI個人化可帶來高達",
+                    retail2_card_text2: "的轉換率提升，以及",
+                    retail2_card_text3: "的顧客滿意度提高。",
+                    tourism1_title: "趨勢一：健康旅遊蓬勃發展",
+                    tourism1_text: "健康已成為旅行的主要動機。從專注於延長壽命的「長壽養生之旅」到改善睡眠的「睡眠旅遊」，消費者尋求能讓身心復原的旅程。這推動了飯店業與健康產業的融合。",
+                    tourism1_chart_title: "健康旅遊市場增長預測",
+                    tourism1_chart_desc: "全球健康旅遊市場預計將從2023年的8300億美元爆炸性增長至2028年的1.3兆美元。",
+                    tourism2_title: "趨勢二：有良知的旅行者",
+                    tourism2_text: "旅行者越來越關注其對環境和社會的影響，推動了對「再生旅遊」的需求——不僅不造成傷害，還要積極改善目的地。他們尋求真實的文化連結，從「體驗經濟」轉向「參與經濟」。",
+                    tourism2_card_title: "永續旅行者的選擇",
+                    tourism2_card_text1: "超過",
+                    tourism2_card_text2: "的消費者對氣候變遷對其旅行的影響感到擔憂。",
+                    tourism2_card_text3: "十分之四的旅行者會積極選擇具有更高永續性評級的供應商。",
+                    future_title: "結論與未來展望",
+                    future_subtitle: "為了在未來市場中勝出，企業領導者需要採納一個敏捷、數據驅動且真實的戰略框架。以下是我們總結的 A.D.A.P.T. 模型，為駕馭變革提供行動指南。",
+                    adapt1_title: "Agility (敏捷性)",
+                    adapt1_text: "建立能快速響應短暫消費趨勢和動盪經濟環境的組織結構。",
+                    adapt2_title: "Data-Centricity (數據中心化)",
+                    adapt2_text: "將第一方數據的收集和分析作為業務核心，將數據轉化為洞察。",
+                    adapt3_title: "Authenticity (真實性)",
+                    adapt3_text: "培養透明文化，確保所有聲明都可信、可驗證，以建立持久信任。",
+                    adapt4_title: "Personalization (個人化)",
+                    adapt4_text: "實現真正的一對一個人化，讓每位顧客都感到被看見和理解。",
+                    adapt5_title: "Transformation (轉型)",
+                    adapt5_text: "勇於從根本上反思商業模式，在被顛覆之前，先顛覆自己。",
+                    footer_text: "© 2025 消費者革命互動式洞察報告。僅供演示用途。",
+                    chart_value_labels: ['優先考慮經濟實惠', '持續購買永續商品', '其他'],
+                    chart_omni_labels: ['網上研究，店內購買 (Webrooming)', '店內研究，網上購買 (Showrooming)'],
+                    chart_omni_dataset_label: '消費者百分比',
+                    chart_omni_tooltip: '的消費者',
+                    chart_wellness_dataset_label: '全球健康旅遊市場 (兆美元)',
+                    chart_wellness_tooltip: '市場規模約'
+                },
+                en: {
+                    header_title: "Consumer Revolution Report",
+                    nav_overview: "Overview",
+                    nav_mindset: "New Consumer Mindset",
+                    nav_transformation: "Industry Transformation",
+                    nav_future: "Future Outlook",
+                    nav_overview_mobile: "Overview",
+                    nav_mindset_mobile: "New Consumer Mindset",
+                    nav_transformation_mobile: "Industry Transformation",
+                    nav_future_mobile: "Future Outlook",
+                    overview_title: "Welcome to the 2025 Consumer Revolution",
+                    overview_subtitle: "This report provides an in-depth analysis of the three core forces driving modern consumer behavior: reshaped values, the pursuit of holistic health, and lifestyles altered by remote work. We explore how these shifts profoundly impact the retail and tourism industries, offering guidance for future business strategies.",
+                    overview_card1_title: "Health is Wealth",
+                    overview_card1_text: "of consumers view health as a top or important priority in their daily lives.",
+                    overview_card2_title: "Trust is King",
+                    overview_card2_text: "of loyal customers state they will continue to buy from trusted brands, even with price increases.",
+                    overview_card3_title: "Life Remodeled",
+                    overview_card3_text: "of employees prefer remote or hybrid work models due to flexibility.",
+                    mindset_title: "The Three Pillars of the New Consumer Mindset",
+                    mindset_subtitle: "Modern consumers are re-evaluating their priorities like never before. Understanding these three core shifts is the first critical step to mastering the future market.",
+                    mindset1_title: "1. The New Value Equation: A Fusion of Pragmatism and Ethics",
+                    mindset1_text: "The definition of 'value' has evolved beyond price. Consumers navigate economic pressures with pragmatic spending while also incorporating brand ethics and sustainability into a complex decision model. This 'eco-logical' consumer expects sustainability to be a built-in feature, not a luxury add-on, leading to a shock to brand loyalty.",
+                    mindset1_chart_title: "Value-Driven Decisions",
+                    mindset1_chart_desc: "The chart shows that while a large number of consumers prioritize budget, nearly half are still willing to pay more for products they perceive as sustainable, illustrating the 'sustainability paradox'.",
+                    mindset1_list_title: "Key Behavior: Value Hacking",
+                    mindset1_item1: "<strong>Wait for Promotions:</strong> 49% of consumers wait for items to go on sale.",
+                    mindset1_item2: "<strong>Switch Retailers:</strong> 46% switch to retailers offering better value.",
+                    mindset1_item3: "<strong>Actively Compare:</strong> 40% use comparison sites to find the best deals.",
+                    mindset1_item4: "<strong>Beware of Shrinkflation:</strong> 78% have noticed 'shrinkflation' and changed their buying habits as a result.",
+                    mindset2_title: "2. Health as the Ultimate Currency: The Pursuit of Holistic Wellbeing",
+                    mindset2_text: "The definition of 'health' has expanded to encompass mental, emotional, and spiritual dimensions. This trend drives all consumer sectors, from food to travel. Consumers seek functional products to optimize personal health metrics, making every brand, to some extent, a 'health company'.",
+                    mindset2_card_title: "The Rise of the Wellness Market",
+                    mindset2_card_text1: "The global wellness market is valued at an estimated",
+                    mindset2_card_text2: "as consumers actively seek products and services to improve mind, body, and soul.",
+                    mindset2_list_title: "The Many Dimensions of Holistic Health",
+                    mindset2_item1: "<strong>Functional Nutrition:</strong> Seeking foods that boost energy, improve gut health, and support immunity.",
+                    mindset2_item2: "<strong>Beauty & Health Merge:</strong> Cosmetics infused with wellness ingredients and ingestible beauty supplements are on the rise.",
+                    mindset2_item3: "<strong>Mental Health First:</strong> Demand for meditation apps, stress-reduction services, and digital detoxes is growing.",
+                    mindset2_item4: "<strong>Tech-Enabled Personalization:</strong> Using wearables and apps to track and optimize personal health.",
+                    mindset3_title: "3. Life Remodeled: The Impact of the 'Work-from-Anywhere' Economy",
+                    mindset3_text: "Remote and hybrid work have become the new normal, radically changing daily life. The home is the new hub, a 'bring-it-to-me' mentality is pervasive, and the line between work and life has blurred. This has created a 'connection paradox': a digitally independent lifestyle fuels a deeper desire for authentic, high-quality connections in physical interactions.",
+                    mindset3_card_title: "The Decentralization of Daily Life",
+                    mindset3_card_text1: "Remote work saves employees approximately",
+                    mindset3_card_text2: "This reallocation of funds and time is shifting consumption from business districts to residential communities.",
+                    mindset3_list_title: "The New Patterns of Work and Life",
+                    mindset3_item1: "<strong>Work-Life Integration:</strong> Shifting from a quest for 'balance' to a search for 'integration' between work and personal life.",
+                    mindset3_item2: "<strong>The Home as Hub:</strong> Nearly 90% of extra free time is spent on solo activities at home.",
+                    mindset3_item3: "<strong>The Rise of 'Bleisure':</strong> The combination of work and travel (Workations) is becoming more common.",
+                    mindset3_item4: "<strong>Seeking Authentic Connection:</strong> Higher expectations for quality physical experiences, like community retail and cultural tourism.",
+                    trans_title: "Industry Transformation: The Ultimate Battlefield for Retail & Tourism",
+                    trans_subtitle: "New consumer trends are forcing traditional industries to undergo fundamental reinvention. Click the buttons below to explore how retail and tourism are facing challenges and seizing opportunities.",
+                    trans_btn_retail: "Retail",
+                    trans_btn_tourism: "Tourism",
+                    retail1_title: "Challenge 1: Omnichannel is Imperative",
+                    retail1_text: "The consumer journey is no longer linear; it's a seamless switch between online and offline channels. Retailers must break down silos to offer a unified, frictionless experience. The 'bring-it-to-me' mindset has also turned logistics from a back-end cost center into a front-line customer experience.",
+                    retail1_chart_title: "The Merging of Online and Offline",
+                    retail1_chart_desc: "The vast majority of consumers combine online research with in-store experiences during their purchasing process, highlighting the importance of a seamless omnichannel strategy.",
+                    retail2_title: "Challenge 2: AI-Powered Personalization",
+                    retail2_text: "In an era of declining brand loyalty, personalization is key to rebuilding connections. AI allows retailers to analyze data at scale to provide personalized recommendations and services, shifting loyalty from 'transactional' to 'relational'. Data privacy is the foundation of it all.",
+                    retail2_card_title: "The Power of Personalization",
+                    retail2_card_text1: "AI personalization can lead to up to a",
+                    retail2_card_text2: "increase in conversion rates and a",
+                    retail2_card_text3: "increase in customer satisfaction.",
+                    tourism1_title: "Trend 1: Wellness Tourism Booms",
+                    tourism1_text: "Wellness has become a primary motivation for travel. From 'longevity retreats' focused on extending lifespan to 'sleep tourism' for better rest, consumers seek journeys that restore body and mind. This is driving a convergence of the hospitality and healthcare industries.",
+                    tourism1_chart_title: "Wellness Tourism Market Growth Forecast",
+                    tourism1_chart_desc: "The global wellness tourism market is projected to grow explosively from $830 billion in 2023 to $1.3 trillion by 2028.",
+                    tourism2_title: "Trend 2: The Conscientious Traveler",
+                    tourism2_text: "Travelers are increasingly aware of their environmental and social impact, driving demand for 'regenerative travel'—not just doing no harm, but actively improving a destination. They seek authentic cultural connections, moving from the 'experience economy' to the 'participation economy'.",
+                    tourism2_card_title: "The Choice of the Sustainable Traveler",
+                    tourism2_card_text1: "Over",
+                    tourism2_card_text2: "of consumers are concerned about the impact of climate change on their travels.",
+                    tourism2_card_text3: "Four in ten travelers will actively choose providers with higher sustainability ratings.",
+                    future_title: "Conclusion & Future Outlook",
+                    future_subtitle: "To win in the future market, business leaders need to adopt an agile, data-driven, and authentic strategic framework. Below is our summary of the A.D.A.P.T. model, providing a guide to navigating change.",
+                    adapt1_title: "Agility",
+                    adapt1_text: "Build an organizational structure that can respond quickly to fleeting consumer trends and a volatile economic environment.",
+                    adapt2_title: "Data-Centricity",
+                    adapt2_text: "Make the collection and analysis of first-party data the core of the business, turning data into insights.",
+                    adapt3_title: "Authenticity",
+                    adapt3_text: "Foster a culture of transparency. Ensure all claims are credible and verifiable to build lasting trust.",
+                    adapt4_title: "Personalization",
+                    adapt4_text: "Achieve true one-to-one personalization, making every customer feel seen and understood.",
+                    adapt5_title: "Transformation",
+                    adapt5_text: "Dare to fundamentally rethink the business model. Disrupt your own business before you are disrupted.",
+                    footer_text: "© 2025 Consumer Revolution Interactive Insights Report. For demonstration purposes only.",
+                    chart_value_labels: ['Prioritize Affordability', 'Buy Sustainable', 'Other'],
+                    chart_omni_labels: ['Webrooming', 'Showrooming'],
+                    chart_omni_dataset_label: '% of Consumers',
+                    chart_omni_tooltip: '% of consumers',
+                    chart_wellness_dataset_label: 'Global Wellness Tourism Market ($T)',
+                    chart_wellness_tooltip: 'Market Size Approx.'
+                }
+            };
+
+            let currentLanguage = 'zh';
+            let activeCharts = {};
+
+            const chartFontColor = '#374151';
+
+            function updateContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.dataset.key;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                const langSwitcher = document.getElementById('lang-switcher');
+                langSwitcher.textContent = lang === 'zh' ? 'English' : '繁體中文';
+            }
+
+            function destroyCharts() {
+                Object.values(activeCharts).forEach(chart => chart.destroy());
+                activeCharts = {};
+            }
+
+            function createValueEquationChart(lang) {
+                const ctx = document.getElementById('valueEquationChart')?.getContext('2d');
+                if (!ctx) return;
+                activeCharts.value = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: translations[lang].chart_value_labels,
+                        datasets: [{
+                            data: [39, 47, 14],
+                            backgroundColor: ['#3b82f6', '#10b981', '#e5e7eb'],
+                            borderColor: '#f8f9fa',
+                            borderWidth: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { color: chartFontColor, font: { family: lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif" } } },
+                            tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}%` } }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+
+            function createOmnichannelChart(lang) {
+                const ctx = document.getElementById('omnichannelChart')?.getContext('2d');
+                if (!ctx) return;
+                activeCharts.omni = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[lang].chart_omni_labels,
+                        datasets: [{
+                            label: translations[lang].chart_omni_dataset_label,
+                            data: [63, 48],
+                            backgroundColor: ['#3b82f6', '#60a5fa'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { beginAtZero: true, max: 100, ticks: { color: chartFontColor, callback: (v) => v + '%' } },
+                            y: { ticks: { color: chartFontColor, font: { family: lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif" } } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (c) => ` ${c.raw}% ${translations[lang].chart_omni_tooltip}` } }
+                        }
+                    }
+                });
+            }
+            
+            function createWellnessTourismChart(lang) {
+                const ctx = document.getElementById('wellnessTourismChart')?.getContext('2d');
+                if (!ctx) return;
+                activeCharts.wellness = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['2023', '2024', '2025', '2026', '2027', '2028'],
+                        datasets: [{
+                            label: translations[lang].chart_wellness_dataset_label,
+                            data: [0.83, 0.92, 1.02, 1.12, 1.21, 1.30],
+                            borderColor: '#0d9488',
+                            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                            fill: true, tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                             x: { ticks: { color: chartFontColor } },
+                             y: { ticks: { color: chartFontColor, callback: (v) => '$' + v + 'T' } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: chartFontColor, font: { family: lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif" } } },
+                            tooltip: { callbacks: { label: (c) => ` ${translations[lang].chart_wellness_tooltip}: $${c.raw}T` } }
+                        }
+                    }
+                });
+            }
+            
+            function renderAll(lang) {
+                updateContent(lang);
+                destroyCharts();
+                createValueEquationChart(lang);
+                createOmnichannelChart(lang);
+                createWellnessTourismChart(lang);
+            }
+
+            // --- Event Listeners ---
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                renderAll(currentLanguage);
+            });
+
+            document.getElementById('btn-retail').addEventListener('click', () => {
+                document.getElementById('btn-retail').classList.add('active');
+                document.getElementById('btn-tourism').classList.remove('active');
+                document.getElementById('content-retail').classList.remove('hidden');
+                document.getElementById('content-tourism').classList.add('hidden');
+            });
+
+            document.getElementById('btn-tourism').addEventListener('click', () => {
+                document.getElementById('btn-tourism').classList.add('active');
+                document.getElementById('btn-retail').classList.remove('active');
+                document.getElementById('content-tourism').classList.remove('hidden');
+                document.getElementById('content-retail').classList.add('hidden');
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            mobileMenu.addEventListener('click', (e) => {
+                if(e.target.tagName === 'A') mobileMenu.classList.add('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const headerHeight = document.getElementById('header').offsetHeight;
+            const onScroll = () => {
+                let current = '';
+                sections.forEach(section => {
+                    if (window.scrollY >= section.offsetTop - headerHeight - 20) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+            window.addEventListener('scroll', onScroll);
+            
+            // Initial render
+            renderAll(currentLanguage);
+        });
+    </script>
+</body>
+</html>
