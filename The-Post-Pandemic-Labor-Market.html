@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：後疫情時代的勞動力市場</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A thematic, dashboard-style single-page application. The structure is designed for non-linear exploration, allowing users to dive into topics of interest. It starts with a high-level overview (The Great Disruption), then drills down into three core themes identified from the report: Deepening Inequality, The New Workplace, and The Digital Future. Each theme is a self-contained section with interactive charts and summary cards. This structure prioritizes user engagement and understanding over a linear replication of the report's chapters. The final section on policy recommendations provides actionable takeaways. This design choice makes the dense report content more accessible and digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Initial Shock (Goal: Compare): A side-by-side HTML/CSS layout compares US vs. EU policy responses for quick understanding.
+        - Inequality (Goal: Compare/Explore): An interactive bar chart (Chart.js) with a dropdown allows users to filter data by demographic (race, age), which directly visualizes the report's key finding of disparate impacts.
+        - Remote Work (Goal: Organize/Compare): A "paradox" layout using HTML/CSS cards shows the pros and cons of remote work on productivity and well-being. A line chart (Chart.js) illustrates the structural impact on property values.
+        - Future of Work (Goal: Compare): A horizontal bar chart (Chart.js) effectively contrasts growing vs. declining job roles, visualizing the "hollowing out" concept.
+        - Policy (Goal: Inform/Organize): Interactive HTML/CSS cards present policy recommendations, making them scannable and engaging. Clicking reveals more detail.
+        - All choices adhere to the NO SVG/Mermaid constraint, using either Chart.js (Canvas) or structured HTML/CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF5;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 50vh;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0C4A6E;
+            border-bottom-color: #0C4A6E;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .section-title {
+            border-bottom: 2px solid #3B82F6;
+            padding-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-weight: 700;
+            color: #1E40AF;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800" data-lang-key="mainTitle">後疫情時代的勞動力市場</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-lang-key="navOverview">總覽</a>
+                            <a href="#inequality" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-lang-key="navInequality">不平等</a>
+                            <a href="#work-transformation" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-lang-key="navWorkTransformation">工作轉型</a>
+                            <a href="#digital-future" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-lang-key="navDigitalFuture">數位未來</a>
+                            <a href="#policy" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700 border-b-2 border-transparent" data-lang-key="navPolicy">政策建議</a>
+                        </div>
+                    </div>
+                    <button id="lang-toggle" class="ml-4 px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition">English</button>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <option value="#overview" data-lang-key="navOverview">總覽</option>
+                        <option value="#inequality" data-lang-key="navInequality">不平等</option>
+                        <option value="#work-transformation" data-lang-key="navWorkTransformation">工作轉型</option>
+                        <option value="#digital-future" data-lang-key="navDigitalFuture">數位未來</option>
+                        <option value="#policy" data-lang-key="navPolicy">政策建議</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="scroll-mt-20 mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 section-title" data-lang-key="overviewTitle">總覽：一場前所未有的衝擊與變革</h2>
+            <p class="text-gray-600 mb-8 max-w-3xl" data-lang-key="overviewDesc">COVID-19不僅是公共衛生危機，更是一場深刻的經濟地震。它既是破壞者，也是加速器，永久性地改變了工作、不平等和經濟的結構。本互動報告將引導您探索這場變革的三大核心主題。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <p class="text-gray-500" data-lang-key="kpi1Title">全球貧困率</p>
+                    <p class="text-4xl kpi-value" data-lang-key="kpi1Value">20年來首次上升</p>
+                    <p class="text-sm text-gray-500 mt-2" data-lang-key="kpi1Desc">約1億人陷入赤貧</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <p class="text-gray-500" data-lang-key="kpi2Title">遠程工作可行性</p>
+                    <p class="text-4xl kpi-value" data-lang-key="kpi2Value">4-5倍</p>
+                    <p class="text-sm text-gray-500 mt-2" data-lang-key="kpi2Desc">已開發經濟體中，每週可在家工作3-5天的勞動力比例，相較疫情前</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <p class="text-gray-500" data-lang-key="kpi3Title">數位化進程</p>
+                    <p class="text-4xl kpi-value" data-lang-key="kpi3Value">提前5年</p>
+                    <p class="text-sm text-gray-500 mt-2" data-lang-key="kpi3Desc">疫情加速了全球經濟的數位化轉型</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="policyResponseTitle">分化的政策應對：一場戰略抉擇</h3>
+                <p class="text-gray-600 mb-6" data-lang-key="policyResponseDesc">面對危機，各國選擇了不同路徑，這決定了其勞動力市場的命運。歐洲模式優先考慮穩定，而美國模式則接受了短期混亂以換取更快的市場重新配置。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h4 class="font-bold text-xl text-blue-700 mb-2" data-lang-key="europeModelTitle">🇪🇺 歐洲模式：工作保留</h4>
+                        <ul class="space-y-2 list-disc list-inside text-gray-700">
+                            <li data-lang-key="europeModel1"><span class="font-semibold">核心工具：</span>薪資補貼（工作保留計畫）。</li>
+                            <li data-lang-key="europeModel2"><span class="font-semibold">目標：</span>維持雇主與員工的聯繫，抑制失業率。</li>
+                            <li data-lang-key="europeModel3"><span class="font-semibold">成效：</span>成功防止大規模裁員，維持社會穩定。</li>
+                            <li data-lang-key="europeModel4"><span class="font-semibold">潛在代價：</span>可能延緩了結構調整，支撐了「殭屍工作」。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl text-red-700 mb-2" data-lang-key="usModelTitle">🇺🇸 美國模式：收入支持</h4>
+                        <ul class="space-y-2 list-disc list-inside text-gray-700">
+                            <li data-lang-key="usModel1"><span class="font-semibold">核心工具：</span>擴大失業救濟（CARES法案）。</li>
+                            <li data-lang-key="usModel2"><span class="font-semibold">目標：</span>為失業者提供直接收入，緩衝經濟衝擊。</li>
+                            <li data-lang-key="usModel3"><span class="font-semibold">成效：</span>有效緩解貧困，穩定消費需求。</li>
+                            <li data-lang-key="usModel4"><span class="font-semibold">潛在代價：</span>經歷大規模失業潮，短期社會動盪劇烈。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Inequality -->
+        <section id="inequality" class="scroll-mt-20 mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 section-title" data-lang-key="inequalityTitle">剖析：加劇的不平等</h2>
+            <p class="text-gray-600 mb-8 max-w-3xl" data-lang-key="inequalityDesc">疫情如同一面放大鏡，無情地放大了社會既有的裂痕。衝擊並非隨機分佈，而是不成比例地打擊了最脆弱的群體。新的分水嶺已經出現：遠程工作的能力和能否獲得社會安全網，成為決定個人經濟韌性的關鍵。</p>
+            
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 sm:mb-0" data-lang-key="inequalityChartTitle">不同群體遭受的衝擊</h3>
+                    <div class="flex items-center space-x-2">
+                         <label for="inequality-filter" class="text-sm font-medium text-gray-700" data-lang-key="filterLabel">選擇維度:</label>
+                        <select id="inequality-filter" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="race-uk" selected data-lang-key="filterRaceUk">英國：族裔別失業率</option>
+                            <option value="race-us" data-lang-key="filterRaceUs">美國：族裔別失業持續時間</option>
+                            <option value="age-us" data-lang-key="filterAgeUs">美國：年齡別失業持續時間</option>
+                        </select>
+                    </div>
+                </div>
+                <p id="chart-context" class="text-gray-600 mb-6 text-center" data-lang-key="chartContext-race-uk">數據顯示，在英國，少數族裔的失業率遠高於白人，其中孟加拉/巴基斯坦裔最高。請使用下拉選單查看不同維度的比較。</p>
+                <div class="chart-container">
+                    <canvas id="inequalityChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Work Transformation -->
+        <section id="work-transformation" class="scroll-mt-20 mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 section-title" data-lang-key="workTransformationTitle">轉變：遠程工作成為新常態</h2>
+            <p class="text-gray-600 mb-8 max-w-3xl" data-lang-key="workTransformationDesc">疫情發起了一場全球最大的工作實驗，永久地「解綁」了工作、人才與地理位置。遠程與混合工作從邊緣選擇變為主導趨勢，深刻影響著生產力、員工福祉和城市景觀。</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white p-8 rounded-lg shadow-lg card">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="paradoxTitle">生產力與福祉的悖論</h3>
+                    <p class="text-gray-600 mb-6" data-lang-key="paradoxDesc">遠程工作帶來了靈活性，但也伴隨著新的挑戰，對員工和企業的影響呈現複雜的兩面性。</p>
+                     <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg text-green-700" data-lang-key="paradoxProsTitle">✅ 積極方面</h4>
+                            <ul class="list-disc list-inside text-gray-700">
+                                <li data-lang-key="paradoxPro1">更好的工作與生活平衡</li>
+                                <li data-lang-key="paradoxPro2">省去通勤時間與壓力</li>
+                                <li data-lang-key="paradoxPro3">賦予員工更大的自主性</li>
+                                <li data-lang-key="paradoxPro4">混合辦公模式不影響生產力</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg text-red-700" data-lang-key="paradoxConsTitle">❌ 消極方面</h4>
+                            <ul class="list-disc list-inside text-gray-700">
+                                <li data-lang-key="paradoxCon1">社交孤立與孤獨感</li>
+                                <li data-lang-key="paradoxCon2">工作與生活界線模糊，導致過勞</li>
+                                <li data-lang-key="paradoxCon3">完全遠程可能降低約10%生產力</li>
+                                <li data-lang-key="paradoxCon4">心理健康挑戰顯著增加</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg card">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="propertyTitle">重塑城市景觀</h3>
+                    <p class="text-gray-600 mb-6" data-lang-key="propertyDesc">辦公室需求的結構性下降正衝擊著全球主要城市的商業地產市場，預示著市中心價值的重估。</p>
+                     <div class="chart-container" style="height: 300px;">
+                        <canvas id="propertyValueChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-gray-500 mt-2" data-lang-key="propertyChartCaption">辦公室物業價值預測（至2030年）</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Digital Future -->
+        <section id="digital-future" class="scroll-mt-20 mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 section-title" data-lang-key="digitalFutureTitle">加速：數位化未來與新工作世界</h2>
+            <p class="text-gray-600 mb-8 max-w-3xl" data-lang-key="digitalFutureDesc">疫情為數位轉型揚起了滿帆，催生了一個「技能本位經濟」。個人的經濟前景愈發取決於其持續更新技能的能力，而非傳統學歷。勞動力市場的「中空化」趨勢加劇。</p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="futureWorkTitle">未來工作的變遷</h3>
+                    <p class="text-gray-600 mb-6" data-lang-key="futureWorkDesc">到2030年，全球八大經濟體中可能有高達1億人需要徹底轉換職業。下圖顯示了需求增長最快和衰退最快的角色類型。</p>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="jobRolesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                     <h3 class="text-2xl font-bold text-gray-800 mb-4" data-lang-key="conveyorBeltTitle">關鍵理念：「技能傳送帶」假說</h3>
+                    <div class="flex items-center justify-center text-5xl mb-4">
+                        <span>🏃‍♂️</span><span class="text-gray-300 mx-2">➡️</span><span class="text-gray-300 mx-2">➡️</span><span>🏆</span>
+                    </div>
+                    <p class="text-gray-600 mb-4" data-lang-key="conveyorBeltDesc1">在數位化時代，就業本身成為一種競爭優勢。在職者能持續接觸和學習新興技能，如同站在一條不斷前進的「傳送帶」上。</p>
+                    <p class="text-gray-600" data-lang-key="conveyorBeltDesc2">一旦失業，便如同從傳送帶上跌落，原有技能加速折舊，與市場需求日益脫節，重返就業的難度劇增。這使得終身學習成為生存的必要條件。</p>
+                
+                    <h4 class="font-bold text-lg mt-6 mb-2" data-lang-key="futureSkillsTitle">未來最受歡迎的技能</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                         <div>
+                            <p class="font-semibold text-gray-700" data-lang-key="softSkillsTitle">認知/軟技能:</p>
+                            <ul class="text-sm list-disc list-inside text-gray-600">
+                                <li data-lang-key="softSkill1">分析性思維</li>
+                                <li data-lang-key="softSkill2">創造性思維</li>
+                                <li data-lang-key="softSkill3">韌性與靈活性</li>
+                                <li data-lang-key="softSkill4">領導力</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <p class="font-semibold text-gray-700" data-lang-key="techSkillsTitle">技術技能:</p>
+                            <ul class="text-sm list-disc list-inside text-gray-600">
+                                <li data-lang-key="techSkill1">AI與大數據</li>
+                                <li data-lang-key="techSkill2">網路安全</li>
+                                <li data-lang-key="techSkill3">技術素養</li>
+                                <li data-lang-key="techSkill4">雲端運算</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Policy -->
+        <section id="policy" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 section-title" data-lang-key="policyTitle">展望：邁向韌性與公平的政策新路徑</h2>
+            <p class="text-gray-600 mb-8 max-w-3xl" data-lang-key="policyDesc">面對結構性轉變，過去的政策工具已顯不足。各國政府和企業領袖必須進行範式轉移，從被動應對危機，轉向主動塑造一個更公平、更有韌性的未來勞動力市場。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy1Title">現代化社會安全網</h3>
+                    <p class="text-gray-600" data-lang-key="policy1Desc">為零工和非標準就業者提供可攜式、不與特定雇主掛鉤的普惠性基本保障（如收入支持、醫療保健）。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy2Title">擁抱終身學習</h3>
+                    <p class="text-gray-600" data-lang-key="policy2Desc">將公共資金從初始教育轉向支持貫穿職業生涯的持續學習體系，如推廣「個人學習帳戶」。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy3Title">促進公私營技能聯盟</h3>
+                    <p class="text-gray-600" data-lang-key="policy3Desc">政府扮演召集人，促進雇主、教育機構和工會合作，開發與市場需求緊密結合的培訓計畫。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy4Title">採納「技能優先」招聘</h3>
+                    <p class="text-gray-600" data-lang-key="policy4Desc">鼓勵企業採用基於技能的招聘實踐，而非過度依賴傳統學歷，以擴大人才庫。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy5Title">投資數位基礎設施</h3>
+                    <p class="text-gray-600" data-lang-key="policy5Desc">普及高速網路和數位素養計畫，是確保經濟機會公平的核心社會政策。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md card">
+                    <h3 class="text-xl font-bold text-blue-800 mb-2" data-lang-key="policy6Title">為數位經濟立法</h3>
+                    <p class="text-gray-600" data-lang-key="policy6Desc">建立現代化的監管框架，平衡創新與勞工保護，明確零工的權利和社會保障。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p data-lang-key="footerText">互動式報告，基於《後疫情時代的勞動力市場：駕馭顛覆、不平等與數位化未來》報告生成。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const translations = {
+        zh: {
+            mainTitle: '後疫情時代的勞動力市場',
+            navOverview: '總覽',
+            navInequality: '不平等',
+            navWorkTransformation: '工作轉型',
+            navDigitalFuture: '數位未來',
+            navPolicy: '政策建議',
+            langToggle: 'English',
+            overviewTitle: '總覽：一場前所未有的衝擊與變革',
+            overviewDesc: 'COVID-19不僅是公共衛生危機，更是一場深刻的經濟地震。它既是破壞者，也是加速器，永久性地改變了工作、不平等和經濟的結構。本互動報告將引導您探索這場變革的三大核心主題。',
+            kpi1Title: '全球貧困率',
+            kpi1Value: '20年來首次上升',
+            kpi1Desc: '約1億人陷入赤貧',
+            kpi2Title: '遠程工作可行性',
+            kpi2Value: '4-5倍',
+            kpi2Desc: '已開發經濟體中，每週可在家工作3-5天的勞動力比例，相較疫情前',
+            kpi3Title: '數位化進程',
+            kpi3Value: '提前5年',
+            kpi3Desc: '疫情加速了全球經濟的數位化轉型',
+            policyResponseTitle: '分化的政策應對：一場戰略抉擇',
+            policyResponseDesc: '面對危機，各國選擇了不同路徑，這決定了其勞動力市場的命運。歐洲模式優先考慮穩定，而美國模式則接受了短期混亂以換取更快的市場重新配置。',
+            europeModelTitle: '🇪🇺 歐洲模式：工作保留',
+            europeModel1: '<span class="font-semibold">核心工具：</span>薪資補貼（工作保留計畫）。',
+            europeModel2: '<span class="font-semibold">目標：</span>維持雇主與員工的聯繫，抑制失業率。',
+            europeModel3: '<span class="font-semibold">成效：</span>成功防止大規模裁員，維持社會穩定。',
+            europeModel4: '<span class="font-semibold">潛在代價：</span>可能延緩了結構調整，支撐了「殭屍工作」。',
+            usModelTitle: '🇺🇸 美國模式：收入支持',
+            usModel1: '<span class="font-semibold">核心工具：</span>擴大失業救濟（CARES法案）。',
+            usModel2: '<span class="font-semibold">目標：</span>為失業者提供直接收入，緩衝經濟衝擊。',
+            usModel3: '<span class="font-semibold">成效：</span>有效緩解貧困，穩定消費需求。',
+            usModel4: '<span class="font-semibold">潛在代價：</span>經歷大規模失業潮，短期社會動盪劇烈。',
+            inequalityTitle: '剖析：加劇的不平等',
+            inequalityDesc: '疫情如同一面放大鏡，無情地放大了社會既有的裂痕。衝擊並非隨機分佈，而是不成比例地打擊了最脆弱的群體。新的分水嶺已經出現：遠程工作的能力和能否獲得社會安全網，成為決定個人經濟韌性的關鍵。',
+            inequalityChartTitle: '不同群體遭受的衝擊',
+            filterLabel: '選擇維度:',
+            filterRaceUk: '英國：族裔別失業率',
+            filterRaceUs: '美國：族裔別失業持續時間',
+            filterAgeUs: '美國：年齡別失業持續時間',
+            'chartContext-race-uk': '數據顯示，在英國，少數族裔的失業率遠高於白人，其中孟加拉/巴基斯坦裔最高。請使用下拉選單查看不同維度的比較。',
+            'chartContext-race-us': '在美國，亞裔和非裔在2021年經歷了更長的失業時間，反映了他們在重返市場時面臨更大困難。',
+            'chartContext-age-us': '在美國，年長勞動者（55歲及以上）在失業後重返市場面臨的困難最大，失業持續時間最長。',
+            workTransformationTitle: '轉變：遠程工作成為新常態',
+            workTransformationDesc: '疫情發起了一場全球最大的工作實驗，永久地「解綁」了工作、人才與地理位置。遠程與混合工作從邊緣選擇變為主導趨勢，深刻影響著生產力、員工福祉和城市景觀。',
+            paradoxTitle: '生產力與福祉的悖論',
+            paradoxDesc: '遠程工作帶來了靈活性，但也伴隨著新的挑戰，對員工和企業的影響呈現複雜的兩面性。',
+            paradoxProsTitle: '✅ 積極方面',
+            paradoxPro1: '更好的工作與生活平衡',
+            paradoxPro2: '省去通勤時間與壓力',
+            paradoxPro3: '賦予員工更大的自主性',
+            paradoxPro4: '混合辦公模式不影響生產力',
+            paradoxConsTitle: '❌ 消極方面',
+            paradoxCon1: '社交孤立與孤獨感',
+            paradoxCon2: '工作與生活界線模糊，導致過勞',
+            paradoxCon3: '完全遠程可能降低約10%生產力',
+            paradoxCon4: '心理健康挑戰顯著增加',
+            propertyTitle: '重塑城市景觀',
+            propertyDesc: '辦公室需求的結構性下降正衝擊著全球主要城市的商業地產市場，預示著市中心價值的重估。',
+            propertyChartCaption: '辦公室物業價值預測（至2030年）',
+            digitalFutureTitle: '加速：數位化未來與新工作世界',
+            digitalFutureDesc: '疫情為數位轉型揚起了滿帆，催生了一個「技能本位經濟」。個人的經濟前景愈發取決於其持續更新技能的能力，而非傳統學歷。勞動力市場的「中空化」趨勢加劇。',
+            futureWorkTitle: '未來工作的變遷',
+            futureWorkDesc: '到2030年，全球八大經濟體中可能有高達1億人需要徹底轉換職業。下圖顯示了需求增長最快和衰退最快的角色類型。',
+            conveyorBeltTitle: '關鍵理念：「技能傳送帶」假說',
+            conveyorBeltDesc1: '在數位化時代，就業本身成為一種競爭優勢。在職者能持續接觸和學習新興技能，如同站在一條不斷前進的「傳送帶」上。',
+            conveyorBeltDesc2: '一旦失業，便如同從傳送帶上跌落，原有技能加速折舊，與市場需求日益脫節，重返就業的難度劇增。這使得終身學習成為生存的必要條件。',
+            futureSkillsTitle: '未來最受歡迎的技能',
+            softSkillsTitle: '認知/軟技能:',
+            softSkill1: '分析性思維',
+            softSkill2: '創造性思維',
+            softSkill3: '韌性與靈活性',
+            softSkill4: '領導力',
+            techSkillsTitle: '技術技能:',
+            techSkill1: 'AI與大數據',
+            techSkill2: '網路安全',
+            techSkill3: '技術素養',
+            techSkill4: '雲端運算',
+            policyTitle: '展望：邁向韌性與公平的政策新路徑',
+            policyDesc: '面對結構性轉變，過去的政策工具已顯不足。各國政府和企業領袖必須進行範式轉移，從被動應對危機，轉向主動塑造一個更公平、更有韌性的未來勞動力市場。',
+            policy1Title: '現代化社會安全網',
+            policy1Desc: '為零工和非標準就業者提供可攜式、不與特定雇主掛鉤的普惠性基本保障（如收入支持、醫療保健）。',
+            policy2Title: '擁抱終身學習',
+            policy2Desc: '將公共資金從初始教育轉向支持貫穿職業生涯的持續學習體系，如推廣「個人學習帳戶」。',
+            policy3Title: '促進公私營技能聯盟',
+            policy3Desc: '政府扮演召集人，促進雇主、教育機構和工會合作，開發與市場需求緊密結合的培訓計畫。',
+            policy4Title: '採納「技能優先」招聘',
+            policy4Desc: '鼓勵企業採用基於技能的招聘實踐，而非過度依賴傳統學歷，以擴大人才庫。',
+            policy5Title: '投資數位基礎設施',
+            policy5Desc: '普及高速網路和數位素養計畫，是確保經濟機會公平的核心社會政策。',
+            policy6Title: '為數位經濟立法',
+            policy6Desc: '建立現代化的監管框架，平衡創新與勞工保護，明確零工的權利和社會保障。',
+            footerText: '互動式報告，基於《後疫情時代的勞動力市場：駕馭顛覆、不平等與數位化未來》報告生成。'
+        },
+        en: {
+            mainTitle: 'The Post-Pandemic Labor Market',
+            navOverview: 'Overview',
+            navInequality: 'Inequality',
+            navWorkTransformation: 'Work Transformation',
+            navDigitalFuture: 'Digital Future',
+            navPolicy: 'Policy',
+            langToggle: '中文',
+            overviewTitle: 'Overview: An Unprecedented Shock and Transformation',
+            overviewDesc: 'COVID-19 was not just a public health crisis but a profound economic earthquake. It acted as both a disruptor and an accelerator, permanently altering the structures of work, inequality, and the economy. This interactive report guides you through the three core themes of this transformation.',
+            kpi1Title: 'Global Poverty Rate',
+            kpi1Value: 'First Rise in 20 Years',
+            kpi1Desc: 'Approx. 100 million people fell into extreme poverty',
+            kpi2Title: 'Remote Work Potential',
+            kpi2Value: '4-5x Increase',
+            kpi2Desc: 'Share of workforce that can work 3-5 days from home vs. pre-pandemic levels in advanced economies',
+            kpi3Title: 'Digitalization Progress',
+            kpi3Value: '5-Year Leap Forward',
+            kpi3Desc: 'The pandemic accelerated the digital transformation of the global economy',
+            policyResponseTitle: 'Divergent Policy Responses: A Strategic Choice',
+            policyResponseDesc: 'In the face of the crisis, countries chose different paths, shaping the destiny of their labor markets. The European model prioritized stability, while the US model accepted short-term disruption for faster market reallocation.',
+            europeModelTitle: '🇪🇺 European Model: Job Retention',
+            europeModel1: '<span class="font-semibold">Core Tool:</span> Wage subsidies (job retention schemes).',
+            europeModel2: '<span class="font-semibold">Goal:</span> Maintain employer-employee ties, suppress unemployment.',
+            europeModel3: '<span class="font-semibold">Outcome:</span> Successfully prevented mass layoffs, maintained social stability.',
+            europeModel4: '<span class="font-semibold">Potential Cost:</span> May have slowed structural adjustment, propping up "zombie jobs".',
+            usModelTitle: '🇺🇸 US Model: Income Support',
+            usModel1: '<span class="font-semibold">Core Tool:</span> Expanded unemployment benefits (CARES Act).',
+            usModel2: '<span class="font-semibold">Goal:</span> Provide direct income to the unemployed, cushioning the shock.',
+            usModel3: '<span class="font-semibold">Outcome:</span> Effectively mitigated poverty and stabilized consumer demand.',
+            usModel4: '<span class="font-semibold">Potential Cost:</span> Experienced mass unemployment, significant short-term social disruption.',
+            inequalityTitle: 'Dissecting Deepening Inequality',
+            inequalityDesc: 'The pandemic acted like a magnifying glass, cruelly enlarging society\'s existing fissures. The impact was not random but disproportionately hit the most vulnerable. A new divide has emerged: the ability to work remotely and access social safety nets became key determinants of economic resilience.',
+            inequalityChartTitle: 'Disproportionate Impact on Different Groups',
+            filterLabel: 'Select Dimension:',
+            filterRaceUk: 'UK: Unemployment Rate by Ethnicity',
+            filterRaceUs: 'US: Unemployment Duration by Ethnicity',
+            filterAgeUs: 'US: Unemployment Duration by Age',
+            'chartContext-race-uk': 'Data shows that in the UK, unemployment rates for ethnic minorities are far higher than for White individuals, with the Bangladeshi/Pakistani group being the highest. Use the dropdown to compare different dimensions.',
+            'chartContext-race-us': 'In the US, Asian and Black individuals experienced longer durations of unemployment in 2021, reflecting greater difficulty in re-entering the market.',
+            'chartContext-age-us': 'In the US, older workers (55+) faced the greatest difficulty re-entering the job market after unemployment, experiencing the longest durations.',
+            workTransformationTitle: 'The Shift: Remote Work as a New Normal',
+            workTransformationDesc: 'The pandemic initiated the world\'s largest work experiment, permanently "unbundling" work, talent, and geography. Remote and hybrid work shifted from a fringe option to a dominant trend, profoundly impacting productivity, employee well-being, and the urban landscape.',
+            paradoxTitle: 'The Productivity & Well-being Paradox',
+            paradoxDesc: 'Remote work offers flexibility but comes with new challenges, presenting a complex, two-sided impact on employees and businesses.',
+            paradoxProsTitle: '✅ The Upside',
+            paradoxPro1: 'Better work-life balance',
+            paradoxPro2: 'No commute time or stress',
+            paradoxPro3: 'Greater employee autonomy',
+            paradoxPro4: 'Hybrid models show no drop in productivity',
+            paradoxConsTitle: '❌ The Downside',
+            paradoxCon1: 'Social isolation and loneliness',
+            paradoxCon2: 'Blurred work-life boundaries leading to burnout',
+            paradoxCon3: 'Fully remote may decrease productivity by ~10%',
+            paradoxCon4: 'Significant increase in mental health challenges',
+            propertyTitle: 'Reshaping the Urban Landscape',
+            propertyDesc: 'The structural decline in office demand is hitting commercial real estate markets in major global cities, heralding a revaluation of downtown value.',
+            propertyChartCaption: 'Office Property Value Forecast (to 2030)',
+            digitalFutureTitle: 'Acceleration: The Digital Future & The New World of Work',
+            digitalFutureDesc: 'The pandemic set the sails for digital transformation, creating a "skills-based economy." An individual\'s economic prospects increasingly depend on their ability to continuously update their skills, rather than on traditional credentials. The "hollowing out" of the labor market has intensified.',
+            futureWorkTitle: 'The Shifting Landscape of Jobs',
+            futureWorkDesc: 'By 2030, up to 100 million people in eight major economies may need to switch occupations entirely. The chart below shows the fastest-growing and fastest-declining role types.',
+            conveyorBeltTitle: 'Key Concept: The "Skills Conveyor Belt" Hypothesis',
+            conveyorBeltDesc1: 'In the digital age, being employed is itself a competitive advantage. Those in work are continuously exposed to and learn emerging skills, as if on a moving "conveyor belt".',
+            conveyorBeltDesc2: 'Once unemployed, it\'s like falling off the belt. Existing skills depreciate rapidly, becoming disconnected from market demand, making re-entry increasingly difficult. This makes lifelong learning a necessity for survival.',
+            futureSkillsTitle: 'Most In-Demand Skills of the Future',
+            softSkillsTitle: 'Cognitive/Soft Skills:',
+            softSkill1: 'Analytical thinking',
+            softSkill2: 'Creative thinking',
+            softSkill3: 'Resilience and flexibility',
+            softSkill4: 'Leadership',
+            techSkillsTitle: 'Technical Skills:',
+            techSkill1: 'AI and big data',
+            techSkill2: 'Cybersecurity',
+            techSkill3: 'Technology literacy',
+            techSkill4: 'Cloud computing',
+            policyTitle: 'Outlook: A New Policy Path Towards Resilience and Equity',
+            policyDesc: 'Faced with structural shifts, past policy tools are insufficient. Governments and business leaders must undergo a paradigm shift, moving from reactive crisis management to proactively shaping a fairer, more resilient future labor market.',
+            policy1Title: 'Modernize Social Safety Nets',
+            policy1Desc: 'Provide portable, universal basic protections (like income support, healthcare) for gig and non-standard workers, decoupled from specific employers.',
+            policy2Title: 'Embrace Lifelong Learning',
+            policy2Desc: 'Shift public funds from front-loaded initial education to supporting a continuous learning system throughout careers, such as promoting "Individual Learning Accounts".',
+            policy3Title: 'Foster Public-Private Skills Alliances',
+            policy3Desc: 'Government as a convener, fostering partnerships between employers, educational institutions, and unions to develop training programs aligned with market needs.',
+            policy4Title: 'Adopt "Skills-First" Hiring',
+            policy4Desc: 'Encourage businesses to adopt skills-based hiring practices over relying heavily on traditional credentials to widen the talent pool.',
+            policy5Title: 'Invest in Digital Infrastructure',
+            policy5Desc: 'Universal access to high-speed internet and digital literacy programs is a core social policy for ensuring equitable economic opportunity.',
+            policy6Title: 'Legislate for the Digital Economy',
+            policy6Desc: 'Establish a modern regulatory framework to balance innovation with worker protection, clarifying the rights and social security of gig workers.',
+            footerText: 'Interactive report generated based on "The Post-Pandemic Labor Market: Navigating Disruption, Inequality, and the Digital Future".'
+        }
+    };
+
+    const chartConfigData = {
+        zh: {
+            inequality: {
+                yAxisLabel: '百分比 (%) 或 週數',
+                datasets: {
+                    'race-uk': { label: '2022年失業率 (%)', labels: ['白人', '非裔', '巴基斯坦裔/孟加拉裔', '其他族裔(合併)'] },
+                    'race-us': { label: '2021年失業持續時間中位數 (週)', labels: ['白人', '非裔', '西班牙裔', '亞裔'] },
+                    'age-us': { label: '2021年失業持續時間中位數 (週)', labels: ['16-24歲', '25-54歲', '55歲及以上'] }
+                },
+                tooltipUnit: { '%': '%', '週': ' 週' }
+            },
+            property: {
+                label: '辦公室物業價值變化',
+                yAxisLabel: '價值指數 (疫情前=100)',
+                labels: ['疫情前', '2025', '2030 (中等)', '2030 (嚴重)'],
+                tooltip: '價值指數'
+            },
+            jobRoles: {
+                label: '需求變化',
+                xAxisLabel: '需求變化趨勢 (增長 vs 衰退)',
+                labels: ['AI與機器學習專家', '軟體開發者', '數據輸入員', '行政與執行秘書'],
+                tooltip: '趨勢指標'
+            }
+        },
+        en: {
+            inequality: {
+                yAxisLabel: 'Percentage (%) or Weeks',
+                datasets: {
+                    'race-uk': { label: '2022 Unemployment Rate (%)', labels: ['White', 'Black', 'Pakistani/Bangladeshi', 'Other Ethnicities (merged)'] },
+                    'race-us': { label: '2021 Median Unemployment Duration (weeks)', labels: ['White', 'Black', 'Hispanic', 'Asian'] },
+                    'age-us': { label: '2021 Median Unemployment Duration (weeks)', labels: ['16-24 years', '25-54 years', '55+ years'] }
+                },
+                tooltipUnit: { '%': '%', '週': ' weeks' }
+            },
+            property: {
+                label: 'Office Property Value Change',
+                yAxisLabel: 'Value Index (Pre-pandemic=100)',
+                labels: ['Pre-Pandemic', '2025', '2030 (Moderate)', '2030 (Severe)'],
+                tooltip: 'Value Index'
+            },
+            jobRoles: {
+                label: 'Demand Change',
+                xAxisLabel: 'Demand Trend (Growth vs. Decline)',
+                labels: ['AI & Machine Learning Specialists', 'Software Developers', 'Data Entry Clerks', 'Administrative Secretaries'],
+                tooltip: 'Trend Indicator'
+            }
+        }
+    };
+    
+    const chartData = {
+        inequality: {
+            'race-uk': [3, 7, 9, 6],
+            'race-us': [15.6, 19.0, 15.4, 21.9],
+            'age-us': [10.6, 19.8, 27.0]
+        },
+        property: [100, 85, 74, 58],
+        jobRoles: [85, 70, -65, -80]
+    };
+    
+    let currentLang = 'zh';
+    let inequalityChart, propertyValueChart, jobRolesChart;
+
+    const setLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        
+        document.querySelectorAll('[data-lang-key]').forEach(elem => {
+            const key = elem.getAttribute('data-lang-key');
+            if (translations[lang][key]) {
+                // Use innerHTML for elements that might contain formatting like <span>
+                if (key.includes('Model')) { 
+                    elem.innerHTML = translations[lang][key];
+                } else {
+                    elem.textContent = translations[lang][key];
+                }
+            }
+        });
+        
+        document.getElementById('lang-toggle').textContent = translations[lang]['langToggle'];
+        
+        // Re-create charts with new language settings
+        createCharts(lang);
+    };
+
+    const createCharts = (lang) => {
+        // Destroy existing charts if they exist
+        if (inequalityChart) inequalityChart.destroy();
+        if (propertyValueChart) propertyValueChart.destroy();
+        if (jobRolesChart) jobRolesChart.destroy();
+
+        const config = chartConfigData[lang];
+        
+        // Inequality Chart
+        const inequalityCtx = document.getElementById('inequalityChart').getContext('2d');
+        const selectedInequalityData = document.getElementById('inequality-filter').value;
+        inequalityChart = new Chart(inequalityCtx, {
+            type: 'bar',
+            data: {
+                labels: config.inequality.datasets[selectedInequalityData].labels,
+                datasets: [{
+                    label: config.inequality.datasets[selectedInequalityData].label,
+                    data: chartData.inequality[selectedInequalityData],
+                    backgroundColor: ['#60A5FA', '#F87171', '#FBBF24', '#34D399'],
+                    borderColor: ['#3B82F6', '#EF4444', '#F59E0B', '#10B981'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, title: { display: true, text: config.inequality.yAxisLabel }}},
+                plugins: { legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                let unitKey = label.includes('%') ? '%' : '週';
+                                let unit = config.inequality.tooltipUnit[unitKey];
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) { label += context.parsed.y + unit; }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Property Value Chart
+        const propertyValueCtx = document.getElementById('propertyValueChart').getContext('2d');
+        propertyValueChart = new Chart(propertyValueCtx, {
+            type: 'line',
+            data: {
+                labels: config.property.labels,
+                datasets: [{
+                    label: config.property.label,
+                    data: chartData.property,
+                    fill: true, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgb(239, 68, 68)', tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false, title: { display: true, text: config.property.yAxisLabel }}},
+                plugins: { legend: { display: false },
+                    tooltip: {
+                        callbacks: { label: (context) => `${config.property.tooltip}: ${context.formattedValue}` }
+                    }
+                }
+            }
+        });
+
+        // Job Roles Chart
+        const jobRolesCtx = document.getElementById('jobRolesChart').getContext('2d');
+        jobRolesChart = new Chart(jobRolesCtx, {
+            type: 'bar',
+            data: {
+                labels: config.jobRoles.labels,
+                datasets: [{
+                    label: config.jobRoles.label,
+                    data: chartData.jobRoles,
+                    backgroundColor: (c) => c.raw > 0 ? 'rgba(52, 211, 153, 0.7)' : 'rgba(248, 113, 113, 0.7)',
+                    borderColor: (c) => c.raw > 0 ? 'rgb(16, 185, 129)' : 'rgb(239, 68, 68)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                scales: { x: { title: { display: true, text: config.jobRoles.xAxisLabel }}},
+                plugins: { legend: { display: false },
+                    tooltip: {
+                         callbacks: { label: (context) => `${config.jobRoles.tooltip}: ${context.formattedValue}` }
+                    }
+                }
+            }
+        });
+    };
+
+    document.getElementById('lang-toggle').addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        setLanguage(newLang);
+    });
+
+    document.getElementById('inequality-filter').addEventListener('change', (e) => {
+        const selectedValue = e.target.value;
+        const config = chartConfigData[currentLang];
+        document.getElementById('chart-context').textContent = translations[currentLang][`chartContext-${selectedValue}`];
+        
+        inequalityChart.data.labels = config.inequality.datasets[selectedValue].labels;
+        inequalityChart.data.datasets[0].label = config.inequality.datasets[selectedValue].label;
+        inequalityChart.data.datasets[0].data = chartData.inequality[selectedValue];
+        inequalityChart.update();
+    });
+
+    // Smooth scrolling for navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+    
+    // Mobile navigation
+    document.getElementById('mobile-nav').addEventListener('change', function(e) {
+        const target = e.target.value;
+        if(target) {
+            document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 80) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    // Initial setup
+    setLanguage('zh');
+
+});
+</script>
+
+</body>
+</html>
