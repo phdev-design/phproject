@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：太空科技與人因挑戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Cosmic Harmony -->
+    <!-- Application Structure Plan: 本應用採用主題式儀表板結構，而非報告的線性佈局。頂部為導航欄，引導用戶至四大核心區塊：1.「概覽」：以卡片式設計呈現關鍵數據，快速建立報告核心概念。2.「技術先鋒」：使用頁籤分類展示推進系統、先進材料與ISRU，便於用戶聚焦特定技術領域。3.「人體挑戰」：透過互動式網格佈局，將生理與心理影響視覺化，用戶點擊即可深入探索。4.「未來展望」：總結報告結論，並以互動式關係圖呈現技術與人因之間的緊密聯繫。此結構旨在促進非線性探索，讓用戶能直觀地理解技術發展與人類極限之間的關聯性，從而提升資訊吸收效率與使用者參與度。 -->
+    <!-- Visualization & Content Choices: 1. **猛禽 vs. BE-4 比較**: 目標：比較。方式：Chart.js 水平條形圖。互動：點擊按鈕切換推力、壓力等指標。理由：清晰呈現兩款引擎的性能差異，互動切換增加了資訊密度。2. **生理影響**: 目標：告知。方式：Chart.js 環圈圖（SANS盛行率）、條形圖（骨質流失）。互動：點擊不同生理系統卡片，動態載入對應的圖表與解說。理由：將複雜的健康風險分解為易於理解的視覺化數據。3. **ISRU 流程**: 目標：組織。方式：HTML/CSS Flexbox 流程圖。互動：滑鼠懸停顯示步驟詳情。理由：以簡潔的視覺語言解釋複雜的化學過程，無需額外函式庫。4. **技術與人因關係**: 目標：建立關係。方式：HTML/CSS 關係圖。互動：點擊技術節點，高亮顯示其能應對的人因挑戰。理由：直觀地視覺化報告的核心論點——技術與人類挑戰的相互作用。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        :lang(en) {
+            font-family: 'Roboto', sans-serif;
+        }
+        body {
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0056b3;
+            border-bottom-color: #0056b3;
+        }
+        .tab-btn {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-btn.active {
+            background-color: #007BFF;
+            color: white;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800" data-lang-key="headerTitle">太空探索新紀元</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#overview" class="nav-link pb-1" data-lang-key="navOverview">概覽</a>
+                <a href="#tech" class="nav-link pb-1" data-lang-key="navTech">技術先鋒</a>
+                <a href="#human" class="nav-link pb-1" data-lang-key="navHuman">人體挑戰</a>
+                <a href="#future" class="nav-link pb-1" data-lang-key="navFuture">未來展望</a>
+                <button id="lang-switcher" class="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg text-sm hover:bg-gray-300 transition-colors">English</button>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="#overview" data-lang-key="navOverview">概覽</option>
+                    <option value="#tech" data-lang-key="navTech">技術先鋒</option>
+                    <option value="#human" data-lang-key="navHuman">人體挑戰</option>
+                    <option value="#future" data-lang-key="navFuture">未來展望</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        
+        <section id="intro" class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900" data-lang-key="introTitle">新時代的疆界</h2>
+            <p class="max-w-4xl mx-auto text-lg text-gray-600" data-lang-key="introText">
+                本報告深入剖析當代太空探索的兩大核心：一方面是革命性的火箭與材料科技，它們為星際旅行鋪平道路；另一方面則是長期太空飛行對人類身心的嚴峻考驗。技術的飛躍正開啟星辰大海，但我們能走多遠，最終取決於能否應對「人」這個終極挑戰。
+            </p>
+        </section>
+
+        <section id="overview" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-10" data-lang-key="overviewTitle">核心數據概覽</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="card p-6 flex flex-col items-center text-center">
+                    <span class="text-6xl mb-2">🚀</span>
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="overviewCard1Title">太空經濟</h4>
+                    <p class="text-3xl font-bold text-blue-600">$1.8T</p>
+                    <p class="text-gray-500" data-lang-key="overviewCard1Desc">預計2035年全球規模</p>
+                </div>
+                <div class="card p-6 flex flex-col items-center text-center">
+                    <span class="text-6xl mb-2">🦴</span>
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="overviewCard2Title">骨質流失</h4>
+                    <p class="text-3xl font-bold text-red-600">-1.5%</p>
+                    <p class="text-gray-500" data-lang-key="overviewCard2Desc">宇航員每月平均流失率</p>
+                </div>
+                <div class="card p-6 flex flex-col items-center text-center">
+                    <span class="text-6xl mb-2">⏱️</span>
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="overviewCard3Title">火星旅程</h4>
+                    <p class="text-3xl font-bold text-green-600">~90 Days</p>
+                    <p class="text-gray-500" data-lang-key="overviewCard3Desc">核熱推進(NTP)潛在單程時間</p>
+                </div>
+                <div class="card p-6 flex flex-col items-center text-center">
+                    <span class="text-6xl mb-2">👁️</span>
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="overviewCard4Title">SANS 症候群</h4>
+                    <p class="text-3xl font-bold text-yellow-600">~70%</p>
+                    <p class="text-gray-500" data-lang-key="overviewCard4Desc">長期飛行宇航員受影響比例</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="tech" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-4" data-lang-key="techTitle">技術先鋒：實現星際旅航的基石</h3>
+             <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10" data-lang-key="techIntro">
+                此部分深入評估奠定新太空時代基礎的各項關鍵技術。從大幅降低發射成本的可重複使用火箭，到支撐未來任務的先進材料與就地資源利用技術，這些創新共同為規模空前的深空探索提供了可能。
+            </p>
+            <div class="bg-white rounded-lg shadow-lg p-4 md:p-8">
+                <div class="flex justify-center border-b mb-6">
+                    <button class="tab-btn py-2 px-4 font-semibold text-gray-600 rounded-t-lg active" data-tab="propulsion" data-lang-key="techTab1">推進系統</button>
+                    <button class="tab-btn py-2 px-4 font-semibold text-gray-600 rounded-t-lg" data-tab="materials" data-lang-key="techTab2">先進材料</button>
+                    <button class="tab-btn py-2 px-4 font-semibold text-gray-600 rounded-t-lg" data-tab="isru" data-lang-key="techTab3">就地資源利用</button>
+                </div>
+                <div id="propulsion" class="tab-content">
+                    <h4 class="text-2xl font-bold mb-4 text-center" data-lang-key="engineTitle">甲烷引擎競賽：猛禽 vs BE-4</h4>
+                    <p class="text-center text-gray-600 mb-6" data-lang-key="engineIntro">下一代火箭引擎普遍採用液氧甲烷組合，因其燃燒潔淨、成本低廉且利於在火星就地生產。SpaceX的猛禽與藍色起源的BE-4是此領域的兩大巨頭，但其設計哲學截然不同。</p>
+                    <div class="chart-container mx-auto">
+                        <canvas id="engineChart"></canvas>
+                    </div>
+                    <div class="flex justify-center space-x-4 mt-4">
+                        <button id="showThrust" class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow" data-lang-key="engineBtn1">顯示推力</button>
+                        <button id="showPressure" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg shadow" data-lang-key="engineBtn2">顯示燃燒室壓力</button>
+                    </div>
+                </div>
+                <div id="materials" class="tab-content hidden">
+                    <h4 class="text-2xl font-bold mb-6 text-center" data-lang-key="materialTitle">抵禦烈焰：熱防護系統</h4>
+                     <p class="text-center text-gray-600 mb-8" data-lang-key="materialIntro">對於可重複使用的飛行器，在重返大氣層時抵禦數千度高溫是成敗關鍵。目前主流技術路徑各有千秋，體現了不同的設計與運營哲學。</p>
+                    <div class="grid md:grid-cols-2 gap-8 items-start">
+                        <div class="text-center p-4 border rounded-lg">
+                            <h5 class="font-bold text-lg mb-2" data-lang-key="materialCard1Title">SpaceX 可重複使用隔熱瓦</h5>
+                            <div class="text-5xl mb-2">🛡️</div>
+                            <ul class="text-left list-disc list-inside space-y-2 text-gray-700" data-lang-key="materialCard1List">
+                                <li><b>類型：</b> 非燒蝕，輻射散熱</li>
+                                <li><b>材料：</b> 二氧化矽纖維陶瓷</li>
+                                <li><b>優點：</b> 理論上可多次重複使用，標準化六邊形設計簡化維護</li>
+                                <li><b>挑戰：</b> 結構複雜，對縫隙密封要求極高</li>
+                            </ul>
+                        </div>
+                        <div class="text-center p-4 border rounded-lg">
+                            <h5 class="font-bold text-lg mb-2" data-lang-key="materialCard2Title">NASA PICA 燒蝕型隔熱罩</h5>
+                            <div class="text-5xl mb-2">🔥</div>
+                            <ul class="text-left list-disc list-inside space-y-2 text-gray-700" data-lang-key="materialCard2List">
+                                <li><b>類型：</b> 燒蝕，材料剝離帶走熱量</li>
+                                <li><b>材料：</b> 酚醛浸漬碳燒蝕體</li>
+                                <li><b>優點：</b> 重量輕，隔熱性能極佳，技術成熟</li>
+                                <li><b>挑戰：</b> 通常為一次性使用，限制了快速重複發射</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div id="isru" class="tab-content hidden">
+                    <h4 class="text-2xl font-bold mb-6 text-center" data-lang-key="isruTitle">火星推進劑生產流程</h4>
+                    <p class="text-center text-gray-600 mb-8" data-lang-key="isruIntro">就地資源利用(ISRU)是實現火星長期駐留的基石。透過MOXIE實驗與薩巴捷反應，宇航員可利用火星大氣製造返回地球所需的氧氣與甲烷燃料。</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="text-center p-4 border rounded-lg w-full md:w-1/3">
+                            <div class="text-4xl">🌬️</div>
+                            <p class="font-bold mt-2" data-lang-key="isruStep1Title">1. 採集火星大氣</p>
+                            <p class="text-sm text-gray-600" data-lang-key="isruStep1Desc">(主要成分: 95% CO₂)</p>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-400">→</div>
+                        <div class="text-center p-4 border rounded-lg w-full md:w-1/3">
+                            <div class="text-4xl">⚡</div>
+                            <p class="font-bold mt-2" data-lang-key="isruStep2Title">2. MOXIE 電解</p>
+                            <p class="text-sm text-gray-600">CO₂ → C + O₂ (氧化劑)</p>
+                        </div>
+                        <div class="text-2xl font-bold text-gray-400">→</div>
+                        <div class="text-center p-4 border rounded-lg w-full md:w-1/3">
+                            <div class="text-4xl">🧪</div>
+                            <p class="font-bold mt-2" data-lang-key="isruStep3Title">3. 薩巴捷反應</p>
+                            <p class="text-sm text-gray-600">CO₂ + H₂ → CH₄ (燃料) + H₂O</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="human" class="mb-20">
+            <h3 class="text-3xl font-bold text-center mb-4" data-lang-key="humanTitle">人體挑戰：終極的考驗</h3>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10" data-lang-key="humanIntro">
+                當我們將目光從機器轉向駕馭它們的人類，長期太空飛行對身心的深遠影響便成為主要障礙。本節將探討從生理衰退到心理韌性的各個層面，以及為應對這些風險而開發的各項對策。點擊下方卡片以深入了解。
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6 cursor-pointer" data-health-topic="musculoskeletal">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard1Title">💪 肌肉骨骼系統</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard1Desc">失重導致骨質與肌肉迅速流失，是宇航員面臨的最直接的生理挑戰之一。</p>
+                </div>
+                <div class="card p-6 cursor-pointer" data-health-topic="cardiovascular">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard2Title">❤️ 心血管系統</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard2Desc">體液上移引發心臟功能下降與血壓調節問題，並與SANS症候群密切相關。</p>
+                </div>
+                <div class="card p-6 cursor-pointer" data-health-topic="sans">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard3Title">👁️ SANS 症候群</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard3Desc">太空飛行相關神經眼症候群，可能導致視力永久性損傷，是火星任務的頭號風險。</p>
+                </div>
+                <div class="card p-6 cursor-pointer" data-health-topic="radiation">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard4Title">⚛️ 輻射威脅</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard4Desc">離開地球磁場後，銀河宇宙射線會顯著增加癌症與中樞神經系統損傷風險。</p>
+                </div>
+                <div class="card p-6 cursor-pointer" data-health-topic="psychological">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard5Title">🧠 心理考驗</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard5Desc">長期的隔離、禁閉與壓力是巨大的心理挑戰，需要創新的自主支持系統。</p>
+                </div>
+                 <div class="card p-6 cursor-pointer" data-health-topic="immune">
+                    <h4 class="font-bold text-xl mb-2" data-lang-key="humanCard6Title">🛡️ 免疫系統</h4>
+                    <p class="text-gray-600" data-lang-key="humanCard6Desc">輻射、壓力與微重力共同作用，導致免疫功能下降，增加感染與潛伏病毒活化風險。</p>
+                </div>
+            </div>
+            <div id="health-details" class="mt-10 bg-white rounded-lg shadow-lg p-6 md:p-8 hidden">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h4 id="health-title" class="text-2xl font-bold mb-4"></h4>
+                        <p id="health-description" class="text-gray-700"></p>
+                    </div>
+                    <div class="chart-container mx-auto">
+                        <canvas id="healthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="future" class="mb-12">
+            <h3 class="text-3xl font-bold text-center mb-4" data-lang-key="futureTitle">未來展望：整合性的挑戰</h3>
+            <p class="max-w-3xl mx-auto text-center text-gray-600 mb-10" data-lang-key="futureIntro">
+                成功的深空任務，必須採用一個整體的「人類系統」方法。解決一個問題的方案，有時反而會加劇另一個問題。下圖展示了技術對策與人類風險之間複雜的交互關係。點擊左側的技術節點，查看其如何影響右側的人類因素。
+            </p>
+            <div class="relative bg-white rounded-lg shadow-lg p-8">
+                <div id="relationship-map" class="grid grid-cols-2 gap-8 md:gap-16">
+                    <div id="tech-nodes" class="space-y-6 flex flex-col justify-around">
+                        <div class="card p-4 text-center cursor-pointer relation-node" data-relates="radiation-exposure,psychological-stress">
+                            <h5 class="font-bold" data-lang-key="futureNode1Title">核熱推進 (NTP)</h5>
+                            <p class="text-sm text-gray-600" data-lang-key="futureNode1Desc">縮短旅行時間</p>
+                        </div>
+                        <div class="card p-4 text-center cursor-pointer relation-node" data-relates="bone-loss,muscle-atrophy">
+                            <h5 class="font-bold" data-lang-key="futureNode2Title">高級阻力鍛鍊 (ARED)</h5>
+                            <p class="text-sm text-gray-600" data-lang-key="futureNode2Desc">對抗肌肉骨骼萎縮</p>
+                        </div>
+                         <div class="card p-4 text-center cursor-pointer relation-node" data-relates="psychological-stress,isolation">
+                            <h5 class="font-bold" data-lang-key="futureNode3Title">自主支持系統 (VR/AI)</h5>
+                            <p class="text-sm text-gray-600" data-lang-key="futureNode3Desc">應對心理壓力</p>
+                        </div>
+                    </div>
+                    <div id="human-nodes" class="space-y-6 flex flex-col justify-around">
+                        <div id="radiation-exposure" class="card p-4 text-center opacity-50 transition-opacity">
+                            <h5 class="font-bold" data-lang-key="futureFactor1Title">輻射暴露</h5>
+                            <p class="text-sm text-gray-600" data-lang-key="futureFactor1Desc">旅行時間越長，暴露越多</p>
+                        </div>
+                        <div id="bone-loss" class="card p-4 text-center opacity-50 transition-opacity">
+                            <h5 class="font-bold" data-lang-key="futureFactor2Title">骨質與肌肉流失</h5>
+                             <p class="text-sm text-gray-600" data-lang-key="futureFactor2Desc">失重下的必然結果</p>
+                        </div>
+                        <div id="psychological-stress" class="card p-4 text-center opacity-50 transition-opacity">
+                             <h5 class="font-bold" data-lang-key="futureFactor3Title">心理壓力</h5>
+                             <p class="text-sm text-gray-600" data-lang-key="futureFactor3Desc">源於隔離與高風險任務</p>
+                        </div>
+                         <div id="isolation" class="card p-4 text-center opacity-50 transition-opacity">
+                             <h5 class="font-bold" data-lang-key="futureFactor4Title">隔離與禁閉</h5>
+                             <p class="text-sm text-gray-600" data-lang-key="futureFactor4Desc">深空任務的核心特徵</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p data-lang-key="footerText1">本互動式報告根據《新時代的疆界：關於先進火箭技術、太空材料與長期太空飛行人因挑戰的專家報告》生成。</p>
+            <p data-lang-key="footerText2">&copy; 2025 互動式數據探索。保留所有權利。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const languageData = {
+                'zh-Hant': {
+                    "headerTitle": "太空探索新紀元",
+                    "navOverview": "概覽", "navTech": "技術先鋒", "navHuman": "人體挑戰", "navFuture": "未來展望",
+                    "introTitle": "新時代的疆界",
+                    "introText": "本報告深入剖析當代太空探索的兩大核心：一方面是革命性的火箭與材料科技，它們為星際旅行鋪平道路；另一方面則是長期太空飛行對人類身心的嚴峻考驗。技術的飛躍正開啟星辰大海，但我們能走多遠，最終取決於能否應對「人」這個終極挑戰。",
+                    "overviewTitle": "核心數據概覽",
+                    "overviewCard1Title": "太空經濟", "overviewCard1Desc": "預計2035年全球規模",
+                    "overviewCard2Title": "骨質流失", "overviewCard2Desc": "宇航員每月平均流失率",
+                    "overviewCard3Title": "火星旅程", "overviewCard3Desc": "核熱推進(NTP)潛在單程時間",
+                    "overviewCard4Title": "SANS 症候群", "overviewCard4Desc": "長期飛行宇航員受影響比例",
+                    "techTitle": "技術先鋒：實現星際旅航的基石",
+                    "techIntro": "此部分深入評估奠定新太空時代基礎的各項關鍵技術。從大幅降低發射成本的可重複使用火箭，到支撐未來任務的先進材料與就地資源利用技術，這些創新共同為規模空前的深空探索提供了可能。",
+                    "techTab1": "推進系統", "techTab2": "先進材料", "techTab3": "就地資源利用",
+                    "engineTitle": "甲烷引擎競賽：猛禽 vs BE-4",
+                    "engineIntro": "下一代火箭引擎普遍採用液氧甲烷組合，因其燃燒潔淨、成本低廉且利於在火星就地生產。SpaceX的猛禽與藍色起源的BE-4是此領域的兩大巨頭，但其設計哲學截然不同。",
+                    "engineBtn1": "顯示推力", "engineBtn2": "顯示燃燒室壓力",
+                    "engineThrustLabel": "海平面推力 (MN)", "enginePressureLabel": "燃燒室壓力 (bar)",
+                    "materialTitle": "抵禦烈焰：熱防護系統",
+                    "materialIntro": "對於可重複使用的飛行器，在重返大氣層時抵禦數千度高溫是成敗關鍵。目前主流技術路徑各有千秋，體現了不同的設計與運營哲學。",
+                    "materialCard1Title": "SpaceX 可重複使用隔熱瓦",
+                    "materialCard1List": "<li><b>類型：</b> 非燒蝕，輻射散熱</li><li><b>材料：</b> 二氧化矽纖維陶瓷</li><li><b>優點：</b> 理論上可多次重複使用，標準化六邊形設計簡化維護</li><li><b>挑戰：</b> 結構複雜，對縫隙密封要求極高</li>",
+                    "materialCard2Title": "NASA PICA 燒蝕型隔熱罩",
+                    "materialCard2List": "<li><b>類型：</b> 燒蝕，材料剝離帶走熱量</li><li><b>材料：</b> 酚醛浸漬碳燒蝕體</li><li><b>優點：</b> 重量輕，隔熱性能極佳，技術成熟</li><li><b>挑戰：</b> 通常為一次性使用，限制了快速重複發射</li>",
+                    "isruTitle": "火星推進劑生產流程",
+                    "isruIntro": "就地資源利用(ISRU)是實現火星長期駐留的基石。透過MOXIE實驗與薩巴捷反應，宇航員可利用火星大氣製造返回地球所需的氧氣與甲烷燃料。",
+                    "isruStep1Title": "1. 採集火星大氣", "isruStep1Desc": "(主要成分: 95% CO₂)",
+                    "isruStep2Title": "2. MOXIE 電解", "isruStep3Title": "3. 薩巴捷反應",
+                    "humanTitle": "人體挑戰：終極的考驗",
+                    "humanIntro": "當我們將目光從機器轉向駕馭它們的人類，長期太空飛行對身心的深遠影響便成為主要障礙。本節將探討從生理衰退到心理韌性的各個層面，以及為應對這些風險而開發的各項對策。點擊下方卡片以深入了解。",
+                    "humanCard1Title": "💪 肌肉骨骼系統", "humanCard1Desc": "失重導致骨質與肌肉迅速流失，是宇航員面臨的最直接的生理挑戰之一。",
+                    "humanCard2Title": "❤️ 心血管系統", "humanCard2Desc": "體液上移引發心臟功能下降與血壓調節問題，並與SANS症候群密切相關。",
+                    "humanCard3Title": "👁️ SANS 症候群", "humanCard3Desc": "太空飛行相關神經眼症候群，可能導致視力永久性損傷，是火星任務的頭號風險。",
+                    "humanCard4Title": "⚛️ 輻射威脅", "humanCard4Desc": "離開地球磁場後，銀河宇宙射線會顯著增加癌症與中樞神經系統損傷風險。",
+                    "humanCard5Title": "🧠 心理考驗", "humanCard5Desc": "長期的隔離、禁閉與壓力是巨大的心理挑戰，需要創新的自主支持系統。",
+                    "humanCard6Title": "🛡️ 免疫系統", "humanCard6Desc": "輻射、壓力與微重力共同作用，導致免疫功能下降，增加感染與潛伏病毒活化風險。",
+                    "futureTitle": "未來展望：整合性的挑戰",
+                    "futureIntro": "成功的深空任務，必須採用一個整體的「人類系統」方法。解決一個問題的方案，有時反而會加劇另一個問題。下圖展示了技術對策與人類風險之間複雜的交互關係。點擊左側的技術節點，查看其如何影響右側的人類因素。",
+                    "futureNode1Title": "核熱推進 (NTP)", "futureNode1Desc": "縮短旅行時間",
+                    "futureNode2Title": "高級阻力鍛鍊 (ARED)", "futureNode2Desc": "對抗肌肉骨骼萎縮",
+                    "futureNode3Title": "自主支持系統 (VR/AI)", "futureNode3Desc": "應對心理壓力",
+                    "futureFactor1Title": "輻射暴露", "futureFactor1Desc": "旅行時間越長，暴露越多",
+                    "futureFactor2Title": "骨質與肌肉流失", "futureFactor2Desc": "失重下的必然結果",
+                    "futureFactor3Title": "心理壓力", "futureFactor3Desc": "源於隔離與高風險任務",
+                    "futureFactor4Title": "隔離與禁閉", "futureFactor4Desc": "深空任務的核心特徵",
+                    "footerText1": "本互動式報告根據《新時代的疆界：關於先進火箭技術、太空材料與長期太空飛行人因挑戰的專家報告》生成。",
+                    "footerText2": "© 2025 互動式數據探索。保留所有權利。",
+                    "langBtnText": "English",
+                    "healthMusculoskeletalTitle": "肌肉骨骼系統衰退",
+                    "healthMusculoskeletalDesc": "在微重力下，由於缺乏機械負荷，承重骨骼和肌肉會迅速萎縮。骨質以每月1-1.5%的速度流失。目前的對策是每日進行高強度阻力與有氧運動 (如ARED)。",
+                    "healthMusculoskeletalChartLabel": "相對骨密度 (%)",
+                    "healthMusculoskeletalChartDataLabels": ['地球', '太空6個月', '太空12個月'],
+                    "healthCardiovascularTitle": "心血管系統適應性變化",
+                    "healthCardiovascularDesc": "體液向頭部轉移導致心臟負荷減輕，可能出現輕微萎縮，並引發返回地球時的直立性低血壓。長期飛行可能增加動脈壁增厚和心律不整的風險。",
+                    "healthCardiovascularChartLabel": "站立時心率 (BPM)",
+                    "healthCardiovascularChartDataLabels": ['飛行前', '飛行中', '返回後'],
+                    "healthSansTitle": "太空飛行相關神經眼症候群 (SANS)",
+                    "healthSansDesc": "高達70%的長期飛行宇航員會出現SANS，症狀包括視神經盤水腫、眼球後部變平、遠視漂移等。其根本原因被認為與顱內壓力升高有關，可能導致不可逆的視力損傷。",
+                    "healthSansChartDataLabels": ['受SANS影響', '未受影響'],
+                    "healthRadiationTitle": "深空輻射威脅",
+                    "healthRadiationDesc": "銀河宇宙射線(GCRs)會造成複雜DNA損傷，顯著增加宇航員的終生癌症風險（約增加33%），並可能導致認知功能下降等中樞神經系統損傷。現有屏蔽技術效果有限。",
+                    "healthRadiationChartDataLabels": ['基線癌症死亡風險', '火星任務增加的風險'],
+                    "healthPsychologicalTitle": "隔離與禁閉的心理考驗",
+                    "healthPsychologicalDesc": "長期與社會隔絕、生活在狹小單調的環境中，會增加焦慮、抑鬱和人際衝突的風險。由於通訊延遲，未來的深空任務亟需AI心理治療、VR放鬆等自主支持工具。",
+                    "healthPsychologicalChartLabel": "風險增加程度（示意）",
+                    "healthPsychologicalChartDataLabels": ['焦慮', '睡眠障礙', '人際衝突'],
+                    "healthImmuneTitle": "免疫系統功能下降",
+                    "healthImmuneDesc": "多重壓力源（輻射、微重力、心理壓力）共同導致免疫系統失調，表現為T細胞功能下降、潛伏病毒（如EB病毒、水痘病毒）重新活化，增加了任務期間的感染風險。",
+                    "healthImmuneChartLabel": "T細胞功能（示意）",
+                    "healthImmuneChartDataLabels": ['任務前', '任務中期', '任務後期', '返回後'],
+                },
+                'en': {
+                    "headerTitle": "The New Era of Space Exploration",
+                    "navOverview": "Overview", "navTech": "Tech Pioneers", "navHuman": "Human Factors", "navFuture": "Future Outlook",
+                    "introTitle": "Frontiers of a New Age",
+                    "introText": "This report analyzes two core aspects of contemporary space exploration: the revolutionary rocket and material technologies paving the way for interplanetary travel, and the profound challenges of long-duration spaceflight on the human body and mind. Technological leaps are opening the cosmos, but how far we go depends on conquering the ultimate challenge: ourselves.",
+                    "overviewTitle": "Key Metrics at a Glance",
+                    "overviewCard1Title": "Space Economy", "overviewCard1Desc": "Projected global size by 2035",
+                    "overviewCard2Title": "Bone Loss", "overviewCard2Desc": "Astronauts' avg. monthly loss rate",
+                    "overviewCard3Title": "Mars Trip", "overviewCard3Desc": "Potential one-way time with NTP",
+                    "overviewCard4Title": "SANS Syndrome", "overviewCard4Desc": "of long-duration astronauts affected",
+                    "techTitle": "Tech Pioneers: The Foundation of Interstellar Travel",
+                    "techIntro": "This section evaluates the key technologies that form the bedrock of the new space age. From reusable rockets drastically cutting launch costs to advanced materials and in-situ resource utilization, these innovations collectively enable deep space exploration on an unprecedented scale.",
+                    "techTab1": "Propulsion", "techTab2": "Advanced Materials", "techTab3": "ISRU",
+                    "engineTitle": "The Methane Engine Race: Raptor vs. BE-4",
+                    "engineIntro": "Next-gen rocket engines widely adopt methalox for its clean burn, low cost, and potential for in-situ production on Mars. SpaceX's Raptor and Blue Origin's BE-4 are the two giants in this field, but their design philosophies differ starkly.",
+                    "engineBtn1": "Show Thrust", "engineBtn2": "Show Chamber Pressure",
+                    "engineThrustLabel": "Sea Level Thrust (MN)", "enginePressureLabel": "Chamber Pressure (bar)",
+                    "materialTitle": "Defying the Inferno: Thermal Protection Systems",
+                    "materialIntro": "For reusable vehicles, surviving the multi-thousand-degree heat of atmospheric reentry is critical. The leading technological paths each have their own merits, reflecting different design and operational philosophies.",
+                    "materialCard1Title": "SpaceX Reusable Tiles",
+                    "materialCard1List": "<li><b>Type:</b> Non-ablative, radiative</li><li><b>Material:</b> Silica fiber ceramic</li><li><b>Pros:</b> Theoretically high reusability, standardized hexagonal design simplifies maintenance</li><li><b>Cons:</b> Structurally complex, high demands on gap sealing</li>",
+                    "materialCard2Title": "NASA PICA Ablative Shield",
+                    "materialCard2List": "<li><b>Type:</b> Ablative, sheds material to carry away heat</li><li><b>Material:</b> Phenolic Impregnated Carbon Ablator</li><li><b>Pros:</b> Lightweight, excellent thermal insulation, technologically mature</li><li><b>Cons:</b> Typically single-use, limiting rapid re-flight capability</li>",
+                    "isruTitle": "Mars Propellant Production Process",
+                    "isruIntro": "In-Situ Resource Utilization (ISRU) is the cornerstone of long-term Mars habitation. Through the MOXIE experiment and the Sabatier reaction, astronauts can produce the oxygen and methane fuel needed for the return journey using the Martian atmosphere.",
+                    "isruStep1Title": "1. Collect Martian Atmosphere", "isruStep1Desc": "(Mainly 95% CO₂)",
+                    "isruStep2Title": "2. MOXIE Electrolysis", "isruStep3Title": "3. Sabatier Reaction",
+                    "humanTitle": "Human Factors: The Ultimate Challenge",
+                    "humanIntro": "When we shift our focus from machines to the humans who operate them, the profound effects of long-duration spaceflight become the primary obstacle. This section explores everything from physiological decline to psychological resilience and the countermeasures being developed.",
+                    "humanCard1Title": "💪 Musculoskeletal", "humanCard1Desc": "Weightlessness causes rapid bone and muscle loss, one of the most immediate physiological challenges for astronauts.",
+                    "humanCard2Title": "❤️ Cardiovascular", "humanCard2Desc": "Fluid shifts lead to reduced heart function, blood pressure regulation issues, and are linked to SANS.",
+                    "humanCard3Title": "👁️ SANS Syndrome", "humanCard3Desc": "Spaceflight-Associated Neuro-ocular Syndrome can cause permanent vision damage and is a top risk for Mars missions.",
+                    "humanCard4Title": "⚛️ Radiation Threat", "humanCard4Desc": "Beyond Earth's magnetic field, galactic cosmic rays significantly increase cancer and CNS damage risks.",
+                    "humanCard5Title": "🧠 Psychological Toll", "humanCard5Desc": "Long-term isolation, confinement, and stress are immense psychological challenges requiring innovative autonomous support systems.",
+                    "humanCard6Title": "🛡️ Immune System", "humanCard6Desc": "A combination of radiation, stress, and microgravity leads to immune dysfunction, increasing infection risks.",
+                    "futureTitle": "Future Outlook: An Integrated Challenge",
+                    "futureIntro": "A successful deep space mission requires a holistic 'human system' approach. Solutions for one problem can sometimes exacerbate another. The diagram below shows the complex interplay between technological countermeasures and human risks. Click on a tech node to see its impact.",
+                    "futureNode1Title": "Nuclear Thermal Propulsion (NTP)", "futureNode1Desc": "Reduces transit time",
+                    "futureNode2Title": "Advanced Resistive Exercise (ARED)", "futureNode2Desc": "Counteracts atrophy",
+                    "futureNode3Title": "Autonomous Support (VR/AI)", "futureNode3Desc": "Mitigates psychological stress",
+                    "futureFactor1Title": "Radiation Exposure", "futureFactor1Desc": "Increases with transit time",
+                    "futureFactor2Title": "Bone & Muscle Loss", "futureFactor2Desc": "Inevitable in weightlessness",
+                    "futureFactor3Title": "Psychological Stress", "futureFactor3Desc": "From isolation & high stakes",
+                    "futureFactor4Title": "Isolation & Confinement", "futureFactor4Desc": "Core features of deep space missions",
+                    "footerText1": "This interactive report was generated based on 'Frontiers of a New Age: An Expert Report on Advanced Rocketry, Space Materials, and Human Factors in Long-Duration Spaceflight'.",
+                    "footerText2": "© 2025 Interactive Data Exploration. All rights reserved.",
+                    "langBtnText": "中文",
+                    "healthMusculoskeletalTitle": "Musculoskeletal Decline",
+                    "healthMusculoskeletalDesc": "In microgravity, the lack of mechanical loading causes rapid atrophy of weight-bearing bones and muscles. Bone mass is lost at a rate of 1-1.5% per month. The primary countermeasure is daily high-intensity resistive and aerobic exercise (e.g., ARED).",
+                    "healthMusculoskeletalChartLabel": "Relative Bone Mineral Density (%)",
+                    "healthMusculoskeletalChartDataLabels": ['Earth', '6 Months in Space', '12 Months in Space'],
+                    "healthCardiovascularTitle": "Cardiovascular Deconditioning",
+                    "healthCardiovascularDesc": "A headward fluid shift reduces the heart's workload, leading to potential mild atrophy and orthostatic intolerance upon return to gravity. Long-duration flight may increase risks of arterial wall thickening.",
+                    "healthCardiovascularChartLabel": "Standing Heart Rate (BPM)",
+                    "healthCardiovascularChartDataLabels": ['Pre-flight', 'In-flight', 'Post-flight'],
+                    "healthSansTitle": "SANS (Spaceflight Associated Neuro-ocular Syndrome)",
+                    "healthSansDesc": "Affecting up to 70% of long-duration astronauts, SANS involves optic disc edema, globe flattening, and hyperopic shifts. It's thought to be caused by increased intracranial pressure and can lead to irreversible vision damage.",
+                    "healthSansChartDataLabels": ['Affected by SANS', 'Unaffected'],
+                    "healthRadiationTitle": "Deep Space Radiation Threat",
+                    "healthRadiationDesc": "Galactic Cosmic Rays (GCRs) cause complex DNA damage, significantly increasing lifetime cancer risk (by ~33%) and potentially leading to cognitive decline and other CNS damage. Current shielding is only partially effective.",
+                    "healthRadiationChartDataLabels": ['Baseline Cancer Death Risk', 'Added Risk from Mars Mission'],
+                    "healthPsychologicalTitle": "Psychological Toll of Isolation & Confinement",
+                    "healthPsychologicalDesc": "Long-term social isolation in a confined, monotonous environment increases risks of anxiety, depression, and interpersonal conflict. Autonomous support tools like AI therapy and VR are crucial due to communication delays.",
+                    "healthPsychologicalChartLabel": "Risk Increase (Illustrative)",
+                    "healthPsychologicalChartDataLabels": ['Anxiety', 'Sleep Disturbance', 'Interpersonal Conflict'],
+                    "healthImmuneTitle": "Immune System Dysfunction",
+                    "healthImmuneDesc": "Multiple stressors (radiation, microgravity, psychological stress) combine to dysregulate the immune system, leading to T-cell dysfunction and reactivation of latent viruses (e.g., EBV, VZV), which increases in-mission infection risk.",
+                    "healthImmuneChartLabel": "T-Cell Function (Illustrative)",
+                    "healthImmuneChartDataLabels": ['Pre-mission', 'Mid-mission', 'Late-mission', 'Post-mission'],
+                }
+            };
+            
+            let currentLang = 'zh-Hant';
+            let activeEngineMetric = 'thrust';
+            let activeHealthTopic = null;
+
+            const langSwitcher = document.getElementById('lang-switcher');
+            const rootElement = document.documentElement;
+
+            function updateContent(lang) {
+                currentLang = lang;
+                rootElement.lang = lang;
+                const langData = languageData[lang];
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (langData[key]) {
+                        if (el.tagName === 'UL') {
+                           el.innerHTML = langData[key];
+                        } else if (el.tagName === 'OPTION') {
+                           el.textContent = langData[key];
+                        }
+                        else {
+                           el.textContent = langData[key];
+                        }
+                    }
+                });
+                
+                langSwitcher.textContent = langData.langBtnText;
+                
+                updateEngineChart();
+                if(activeHealthTopic) {
+                   updateHealthChart(activeHealthTopic);
+                }
+            }
+            
+            const engineData = {
+                thrust: { values: [2.75, 2.4] },
+                pressure: { values: [350, 140] }
+            };
+
+            let engineChart;
+            function updateEngineChart() {
+                const langData = languageData[currentLang];
+                const metricData = engineData[activeEngineMetric];
+                const chartLabel = langData[activeEngineMetric === 'thrust' ? 'engineThrustLabel' : 'enginePressureLabel'];
+
+                const ctx = document.getElementById('engineChart').getContext('2d');
+                if (engineChart) {
+                    engineChart.destroy();
+                }
+                engineChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['SpaceX Raptor 3', 'Blue Origin BE-4'],
+                        datasets: [{
+                            label: chartLabel,
+                            data: metricData.values,
+                            backgroundColor: ['rgba(2, 132, 199, 0.6)', 'rgba(34, 197, 94, 0.6)'],
+                            borderColor: ['rgba(2, 132, 199, 1)', 'rgba(34, 197, 94, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { x: { beginAtZero: true, title: { display: true, text: chartLabel } } }
+                    }
+                });
+            }
+
+            document.getElementById('showThrust').addEventListener('click', (e) => {
+                activeEngineMetric = 'thrust';
+                updateEngineChart();
+                e.target.classList.add('bg-blue-500', 'text-white');
+                e.target.classList.remove('bg-gray-300', 'text-gray-800');
+                document.getElementById('showPressure').classList.remove('bg-blue-500', 'text-white');
+                document.getElementById('showPressure').classList.add('bg-gray-300', 'text-gray-800');
+            });
+
+            document.getElementById('showPressure').addEventListener('click', (e) => {
+                activeEngineMetric = 'pressure';
+                updateEngineChart();
+                e.target.classList.add('bg-blue-500', 'text-white');
+                e.target.classList.remove('bg-gray-300', 'text-gray-800');
+                document.getElementById('showThrust').classList.remove('bg-blue-500', 'text-white');
+                document.getElementById('showThrust').classList.add('bg-gray-300', 'text-gray-800');
+            });
+            
+            const tabs = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+                    const target = tab.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        content.id === target ? content.classList.remove('hidden') : content.classList.add('hidden');
+                    });
+                });
+            });
+
+            const healthRawData = {
+                musculoskeletal: { type: 'bar', data: [100, 94, 88], options: { scales: { y: { beginAtZero: false, min: 85, max: 101 } } } },
+                cardiovascular: { type: 'line', data: [70, 65, 85], options: {} },
+                sans: { type: 'doughnut', data: [70, 30], options: {} },
+                radiation: { type: 'pie', data: [15, 5], options: {} },
+                psychological: { type: 'bar', data: [75, 60, 45], options: {} },
+                immune: { type: 'line', data: [100, 70, 60, 90], options: {} },
+            };
+
+            const healthCards = document.querySelectorAll('[data-health-topic]');
+            const healthDetailsContainer = document.getElementById('health-details');
+            const healthTitleEl = document.getElementById('health-title');
+            const healthDescriptionEl = document.getElementById('health-description');
+            let healthChart;
+            
+            function updateHealthChart(topic) {
+                const langData = languageData[currentLang];
+                const topicData = healthRawData[topic];
+                
+                const titleKey = `health${topic.charAt(0).toUpperCase() + topic.slice(1)}Title`;
+                const descKey = `health${topic.charAt(0).toUpperCase() + topic.slice(1)}Desc`;
+                const chartLabelKey = `health${topic.charAt(0).toUpperCase() + topic.slice(1)}ChartLabel`;
+                const chartDataLabelsKey = `health${topic.charAt(0).toUpperCase() + topic.slice(1)}ChartDataLabels`;
+
+                healthTitleEl.textContent = langData[titleKey];
+                healthDescriptionEl.textContent = langData[descKey];
+
+                const ctx = document.getElementById('healthChart').getContext('2d');
+                if (healthChart) {
+                    healthChart.destroy();
+                }
+                
+                healthChart = new Chart(ctx, {
+                    type: topicData.type,
+                    data: {
+                        labels: langData[chartDataLabelsKey],
+                        datasets: [{
+                            label: langData[chartLabelKey],
+                            data: topicData.data,
+                             backgroundColor: ['rgba(220, 38, 38, 0.6)', 'rgba(219, 39, 119, 0.6)', 'rgba(245, 158, 11, 0.6)', 'rgba(139, 92, 246, 0.6)', 'rgba(20, 184, 166, 0.6)', 'rgba(99, 102, 241, 0.6)'],
+                            borderColor: ['rgba(220, 38, 38, 1)', 'rgba(219, 39, 119, 1)', 'rgba(245, 158, 11, 1)', 'rgba(139, 92, 246, 1)', 'rgba(20, 184, 166, 1)', 'rgba(99, 102, 241, 1)'],
+                            fill: topicData.type === 'line' ? false : true,
+                            tension: 0.1
+                        }]
+                    },
+                    options: { ...{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }, ...topicData.options }
+                });
+                
+                healthDetailsContainer.classList.remove('hidden');
+            }
+
+            healthCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    activeHealthTopic = card.getAttribute('data-health-topic');
+                    updateHealthChart(activeHealthTopic);
+                    healthDetailsContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                updateContent(newLang);
+            });
+            
+            updateContent('zh-Hant'); // Initial load
+
+            const relationNodes = document.querySelectorAll('.relation-node');
+            const humanNodes = document.querySelectorAll('#human-nodes > div');
+
+            relationNodes.forEach(node => {
+                node.addEventListener('click', () => {
+                    const relatedIds = node.dataset.relates.split(',');
+                    relationNodes.forEach(n => n.classList.remove('ring-2', 'ring-blue-500'));
+                    node.classList.add('ring-2', 'ring-blue-500');
+                    humanNodes.forEach(hNode => {
+                        hNode.classList.remove('opacity-100', 'ring-2', 'ring-green-500');
+                        hNode.classList.add('opacity-50');
+                        if (relatedIds.includes(hNode.id)) {
+                            hNode.classList.remove('opacity-50');
+                            hNode.classList.add('opacity-100', 'ring-2', 'ring-green-500');
+                        }
+                    });
+                });
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', () => {
+                const targetId = mobileNav.value;
+                document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main > section');
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 70) {
+                        current = '#' + section.id;
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>
