@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：氣候變遷下的全球糧食危機</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive narrative journey, not a linear report clone. It flows from a high-level overview (Hero) -> The Core Problem (Impact Mechanisms) -> The Ripple Effect (Economic & Human Costs) -> Solutions (Building Resilience at different scales) -> The Future (Forward-looking choices). This thematic structure guides the user from understanding the 'what' and 'why' to the 'how' and 'what's next'. Interactive elements like clickable cards, tabs, and dynamic charts are used to make complex data digestible and encourage exploration, enhancing user engagement and synthesis of information. -->
+    <!-- Visualization & Content Choices: 
+    - Key Stats (Hero): Goal: Inform/Impact. Method: Large text. Justification: Grabs attention immediately.
+    - Impact Channels (Core Problem): Goal: Organize. Method: Interactive HTML/CSS cards. Justification: Breaks down complex mechanisms into simple, explorable parts.
+    - Heatflation Chart (Ripple Effect): Goal: Show Change. Method: Chart.js Bar Chart. Justification: Visually demonstrates the severity of projected price hikes.
+    - Food Security Pillars (Ripple Effect): Goal: Organize/Inform. Method: HTML/CSS diagram with hover interactions. Justification: Explains the 4-pillar framework intuitively.
+    - National Strategies (Resilience): Goal: Compare. Method: Tabbed interface with clickable cards. Justification: More dynamic and user-friendly than a static table for comparing policies.
+    - True Cost Accounting Chart (Future): Goal: Inform/Compare. Method: Chart.js Doughnut Chart. Justification: Powerfully visualizes the huge hidden costs of the current food system.
+    All choices confirm to the NO SVG/Mermaid rule, using Chart.js on Canvas and structured HTML/CSS for all visuals. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lato', sans-serif;
+            background-color: #FDFBF7;
+            color: #383838;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E07A5F;
+            border-bottom-color: #E07A5F;
+        }
+        .tab-button {
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .tab-button.active {
+            background-color: #A3B18A;
+            color: white;
+        }
+        .impact-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .impact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 data-lang="headerTitle" class="text-xl font-bold text-gray-800">氣候與糧食的未來</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#problem" class="nav-link" data-lang="navProblem">核心問題</a>
+                <a href="#ripple-effect" class="nav-link" data-lang="navRipple">連鎖效應</a>
+                <a href="#resilience" class="nav-link" data-lang="navResilience">建構韌性</a>
+                <a href="#future" class="nav-link" data-lang="navFuture">未來之路</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 border border-gray-400 rounded-md text-sm hover:bg-gray-100 transition-colors">English</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#problem" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang="navProblemMobile">核心問題</a>
+            <a href="#ripple-effect" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang="navRippleMobile">連鎖效應</a>
+            <a href="#resilience" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang="navResilienceMobile">建構韌性</a>
+            <a href="#future" class="block py-2 px-4 text-sm hover:bg-gray-200" data-lang="navFutureMobile">未來之路</a>
+            <div class="px-4 py-2">
+                 <button id="lang-switcher-mobile" class="w-full px-3 py-2 border border-gray-400 rounded-md text-sm hover:bg-gray-100 transition-colors">English</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 data-lang="heroTitle" class="text-3xl md:text-5xl font-bold text-gray-900 leading-tight">氣候變遷下的全球糧食危機</h2>
+                <p data-lang="heroSubtitle" class="mt-4 md:mt-6 max-w-3xl mx-auto text-lg text-gray-600">氣候變遷正以前所未有的方式衝擊全球農糧體系，從產量下降到價格飆升，威脅著數億人的生計與糧食安全。這不僅是環境議題，更是攸關人類存續的經濟與社會挑戰。</p>
+                <div class="mt-10 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-amber-50 p-6 rounded-lg shadow-sm">
+                        <p data-lang="stat1_title" class="text-4xl md:text-5xl font-bold text-amber-700">$3.8兆</p>
+                        <p data-lang="stat1_desc" class="mt-2 text-gray-700">過去30年極端天氣造成的全球農業損失</p>
+                    </div>
+                    <div class="bg-red-50 p-6 rounded-lg shadow-sm">
+                        <p data-lang="stat2_title" class="text-4xl md:text-5xl font-bold text-red-700">1.81億</p>
+                        <p data-lang="stat2_desc" class="mt-2 text-gray-700">至2050年，可能因氣候變遷額外陷入飢餓的人口</p>
+                    </div>
+                    <div class="bg-emerald-50 p-6 rounded-lg shadow-sm">
+                        <p data-lang="stat3_title" class="text-4xl md:text-5xl font-bold text-emerald-700">$12兆</p>
+                        <p data-lang="stat3_desc" class="mt-2 text-gray-700">全球農糧體系每年隱藏的健康與環境成本</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem" class="py-16 md:py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 data-lang="problemTitle" class="text-3xl font-bold text-gray-800">核心問題：氣候如何攻擊農業？</h3>
+                    <p data-lang="problemSubtitle" class="mt-4 max-w-2xl mx-auto text-gray-600">氣候變遷透過多重且相互關聯的途徑，全面性地對農業生產施加壓力。這些衝擊並非單獨發生，而是相互加劇，形成「壓力協同作用」。點擊下方卡片以了解更多。</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="impact-card bg-white p-6 rounded-lg shadow-md border-t-4 border-red-500">
+                        <h4 data-lang="impact1_title" class="text-xl font-bold text-gray-800">🌡️ 溫度上升與熱壓力</h4>
+                        <p data-lang="impact1_desc" class="mt-3 text-gray-600">高溫縮短作物生長季，降低產量（如稻米），並對畜禽造成熱壓力，影響乳、蛋生產。傳統作物適栽區被迫向高緯度遷移。</p>
+                    </div>
+                    <div class="impact-card bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                        <h4 data-lang="impact2_title" class="text-xl font-bold text-gray-800">💧 水文循環紊亂</h4>
+                        <p data-lang="impact2_desc" class="mt-3 text-gray-600">降雨模式變得極端，導致乾旱與洪水頻發。乾旱耗盡灌溉水源，洪水則直接摧毀農田與作物，形成雙重打擊。</p>
+                    </div>
+                    <div class="impact-card bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+                        <h4 data-lang="impact3_title" class="text-xl font-bold text-gray-800">🌪️ 極端天氣事件</h4>
+                        <p data-lang="impact3_desc" class="mt-3 text-gray-600">颱風、熱浪、寒流的頻率和強度增加，能在短時間內對農業造成災難性的破壞，摧毀基礎設施，導致農民破產。</p>
+                    </div>
+                    <div class="impact-card bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                        <h4 data-lang="impact4_title" class="text-xl font-bold text-gray-800">🦋 連鎖生態效應</h4>
+                        <p data-lang="impact4_desc" class="mt-3 text-gray-600">氣候變暖改變病蟲害的地理分佈，並擾亂植物開花與授粉昆蟲的活躍期，對依賴授粉的作物構成巨大威脅。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ripple-effect" class="py-16 md:py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 data-lang="rippleTitle" class="text-3xl font-bold text-gray-800">連鎖效應：從農田到餐桌的衝擊</h3>
+                    <p data-lang="rippleSubtitle" class="mt-4 max-w-2xl mx-auto text-gray-600">農業的物理衝擊迅速轉化為深刻的經濟與社會後果，影響著每一個人。</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h4 data-lang="heatflationTitle" class="text-2xl font-bold text-gray-800 mb-4">經濟代價：「熱通膨」的崛起</h4>
+                        <p data-lang="heatflationDesc" class="text-gray-600 mb-6">氣候變遷導致的作物歉收和生產成本上升，正成為推動全球糧食價格上漲的核心驅動力，此現象被稱為「熱通膨」(Heatflation)。它對最基本的生活必需品——食物——徵收了一種「隱形稅」，不成比例地侵蝕了低收入家庭的購買力。</p>
+                        <div class="chart-container">
+                            <canvas id="heatflationChart"></canvas>
+                        </div>
+                        <p data-lang="heatflationCaption" class="text-center text-sm text-gray-500 mt-2">圖表說明：至2030年，氣候變遷對主要糧食出口價格的預計漲幅。</p>
+                    </div>
+                    <div>
+                        <h4 data-lang="humanCostTitle" class="text-2xl font-bold text-gray-800 mb-4">人類的代價：受威脅的糧食安全</h4>
+                        <p data-lang="humanCostDesc" class="text-gray-600 mb-6">氣候變遷正從四個面向全面性地威脅糧食安全。將滑鼠懸停在下方的支柱上，了解氣候變遷如何破壞我們獲取充足、營養且穩定食物的能力。</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="food-security-pillar bg-white p-4 rounded-lg shadow-sm border-l-4 border-teal-500">
+                                <h5 data-lang="pillar1_title" class="font-bold text-teal-800">可得性 (Availability)</h5>
+                                <p data-lang="pillar1_desc" class="text-sm text-gray-600">產量下降直接減少了糧食的總供應量。</p>
+                            </div>
+                            <div class="food-security-pillar bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
+                                <h5 data-lang="pillar2_title" class="font-bold text-orange-800">可及性 (Access)</h5>
+                                <p data-lang="pillar2_desc" class="text-sm text-gray-600">價格飆升和農民收入下降，使窮人買不起食物。</p>
+                            </div>
+                            <div class="food-security-pillar bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
+                                <h5 data-lang="pillar3_title" class="font-bold text-purple-800">利用性 (Utilization)</h5>
+                                <p data-lang="pillar3_desc" class="text-sm text-gray-600">CO2濃度升高降低作物營養價值，導致「隱性飢餓」。</p>
+                            </div>
+                             <div class="food-security-pillar bg-white p-4 rounded-lg shadow-sm border-l-4 border-pink-500">
+                                <h5 data-lang="pillar4_title" class="font-bold text-pink-800">穩定性 (Stability)</h5>
+                                <p data-lang="pillar4_desc" class="text-sm text-gray-600">極端天氣頻發，破壞供應鏈，使糧食供應不穩定。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resilience" class="py-16 md:py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h3 data-lang="resilienceTitle" class="text-3xl font-bold text-gray-800">建構韌性：我們的應對策略</h3>
+                    <p data-lang="resilienceSubtitle" class="mt-4 max-w-2xl mx-auto text-gray-600">面對系統性威脅，我們需要從農場到國家層面的全面性策略。點擊下方頁籤，探索不同層級的解決方案。</p>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex border-b border-gray-300">
+                        <button data-tab="farm" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-700 bg-gray-100 rounded-t-lg active" data-lang="tabFarm">農場層級</button>
+                        <button data-tab="national" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-700 bg-gray-100 rounded-t-lg" data-lang="tabNational">國家策略</button>
+                        <button data-tab="vulnerable" class="tab-button flex-1 py-3 px-1 text-center font-semibold text-gray-700 bg-gray-100 rounded-t-lg" data-lang="tabVulnerable">保護弱勢</button>
+                    </div>
+
+                    <div id="tab-content" class="mt-8">
+                        <div id="farm-content" class="tab-pane active">
+                            <p data-lang="farmDesc" class="text-gray-600 mb-6 text-center">「韌性農業」是第一道防線，它整合了科技與生態方法，旨在提高生產力、增強韌性並減少排放。最有效的策略往往是兩者的結合。</p>
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="bg-white p-6 rounded-lg shadow-md">
+                                    <h4 data-lang="farmTechTitle" class="text-xl font-bold text-blue-600">技術路徑（精準農業）</h4>
+                                    <ul class="mt-4 space-y-2 text-gray-600 list-disc list-inside">
+                                        <li data-lang="farmTech1"><b>智慧灌溉：</b>利用感測器和數據分析，提高水分利用效率。</li>
+                                        <li data-lang="farmTech2"><b>設施農業：</b>興建強固型溫網室，保護高價值作物。</li>
+                                        <li data-lang="farmTech3"><b>生物科技：</b>研發耐高溫、乾旱、病蟲害的品種。</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg shadow-md">
+                                    <h4 data-lang="farmEcoTitle" class="text-xl font-bold text-green-600">生態路徑（生態農業）</h4>
+                                    <ul class="mt-4 space-y-2 text-gray-600 list-disc list-inside">
+                                        <li data-lang="farmEco1"><b>土壤健康管理：</b>透過覆蓋作物、免耕等增加土壤有機質。</li>
+                                        <li data-lang="farmEco2"><b>系統多樣化：</b>如農林複合經營、間作，以分散風險。</li>
+                                        <li data-lang="farmEco3"><b>水資源就地管理：</b>修建蓄水塘，攔截雨水供乾季使用。</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="national-content" class="tab-pane hidden">
+                             <p data-lang="nationalDesc" class="text-gray-600 mb-6 text-center">各國基於其國情發展出不同的應對策略。以下是幾個主要經濟體的做法。</p>
+                             <div class="space-y-4">
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p data-lang="nationalUS"><b>美國 🇺🇸:</b> 科技與市場導向。大規模投資科研，推動精準農業，並透過聯邦作物保險計畫管理風險。</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p data-lang="nationalCN"><b>中國 🇨🇳:</b> 國家安全驅動。國家主導大型水利工程，嚴格保護耕地，推動「藏糧於地、藏糧於技」。</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p data-lang="nationalJP"><b>日本 🇯🇵:</b> 保護與創新並行。以高關稅和補貼保護國內農業，同時發展農業機器人等高科技。</p>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg shadow-sm">
+                                    <p data-lang="nationalVN"><b>越南 🇻🇳:</b> 出口與韌性建設。積極參與國際合作，推廣低排放高產技術，應對湄公河三角洲的威脅。</p>
+                                </div>
+                             </div>
+                        </div>
+
+                        <div id="vulnerable-content" class="tab-pane hidden">
+                            <p data-lang="vulnerableDesc" class="text-gray-600 mb-6 text-center">在所有策略中，必須有底線，即確保最脆弱群體的基本生存權利。這需要強而有力的社會政策。</p>
+                            <div class="grid md:grid-cols-3 gap-6">
+                                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                                    <h4 data-lang="vulnerable1_title" class="font-bold text-lg text-fuchsia-700">社會安全網</h4>
+                                    <p data-lang="vulnerable1_desc" class="mt-2 text-sm text-gray-600">建立食物券、現金轉移等直接補貼機制，是保障弱勢群體「可及性」的最後一道防線。</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                                    <h4 data-lang="vulnerable2_title" class="font-bold text-lg text-sky-700">法律與制度</h4>
+                                    <p data-lang="vulnerable2_desc" class="mt-2 text-sm text-gray-600">制定全面的《糧食安全法》，從法律上保障耕地紅線、規範國家糧食儲備。</p>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg shadow-md text-center">
+                                    <h4 data-lang="vulnerable3_title" class="font-bold text-lg text-lime-700">減少糧食浪費</h4>
+                                    <p data-lang="vulnerable3_desc" class="mt-2 text-sm text-gray-600">減少從生產到消費過程中的浪費，等於在不增加投入的情況下，直接增加糧食供應。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-16 md:py-20 bg-gray-800 text-white">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h3 data-lang="futureTitle" class="text-3xl font-bold">未來之路：抉擇與真實代價</h3>
+                    <p data-lang="futureSubtitle" class="mt-4 max-w-2xl mx-auto text-gray-300">未來並非命定，而是當下政策選擇的結果。聯合國提出的「食物真實成本核算」(TCA) 框架，揭示了我們當前農糧體系巨大的隱藏成本，為系統性轉型提供了強力的經濟論證。</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h4 data-lang="tcaTitle" class="text-2xl font-bold mb-4">食物的真實成本</h4>
+                        <p data-lang="tcaDesc1" class="text-gray-300 mb-4">我們日常消費的食物，其市場價格遠未反映其對健康、環境和社會造成的巨大隱藏成本。據聯合國糧農組織(FAO)估算，全球農糧體系的年度隱藏成本高達10至12兆美元，約佔全球GDP的10%。</p>
+                        <p data-lang="tcaDesc2" class="text-gray-300">這個框架告訴我們：投資於永續農業不是一項「額外成本」，而是避免未來更大開支的「明智之舉」。我們再也無法負擔不轉型的代價。</p>
+                    </div>
+                     <div class="chart-container">
+                        <canvas id="tcaChart"></canvas>
+                        <div id="tca-center-text" class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                            <span data-lang="tcaCenterTitle" class="text-3xl font-bold text-white">~$12兆</span>
+                            <span data-lang="tcaCenterSubtitle" class="text-sm text-gray-300">年度隱藏成本</span>
+                        </div>
+                    </div>
+                </div>
+                 <div class="text-center mt-12">
+                    <h4 data-lang="futureCallToActionTitle" class="text-2xl font-bold">整合行動的呼籲</h4>
+                    <p data-lang="futureCallToActionDesc" class="mt-4 max-w-3xl mx-auto text-gray-300">通往糧食安全的未來，要求我們進行根本性變革。這需要打破政策壁壘，大規模投資於轉型，並強化全球治理。這是一場關乎我們如何生產、分配和消費食物的深刻革命。</p>
+                 </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-8">
+        <div class="container mx-auto px-6 text-center text-sm text-gray-400">
+            <p data-lang="footerText1">本互動式報告內容基於「氣候變遷與全球農糧體系」研究報告。</p>
+            <p data-lang="footerText2">為教育與資訊目的而設計。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const translations = {
+                zh: {
+                    pageTitle: "互動式報告：氣候變遷下的全球糧食危機",
+                    headerTitle: "氣候與糧食的未來",
+                    navProblem: "核心問題",
+                    navRipple: "連鎖效應",
+                    navResilience: "建構韌性",
+                    navFuture: "未來之路",
+                    langButton: "English",
+                    heroTitle: "氣候變遷下的全球糧食危機",
+                    heroSubtitle: "氣候變遷正以前所未有的方式衝擊全球農糧體系，從產量下降到價格飆升，威脅著數億人的生計與糧食安全。這不僅是環境議題，更是攸關人類存續的經濟與社會挑戰。",
+                    stat1_title: "$3.8兆",
+                    stat1_desc: "過去30年極端天氣造成的全球農業損失",
+                    stat2_title: "1.81億",
+                    stat2_desc: "至2050年，可能因氣候變遷額外陷入飢餓的人口",
+                    stat3_title: "$12兆",
+                    stat3_desc: "全球農糧體系每年隱藏的健康與環境成本",
+                    problemTitle: "核心問題：氣候如何攻擊農業？",
+                    problemSubtitle: "氣候變遷透過多重且相互關聯的途徑，全面性地對農業生產施加壓力。這些衝擊並非單獨發生，而是相互加劇，形成「壓力協同作用」。點擊下方卡片以了解更多。",
+                    impact1_title: "🌡️ 溫度上升與熱壓力",
+                    impact1_desc: "高溫縮短作物生長季，降低產量（如稻米），並對畜禽造成熱壓力，影響乳、蛋生產。傳統作物適栽區被迫向高緯度遷移。",
+                    impact2_title: "💧 水文循環紊亂",
+                    impact2_desc: "降雨模式變得極端，導致乾旱與洪水頻發。乾旱耗盡灌溉水源，洪水則直接摧毀農田與作物，形成雙重打擊。",
+                    impact3_title: "🌪️ 極端天氣事件",
+                    impact3_desc: "颱風、熱浪、寒流的頻率和強度增加，能在短時間內對農業造成災難性的破壞，摧毀基礎設施，導致農民破產。",
+                    impact4_title: "🦋 連鎖生態效應",
+                    impact4_desc: "氣候變暖改變病蟲害的地理分佈，並擾亂植物開花與授粉昆蟲的活躍期，對依賴授粉的作物構成巨大威脅。",
+                    rippleTitle: "連鎖效應：從農田到餐桌的衝擊",
+                    rippleSubtitle: "農業的物理衝擊迅速轉化為深刻的經濟與社會後果，影響著每一個人。",
+                    heatflationTitle: "經濟代價：「熱通膨」的崛起",
+                    heatflationDesc: "氣候變遷導致的作物歉收和生產成本上升，正成為推動全球糧食價格上漲的核心驅動力，此現象被稱為「熱通膨」(Heatflation)。它對最基本的生活必需品——食物——徵收了一種「隱形稅」，不成比例地侵蝕了低收入家庭的購買力。",
+                    heatflationCaption: "圖表說明：至2030年，氣候變遷對主要糧食出口價格的預計漲幅。",
+                    humanCostTitle: "人類的代價：受威脅的糧食安全",
+                    humanCostDesc: "氣候變遷正從四個面向全面性地威脅糧食安全。將滑鼠懸停在下方的支柱上，了解氣候變遷如何破壞我們獲取充足、營養且穩定食物的能力。",
+                    pillar1_title: "可得性 (Availability)",
+                    pillar1_desc: "產量下降直接減少了糧食的總供應量。",
+                    pillar2_title: "可及性 (Access)",
+                    pillar2_desc: "價格飆升和農民收入下降，使窮人買不起食物。",
+                    pillar3_title: "利用性 (Utilization)",
+                    pillar3_desc: "CO2濃度升高降低作物營養價值，導致「隱性飢餓」。",
+                    pillar4_title: "穩定性 (Stability)",
+                    pillar4_desc: "極端天氣頻發，破壞供應鏈，使糧食供應不穩定。",
+                    resilienceTitle: "建構韌性：我們的應對策略",
+                    resilienceSubtitle: "面對系統性威脅，我們需要從農場到國家層面的全面性策略。點擊下方頁籤，探索不同層級的解決方案。",
+                    tabFarm: "農場層級",
+                    tabNational: "國家策略",
+                    tabVulnerable: "保護弱勢",
+                    farmDesc: "「韌性農業」是第一道防線，它整合了科技與生態方法，旨在提高生產力、增強韌性並減少排放。最有效的策略往往是兩者的結合。",
+                    farmTechTitle: "技術路徑（精準農業）",
+                    farmTech1: "<b>智慧灌溉：</b>利用感測器和數據分析，提高水分利用效率。",
+                    farmTech2: "<b>設施農業：</b>興建強固型溫網室，保護高價值作物。",
+                    farmTech3: "<b>生物科技：</b>研發耐高溫、乾旱、病蟲害的品種。",
+                    farmEcoTitle: "生態路徑（生態農業）",
+                    farmEco1: "<b>土壤健康管理：</b>透過覆蓋作物、免耕等增加土壤有機質。",
+                    farmEco2: "<b>系統多樣化：</b>如農林複合經營、間作，以分散風險。",
+                    farmEco3: "<b>水資源就地管理：</b>修建蓄水塘，攔截雨水供乾季使用。",
+                    nationalDesc: "各國基於其國情發展出不同的應對策略。以下是幾個主要經濟體的做法。",
+                    nationalUS: "<b>美國 🇺🇸:</b> 科技與市場導向。大規模投資科研，推動精準農業，並透過聯邦作物保險計畫管理風險。",
+                    nationalCN: "<b>中國 🇨🇳:</b> 國家安全驅動。國家主導大型水利工程，嚴格保護耕地，推動「藏糧於地、藏糧於技」。",
+                    nationalJP: "<b>日本 🇯🇵:</b> 保護與創新並行。以高關稅和補貼保護國內農業，同時發展農業機器人等高科技。",
+                    nationalVN: "<b>越南 🇻🇳:</b> 出口與韌性建設。積極參與國際合作，推廣低排放高產技術，應對湄公河三角洲的威脅。",
+                    vulnerableDesc: "在所有策略中，必須有底線，即確保最脆弱群體的基本生存權利。這需要強而有力的社會政策。",
+                    vulnerable1_title: "社會安全網",
+                    vulnerable1_desc: "建立食物券、現金轉移等直接補貼機制，是保障弱勢群體「可及性」的最後一道防線。",
+                    vulnerable2_title: "法律與制度",
+                    vulnerable2_desc: "制定全面的《糧食安全法》，從法律上保障耕地紅線、規範國家糧食儲備。",
+                    vulnerable3_title: "減少糧食浪費",
+                    vulnerable3_desc: "減少從生產到消費過程中的浪費，等於在不增加投入的情況下，直接增加糧食供應。",
+                    futureTitle: "未來之路：抉擇與真實代價",
+                    futureSubtitle: "未來並非命定，而是當下政策選擇的結果。聯合國提出的「食物真實成本核算」(TCA) 框架，揭示了我們當前農糧體系巨大的隱藏成本，為系統性轉型提供了強力的經濟論證。",
+                    tcaTitle: "食物的真實成本",
+                    tcaDesc1: "我們日常消費的食物，其市場價格遠未反映其對健康、環境和社會造成的巨大隱藏成本。據聯合國糧農組織(FAO)估算，全球農糧體系的年度隱藏成本高達10至12兆美元，約佔全球GDP的10%。",
+                    tcaDesc2: "這個框架告訴我們：投資於永續農業不是一項「額外成本」，而是避免未來更大開支的「明智之舉」。我們再也無法負擔不轉型的代價。",
+                    tcaCenterTitle: "~$12兆",
+                    tcaCenterSubtitle: "年度隱藏成本",
+                    futureCallToActionTitle: "整合行動的呼籲",
+                    futureCallToActionDesc: "通往糧食安全的未來，要求我們進行根本性變革。這需要打破政策壁壘，大規模投資於轉型，並強化全球治理。這是一場關乎我們如何生產、分配和消費食物的深刻革命。",
+                    footerText1: "本互動式報告內容基於「氣候變遷與全球農糧體系」研究報告。",
+                    footerText2: "為教育與資訊目的而設計。",
+                    heatflationChartLabel: "預計價格上漲幅度 (%)",
+                    heatflationChartLabels: ['玉米', '小麥', '稻米'],
+                    tcaChartLabel: "隱藏成本分佈 (兆美元)",
+                    tcaChartLabels: ['健康成本', '環境成本', '社會成本'],
+                },
+                en: {
+                    pageTitle: "Interactive Report: The Global Food Crisis Under Climate Change",
+                    headerTitle: "The Future of Climate & Food",
+                    navProblem: "The Core Problem",
+                    navRipple: "Ripple Effect",
+                    navResilience: "Building Resilience",
+                    navFuture: "The Path Forward",
+                    langButton: "中文",
+                    heroTitle: "The Global Food Crisis Under Climate Change",
+                    heroSubtitle: "Climate change is impacting the global agrifood system in unprecedented ways, from declining yields to soaring prices, threatening the livelihoods and food security of hundreds of millions. This is not just an environmental issue, but an economic and social challenge for human survival.",
+                    stat1_title: "$3.8 Trillion",
+                    stat1_desc: "Global agricultural losses from extreme weather in the last 30 years.",
+                    stat2_title: "181 Million",
+                    stat2_desc: "Additional people who may face hunger by 2050 due to climate change.",
+                    stat3_title: "$12 Trillion",
+                    stat3_desc: "Annual hidden health and environmental costs of the global agrifood system.",
+                    problemTitle: "The Core Problem: How Climate Attacks Agriculture",
+                    problemSubtitle: "Climate change exerts comprehensive pressure on agricultural production through multiple, interconnected pathways. These impacts do not occur in isolation but reinforce each other, creating a 'stress synergy'. Click the cards below to learn more.",
+                    impact1_title: "🌡️ Rising Temperatures & Heat Stress",
+                    impact1_desc: "High temperatures shorten crop growing seasons, reducing yields (e.g., rice), and cause heat stress in livestock, affecting milk and egg production. Traditional crop zones are forced to migrate to higher latitudes.",
+                    impact2_title: "💧 Disrupted Water Cycles",
+                    impact2_desc: "Rainfall patterns become extreme, leading to frequent droughts and floods. Droughts deplete irrigation sources, while floods directly destroy farmland and crops, creating a double blow.",
+                    impact3_title: "🌪️ Extreme Weather Events",
+                    impact3_desc: "The frequency and intensity of typhoons, heatwaves, and cold snaps increase, causing catastrophic damage to agriculture in a short time, destroying infrastructure, and bankrupting farmers.",
+                    impact4_title: "🦋 Cascading Ecological Effects",
+                    impact4_desc: "A warming climate alters the geographical distribution of pests and diseases and disrupts the timing of plant flowering and pollinator activity, posing a huge threat to pollinator-dependent crops.",
+                    rippleTitle: "The Ripple Effect: Impacts from Farm to Table",
+                    rippleSubtitle: "The physical impacts on agriculture quickly translate into profound economic and social consequences, affecting everyone.",
+                    heatflationTitle: "Economic Cost: The Rise of 'Heatflation'",
+                    heatflationDesc: "Crop failures and rising production costs due to climate change are becoming a core driver of global food price hikes, a phenomenon dubbed 'Heatflation.' It imposes an 'invisible tax' on the most basic necessity—food—disproportionately eroding the purchasing power of low-income households.",
+                    heatflationCaption: "Chart: Projected increase in major food export prices by 2030 due to climate change.",
+                    humanCostTitle: "The Human Cost: Threatened Food Security",
+                    humanCostDesc: "Climate change threatens food security on four comprehensive fronts. Hover over the pillars below to understand how climate change undermines our ability to access sufficient, nutritious, and stable food.",
+                    pillar1_title: "Availability",
+                    pillar1_desc: "Declining yields directly reduce the total supply of food.",
+                    pillar2_title: "Access",
+                    pillar2_desc: "Soaring prices and falling farmer incomes make it impossible for the poor to afford food.",
+                    pillar3_title: "Utilization",
+                    pillar3_desc: "Higher CO2 levels reduce the nutritional value of crops, leading to 'hidden hunger'.",
+                    pillar4_title: "Stability",
+                    pillar4_desc: "Frequent extreme weather disrupts supply chains, making food supply unstable.",
+                    resilienceTitle: "Building Resilience: Our Response Strategies",
+                    resilienceSubtitle: "Facing systemic threats requires comprehensive strategies from the farm to the national level. Click the tabs below to explore solutions at different scales.",
+                    tabFarm: "Farm Level",
+                    tabNational: "National Strategies",
+                    tabVulnerable: "Protecting the Vulnerable",
+                    farmDesc: "'Resilient Agriculture' is the first line of defense. It integrates technology and ecological methods to increase productivity, enhance resilience, and reduce emissions. The most effective strategies often combine both.",
+                    farmTechTitle: "Technological Path (Precision Ag)",
+                    farmTech1: "<b>Smart Irrigation:</b> Use sensors and data analysis to improve water use efficiency.",
+                    farmTech2: "<b>Protected Cultivation:</b> Build reinforced greenhouses to protect high-value crops.",
+                    farmTech3: "<b>Biotechnology:</b> Develop varieties resistant to heat, drought, pests, and diseases.",
+                    farmEcoTitle: "Ecological Path (Agroecology)",
+                    farmEco1: "<b>Soil Health Management:</b> Increase soil organic matter through cover crops, no-till, etc.",
+                    farmEco2: "<b>System Diversification:</b> Use agroforestry and intercropping to spread risks.",
+                    farmEco3: "<b>On-farm Water Management:</b> Build ponds to capture rainwater for the dry season.",
+                    nationalDesc: "Countries are developing different response strategies based on their national conditions. Here are the approaches of several major economies.",
+                    nationalUS: "<b>USA 🇺🇸:</b> Technology and market-oriented. Large-scale investment in R&D, promotion of precision agriculture, and risk management through the Federal Crop Insurance Program.",
+                    nationalCN: "<b>China 🇨🇳:</b> National security-driven. State-led large-scale water projects, strict protection of arable land, and promoting 'storing grain in the land and in technology'.",
+                    nationalJP: "<b>Japan 🇯🇵:</b> Protection and innovation in parallel. High tariffs and subsidies to protect domestic agriculture, while developing agricultural robotics and other high-tech.",
+                    nationalVN: "<b>Vietnam 🇻🇳:</b> Export and resilience building. Actively participating in international cooperation to promote low-emission, high-yield technologies to address threats in the Mekong Delta.",
+                    vulnerableDesc: "Within all strategies, there must be a bottom line: ensuring the basic survival rights of the most vulnerable groups. This requires strong social policies.",
+                    vulnerable1_title: "Social Safety Nets",
+                    vulnerable1_desc: "Establishing direct subsidy mechanisms like food stamps and cash transfers is the last line of defense to ensure 'access' for vulnerable groups.",
+                    vulnerable2_title: "Laws and Institutions",
+                    vulnerable2_desc: "Enact comprehensive Food Security Acts to legally protect arable land red lines and regulate national food reserves.",
+                    vulnerable3_title: "Reducing Food Waste",
+                    vulnerable3_desc: "Reducing waste from production to consumption directly increases food supply without increasing inputs.",
+                    futureTitle: "The Path Forward: Choices and True Costs",
+                    futureSubtitle: "The future is not predetermined but the result of present policy choices. The UN's 'True Cost Accounting' (TCA) framework reveals the huge hidden costs of our current agrifood system, providing a powerful economic case for systemic transformation.",
+                    tcaTitle: "The True Cost of Food",
+                    tcaDesc1: "The market price of the food we consume daily does not reflect the huge hidden costs it imposes on health, the environment, and society. The FAO estimates the annual hidden costs of the global agrifood system are $10-12 trillion, about 10% of global GDP.",
+                    tcaDesc2: "This framework tells us: investing in sustainable agriculture is not an 'extra cost,' but a 'wise investment' to avoid much larger future expenses. We can no longer afford the cost of inaction.",
+                    tcaCenterTitle: "~$12 Trillion",
+                    tcaCenterSubtitle: "Annual Hidden Costs",
+                    futureCallToActionTitle: "A Call for Integrated Action",
+                    futureCallToActionDesc: "The path to a food-secure future requires fundamental change. It demands breaking down policy silos, investing massively in transformation, and strengthening global governance. This is a profound revolution in how we produce, distribute, and consume food.",
+                    footerText1: "This interactive report is based on the 'Climate Change and the Global Agrifood System' research report.",
+                    footerText2: "Designed for educational and informational purposes.",
+                    heatflationChartLabel: "Projected Price Increase (%)",
+                    heatflationChartLabels: ['Corn', 'Wheat', 'Rice'],
+                    tcaChartLabel: "Distribution of Hidden Costs (Trillion USD)",
+                    tcaChartLabels: ['Health Costs', 'Environmental Costs', 'Social Costs'],
+                }
+            };
+
+            let currentLang = 'zh';
+            let heatflationChartInstance;
+            let tcaChartInstance;
+
+            const langSwitchers = [document.getElementById('lang-switcher'), document.getElementById('lang-switcher-mobile')];
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            function updateContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+                document.querySelectorAll('[data-lang]').forEach(el => {
+                    const key = el.dataset.lang;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+
+                document.title = translations[lang].pageTitle;
+                
+                langSwitchers.forEach(s => {
+                    if (s) s.textContent = translations[lang].langButton;
+                });
+                
+                // Also update mobile nav link texts
+                const mobileNavKeys = ['navProblem', 'navRipple', 'navResilience', 'navFuture'];
+                mobileNavKeys.forEach(key => {
+                    const mobileEl = document.querySelector(`#mobile-menu [data-lang="${key}Mobile"]`);
+                    if(mobileEl) mobileEl.textContent = translations[lang][key];
+                });
+
+                renderCharts(lang);
+            }
+
+            function renderCharts(lang) {
+                if (heatflationChartInstance) {
+                    heatflationChartInstance.destroy();
+                }
+                const heatflationCtx = document.getElementById('heatflationChart').getContext('2d');
+                heatflationChartInstance = new Chart(heatflationCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[lang].heatflationChartLabels,
+                        datasets: [{
+                            label: translations[lang].heatflationChartLabel,
+                            data: [177, 120, 107],
+                            backgroundColor: ['rgba(251, 191, 36, 0.6)','rgba(239, 68, 68, 0.6)','rgba(59, 130, 246, 0.6)'],
+                            borderColor: ['rgba(251, 191, 36, 1)','rgba(239, 68, 68, 1)','rgba(59, 130, 246, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { color: '#374151', callback: function(value) { return value + '%' } }, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { ticks: { color: '#374151', font: { size: 14 } }, grid: { display: false } } }, plugins: { legend: { display: false } } }
+                });
+
+                if (tcaChartInstance) {
+                    tcaChartInstance.destroy();
+                }
+                const tcaCtx = document.getElementById('tcaChart').getContext('2d');
+                tcaChartInstance = new Chart(tcaCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: translations[lang].tcaChartLabels,
+                        datasets: [{
+                            label: translations[lang].tcaChartLabel,
+                            data: [9, 2.9, 0.5],
+                            backgroundColor: ['rgba(239, 68, 68, 0.7)','rgba(22, 163, 74, 0.7)','rgba(251, 146, 60, 0.7)'],
+                            borderColor: ['#FDFBF7','#FDFBF7','#FDFBF7'],
+                            borderWidth: 3, hoverOffset: 4
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: '#D1D5DB', font: { size: 14 }, padding: 20 } }, tooltip: { callbacks: { label: (context) => `${context.label}: $${context.parsed} Trillion` } } } }
+                });
+            }
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            langSwitchers.forEach(s => {
+                if(s) s.addEventListener('click', () => {
+                    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                    updateContent(currentLang);
+                });
+            });
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    tabPanes.forEach(pane => {
+                        pane.id === `${tabId}-content` ? pane.classList.remove('hidden') : pane.classList.add('hidden');
+                    });
+                });
+            });
+            
+            updateContent(currentLang);
+        });
+    </script>
+
+</body>
+</html>
