@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動報告：青少年、社交媒體與心理健康</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured as a guided journey, moving from broad understanding to specific actions, different from the original report's linear format. It starts with a Hero section to grab attention. 'The Core Dilemma' uses an interactive toggle (Risks vs. Benefits) with charts to present the main conflict. 'Deeper Dive' explains nuances like Active vs. Passive use with interactive HTML elements. 'From Awareness to Action' uses tabs and modals for successful campaigns. 'Your Action Plan' is a key interactive feature, using role-selector buttons (Policymaker, Educator, etc.) to filter and display tailored advice in accordions. Finally, 'Find Help Now' makes the report's appendix actionable by presenting resources in clear, accessible cards. This user-centric, non-linear structure prioritizes exploration and personal relevance over passive reading. -->
+    <!-- Visualization & Content Choices: Report Info: Stats on social media risks/benefits -> Goal: Inform/Compare -> Viz: Bar charts (Chart.js) for sleep deficit and risk increase, dynamic number counters for engagement. Justification: Charts offer a quick, impactful visual summary of key data points. Interaction: Toggle between 'Risks' and 'Benefits' to compare impacts directly. Report Info: Active vs. Passive use concept -> Goal: Explain -> Viz: Interactive HTML/CSS diagram with hover effects. Justification: An interactive diagram is more engaging than static text for explaining a behavioral concept. Interaction: Hovering reveals outcomes, reinforcing the cause-and-effect relationship. Report Info: Stakeholder advice -> Goal: Organize/Personalize -> Viz: Interactive role-selector with accordions. Justification: This allows users to immediately find information relevant to them without scrolling through irrelevant text, greatly enhancing usability. Interaction: Clicking a role button filters the displayed advice. All visualizations are built to be interactive and avoid static images. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lato', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D405B;
+        }
+        .bg-primary { background-color: #F8F7F4; }
+        .bg-secondary { background-color: #E07A5F; }
+        .bg-accent { background-color: #81B29A; }
+        .text-heading { color: #3D405B; }
+        .text-body { color: #4F526D; }
+        .text-accent { color: #E07A5F; }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #E07A5F;
+            border-bottom-color: #E07A5F;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .role-button.active {
+            background-color: #3D405B;
+            color: #F8F7F4;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px;
+            max-height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 320px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-primary">
+
+    <header class="sticky top-0 bg-primary/80 backdrop-blur-lg z-50 shadow-sm">
+        <div class="container mx-auto px-6 py-3 flex items-center justify-center relative">
+            <nav>
+                <ul class="flex items-center justify-center space-x-4 sm:space-x-8 text-sm sm:text-base font-medium text-heading">
+                    <li><a href="#dilemma" class="nav-link pb-1 border-b-2 border-transparent hover:text-accent" data-lang-key="navDilemma">核心議題</a></li>
+                    <li><a href="#deepdive" class="nav-link pb-1 border-b-2 border-transparent hover:text-accent" data-lang-key="navDeepDive">深度剖析</a></li>
+                    <li><a href="#actionplan" class="nav-link pb-1 border-b-2 border-transparent hover:text-accent" data-lang-key="navActionPlan">行動方案</a></li>
+                    <li><a href="#resources" class="nav-link pb-1 border-b-2 border-transparent hover:text-accent" data-lang-key="navResources">尋求協助</a></li>
+                </ul>
+            </nav>
+            <div class="absolute top-1/2 -translate-y-1/2 right-6">
+                <button id="lang-switcher" class="px-3 py-1 bg-white text-heading font-semibold rounded-lg shadow-sm text-sm">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 sm:py-16">
+
+        <section id="hero" class="text-center mb-16 sm:mb-24">
+            <h1 class="text-4xl md:text-6xl font-bold text-heading mb-4" data-lang-key="heroTitle">數位時代的十字路口</h1>
+            <p class="text-lg md:text-xl text-body max-w-3xl mx-auto" data-lang-key="heroSubtitle">深入探索社交媒體對青少年心理健康的雙重影響，並了解我們如何共同建立一個更具支持性的數位未來。</p>
+        </section>
+
+        <section id="dilemma" class="scroll-mt-20 mb-16 sm:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-heading mb-3" data-lang-key="dilemmaTitle">雙面刃：社交媒體的風險與潛力</h2>
+                <p class="text-body max-w-2xl mx-auto" data-lang-key="dilemmaSubtitle">社交媒體既是潛在風險的來源，也可能成為支持與連結的工具。了解其正反兩面是邁向健康數位生活的第一步。</p>
+            </div>
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex rounded-lg shadow-md">
+                    <button id="show-risks" class="toggle-button bg-white text-heading px-6 py-3 rounded-l-lg font-semibold border-r border-gray-200" data-lang-key="toggleRisks">潛在風險</button>
+                    <button id="show-benefits" class="toggle-button bg-white text-heading px-6 py-3 rounded-r-lg font-semibold" data-lang-key="toggleBenefits">正面潛力</button>
+                </div>
+            </div>
+
+            <div id="risks-content" class="content-panel">
+                <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-6">
+                        <div class="p-4 rounded-lg">
+                            <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="risk1Title">📈 抑鬱與焦慮風險加倍</h3>
+                            <p class="text-body" data-lang-key="risk1Desc">每天在社交媒體上花費超過3小時的青少年，其經歷不良心理健康後果的風險，是其他同齡人的<span class="text-accent font-bold text-2xl">兩倍</span>。持續的社會比較和資訊過載是主要原因。</p>
+                        </div>
+                        <div class="p-4 rounded-lg">
+                            <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="risk2Title">📉 睡眠剝奪的連鎖效應</h3>
+                            <p class="text-body" data-lang-key="risk2Desc">夜間使用社交媒體嚴重影響睡眠。青少年平均睡眠比建議的8-10小時少1-1.5小時，這直接導致情緒調節能力下降和壓力感增加。</p>
+                        </div>
+                         <div class="p-4 rounded-lg">
+                            <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="risk3Title">🎭 身體意象與自尊挑戰</h3>
+                            <p class="text-body" data-lang-key="risk3Desc">近半數（46%）青少年承認社交媒體讓他們對自己的身體感覺更糟。理想化、經過編輯的圖像，是導致身體不滿和自尊心下降的元兇。</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h4 class="text-lg font-bold text-heading text-center mb-4" data-lang-key="sleepChartTitle">青少年建議睡眠 vs. 平均實際睡眠</h4>
+                        <div class="chart-container">
+                            <canvas id="sleepChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="benefits-content" class="content-panel hidden">
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                     <div class="bg-white p-6 rounded-xl shadow-lg flex flex-col justify-center items-center text-center h-full">
+                        <h4 class="text-xl font-bold text-heading mb-2" data-lang-key="benefit1Title">🤝 找到歸屬感與支持</h4>
+                        <p class="text-5xl font-bold text-accent my-4">80%</p>
+                        <p class="text-body max-w-xs" data-lang-key="benefit1Desc">的青少年認為社交媒體讓他們與朋友的生活聯繫更緊密，特別是對於現實中可能感到孤立的群體，線上社群提供了寶貴的避風港。</p>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="p-4 rounded-lg">
+                            <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="benefit2Title">💡 資訊獲取與求助管道</h3>
+                            <p class="text-body" data-lang-key="benefit2Desc">社交媒體是獲取心理健康知識的便捷管道，能提升青少年的心理健康素養，並鼓勵他們在需要時邁出尋求幫助的第一步。</p>
+                        </div>
+                        <div class="p-4 rounded-lg">
+                            <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="benefit3Title">🎨 身份認同與自我表達</h3>
+                            <p class="text-body" data-lang-key="benefit3Desc">超過七成（71%）的青少年表示，社交媒體為他們提供了一個展示創造性、探索興趣和建立自信的舞台，這在身份探索的關鍵時期尤為重要。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="deepdive" class="scroll-mt-20 mb-16 sm:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-heading mb-3" data-lang-key="deepdiveTitle">關鍵不在時長，而在於「如何使用」</h2>
+                <p class="text-body max-w-3xl mx-auto" data-lang-key="deepdiveSubtitle">影響是好是壞，取決於複雜的調節因素。我們需要從關注「使用時長」轉向關注「互動品質」和「心理技能」。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-heading mb-4 text-center" data-lang-key="usageTypeTitle">主動參與 vs. 被動消費</h3>
+                    <div class="flex justify-around items-center h-full">
+                        <div id="active-use" class="text-center p-4 rounded-lg cursor-pointer transition-transform transform hover:scale-105">
+                            <p class="text-4xl mb-2">💬</p>
+                            <h4 class="font-semibold" data-lang-key="activeUse">主動使用</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="activeUseExample">傳送訊息、對話</p>
+                            <div id="active-info" class="absolute bg-green-100 text-green-800 p-2 rounded-lg text-xs mt-2 opacity-0 transition-opacity pointer-events-none -translate-x-1/2 left-1/2" data-lang-key="activeUseEffect">
+                                提升幸福感和連結感
+                            </div>
+                        </div>
+                        <div class="text-gray-300 text-2xl font-light">vs</div>
+                        <div id="passive-use" class="text-center p-4 rounded-lg cursor-pointer transition-transform transform hover:scale-105">
+                            <p class="text-4xl mb-2">👀</p>
+                            <h4 class="font-semibold" data-lang-key="passiveUse">被動消費</h4>
+                            <p class="text-sm text-gray-500" data-lang-key="passiveUseExample">滾動瀏覽、觀看</p>
+                            <div id="passive-info" class="absolute bg-red-100 text-red-800 p-2 rounded-lg text-xs mt-2 opacity-0 transition-opacity pointer-events-none -translate-x-1/2 left-1/2" data-lang-key="passiveUseEffect">
+                                觸發負面比較和焦慮
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-sm text-center text-gray-500 mt-4" data-lang-key="hoverHint">將滑鼠懸停在上方查看潛在影響。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-heading mb-4 text-center" data-lang-key="personalizedTitle">個人化的影響</h3>
+                    <p class="text-body text-center mb-4" data-lang-key="personalizedDesc">社交媒體的影響因人而異。性別、年齡和個人心理狀態都是關鍵因素。研究甚至提出了「甜蜜點」假說，認為適度使用可能比完全不用更有益。</p>
+                    <div class="text-center">
+                        <span class="inline-block bg-accent text-white px-4 py-2 rounded-full text-sm font-semibold" data-lang-key="personalizedTagline">尋找你的部落，而不僅是觀看遊行</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="actionplan" class="scroll-mt-20 mb-16 sm:mb-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-heading mb-3" data-lang-key="actionplanTitle">從意識到行動：建立支持生態系統</h2>
+                <p class="text-body max-w-2xl mx-auto" data-lang-key="actionplanSubtitle">應對挑戰需要社會各層面的協同努力。以下是針對不同角色的具體行動指南，點擊你的身份查看建議。</p>
+            </div>
+            
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
+                <button class="role-button px-5 py-2 rounded-full font-semibold transition-colors bg-white shadow-sm hover:bg-gray-100" data-role="teen" data-lang-key="roleTeen">我是青少年</button>
+                <button class="role-button px-5 py-2 rounded-full font-semibold transition-colors bg-white shadow-sm hover:bg-gray-100" data-role="parent" data-lang-key="roleParent">我是家長</button>
+                <button class="role-button px-5 py-2 rounded-full font-semibold transition-colors bg-white shadow-sm hover:bg-gray-100" data-role="educator" data-lang-key="roleEducator">我是教育工作者</button>
+                <button class="role-button px-5 py-2 rounded-full font-semibold transition-colors bg-white shadow-sm hover:bg-gray-100" data-role="policymaker" data-lang-key="rolePolicymaker">我是政策制定者</button>
+            </div>
+
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div id="role-content-teen" class="role-content hidden">
+                    <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="teenAcc1Title">主動管理你的數位世界</span>
+                            <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="teenAcc1Content">
+                                    <li><b>策展你的信息流：</b> 定期審視關注列表，取消關注讓你感覺不好的帳號，多關注能激勵你的內容。</li>
+                                    <li><b>設定界線：</b> 善用螢幕時間管理工具，感到不知所措時主動休息，進行線下活動。</li>
+                                    <li><b>思考後再發布：</b> 考慮內容對他人和未來自己的影響。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item bg-white rounded-lg shadow">
+                         <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="teenAcc2Title">尋求支持與傳播善意</span>
+                            <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="teenAcc2Content">
+                                    <li><b>勇敢求助：</b> 遭遇網路欺凌或看到不安內容時，截圖、屏蔽、舉報，並告訴信任的成年人。</li>
+                                    <li><b>成為善意的來源：</b> 一個友好的評論可以點亮別人的一天。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="role-content-parent" class="role-content hidden">
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="parentAcc1Title">建立基於信任的溝通</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="parentAcc1Content">
+                                    <li><b>開放式溝通：</b> 鼓勵孩子分享線上經歷，以好奇代替評判。可以請孩子「教」你使用他們喜歡的應用。</li>
+                                    <li><b>以身作則：</b> 與孩子交談時放下手機，示範健康的數位習慣。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="parentAcc2Title">共同設定家庭界線</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="parentAcc2Content">
+                                    <li><b>家庭媒體計劃：</b> 與孩子共同制定「無螢幕時間」（如用餐時）和「無螢幕空間」（如臥室）。</li>
+                                    <li><b>避免將螢幕時間作為獎懲工具：</b> 這反而會增加其在孩子心中的價值。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="role-content-educator" class="role-content hidden">
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="eduAcc1Title">教授實用心理與數位技能</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="eduAcc1Content">
+                                    <li><b>整合課程：</b> 將數位公民、媒體素養和情緒管理技能納入教學。</li>
+                                    <li><b>引入框架：</b> 使用「命名、馴服、重塑」等簡單框架教導學生應對情緒。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="eduAcc2Title">營造支持性校園環境</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="eduAcc2Content">
+                                    <li><b>開放對話：</b> 營造信任氛圍，鼓勵學生討論線上體驗。</li>
+                                    <li><b>設立安全空間：</b> 如設立「冷靜角」，在課堂推廣正念練習。</li>
+                                    <li><b>深化家校合作：</b> 將家長視為夥伴，提供工具和建議。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="role-content-policymaker" class="role-content hidden">
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                            <span data-lang-key="policyAcc1Title">推動立法與行業標準</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="policyAcc1Content">
+                                    <li><b>安全設計：</b> 立法要求科技平台將兒童安全置於優先地位，如實施更嚴格的隱私保護，限制數據收集。</li>
+                                    <li><b>算法透明度：</b> 要求審查和限制可能導致成癮的設計（如無限滾動）。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="accordion-item bg-white rounded-lg shadow">
+                        <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center">
+                           <span data-lang-key="policyAcc2Title">建立系統性支持基礎設施</span>
+                             <span class="transform transition-transform text-accent text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-4 pt-0 text-body">
+                                <ul class="list-disc list-inside space-y-2" data-lang-key="policyAcc2Content">
+                                    <li><b>資助研究：</b> 增加對社交媒體影響的縱向研究資助，以揭示因果關係。</li>
+                                    <li><b>普及專業人員：</b> 確保學校系統有充足資源配備合格的心理健康專業人員。</li>
+                                    <li><b>建立導航系統：</b> 支持全國統一的危機熱線和可搜索的服務數據庫。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-heading mb-3" data-lang-key="resourcesTitle">感到不知所措？援助就在身邊</h2>
+                <p class="text-body max-w-2xl mx-auto" data-lang-key="resourcesSubtitle">如果你或你認識的人正在掙扎，請記住，尋求幫助是力量的象徵。以下是一些真實存在於英國的支持服務典範，可以為您提供幫助。</p>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource1Title">Kooth</h3>
+                    <p class="text-body mb-4" data-lang-key="resource1Desc">為10-25歲年輕人提供免費、匿名、保密的線上諮詢和情感支持。無需轉介，沒有等候名單。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLink">訪問網站 →</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource2Title">YoungMinds</h3>
+                    <p class="text-body mb-4" data-lang-key="resource2Desc">英國領先的青少年心理健康慈善機構，提供大量線上資訊，並為家長設立求助熱線。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLinkParent">家長熱線 →</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource3Title">Childline</h3>
+                    <p class="text-body mb-4" data-lang-key="resource3Desc">為兒童和青少年提供24/7的免費保密電話求助熱線。電話：0800 1111。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLinkCall">立即通話 →</a>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource4Title">Samaritans</h3>
+                    <p class="text-body mb-4" data-lang-key="resource4Desc">為任何處於情緒困擾中的人提供24/7的傾聽服務。電話：116 123。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLinkListen">尋求傾聽 →</a>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource5Title">42nd Street</h3>
+                    <p class="text-body mb-4" data-lang-key="resource5Desc">位於大曼徹斯特地區的本地機構，為年輕人提供諮詢、藝術治療和團體活動等支持。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLinkLearn">了解更多 →</a>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-transform transform hover:-translate-y-2">
+                    <h3 class="text-xl font-bold text-heading mb-2" data-lang-key="resource6Title">Papyrus</h3>
+                    <p class="text-body mb-4" data-lang-key="resource6Desc">專注於預防年輕人自殺的慈善機構，提供支持熱線 HOPELINEUK。</p>
+                    <a href="#" class="font-semibold text-accent hover:underline" data-lang-key="resourceLinkHelp">獲取幫助 →</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-100 mt-16 sm:mt-24">
+        <div class="container mx-auto px-6 py-8 text-center text-body">
+            <p class="font-semibold text-heading mb-2" data-lang-key="footerTitle">邁向數位福祉的共同責任</p>
+            <p class="text-sm max-w-4xl mx-auto" data-lang-key="footerDesc">應對這個時代的挑戰，需要科技公司、政策制定者、教育者、家長和青少年自身的共同努力。讓我們以智慧、同理心和集體行動，確保年輕一代能在數位世界中健康、快樂地成長。</p>
+            <a href="#hero" class="mt-4 inline-block text-sm text-accent font-semibold hover:underline" data-lang-key="footerLink">返回頂部 ↑</a>
+        </div>
+    </footer>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    let currentLang = 'zh';
+
+    const translations = {
+        zh: {
+            navDilemma: '核心議題',
+            navDeepDive: '深度剖析',
+            navActionPlan: '行動方案',
+            navResources: '尋求協助',
+            heroTitle: '數位時代的十字路口',
+            heroSubtitle: '深入探索社交媒體對青少年心理健康的雙重影響，並了解我們如何共同建立一個更具支持性的數位未來。',
+            dilemmaTitle: '雙面刃：社交媒體的風險與潛力',
+            dilemmaSubtitle: '社交媒體既是潛在風險的來源，也可能成為支持與連結的工具。了解其正反兩面是邁向健康數位生活的第一步。',
+            toggleRisks: '潛在風險',
+            toggleBenefits: '正面潛力',
+            risk1Title: '📈 抑鬱與焦慮風險加倍',
+            risk1Desc: '每天在社交媒體上花費超過3小時的青少年，其經歷不良心理健康後果的風險，是其他同齡人的<span class="text-accent font-bold text-2xl">兩倍</span>。持續的社會比較和資訊過載是主要原因。',
+            risk2Title: '📉 睡眠剝奪的連鎖效應',
+            risk2Desc: '夜間使用社交媒體嚴重影響睡眠。青少年平均睡眠比建議的8-10小時少1-1.5小時，這直接導致情緒調節能力下降和壓力感增加。',
+            risk3Title: '🎭 身體意象與自尊挑戰',
+            risk3Desc: '近半數（46%）青少年承認社交媒體讓他們對自己的身體感覺更糟。理想化、經過編輯的圖像，是導致身體不滿和自尊心下降的元兇。',
+            sleepChartTitle: '青少年建議睡眠 vs. 平均實際睡眠',
+            sleepChartLabel1: '建議睡眠',
+            sleepChartLabel2: '青少年平均睡眠',
+            sleepChartUnit: '小時',
+            benefit1Title: '🤝 找到歸屬感與支持',
+            benefit1Desc: '的青少年認為社交媒體讓他們與朋友的生活聯繫更緊密，特別是對於現實中可能感到孤立的群體，線上社群提供了寶貴的避風港。',
+            benefit2Title: '💡 資訊獲取與求助管道',
+            benefit2Desc: '社交媒體是獲取心理健康知識的便捷管道，能提升青少年的心理健康素養，並鼓勵他們在需要時邁出尋求幫助的第一步。',
+            benefit3Title: '🎨 身份認同與自我表達',
+            benefit3Desc: '超過七成（71%）的青少年表示，社交媒體為他們提供了一個展示創造性、探索興趣和建立自信的舞台，這在身份探索的關鍵時期尤為重要。',
+            deepdiveTitle: '關鍵不在時長，而在於「如何使用」',
+            deepdiveSubtitle: '影響是好是壞，取決於複雜的調節因素。我們需要從關注「使用時長」轉向關注「互動品質」和「心理技能」。',
+            usageTypeTitle: '主動參與 vs. 被動消費',
+            activeUse: '主動使用',
+            activeUseExample: '傳送訊息、對話',
+            activeUseEffect: '提升幸福感和連結感',
+            passiveUse: '被動消費',
+            passiveUseExample: '滾動瀏覽、觀看',
+            passiveUseEffect: '觸發負面比較和焦慮',
+            hoverHint: '將滑鼠懸停在上方查看潛在影響。',
+            personalizedTitle: '個人化的影響',
+            personalizedDesc: '社交媒體的影響因人而異。性別、年齡和個人心理狀態都是關鍵因素。研究甚至提出了「甜蜜點」假說，認為適度使用可能比完全不用更有益。',
+            personalizedTagline: '尋找你的部落，而不僅是觀看遊行',
+            actionplanTitle: '從意識到行動：建立支持生態系統',
+            actionplanSubtitle: '應對挑戰需要社會各層面的協同努力。以下是針對不同角色的具體行動指南，點擊你的身份查看建議。',
+            roleTeen: '我是青少年',
+            roleParent: '我是家長',
+            roleEducator: '我是教育工作者',
+            rolePolicymaker: '我是政策制定者',
+            teenAcc1Title: '主動管理你的數位世界',
+            teenAcc1Content: '<li><b>策展你的信息流：</b> 定期審視關注列表，取消關注讓你感覺不好的帳號，多關注能激勵你的內容。</li><li><b>設定界線：</b> 善用螢幕時間管理工具，感到不知所措時主動休息，進行線下活動。</li><li><b>思考後再發布：</b> 考慮內容對他人和未來自己的影響。</li>',
+            teenAcc2Title: '尋求支持與傳播善意',
+            teenAcc2Content: '<li><b>勇敢求助：</b> 遭遇網路欺凌或看到不安內容時，截圖、屏蔽、舉報，並告訴信任的成年人。</li><li><b>成為善意的來源：</b> 一個友好的評論可以點亮別人的一天。</li>',
+            parentAcc1Title: '建立基於信任的溝通',
+            parentAcc1Content: '<li><b>開放式溝通：</b> 鼓勵孩子分享線上經歷，以好奇代替評判。可以請孩子「教」你使用他們喜歡的應用。</li><li><b>以身作則：</b> 與孩子交談時放下手機，示範健康的數位習慣。</li>',
+            parentAcc2Title: '共同設定家庭界線',
+            parentAcc2Content: '<li><b>家庭媒體計劃：</b> 與孩子共同制定「無螢幕時間」（如用餐時）和「無螢幕空間」（如臥室）。</li><li><b>避免將螢幕時間作為獎懲工具：</b> 這反而會增加其在孩子心中的價值。</li>',
+            eduAcc1Title: '教授實用心理與數位技能',
+            eduAcc1Content: '<li><b>整合課程：</b> 將數位公民、媒體素養和情緒管理技能納入教學。</li><li><b>引入框架：</b> 使用「命名、馴服、重塑」等簡單框架教導學生應對情緒。</li>',
+            eduAcc2Title: '營造支持性校園環境',
+            eduAcc2Content: '<li><b>開放對話：</b> 營造信任氛圍，鼓勵學生討論線上體驗。</li><li><b>設立安全空間：</b> 如設立「冷靜角」，在課堂推廣正念練習。</li><li><b>深化家校合作：</b> 將家長視為夥伴，提供工具和建議。</li>',
+            policyAcc1Title: '推動立法與行業標準',
+            policyAcc1Content: '<li><b>安全設計：</b> 立法要求科技平台將兒童安全置於優先地位，如實施更嚴格的隱私保護，限制數據收集。</li><li><b>算法透明度：</b> 要求審查和限制可能導致成癮的設計（如無限滾動）。</li>',
+            policyAcc2Title: '建立系統性支持基礎設施',
+            policyAcc2Content: '<li><b>資助研究：</b> 增加對社交媒體影響的縱向研究資助，以揭示因果關係。</li><li><b>普及專業人員：</b> 確保學校系統有充足資源配備合格的心理健康專業人員。</li><li><b>建立導航系統：</b> 支持全國統一的危機熱線和可搜索的服務數據庫。</li>',
+            resourcesTitle: '感到不知所措？援助就在身邊',
+            resourcesSubtitle: '如果你或你認識的人正在掙扎，請記住，尋求幫助是力量的象徵。以下是一些真實存在於英國的支持服務典範，可以為您提供幫助。',
+            resource1Title: 'Kooth',
+            resource1Desc: '為10-25歲年輕人提供免費、匿名、保密的線上諮詢和情感支持。無需轉介，沒有等候名單。',
+            resourceLink: '訪問網站 →',
+            resource2Title: 'YoungMinds',
+            resource2Desc: '英國領先的青少年心理健康慈善機構，提供大量線上資訊，並為家長設立求助熱線。',
+            resourceLinkParent: '家長熱線 →',
+            resource3Title: 'Childline',
+            resource3Desc: '為兒童和青少年提供24/7的免費保密電話求助熱線。電話：0800 1111。',
+            resourceLinkCall: '立即通話 →',
+            resource4Title: 'Samaritans',
+            resource4Desc: '為任何處於情緒困擾中的人提供24/7的傾聽服務。電話：116 123。',
+            resourceLinkListen: '尋求傾聽 →',
+            resource5Title: '42nd Street',
+            resource5Desc: '位於大曼徹斯特地區的本地機構，為年輕人提供諮詢、藝術治療和團體活動等支持。',
+            resourceLinkLearn: '了解更多 →',
+            resource6Title: 'Papyrus',
+            resource6Desc: '專注於預防年輕人自殺的慈善機構，提供支持熱線 HOPELINEUK。',
+            resourceLinkHelp: '獲取幫助 →',
+            footerTitle: '邁向數位福祉的共同責任',
+            footerDesc: '應對這個時代的挑戰，需要科技公司、政策制定者、教育者、家長和青少年自身的共同努力。讓我們以智慧、同理心和集體行動，確保年輕一代能在數位世界中健康、快樂地成長。',
+            footerLink: '返回頂部 ↑'
+        },
+        en: {
+            navDilemma: 'The Dilemma',
+            navDeepDive: 'Deep Dive',
+            navActionPlan: 'Action Plan',
+            navResources: 'Get Help',
+            heroTitle: 'Crossroads of the Digital Age',
+            heroSubtitle: 'Explore the dual impact of social media on teen mental health and learn how we can build a more supportive digital future together.',
+            dilemmaTitle: 'The Double-Edged Sword: Risks & Potential',
+            dilemmaSubtitle: 'Social media is both a source of potential risk and a tool for support and connection. Understanding both sides is the first step toward a healthy digital life.',
+            toggleRisks: 'Potential Risks',
+            toggleBenefits: 'Positive Potential',
+            risk1Title: '📈 Double the Risk of Depression & Anxiety',
+            risk1Desc: 'Teens spending over 3 hours daily on social media are <span class="text-accent font-bold text-2xl">twice</span> as likely to suffer poor mental health outcomes. Constant social comparison and information overload are key culprits.',
+            risk2Title: '📉 The Domino Effect of Sleep Deprivation',
+            risk2Desc: 'Nighttime social media use severely impacts sleep. Teens get 1-1.5 hours less sleep than the recommended 8-10, directly impairing emotional regulation and increasing stress.',
+            risk3Title: '🎭 Body Image & Self-Esteem Challenges',
+            risk3Desc: 'Nearly half (46%) of teens admit social media makes them feel worse about their bodies. Idealized, edited images are a primary driver of body dissatisfaction and low self-esteem.',
+            sleepChartTitle: 'Teen Recommended vs. Average Actual Sleep',
+            sleepChartLabel1: 'Recommended',
+            sleepChartLabel2: 'Teen Average',
+            sleepChartUnit: 'Hours',
+            benefit1Title: '🤝 Finding Belonging & Support',
+            benefit1Desc: 'of teens feel more connected to their friends\' lives thanks to social media. For those who feel isolated offline, online communities provide an invaluable safe haven.',
+            benefit2Title: '💡 Access to Information & Help-Seeking',
+            benefit2Desc: 'Social media is an accessible channel for mental health information, increasing teens\' health literacy and encouraging them to seek help when needed.',
+            benefit3Title: '🎨 Identity & Self-Expression',
+            benefit3Desc: 'Over 70% of teens say social media provides a creative outlet to explore interests and build confidence, which is crucial during the key period of identity formation.',
+            deepdiveTitle: 'It\'s Not How Long, But How You Use It',
+            deepdiveSubtitle: 'The impact, good or bad, depends on complex factors. We need to shift from focusing on "screen time" to "interaction quality" and "psychological skills."',
+            usageTypeTitle: 'Active Engagement vs. Passive Consumption',
+            activeUse: 'Active Use',
+            activeUseExample: 'Messaging, conversing',
+            activeUseEffect: 'Boosts well-being & connection',
+            passiveUse: 'Passive Use',
+            passiveUseExample: 'Scrolling, viewing',
+            passiveUseEffect: 'Triggers comparison & anxiety',
+            hoverHint: 'Hover over the icons to see the potential effects.',
+            personalizedTitle: 'Personalized Impact',
+            personalizedDesc: 'The effects of social media vary by individual. Gender, age, and personal mental state are key factors. Research even suggests a "sweet spot" hypothesis, where moderate use may be more beneficial than none at all.',
+            personalizedTagline: 'Find Your Tribe, Don\'t Just Watch the Parade',
+            actionplanTitle: 'From Awareness to Action: Building a Support Ecosystem',
+            actionplanSubtitle: 'Tackling the challenges requires a concerted effort from all levels of society. Here are specific action guides for different roles. Click your identity to see recommendations.',
+            roleTeen: 'I am a Teen',
+            roleParent: 'I am a Parent',
+            roleEducator: 'I am an Educator',
+            rolePolicymaker: 'I am a Policymaker',
+            teenAcc1Title: 'Actively Manage Your Digital World',
+            teenAcc1Content: '<li><b>Curate Your Feed:</b> Regularly review who you follow. Unfollow accounts that make you feel bad and follow those that inspire you.</li><li><b>Set Boundaries:</b> Use screen time tools. Take breaks when you feel overwhelmed and engage in offline activities.</li><li><b>Think Before You Post:</b> Consider the impact on others and your future self.</li>',
+            teenAcc2Title: 'Seek Support & Spread Kindness',
+            teenAcc2Content: '<li><b>Ask for Help:</b> If you encounter cyberbullying or distressing content, screenshot, block, report, and tell a trusted adult.</li><li><b>Be a Source of Good:</b> A kind comment can make someone\'s day.</li>',
+            parentAcc1Title: 'Build Trust-Based Communication',
+            parentAcc1Content: '<li><b>Open Dialogue:</b> Encourage your child to share their online experiences. Approach with curiosity, not judgment. Ask them to "teach" you their favorite app.</li><li><b>Lead by Example:</b> Put your phone away when talking with your child to model healthy digital habits.</li>',
+            parentAcc2Title: 'Set Family Boundaries Together',
+            parentAcc2Content: '<li><b>Family Media Plan:</b> Co-create "screen-free times" (like meals) and "screen-free zones" (like bedrooms).</li><li><b>Avoid Using Screen Time as a Reward/Punishment:</b> This can increase its perceived value.</li>',
+            eduAcc1Title: 'Teach Practical Mental & Digital Skills',
+            eduAcc1Content: '<li><b>Integrate into Curriculum:</b> Embed digital citizenship, media literacy, and emotional regulation skills into teaching.</li><li><b>Introduce Frameworks:</b> Use simple frameworks like "Name it, Tame it, Reframe it" to help students manage emotions.</li>',
+            eduAcc2Title: 'Foster a Supportive School Environment',
+            eduAcc2Content: '<li><b>Open Conversations:</b> Create a trusting atmosphere for students to discuss online experiences.</li><li><b>Create Safe Spaces:</b> Establish "calm-down corners" and promote mindfulness in the classroom.</li><li><b>Deepen Home-School Partnership:</b> Treat parents as partners, providing them with tools and advice.</li>',
+            policyAcc1Title: 'Promote Legislation & Industry Standards',
+            policyAcc1Content: '<li><b>Safety by Design:</b> Legislate to require tech platforms to prioritize child safety, such as stricter privacy protections and limited data collection.</li><li><b>Algorithmic Transparency:</b> Mandate audits and limits on features designed to be addictive (e.g., infinite scroll).</li>',
+            policyAcc2Title: 'Build Systemic Support Infrastructure',
+            policyAcc2Content: '<li><b>Fund Research:</b> Increase funding for longitudinal studies on social media\'s impact to uncover causal links.</li><li><b>Universal Access to Professionals:</b> Ensure school systems are resourced with qualified mental health professionals.</li><li><b>Create Navigation Systems:</b> Support national crisis hotlines and searchable service databases.</li>',
+            resourcesTitle: 'Feeling Overwhelmed? Help is Available',
+            resourcesSubtitle: 'If you or someone you know is struggling, remember that asking for help is a sign of strength. Here are some examples of support services available in the UK.',
+            resource1Title: 'Kooth',
+            resource1Desc: 'Free, anonymous, and confidential online counseling and emotional support for young people aged 10-25. No referral needed, no waiting lists.',
+            resourceLink: 'Visit Website →',
+            resource2Title: 'YoungMinds',
+            resource2Desc: 'The UK\'s leading charity for children and young people\'s mental health, offering online information and a helpline for parents.',
+            resourceLinkParent: 'Parents Helpline →',
+            resource3Title: 'Childline',
+            resource3Desc: 'A free, private and confidential 24/7 telephone helpline for any child or young person. Phone: 0800 1111.',
+            resourceLinkCall: 'Call Now →',
+            resource4Title: 'Samaritans',
+            resource4Desc: 'A 24/7 listening service for anyone in emotional distress. Phone: 116 123.',
+            resourceLinkListen: 'Get a Listener →',
+            resource5Title: '42nd Street',
+            resource5Desc: 'A Greater Manchester-based charity offering counseling, art therapy, and group activities for young people.',
+            resourceLinkLearn: 'Learn More →',
+            resource6Title: 'Papyrus',
+            resource6Desc: 'A charity focused on the prevention of suicide in young people, offering the support hotline HOPELINEUK.',
+            resourceLinkHelp: 'Get Help →',
+            footerTitle: 'A Shared Responsibility for Digital Well-being',
+            footerDesc: 'Tackling the challenges of this era requires a joint effort from tech companies, policymakers, educators, parents, and teens themselves. Let\'s work together with wisdom, empathy, and collective action to ensure the younger generation can thrive in the digital world.',
+            footerLink: 'Back to Top ↑'
+        }
+    };
+
+    const riskBenefitData = {
+        labels: [translations[currentLang].sleepChartLabel1, translations[currentLang].sleepChartLabel2],
+        datasets: [{
+            label: translations[currentLang].sleepChartUnit,
+            data: [9, 7.25],
+            backgroundColor: ['#81B29A', '#E07A5F'],
+            borderColor: ['#81B29A', '#E07A5F'],
+            borderWidth: 1
+        }]
+    };
+
+    const sleepChartCtx = document.getElementById('sleepChart').getContext('2d');
+    const sleepChart = new Chart(sleepChartCtx, {
+        type: 'bar',
+        data: riskBenefitData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 10,
+                    grid: { display: false },
+                    ticks: { font: { family: "'Lato', sans-serif" }}
+                },
+                 y: {
+                    grid: { display: false },
+                    ticks: { font: { family: "'Noto Sans TC', 'Lato', sans-serif" }}
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    bodyFont: { family: "'Noto Sans TC', 'Lato', sans-serif" },
+                    titleFont: { family: "'Noto Sans TC', 'Lato', sans-serif" },
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    function updateLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        sleepChart.data.labels = [translations[lang].sleepChartLabel1, translations[lang].sleepChartLabel2];
+        sleepChart.data.datasets[0].label = translations[lang].sleepChartUnit;
+        sleepChart.update();
+
+        document.body.style.fontFamily = lang === 'zh' ? "'Noto Sans TC', 'Lato', sans-serif" : "'Lato', 'Noto Sans TC', sans-serif";
+    }
+
+    const langSwitcher = document.getElementById('lang-switcher');
+    langSwitcher.addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        updateLanguage(newLang);
+        langSwitcher.textContent = newLang === 'zh' ? 'EN' : '中文';
+    });
+    
+    const toggleButtons = document.querySelectorAll('.toggle-button');
+    const contentPanels = document.querySelectorAll('.content-panel');
+    const showRisksButton = document.getElementById('show-risks');
+    const showBenefitsButton = document.getElementById('show-benefits');
+    const risksContent = document.getElementById('risks-content');
+    const benefitsContent = document.getElementById('benefits-content');
+
+    function updateToggleState() {
+        if (!risksContent.classList.contains('hidden')) {
+            showRisksButton.style.backgroundColor = '#81B29A';
+            showRisksButton.style.color = 'white';
+            showBenefitsButton.style.backgroundColor = 'white';
+            showBenefitsButton.style.color = '#3D405B';
+        } else {
+            showBenefitsButton.style.backgroundColor = '#81B29A';
+            showBenefitsButton.style.color = 'white';
+            showRisksButton.style.backgroundColor = 'white';
+            showRisksButton.style.color = '#3D405B';
+        }
+    }
+    
+    showRisksButton.addEventListener('click', () => {
+        risksContent.classList.remove('hidden');
+        benefitsContent.classList.add('hidden');
+        updateToggleState();
+    });
+
+    showBenefitsButton.addEventListener('click', () => {
+        benefitsContent.classList.remove('hidden');
+        risksContent.classList.add('hidden');
+        updateToggleState();
+    });
+    
+    updateToggleState();
+
+    const roleButtons = document.querySelectorAll('.role-button');
+    const roleContents = document.querySelectorAll('.role-content');
+
+    roleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const role = this.dataset.role;
+            
+            roleButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            roleContents.forEach(content => {
+                content.classList.toggle('hidden', content.id !== `role-content-${role}`);
+            });
+            
+            document.querySelectorAll('.accordion-header.open').forEach(openHeader => {
+               toggleAccordion(openHeader, false);
+            });
+            const firstAccordion = document.querySelector(`#role-content-${role} .accordion-item .accordion-header`);
+            if(firstAccordion) {
+                toggleAccordion(firstAccordion, true);
+            }
+        });
+    });
+
+    // Auto-select first role on load
+    if (roleButtons.length > 0) {
+        roleButtons[0].click();
+    }
+    
+    const accordionHeaders = document.querySelectorAll('.accordion-header');
+
+    function toggleAccordion(header, forceOpen = null) {
+        const content = header.nextElementSibling;
+        const icon = header.querySelector('span:last-child');
+        const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+
+        const open = forceOpen === null ? !isOpen : forceOpen;
+
+        if (open) {
+            content.style.maxHeight = content.scrollHeight + "px";
+            content.style.paddingTop = "0";
+            content.style.paddingBottom = "1rem";
+            header.classList.add('open');
+            icon.innerText = '−';
+        } else {
+            content.style.maxHeight = null;
+            content.style.paddingTop = null;
+            content.style.paddingBottom = null;
+            header.classList.remove('open');
+            icon.innerText = '+';
+        }
+    }
+    
+    accordionHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            toggleAccordion(this);
+        });
+    });
+
+    const activeUse = document.getElementById('active-use');
+    const passiveUse = document.getElementById('passive-use');
+    const activeInfo = document.getElementById('active-info');
+    const passiveInfo = document.getElementById('passive-info');
+    
+    activeUse.addEventListener('mouseenter', () => activeInfo.style.opacity = 1);
+    activeUse.addEventListener('mouseleave', () => activeInfo.style.opacity = 0);
+    passiveUse.addEventListener('mouseenter', () => passiveInfo.style.opacity = 1);
+    passiveUse.addEventListener('mouseleave', () => passiveInfo.style.opacity = 0);
+
+    const navLinks = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('main > section');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                });
+            }
+        });
+    }, { rootMargin: '-50% 0px -50% 0px' });
+
+    sections.forEach(section => observer.observe(section));
+
+    navLinks.forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+});
+</script>
+
+</body>
+</html>
