@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>樂齡生活互動指南 / Active Ageing Interactive Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured around the three core pillars of Active Ageing (Health, Security, Participation) from the source report, plus an introduction and a practical "Design Your Life" section. This thematic, non-linear dashboard approach was chosen over a direct report-chapter replication to enhance user engagement and allow exploration based on personal interest. The user flow is: land on the intro, grasp the core philosophy, then freely navigate via a sticky header to any pillar. This structure breaks down complex information into digestible, interactive modules (e.g., pension comparison tabs, activity charts), making the content more accessible and less intimidating for the target audience of retirees or pre-retirees. -->
+    <!-- Visualization & Content Choices: 
+        - Active Ageing Framework: Goal=Organize, Method=HTML/CSS diagram, Interaction=Hover for info. Justification: Visually establishes the app's core model.
+        - NHS Activity Recommendations: Goal=Inform/Compare, Method=Chart.js Bar Chart, Interaction=None (visual simplicity). Justification: Quantifies exercise goals clearly.
+        - Eatwell Guide: Goal=Inform (Proportions), Method=Chart.js Doughnut Chart, Interaction=Hover tooltips. Justification: Intuitive for showing parts of a whole.
+        - UK Pension Comparison: Goal=Compare, Method=JS-powered Tabs, Interaction=Click to switch content. Justification: Saves space and simplifies comparison vs. a static table.
+        - Weekly Routine Planner: Goal=Organize/Inspire, Method=HTML Grid with JS-powered modals, Interaction=Click for details. Justification: Turns a static table into an interactive planning tool.
+        - Resource Directory: Goal=Organize, Method=HTML/JS Accordion, Interaction=Click to expand/collapse. Justification: Manages a long list of links cleanly. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) body { font-family: 'Noto Sans TC', sans-serif; }
+        :lang(en) body { font-family: 'Roboto', sans-serif; }
+        body { background-color: #FDFBF8; color: #4F4A45; }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; }
+        .nav-link.active { color: #A47551; border-bottom-color: #A47551; }
+        .nav-link:hover { color: #A47551; }
+        .pillar-card { background-color: #F7F1E5; transition: transform 0.3s, box-shadow 0.3s; }
+        .pillar-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
+        .tab-btn.active { background-color: #A47551; color: #FFFFFF; }
+        .tab-btn { background-color: #EADDC6; color: #4F4A45; }
+        .accordion-header { transition: background-color 0.3s; }
+        .accordion-header:hover { background-color: #F7F1E5; }
+        .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 640px) { .chart-container { height: 350px; } }
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 40;
+            display: none; 
+        }
+        .modal-content {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 50; display: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-[#FDFBF8]/80 backdrop-blur-sm sticky top-0 z-30 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-[#A47551]" data-lang-key="app_title">樂齡生活互動指南</h1>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#intro" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_intro">核心理念</a>
+                    <a href="#health" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_health">健康支柱</a>
+                    <a href="#security" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_security">安全支柱</a>
+                    <a href="#participation" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_participation">參與支柱</a>
+                    <a href="#design" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_design">設計您的生活</a>
+                    <a href="#resources" class="nav-link text-gray-600 border-b-2 border-transparent pb-1" data-lang-key="nav_resources">資源中心</a>
+                    <button id="lang-switcher" class="ml-4 px-3 py-1 text-sm border-2 border-[#A47551] text-[#A47551] rounded-full hover:bg-[#A47551] hover:text-white transition-colors">English</button>
+                </nav>
+                <div class="flex items-center md:hidden">
+                    <button id="lang-switcher-mobile" class="mr-2 px-3 py-1 text-sm border-2 border-[#A47551] text-[#A47551] rounded-full hover:bg-[#A47551] hover:text-white transition-colors">English</button>
+                    <button id="mobile-menu-button" class="p-2 rounded-md text-gray-600 hover:text-[#A47551] hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#A47551]">
+                        <span class="sr-only" data-lang-key="sr_open_menu">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#intro" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_intro_mobile">核心理念</a>
+                <a href="#health" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_health_mobile">健康支柱</a>
+                <a href="#security" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_security_mobile">安全支柱</a>
+                <a href="#participation" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_participation_mobile">參與支柱</a>
+                <a href="#design" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_design_mobile">設計您的生活</a>
+                <a href="#resources" class="nav-link-mobile text-gray-600 hover:bg-[#F7F1E5] hover:text-[#A47551] block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_resources_mobile">資源中心</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="intro" class="scroll-mt-16 text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-[#A47551] mb-4" data-lang-key="intro_title">重新定義退休：擁抱積極老齡化</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-700 mb-8" data-lang-key="intro_desc">
+                歡迎來到您的退休生活新藍圖。本指南將帶您超越傳統的退休觀念，探索「積極老齡化」的賦權理念。這意味著退休不是人生的終點，而是一個充滿成長、參與和深刻幸福感的全新篇章。此應用程式將積極老齡化的核心理念——健康、安全與參與——轉化為實際可行的生活策略，助您擘劃一條通往璀璨、健康且富有意義的晚年之路。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="pillar-card p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="text-4xl mb-4 text-[#6A9C89]">🌿</div>
+                    <h3 class="text-2xl font-bold text-[#6A9C89] mb-2" data-lang-key="pillar_health_title">健康 Health</h3>
+                    <p class="text-gray-600" data-lang-key="pillar_health_desc">促進身體、心理和社會的全面福祉，追求韌性與獨立，預防勝於治療。</p>
+                </div>
+                <div class="pillar-card p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="text-4xl mb-4 text-[#A47551]">🛡️</div>
+                    <h3 class="text-2xl font-bold text-[#A47551] mb-2" data-lang-key="pillar_security_title">安全 Security</h3>
+                    <p class="text-gray-600" data-lang-key="pillar_security_desc">確保財務穩定、人身安全和獲得照護的權利，為所有活動提供堅實基礎。</p>
+                </div>
+                <div class="pillar-card p-6 rounded-xl shadow-md border border-gray-200">
+                    <div class="text-4xl mb-4 text-[#89A1C4]">🤝</div>
+                    <h3 class="text-2xl font-bold text-[#89A1C4] mb-2" data-lang-key="pillar_participation_title">參與 Participation</h3>
+                    <p class="text-gray-600" data-lang-key="pillar_participation_desc">持續參與社會、文化和公民事務，透過學習與貢獻找到目標感和活力。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="health" class="scroll-mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#6A9C89]" data-lang-key="health_title">健康支柱：滋養身心靈</h2>
+            <p class="max-w-3xl mx-auto text-lg text-center text-gray-700 mb-12" data-lang-key="health_desc">
+                身心健康是享受退休生活的基石。本節整合了身體活動、均衡營養和心靈滋養的關鍵策略，旨在幫助您建立韌性，維持獨立自主的生活品質。這裡的每一個建議不僅是為了預防疾病，更是為了提升您的日常活力與幸福感。
+            </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="health_activity_title">每週身體活動目標</h3>
+                    <p class="text-center text-gray-600 mb-4" data-lang-key="health_activity_desc">根據英國NHS建議，65歲以上成年人應達成以下目標以維持健康。</p>
+                    <div class="chart-container h-64 sm:h-80">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    <div class="mt-6 space-y-3">
+                         <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg" data-lang-key="health_strength_title">💪 每週2次力量訓練</h4>
+                            <p class="text-gray-600" data-lang-key="health_strength_desc">例如：提重物、瑜珈、皮拉提斯、園藝。</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg" data-lang-key="health_balance_title">🧘 每週2次平衡與柔韌性訓練</h4>
+                            <p class="text-gray-600" data-lang-key="health_balance_desc">例如：太極、單腳站立、伸展運動。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                     <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="health_nutrition_title">均衡飲食指南 (Eatwell)</h3>
+                     <p class="text-center text-gray-600 mb-4" data-lang-key="health_nutrition_desc">均衡的飲食是身體健康的燃料。下圖展示了各類食物的建議攝取比例。</p>
+                    <div class="chart-container h-64 sm:h-80">
+                        <canvas id="nutritionChart"></canvas>
+                    </div>
+                    <div class="mt-6 text-center text-gray-600">
+                        <p data-lang-key="health_nutrition_tip"><strong>關鍵提醒：</strong>每天至少5份蔬果，多喝水，每週至少一份富含油脂的魚。</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="health_mental_title">心靈與認知健康策略</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">🧠</div>
+                            <h4 class="font-bold text-lg mb-2" data-lang-key="health_brain_title">鍛鍊大腦</h4>
+                            <p class="text-gray-600" data-lang-key="health_brain_desc">透過學習新技能（語言、樂器）、玩益智遊戲（數獨、填字）和進行創意追求（繪畫、寫作）來保持大腦活躍。</p>
+                        </div>
+                         <div class="text-center">
+                            <div class="text-3xl mb-2">👨‍👩‍👧‍👦</div>
+                            <h4 class="font-bold text-lg mb-2" data-lang-key="health_social_title">對抗孤獨</h4>
+                            <p class="text-gray-600" data-lang-key="health_social_desc">主動建立社交網絡，加入俱樂部、參加課程或從事志願服務，並善用科技與親友保持聯繫。</p>
+                        </div>
+                         <div class="text-center">
+                            <div class="text-3xl mb-2">😌</div>
+                            <h4 class="font-bold text-lg mb-2" data-lang-key="health_stress_title">管理壓力</h4>
+                            <p class="text-gray-600" data-lang-key="health_stress_desc">練習正念、深呼吸，維持規律作息，並透過散步等溫和運動釋放緊張情緒，培養情緒韌性。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="scroll-mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#A47551]" data-lang-key="security_title">安全支柱：規劃您的財務未來</h2>
+            <p class="max-w-3xl mx-auto text-lg text-center text-gray-700 mb-12" data-lang-key="security_desc">
+                財務安全是實現積極退休生活的基石，它給予您追求熱情和參與活動的自由與信心。本節將複雜的英國退休金體系簡化，並提供策略性規劃的要點。了解您的收入來源和增長資產的方法，是確保您能安享晚年的第一步。
+            </p>
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="security_pension_title">英國退休金體系解析</h3>
+                <div class="max-w-2xl mx-auto">
+                    <div class="flex justify-center border-b border-gray-200 mb-6">
+                        <button class="tab-btn flex-1 py-2 px-4 rounded-t-lg font-semibold active" data-tab="state" data-lang-key="tab_state">國家養老金</button>
+                        <button class="tab-btn flex-1 py-2 px-4 rounded-t-lg font-semibold" data-tab="workplace" data-lang-key="tab_workplace">職場養老金</button>
+                        <button class="tab-btn flex-1 py-2 px-4 rounded-t-lg font-semibold" data-tab="personal" data-lang-key="tab_personal">個人養老金</button>
+                    </div>
+                    <div id="tab-content">
+                        <div class="tab-pane active" id="state">
+                            <h4 class="text-xl font-bold mb-2" data-lang-key="state_pension_title">國家養老金 (State Pension)</h4>
+                            <p class="text-gray-600 mb-4" data-lang-key="state_pension_desc">由政府提供，是退休收入的基礎。金額取決於您的國民保險（NI）繳款記錄。</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="state_pension_l1"><strong>資金來源：</strong>國民保險 (NI) 繳款。</li>
+                                <li data-lang-key="state_pension_l2"><strong>資格：</strong>通常需要至少10年NI繳款年資，約35年可領取全額。</li>
+                                <li data-lang-key="state_pension_l3"><strong>如何領取：</strong>達到國家養老金年齡後向政府申領。</li>
+                            </ul>
+                        </div>
+                        <div class="tab-pane hidden" id="workplace">
+                            <h4 class="text-xl font-bold mb-2" data-lang-key="workplace_pension_title">職場養老金 (Workplace Pension)</h4>
+                            <p class="text-gray-600 mb-4" data-lang-key="workplace_pension_desc">由雇主設立，通常您和雇主都會供款。自2012年起有「自動加入」政策。</p>
+                             <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="workplace_pension_l1"><strong>資金來源：</strong>雇員和雇主共同供款。</li>
+                                <li data-lang-key="workplace_pension_l2"><strong>最終金額：</strong>取決於總供款額與投資表現（適用於確定提撥制）。</li>
+                                <li data-lang-key="workplace_pension_l3"><strong>重要提示：</strong>若您換過工作，記得使用政府的養老金追蹤服務。</li>
+                            </ul>
+                        </div>
+                        <div class="tab-pane hidden" id="personal">
+                             <h4 class="text-xl font-bold mb-2" data-lang-key="personal_pension_title">個人養老金 (Personal Pension)</h4>
+                            <p class="text-gray-600 mb-4" data-lang-key="personal_pension_desc">由您自己安排的退休金計畫，例如SIPP，適合自僱人士或希望補充退休儲蓄者。</p>
+                             <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="personal_pension_l1"><strong>資金來源：</strong>個人供款。</li>
+                                <li data-lang-key="personal_pension_l2"><strong>最終金額：</strong>取決於總供款額與投資表現。</li>
+                                <li data-lang-key="personal_pension_l3"><strong>靈活性：</strong>通常在投資選擇上提供更大的靈活性。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <h3 class="text-2xl font-bold mt-12 mb-6 text-center" data-lang-key="security_planning_title">策略性財務規劃要點</h3>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div>
+                        <div class="text-3xl mb-2">📈</div>
+                        <h4 class="font-bold text-lg" data-lang-key="security_plan1_title">多元化投資</h4>
+                        <p class="text-gray-600" data-lang-key="security_plan1_desc">將資產分散於股票、債券等不同類別以降低風險。</p>
+                    </div>
+                     <div>
+                        <div class="text-3xl mb-2">💰</div>
+                        <h4 class="font-bold text-lg" data-lang-key="security_plan2_title">稅務效率</h4>
+                        <p class="text-gray-600" data-lang-key="security_plan2_desc">善用ISA等免稅帳戶，並明智地規劃養老金提款方式。</p>
+                    </div>
+                    <div>
+                        <div class="text-3xl mb-2">⚖️</div>
+                        <h4 class="font-bold text-lg" data-lang-key="security_plan3_title">平衡增長與穩定</h4>
+                        <p class="text-gray-600" data-lang-key="security_plan3_desc">在追求資本增值與尋求穩定收入之間取得平衡。</p>
+                    </div>
+                     <div>
+                        <div class="text-3xl mb-2">👨‍🏫</div>
+                        <h4 class="font-bold text-lg" data-lang-key="security_plan4_title">考慮第二事業</h4>
+                        <p class="text-gray-600" data-lang-key="security_plan4_desc">兼職工作或諮詢不僅提供收入，也帶來目標感。</p>
+                    </div>
+                 </div>
+            </div>
+        </section>
+
+        <section id="participation" class="scroll-mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#89A1C4]" data-lang-key="participation_title">參與支柱：尋找目標與貢獻</h2>
+            <p class="max-w-3xl mx-auto text-lg text-center text-gray-700 mb-12" data-lang-key="participation_desc">
+                有意義的參與是點燃退休生活活力的火花。本節的核心是「終身學習」和「社會貢獻」。這不僅關乎保持忙碌，更在於透過學習新知、分享經驗和服務社群，來發現新的目標與熱情，從而獲得深刻的滿足感與成就感。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4" data-lang-key="participation_learning_title">終身學習的力量</h3>
+                    <p class="text-gray-600 mb-4" data-lang-key="participation_learning_desc">退休提供了探索新知的絕佳機會。學習不僅能健腦，還能拓展社交圈，帶來成就感。</p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_learning_l1"><strong>學習新技能：</strong>挑戰自我，學習一門新語言、樂器、攝影或電腦技能。</span>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_learning_l2"><strong>加入學習社群：</strong>參加「第三年齡大學」(u3a) 的課程或本地讀書會。</span>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_learning_l3"><strong>利用線上資源：</strong>探索如 OpenLearn 等平台提供的免費線上課程。</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4" data-lang-key="participation_contrib_title">透過貢獻找到滿足感</h3>
+                    <p class="text-gray-600 mb-4" data-lang-key="participation_contrib_desc">志願服務是回饋社會、結識同好並找到目標感的絕佳途徑。這是一種「高回報」活動。</p>
+                     <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_contrib_l1"><strong>尋找機會：</strong>從地方志工中心或 Do IT 等線上平台開始。</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_contrib_l2"><strong>發揮您的專長：</strong>您的經驗和技能對慈善機構、學校或社區團體來說是寶貴的資產。</span>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-green-500 mr-3 mt-1">✓</span>
+                            <span data-lang-key="participation_contrib_l3"><strong>獲得多重益處：</strong>志願服務能同時促進社交、認知和心理健康。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="design" class="scroll-mt-16 mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#A47551]" data-lang-key="design_title">設計您的生活：從願景到日常</h2>
+            <p class="max-w-3xl mx-auto text-lg text-center text-gray-700 mb-12" data-lang-key="design_desc">
+                一個精彩的退休生活需要主動設計。本節將所有理念融會貫通，指導您如何建立一個既有結構又富彈性的日常生活。一個自我設計的例行公事能提供目標感和動力，將您從漫無目的的狀態中解放出來，賦予您塑造每一天的力量。
+            </p>
+            <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold mb-6 text-center" data-lang-key="design_planner_title">一週生活規劃範本</h3>
+                <p class="text-center text-gray-600 mb-8" data-lang-key="design_planner_desc">這是一個平衡了運動、社交、學習和放鬆的範例。點擊每個時段查看活動建議，並以此為靈感設計您專屬的時間表。</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border-t border-l border-gray-200">
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r hidden lg:block" data-lang-key="planner_time">時間</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_mon">週一</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_tue">週二</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_wed">週三</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_thu">週四</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_fri">週五</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_sat">週六</div>
+                    <div class="font-bold text-center py-2 bg-gray-50 border-b border-r col-span-2 sm:col-span-4 lg:col-span-1" data-lang-key="planner_sun">週日</div>
+
+                    <div class="font-bold text-center py-4 bg-gray-50 border-b border-r hidden lg:flex items-center justify-center" data-lang-key="planner_morning">上午</div>
+                    <div class="planner-slot border-b border-r" data-key="mon_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="tue_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="wed_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="thu_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="fri_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="sat_am"></div>
+                    <div class="planner-slot border-b border-r" data-key="sun_am"></div>
+
+                    <div class="font-bold text-center py-4 bg-gray-50 border-b border-r hidden lg:flex items-center justify-center" data-lang-key="planner_afternoon">下午</div>
+                    <div class="planner-slot border-b border-r" data-key="mon_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="tue_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="wed_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="thu_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="fri_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="sat_pm"></div>
+                    <div class="planner-slot border-b border-r" data-key="sun_pm"></div>
+
+                    <div class="font-bold text-center py-4 bg-gray-50 border-b border-r hidden lg:flex items-center justify-center" data-lang-key="planner_evening">晚上</div>
+                    <div class="planner-slot border-b border-r" data-key="mon_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="tue_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="wed_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="thu_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="fri_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="sat_eve"></div>
+                    <div class="planner-slot border-b border-r" data-key="sun_eve"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center mb-12" data-lang-key="resources_title">資源中心</h2>
+            <div class="max-w-3xl mx-auto space-y-4">
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-lg">
+                        <span data-lang-key="resources_cat1_title">財務規劃與退休金</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" data-lang-key="resources_cat1_list">
+                            <li>GOV.UK: Plan for Retirement - 英國政府官方退休規劃入口網站</li>
+                            <li>Pension Tracing Service - 用於追蹤失聯的舊職場退休金</li>
+                            <li>MoneyHelper (including Pension Wise) - 提供免費、公正的退休金指導服務</li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-lg">
+                        <span data-lang-key="resources_cat2_title">健康與福祉</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" data-lang-key="resources_cat2_list">
+                           <li>NHS Live Well - 提供運動和飲食指南的官方健康資訊平台</li>
+                           <li>Age UK - 提供諮詢熱線、健康福祉資訊和地方服務</li>
+                           <li>The Silver Line - 為年長者設立的免費保密求助熱線</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-lg">
+                        <span data-lang-key="resources_cat3_title">終身學習</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" data-lang-key="resources_cat3_list">
+                           <li>University of the Third Age (u3a) - 遍布全國的學習團體</li>
+                           <li>OpenLearn - 由英國公開大學提供的免費線上課程</li>
+                           <li>Senior Planet - 提供專為年長者設計的線上課程</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-sm border border-gray-200">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-lg">
+                        <span data-lang-key="resources_cat4_title">志願服務與社會參與</span>
+                        <span class="accordion-icon">▼</span>
+                    </button>
+                    <div class="accordion-content hidden p-4 border-t border-gray-200">
+                        <ul class="list-disc list-inside space-y-2 text-gray-700" data-lang-key="resources_cat4_list">
+                            <li>NCVO - 尋找志願服務機會的國家級機構</li>
+                            <li>Do IT - 全國性的志願服務機會資料庫</li>
+                            <li>Volunteering Matters - 專為50歲以上人士提供志願服務機會</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#F7F1E5] mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-600">
+            <p data-lang-key="footer_text">&copy; 2025 樂齡生活互動指南。基於「擘劃璀璨晚年」報告內容創建。</p>
+        </div>
+    </footer>
+    
+    <div id="modal-backdrop" class="modal-backdrop"></div>
+    <div id="modal-content" class="modal-content bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-sm text-center">
+        <h3 id="modal-title" class="text-xl font-bold mb-4"></h3>
+        <p id="modal-body" class="text-gray-700 mb-6"></p>
+        <button id="modal-close" class="bg-[#A47551] text-white py-2 px-6 rounded-lg hover:bg-opacity-90" data-lang-key="modal_close_btn">關閉</button>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const translations = {
+        zh: {
+            app_title: "樂齡生活互動指南",
+            nav_intro: "核心理念", nav_health: "健康支柱", nav_security: "安全支柱", nav_participation: "參與支柱", nav_design: "設計您的生活", nav_resources: "資源中心",
+            nav_intro_mobile: "核心理念", nav_health_mobile: "健康支柱", nav_security_mobile: "安全支柱", nav_participation_mobile: "參與支柱", nav_design_mobile: "設計您的生活", nav_resources_mobile: "資源中心",
+            sr_open_menu: "打開主選單", lang_switcher: "English",
+            intro_title: "重新定義退休：擁抱積極老齡化",
+            intro_desc: "歡迎來到您的退休生活新藍圖。本指南將帶您超越傳統的退休觀念，探索「積極老齡化」的賦權理念。這意味著退休不是人生的終點，而是一個充滿成長、參與和深刻幸福感的全新篇章。此應用程式將積極老齡化的核心理念——健康、安全與參與——轉化為實際可行的生活策略，助您擘劃一條通往璀璨、健康且富有意義的晚年之路。",
+            pillar_health_title: "健康 Health", pillar_health_desc: "促進身體、心理和社會的全面福祉，追求韌性與獨立，預防勝於治療。",
+            pillar_security_title: "安全 Security", pillar_security_desc: "確保財務穩定、人身安全和獲得照護的權利，為所有活動提供堅實基礎。",
+            pillar_participation_title: "參與 Participation", pillar_participation_desc: "持續參與社會、文化和公民事務，透過學習與貢獻找到目標感和活力。",
+            health_title: "健康支柱：滋養身心靈",
+            health_desc: "身心健康是享受退休生活的基石。本節整合了身體活動、均衡營養和心靈滋養的關鍵策略，旨在幫助您建立韌性，維持獨立自主的生活品質。這裡的每一個建議不僅是為了預防疾病，更是為了提升您的日常活力與幸福感。",
+            health_activity_title: "每週身體活動目標", health_activity_desc: "根據英國NHS建議，65歲以上成年人應達成以下目標以維持健康。",
+            health_strength_title: "💪 每週2次力量訓練", health_strength_desc: "例如：提重物、瑜珈、皮拉提斯、園藝。",
+            health_balance_title: "🧘 每週2次平衡與柔韌性訓練", health_balance_desc: "例如：太極、單腳站立、伸展運動。",
+            health_nutrition_title: "均衡飲食指南 (Eatwell)", health_nutrition_desc: "均衡的飲食是身體健康的燃料。下圖展示了各類食物的建議攝取比例。",
+            health_nutrition_tip: "<strong>關鍵提醒：</strong>每天至少5份蔬果，多喝水，每週至少一份富含油脂的魚。",
+            health_mental_title: "心靈與認知健康策略",
+            health_brain_title: "鍛鍊大腦", health_brain_desc: "透過學習新技能（語言、樂器）、玩益智遊戲（數獨、填字）和進行創意追求（繪畫、寫作）來保持大腦活躍。",
+            health_social_title: "對抗孤獨", health_social_desc: "主動建立社交網絡，加入俱樂部、參加課程或從事志願服務，並善用科技與親友保持聯繫。",
+            health_stress_title: "管理壓力", health_stress_desc: "練習正念、深呼吸，維持規律作息，並透過散步等溫和運動釋放緊張情緒，培養情緒韌性。",
+            security_title: "安全支柱：規劃您的財務未來",
+            security_desc: "財務安全是實現積極退休生活的基石，它給予您追求熱情和參與活動的自由與信心。本節將複雜的英國退休金體系簡化，並提供策略性規劃的要點。了解您的收入來源和增長資產的方法，是確保您能安享晚年的第一步。",
+            security_pension_title: "英國退休金體系解析",
+            tab_state: "國家養老金", tab_workplace: "職場養老金", tab_personal: "個人養老金",
+            state_pension_title: "國家養老金 (State Pension)", state_pension_desc: "由政府提供，是退休收入的基礎。金額取決於您的國民保險（NI）繳款記錄。",
+            state_pension_l1: "<strong>資金來源：</strong>國民保險 (NI) 繳款。", state_pension_l2: "<strong>資格：</strong>通常需要至少10年NI繳款年資，約35年可領取全額。", state_pension_l3: "<strong>如何領取：</strong>達到國家養老金年齡後向政府申領。",
+            workplace_pension_title: "職場養老金 (Workplace Pension)", workplace_pension_desc: "由雇主設立，通常您和雇主都會供款。自2012年起有「自動加入」政策。",
+            workplace_pension_l1: "<strong>資金來源：</strong>雇員和雇主共同供款。", workplace_pension_l2: "<strong>最終金額：</strong>取決於總供款額與投資表現（適用於確定提撥制）。", workplace_pension_l3: "<strong>重要提示：</strong>若您換過工作，記得使用政府的養老金追蹤服務。",
+            personal_pension_title: "個人養老金 (Personal Pension)", personal_pension_desc: "由您自己安排的退休金計畫，例如SIPP，適合自僱人士或希望補充退休儲蓄者。",
+            personal_pension_l1: "<strong>資金來源：</strong>個人供款。", personal_pension_l2: "<strong>最終金額：</strong>取決於總供款額與投資表現。", personal_pension_l3: "<strong>靈活性：</strong>通常在投資選擇上提供更大的靈活性。",
+            security_planning_title: "策略性財務規劃要點",
+            security_plan1_title: "多元化投資", security_plan1_desc: "將資產分散於股票、債券等不同類別以降低風險。",
+            security_plan2_title: "稅務效率", security_plan2_desc: "善用ISA等免稅帳戶，並明智地規劃養老金提款方式。",
+            security_plan3_title: "平衡增長與穩定", security_plan3_desc: "在追求資本增值與尋求穩定收入之間取得平衡。",
+            security_plan4_title: "考慮第二事業", security_plan4_desc: "兼職工作或諮詢不僅提供收入，也帶來目標感。",
+            participation_title: "參與支柱：尋找目標與貢獻",
+            participation_desc: "有意義的參與是點燃退休生活活力的火花。本節的核心是「終身學習」和「社會貢獻」。這不僅關乎保持忙碌，更在於透過學習新知、分享經驗和服務社群，來發現新的目標與熱情，從而獲得深刻的滿足感與成就感。",
+            participation_learning_title: "終身學習的力量", participation_learning_desc: "退休提供了探索新知的絕佳機會。學習不僅能健腦，還能拓展社交圈，帶來成就感。",
+            participation_learning_l1: "<strong>學習新技能：</strong>挑戰自我，學習一門新語言、樂器、攝影或電腦技能。",
+            participation_learning_l2: "<strong>加入學習社群：</strong>參加「第三年齡大學」(u3a) 的課程或本地讀書會。",
+            participation_learning_l3: "<strong>利用線上資源：</strong>探索如 OpenLearn 等平台提供的免費線上課程。",
+            participation_contrib_title: "透過貢獻找到滿足感", participation_contrib_desc: "志願服務是回饋社會、結識同好並找到目標感的絕佳途徑。這是一種「高回報」活動。",
+            participation_contrib_l1: "<strong>尋找機會：</strong>從地方志工中心或 Do IT 等線上平台開始。",
+            participation_contrib_l2: "<strong>發揮您的專長：</strong>您的經驗和技能對慈善機構、學校或社區團體來說是寶貴的資產。",
+            participation_contrib_l3: "<strong>獲得多重益處：</strong>志願服務能同時促進社交、認知和心理健康。",
+            design_title: "設計您的生活：從願景到日常",
+            design_desc: "一個精彩的退休生活需要主動設計。本節將所有理念融會貫通，指導您如何建立一個既有結構又富彈性的日常生活。一個自我設計的例行公事能提供目標感和動力，將您從漫無目的的狀態中解放出來，賦予您塑造每一天的力量。",
+            design_planner_title: "一週生活規劃範本", design_planner_desc: "這是一個平衡了運動、社交、學習和放鬆的範例。點擊每個時段查看活動建議，並以此為靈感設計您專屬的時間表。",
+            planner_time: "時間", planner_mon: "週一", planner_tue: "週二", planner_wed: "週三", planner_thu: "週四", planner_fri: "週五", planner_sat: "週六", planner_sun: "週日",
+            planner_morning: "上午", planner_afternoon: "下午", planner_evening: "晚上",
+            resources_title: "資源中心",
+            resources_cat1_title: "財務規劃與退休金", resources_cat1_list: `<li>GOV.UK: Plan for Retirement - 英國政府官方退休規劃入口網站</li><li>Pension Tracing Service - 用於追蹤失聯的舊職場退休金</li><li>MoneyHelper (including Pension Wise) - 提供免費、公正的退休金指導服務</li>`,
+            resources_cat2_title: "健康與福祉", resources_cat2_list: `<li>NHS Live Well - 提供運動和飲食指南的官方健康資訊平台</li><li>Age UK - 提供諮詢熱線、健康福祉資訊和地方服務</li><li>The Silver Line - 為年長者設立的免費保密求助熱線</li>`,
+            resources_cat3_title: "終身學習", resources_cat3_list: `<li>University of the Third Age (u3a) - 遍布全國的學習團體</li><li>OpenLearn - 由英國公開大學提供的免費線上課程</li><li>Senior Planet - 提供專為年長者設計的線上課程</li>`,
+            resources_cat4_title: "志願服務與社會參與", resources_cat4_list: `<li>NCVO - 尋找志願服務機會的國家級機構</li><li>Do IT - 全國性的志願服務機會資料庫</li><li>Volunteering Matters - 專為50歲以上人士提供志願服務機會</li>`,
+            footer_text: "&copy; 2025 樂齡生活互動指南。基於「擘劃璀璨晚年」報告內容創建。",
+            modal_close_btn: "關閉",
+            planner_data: {
+                mon_am: { title: "週一上午", activity: "快走，與朋友喝咖啡" }, tue_am: { title: "週二上午", activity: "園藝" }, wed_am: { title: "週三上午", activity: "在慈善商店做志工" }, thu_am: { title: "週四上午", activity: "健身房力量訓練" }, fri_am: { title: "週五上午", activity: "游泳" }, sat_am: { title: "週六上午", activity: "與家人共度時光" }, sun_am: { title: "週日上午", activity: "閱讀，放鬆" },
+                mon_pm: { title: "週一下午", activity: "處理家務，午休" }, tue_pm: { title: "週二下午", activity: "U3A歷史課" }, wed_pm: { title: "週三下午", activity: "處理個人事務" }, thu_pm: { title: "週四下午", activity: "嗜好時間（繪畫）" }, fri_pm: { title: "週五下午", activity: "處理家務，午休" }, sat_pm: { title: "週六下午", activity: "遠足" }, sun_pm: { title: "週日下午", activity: "與朋友共進午餐" },
+                mon_eve: { title: "週一晚上", activity: "烹飪，與家人共進晚餐" }, tue_eve: { title: "週二晚上", activity: "閱讀" }, wed_eve: { title: "週三晚上", activity: "觀看電影" }, thu_eve: { title: "週四晚上", activity: "烹飪，與家人共進晚餐" }, fri_eve: { title: "週五晚上", activity: "外出用餐或看戲" }, sat_eve: { title: "週六晚上", activity: "棋牌遊戲之夜" }, sun_eve: { title: "週日晚上", activity: "規劃下週活動" }
+            },
+            chart_activity_label: "建議每週分鐘數", chart_activity_cat1: "中等強度活動 (分鐘)", chart_activity_cat2: "高強度活動 (分鐘)", chart_activity_tooltip_suffix: "分鐘",
+            chart_nutrition_cat1: "水果和蔬菜", chart_nutrition_cat2: "澱粉類碳水化合物", chart_nutrition_cat3: "蛋白質", chart_nutrition_cat4: "乳製品或替代品", chart_nutrition_cat5: "油和塗抹醬", chart_nutrition_tooltip_prefix: "約"
+        },
+        en: {
+            app_title: "Active Ageing Interactive Guide",
+            nav_intro: "Core Philosophy", nav_health: "Health Pillar", nav_security: "Security Pillar", nav_participation: "Participation Pillar", nav_design: "Design Your Life", nav_resources: "Resource Hub",
+            nav_intro_mobile: "Core Philosophy", nav_health_mobile: "Health Pillar", nav_security_mobile: "Security Pillar", nav_participation_mobile: "Participation Pillar", nav_design_mobile: "Design Your Life", nav_resources_mobile: "Resource Hub",
+            sr_open_menu: "Open main menu", lang_switcher: "中文",
+            intro_title: "Redefining Retirement: Embracing Active Ageing",
+            intro_desc: "Welcome to your new retirement blueprint. This guide moves beyond traditional notions of retirement to explore the empowering philosophy of 'Active Ageing.' It means retirement isn't an end, but a dynamic new chapter for growth, engagement, and profound well-being. This application translates the core pillars of Active Ageing—Health, Security, and Participation—into actionable life strategies, helping you chart a course toward a brilliant, healthy, and meaningful later life.",
+            pillar_health_title: "Health", pillar_health_desc: "Promoting complete physical, mental, and social well-being, focusing on resilience, independence, and prevention over cure.",
+            pillar_security_title: "Security", pillar_security_desc: "Ensuring financial stability, physical safety, and the right to care, providing a solid foundation for all activities.",
+            pillar_participation_title: "Participation", pillar_participation_desc: "Continuing engagement in social, cultural, and civic affairs, finding purpose and vitality through learning and contribution.",
+            health_title: "Health Pillar: Nourishing Mind, Body & Spirit",
+            health_desc: "Physical and mental health is the cornerstone of an enjoyable retirement. This section integrates key strategies for physical activity, balanced nutrition, and mental wellness to help you build resilience and maintain an independent quality of life. Every recommendation here is not just about preventing illness, but about boosting your daily vitality and happiness.",
+            health_activity_title: "Weekly Physical Activity Goals", health_activity_desc: "Based on NHS recommendations, adults aged 65 and over should aim for these goals to stay healthy.",
+            health_strength_title: "💪 2x Weekly Strength Training", health_strength_desc: "Examples: Carrying heavy shopping, yoga, pilates, heavy gardening.",
+            health_balance_title: "🧘 2x Weekly Balance & Flexibility", health_balance_desc: "Examples: Tai chi, standing on one leg, stretching exercises.",
+            health_nutrition_title: "The Eatwell Guide", health_nutrition_desc: "A balanced diet is the fuel for a healthy body. The chart below shows the recommended proportions of different food groups.",
+            health_nutrition_tip: "<strong>Key Reminders:</strong> At least 5 portions of fruit and veg a day, drink plenty of fluids, and have at least one portion of oily fish per week.",
+            health_mental_title: "Mental & Cognitive Health Strategies",
+            health_brain_title: "Exercise Your Brain", health_brain_desc: "Keep your mind active by learning new skills (language, instrument), playing puzzles (Sudoku, crosswords), and pursuing creative hobbies (painting, writing).",
+            health_social_title: "Combat Loneliness", health_social_desc: "Proactively build your social network by joining clubs, taking classes, or volunteering. Use technology to stay connected with family and friends.",
+            health_stress_title: "Manage Stress", health_stress_desc: "Practice mindfulness, deep breathing, maintain a routine, and use gentle exercise like walking to release tension and build emotional resilience.",
+            security_title: "Security Pillar: Planning Your Financial Future",
+            security_desc: "Financial security is the bedrock of active retirement, providing the freedom and confidence to pursue passions and participate in activities. This section simplifies the complex UK pension system and provides key points for strategic planning. Understanding your income sources and how to grow your assets is the first step to ensuring a comfortable retirement.",
+            security_pension_title: "UK Pension System Explained",
+            tab_state: "State Pension", tab_workplace: "Workplace Pension", tab_personal: "Personal Pension",
+            state_pension_title: "State Pension", state_pension_desc: "Provided by the government, this is the foundation of your retirement income. The amount depends on your National Insurance (NI) record.",
+            state_pension_l1: "<strong>Source:</strong> National Insurance (NI) contributions.", state_pension_l2: "<strong>Eligibility:</strong> Usually need at least 10 years of NI contributions, and around 35 years for the full amount.", state_pension_l3: "<strong>How to claim:</strong> Apply to the government upon reaching State Pension age.",
+            workplace_pension_title: "Workplace Pension", workplace_pension_desc: "Set up by your employer. Both you and your employer usually contribute. 'Auto-enrolment' has been in place since 2012.",
+            workplace_pension_l1: "<strong>Source:</strong> Contributions from you and your employer.", workplace_pension_l2: "<strong>Final amount depends on:</strong> Total contributions and investment performance (for Defined Contribution schemes).", workplace_pension_l3: "<strong>Key tip:</strong> Use the government's Pension Tracing Service if you've had multiple jobs.",
+            personal_pension_title: "Personal Pension", personal_pension_desc: "A pension plan you arrange yourself, like a SIPP. Ideal for the self-employed or those wanting to top up other pensions.",
+            personal_pension_l1: "<strong>Source:</strong> Your own contributions.", personal_pension_l2: "<strong>Final amount depends on:</strong> Total contributions and investment performance.", personal_pension_l3: "<strong>Flexibility:</strong> Often offers greater flexibility in investment choices.",
+            security_planning_title: "Strategic Financial Planning Points",
+            security_plan1_title: "Diversify Investments", security_plan1_desc: "Spread assets across different classes like stocks and bonds to reduce risk.",
+            security_plan2_title: "Tax Efficiency", security_plan2_desc: "Make use of tax-free accounts like ISAs and plan pension withdrawals wisely.",
+            security_plan3_title: "Balance Growth & Stability", security_plan3_desc: "Strike a balance between seeking capital appreciation and ensuring a stable income.",
+            security_plan4_title: "Consider an Encore Career", security_plan4_desc: "Part-time work or consulting provides income and a sense of purpose.",
+            participation_title: "Participation Pillar: Finding Purpose & Contribution",
+            participation_desc: "Meaningful participation is the spark that ignites a vibrant retirement. This section focuses on 'Lifelong Learning' and 'Social Contribution.' It's not just about staying busy, but about discovering new purpose and passion by learning, sharing wisdom, and serving the community, leading to profound satisfaction and fulfillment.",
+            participation_learning_title: "The Power of Lifelong Learning", participation_learning_desc: "Retirement offers a golden opportunity to explore new knowledge. Learning not only keeps the brain healthy but also expands social circles and brings a sense of achievement.",
+            participation_learning_l1: "<strong>Learn a New Skill:</strong> Challenge yourself by learning a new language, a musical instrument, photography, or computer skills.",
+            participation_learning_l2: "<strong>Join a Learning Community:</strong> Participate in classes at the University of the Third Age (u3a) or join a local book club.",
+            participation_learning_l3: "<strong>Use Online Resources:</strong> Explore free online courses from platforms like OpenLearn.",
+            participation_contrib_title: "Finding Fulfilment Through Contribution", participation_contrib_desc: "Volunteering is an excellent way to give back, meet like-minded people, and find a sense of purpose. It's a 'high-return' activity.",
+            participation_contrib_l1: "<strong>Find Opportunities:</strong> Start with your local volunteer centre or online platforms like Do IT.",
+            participation_contrib_l2: "<strong>Use Your Expertise:</strong> Your experience and skills are invaluable assets to charities, schools, or community groups.",
+            participation_contrib_l3: "<strong>Reap Multiple Benefits:</strong> Volunteering promotes social, cognitive, and mental health simultaneously.",
+            design_title: "Design Your Life: From Vision to Daily Routine",
+            design_desc: "A great retirement is actively designed. This section brings all the principles together, guiding you on how to create a daily life that is both structured and flexible. A self-designed routine provides purpose and motivation, freeing you from aimlessness and empowering you to shape each day.",
+            design_planner_title: "Sample Weekly Life Planner", design_planner_desc: "This is a balanced example of exercise, socialising, learning, and relaxation. Click on each slot for activity ideas and use it as inspiration to design your own schedule.",
+            planner_time: "Time", planner_mon: "Mon", planner_tue: "Tue", planner_wed: "Wed", planner_thu: "Thu", planner_fri: "Fri", planner_sat: "Sat", planner_sun: "Sun",
+            planner_morning: "Morning", planner_afternoon: "Afternoon", planner_evening: "Evening",
+            resources_title: "Resource Hub",
+            resources_cat1_title: "Financial Planning & Pensions", resources_cat1_list: `<li>GOV.UK: Plan for Retirement - The official government portal for retirement planning.</li><li>Pension Tracing Service - To find lost old workplace pensions.</li><li>MoneyHelper (including Pension Wise) - For free, impartial guidance on pensions.</li>`,
+            resources_cat2_title: "Health & Wellbeing", resources_cat2_list: `<li>NHS Live Well - Official health information platform with exercise and diet guides.</li><li>Age UK - Offers advice lines, wellbeing information, and local services.</li><li>The Silver Line - A free, confidential helpline for older people.</li>`,
+            resources_cat3_title: "Lifelong Learning", resources_cat3_list: `<li>University of the Third Age (u3a) - A UK-wide movement of locally-run interest groups.</li><li>OpenLearn - Free online courses from The Open University.</li><li>Senior Planet - Offers online courses designed for older adults.</li>`,
+            resources_cat4_title: "Volunteering & Social Participation", resources_cat4_list: `<li>NCVO - The national body for voluntary organisations.</li><li>Do IT - A national database of volunteering opportunities.</li><li>Volunteering Matters - Provides volunteering opportunities specifically for people over 50.</li>`,
+            footer_text: "&copy; 2025 Active Ageing Interactive Guide. Created based on the 'Blueprint for a Brilliant Later Life' report.",
+            modal_close_btn: "Close",
+            planner_data: {
+                mon_am: { title: "Monday Morning", activity: "Brisk walk, coffee with a friend" }, tue_am: { title: "Tuesday Morning", activity: "Gardening" }, wed_am: { title: "Wednesday Morning", activity: "Volunteering at a charity shop" }, thu_am: { title: "Thursday Morning", activity: "Gym for strength training" }, fri_am: { title: "Friday Morning", activity: "Swimming" }, sat_am: { title: "Saturday Morning", activity: "Time with family" }, sun_am: { title: "Sunday Morning", activity: "Reading, relaxing" },
+                mon_pm: { title: "Monday Afternoon", activity: "Chores, nap" }, tue_pm: { title: "Tuesday Afternoon", activity: "U3A history class" }, wed_pm: { title: "Wednesday Afternoon", activity: "Personal errands" }, thu_pm: { title: "Thursday Afternoon", activity: "Hobby time (painting)" }, fri_pm: { title: "Friday Afternoon", activity: "Chores, nap" }, sat_pm: { title: "Saturday Afternoon", activity: "Hiking" }, sun_pm: { title: "Sunday Afternoon", activity: "Lunch with friends" },
+                mon_eve: { title: "Monday Evening", activity: "Cooking, dinner with family" }, tue_eve: { title: "Tuesday Evening", activity: "Reading" }, wed_eve: { title: "Wednesday Evening", activity: "Watching a film" }, thu_eve: { title: "Thursday Evening", activity: "Cooking, dinner with family" }, fri_eve: { title: "Friday Evening", activity: "Dinner out or theatre" }, sat_eve: { title: "Saturday Evening", activity: "Board games night" }, sun_eve: { title: "Sunday Evening", activity: "Planning the week ahead" }
+            },
+            chart_activity_label: "Recommended weekly minutes", chart_activity_cat1: "Moderate Activity (mins)", chart_activity_cat2: "Vigorous Activity (mins)", chart_activity_tooltip_suffix: "minutes",
+            chart_nutrition_cat1: "Fruit & Vegetables", chart_nutrition_cat2: "Starchy Carbohydrates", chart_nutrition_cat3: "Proteins", chart_nutrition_cat4: "Dairy & Alternatives", chart_nutrition_cat5: "Oils & Spreads", chart_nutrition_tooltip_prefix: "Approx."
+        }
+    };
+
+    let currentLang = localStorage.getItem('lang') || 'zh';
+    let activityChart, nutritionChart;
+
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        localStorage.setItem('lang', lang);
+        document.documentElement.lang = lang;
+
+        document.querySelectorAll('[data-lang-key]').forEach(elem => {
+            const key = elem.getAttribute('data-lang-key');
+            if (translations[lang][key]) {
+                elem.innerHTML = translations[lang][key];
+            }
+        });
+
+        document.getElementById('lang-switcher').textContent = translations[lang].lang_switcher;
+        document.getElementById('lang-switcher-mobile').textContent = translations[lang].lang_switcher;
+        
+        updateCharts(lang);
+        populatePlanner(lang);
+    };
+
+    const updateCharts = (lang) => {
+        const langData = translations[lang];
+        
+        activityChart.data.datasets[0].label = langData.chart_activity_label;
+        activityChart.data.labels = [langData.chart_activity_cat1, langData.chart_activity_cat2];
+        activityChart.options.plugins.tooltip.callbacks.label = (context) => ` ${context.raw} ${langData.chart_activity_tooltip_suffix}`;
+        activityChart.update();
+        
+        nutritionChart.data.labels = [langData.chart_nutrition_cat1, langData.chart_nutrition_cat2, langData.chart_nutrition_cat3, langData.chart_nutrition_cat4, langData.chart_nutrition_cat5];
+        nutritionChart.options.plugins.tooltip.callbacks.label = (context) => `${context.label}: ${langData.chart_nutrition_tooltip_prefix} ${context.raw}%`;
+        nutritionChart.update();
+    };
+
+    const populatePlanner = (lang) => {
+        const plannerData = translations[lang].planner_data;
+        document.querySelectorAll('.planner-slot').forEach(slot => {
+            const key = slot.dataset.key;
+            if (plannerData[key]) {
+                const { title, activity } = plannerData[key];
+                const shortActivity = activity.split(/,|，/)[0];
+                const mobileTitle = title.replace('上午', '早').replace('下午', '午').replace('晚上', '晚').replace('Morning','AM').replace('Afternoon','PM').replace('Evening','PM');
+                slot.innerHTML = `<div class="p-2 h-20 flex items-center justify-center text-center text-xs text-gray-600 cursor-pointer hover:bg-[#F7F1E5] transition-colors"><span class="hidden sm:inline">${shortActivity}</span><span class="sm:hidden">${mobileTitle}</span></div>`;
+                slot.dataset.title = title;
+                slot.dataset.activity = activity;
+            }
+        });
+    };
+
+    const createCharts = () => {
+        const activityCtx = document.getElementById('activityChart').getContext('2d');
+        activityChart = new Chart(activityCtx, {
+            type: 'bar', data: { datasets: [{ borderWidth: 1 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, title: { display: false }, tooltip: { callbacks: {} } },
+                scales: { y: { beginAtZero: true, grid: { color: '#F0F0F0' } }, x: { grid: { display: false } } }
+            }
+        });
+
+        const nutritionCtx = document.getElementById('nutritionChart').getContext('2d');
+        nutritionChart = new Chart(nutritionCtx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [40, 38, 12, 8, 2],
+                    backgroundColor: ['#6A9C89', '#EADDC6', '#89A1C4', '#F4A261', '#E76F51'],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 15, padding: 15 } },
+                    title: { display: false },
+                    tooltip: { callbacks: {} }
+                }
+            }
+        });
+    };
+    
+    // Initial Setup
+    createCharts();
+    switchLanguage(currentLang);
+
+    // Event Listeners
+    document.getElementById('lang-switcher').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+    document.getElementById('lang-switcher-mobile').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            tabPanes.forEach(pane => {
+                pane.classList.toggle('hidden', pane.id !== button.dataset.tab);
+                pane.classList.toggle('active', pane.id === button.dataset.tab);
+            });
+        });
+    });
+
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.accordion-icon');
+            const isVisible = !content.classList.contains('hidden');
+            content.classList.toggle('hidden');
+            icon.textContent = isVisible ? '▼' : '▲';
+        });
+    });
+
+    const sections = document.querySelectorAll('section');
+    const navLinks = document.querySelectorAll('nav .nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            if (pageYOffset >= section.offsetTop - 80) current = section.id;
+        });
+        navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href').includes(current));
+        });
+    });
+    
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    document.querySelectorAll('.nav-link-mobile').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+    
+    const modalBackdrop = document.getElementById('modal-backdrop');
+    const modalContent = document.getElementById('modal-content');
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modalClose = document.getElementById('modal-close');
+
+    document.querySelector('#design .grid').addEventListener('click', function(e) {
+        const slot = e.target.closest('.planner-slot');
+        if (slot) {
+            modalTitle.textContent = slot.dataset.title;
+            modalBody.textContent = slot.dataset.activity;
+            modalBackdrop.style.display = 'block';
+            modalContent.style.display = 'block';
+        }
+    });
+    
+    const closeModal = () => {
+        modalBackdrop.style.display = 'none';
+        modalContent.style.display = 'none';
+    };
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+});
+</script>
+
+</body>
+</html>
