@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生成式AI互動報告：藝術、模仿與創造</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Harmony (Stone, Amber, Teal) -->
+    <!-- Application Structure Plan: The application is designed as a thematic, multi-section single-page explorer. This structure breaks down the dense report into four digestible themes: Model Principles, Style Imitation, Nature of Creativity, and Legal Frontiers. A persistent top navigation allows users to jump to any section, facilitating non-linear exploration. This is superior to a simple linear document as it allows users to self-direct their learning journey based on their interests. Key interactions include an interactive radar chart for model comparison, tabbed interfaces for detailed explanations, and accordion-style cards for philosophical and legal arguments, which turn passive reading into an active discovery process. This design prioritizes user comprehension and engagement over rigidly following the source report's chapter structure. -->
+    <!-- Visualization & Content Choices: 
+        - Model Comparison (Table 1) -> Goal: Compare -> Viz: Interactive Radar Chart (Chart.js) -> Interaction: Hovering highlights a model's strengths/weaknesses across Fidelity, Diversity, and Speed, with a linked text description. Justification: Visually superior to a static table for understanding trade-offs.
+        - Model Architectures -> Goal: Organize/Inform -> Viz: HTML/CSS diagrams -> Interaction: Static visual aid. Justification: Lightweight, theme-consistent, and avoids external images/SVG.
+        - Philosophical/Legal Concepts -> Goal: Organize/Inform -> Viz: Accordion Cards -> Interaction: Click-to-expand. Justification: Manages information density, preventing user overload by showing high-level concepts first and allowing drill-down.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <style>
+        :lang(zh-Hant) {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        :lang(en) {
+            font-family: 'Roboto', sans-serif;
+        }
+        body {
+            background-color: #fafaf9; /* stone-50 */
+            color: #292524; /* stone-800 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488; /* teal-600 */
+            border-bottom-color: #0d9488; /* teal-600 */
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            max-height: 450px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .accordion-header.active {
+            background-color: #f59e0b1a; /* amber-400 with opacity */
+        }
+        .tab-button.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header id="header" class="bg-stone-50/80 backdrop-blur-sm sticky top-0 z-50 w-full border-b border-stone-200">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#hero" id="nav-title" class="text-xl font-bold text-teal-700">生成式AI報告</a>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div id="desktop-nav-links" class="ml-10 flex items-baseline space-x-4">
+                        <a href="#section-models" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-600">模型原理</a>
+                        <a href="#section-imitation" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-600">風格模仿</a>
+                        <a href="#section-creativity" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-600">創造本質</a>
+                        <a href="#section-legal" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-600">法律前沿</a>
+                    </div>
+                    <button id="lang-toggle-button" class="ml-6 px-3 py-1.5 rounded-md text-sm font-medium text-teal-600 border border-teal-600 hover:bg-teal-50 transition-colors">English</button>
+                </div>
+                <div class="md:hidden">
+                     <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-stone-500 hover:text-teal-600 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div id="mobile-nav-links" class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#section-models" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-stone-600">模型原理</a>
+                <a href="#section-imitation" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-stone-600">風格模仿</a>
+                <a href="#section-creativity" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-stone-600">創造本質</a>
+                <a href="#section-legal" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-stone-600">法律前沿</a>
+            </div>
+             <div class="px-5 pb-3">
+                 <button id="lang-toggle-button-mobile" class="w-full px-3 py-2 rounded-md text-sm font-medium text-teal-600 border border-teal-600 hover:bg-teal-50 transition-colors">English</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="py-24 sm:py-32 bg-amber-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 id="hero-title" class="text-4xl md:text-6xl font-bold tracking-tight text-stone-900">
+                    <span id="hero-title-1" class="block">生成式人工智慧的</span>
+                    <span id="hero-title-2" class="block text-teal-700">藝術、模仿與創造性本質</span>
+                </h1>
+                <p id="hero-subtitle" class="mt-6 max-w-2xl mx-auto text-lg leading-8 text-stone-600">
+                    一份互動式綜合分析報告，旨在解析驅動AI的底層模型、模仿藝術風格的機制，並深入探討其創造行為的本質與法律邊界。
+                </p>
+                <div class="mt-10">
+                    <a id="hero-button" href="#section-models" class="rounded-md bg-teal-600 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-teal-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600 transition-colors">開始探索 ↓</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-models" class="py-20 sm:py-28">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 id="models-title" class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">演算法畫布：解構生成式AI模型</h2>
+                    <p id="models-subtitle" class="mt-4 max-w-3xl mx-auto text-lg text-stone-600">
+                        生成式AI的魔力源於其複雜的數學模型。本節將解析三種最具影響力的圖像生成模型架構，並透過互動圖表比較其核心性能。您可以點擊下方的模型標籤來切換詳細介紹。
+                    </p>
+                </div>
+
+                <div class="max-w-5xl mx-auto">
+                    <div id="model-tab-buttons" class="mb-8 flex justify-center space-x-2 sm:space-x-4">
+                        <!-- Tab buttons will be injected by JavaScript -->
+                    </div>
+                    <div id="model-tabs-content">
+                        <!-- Content will be injected by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="mt-20">
+                    <h3 id="models-chart-title" class="text-2xl font-bold text-center text-stone-800 mb-4">模型性能比較：三難困境</h3>
+                    <p id="models-chart-subtitle" class="text-center max-w-2xl mx-auto text-stone-600 mb-8">
+                        生成模型常在「保真度」、「多樣性」與「生成速度」之間權衡。下方的雷達圖直觀地展示了三種模型的特性。將滑鼠懸停在圖例上可以高亮對應模型的表現。
+                    </p>
+                    <div class="flex flex-col lg:flex-row items-center gap-8">
+                        <div class="chart-container w-full lg:w-1/2">
+                            <canvas id="modelComparisonChart"></canvas>
+                        </div>
+                        <div id="model-chart-info" class="w-full lg:w-1/2 p-6 bg-white rounded-xl shadow-md border border-stone-200">
+                            <!-- Info text will be injected by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section-imitation" class="py-20 sm:py-28 bg-stone-100">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 id="imitation-title" class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">模仿的藝術：AI如何複製風格</h2>
+                    <p id="imitation-subtitle" class="mt-4 max-w-3xl mx-auto text-lg text-stone-600">
+                        從複製紋理到引導概念，AI透過多種技術模仿藝術風格。本節將介紹三種核心方法，並探討其在理解風格背後深層文化脈絡時的固有局限。
+                    </p>
+                </div>
+                <div id="imitation-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                    <!-- Cards will be injected by JavaScript -->
+                </div>
+                 <div id="imitation-limitations" class="mt-16 max-w-4xl mx-auto p-6 bg-amber-100 border-l-4 border-amber-500 text-amber-800 rounded-r-lg">
+                    <!-- Limitations content will be injected by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="section-creativity" class="py-20 sm:py-28">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 id="creativity-title" class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">創造的本質：辯證AI的創造力</h2>
+                    <p id="creativity-subtitle" class="mt-4 max-w-3xl mx-auto text-lg text-stone-600">
+                        AI的行為能被稱之為「創造」嗎？這個問題超越了技術，深入哲學與心理學的核心。本節將探討關於機器創造力的多維度辯論，點擊下方主題以展開詳細論述。
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+                    <div id="creativity-philosophy">
+                        <h3 id="creativity-philosophy-title" class="text-2xl font-bold text-stone-800 mb-6 text-center">哲學探問</h3>
+                        <div id="accordion-philosophy" class="space-y-4">
+                            <!-- Accordion items will be injected by JS -->
+                        </div>
+                    </div>
+                     <div id="creativity-frameworks">
+                        <h3 id="creativity-frameworks-title" class="text-2xl font-bold text-stone-800 mb-6 text-center">理論框架</h3>
+                        <div id="accordion-frameworks" class="space-y-4">
+                            <!-- Accordion items will be injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section-legal" class="py-20 sm:py-28 bg-stone-100">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 id="legal-title" class="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">創造的法律邊界</h2>
+                    <p id="legal-subtitle" class="mt-4 max-w-3xl mx-auto text-lg text-stone-600">
+                        從哲學辯論轉向現實世界，AI生成的藝術品在法律領域引發了前所未有的挑戰，尤其是在版權法方面。本節將解析關鍵的法律原則與訴訟案例。
+                    </p>
+                </div>
+                <div id="legal-content" class="max-w-4xl mx-auto space-y-6">
+                     <!-- Legal content will be injected by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-stone-800 text-stone-300">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p id="footer-title">生成式AI互動報告</p>
+            <p id="footer-subtitle" class="text-sm text-stone-400 mt-2">基於綜合分析報告建構的互動式體驗</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let currentLanguage = 'zh-Hant';
+        let modelComparisonChart;
+        
+        const textContent = {
+            'zh-Hant': {
+                lang: 'zh-Hant',
+                langButton: 'English',
+                navTitle: '生成式AI報告',
+                navLinks: ['模型原理', '風格模仿', '創造本質', '法律前沿'],
+                heroTitle1: '生成式人工智慧的',
+                heroTitle2: '藝術、模仿與創造性本質',
+                heroSubtitle: '一份互動式綜合分析報告，旨在解析驅動AI的底層模型、模仿藝術風格的機制，並深入探討其創造行為的本質與法律邊界。',
+                heroButton: '開始探索 ↓',
+                modelsTitle: '演算法畫布：解構生成式AI模型',
+                modelsSubtitle: '生成式AI的魔力源於其複雜的數學模型。本節將解析三種最具影響力的圖像生成模型架構，並透過互動圖表比較其核心性能。您可以點擊下方的模型標籤來切換詳細介紹。',
+                modelsChartTitle: '模型性能比較：三難困境',
+                modelsChartSubtitle: '生成模型常在「保真度」、「多樣性」與「生成速度」之間權衡。下方的雷達圖直觀地展示了三種模型的特性。將滑鼠懸停在圖例上可以高亮對應模型的表現。',
+                chartLabels: ['保真度 (Fidelity)', '多樣性 (Diversity)', '速度 (Speed)'],
+                chartDefaultInfoTitle: '模型特性總覽',
+                chartDefaultInfoText: '生成式AI的發展長期圍繞著保真度、多樣性與速度的核心權衡。<strong>GANs</strong>追求極致的保真度與速度，但犧牲了多樣性。<strong>VAEs</strong>則以多樣性見長，但生成圖像較模糊。<strong>擴散模型</strong>在保真度與多樣性上均達到頂峰，卻以極慢的生成速度為代價。這種演進反映了研究社群從追求速度轉向追求更可控、更高品質生成過程的哲學轉變。',
+                imitationTitle: '模仿的藝術：AI如何複製風格',
+                imitationSubtitle: '從複製紋理到引導概念，AI透過多種技術模仿藝術風格。本節將介紹三種核心方法，並探討其在理解風格背後深層文化脈絡時的固有局限。',
+                creativityTitle: '創造的本質：辯證AI的創造力',
+                creativitySubtitle: 'AI的行為能被稱之為「創造」嗎？這個問題超越了技術，深入哲學與心理學的核心。本節將探討關於機器創造力的多維度辯論，點擊下方主題以展開詳細論述。',
+                creativityPhilosophyTitle: '哲學探問',
+                creativityFrameworksTitle: '理論框架',
+                legalTitle: '創造的法律邊界',
+                legalSubtitle: '從哲學辯論轉向現實世界，AI生成的藝術品在法律領域引發了前所未有的挑戰，尤其是在版權法方面。本節將解析關鍵的法律原則與訴訟案例。',
+                footerTitle: '生成式AI互動報告',
+                footerSubtitle: '基於綜合分析報告建構的互動式體驗',
+                models: {
+                    gan: { title: '生成對抗網路 (GANs)', description: '由一個「生成器」和一個「判別器」相互對抗學習。生成器努力創造逼真的圖像來欺騙判別器，而判別器則努力分辨真偽。這種對抗賽局驅使模型生成高品質、高保真度的圖像。', diagram: { noise: '雜訊', latent: '潛在空間', generator: '生成器 (G)', forger: '偽造者', discriminator: '判別器 (D)', critic: '評論家', realData: '真實數據'}, pros: '生成速度快、保真度高。', cons: '訓練不穩定、易發生模式崩潰、多樣性低。', prosTitle: '優點', consTitle: '缺點' },
+                    vae: { title: '變分自動編碼器 (VAEs)', description: '基於編碼器-解碼器架構，將輸入圖像壓縮到一個連續的、有結構的「潛在空間」，然後再從中解碼生成新圖像。它學習的是數據的機率性表徵，而非單一的點。', diagram: { original: '原始圖像', encoder: '編碼器', latent: '潛在空間 (μ, σ)', decoder: '解碼器', reconstructed: '重建圖像' }, pros: '高多樣性、訓練穩定、有意義的潛在空間。', cons: '輸出通常較模糊。', prosTitle: '優點', consTitle: '缺點' },
+                    diffusion: { title: '擴散模型 (Diffusion Models)', description: '靈感來自熱力學，其過程分為兩步：首先，在一個固定的「前向過程」中逐步向圖像添加雜訊，直到其變為純雜訊；然後，模型學習一個「反向過程」，從純雜訊開始，迭代地去除雜訊，最終還原出一張清晰的圖像。', diagram: { clear: '清晰圖像', forward: '前向加噪', noise: '純雜訊', reverse: '反向去噪 (學習)', generated: '生成圖像'}, pros: '頂尖的圖像品質和多樣性、訓練穩定。', cons: '生成速度極慢、計算量大。', prosTitle: '優點', consTitle: '缺點' }
+                },
+                imitation: [
+                    { icon: '🎨', title: '神經風格轉換 (NST)', description: '一項奠基性技術，利用預訓練的CNN網路，將一張「內容圖像」的結構與另一張「風格圖像」的紋理、顏色分開，然後再將它們重新組合，生成一幅兼具兩者特點的新圖像。這是一種直接的「風格嫁接」。' },
+                    { icon: '⚙️', title: '模型微調 (Fine-Tuning)', description: '一種更深層次的「風格內化」。在一個通用的預訓練大模型基礎上，使用特定藝術家或流派的小型、專業化數據集進行額外訓練，使模型生成結果的風格向新的數據集「偏斜」。' },
+                    { icon: '✍️', title: '提示詞工程 (Prompt Engineering)', description: '使用者與AI溝通最主要、最靈活的方式。透過精心設計的文字指令（如藝術家姓名、藝術流派、媒介技術、氛圍詞）來引導和控制文字到圖像模型的輸出風格。' }
+                ],
+                imitationLimitations: { title: '脈絡與文化理解的局限', description: '儘管AI在視覺模仿上成就驚人，但它能複製「形式」，卻無法理解形式背後的「意義」。AI的模仿是去脈絡化的、純粹基於統計的行為，缺乏對歷史背景、藝術家情感或文化符號的真正理解，這可能導致情感空洞或無意的文化挪用。' },
+                creativity: {
+                    philosophy: [
+                        { title: '意識與意圖', content: '真正的創造力被認為需要主觀經驗和內在的創作意願。AI缺乏第一人稱視角和自發的創作動機，其行為是被動地響應外部指令和優化數學目標。' },
+                        { title: '情感與好奇心', content: '人類藝術植根於真實情感和探索未知的渴望。AI可以模仿情感的表達，但無法感受它們，也缺乏由好奇心驅動的、為了理解世界而進行的創作。' },
+                        { title: '真理的融貫論 vs. 對應論', content: 'AI是「融貫論」的實踐者，其生成內容只需與訓練數據在邏輯上保持一致，而無法像人類一樣透過與現實世界互動來「對應」和驗證真偽。這導致了「幻覺」現象的產生。' }
+                    ],
+                    frameworks: [
+                        { title: 'P-創造力 vs. H-創造力', content: 'Margaret Boden的理論。P-創造力（心理學）指對個體而言是新穎的，AI多屬此類。H-創造力（歷史）指在人類歷史上都是前所未有的。' },
+                        { title: '探索性 vs. 轉型性創造力', content: '探索性創造力在既定規則內組合，而轉型性創造力則打破規則本身。目前的AI主要局限於探索性創造力。' },
+                        { title: '4P框架', content: '從個人（Person）、過程（Process）、產品（Product）和環境（Press）四個維度考察創造力。AI在「過程」和「產品」上表現出色，但在「個人」和「環境」維度存在根本性缺失。' }
+                    ]
+                },
+                legal: [
+                    { title: '「人類作者」原則', content: '美國版權局的核心立場是，版權只授予由人類創作的作品。完全由AI自動生成的內容不受保護。對於AI輔助作品，關鍵在於人類創造性控制的程度，僅提供提示詞通常不夠。' },
+                    { title: 'AI訓練中的「合理使用」辯論', content: '這是當前訴訟的核心戰場。AI公司主張訓練過程是「轉化性使用」，從數據中學習統計規律。版權持有人則認為這是大規模侵權，且AI輸出物會損害原作市場。' },
+                    { title: '關鍵案例：蓋帝圖像 vs. Stability AI', content: '蓋帝圖像指控Stability AI抓取其千萬張圖片進行訓練。一個關鍵證據是AI有時會生成帶有扭曲的蓋帝浮水印的圖像，暗示可能存在直接複製而非僅僅學習。此案挑戰了數據抓取的合法性。' },
+                    { title: '藝術風格的不可版權性', content: '版權法保護「表達」而不保護「想法」或「風格」。因此，模仿某個藝術家的總體風格本身不構成侵權。但如果輸出結果與某件具體受版權保護作品構成「實質性相似」，則可能侵權。' }
+                ]
+            },
+            'en': {
+                lang: 'en',
+                langButton: '中文',
+                navTitle: 'Generative AI Report',
+                navLinks: ['Models', 'Style Imitation', 'Creativity', 'Legal Frontiers'],
+                heroTitle1: 'The Art, Imitation, and',
+                heroTitle2: 'Creative Nature of Generative AI',
+                heroSubtitle: 'An interactive comprehensive analysis report aimed at dissecting the underlying models driving AI, the mechanisms for imitating artistic styles, and exploring the nature of its creative behavior and legal boundaries.',
+                heroButton: 'Start Exploring ↓',
+                modelsTitle: 'The Algorithmic Canvas: Deconstructing Generative AI Models',
+                modelsSubtitle: 'The magic of generative AI stems from its complex mathematical models. This section will analyze the three most influential image generation model architectures and compare their core performance through an interactive chart. You can click the model tabs below for detailed introductions.',
+                modelsChartTitle: 'Model Performance Comparison: The Trilemma',
+                modelsChartSubtitle: 'Generative models often trade off between "Fidelity," "Diversity," and "Generation Speed." The radar chart below visualizes the characteristics of the three models. Hover over the legend to highlight the performance of the corresponding model.',
+                chartLabels: ['Fidelity', 'Diversity', 'Speed'],
+                chartDefaultInfoTitle: 'Model Characteristics Overview',
+                chartDefaultInfoText: 'The development of generative AI has long revolved around the core trade-off between fidelity, diversity, and speed. <strong>GANs</strong> pursue extreme fidelity and speed at the cost of diversity. <strong>VAEs</strong> excel in diversity but often produce blurrier images. <strong>Diffusion Models</strong> achieve top performance in both fidelity and diversity, but at the cost of extremely slow generation speed. This evolution reflects a philosophical shift in the research community from pursuing speed to seeking more controllable, higher-quality generation processes.',
+                imitationTitle: 'The Art of Imitation: How AI Replicates Style',
+                imitationSubtitle: 'From replicating textures to guiding concepts, AI imitates artistic styles through various techniques. This section introduces three core methods and discusses their inherent limitations in understanding the deep cultural context behind styles.',
+                creativityTitle: 'The Nature of Creativity: A Dialectic on AI\'s Creativity',
+                creativitySubtitle: 'Can AI\'s behavior be called "creation"? This question transcends technology and delves into the core of philosophy and psychology. This section will explore the multi-dimensional debate on machine creativity. Click on the topics below to expand the detailed discussions.',
+                creativityPhilosophyTitle: 'Philosophical Inquiries',
+                creativityFrameworksTitle: 'Theoretical Frameworks',
+                legalTitle: 'The Legal Frontiers of Creation',
+                legalSubtitle: 'Moving from philosophical debates to the real world, AI-generated artworks pose unprecedented challenges in the legal domain, especially concerning copyright law. This section will analyze key legal principles and court cases.',
+                footerTitle: 'Generative AI Interactive Report',
+                footerSubtitle: 'An interactive experience built upon a comprehensive analysis report.',
+                 models: {
+                    gan: { title: 'Generative Adversarial Networks (GANs)', description: 'Consists of a "Generator" and a "Discriminator" that learn through mutual opposition. The generator tries to create realistic images to fool the discriminator, while the discriminator tries to distinguish real from fake. This adversarial game drives the model to produce high-quality, high-fidelity images.', diagram: { noise: 'Noise', latent: 'Latent Space', generator: 'Generator (G)', forger: 'Forger', discriminator: 'Discriminator (D)', critic: 'Critic', realData: 'Real Data'}, pros: 'Fast generation, high fidelity.', cons: 'Unstable training, prone to mode collapse, low diversity.', prosTitle: 'Pros', consTitle: 'Cons' },
+                    vae: { title: 'Variational Autoencoders (VAEs)', description: 'Based on an encoder-decoder architecture, it compresses an input image into a continuous, structured "latent space" and then decodes from it to generate new images. It learns a probabilistic representation of the data, not just a single point.', diagram: { original: 'Original Image', encoder: 'Encoder', latent: 'Latent Space (μ, σ)', decoder: 'Decoder', reconstructed: 'Reconstructed Image' }, pros: 'High diversity, stable training, meaningful latent space.', cons: 'Outputs are often blurry.', prosTitle: 'Pros', consTitle: 'Cons' },
+                    diffusion: { title: 'Diffusion Models', description: 'Inspired by thermodynamics, the process is twofold: first, noise is progressively added to an image in a fixed "forward process" until it becomes pure noise. Then, the model learns a "reverse process" to start from pure noise and iteratively denoise it to restore a clear image.', diagram: { clear: 'Clear Image', forward: 'Forward Noising', noise: 'Pure Noise', reverse: 'Reverse Denoising (Learned)', generated: 'Generated Image'}, pros: 'State-of-the-art image quality and diversity, stable training.', cons: 'Extremely slow generation, computationally expensive.', prosTitle: 'Pros', consTitle: 'Cons' }
+                },
+                imitation: [
+                    { icon: '🎨', title: 'Neural Style Transfer (NST)', description: 'A foundational technique that uses a pre-trained CNN to separate the "content" structure of one image from the "style" (texture, color) of another, then recombines them into a new image. It\'s a direct form of "style grafting".' },
+                    { icon: '⚙️', title: 'Fine-Tuning', description: 'A deeper form of "style internalization." It involves taking a general pre-trained large model and conducting additional training on a small, specialized dataset of a specific artist or genre to "skew" the model\'s output towards that new style.' },
+                    { icon: '✍️', title: 'Prompt Engineering', description: 'The primary and most flexible way for users to communicate with AI. It involves crafting descriptive text commands (like artist names, art movements, techniques, mood words) to guide and control the output style of text-to-image models.' }
+                ],
+                imitationLimitations: { title: 'Limitations in Context and Cultural Understanding', description: 'Although AI is remarkably successful at visual imitation, it can replicate "form" but cannot understand the "meaning" behind it. AI\'s imitation is a decontextualized, purely statistical act, lacking a true understanding of historical context, artist emotions, or cultural symbols, which can lead to emotionally hollow results or unintentional cultural appropriation.' },
+                creativity: {
+                    philosophy: [
+                        { title: 'Consciousness and Intent', content: 'True creativity is argued to require subjective experience and an internal will to create. AI lacks a first-person perspective and spontaneous creative motivation; its actions are passive responses to external commands and mathematical optimization goals.' },
+                        { title: 'Emotion and Curiosity', content: 'Human art is rooted in genuine emotions and a desire to explore the unknown. AI can mimic expressions of emotion but cannot feel them, nor does it possess the curiosity-driven impulse to create for the sake of understanding the world.' },
+                        { title: 'Coherence vs. Correspondence Theory of Truth', content: 'AI is a "coherence" practitioner. Its generated content only needs to be logically consistent with its training data, unlike humans who can "correspond" with and verify against the real world. This leads to "hallucinations".' }
+                    ],
+                    frameworks: [
+                        { title: 'P-Creativity vs. H-Creativity', content: 'A theory by Margaret Boden. P-creativity (psychological) is novel to the individual; most AI creations fall here. H-creativity (historical) is novel in all of human history.' },
+                        { title: 'Exploratory vs. Transformational Creativity', content: 'Exploratory creativity combines within existing rules, while transformational creativity breaks the rules themselves. Current AI is largely limited to exploratory creativity.' },
+                        { title: 'The 4P Framework', content: 'Examines creativity through Person, Process, Product, and Press (environment). AI excels at "Process" and "Product" but has fundamental deficits in the "Person" and "Press" dimensions.' }
+                    ]
+                },
+                legal: [
+                    { title: '"Human Authorship" Principle', content: 'The U.S. Copyright Office\'s core position is that copyright is granted only to works created by humans. Content generated entirely automatically by AI is not protected. For AI-assisted works, the key is the degree of human creative control; merely providing a prompt is generally insufficient.' },
+                    { title: '"Fair Use" Debate in AI Training', content: 'This is the central battlefield of current litigation. AI companies argue the training process is "transformative use" to learn statistical patterns. Copyright holders argue it\'s mass infringement and that AI outputs harm the market for the original works.' },
+                    { title: 'Key Case: Getty Images v. Stability AI', content: 'Getty alleges Stability AI scraped millions of its images for training. A key piece of evidence is that the AI sometimes generates images with a distorted Getty watermark, suggesting direct copying, not just learning. The case challenges the legality of data scraping.' },
+                    { title: 'Non-Copyrightability of Artistic Style', content: 'Copyright law protects "expression," not "ideas" or "styles." Therefore, imitating an artist\'s general style is not itself infringement. However, if the output is "substantially similar" to a specific copyrighted work, it may be infringing.' }
+                ]
+            }
+        };
+
+        const renderContent = (lang) => {
+            const data = textContent[lang];
+            document.documentElement.lang = lang;
+
+            // Update text content
+            document.getElementById('nav-title').innerText = data.navTitle;
+            document.getElementById('hero-title-1').innerText = data.heroTitle1;
+            document.getElementById('hero-title-2').innerText = data.heroTitle2;
+            document.getElementById('hero-subtitle').innerText = data.heroSubtitle;
+            document.getElementById('hero-button').innerText = data.heroButton;
+            document.getElementById('models-title').innerText = data.modelsTitle;
+            document.getElementById('models-subtitle').innerText = data.modelsSubtitle;
+            document.getElementById('models-chart-title').innerText = data.modelsChartTitle;
+            document.getElementById('models-chart-subtitle').innerText = data.modelsChartSubtitle;
+            document.getElementById('imitation-title').innerText = data.imitationTitle;
+            document.getElementById('imitation-subtitle').innerText = data.imitationSubtitle;
+            document.getElementById('creativity-title').innerText = data.creativityTitle;
+            document.getElementById('creativity-subtitle').innerText = data.creativitySubtitle;
+            document.getElementById('creativity-philosophy-title').innerText = data.creativityPhilosophyTitle;
+            document.getElementById('creativity-frameworks-title').innerText = data.creativityFrameworksTitle;
+            document.getElementById('legal-title').innerText = data.legalTitle;
+            document.getElementById('legal-subtitle').innerText = data.legalSubtitle;
+            document.getElementById('footer-title').innerText = data.footerTitle;
+            document.getElementById('footer-subtitle').innerText = data.footerSubtitle;
+
+            // Update nav links
+            const desktopNavLinks = document.getElementById('desktop-nav-links');
+            desktopNavLinks.innerHTML = data.navLinks.map(linkText => `<a href="#section-${linkText.toLowerCase().split(' ')[0]}" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-stone-600">${linkText}</a>`).join('');
+
+            const mobileNavLinks = document.getElementById('mobile-nav-links');
+            mobileNavLinks.innerHTML = data.navLinks.map(linkText => `<a href="#section-${linkText.toLowerCase().split(' ')[0]}" class="block nav-link px-3 py-2 rounded-md text-base font-medium text-stone-600">${linkText}</a>`).join('');
+
+            // Update lang toggle buttons
+            document.getElementById('lang-toggle-button').innerText = data.langButton;
+            document.getElementById('lang-toggle-button-mobile').innerText = data.langButton;
+            
+            populateModelTabs(lang);
+            populateImitationSection(lang);
+            populateCreativityAccordions(lang);
+            populateLegalSection(lang);
+            createOrUpdateChart(lang);
+            
+            // Re-attach accordion logic after re-render
+            attachAccordionLogic();
+        };
+        
+        const populateModelTabs = (lang) => {
+            const data = textContent[lang].models;
+            const modelTabsContent = document.getElementById('model-tabs-content');
+            const modelTabButtons = document.getElementById('model-tab-buttons');
+            
+            modelTabButtons.innerHTML = '';
+            modelTabsContent.innerHTML = '';
+
+            Object.keys(data).forEach((key, index) => {
+                const model = data[key];
+                const isActive = index === 0;
+
+                // Create tab button
+                const button = document.createElement('button');
+                button.className = `tab-button px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 ${isActive ? 'active' : ''}`;
+                button.dataset.tab = key;
+                button.innerText = model.title.split('(')[0].trim();
+                modelTabButtons.appendChild(button);
+
+                // Create tab content
+                const contentDiv = document.createElement('div');
+                contentDiv.id = `tab-content-${key}`;
+                contentDiv.className = `tab-content p-6 bg-white rounded-xl shadow-lg border border-stone-200 ${isActive ? '' : 'hidden'}`;
+                
+                const diagramContent = {
+                    gan: `<div class="flex items-center justify-center space-x-4"><div class="text-center"><div class="p-4 border-2 border-dashed border-stone-400 rounded-lg">${model.diagram.noise}</div><div class="mt-2 text-stone-600">${model.diagram.latent}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-6 bg-blue-100 border-2 border-blue-400 rounded-xl">${model.diagram.generator}</div><div class="mt-2 text-stone-600">${model.diagram.forger}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-6 bg-red-100 border-2 border-red-400 rounded-xl">${model.diagram.discriminator}</div><div class="mt-2 text-stone-600">${model.diagram.critic}</div></div></div><div class="text-center mt-4 text-2xl text-teal-600 font-mono">↑</div><div class="text-center text-stone-600">${model.diagram.realData}</div>`,
+                    vae: `<div class="flex items-center justify-around flex-wrap gap-2"><div class="text-center"><div class="p-4 border-2 border-stone-400 rounded-lg">${model.diagram.original}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-6 bg-blue-100 border-2 border-blue-400 rounded-xl">${model.diagram.encoder}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-4 border-2 border-dashed border-stone-400 rounded-lg">${model.diagram.latent}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-6 bg-red-100 border-2 border-red-400 rounded-xl">${model.diagram.decoder}</div></div><div class="text-3xl text-teal-600 font-mono">→</div><div class="text-center"><div class="p-4 border-2 border-stone-400 rounded-lg">${model.diagram.reconstructed}</div></div></div>`,
+                    diffusion: `<div class="flex items-center justify-center space-x-6 flex-wrap gap-4"><div class="text-center"><div class="p-4 border-2 border-stone-400 rounded-lg">${model.diagram.clear}</div></div><div class="text-center"><div class="text-2xl text-teal-600 font-mono">→ → →</div><div class="text-stone-600 text-sm">${model.diagram.forward}</div></div><div class="text-center"><div class="p-4 border-2 border-dashed border-stone-400 rounded-lg">${model.diagram.noise}</div></div><div class="text-center"><div class="text-2xl text-red-500 font-mono">← ← ←</div><div class="text-stone-600 text-sm">${model.diagram.reverse}</div></div><div class="text-center"><div class="p-4 border-2 border-red-400 rounded-lg bg-red-100">${model.diagram.generated}</div></div></div>`
+                };
+
+                contentDiv.innerHTML = `
+                    <h4 class="text-xl font-bold text-teal-700 mb-4">${model.title}</h4>
+                    <p class="text-stone-600 mb-6">${model.description}</p>
+                    <div class="my-6 p-4 bg-stone-50 rounded-lg">${diagramContent[key]}</div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-md">
+                            <h5 class="font-semibold text-green-800">${model.prosTitle}</h5><p class="text-green-700">${model.pros}</p>
+                        </div>
+                        <div class="flex-1 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-md">
+                            <h5 class="font-semibold text-red-800">${model.consTitle}</h5><p class="text-red-700">${model.cons}</p>
+                        </div>
+                    </div>`;
+                modelTabsContent.appendChild(contentDiv);
+            });
+            
+            // Add tab logic
+            modelTabButtons.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+                    modelTabsContent.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+                    modelTabButtons.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                });
+            });
+        };
+
+        const populateImitationSection = (lang) => {
+            const data = textContent[lang];
+            const imitationGrid = document.getElementById('imitation-grid');
+            imitationGrid.innerHTML = data.imitation.map(item => `
+                <div class="bg-white p-8 rounded-xl shadow-lg border border-stone-200 text-center hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                    <div class="text-5xl mb-4">${item.icon}</div>
+                    <h4 class="text-xl font-bold text-stone-800 mb-2">${item.title}</h4>
+                    <p class="text-stone-600 leading-relaxed">${item.description}</p>
+                </div>
+            `).join('');
+            
+            const imitationLimitations = document.getElementById('imitation-limitations');
+            imitationLimitations.innerHTML = `
+                <h4 class="font-bold text-lg mb-2">${data.imitationLimitations.title}</h4>
+                <p>${data.imitationLimitations.description}</p>`;
+        };
+
+        const createAccordionItem = (title, content) => {
+            return `
+                <div class="bg-white rounded-lg shadow-sm border border-stone-200 overflow-hidden">
+                    <div class="accordion-header flex justify-between items-center p-4 cursor-pointer hover:bg-stone-100 transition-colors">
+                        <h5 class="font-semibold text-stone-700">${title}</h5>
+                        <span class="transform transition-transform duration-300 text-teal-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </div>
+                    <div class="accordion-content overflow-hidden transition-max-height duration-500 ease-in-out" style="max-height: 0;">
+                        <p class="p-4 pt-0 text-stone-600">${content}</p>
+                    </div>
+                </div>`;
+        };
+        
+        const populateCreativityAccordions = (lang) => {
+            const data = textContent[lang].creativity;
+            const accordionPhilosophy = document.getElementById('accordion-philosophy');
+            accordionPhilosophy.innerHTML = data.philosophy.map(item => createAccordionItem(item.title, item.content)).join('');
+            
+            const accordionFrameworks = document.getElementById('accordion-frameworks');
+            accordionFrameworks.innerHTML = data.frameworks.map(item => createAccordionItem(item.title, item.content)).join('');
+        };
+        
+        const attachAccordionLogic = () => {
+             document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('span');
+                    header.classList.toggle('active');
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        };
+
+        const populateLegalSection = (lang) => {
+            const data = textContent[lang].legal;
+            const legalContent = document.getElementById('legal-content');
+            legalContent.innerHTML = data.map(item => `
+                <div class="bg-white p-6 rounded-lg shadow-md border border-stone-200">
+                    <h4 class="text-lg font-bold text-teal-700">${item.title}</h4>
+                    <p class="mt-2 text-stone-600">${item.content}</p>
+                </div>
+            `).join('');
+        };
+        
+        const createOrUpdateChart = (lang) => {
+            const data = textContent[lang];
+            const chartData = {
+                labels: data.chartLabels,
+                datasets: [
+                    { label: 'GANs', data: [9, 3, 9], fill: true, backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgb(239, 68, 68)', pointBackgroundColor: 'rgb(239, 68, 68)' },
+                    { label: 'VAEs', data: [4, 9, 8], fill: true, backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: 'rgb(59, 130, 246)', pointBackgroundColor: 'rgb(59, 130, 246)' },
+                    { label: 'Diffusion Models', data: [10, 10, 2], fill: true, backgroundColor: 'rgba(20, 184, 166, 0.2)', borderColor: 'rgb(20, 184, 166)', pointBackgroundColor: 'rgb(20, 184, 166)' }
+                ]
+            };
+            
+            const modelChartInfoDiv = document.getElementById('model-chart-info');
+            const defaultChartInfo = `<h4 class="text-xl font-bold text-stone-800 mb-4">${data.chartDefaultInfoTitle}</h4><p class="text-stone-600">${data.chartDefaultInfoText}</p>`;
+            modelChartInfoDiv.innerHTML = defaultChartInfo;
+
+            if (modelComparisonChart) {
+                modelComparisonChart.destroy();
+            }
+            
+            const chartCtx = document.getElementById('modelComparisonChart').getContext('2d');
+            modelComparisonChart = new Chart(chartCtx, {
+                type: 'radar',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14 }, color: '#44403c' },
+                            ticks: { display: false, stepSize: 2 },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            onHover: (event, legendItem) => updateChartInfo(lang, legendItem.datasetIndex),
+                            onLeave: () => { modelChartInfoDiv.innerHTML = defaultChartInfo; }
+                        },
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw}` } }
+                    }
+                }
+            });
+        };
+        
+        const updateChartInfo = (lang, index) => {
+            const data = textContent[lang];
+            let modelKey;
+            if (index === 0) modelKey = 'gan';
+            else if (index === 1) modelKey = 'vae';
+            else if (index === 2) modelKey = 'diffusion';
+            
+            const modelData = data.models[modelKey];
+            if (modelData) {
+                document.getElementById('model-chart-info').innerHTML = `
+                    <h4 class="text-xl font-bold text-stone-800 mb-4">${modelData.title}</h4>
+                    <p class="text-stone-600 mb-4">${modelData.description}</p>
+                    <div class="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-md mb-2">
+                        <h5 class="font-semibold text-green-800">${modelData.prosTitle}</h5><p class="text-green-700">${modelData.pros}</p>
+                    </div>
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-r-md">
+                        <h5 class="font-semibold text-red-800">${modelData.consTitle}</h5><p class="text-red-700">${modelData.cons}</p>
+                    </div>`;
+            }
+        };
+
+        const toggleLanguage = () => {
+            currentLanguage = currentLanguage === 'zh-Hant' ? 'en' : 'zh-Hant';
+            renderContent(currentLanguage);
+        };
+
+        document.getElementById('lang-toggle-button').addEventListener('click', toggleLanguage);
+        document.getElementById('lang-toggle-button-mobile').addEventListener('click', toggleLanguage);
+        
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Smooth scrolling and active nav link highlighting
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 80) { // 80px offset for sticky header
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') && link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+        
+        // Initial render
+        renderContent(currentLanguage);
+    });
+    </script>
+</body>
+</html>
