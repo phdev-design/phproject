@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">互動式報告：生物科技的監管與威脅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Neutral Teal & Amber -->
+    <!-- Application Structure Plan: 本應用程式採用了主題式、非線性的儀表板佈局，而非報告的章節結構，以提升使用者體驗。結構分為五個核心互動區塊：1)「權力的雙螺旋」介紹頁，立即呈現生物科技的「潛力」與「風險」雙重性；2)「全球監管迷宮」，讓使用者透過點擊地圖或按鈕，互動式地比較美、歐、中、英、日五國的監管政策；3)「倫理的十字路口」，專門探討人類基因編輯的倫理紅線，並以案例說明治理失敗的後果；4)「安全的困境」，視覺化生物武器的威脅，並讓使用者探索強化《禁止生物武器公約》的不同方案；5)「前進的道路」，以清晰的圖示總結報告提出的「縱深防禦」戰略建議。這種結構旨在引導使用者從不同角度探索議題，將被動閱讀轉化為主動探究，從而更深刻地理解報告的核心資訊。 -->
+    <!-- Visualization & Content Choices: 報告中的資訊被轉化為多種互動式視覺元素，以達成不同溝通目標，並確認未使用SVG或Mermaid。1) 目標：比較各國政策 -> 方式：互動式世界地圖和可篩選的條形圖 (Chart.js)。理由：地圖提供直觀的地理上下文，條形圖則能精確比較不同監管指標，比靜態表格更具探索性。2) 目標：解釋複雜概念 (體細胞 vs. 可遺傳編輯) -> 方式：使用HTML/CSS構建的並排流程圖。理由：視覺化流程能清晰區分兩個複雜概念，降低認知負擔。3) 目標：展示不同方案的利弊 (BWC強化方案) -> 方式：雷達圖 (Chart.js)。理由：雷達圖適合比較多個項目在多個維度上的表現，能直觀呈現各方案的強弱之處。4) 目標：呈現關鍵案例 (賀建奎事件) -> 方式：點擊觸發的彈出式資訊卡片。理由：避免資訊過載，讓使用者在需要時才深入了解細節，維持主頁面的簡潔。所有圖表皆由Chart.js基於Canvas渲染。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Roboto', 'Noto Sans TC', sans-serif; background-color: #f8fafc; color: #1e293b;}
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 400px; } }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #0d9488; border-bottom-color: #0d9488; }
+        .nav-link:hover { color: #0d9488; }
+        .card-hover { transition: transform 0.3s, box-shadow 0.3s; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .country-btn.selected { background-color: #0d9488; color: white; }
+        .modal { transition: opacity 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 id="headerTitle" class="text-xl font-bold text-slate-800">生物科技治理報告</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#intro" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent" data-lang-key="nav_intro">權力的雙螺旋</a>
+                            <a href="#regulation" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent" data-lang-key="nav_regulation">全球監管迷宮</a>
+                            <a href="#ethics" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent" data-lang-key="nav_ethics">倫理的十字路口</a>
+                            <a href="#security" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent" data-lang-key="nav_security">安全的困境</a>
+                            <a href="#future" class="nav-link px-3 py-2 text-sm font-medium text-slate-600 border-b-2 border-transparent" data-lang-key="nav_future">前進的道路</a>
+                        </div>
+                    </div>
+                    <button id="lang-toggle-btn" class="ml-4 px-3 py-1.5 text-sm font-medium text-slate-600 border border-slate-300 rounded-md hover:bg-slate-100 transition-colors">English</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Section 1: The Double Helix -->
+        <section id="intro" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase" data-lang-key="intro_subtitle">權力的雙螺旋</h2>
+                <p class="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl" data-lang-key="intro_title">在潛力與風險之間</p>
+                <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500" data-lang-key="intro_desc">本節介紹當代生物技術革命的雙重性。您將看到基因編輯與合成生物學如何為醫學和農業帶來顛覆性進步，同時也開啟了倫理爭議並提升了生物武器的威脅。這是理解整個報告核心張力的起點。</p>
+                
+                <div class="mt-12 grid gap-8 md:grid-cols-2 lg:gap-12">
+                    <div class="bg-white p-8 rounded-lg shadow-lg card-hover">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-emerald-100 text-emerald-600 mx-auto">
+                            <span class="text-3xl">🧬</span>
+                        </div>
+                        <h3 class="mt-6 text-xl font-bold text-slate-900" data-lang-key="intro_potential_title">無限潛力</h3>
+                        <p class="mt-4 text-slate-600" data-lang-key="intro_potential_desc">基因編輯與合成生物學正重塑生命科學。從開發遺傳病的新療法、培育更能抵抗氣候變遷的作物，到利用微生物工廠綠色製造化學品與燃料，這些技術預示著一個更健康、更可持續的未來。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg card-hover">
+                        <div class="flex items-center justify-center h-12 w-12 rounded-md bg-rose-100 text-rose-600 mx-auto">
+                            <span class="text-3xl">☣️</span>
+                        </div>
+                        <h3 class="mt-6 text-xl font-bold text-slate-900" data-lang-key="intro_risk_title">潛在風險</h3>
+                        <p class="mt-4 text-slate-600" data-lang-key="intro_risk_desc">技術的「民主化」降低了濫用門檻。對人類基因的改造引發深刻的倫理擔憂；而增強病原體或合成病毒的能力，則對全球安全構成嚴峻挑戰，使生物武器的威脅變得前所未有的真實。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Global Regulatory Maze -->
+        <section id="regulation" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase" data-lang-key="reg_subtitle">全球監管迷宮</h2>
+                    <p class="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl" data-lang-key="reg_title">破碎的全球規則</p>
+                    <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500" data-lang-key="reg_desc">各國如何監管基因編輯技術？本節讓您互動式地探索和比較主要國家（美國、歐盟、中國、英國、日本）的政策。您會發現一個充滿矛盾的全球格局，各國在促進創新、保護公眾與國家安全之間做出不同的戰略抉擇。</p>
+                </div>
+
+                <div class="mt-12">
+                    <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8">
+                        <button class="country-btn px-4 py-2 text-sm font-medium rounded-md border bg-white" data-country="USA">🇺🇸 美國</button>
+                        <button class="country-btn px-4 py-2 text-sm font-medium rounded-md border bg-white" data-country="EU">🇪🇺 歐盟</button>
+                        <button class="country-btn px-4 py-2 text-sm font-medium rounded-md border bg-white" data-country="CHN">🇨🇳 中國</button>
+                        <button class="country-btn px-4 py-2 text-sm font-medium rounded-md border bg-white" data-country="UK">🇬🇧 英國</button>
+                        <button class="country-btn px-4 py-2 text-sm font-medium rounded-md border bg-white" data-country="JPN">🇯🇵 日本</button>
+                    </div>
+
+                    <div id="regulation-display" class="bg-slate-100 p-6 rounded-lg min-h-[250px] transition-opacity duration-300"></div>
+                </div>
+                
+                <div class="mt-16">
+                     <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-slate-800" data-lang-key="reg_chart_title">基因編輯食品監管框架比較</h3>
+                        <p class="text-slate-500 mt-2" data-lang-key="reg_chart_desc">透過下圖比較各國在基因編輯食品監管上的核心差異。</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="regulationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Ethics -->
+        <section id="ethics" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase" data-lang-key="ethics_subtitle">倫理的十字路口</h2>
+                    <p class="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl" data-lang-key="ethics_title">不可逾越的紅線？</p>
+                     <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500" data-lang-key="ethics_desc">本節聚焦於最敏感的議題：人類基因編輯。您將了解治療個體的「體細胞編輯」與影響後代的「可遺傳編輯」之間的關鍵區別。透過賀建奎事件的案例分析，我們將探討全球社會如何嘗試為這項強大技術劃定倫理邊界。</p>
+                </div>
+
+                <div class="mt-12 grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg text-emerald-700 text-center" data-lang-key="ethics_somatic_title">體細胞基因編輯 (Somatic)</h4>
+                        <div class="mt-4 text-center">
+                            <span class="text-5xl">👤</span>
+                            <p class="font-semibold mt-2" data-lang-key="ethics_somatic_target">目標：個體患者</p>
+                        </div>
+                        <p class="text-slate-600 mt-4" data-lang-key="ethics_somatic_desc">編輯血液、肌肉等體細胞，旨在治療特定個體的疾病。基因改變<span class="font-bold text-emerald-700" data-lang-key="ethics_somatic_desc_highlight">不會</span>遺傳給後代。這被視為一種先進的基因療法，倫理爭議相對較小。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                         <h4 class="font-bold text-lg text-rose-700 text-center" data-lang-key="ethics_hhge_title">可遺傳人類基因編輯 (HHGE)</h4>
+                         <div class="mt-4 text-center">
+                            <span class="text-5xl">👨‍👩‍👧‍👦</span>
+                            <p class="font-semibold mt-2" data-lang-key="ethics_hhge_target">目標：生殖細胞/胚胎</p>
+                        </div>
+                        <p class="text-slate-600 mt-4" data-lang-key="ethics_hhge_desc">編輯精子、卵子或早期胚胎，基因改變<span class="font-bold text-rose-700" data-lang-key="ethics_hhge_desc_highlight">將會</span>遺傳給所有後代。這跨越了重大的倫理紅線，引發對代際風險、優生學和人類未來的深刻擔憂。</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 text-center bg-slate-100 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold text-slate-800" data-lang-key="ethics_case_title">案例分析：賀建奎事件</h3>
+                    <p class="mt-2 text-slate-600 max-w-3xl mx-auto" data-lang-key="ethics_case_desc">2018年，中國科學家賀建奎宣布創造了世界首例基因編輯嬰兒，引發全球震驚與譴責。這一事件是典型的治理潰敗，暴露了從機構監督、倫理審查到國家法規的全面失靈。</p>
+                    <button id="he-case-btn" class="mt-4 px-5 py-2.5 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 focus:ring-4 focus:outline-none focus:ring-teal-300" data-lang-key="ethics_case_btn">了解更多關於治理失敗的教訓</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Security Dilemma -->
+        <section id="security" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase" data-lang-key="sec_subtitle">安全的困境</h2>
+                    <p class="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl" data-lang-key="sec_title">新技術與舊威脅</p>
+                    <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500" data-lang-key="sec_desc">基因編輯與合成生物學如何改變生物武器的樣貌？本節評估新技術帶來的具體威脅，並檢視旨在防範此類威脅的核心國際條約——《禁止生物武器公約》(BWC) 在應對新挑戰時的效力與困境。</p>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold text-slate-800 text-center mb-8" data-lang-key="sec_threat_title">現代生物武器的潛在威脅途徑</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                        <div class="bg-slate-50 p-6 rounded-lg card-hover">
+                            <span class="text-4xl">🦠➡️👹</span>
+                            <h4 class="font-bold mt-3" data-lang-key="sec_threat1_title">增強現有病原體</h4>
+                            <p class="text-sm text-slate-500 mt-2" data-lang-key="sec_threat1_desc">利用CRISPR等工具，改造已知病原體，以提高其毒力、傳播能力或抗藥性。</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-lg card-hover">
+                             <span class="text-4xl">🧬➡️💀</span>
+                            <h4 class="font-bold mt-3" data-lang-key="sec_threat2_title">重現已知威脅</h4>
+                            <p class="text-sm text-slate-500 mt-2" data-lang-key="sec_threat2_desc">利用DNA合成技術，從零開始「復活」已滅絕的病毒，如天花病毒的近親。</p>
+                        </div>
+                        <div class="bg-slate-50 p-6 rounded-lg card-hover">
+                             <span class="text-4xl">😇➡️😈</span>
+                            <h4 class="font-bold mt-3" data-lang-key="sec_threat3_title">使良性微生物致病</h4>
+                            <p class="text-sm text-slate-500 mt-2" data-lang-key="sec_threat3_desc">將產生毒素的基因迴路植入常見的無害細菌中，創造出新型生物武器。</p>
+                        </div>
+                         <div class="bg-slate-50 p-6 rounded-lg card-hover">
+                            <span class="text-4xl">🎯</span>
+                            <h4 class="font-bold mt-3" data-lang-key="sec_threat4_title">設計全新靶向武器</h4>
+                            <p class="text-sm text-slate-500 mt-2" data-lang-key="sec_threat4_desc">理論上可能製造出針對特定基因標記族群的「基因武器」，AI加速了這種可能。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                     <div class="text-center mb-8">
+                        <h3 class="text-2xl font-bold text-slate-800" data-lang-key="sec_chart_title">強化《禁止生物武器公約》(BWC) 的道路</h3>
+                        <p class="text-slate-500 mt-2" data-lang-key="sec_chart_desc">BWC缺乏核查機制是其致命弱點。下圖比較了各方提出的不同強化方案的特點。</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="bwcChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Section 5: Future -->
+        <section id="future" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-base font-semibold text-teal-600 tracking-wide uppercase" data-lang-key="future_subtitle">前進的道路</h2>
+                    <p class="mt-2 text-3xl font-extrabold text-slate-900 tracking-tight sm:text-4xl" data-lang-key="future_title">規劃安全的生物未來</p>
+                    <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-500" data-lang-key="future_desc">應對生物技術的挑戰是一個複雜的系統工程，沒有單一的解決方案。本節總結報告的核心建議，提出一個多層次的「縱深防禦」治理體系，旨在全面加固每一道防線，以確保技術發展導向一個更安全、繁榮的人類未來。</p>
+                </div>
+
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="space-y-4">
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-teal-600">
+                            <h4 class="text-lg font-bold" data-lang-key="future_layer1_title">第一層：國際規範與條約</h4>
+                            <p class="text-slate-600 mt-1" data-lang-key="future_layer1_desc">如《禁止生物武器公約》和WHO的治理框架，設定全球的行為準則，是防禦的基礎。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-cyan-500">
+                            <h4 class="text-lg font-bold" data-lang-key="future_layer2_title">第二層：國家法律與監管</h4>
+                            <p class="text-slate-600 mt-1" data-lang-key="future_layer2_desc">如美國的DURC政策和中國的《刑法》，提供本土化的執法依據，是防禦的核心。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-amber-500">
+                            <h4 class="text-lg font-bold" data-lang-key="future_layer3_title">第三層：產業與供應鏈安全</h4>
+                            <p class="text-slate-600 mt-1" data-lang-key="future_layer3_desc">如對DNA合成訂單進行篩查，在關鍵節點扮演「守門人」角色，是防禦的關鍵環節。</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-rose-500">
+                            <h4 class="text-lg font-bold" data-lang-key="future_layer4_title">第四層：機構監督與個人責任</h4>
+                            <p class="text-slate-600 mt-1" data-lang-key="future_layer4_desc">研究機構的嚴格監督和科學家個人的倫理責任，是整個防禦體系的基石和最後防線。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p id="footer-text">&copy; 2025 生物科技治理互動報告。基於「權力的雙螺旋」報告內容創建。</p>
+        </div>
+    </footer>
+    
+    <!-- Modal for He Jiankui Case -->
+    <div id="he-case-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+        <div class="bg-white rounded-lg shadow-xl m-4 max-w-2xl w-full p-6 sm:p-8 relative transform scale-95 transition-all duration-300">
+            <h3 class="text-2xl font-bold text-slate-900" data-lang-key="modal_title">案例剖析：賀建奎事件的教訓</h3>
+            <p class="mt-4 text-slate-600" data-lang-key="modal_intro">2018年，中國科學家賀建奎宣布他創造了全球首例基因編輯嬰兒，聲稱通過編輯CCR5基因使其能免疫HIV。此舉引發了全球科學界和倫理學界的強烈譴責。</p>
+            <div class="mt-6 border-t pt-4">
+                <h4 class="font-semibold text-lg" data-lang-key="modal_failure_title">一場多層次的治理潰敗：</h4>
+                <ul class="list-disc list-inside space-y-2 mt-2 text-slate-600">
+                    <li data-lang-key="modal_failure1"></li>
+                    <li data-lang-key="modal_failure2"></li>
+                    <li data-lang-key="modal_failure3"></li>
+                    <li data-lang-key="modal_failure4"></li>
+                </ul>
+            </div>
+            <p class="mt-6 text-slate-700 font-medium" data-lang-key="modal_conclusion">這一事件成為一個強大的催化劑，直接推動了中國迅速完善相關法律，也促使WHO等國際組織加快構建全球治理框架，以填補這一危險的治理真空。</p>
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-slate-500 hover:text-slate-800 text-2xl font-bold">&times;</button>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const translations = {
+        en: {
+            pageTitle: "Interactive Report: Biotech Governance & Threats",
+            headerTitle: "Biotech Governance Report",
+            lang_toggle: "中文",
+            nav_intro: "The Double Helix",
+            nav_regulation: "Global Regulatory Maze",
+            nav_ethics: "Ethical Crossroads",
+            nav_security: "Security Dilemma",
+            nav_future: "The Path Forward",
+            intro_subtitle: "The Double Helix of Power",
+            intro_title: "Between Promise and Peril",
+            intro_desc: "This section introduces the duality of the contemporary biotech revolution. You will see how gene editing and synthetic biology offer disruptive advances in medicine and agriculture, while also opening ethical controversies and elevating the threat of biological weapons. This is the starting point for understanding the core tension of the entire report.",
+            intro_potential_title: "Boundless Potential",
+            intro_potential_desc: "Gene editing and synthetic biology are reshaping life sciences. From developing new therapies for genetic diseases and creating crops more resilient to climate change, to using microbial factories for green manufacturing of chemicals and fuels, these technologies promise a healthier, more sustainable future.",
+            intro_risk_title: "Potential Risks",
+            intro_risk_desc: "The 'democratization' of technology lowers the barrier to misuse. Altering the human genome raises profound ethical concerns, while the ability to enhance pathogens or synthesize viruses poses a severe challenge to global security, making the threat of bioweapons more real than ever.",
+            reg_subtitle: "Global Regulatory Maze",
+            reg_title: "A Fractured Global Rulebook",
+            reg_desc: "How do different countries regulate gene editing? This section allows you to interactively explore and compare the policies of major players (USA, EU, China, UK, Japan). You will discover a contradictory global landscape where nations make different strategic choices in balancing innovation, public protection, and national security.",
+            reg_chart_title: "Comparison of Regulatory Frameworks for Gene-Edited Foods",
+            reg_chart_desc: "Compare the core differences in gene-edited food regulation among countries using the chart below.",
+            ethics_subtitle: "Ethical Crossroads",
+            ethics_title: "An Uncrossable Red Line?",
+            ethics_desc: "This section focuses on the most sensitive issue: human genome editing. You will learn the key distinction between 'somatic editing' for treating individuals and 'heritable editing' that affects future generations. Through the case study of the He Jiankui affair, we explore how global society is attempting to draw ethical boundaries for this powerful technology.",
+            ethics_somatic_title: "Somatic Genome Editing",
+            ethics_somatic_target: "Target: Individual Patients",
+            ethics_somatic_desc: "Editing somatic cells like blood or muscle to treat an individual's disease. The genetic changes are ",
+            ethics_somatic_desc_highlight: "not heritable",
+            ethics_somatic_desc_end: ". This is considered an advanced form of gene therapy with relatively fewer ethical controversies.",
+            ethics_hhge_title: "Heritable Human Genome Editing (HHGE)",
+            ethics_hhge_target: "Target: Germ Cells/Embryos",
+            ethics_hhge_desc: "Editing sperm, eggs, or early embryos. The genetic changes ",
+            ethics_hhge_desc_highlight: "will be inherited",
+            ethics_hhge_desc_end: " by all subsequent generations. This crosses a major ethical red line, raising deep concerns about intergenerational risks, eugenics, and the future of humanity.",
+            ethics_case_title: "Case Study: The He Jiankui Affair",
+            ethics_case_desc: "In 2018, Chinese scientist He Jiankui announced the creation of the world's first gene-edited babies, sparking global shock and condemnation. The incident was a classic governance failure, exposing systemic breakdowns from institutional oversight and ethical review to national regulations.",
+            ethics_case_btn: "Learn more about the lessons from this governance failure",
+            sec_subtitle: "Security Dilemma",
+            sec_title: "New Tech, Old Threats",
+            sec_desc: "How do gene editing and synthetic biology change the landscape of bioweapons? This section assesses the specific threats posed by new technologies and examines the effectiveness and dilemmas of the core international treaty designed to prevent them—the Biological Weapons Convention (BWC)—in facing new challenges.",
+            sec_threat_title: "Potential Threat Pathways for Modern Bioweapons",
+            sec_threat1_title: "Enhancing Existing Pathogens",
+            sec_threat1_desc: "Using tools like CRISPR to modify known pathogens to increase their virulence, transmissibility, or drug resistance.",
+            sec_threat2_title: "Recreating Known Threats",
+            sec_threat2_desc: "Using DNA synthesis to 'resurrect' extinct viruses, like relatives of smallpox, from scratch.",
+            sec_threat3_title: "Weaponizing Benign Microbes",
+            sec_threat3_desc: "Inserting toxin-producing genetic circuits into common, harmless bacteria to create novel bioweapons.",
+            sec_threat4_title: "Designing Novel Targeted Weapons",
+            sec_threat4_desc: "Theoretically, it may be possible to create 'genetic weapons' targeting specific ethnic groups, a possibility accelerated by AI.",
+            sec_chart_title: "The Path to Strengthening the Biological Weapons Convention (BWC)",
+            sec_chart_desc: "The BWC's lack of a verification mechanism is its fatal flaw. The chart below compares the features of different proposed strengthening options.",
+            future_subtitle: "The Path Forward",
+            future_title: "Charting a Secure Bio-Future",
+            future_desc: "Addressing the challenges of biotechnology is a complex systems engineering problem with no single solution. This section summarizes the report's core recommendations, proposing a multi-layered 'defense-in-depth' governance system aimed at strengthening every line of defense to ensure technology development leads to a safer, more prosperous human future.",
+            future_layer1_title: "Layer 1: International Norms & Treaties",
+            future_layer1_desc: "Such as the BWC and WHO's governance framework, they set global standards of behavior and form the foundation of defense.",
+            future_layer2_title: "Layer 2: National Laws & Regulations",
+            future_layer2_desc: "Such as the US DURC policy and China's Criminal Law, they provide localized enforcement and are the core of defense.",
+            future_layer3_title: "Layer 3: Industry & Supply Chain Security",
+            future_layer3_desc: "Such as screening DNA synthesis orders, they act as 'gatekeepers' at critical nodes and are a key link in defense.",
+            future_layer4_title: "Layer 4: Institutional Oversight & Individual Responsibility",
+            future_layer4_desc: "Strict oversight by research institutions and the ethical responsibility of individual scientists form the bedrock and last line of the entire defense system.",
+            footer_text: "© 2025 Interactive Report on Biotech Governance. Created based on the 'Double Helix of Power' report.",
+            modal_title: "Case Analysis: Lessons from the He Jiankui Affair",
+            modal_intro: "In 2018, Chinese scientist He Jiankui announced he had created the world's first gene-edited babies, claiming to have made them immune to HIV by editing the CCR5 gene. The act drew fierce condemnation from the global scientific and ethical communities.",
+            modal_failure_title: "A Multi-layered Governance Failure:",
+            modal_failure1: "Institutional oversight failure: His university failed to effectively supervise his research activities.",
+            modal_failure2: "Sham ethical review: The ethical review application he submitted was alleged to be fraudulent, bypassing proper procedures.",
+            modal_failure3: "Failure of scientific self-regulation: He ignored the broad global scientific consensus on a moratorium for the clinical application of heritable human genome editing.",
+            modal_failure4: "Gaps in national regulation: At the time of the incident, China lacked national-level laws with sufficient deterrent force.",
+            modal_conclusion: "This incident became a powerful catalyst, directly prompting China to rapidly improve its relevant laws and encouraging international organizations like the WHO to accelerate the construction of a global governance framework to fill this dangerous vacuum.",
+            regulationData: {
+                USA: {
+                    title: '🇺🇸 USA: Coordinated, Pro-Innovation Framework',
+                    philosophy_title: 'Regulatory Philosophy: ',
+                    philosophy: 'Product-Based',
+                    description: 'Regulation focuses on the characteristics of the final product, not the process. If a gene-edited product is "substantially equivalent" to a conventional one, it is not subject to additional regulation. This model aims to encourage innovation and commercialization to maintain its global bio-economy leadership.',
+                    policy_title: 'Key Policy: ',
+                    policy: 'Exempts most gene-edited plants that could be achieved through conventional breeding (SECURE rule), simplifying the regulatory process.'
+                },
+                EU: {
+                    title: '🇪🇺 EU: Precaution, Politics, and a Potential Pivot',
+                    philosophy_title: 'Regulatory Philosophy: ',
+                    philosophy: 'Process-Based',
+                    description: 'Rooted in the "precautionary principle," which assumes the genetic modification process itself carries potential risks, requiring all GMOs to undergo strict assessment. While this has suppressed innovation, it meets consumer demands for the right to know.',
+                    policy_title: 'Key Policy: ',
+                    policy: 'Traditionally the world\'s strictest. A proposal for New Genomic Techniques (NGT) is under debate, which may relax rules for some gene-edited plants equivalent to conventional ones (NGT-1).'
+                },
+                CHN: {
+                    title: '🇨🇳 China: From Laissez-faire to Iron Fist',
+                    philosophy_title: 'Regulatory Philosophy: ',
+                    philosophy: 'State-Controlled Process-Based',
+                    description: 'After the "He Jiankui affair," China rapidly shifted from a regulatory vacuum to strict state-level control, treating human genetic resources as a national strategic asset and criminalizing certain misuses.',
+                    policy_title: 'Key Policy: ',
+                    policy: 'Implements a strict approval system for the collection, preservation, use, and provision of human genetic resources, and imposes the most severe legal penalties for heritable human genome editing.'
+                },
+                UK: {
+                    title: '🇬🇧 UK: Tailored, Research-Permissive Model',
+                    philosophy_title: 'Regulatory Philosophy: ',
+                    philosophy: 'Pragmatic Dual-Track System',
+                    description: 'Post-Brexit, the UK has relaxed regulations on precision breeding in agriculture. In human genome editing, it adopts a unique "permit research, prohibit reproduction" model.',
+                    policy_title: 'Key Policy: ',
+                    policy: 'The law strictly forbids implanting gene-edited embryos for reproduction, but the HFEA can authorize their use for basic research within 14 days, striking a balance between exploration and ethics.'
+                },
+                JPN: {
+                    title: '🇯🇵 Japan: Pragmatic, Differentiated System',
+                    philosophy_title: 'Regulatory Philosophy: ',
+                    philosophy: 'Process-Based Differentiated Management',
+                    description: 'Adopts a highly pragmatic, differentiated management approach, with the key distinction being whether foreign genes are introduced during the editing process. Aims to encourage innovation that does not involve "transgenes".',
+                    policy_title: 'Key Policy: ',
+                    policy: 'Gene-edited foods without foreign DNA only require voluntary notification to be marketed, without mandatory safety reviews or labeling, sparking consumer right-to-know controversies.'
+                }
+            },
+            regulationChart: {
+                title: "Regulatory Stance on Gene-Edited Foods (No Foreign DNA)",
+                label: "Regulatory Looseness (Higher is looser)",
+                countries: ['Japan', 'UK', 'USA', 'EU (Proposal)', 'China'],
+                tooltip_labels: {
+                    '1': 'Strict Review',
+                    '2.5': 'Differentiated Mgmt',
+                    '4': 'Notification Only',
+                    '4.5': 'Largely Exempt',
+                }
+            },
+            bwcChart: {
+                title: "Comparison of BWC Strengthening Options (Higher is stronger)",
+                labels: ['Legal Bindingness', 'Political Feasibility', 'Verification Efficacy', 'Implementation Speed', 'Developing Country Support'],
+                dataset1_label: "Comprehensive Verification Protocol",
+                dataset2_label: "Modular/Incremental Improvement",
+            }
+        },
+        zh: {
+            pageTitle: "互動式報告：生物科技的監管與威脅",
+            headerTitle: "生物科技治理報告",
+            lang_toggle: "English",
+            nav_intro: "權力的雙螺旋",
+            nav_regulation: "全球監管迷宮",
+            nav_ethics: "倫理的十字路口",
+            nav_security: "安全的困境",
+            nav_future: "前進的道路",
+            intro_subtitle: "權力的雙螺旋",
+            intro_title: "在潛力與風險之間",
+            intro_desc: "本節介紹當代生物技術革命的雙重性。您將看到基因編輯與合成生物學如何為醫學和農業帶來顛覆性進步，同時也開啟了倫理爭議並提升了生物武器的威脅。這是理解整個報告核心張力的起點。",
+            intro_potential_title: "無限潛力",
+            intro_potential_desc: "基因編輯與合成生物學正重塑生命科學。從開發遺傳病的新療法、培育更能抵抗氣候變遷的作物，到利用微生物工廠綠色製造化學品與燃料，這些技術預示著一個更健康、更可持續的未來。",
+            intro_risk_title: "潛在風險",
+            intro_risk_desc: "技術的「民主化」降低了濫用門檻。對人類基因的改造引發深刻的倫理擔憂；而增強病原體或合成病毒的能力，則對全球安全構成嚴峻挑戰，使生物武器的威脅變得前所未有的真實。",
+            reg_subtitle: "全球監管迷宮",
+            reg_title: "破碎的全球規則",
+            reg_desc: "各國如何監管基因編輯技術？本節讓您互動式地探索和比較主要國家（美國、歐盟、中國、英國、日本）的政策。您會發現一個充滿矛盾的全球格局，各國在促進創新、保護公眾與國家安全之間做出不同的戰略抉擇。",
+            reg_chart_title: "基因編輯食品監管框架比較",
+            reg_chart_desc: "透過下圖比較各國在基因編輯食品監管上的核心差異。",
+            ethics_subtitle: "倫理的十字路口",
+            ethics_title: "不可逾越的紅線？",
+            ethics_desc: "本節聚焦於最敏感的議題：人類基因編輯。您將了解治療個體的「體細胞編輯」與影響後代的「可遺傳編輯」之間的關鍵區別。透過賀建奎事件的案例分析，我們將探討全球社會如何嘗試為這項強大技術劃定倫理邊界。",
+            ethics_somatic_title: "體細胞基因編輯 (Somatic)",
+            ethics_somatic_target: "目標：個體患者",
+            ethics_somatic_desc: "編輯血液、肌肉等體細胞，旨在治療特定個體的疾病。基因改變",
+            ethics_somatic_desc_highlight: "不會",
+            ethics_somatic_desc_end: "遺傳給後代。這被視為一種先進的基因療法，倫理爭議相對較小。",
+            ethics_hhge_title: "可遺傳人類基因編輯 (HHGE)",
+            ethics_hhge_target: "目標：生殖細胞/胚胎",
+            ethics_hhge_desc: "編輯精子、卵子或早期胚胎，基因改變",
+            ethics_hhge_desc_highlight: "將會",
+            ethics_hhge_desc_end: "遺傳給所有後代。這跨越了重大的倫理紅線，引發對代際風險、優生學和人類未來的深刻擔憂。",
+            ethics_case_title: "案例分析：賀建奎事件",
+            ethics_case_desc: "2018年，中國科學家賀建奎宣布創造了世界首例基因編輯嬰兒，引發全球震驚與譴責。這一事件是典型的治理潰敗，暴露了從機構監督、倫理審查到國家法規的全面失靈。",
+            ethics_case_btn: "了解更多關於治理失敗的教訓",
+            sec_subtitle: "安全的困境",
+            sec_title: "新技術與舊威脅",
+            sec_desc: "基因編輯與合成生物學如何改變生物武器的樣貌？本節評估新技術帶來的具體威脅，並檢視旨在防範此類威脅的核心國際條約——《禁止生物武器公約》(BWC) 在應對新挑戰時的效力與困境。",
+            sec_threat_title: "現代生物武器的潛在威脅途徑",
+            sec_threat1_title: "增強現有病原體",
+            sec_threat1_desc: "利用CRISPR等工具，改造已知病原體，以提高其毒力、傳播能力或抗藥性。",
+            sec_threat2_title: "重現已知威脅",
+            sec_threat2_desc: "利用DNA合成技術，從零開始「復活」已滅絕的病毒，如天花病毒的近親。",
+            sec_threat3_title: "使良性微生物致病",
+            sec_threat3_desc: "將產生毒素的基因迴路植入常見的無害細菌中，創造出新型生物武器。",
+            sec_threat4_title: "設計全新靶向武器",
+            sec_threat4_desc: "理論上可能製造出針對特定基因標記族群的「基因武器」，AI加速了這種可能。",
+            sec_chart_title: "強化《禁止生物武器公約》(BWC) 的道路",
+            sec_chart_desc: "BWC缺乏核查機制是其致命弱點。下圖比較了各方提出的不同強化方案的特點。",
+            future_subtitle: "前進的道路",
+            future_title: "規劃安全的生物未來",
+            future_desc: "應對生物技術的挑戰是一個複雜的系統工程，沒有單一的解決方案。本節總結報告的核心建議，提出一個多層次的「縱深防禦」治理體系，旨在全面加固每一道防線，以確保技術發展導向一個更安全、繁榮的人類未來。",
+            future_layer1_title: "第一層：國際規範與條約",
+            future_layer1_desc: "如《禁止生物武器公約》和WHO的治理框架，設定全球的行為準則，是防禦的基礎。",
+            future_layer2_title: "第二層：國家法律與監管",
+            future_layer2_desc: "如美國的DURC政策和中國的《刑法》，提供本土化的執法依據，是防禦的核心。",
+            future_layer3_title: "第三層：產業與供應鏈安全",
+            future_layer3_desc: "如對DNA合成訂單進行篩查，在關鍵節點扮演「守門人」角色，是防禦的關鍵環節。",
+            future_layer4_title: "第四層：機構監督與個人責任",
+            future_layer4_desc: "研究機構的嚴格監督和科學家個人的倫理責任，是整個防禦體系的基石和最後防線。",
+            footer_text: "© 2025 生物科技治理互動報告。基於「權力的雙螺旋」報告內容創建。",
+            modal_title: "案例剖析：賀建奎事件的教訓",
+            modal_intro: "2018年，中國科學家賀建奎宣布他創造了全球首例基因編輯嬰兒，聲稱通過編輯CCR5基因使其能免疫HIV。此舉引發了全球科學界和倫理學界的強烈譴責。",
+            modal_failure_title: "一場多層次的治理潰敗：",
+            modal_failure1: "<span class='font-bold'>機構監督失靈：</span>其所在大學未能有效監督其研究行為。",
+            modal_failure2: "<span class='font-bold'>倫理審查虛設：</span>他提交的倫理審查申請被指偽造，繞過了正規程序。",
+            modal_failure3: "<span class='font-bold'>科學家自律失效：</span>他無視全球科學界關於暫停可遺傳人類基因編輯臨床應用的廣泛共識。",
+            modal_failure4: "<span class='font-bold'>國家法規存在漏洞：</span>事發時，中國缺乏具有足夠威懾力的國家層級法律。",
+            modal_conclusion: "這一事件成為一個強大的催化劑，直接推動了中國迅速完善相關法律，也促使WHO等國際組織加快構建全球治理框架，以填補這一危險的治理真空。",
+            regulationData: {
+                USA: {
+                    title: '🇺🇸 美國：協調的、親創新的框架',
+                    philosophy_title: '監管哲學：',
+                    philosophy: '基於產品 (Product-Based)',
+                    description: '監管焦點是最終產品的特性，而非生產過程。如果基因編輯產品與傳統產品「實質等同」，則不受額外監管。此模式旨在鼓勵創新和商業化，維持其全球生物經濟領導地位。',
+                    policy_title: '核心政策：',
+                    policy: '豁免多數可通過傳統育種實現的基因編輯植物（SECURE規則），簡化監管流程。'
+                },
+                EU: {
+                    title: '🇪🇺 歐盟：預防、政治與潛在的轉向',
+                    philosophy_title: '監管哲學：',
+                    philosophy: '基於過程 (Process-Based)',
+                    description: '植根於「預防原則」，認為基因改造過程本身具潛在風險，所有GMO產品都需嚴格評估。雖然抑制了創新，但滿足了消費者對知情權的要求。',
+                    policy_title: '核心政策：',
+                    policy: '傳統上全球最嚴格。目前正辯論NGT提案，可能對部分「等同於傳統育種」的基因編輯植物（NGT-1）放鬆監管。'
+                },
+                CHN: {
+                    title: '🇨� 中國：從放任到鐵腕',
+                    philosophy_title: '監管哲學：',
+                    philosophy: '國家控制下的基於過程',
+                    description: '在「賀建奎事件」後，迅速從監管真空轉向嚴格的國家級管控。將人類遺傳資源視為國家戰略資產，並將特定濫用行為入刑。',
+                    policy_title: '核心政策：',
+                    policy: '對人類遺傳資源實行嚴格的採集、保藏、利用和對外提供審批制度，對可遺傳人類基因編輯實施最嚴厲的法律制裁。'
+                },
+                UK: {
+                    title: '🇬🇧 英國：量身定制的、允許研究的模式',
+                    philosophy_title: '監管哲學：',
+                    philosophy: '務實的雙軌制',
+                    description: '脫歐後，在農業領域放鬆對精準育種的監管。在人類基因編輯領域，採取「允許研究，禁止生殖」的獨特模式。',
+                    policy_title: '核心政策：',
+                    policy: '法律嚴禁將基因編輯胚胎用於生殖，但HFEA可授權用於14天內的基礎科學研究，在探索與倫理間取得平衡。'
+                },
+                JPN: {
+                    title: '🇯🇵 日本：務實的、分類管理的體系',
+                    philosophy_title: '監管哲學：',
+                    philosophy: '基於過程的分類管理',
+                    description: '採取高度務實的分類管理，核心區別在於編輯過程是否引入外源基因。旨在鼓勵不涉及「轉基因」的技術創新。',
+                    policy_title: '核心政策：',
+                    policy: '對於未插入外源DNA的基因編輯食品，僅需自願性通報即可上市，無需強制安全審查和標示，引發消費者知情權爭議。'
+                }
+            },
+            regulationChart: {
+                title: "各國對「無外源DNA」基因編輯食品的監管態度",
+                label: "監管寬鬆度 (數值越高越寬鬆)",
+                countries: ['日本', '英國', '美國', '歐盟 (提案)', '中國'],
+                tooltip_labels: {
+                    '1': '嚴格審批',
+                    '2.5': '分類管理',
+                    '4': '僅需通報',
+                    '4.5': '基本豁免',
+                }
+            },
+            bwcChart: {
+                title: "不同強化方案的特點比較 (數值越高越強)",
+                labels: ['法律約束力', '政治可行性', '核查有效性', '實施速度', '發展中國家支持'],
+                dataset1_label: "全面核查議定書",
+                dataset2_label: "模塊化/漸進式改進",
+            }
+        }
+    };
+
+    let currentLang = 'zh';
+    let regulationChart, bwcChart;
+    
+    const langToggleBtn = document.getElementById('lang-toggle-btn');
+    const regulationDisplay = document.getElementById('regulation-display');
+    const countryButtons = document.querySelectorAll('.country-btn');
+    let currentCountry = 'USA';
+
+    function updateTexts() {
+        const langData = translations[currentLang];
+        document.documentElement.lang = currentLang === 'zh' ? 'zh-Hant' : 'en';
+        
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            const keys = key.split('_');
+            if (keys.length > 2 && keys[1] === 'desc' && keys[2] === 'highlight') {
+                 // Special handling for split descriptions
+                const baseKey = keys[0] + '_desc';
+                const highlightKey = baseKey + '_highlight';
+                const endKey = baseKey + '_end';
+                el.innerHTML = `${langData[baseKey]}<span class="font-bold ${currentLang === 'zh' && highlightKey.includes('hhge') ? 'text-rose-700' : 'text-emerald-700'}">${langData[highlightKey]}</span>${langData[endKey]}`;
+
+            } else if (key.startsWith('modal_failure')) {
+                el.innerHTML = langData[key];
+            }
+            else if (langData[key]) {
+                el.textContent = langData[key];
+            }
+        });
+        
+        document.getElementById('pageTitle').textContent = langData.pageTitle;
+        document.getElementById('headerTitle').textContent = langData.headerTitle;
+        langToggleBtn.textContent = langData.lang_toggle;
+        document.getElementById('footer-text').textContent = langData.footer_text;
+
+        // Update dynamic content
+        updateRegulationInfo(currentCountry);
+        updateCharts();
+    }
+
+    function updateRegulationInfo(countryCode) {
+        currentCountry = countryCode;
+        const countryData = translations[currentLang].regulationData[countryCode];
+        if (!countryData) return;
+
+        regulationDisplay.style.opacity = 0;
+        setTimeout(() => {
+            regulationDisplay.innerHTML = `
+                <h3 class="text-xl font-bold text-slate-800">${countryData.title}</h3>
+                <p class="mt-2"><span class="font-semibold text-teal-700">${countryData.philosophy_title}</span>${countryData.philosophy}</p>
+                <p class="mt-4 text-slate-600">${countryData.description}</p>
+                <p class="mt-2 bg-white p-3 rounded-md text-sm"><span class="font-semibold">${countryData.policy_title}</span>${countryData.policy}</p>
+            `;
+            regulationDisplay.style.opacity = 1;
+        }, 300);
+        
+        countryButtons.forEach(btn => {
+            btn.classList.remove('selected');
+            if(btn.dataset.country === countryCode) {
+                btn.classList.add('selected');
+            }
+        });
+    }
+    
+    langToggleBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        updateTexts();
+    });
+
+    countryButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            updateRegulationInfo(button.dataset.country);
+        });
+    });
+
+    // Modal
+    const modal = document.getElementById('he-case-modal');
+    const openModalBtn = document.getElementById('he-case-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const modalContent = modal.querySelector('div');
+
+    function openModal() {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modalContent.classList.remove('scale-95');
+    }
+    
+    function closeModal() {
+        modalContent.classList.add('scale-95');
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.classList.add('pointer-events-none'), 300);
+    }
+    
+    openModalBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if(e.target === modal) closeModal();
+    });
+
+    // Navigation
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('main section');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { root: null, rootMargin: '0px', threshold: 0.4 });
+    sections.forEach(section => observer.observe(section));
+
+    function createCharts() {
+        const regCtx = document.getElementById('regulationChart').getContext('2d');
+        regulationChart = new Chart(regCtx, {
+            type: 'bar',
+            data: {}, 
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true },
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed.x !== null) {
+                                    const val = context.parsed.x;
+                                    const labels = translations[currentLang].regulationChart.tooltip_labels;
+                                    let desc = '';
+                                    if(val >= 4.5) desc = labels['4.5'];
+                                    else if(val >=4) desc = labels['4'];
+                                    else if(val >= 2.5) desc = labels['2.5'];
+                                    else desc = labels['1'];
+                                    label += desc;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: { x: { beginAtZero: true, max: 5, ticks: { display: false } } }
+            }
+        });
+
+        const bwcCtx = document.getElementById('bwcChart').getContext('2d');
+        bwcChart = new Chart(bwcCtx, {
+            type: 'radar',
+            data: {},
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true },
+                    legend: { position: 'bottom'}
+                },
+                scales: { r: { angleLines: { display: true }, suggestedMin: 0, suggestedMax: 5, pointLabels: { font: { size: 11 }}}}
+            }
+        });
+    }
+
+    function updateCharts() {
+        const langData = translations[currentLang];
+        
+        // Regulation Chart
+        regulationChart.data.labels = langData.regulationChart.countries;
+        regulationChart.data.datasets = [{
+            label: langData.regulationChart.label,
+            data: [4, 4, 4.5, 2.5, 1],
+            backgroundColor: ['rgba(251, 191, 36, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(239, 68, 68, 0.6)', 'rgba(34, 197, 94, 0.6)', 'rgba(219, 39, 119, 0.6)'],
+            borderColor: ['rgba(251, 191, 36, 1)', 'rgba(59, 130, 246, 1)', 'rgba(239, 68, 68, 1)', 'rgba(34, 197, 94, 1)', 'rgba(219, 39, 119, 1)'],
+            borderWidth: 1
+        }];
+        regulationChart.options.plugins.title.text = langData.regulationChart.title;
+        regulationChart.update();
+
+        // BWC Chart
+        bwcChart.data.labels = langData.bwcChart.labels;
+        bwcChart.data.datasets = [
+            {
+                label: langData.bwcChart.dataset1_label,
+                data: [5, 1, 5, 1, 5],
+                fill: true,
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                borderColor: 'rgb(239, 68, 68)',
+                pointBackgroundColor: 'rgb(239, 68, 68)',
+            },
+            {
+                label: langData.bwcChart.dataset2_label,
+                data: [2, 4, 3, 4, 3],
+                fill: true,
+                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                borderColor: 'rgb(59, 130, 246)',
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+            }
+        ];
+        bwcChart.options.plugins.title.text = langData.bwcChart.title;
+        bwcChart.update();
+    }
+
+    // Initial setup
+    createCharts();
+    updateTexts(); // This will also call updateRegulationInfo and updateCharts for the first time
+});
+</script>
+</body>
+</html>
