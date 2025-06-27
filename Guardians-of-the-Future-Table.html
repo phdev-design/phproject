@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：工程化農業韌性</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: The application is designed as a thematic, single-page dashboard to transform the dense report into an intuitive, interactive journey. Instead of a linear chapter-by-chapter format, it uses a top-level navigation to guide users through four key concepts: 1) The Core Challenge (setting the stage), 2) The Genetic Toolbox (exploring gene-editing tech), 3) The Climate Intelligence Engine (exploring data/AI tech), and 4) The Integrated Strategy (synthesizing the two for a forward-looking solution). This structure groups information by function, making it easier for users to grasp the core message: the synergy between genetic science ("Genes") and data science ("Bits") for agricultural resilience. The user flow encourages exploration, allowing them to dive into the tools before seeing how they combine in the final strategy, which is a more engaging and logical path to understanding than the original report's layout. -->
+    <!-- Visualization & Content Choices: To make the report's content digestible and engaging, specific interactive elements were chosen. For comparing Transgenesis vs. CRISPR, interactive cards are used instead of a static table, allowing users to click and reveal details, which simplifies complex information. A Chart.js doughnut chart visually quantifies the cost/time benefits of CRISPR. For the AI/data section, an interactive flowchart built with HTML/CSS visualizes the data pipeline from satellites to farm decisions, making an abstract process concrete. The core concept of "Predictive Breeding" is presented as a dynamic, scenario-based graphic where users can select a future climate threat and see the corresponding genetic response, powerfully illustrating the report's main thesis. Finally, challenges and recommendations are organized into a clickable accordion, preventing information overload. All choices prioritize interaction and clear visualization over static text and tables, confirming NO SVG/Mermaid is used, and all charts are rendered on Canvas via Chart.js. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #3a3a3a;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            color: #4A6C6F;
+        }
+        .nav-button.active, .nav-button:hover {
+            color: #C97B63;
+            border-bottom-color: #C97B63;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tech-card {
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .tech-card.selected {
+            border-color: #C97B63;
+            box-shadow: 0 0 15px rgba(201, 123, 99, 0.3);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-item {
+            position: relative;
+            padding-right: 2rem;
+        }
+        .flow-item:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #C97B63;
+            font-size: 1.5rem;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="relative text-center mb-12">
+            <h1 data-lang-key="mainTitle" class="text-4xl md:text-5xl font-bold text-[#4A6C6F] mb-2">未來餐桌的守護者</h1>
+            <p data-lang-key="subTitle" class="text-xl text-[#C97B63]">基因與數據的協奏曲</p>
+            <p data-lang-key="headerIntro" class="mt-4 max-w-3xl mx-auto text-gray-600">
+                面對日益嚴峻的氣候變遷，確保全球糧食安全是一項空前挑戰。本應用程式將帶您深入了解兩大關鍵技術——「精準基因編輯」與「預測性氣候智慧」——如何攜手合作，打造具備氣候韌性的未來農業。
+            </p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-[#4A6C6F] text-white py-2 px-4 rounded-lg hover:bg-[#C97B63] transition-colors">English</button>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-gray-200 mb-12 flex-wrap">
+            <button class="nav-button py-4 px-6 text-lg font-medium border-b-4 border-transparent" data-target="challenge" data-lang-key="navChallenge">核心挑戰</button>
+            <button class="nav-button py-4 px-6 text-lg font-medium border-b-4 border-transparent" data-target="genetics" data-lang-key="navGenetics">基因工具箱</button>
+            <button class="nav-button py-4 px-6 text-lg font-medium border-b-4 border-transparent" data-target="climate" data-lang-key="navClimate">氣候智慧引擎</button>
+            <button class="nav-button py-4 px-6 text-lg font-medium border-b-4 border-transparent" data-target="strategy" data-lang-key="navStrategy">整合策略</button>
+            <button class="nav-button py-4 px-6 text-lg font-medium border-b-4 border-transparent" data-target="forward" data-lang-key="navForward">未來展望</button>
+        </nav>
+
+        <main>
+            <section id="challenge" class="content-section text-center">
+                 <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 data-lang-key="challengeTitle" class="text-3xl font-bold text-[#4A6C6F] mb-4">我們共同面對的挑戰</h2>
+                    <p data-lang-key="challengeIntro" class="text-lg max-w-4xl mx-auto text-gray-700 leading-relaxed">
+                        氣候變遷正以前所未有的方式衝擊全球農業。極端乾旱、土壤鹽鹼化、異常高溫等現象日益頻繁，直接威脅著作物的生長與產量。傳統的育種方法耗時漫長，已難以跟上氣候變化的速度。為了保障未來世代的糧食安全，我們迫切需要更快速、更精準、更具前瞻性的創新解決方案。
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-[#C97B63]">
+                        <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                            <h3 class="text-4xl font-bold counter" data-target="100">0</h3>
+                            <p data-lang-key="stat1" class="text-lg mt-2 text-gray-600">億噸 - 未來30年全球糧食需求增量</p>
+                        </div>
+                        <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                            <h3 class="text-4xl font-bold"><span class="counter" data-target="20">0</span>%</h3>
+                            <p data-lang-key="stat2" class="text-lg mt-2 text-gray-600">因氣候變遷，部分地區產量可能下降</p>
+                        </div>
+                         <div class="bg-[#F8F7F4] p-6 rounded-lg">
+                            <h3 class="text-4xl font-bold"><span class="counter" data-target="15">0</span>年</h3>
+                            <p data-lang-key="stat3" class="text-lg mt-2 text-gray-600">傳統育種開發一個新品種所需時間</p>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="genetics" class="content-section">
+                <div class="text-center mb-10">
+                    <h2 data-lang-key="geneticsTitle" class="text-3xl font-bold text-[#4A6C6F] mb-2">基因工具箱：打造氣候韌性作物</h2>
+                    <p data-lang-key="geneticsIntro" class="max-w-3xl mx-auto text-gray-600">現代生物技術為我們提供了強大的工具，讓我們能夠在分子層面上精準地改良作物，賦予它們對抗乾旱、鹽鹼等逆境的能力。了解兩種核心技術的差異與潛力。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div id="tech-selector" class="flex flex-col gap-6">
+                        <div class="tech-card bg-white p-6 rounded-xl shadow-md" data-tech="transgenesis">
+                            <h3 data-lang-key="transgenesisTitle" class="text-2xl font-bold text-[#4A6C6F]">基因轉殖 (Transgenesis)</h3>
+                            <p data-lang-key="transgenesisDesc" class="text-gray-600 mt-2">將外來物種的基因（轉基因）導入作物，賦予其全新性狀。</p>
+                        </div>
+                        <div class="tech-card bg-white p-6 rounded-xl shadow-md" data-tech="crispr">
+                             <h3 data-lang-key="crisprTitle" class="text-2xl font-bold text-[#4A6C6F]">基因編輯 (CRISPR)</h3>
+                            <p data-lang-key="crisprDesc" class="text-gray-600 mt-2">像分子剪刀一樣，精準修改作物自身基因，無需引入外源基因。</p>
+                        </div>
+                    </div>
+
+                    <div id="tech-details" class="bg-white p-8 rounded-xl shadow-lg min-h-[300px]">
+                        <div id="transgenesis-detail" class="tech-content hidden">
+                            <h4 data-lang-key="transgenesisMechanism" class="text-xl font-bold mb-3">核心機制：隨機「加法」</h4>
+                            <div data-lang-key="transgenesisDetailContent">
+                                <p class="mb-2"><strong>方法：</strong> 利用農桿菌或基因槍將目標基因隨機插入作物基因組。</p>
+                                <p class="mb-2"><strong>優點：</strong> 技術成熟，成功案例多（如抗蟲玉米）。</p>
+                                <p class="mb-2"><strong>挑戰：</strong> 插入位置隨機，可能產生非預期效應；最終產物必含外源DNA，引發法規與社會爭議；研發成本高、週期長。</p>
+                                <p class="mb-2"><strong>法規：</strong> 全球普遍視為GMO（基因改造生物），監管嚴格。</p>
+                            </div>
+                        </div>
+                        <div id="crispr-detail" class="tech-content hidden">
+                            <h4 data-lang-key="crisprMechanism" class="text-xl font-bold mb-3">核心機制：精準「改寫」</h4>
+                             <div data-lang-key="crisprDetailContent">
+                                <p class="mb-2"><strong>方法：</strong> 利用嚮導RNA (gRNA) 引導Cas9蛋白到特定DNA位點進行切割，再由細胞自身機制修復，實現基因的敲除、替換或插入。</p>
+                                <p class="mb-2"><strong>優點：</strong> 精準、高效、成本低、速度快；最終產物可不含任何外源DNA，與自然突變結果相似。</p>
+                                <p class="mb-2"><strong>潛力：</strong> 大幅降低研發門檻，實現農業創新「民主化」，可應用於更多樣的作物與性狀。</p>
+                                <p class="mb-2"><strong>法規：</strong> 美、加等國不視為GMO，歐盟仍嚴格監管，全球法規分歧是主要障礙。</p>
+                             </div>
+                        </div>
+                        <div id="tech-placeholder" class="text-center text-gray-500 pt-16">
+                            <p data-lang-key="techPlaceholder">請點擊左側技術以查看詳細資訊。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-12 bg-white rounded-xl shadow-lg p-8">
+                     <h3 data-lang-key="efficiencyTitle" class="text-2xl font-bold text-center text-[#4A6C6F] mb-4">創新效率的飛躍</h3>
+                     <p data-lang-key="efficiencyDesc" class="text-center max-w-2xl mx-auto text-gray-600 mb-6">相較於傳統基因轉殖，CRISPR技術在研發時間與成本上展現出革命性的優勢，這也為大學、研究機構及中小型企業開啟了創新之門。</p>
+                    <div class="chart-container">
+                        <canvas id="techComparisonChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="climate" class="content-section">
+                <div class="text-center mb-10">
+                    <h2 data-lang-key="climateTitle" class="text-3xl font-bold text-[#4A6C6F] mb-2">氣候智慧引擎：從數據到決策</h2>
+                    <p data-lang-key="climateIntro" class="max-w-3xl mx-auto text-gray-600">如果說基因工程是改造作物的「硬體」，那麼氣候智慧就是優化其運行的「軟體」。透過融合遙測數據與人工智慧，我們能更精準地預測農業生產，指導田間管理。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h3 data-lang-key="dataflowTitle" class="text-2xl font-bold text-center text-[#4A6C6F] mb-6">智慧農業數據流</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+                        <div class="flow-item bg-[#D8E2DC] p-4 rounded-lg shadow-sm">
+                            <div class="text-4xl">🛰️</div>
+                            <h4 data-lang-key="flow1Title" class="font-bold mt-2">地球觀測</h4>
+                            <p data-lang-key="flow1Desc" class="text-sm text-gray-700">衛星與無人機收集高解析度光譜影像</p>
+                        </div>
+                        <div class="flow-item bg-[#D8E2DC] p-4 rounded-lg shadow-sm">
+                            <div class="text-4xl">📊</div>
+                            <h4 data-lang-key="flow2Title" class="font-bold mt-2">數據分析</h4>
+                            <p data-lang-key="flow2Desc" class="text-sm text-gray-700">分析NDVI、土壤濕度等關鍵指標</p>
+                        </div>
+                        <div class="flow-item bg-[#D8E2DC] p-4 rounded-lg shadow-sm">
+                            <div class="text-4xl">🧠</div>
+                            <h4 data-lang-key="flow3Title" class="font-bold mt-2">AI模型</h4>
+                            <p data-lang-key="flow3Desc" class="text-sm text-gray-700">機器學習融合多源數據，預測產量</p>
+                        </div>
+                        <div class="flow-item bg-[#D8E2DC] p-4 rounded-lg shadow-sm">
+                           <div class="text-4xl">👨‍🌾</div>
+                            <h4 data-lang-key="flow4Title" class="font-bold mt-2">決策支持</h4>
+                            <p data-lang-key="flow4Desc" class="text-sm text-gray-700">提供灌溉、施肥、收穫等精準建議</p>
+                        </div>
+                    </div>
+                     <p data-lang-key="dataflowConclusion" class="text-center max-w-3xl mx-auto text-gray-600 mt-8">
+                       這種數據驅動的方法解決了傳統作物生長模型依賴稀疏地面站點數據的瓶頸。透過整合AI的強大預測能力與傳統模型的農學解釋能力（混合模型），我們能獲得不僅準確，而且值得信賴、可操作的農業預測。
+                    </p>
+                </div>
+            </section>
+
+            <section id="strategy" class="content-section">
+                 <div class="text-center mb-10">
+                    <h2 data-lang-key="strategyTitle" class="text-3xl font-bold text-[#4A6C6F] mb-2">整合策略：為未來氣候而育種</h2>
+                    <p data-lang-key="strategyIntro" class="max-w-3xl mx-auto text-gray-600">真正的突破在於將「基因」與「位元」結合。我們不再被動地應對當前的氣候，而是能主動地、前瞻性地為2050年乃至更遠的未來設計作物。</p>
+                </div>
+                 <div class="bg-white rounded-xl shadow-lg p-8">
+                     <h3 data-lang-key="predictiveBreedingTitle" class="text-2xl font-bold text-center text-[#4A6C6F] mb-2">「預測性育種」新範式</h3>
+                     <div class="text-center mb-6">
+                         <label for="climate-scenario" class="mr-2 text-gray-700" data-lang-key="scenarioLabel">選擇一個2050年的氣候挑戰情境：</label>
+                         <select id="climate-scenario" class="p-2 rounded-md border border-gray-300">
+                             <option value="drought" data-lang-key="scenarioDrought">極端乾旱頻發</option>
+                             <option value="salinity" data-lang-key="scenarioSalinity">土壤鹽鹼化加劇</option>
+                             <option value="heat" data-lang-key="scenarioHeat">持續性高溫熱浪</option>
+                         </select>
+                     </div>
+                     <div class="flex flex-col md:flex-row justify-around items-center gap-8 p-6 bg-[#F8F7F4] rounded-lg">
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-gray-700 mb-2" data-lang-key="step1Title">1. 氣候模型預測</h4>
+                            <div class="text-5xl mb-2">🔮</div>
+                            <p id="scenario-prediction" class="text-lg text-[#C97B63] font-semibold"></p>
+                        </div>
+                        <div class="text-3xl text-[#4A6C6F] font-bold">→</div>
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-gray-700 mb-2" data-lang-key="step2Title">2. 識別關鍵性狀</h4>
+                            <div class="text-5xl mb-2">🎯</div>
+                            <p id="scenario-trait" class="text-lg text-[#C97B63] font-semibold"></p>
+                        </div>
+                        <div class="text-3xl text-[#4A6C6F] font-bold">→</div>
+                        <div class="text-center">
+                            <h4 class="text-xl font-bold text-gray-700 mb-2" data-lang-key="step3Title">3. 精準基因編輯</h4>
+                             <div class="text-5xl mb-2">🧬</div>
+                            <p id="scenario-action" class="text-lg text-[#C97B63] font-semibold"></p>
+                        </div>
+                        <div class="text-3xl text-[#4A6C6F] font-bold">→</div>
+                         <div class="text-center">
+                            <h4 class="text-xl font-bold text-gray-700 mb-2" data-lang-key="step4Title">4. 培育未來作物</h4>
+                            <div class="text-5xl mb-2">🌾</div>
+                            <p id="scenario-result" class="text-lg text-[#C97B63] font-semibold"></p>
+                        </div>
+                     </div>
+                     <p data-lang-key="predictiveBreedingConclusion" class="text-center max-w-3xl mx-auto text-gray-600 mt-8">
+                        這種從「被動反應」到「主動預測」的轉變，是加速農業創新的良性循環。氣候模型識別需求，基因編輯提供解決方案，而新作物在田間的表現數據又能反過來優化模型，讓我們能夠跑在氣候變化的前頭。
+                     </p>
+                 </div>
+            </section>
+
+            <section id="forward" class="content-section">
+                <div class="text-center mb-10">
+                    <h2 data-lang-key="forwardTitle" class="text-3xl font-bold text-[#4A6C6F] mb-2">未來展望：挑戰與策略</h2>
+                    <p data-lang-key="forwardIntro" class="max-w-3xl mx-auto text-gray-600">要將此願景轉化為全球現實，我們必須克服數據、法規、經濟和公眾信任等多重障礙。以下是針對不同領域決策者的策略性建議。</p>
+                </div>
+                <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                    <!-- Accordion items will be injected here by JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const translations = {
+                zh: {
+                    mainTitle: '未來餐桌的守護者',
+                    subTitle: '基因與數據的協奏曲',
+                    headerIntro: '面對日益嚴峻的氣候變遷，確保全球糧食安全是一項空前挑戰。本應用程式將帶您深入了解兩大關鍵技術——「精準基因編輯」與「預測性氣候智慧」——如何攜手合作，打造具備氣候韌性的未來農業。',
+                    navChallenge: '核心挑戰',
+                    navGenetics: '基因工具箱',
+                    navClimate: '氣候智慧引擎',
+                    navStrategy: '整合策略',
+                    navForward: '未來展望',
+                    challengeTitle: '我們共同面對的挑戰',
+                    challengeIntro: '氣候變遷正以前所未有的方式衝擊全球農業。極端乾旱、土壤鹽鹼化、異常高溫等現象日益頻繁，直接威脅著作物的生長與產量。傳統的育種方法耗時漫長，已難以跟上氣候變化的速度。為了保障未來世代的糧食安全，我們迫切需要更快速、更精準、更具前瞻性的創新解決方案。',
+                    stat1: '億噸 - 未來30年全球糧食需求增量',
+                    stat2: '因氣候變遷，部分地區產量可能下降',
+                    stat3: '傳統育種開發一個新品種所需時間',
+                    geneticsTitle: '基因工具箱：打造氣候韌性作物',
+                    geneticsIntro: '現代生物技術為我們提供了強大的工具，讓我們能夠在分子層面上精準地改良作物，賦予它們對抗乾旱、鹽鹼等逆境的能力。了解兩種核心技術的差異與潛力。',
+                    transgenesisTitle: '基因轉殖 (Transgenesis)',
+                    transgenesisDesc: '將外來物種的基因（轉基因）導入作物，賦予其全新性狀。',
+                    crisprTitle: '基因編輯 (CRISPR)',
+                    crisprDesc: '像分子剪刀一樣，精準修改作物自身基因，無需引入外源基因。',
+                    transgenesisMechanism: '核心機制：隨機「加法」',
+                    transgenesisDetailContent: `<p class="mb-2"><strong>方法：</strong> 利用農桿菌或基因槍將目標基因隨機插入作物基因組。</p><p class="mb-2"><strong>優點：</strong> 技術成熟，成功案例多（如抗蟲玉米）。</p><p class="mb-2"><strong>挑戰：</strong> 插入位置隨機，可能產生非預期效應；最終產物必含外源DNA，引發法規與社會爭議；研發成本高、週期長。</p><p class="mb-2"><strong>法規：</strong> 全球普遍視為GMO（基因改造生物），監管嚴格。</p>`,
+                    crisprMechanism: '核心機制：精準「改寫」',
+                    crisprDetailContent: `<p class="mb-2"><strong>方法：</strong> 利用嚮導RNA (gRNA) 引導Cas9蛋白到特定DNA位點進行切割，再由細胞自身機制修復，實現基因的敲除、替換或插入。</p><p class="mb-2"><strong>優點：</strong> 精準、高效、成本低、速度快；最終產物可不含任何外源DNA，與自然突變結果相似。</p><p class="mb-2"><strong>潛力：</strong> 大幅降低研發門檻，實現農業創新「民主化」，可應用於更多樣的作物與性狀。</p><p class="mb-2"><strong>法規：</strong> 美、加等國不視為GMO，歐盟仍嚴格監管，全球法規分歧是主要障礙。</p>`,
+                    techPlaceholder: '請點擊左側技術以查看詳細資訊。',
+                    efficiencyTitle: '創新效率的飛躍',
+                    efficiencyDesc: '相較於傳統基因轉殖，CRISPR技術在研發時間與成本上展現出革命性的優勢，這也為大學、研究機構及中小型企業開啟了創新之門。',
+                    climateTitle: '氣候智慧引擎：從數據到決策',
+                    climateIntro: '如果說基因工程是改造作物的「硬體」，那麼氣候智慧就是優化其運行的「軟體」。透過融合遙測數據與人工智慧，我們能更精準地預測農業生產，指導田間管理。',
+                    dataflowTitle: '智慧農業數據流',
+                    flow1Title: '地球觀測',
+                    flow1Desc: '衛星與無人機收集高解析度光譜影像',
+                    flow2Title: '數據分析',
+                    flow2Desc: '分析NDVI、土壤濕度等關鍵指標',
+                    flow3Title: 'AI模型',
+                    flow3Desc: '機器學習融合多源數據，預測產量',
+                    flow4Title: '決策支持',
+                    flow4Desc: '提供灌溉、施肥、收穫等精準建議',
+                    dataflowConclusion: '這種數據驅動的方法解決了傳統作物生長模型依賴稀疏地面站點數據的瓶頸。透過整合AI的強大預測能力與傳統模型的農學解釋能力（混合模型），我們能獲得不僅準確，而且值得信賴、可操作的農業預測。',
+                    strategyTitle: '整合策略：為未來氣候而育種',
+                    strategyIntro: '真正的突破在於將「基因」與「位元」結合。我們不再被動地應對當前的氣候，而是能主動地、前瞻性地為2050年乃至更遠的未來設計作物。',
+                    predictiveBreedingTitle: '「預測性育種」新範式',
+                    scenarioLabel: '選擇一個2050年的氣候挑戰情境：',
+                    scenarioDrought: '極端乾旱頻發',
+                    scenarioSalinity: '土壤鹽鹼化加劇',
+                    scenarioHeat: '持續性高溫熱浪',
+                    step1Title: '1. 氣候模型預測',
+                    step2Title: '2. 識別關鍵性狀',
+                    step3Title: '3. 精準基因編輯',
+                    step4Title: '4. 培育未來作物',
+                    predictiveBreedingConclusion: '這種從「被動反應」到「主動預測」的轉變，是加速農業創新的良性循環。氣候模型識別需求，基因編輯提供解決方案，而新作物在田間的表現數據又能反過來優化模型，讓我們能夠跑在氣候變化的前頭。',
+                    forwardTitle: '未來展望：挑戰與策略',
+                    forwardIntro: '要將此願景轉化為全球現實，我們必須克服數據、法規、經濟和公眾信任等多重障礙。以下是針對不同領域決策者的策略性建議。',
+                    chartTitle: '平均研發成本與週期示意（百萬美元）',
+                    chartLabelTransgenesis: '傳統基因轉殖',
+                    chartLabelCrispr: 'CRISPR基因編輯',
+                    chartTooltip: '約 {value} 百萬美元 / 10+ 年 vs. 更低 / 更短',
+                    scenarioData: {
+                        drought: { prediction: "降雨量減少30%", trait: "發達的深根系", action: "編輯DREB2A等基因", result: "抗旱玉米" },
+                        salinity: { prediction: "沿海土壤鹽度上升", trait: "高效的鈉離子外排能力", action: "優化HKT1;5、SOS1基因", result: "耐鹽水稻" },
+                        heat: { prediction: "夏季熱浪天數增加", trait: "更高的熱休克蛋白表現", action: "編輯熱休克因子基因", result: "耐熱小麥" }
+                    },
+                    accordionData: [
+                        { title: "法規僵局 (Regulatory Gridlock)", content: `<strong>致政策制定者：</strong>推動建立基於科學風險評估、而非過程的國際協調監管框架，促進創新與貿易。<br><strong>致研究機構：</strong>積極參與政策對話，提供科學證據支持合理的法規改革。` },
+                        { title: "數據貧困 (Data Poverty)", content: `<strong>致政策制定者：</strong>加大對發展中國家公共數據基礎設施（如氣象站網、土壤圖譜）的投資。<br><strong>致投資者與捐助機構：</strong>資助旨在改善數據可及性的項目，支持開源數據平台開發。` },
+                        { title: "經濟與倫理問題 (Economic & Ethical Issues)", content: `<strong>致政策制定者：</strong>制定政策鼓勵公私合作（PPP），確保技術成果能惠及小農戶。<br><strong>致研究機構：</strong>優先關注對區域糧食安全至關重要的「孤兒作物」，而非僅聚焦大宗商品。<br><strong>致投資者：</strong>設立影響力投資基金，支持為小農戶開發技術的社會企業。` },
+                        { title: "公眾信任 (Public Trust)", content: `<strong>致研究機構：</strong>建立透明的治理與溝通機制，進行有效的公眾對話，而非單向的知識灌輸。<br><strong>致政策制定者：</strong>確保標示政策的清晰與一致性，建立公眾可參與的監督機制。` }
+                    ]
+                },
+                en: {
+                    mainTitle: 'Guardians of the Future Table',
+                    subTitle: 'A Symphony of Genes and Data',
+                    headerIntro: 'Facing severe climate change, ensuring global food security is an unprecedented challenge. This application explores how two key technologies—precision gene editing and predictive climate intelligence—can work together to create climate-resilient agriculture for the future.',
+                    navChallenge: 'The Core Challenge',
+                    navGenetics: 'The Genetic Toolbox',
+                    navClimate: 'Climate Intelligence Engine',
+                    navStrategy: 'Integrated Strategy',
+                    navForward: 'The Path Forward',
+                    challengeTitle: 'The Challenge We Face Together',
+                    challengeIntro: 'Climate change is impacting global agriculture in unprecedented ways. Extreme droughts, soil salinization, and heatwaves are becoming more frequent, directly threatening crop growth and yield. Traditional breeding methods are too slow to keep pace. To secure food for future generations, we urgently need faster, more precise, and forward-thinking solutions.',
+                    stat1: 'Billion Tons - Additional global food demand in the next 30 years',
+                    stat2: 'Yield decline in some regions due to climate change',
+                    stat3: 'Years for traditional breeding to develop a new variety',
+                    geneticsTitle: 'The Genetic Toolbox: Building Climate-Resilient Crops',
+                    geneticsIntro: 'Modern biotechnology provides powerful tools to precisely improve crops at the molecular level, giving them the ability to withstand stresses like drought and salinity. Understand the differences and potential of two core technologies.',
+                    transgenesisTitle: 'Transgenesis',
+                    transgenesisDesc: 'Introducing genes from foreign species to grant crops entirely new traits.',
+                    crisprTitle: 'CRISPR Gene Editing',
+                    crisprDesc: 'Acts like molecular scissors to precisely modify a crop\'s own genes without introducing foreign DNA.',
+                    transgenesisMechanism: 'Core Mechanism: Random "Addition"',
+                    transgenesisDetailContent: `<p class="mb-2"><strong>Method:</strong> Uses Agrobacterium or a gene gun to randomly insert target genes into the crop genome.</p><p class="mb-2"><strong>Pros:</strong> Mature technology with many success stories (e.g., insect-resistant corn).</p><p class="mb-2"><strong>Cons:</strong> Random insertion can cause unintended effects; final product contains foreign DNA, leading to regulatory and social controversy; high R&D cost and long timeline.</p><p class="mb-2"><strong>Regulation:</strong> Widely considered a GMO globally, subject to strict oversight.</p>`,
+                    crisprMechanism: 'Core Mechanism: Precise "Rewrite"',
+                    crisprDetailContent: `<p class="mb-2"><strong>Method:</strong> Uses a guide RNA (gRNA) to direct the Cas9 protein to a specific DNA site for cutting, allowing the cell's own repair mechanisms to knock out, replace, or insert genes.</p><p class="mb-2"><strong>Pros:</strong> Precise, efficient, low-cost, and fast; the final product can be free of foreign DNA, similar to natural mutations.</p><p class="mb-2"><strong>Potential:</strong> Lowers R&D barriers, "democratizing" agricultural innovation for a wider variety of crops and traits.</p><p class="mb-2"><strong>Regulation:</strong> Not considered GMO in the US, Canada, etc., but still strictly regulated in the EU. Global regulatory divergence is a major hurdle.</p>`,
+                    techPlaceholder: 'Please click a technology on the left for details.',
+                    efficiencyTitle: 'A Leap in Innovation Efficiency',
+                    efficiencyDesc: 'Compared to traditional transgenesis, CRISPR technology offers revolutionary advantages in R&D time and cost, opening doors for universities, research institutions, and small to medium-sized enterprises.',
+                    climateTitle: 'Climate Intelligence Engine: From Data to Decision',
+                    climateIntro: 'If genetic engineering is the "hardware" for modifying crops, climate intelligence is the "software" that optimizes their performance. By fusing remote sensing data with AI, we can more accurately predict agricultural production and guide farm management.',
+                    dataflowTitle: 'Smart Agriculture Data Flow',
+                    flow1Title: 'Earth Observation',
+                    flow1Desc: 'Satellites and drones collect high-resolution spectral imagery.',
+                    flow2Title: 'Data Analytics',
+                    flow2Desc: 'Analyze key indicators like NDVI, soil moisture, etc.',
+                    flow3Title: 'AI Models',
+                    flow3Desc: 'Machine learning fuses multi-source data to predict yield.',
+                    flow4Title: 'Decision Support',
+                    flow4Desc: 'Provide precise advice on irrigation, fertilization, and harvesting.',
+                    dataflowConclusion: 'This data-driven approach overcomes the bottleneck of traditional crop models that rely on sparse ground station data. By integrating the predictive power of AI with the agronomic interpretability of traditional models (hybrid models), we can obtain agricultural forecasts that are not only accurate but also trustworthy and actionable.',
+                    strategyTitle: 'Integrated Strategy: Breeding for a Future Climate',
+                    strategyIntro: 'The real breakthrough lies in combining "genes" and "bits." We no longer passively react to the current climate but can proactively and preemptively design crops for 2050 and beyond.',
+                    predictiveBreedingTitle: 'The New "Predictive Breeding" Paradigm',
+                    scenarioLabel: 'Select a 2050 climate challenge scenario:',
+                    scenarioDrought: 'Frequent extreme droughts',
+                    scenarioSalinity: 'Increased soil salinization',
+                    scenarioHeat: 'Persistent high-temperature heatwaves',
+                    step1Title: '1. Climate Model Prediction',
+                    step2Title: '2. Identify Key Traits',
+                    step3Title: '3. Precision Gene Editing',
+                    step4Title: '4. Develop Future Crops',
+                    predictiveBreedingConclusion: 'This shift from "reactive" to "proactive" creates a virtuous cycle of agricultural innovation. Climate models identify needs, gene editing provides solutions, and the performance data from new crops in the field, in turn, refines the models, allowing us to stay ahead of climate change.',
+                    forwardTitle: 'The Path Forward: Challenges and Strategies',
+                    forwardIntro: 'To turn this vision into a global reality, we must overcome obstacles in data, regulation, economics, and public trust. Here are strategic recommendations for various stakeholders.',
+                    chartTitle: 'Avg. R&D Cost & Timeline (in millions USD)',
+                    chartLabelTransgenesis: 'Traditional Transgenesis',
+                    chartLabelCrispr: 'CRISPR Gene Editing',
+                    chartTooltip: 'Approx. ${value}M / 10+ years vs. much less / shorter',
+                    scenarioData: {
+                        drought: { prediction: "30% less rainfall", trait: "Deeper, extensive root system", action: "Edit genes like DREB2A", result: "Drought-tolerant maize" },
+                        salinity: { prediction: "Rising coastal soil salinity", trait: "Efficient sodium ion exclusion", action: "Optimize HKT1;5, SOS1 genes", result: "Salt-tolerant rice" },
+                        heat: { prediction: "More summer heatwave days", trait: "Higher heat shock protein expression", action: "Edit heat shock factor genes", result: "Heat-tolerant wheat" }
+                    },
+                    accordionData: [
+                        { title: "Regulatory Gridlock", content: `<strong>For Policymakers:</strong> Foster international regulatory harmonization based on scientific risk assessment, not the process, to promote innovation and trade.<br><strong>For Research Institutions:</strong> Actively engage in policy dialogue, providing scientific evidence to support sensible regulatory reform.` },
+                        { title: "Data Poverty", content: `<strong>For Policymakers:</strong> Increase investment in public data infrastructure (e.g., weather station networks, soil maps) in developing countries.<br><strong>For Investors & Donors:</strong> Fund projects aimed at improving data accessibility and support the development of open-source data platforms.` },
+                        { title: "Economic & Ethical Issues", content: `<strong>For Policymakers:</strong> Enact policies encouraging Public-Private Partnerships (PPPs) to ensure technology benefits smallholder farmers.<br><strong>For Research Institutions:</strong> Prioritize "orphan crops" crucial to regional food security, not just major commodities.<br><strong>For Investors:</strong> Establish impact investment funds to support social enterprises developing technologies for smallholders.` },
+                        { title: "Public Trust", content: `<strong>For Research Institutions:</strong> Establish transparent governance and communication, engaging in effective public dialogue, not one-way information delivery.<br><strong>For Policymakers:</strong> Ensure clear and consistent labeling policies and establish public oversight mechanisms.` }
+                    ]
+                }
+            };
+            
+            let currentLang = 'zh';
+            let techComparisonChart;
+
+            const navButtons = document.querySelectorAll('.nav-button');
+            const contentSections = document.querySelectorAll('.content-section');
+            const techCards = document.querySelectorAll('.tech-card');
+            const techDetails = document.querySelectorAll('.tech-content');
+            const techPlaceholder = document.getElementById('tech-placeholder');
+            const scenarioSelect = document.getElementById('climate-scenario');
+            const langSwitcher = document.getElementById('lang-switcher');
+
+            function updateLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                langSwitcher.textContent = lang === 'zh' ? 'English' : '中文';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        // Use innerHTML for keys that contain HTML tags
+                        if (key.includes('Content') || key.includes('accordion')) {
+                            el.innerHTML = translations[lang][key];
+                        } else {
+                            el.textContent = translations[lang][key];
+                        }
+                    }
+                });
+                
+                // Re-inject content for elements that are dynamically created or have complex innerHTML
+                const transgenesisDetailContentEl = document.querySelector('[data-lang-key="transgenesisDetailContent"]');
+                if (transgenesisDetailContentEl) transgenesisDetailContentEl.innerHTML = translations[lang].transgenesisDetailContent;
+                
+                const crisprDetailContentEl = document.querySelector('[data-lang-key="crisprDetailContent"]');
+                if (crisprDetailContentEl) crisprDetailContentEl.innerHTML = translations[lang].crisprDetailContent;
+
+
+                updateScenario(scenarioSelect.value);
+                setupAccordion();
+                createOrUpdateChart();
+            }
+
+            function createOrUpdateChart() {
+                if (techComparisonChart) {
+                    techComparisonChart.destroy();
+                }
+
+                const ctx = document.getElementById('techComparisonChart').getContext('2d');
+                const langData = translations[currentLang];
+                
+                techComparisonChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [langData.chartLabelTransgenesis, langData.chartLabelCrispr],
+                        datasets: [{
+                            data: [130, 10],
+                            backgroundColor: ['#E8D5C4', '#4A6C6F'],
+                            borderColor: '#F8F7F4',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { font: { size: 14 } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed !== null) {
+                                            label += langData.chartTooltip.replace('{value}', context.parsed);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: langData.chartTitle,
+                                font: { size: 16 },
+                                color: '#3a3a3a',
+                                padding: { top: 10, bottom: 10 }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function updateScenario(scenario) {
+                const data = translations[currentLang].scenarioData[scenario];
+                document.getElementById('scenario-prediction').textContent = data.prediction;
+                document.getElementById('scenario-trait').textContent = data.trait;
+                document.getElementById('scenario-action').textContent = data.action;
+                document.getElementById('scenario-result').textContent = data.result;
+            }
+
+            function setupAccordion() {
+                const container = document.getElementById('accordion-container');
+                container.innerHTML = '';
+                translations[currentLang].accordionData.forEach((item) => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white rounded-lg shadow-md overflow-hidden';
+                    div.innerHTML = `
+                        <button class="accordion-button w-full text-left p-5 font-semibold text-lg text-[#4A6C6F] flex justify-between items-center transition hover:bg-gray-50">
+                            <span>${item.title}</span>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </button>
+                        <div class="accordion-content px-5 pb-5 text-gray-700 leading-relaxed">
+                            <p>${item.content}</p>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+                
+                document.querySelectorAll('.accordion-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const content = button.nextElementSibling;
+                        const icon = button.querySelector('span:last-child');
+                        if (content.style.maxHeight) {
+                            content.style.maxHeight = null;
+                            icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                            document.querySelectorAll('.accordion-button span:last-child').forEach(i => i.style.transform = 'rotate(0deg)');
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            icon.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                });
+            }
+
+            function animateCounters() {
+                const counters = document.querySelectorAll('.counter');
+                const speed = 200;
+                counters.forEach(counter => {
+                    const target = +counter.getAttribute('data-target');
+                    let count = 0;
+                    const updateCount = () => {
+                        const inc = target / speed;
+                        if (count < target) {
+                            count += inc;
+                            counter.innerText = Math.ceil(count);
+                            setTimeout(updateCount, 10);
+                        } else {
+                            counter.innerText = target;
+                        }
+                    };
+                    updateCount();
+                });
+            }
+
+            function navigateTo(targetId) {
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.target === targetId);
+                });
+                contentSections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                });
+                if (targetId === 'challenge') {
+                    animateCounters();
+                }
+            }
+            
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => navigateTo(button.dataset.target));
+            });
+
+            techCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const target = card.dataset.tech;
+                    techCards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    techPlaceholder.style.display = 'none';
+                    techDetails.forEach(detail => {
+                        detail.classList.toggle('hidden', detail.id !== `${target}-detail`);
+                    });
+                });
+            });
+            
+            scenarioSelect.addEventListener('change', (e) => updateScenario(e.target.value));
+
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(newLang);
+            });
+            
+            // Initial setup and a small refactor in language update logic
+            function initializeApp() {
+                navigateTo('challenge');
+                updateLanguage('zh');
+                techCards[1].click();
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
