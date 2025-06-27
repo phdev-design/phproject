@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：《Minecraft》的成功解構 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthy Harmony -->
+    <!-- Application Structure Plan: The application is structured into four thematic, scroll-linked sections rather than a linear report format: 1. **Hero/Intro:** Grabs attention with key stats. 2. **核心玩法 (Core Gameplay):** Uses interactive buttons to explore game modes, making it more engaging than a static table. 3. **人氣引擎 (Popularity Engine):** Visualizes the "Success Flywheel" as an interactive diagram, transforming a concept into an explorable element. 4. **超越遊戲 (Beyond the Game):** Employs a tabbed interface to neatly present the distinct yet related topics of Business and Education. 5. **市場比較 (Market Comparison):** Features a dynamic radar chart, allowing users to actively compare Minecraft against its competitors, offering a far more insightful and memorable experience than a simple table. This structure guides the user through a narrative journey from "what" to "why" to "so what," prioritizing interactive discovery over passive reading. A language switcher has been added to the header for full EN/ZH localization. -->
+    <!-- Visualization & Content Choices: 1. **Key Stats (Hero):** Goal: Inform. Method: Large typography. Justification: Immediately establishes the scale and importance of the topic. 2. **Game Mode Explorer:** Goal: Organize/Inform. Method: JS-powered content switching with buttons. Justification: Breaks down dense information from the report's table into digestible, user-controlled chunks, improving comprehension. 3. **Success Flywheel Diagram:** Goal: Explain Relationships. Method: HTML/CSS diagram with interactive hover/click effects. Justification: Visually decodes the core argument of Part 2, making the abstract concept of the growth loop tangible and easy to understand. 4. **Competitor Radar Chart:** Goal: Compare/Analyze. Method: Chart.js Canvas. Justification: Translates the qualitative/quantitative data from the comparison table into a powerful visual format. Radar charts are excellent for multi-attribute comparison, and making it interactive gives users analytical control. It's the "wow" factor that summarizes a key analytical part of the report. All textual content is now dynamic, driven by a centralized language store. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .bg-primary { background-color: #FDFBF8; }
+        .bg-secondary { background-color: #F4F1ED; }
+        .bg-accent { background-color: #A8BDB1; }
+        .text-accent { color: #5E7A6B; }
+        .text-dark { color: #353535; }
+        .border-accent { border-color: #A8BDB1; }
+        .btn-nav {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+        .btn-nav.active, .btn-nav:hover {
+            background-color: #5E7A6B;
+            color: #FFFFFF;
+            border-color: #5E7A6B;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #353535;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #5E7A6B;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.75;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        .interactive-btn {
+            background-color: #F4F1ED;
+            color: #5E7A6B;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid #e0dcd7;
+        }
+        .interactive-btn.active, .interactive-btn:hover {
+            background-color: #5E7A6B;
+            color: #FFFFFF;
+            border-color: #5E7A6B;
+        }
+        .flywheel-node {
+            background-color: white;
+            border: 2px solid #A8BDB1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+        }
+        .flywheel-arrow {
+            color: #A8BDB1;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom: 2px solid #5E7A6B;
+            color: #5E7A6B;
+            font-weight: 700;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-primary" x-data="{ activeSection: 'intro' }">
+
+    <header class="p-4 fixed top-0 left-0 right-0 bg-primary/80 backdrop-blur-sm z-50 transition-shadow duration-300" :class="{ 'shadow-md': activeSection !== 'intro' }">
+        <nav class="container mx-auto flex justify-between items-center">
+            <div class="flex-1"></div>
+            <div class="flex space-x-1 md:space-x-2 bg-secondary p-2 rounded-full">
+                <a href="#gameplay" @click="activeSection = 'gameplay'" class="btn-nav" :class="{'active': activeSection === 'gameplay'}" x-text="$store.texts.nav_gameplay[$store.texts.lang]"></a>
+                <a href="#popularity" @click="activeSection = 'popularity'" class="btn-nav" :class="{'active': activeSection === 'popularity'}" x-text="$store.texts.nav_popularity[$store.texts.lang]"></a>
+                <a href="#beyond" @click="activeSection = 'beyond'" class="btn-nav" :class="{'active': activeSection === 'beyond'}" x-text="$store.texts.nav_beyond[$store.texts.lang]"></a>
+                <a href="#comparison" @click="activeSection = 'comparison'" class="btn-nav" :class="{'active': activeSection === 'comparison'}" x-text="$store.texts.nav_comparison[$store.texts.lang]"></a>
+            </div>
+            <div class="flex-1 flex justify-end">
+                <button @click="toggleLanguage()" class="btn-nav" x-text="$store.texts.lang_toggle[$store.texts.lang]"></button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="min-h-screen flex flex-col justify-center items-center text-center p-4" x-intersect.threshold.0.5="activeSection = 'intro'">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-6xl font-bold text-dark mb-4" x-text="$store.texts.intro_title[$store.texts.lang]"></h1>
+                <p class="text-lg md:text-xl text-accent mb-8" x-text="$store.texts.intro_subtitle[$store.texts.lang]"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 text-center">
+                    <div class="bg-secondary p-6 rounded-lg">
+                        <p class="text-3xl md:text-4xl font-bold text-dark">#1</p>
+                        <p class="text-accent" x-text="$store.texts.intro_stat1[$store.texts.lang]"></p>
+                    </div>
+                    <div class="bg-secondary p-6 rounded-lg">
+                        <p class="text-3xl md:text-4xl font-bold text-dark">1.5T+</p>
+                        <p class="text-accent" x-text="$store.texts.intro_stat2[$store.texts.lang]"></p>
+                    </div>
+                    <div class="bg-secondary p-6 rounded-lg">
+                        <p class="text-3xl md:text-4xl font-bold text-dark">$2.5B</p>
+                        <p class="text-accent" x-text="$store.texts.intro_stat3[$store.texts.lang]"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gameplay" class="py-16 md:py-24 bg-secondary" x-intersect.threshold.0.3="activeSection = 'gameplay'">
+            <div class="container mx-auto px-4 text-center" x-data="gameplaySection()">
+                <h2 class="section-title" x-text="$store.texts.gameplay_title[$store.texts.lang]"></h2>
+                <p class="section-subtitle" x-text="$store.texts.gameplay_subtitle[$store.texts.lang]"></p>
+                
+                <div class="mb-8 flex flex-wrap justify-center gap-2">
+                    <template x-for="mode in $store.texts.gameModes[$store.texts.lang]" :key="mode.id">
+                        <button @click="activeModeId = mode.id" :class="{'active': activeModeId === mode.id}" class="interactive-btn" x-text="mode.name"></button>
+                    </template>
+                </div>
+
+                <div class="max-w-3xl mx-auto text-left">
+                    <template x-for="mode in $store.texts.gameModes[$store.texts.lang]" :key="mode.id">
+                        <div x-show="activeModeId === mode.id" x-transition.opacity.duration.300ms class="card">
+                            <h3 class="text-2xl font-bold text-dark mb-2" x-text="mode.name"></h3>
+                            <p class="text-accent font-semibold mb-4" x-text="mode.tagline"></p>
+                            <p class="mb-4" x-text="mode.description"></p>
+                            <ul class="space-y-2">
+                                <template x-for="feature in mode.features" :key="feature.label">
+                                    <li class="flex items-start">
+                                        <span class="text-accent font-bold w-28 md:w-32 flex-shrink-0" x-text="feature.label"></span>
+                                        <span x-text="feature.value"></span>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+
+        <section id="popularity" class="py-16 md:py-24 bg-primary" x-intersect.threshold.0.3="activeSection = 'popularity'">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="section-title" x-text="$store.texts.popularity_title[$store.texts.lang]"></h2>
+                <p class="section-subtitle" x-text="$store.texts.popularity_subtitle[$store.texts.lang]"></p>
+
+                <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-5 items-center gap-4 text-center font-semibold text-dark">
+                    <div class="flywheel-node p-4 rounded-lg" x-text="$store.texts.flywheel1[$store.texts.lang]"></div>
+                    <div class="flywheel-arrow hidden md:block">→</div>
+                    <div class="flywheel-arrow block md:hidden self-center justify-self-center transform rotate-90">→</div>
+                    <div class="flywheel-node p-4 rounded-lg" x-html="$store.texts.flywheel2[$store.texts.lang]"></div>
+                     <div class="flywheel-arrow hidden md:block">→</div>
+                    <div class="flywheel-arrow block md:hidden self-center justify-self-center transform rotate-90">→</div>
+                    <div class="flywheel-node p-4 rounded-lg" x-html="$store.texts.flywheel3[$store.texts.lang]"></div>
+                     <div class="flywheel-arrow block md:hidden self-center justify-self-center transform rotate-90">→</div>
+                    <div class="col-span-1 md:col-span-5 flex justify-center my-4">
+                         <div class="flywheel-arrow transform -rotate-45 md:rotate-90">↑</div>
+                    </div>
+                    <div class="col-span-1 md:col-span-5 flex justify-center items-center">
+                       <div class="flywheel-node p-4 rounded-lg" x-text="$store.texts.flywheel4[$store.texts.lang]"></div>
+                    </div>
+                </div>
+
+                 <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-dark mb-2" x-text="$store.texts.pop_card1_title[$store.texts.lang]"></h3>
+                        <p x-text="$store.texts.pop_card1_text[$store.texts.lang]"></p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-dark mb-2" x-text="$store.texts.pop_card2_title[$store.texts.lang]"></h3>
+                        <p x-text="$store.texts.pop_card2_text[$store.texts.lang]"></p>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-xl font-bold text-dark mb-2" x-text="$store.texts.pop_card3_title[$store.texts.lang]"></h3>
+                        <p x-text="$store.texts.pop_card3_text[$store.texts.lang]"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="beyond" class="py-16 md:py-24 bg-secondary" x-intersect.threshold.0.3="activeSection = 'beyond'">
+            <div class="container mx-auto px-4" x-data="{ tab: 'business' }">
+                <div class="text-center">
+                    <h2 class="section-title" x-text="$store.texts.beyond_title[$store.texts.lang]"></h2>
+                    <p class="section-subtitle" x-text="$store.texts.beyond_subtitle[$store.texts.lang]"></p>
+                </div>
+                
+                <div class="max-w-3xl mx-auto">
+                    <div class="mb-8 border-b border-gray-300 flex justify-center">
+                        <button @click="tab = 'business'" class="tab-btn px-6 py-3 text-lg text-gray-500 transition-colors" :class="{ 'active': tab === 'business' }" x-text="$store.texts.beyond_tab1[$store.texts.lang]"></button>
+                        <button @click="tab = 'education'" class="tab-btn px-6 py-3 text-lg text-gray-500 transition-colors" :class="{ 'active': tab === 'education' }" x-text="$store.texts.beyond_tab2[$store.texts.lang]"></button>
+                    </div>
+
+                    <div x-show="tab === 'business'" x-transition.opacity.duration.300ms>
+                        <div class="card">
+                            <h3 class="text-2xl font-bold text-dark mb-4" x-text="$store.texts.business_title[$store.texts.lang]"></h3>
+                            <p class="mb-4" x-text="$store.texts.business_p1[$store.texts.lang]"></p>
+                            <div class="space-y-3">
+                                <p><strong x-text="$store.texts.business_strong1[$store.texts.lang]"></strong> <span x-text="$store.texts.business_p2[$store.texts.lang]"></span></p>
+                                <p><strong x-text="$store.texts.business_strong2[$store.texts.lang]"></strong> <span x-text="$store.texts.business_p3[$store.texts.lang]"></span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="tab === 'education'" x-transition.opacity.duration.300ms x-cloak>
+                        <div class="card">
+                            <h3 class="text-2xl font-bold text-dark mb-4" x-text="$store.texts.education_title[$store.texts.lang]"></h3>
+                            <p class="mb-4" x-text="$store.texts.education_p1[$store.texts.lang]"></p>
+                             <div class="space-y-3">
+                                <p><strong x-text="$store.texts.education_strong1[$store.texts.lang]"></strong> <span x-text="$store.texts.education_p2[$store.texts.lang]"></span></p>
+                                <p><strong x-text="$store.texts.education_strong2[$store.texts.lang]"></strong> <span x-text="$store.texts.education_p3[$store.texts.lang]"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="py-16 md:py-24 bg-primary" x-intersect.threshold.0.3="activeSection = 'comparison'">
+            <div class="container mx-auto px-4 text-center">
+                 <h2 class="section-title" x-text="$store.texts.comparison_title[$store.texts.lang]"></h2>
+                <p class="section-subtitle" x-text="$store.texts.comparison_subtitle[$store.texts.lang]"></p>
+                
+                <div class="chart-container">
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+                 <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <p class="font-semibold text-dark" x-text="$store.texts.comparison_select[$store.texts.lang]"></p>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="mc_toggle" class="form-checkbox h-5 w-5 text-accent rounded focus:ring-accent" checked @change="updateChartVisibility()">
+                        <span class="text-dark">Minecraft</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="rb_toggle" class="form-checkbox h-5 w-5 text-accent rounded focus:ring-accent" checked @change="updateChartVisibility()">
+                        <span class="text-dark">Roblox</span>
+                    </label>
+                     <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="tr_toggle" class="form-checkbox h-5 w-5 text-accent rounded focus:ring-accent" checked @change="updateChartVisibility()">
+                        <span class="text-dark">Terraria</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="text-center p-8 bg-secondary mt-16">
+        <p class="text-accent" x-text="$store.texts.footer_text[$store.texts.lang]"></p>
+    </footer>
+
+    <script>
+        const localizationData = {
+            lang: 'zh',
+            lang_toggle: { zh: 'English', en: '中文' },
+            nav_gameplay: { zh: '核心玩法', en: 'Gameplay' },
+            nav_popularity: { zh: '人氣引擎', en: 'Popularity' },
+            nav_beyond: { zh: '超越遊戲', en: 'Beyond' },
+            nav_comparison: { zh: '市場比較', en: 'Comparison' },
+            intro_title: { zh: '解構方塊：Minecraft的成功之道', en: 'Deconstructing Blocks: The Success of Minecraft' },
+            intro_subtitle: { zh: '一個全球文化現象的互動式分析，探討其玩法、持久的流行度與多維度的成功。', en: 'An interactive analysis of a global cultural phenomenon, exploring its gameplay, enduring popularity, and multifaceted success.' },
+            intro_stat1: { zh: '史上最暢銷電子遊戲', en: 'Best-Selling Video Game of All Time' },
+            intro_stat2: { zh: 'YouTube總觀看次數', en: 'Total Views on YouTube' },
+            intro_stat3: { zh: '微軟收購價 (2014)', en: 'Microsoft Acquisition Price (2014)' },
+            gameplay_title: { zh: '核心玩法：無限世界的基礎', en: 'Core Gameplay: The Foundation of Infinite Worlds' },
+            gameplay_subtitle: { zh: '本節將深入探討《Minecraft》的基礎。從賦予玩家絕對自由的沙盒哲學，到構成遊戲體驗核心的各種模式，我們將一同了解這款遊戲「玩的是什麼」。點擊下方的按鈕，探索不同遊戲模式的獨特之處。', en: 'This section dives into the fundamentals of Minecraft. From the sandbox philosophy that grants absolute freedom to the various modes that form the core experience, we will explore "what this game is about." Click the buttons below to explore the unique aspects of each game mode.' },
+            popularity_title: { zh: '人氣引擎：一個自我增強的生態飛輪', en: 'Popularity Engine: A Self-Reinforcing Flywheel' },
+            popularity_subtitle: { zh: '《Minecraft》的持續流行並非偶然。它是由一個強大的「成功飛輪」所驅動。這個互動圖解展示了遊戲的核心吸引力、活躍的社群以及內容創作者如何協同作用，共同將遊戲推向文化現象的高峰。', en: 'The sustained popularity of Minecraft is no accident. It\'s driven by a powerful "Success Flywheel." This interactive diagram shows how the game\'s core appeal, active community, and content creators work in synergy to propel it to the heights of a cultural phenomenon.' },
+            flywheel1: { zh: '無限創意與自由', en: 'Infinite Creativity & Freedom' },
+            flywheel2: { zh: '社群內容共創<br>(模組/伺服器)', en: 'Community Co-Creation<br>(Mods/Servers)' },
+            flywheel3: { zh: '創作者內容傳播<br>(YouTube/實況)', en: 'Creator Content-Dissemination<br>(YouTube/Streams)' },
+            flywheel4: { zh: '吸引新玩家加入', en: 'Attracts New Players' },
+            pop_card1_title: { zh: '無限創意與掌控感', en: 'Infinite Creativity & Control' },
+            pop_card1_text: { zh: '遊戲提供了一個近乎無限的創意平台，滿足了人類塑造自身環境的根本需求。其方塊狀的簡約美學降低了創作門檻，同時鼓勵玩家用想像力填補細節。', en: 'The game provides a nearly infinite creative platform, satisfying the fundamental human need to shape one\'s environment. Its blocky, minimalist aesthetic lowers the barrier to creation while encouraging players to fill in the details with their imagination.' },
+            pop_card2_title: { zh: '社群即共同開發者', en: 'Community as Co-Developers' },
+            pop_card2_text: { zh: '使用者生成內容（UGC）是遊戲長盛不衰的關鍵。從改變遊戲機制的「模組」，到創造全新玩法的「多人伺服器」（如Hypixel），社群不斷為遊戲注入新的活力。', en: 'User-Generated Content (UGC) is key to the game\'s longevity. From "mods" that change game mechanics to "multiplayer servers" (like Hypixel) that create entirely new ways to play, the community constantly breathes new life into the game.' },
+            pop_card3_title: { zh: 'YouTube共生體', en: 'The YouTube Symbiosis' },
+            pop_card3_text: { zh: '遊戲的開放性使其成為產生無盡影片內容的溫床。內容創作者不僅推廣了遊戲，更塑造了其文化。2019年PewDiePie的系列影片甚至引發了遊戲人氣的巨大復興。', en: 'The game\'s open nature makes it a perfect breeding ground for endless video content. Content creators not only promote the game but also shape its culture. PewDiePie\'s 2019 series even sparked a massive resurgence in the game\'s popularity.' },
+            beyond_title: { zh: '超越遊戲：商業與教育的生態系統', en: 'Beyond the Game: An Ecosystem of Business & Education' },
+            beyond_subtitle: { zh: '《Minecraft》的成功遠不止於銷售數字。它已演變為一個強大的商業平台和革命性的教育工具。本節將探討微軟如何將其打造成商業帝國，以及它如何在全球的教室中點燃學習的火花。', en: 'Minecraft\'s success goes far beyond sales numbers. It has evolved into a powerful business platform and a revolutionary educational tool. This section explores how Microsoft has built it into a commercial empire and how it ignites learning in classrooms worldwide.' },
+            beyond_tab1: { zh: '商業帝國', en: 'Business Empire' },
+            beyond_tab2: { zh: '教育革命', en: 'Education Revolution' },
+            business_title: { zh: '從獨立奇蹟到科技巨擘', en: 'From Indie Miracle to Tech Titan' },
+            business_p1: { zh: '2014年，微軟以25億美元的天價收購了《Minecraft》。這項投資不僅著眼於遊戲本身，更是對一個擁有龐大使用者基礎的「元宇宙雛形」平台的戰略佈局。', en: 'In 2014, Microsoft acquired Minecraft for a staggering $2.5 billion. This investment wasn\'t just in a game, but a strategic move into a "proto-metaverse" platform with a massive user base.' },
+            business_strong1: { zh: '平台擴張：', en: 'Platform Expansion:' },
+            business_p2: { zh: '微軟將遊戲推向幾乎所有平台，並透過「基岩版」實現跨平台連線，打造了一個更統一的玩家社群。', en: 'Microsoft pushed the game to virtually all platforms and enabled cross-play through the "Bedrock Edition," creating a more unified player community.' },
+            business_strong2: { zh: '商業化模式：', en: 'Monetization Model:' },
+            business_p3: { zh: '在基岩版中引入「市集（Marketplace）」，讓創作者可以銷售自製的外觀、地圖等內容，建立了一個官方管理的UGC經濟體，為微軟和創作者帶來了巨大收益。', en: 'The "Marketplace" was introduced in the Bedrock Edition, allowing creators to sell their custom skins, maps, and more, creating an officially managed UGC economy that benefits both Microsoft and creators.' },
+            education_title: { zh: '意想不到的教室', en: 'The Unexpected Classroom' },
+            education_p1: { zh: '《Minecraft：教育版》將遊戲轉變為強大的學習工具，被全球數萬所學校採用，在課堂中教授從程式設計到歷史的各種科目。', en: 'Minecraft: Education Edition transforms the game into a powerful learning tool, used by tens of thousands of schools worldwide to teach subjects from coding to history.' },
+            education_strong1: { zh: 'STEM領域應用：', en: 'STEM Applications:' },
+            education_p2: { zh: '學生可透過「程式碼編輯器」學習程式設計，利用化學資源包進行安全的化學實驗，並在方塊世界中探索幾何與物理概念。', en: 'Students can learn coding via the "Code Builder," conduct safe chemistry experiments with the Chemistry Resource Pack, and explore concepts of geometry and physics in a blocky world.' },
+            education_strong2: { zh: '培養關鍵技能：', en: 'Fostering Key Skills:' },
+            education_p3: { zh: '遊戲化學習顯著提升了學生的參與度，並有效地培養了創造力、協作能力與批判性思維等21世紀關鍵技能。', en: 'Gamified learning significantly boosts student engagement and effectively cultivates crucial 21st-century skills like creativity, collaboration, and critical thinking.' },
+            comparison_title: { zh: '市場比較：定位獨特之處', en: 'Market Comparison: Defining the Niche' },
+            comparison_subtitle: { zh: '為了完全理解《Minecraft》的成功，我們需要將其與沙盒遊戲領域的另外兩位要角——《Roblox》與《Terraria》——進行比較。下方的互動式雷達圖將直觀地展示它們在核心玩法、創意焦點和商業模式上的關鍵差異。', en: 'To fully understand Minecraft\'s success, we need to compare it with two other major players in the sandbox genre: Roblox and Terraria. The interactive radar chart below visualizes their key differences in core gameplay, creative focus, and business models.' },
+            comparison_select: { zh: '選擇比較對象：', en: 'Select games to compare:' },
+            footer_text: { zh: '互動式報告由AI生成，基於提供的《Minecraft》成功分析文件。', en: 'Interactive report generated by AI, based on the provided analysis of Minecraft\'s success.' },
+            gameModes: {
+                zh: [
+                    { id: 'survival', name: '生存模式 (Survival)', tagline: '經典的原版體驗：在挑戰中創造。', description: '玩家必須管理生命與飢餓，採集所有資源，並在夜晚抵禦怪物。此模式完美平衡了創造性與挑戰性，是大多數玩家體驗《Minecraft》的第一站。', features: [{ label: '核心目標', value: '生存、探索、發展、擊敗終界龍' }, { label: '資源', value: '需手動採集所有資源' }, { label: '生命/飢餓', value: '存在，需時刻管理' }, { label: '戰鬥', value: '需與敵對生物戰鬥以求生存' }] },
+                    { id: 'creative', name: '創造模式 (Creative)', tagline: '終極的數位畫布：想像力是唯一的極限。', description: '玩家擁有無限量的所有方塊與物品，具備飛行能力，並且是無敵的。此模式純粹用於建築、藝術表達，或測試複雜的機械裝置。', features: [{ label: '核心目標', value: '自由建造、測試、藝術創作' }, { label: '資源', value: '無限取用所有資源' }, { label: '生命/飢餓', value: '不存在' }, { label: '戰鬥', value: '無敵，不受任何傷害' }] },
+                    { id: 'adventure', name: '冒險模式 (Adventure)', tagline: '為故事而生：體驗玩家自訂的地圖。', description: '專為玩家自製的地圖與體驗設計。玩家無法隨意破壞方塊，只能與地圖創作者指定的物件互動，適合解謎、劇情或角色扮演地圖。', features: [{ label: '核心目標', value: '體驗玩家自訂地圖的劇情或挑戰' }, { label: '資源', value: '獲取受地圖規則嚴格限制' }, { label: '生命/飢餓', value: '存在，需管理' }, { label: '戰鬥', value: '通常需要與敵對生物戰鬥' }] },
+                    { id: 'hardcore', name: '極限模式 (Hardcore)', tagline: '終極挑戰：一次生命，沒有回頭路。', description: '生存模式的終極挑戰。遊戲難度鎖定在「困難」，且玩家只有一次生命。一旦死亡，世界將被永久刪除，讓每個決定都至關重要。', features: [{ label: '核心目標', value: '在只有一條命的情況下生存到最後' }, { label: '資源', value: '需手動採集所有資源' }, { label: '生命/飢餓', value: '存在，且死亡即終結' }, { label: '戰鬥', value: '極具挑戰性，難度鎖定困難' }] }
+                ],
+                en: [
+                    { id: 'survival', name: 'Survival Mode', tagline: 'The classic experience: create amidst challenges.', description: 'Players must manage health and hunger, gather all resources, and defend against monsters at night. This mode perfectly balances creativity and challenge, serving as the first stop for most players.', features: [{ label: 'Core Objective', value: 'Survive, explore, develop, defeat the Ender Dragon' }, { label: 'Resources', value: 'All resources must be gathered manually' }, { label: 'Health/Hunger', value: 'Present and must be managed' }, { label: 'Combat', value: 'Required to fight hostile mobs for survival' }] },
+                    { id: 'creative', name: 'Creative Mode', tagline: 'The ultimate digital canvas: imagination is the only limit.', description: 'Players have unlimited access to all blocks and items, can fly, and are invincible. This mode is purely for building, artistic expression, or testing complex machinery.', features: [{ label: 'Core Objective', value: 'Build, test, and create freely' }, { label: 'Resources', value: 'Unlimited access to all resources' }, { label: 'Health/Hunger', value: 'Not present' }, { label: 'Combat', value: 'Invincible, takes no damage' }] },
+                    { id: 'adventure', name: 'Adventure Mode', tagline: 'Born for stories: experience custom player-made maps.', description: 'Designed for custom maps and experiences. Players cannot break blocks freely and can only interact with objects specified by the map creator, suitable for puzzles, stories, or RPG maps.', features: [{ label: 'Core Objective', value: 'Experience the story or challenge of a custom map' }, { label: 'Resources', value: 'Acquisition is strictly limited by map rules' }, { label: 'Health/Hunger', value: 'Present and must be managed' }, { label: 'Combat', value: 'Usually required against hostile mobs' }] },
+                    { id: 'hardcore', name: 'Hardcore Mode', tagline: 'The ultimate challenge: one life, no turning back.', description: 'The ultimate challenge of Survival mode. The difficulty is locked to "Hard," and players have only one life. Upon death, the world is deleted permanently, making every decision critical.', features: [{ label: 'Core Objective', value: 'Survive to the end with only one life' }, { label: 'Resources', value: 'All resources must be gathered manually' }, { label: 'Health/Hunger', value: 'Present, and death is final' }, { label: 'Combat', value: 'Extremely challenging, locked on Hard difficulty' }] }
+                ]
+            },
+            chartContent: {
+                labels: {
+                    zh: ['遊戲創作平台化', 'RPG元素強度', '進程結構化', '建造自由度', '戰鬥複雜度', '社群驅動'],
+                    en: ['Game Creation Platform', 'RPG Element Strength', 'Structured Progression', 'Building Freedom', 'Combat Complexity', 'Community Driven']
+                },
+                datasets: {
+                    minecraft: { zh: 'Minecraft', en: 'Minecraft' },
+                    roblox: { zh: 'Roblox', en: 'Roblox' },
+                    terraria: { zh: 'Terraria', en: 'Terraria' }
+                }
+            }
+        };
+
+        const chartRawData = {
+            minecraft: [3, 2, 1, 5, 2, 4],
+            roblox: [5, 3, 4, 3, 4, 5],
+            terraria: [1, 5, 5, 2, 5, 1]
+        };
+
+        let comparisonChart;
+
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('texts', localizationData);
+            
+            Alpine.data('gameplaySection', () => ({
+                activeModeId: 'survival',
+            }));
+
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const initialLang = Alpine.store('texts').lang;
+            const initialLabels = Alpine.store('texts').chartContent.labels[initialLang];
+
+            comparisonChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: initialLabels,
+                    datasets: [] 
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(74, 74, 74, 0.2)' },
+                            grid: { color: 'rgba(74, 74, 74, 0.2)' },
+                            pointLabels: { 
+                                font: { size: 12, family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                                color: '#4A4A4A'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(253, 251, 248, 0.75)',
+                                color: '#5E7A6B',
+                                stepSize: 1,
+                                font: { weight: 'bold' }
+                            },
+                            min: 0,
+                            max: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 14, family: "'Roboto', 'Noto Sans TC', sans-serif" }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                            titleFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" }
+                        }
+                    }
+                }
+            });
+
+            updateChartVisibility();
+        });
+        
+        function toggleLanguage() {
+            const store = Alpine.store('texts');
+            store.lang = store.lang === 'zh' ? 'en' : 'zh';
+            updateChartLanguage();
+        }
+
+        function updateChartLanguage() {
+            if (!comparisonChart) return;
+            const lang = Alpine.store('texts').lang;
+            const chartLabels = Alpine.store('texts').chartContent.labels[lang];
+            
+            comparisonChart.data.labels = chartLabels;
+            comparisonChart.data.datasets.forEach(dataset => {
+                if (dataset.rawLabel === 'Minecraft') {
+                    dataset.label = Alpine.store('texts').chartContent.datasets.minecraft[lang];
+                } else if (dataset.rawLabel === 'Roblox') {
+                    dataset.label = Alpine.store('texts').chartContent.datasets.roblox[lang];
+                } else if (dataset.rawLabel === 'Terraria') {
+                    dataset.label = Alpine.store('texts').chartContent.datasets.terraria[lang];
+                }
+            });
+            comparisonChart.update();
+        }
+        
+        function updateChartVisibility() {
+            if (!comparisonChart) return;
+            const activeDatasets = [];
+            const lang = Alpine.store('texts').lang;
+
+            if (document.getElementById('mc_toggle').checked) {
+                activeDatasets.push({
+                    rawLabel: 'Minecraft',
+                    label: Alpine.store('texts').chartContent.datasets.minecraft[lang],
+                    data: chartRawData.minecraft,
+                    fill: true, backgroundColor: 'rgba(94, 122, 107, 0.2)', borderColor: 'rgb(94, 122, 107)', pointBackgroundColor: 'rgb(94, 122, 107)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(94, 122, 107)'
+                });
+            }
+            if (document.getElementById('rb_toggle').checked) {
+                 activeDatasets.push({
+                    rawLabel: 'Roblox',
+                    label: Alpine.store('texts').chartContent.datasets.roblox[lang],
+                    data: chartRawData.roblox,
+                    fill: true, backgroundColor: 'rgba(110, 142, 183, 0.2)', borderColor: 'rgb(110, 142, 183)', pointBackgroundColor: 'rgb(110, 142, 183)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(110, 142, 183)'
+                });
+            }
+            if (document.getElementById('tr_toggle').checked) {
+                activeDatasets.push({
+                    rawLabel: 'Terraria',
+                    label: Alpine.store('texts').chartContent.datasets.terraria[lang],
+                    data: chartRawData.terraria,
+                    fill: true, backgroundColor: 'rgba(189, 119, 131, 0.2)', borderColor: 'rgb(189, 119, 131)', pointBackgroundColor: 'rgb(189, 119, 131)', pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: 'rgb(189, 119, 131)'
+                });
+            }
+            
+            comparisonChart.data.datasets = activeDatasets;
+            comparisonChart.update();
+        }
+    </script>
+</body>
+</html>
