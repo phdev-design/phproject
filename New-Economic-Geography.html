@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：遠程辦公的大解綁</title>
+    <!-- Chosen Palette: Urban Slate & Parchment -->
+    <!-- Application Structure Plan: The SPA is designed as a narrative journey, not a linear report summary. It starts with the core thesis (remote work is permanent), then explores the consequences in a logical flow: 1. The Human Element (who is affected - the "Great Sorting"), 2. The Physical Shift (how cities change - the "Donut Effect"), 3. The Systemic Impact (how daily life and the economy respond), 4. The Societal Challenge (the question of equity), and finally 5. The Path Forward (actionable solutions). This structure builds a cause-and-effect story, making the complex information more digestible and engaging for the user than a simple chapter-by-chapter regurgitation. -->
+    <!-- Visualization & Content Choices: Data from the report is translated into interactive visualizations based on its narrative goal. Key choices include: A line chart to show the stabilization trend (Goal: Change). Grouped bar charts to highlight the demographic divide (Goal: Compare). A custom HTML/CSS diagram for the "Donut Effect" to avoid SVG (Goal: Organize). KPI cards for high-impact stats (Goal: Inform). An interactive accordion for policy recommendations to avoid clutter (Goal: Organize). All choices prioritize clarity and user interaction, using Chart.js for charts and structured HTML/CSS for diagrams, strictly adhering to the no-SVG/Mermaid constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            margin: auto;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-8 md:px-8 md:py-12">
+
+        <header class="text-center mb-16 relative">
+            <div class="absolute top-0 right-0 p-2">
+                 <button id="lang-toggle" class="bg-white px-4 py-2 rounded-md shadow-sm font-semibold text-sm transition-colors duration-300 hover:bg-gray-100" style="color: #4A5568;">English</button>
+            </div>
+            <h1 data-lang-key="title" class="text-4xl md:text-6xl font-bold mb-4" style="color: #4A5568;"></h1>
+            <p data-lang-key="subtitle" class="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto"></p>
+        </header>
+
+        <main>
+            <!-- Section 1: The New Reality -->
+            <section id="new-reality" class="mb-20">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="s1_title" class="text-3xl font-bold mb-2" style="color: #4A5568;"></h2>
+                    <p data-lang-key="s1_desc" class="max-w-3xl mx-auto text-gray-600"></p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                        <h3 data-lang-key="s1_chart1_title" class="font-bold text-xl mb-2 text-center"></h3>
+                        <p data-lang-key="s1_chart1_desc" class="text-sm text-gray-500 text-center mb-4"></p>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="wfhDaysChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                             <h3 data-lang-key="s1_kpi1_title" class="font-bold text-xl mb-2"></h3>
+                             <p class="text-6xl font-bold" style="color: #4A5568;">55%</p>
+                             <p data-lang-key="s1_kpi1_desc" class="text-gray-600"></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                            <h3 data-lang-key="s1_kpi2_title" class="font-bold text-xl mb-2"></h3>
+                             <p class="text-6xl font-bold" style="color: #4A5568;">83%</p>
+                             <p data-lang-key="s1_kpi2_desc" class="text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 bg-white p-6 rounded-lg shadow-lg">
+                    <h3 data-lang-key="s1_chart2_title" class="font-bold text-xl mb-4 text-center"></h3>
+                     <div class="text-center mb-6">
+                        <div class="inline-flex rounded-md shadow-sm">
+                            <button id="showIncomeChart" data-lang-key="btn_income" class="px-4 py-2 text-sm font-medium bg-slate-600 text-white border border-gray-200 rounded-l-lg hover:bg-slate-700 focus:z-10 focus:ring-2 focus:ring-blue-700"></button>
+                            <button id="showEducationChart" data-lang-key="btn_education" class="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-t border-b border-gray-200 hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700"></button>
+                            <button id="showExperienceChart" data-lang-key="btn_experience" class="px-4 py-2 text-sm font-medium bg-white text-gray-900 border border-gray-200 rounded-r-md hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700"></button>
+                        </div>
+                    </div>
+                    <div id="sorting-chart-container" class="chart-container">
+                        <canvas id="sortingChart"></canvas>
+                    </div>
+                     <p id="sorting-chart-caption" class="text-sm text-gray-500 text-center mt-4"></p>
+                </div>
+            </section>
+
+            <!-- Section 2: Urban Reshuffle -->
+            <section id="urban-reshuffle" class="mb-20">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="s2_title" class="text-3xl font-bold mb-2" style="color: #4A5568;"></h2>
+                    <p data-lang-key="s2_desc" class="max-w-3xl mx-auto text-gray-600"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                    <div class="md:col-span-3 bg-white p-6 rounded-lg shadow-lg flex flex-col justify-center items-center">
+                        <h3 data-lang-key="s2_viz_title" class="font-bold text-xl mb-4 text-center"></h3>
+                         <div class="relative w-72 h-72 my-4">
+                            <div class="absolute inset-0 border-[20px] border-amber-300 border-dashed rounded-full flex justify-center items-center">
+                                <span data-lang-key="donut_suburbs" class="absolute -top-3 text-amber-800 font-semibold"></span>
+                            </div>
+                            <div class="absolute inset-16 border-[20px] border-red-400 rounded-full flex justify-center items-center">
+                                 <span data-lang-key="donut_center" class="text-red-800 font-semibold text-center"></span>
+                            </div>
+                            <div class="absolute top-1/2 left-12 transform -translate-y-1/2 text-4xl text-red-500 animate-pulse opacity-75">➔</div>
+                             <div class="absolute top-1/2 right-12 transform -translate-y-1/2 rotate-180 text-4xl text-amber-600 animate-pulse opacity-75">➔</div>
+                        </div>
+                        <p data-lang-key="s2_viz_desc" class="text-sm text-center text-gray-500 max-w-md"></p>
+                    </div>
+                     <div class="md:col-span-2 flex flex-col gap-8">
+                        <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                            <h3 data-lang-key="s2_kpi1_title" class="font-bold text-xl mb-2"></h3>
+                            <p class="text-6xl font-bold" style="color: #E53E3E;">+80%</p>
+                            <p data-lang-key="s2_kpi1_desc" class="text-gray-600"></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow-lg">
+                            <h3 data-lang-key="s2_kpi2_title" class="font-bold text-xl mb-4 text-center"></h3>
+                             <div class="flex items-center justify-center space-x-2 text-center text-sm md:text-base">
+                                <div class="p-2 bg-gray-200 rounded-md">🏢<br><span data-lang-key="reuse_1"></span></div>
+                                <div class="text-2xl font-bold" style="color: #4A5568;">→</div>
+                                <div class="p-2 bg-blue-100 rounded-md">🏗️<br><span data-lang-key="reuse_2"></span></div>
+                                <div class="text-2xl font-bold" style="color: #4A5568;">→</div>
+                                <div class="p-2 bg-green-100 rounded-md">🏠<br><span data-lang-key="reuse_3"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 3: Ripple Effect -->
+            <section id="ripple-effect" class="mb-20">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="s3_title" class="text-3xl font-bold mb-2" style="color: #4A5568;"></h2>
+                    <p data-lang-key="s3_desc" class="max-w-3xl mx-auto text-gray-600"></p>
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                         <h3 data-lang-key="s3_chart1_title" class="font-bold text-xl mb-2 text-center"></h3>
+                         <p data-lang-key="s3_chart1_desc" class="text-sm text-gray-500 text-center mb-4"></p>
+                        <div class="chart-container">
+                            <canvas id="transportImpactChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 data-lang-key="s3_chart2_title" class="font-bold text-xl mb-2 text-center"></h3>
+                         <p data-lang-key="s3_chart2_desc" class="text-sm text-gray-500 text-center mb-4"></p>
+                        <div class="chart-container">
+                            <canvas id="spendingShiftChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+             <!-- Section 4: Two-Track Future -->
+            <section id="two-track-future" class="mb-20">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="s4_title" class="text-3xl font-bold mb-2" style="color: #4A5568;"></h2>
+                    <p data-lang-key="s4_desc" class="max-w-3xl mx-auto text-gray-600"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                         <h3 data-lang-key="s4_viz1_title" class="font-bold text-xl mb-4"></h3>
+                         <div class="flex justify-around items-stretch mt-6 gap-4">
+                            <div class="w-1/2 p-4 bg-blue-50 rounded-lg">
+                                <p class="text-4xl">💻</p>
+                                <h4 data-lang-key="track1_title" class="font-bold mt-2"></h4>
+                                <p data-lang-key="track1_desc" class="text-sm text-gray-600"></p>
+                            </div>
+                            <div class="w-1/2 p-4 bg-red-50 rounded-lg">
+                                <p class="text-4xl">🔧</p>
+                                <h4 data-lang-key="track2_title" class="font-bold mt-2"></h4>
+                                <p data-lang-key="track2_desc" class="text-sm text-gray-600"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                         <h3 data-lang-key="s4_viz2_title" class="font-bold text-xl mb-4"></h3>
+                         <p data-lang-key="s4_viz2_desc" class="text-gray-600"></p>
+                         <p data-lang-key="s4_viz2_kpi" class="text-7xl font-bold my-4" style="color: #E53E3E;"></p>
+                         <p data-lang-key="s4_viz2_caption" class="text-sm text-gray-500"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 5: The Path Forward -->
+            <section id="path-forward">
+                 <div class="text-center mb-12">
+                    <h2 data-lang-key="s5_title" class="text-3xl font-bold mb-2" style="color: #4A5568;"></h2>
+                    <p data-lang-key="s5_desc" class="max-w-3xl mx-auto text-gray-600"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 data-lang-key="s5_viz_title" class="font-bold text-xl mb-2 text-center"></h3>
+                    <p data-lang-key="s5_viz_desc" class="text-gray-600 text-center mb-6 max-w-2xl mx-auto"></p>
+                    <div class="flex justify-center items-center flex-wrap gap-4 md:gap-8 text-center text-gray-700">
+                        <div class="flex flex-col items-center"><span class="text-4xl p-3 bg-gray-100 rounded-full">🏠</span><span data-lang-key="city_1" class="mt-2 font-medium"></span></div>
+                        <div class="flex flex-col items-center"><span class="text-4xl p-3 bg-gray-100 rounded-full">🏢</span><span data-lang-key="city_2" class="mt-2 font-medium"></span></div>
+                        <div class="flex flex-col items-center"><span class="text-4xl p-3 bg-gray-100 rounded-full">🛒</span><span data-lang-key="city_3" class="mt-2 font-medium"></span></div>
+                        <div class="flex flex-col items-center"><span class="text-4xl p-3 bg-gray-100 rounded-full">🏥</span><span data-lang-key="city_4" class="mt-2 font-medium"></span></div>
+                        <div class="flex flex-col items-center"><span class="text-4xl p-3 bg-gray-100 rounded-full">🌳</span><span data-lang-key="city_5" class="mt-2 font-medium"></span></div>
+                    </div>
+                </div>
+                
+                <div class="mt-12">
+                     <h3 data-lang-key="s5_accordion_title" class="font-bold text-xl mb-6 text-center"></h3>
+                     <div class="space-y-4 max-w-4xl mx-auto">
+                        <div class="accordion-item bg-white rounded-lg shadow-md">
+                            <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center" style="color: #4A5568;">
+                                <span data-lang-key="acc_title1"></span>
+                                <span class="transform transition-transform duration-300">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <ul id="policy-makers-list" class="p-4 pt-0 list-disc list-inside text-gray-600 space-y-2"></ul>
+                            </div>
+                        </div>
+                         <div class="accordion-item bg-white rounded-lg shadow-md">
+                            <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center" style="color: #4A5568;">
+                                <span data-lang-key="acc_title2"></span>
+                                 <span class="transform transition-transform duration-300">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <ul id="developers-list" class="p-4 pt-0 list-disc list-inside text-gray-600 space-y-2"></ul>
+                            </div>
+                        </div>
+                         <div class="accordion-item bg-white rounded-lg shadow-md">
+                            <button class="accordion-header w-full text-left p-4 font-semibold text-lg flex justify-between items-center" style="color: #4A5568;">
+                                <span data-lang-key="acc_title3"></span>
+                                 <span class="transform transition-transform duration-300">▼</span>
+                            </button>
+                            <div class="accordion-content">
+                                <ul id="employers-list" class="p-4 pt-0 list-disc list-inside text-gray-600 space-y-2"></ul>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <p data-lang-key="footer_source" class="text-gray-500 text-sm"></p>
+            <p data-lang-key="footer_credit" class="text-gray-400 text-xs mt-1"></p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const langData = {
+        zh: {
+            title: "大解綁：遠程辦公如何重塑城市、生活方式與新經濟地理",
+            subtitle: "COVID-19大流行扮演了不可逆轉的催化劑，將『工作』從特定『地點』解綁，引發了一系列深遠的連鎖效應，正在定義一個新的時代。本報告旨在剖析這一結構性轉變的各個層面。",
+            s1_title: "新現實：一場已穩定的革命",
+            s1_desc: "遠程辦公並非曇花一現，數據顯示它已成為全球勞動力市場的永久特徵。然而，這份新生的靈活性並非人人均霑，它揭示並加深了一道新的社會鴻溝。",
+            s1_chart1_title: "全球在家工作(WFH)天數趨於穩定",
+            s1_chart1_desc: "全球每週在家工作的平均天數在2023年後已趨於平緩，證明了混合辦公的持久性。",
+            s1_kpi1_title: "主流模式",
+            s1_kpi1_desc: "的美國員工採用<strong class='font-semibold'>混合模式</strong>",
+            s1_kpi2_title: "員工偏好",
+            s1_kpi2_desc: "的全球員工偏好<strong class='font-semibold'>混合工作</strong>",
+            s1_chart2_title: "「大分類」：誰獲得了遠程工作的入場券？",
+            btn_income: "按收入劃分",
+            btn_education: "按教育劃分",
+            btn_experience: "按資歷劃分",
+            s2_title: "城市重塑：甜甜圈效應與核心區的危機",
+            s2_desc: "當通勤不再是必需品，人口與經濟活動便開始從昂貴的市中心流向廣闊的郊區，引發了一場深刻的城市空間革命。",
+            s2_viz_title: "甜甜圈效應：城市空間重構",
+            donut_suburbs: "郊區 (人口流入)",
+            donut_center: "市中心<br>(人口流出)",
+            s2_viz_desc: "高達 <strong>3/5</strong> 的家庭僅搬到同一座城市的郊區，證明多數人仍需與城市保持聯繫。",
+            s2_kpi1_title: "辦公室市場危機",
+            s2_kpi1_desc: "自2020年3月以來，曼哈頓可用辦公空間供應量增長。",
+            s2_kpi2_title: "解決方案：適應性再利用",
+            reuse_1: "空置辦公樓",
+            reuse_2: "適應性改造",
+            reuse_3: "新住宅",
+            s3_title: "連鎖反應：重塑日常與經濟",
+            s3_desc: "工作模式的改變如同一塊投入湖中的石頭，其漣漪效應擴散至交通、消費乃至個人價值觀的方方面面。",
+            s3_chart1_title: "通勤模式的崩潰",
+            s3_chart1_desc: "在職員工數每下降 <strong>1%</strong>，汽車里程約減 1%，但公共交通客流卻銳減 <strong>2.3%</strong>，使其陷入財政懸崖。",
+            s3_chart2_title: "消費支出的轉移",
+            s3_chart2_desc: "消費從市中心的「服務」大規模轉向為家庭生活添置的「商品」。",
+            s4_title: "雙軌的未來：一個關於公平的挑戰",
+            s4_desc: "遠程辦公的革命加劇了社會不平等，創造了一個「靈活性富裕」階層和一個被「地點綁定」的階層，對職業發展與社會公平構成挑戰。",
+            s4_viz1_title: "雙軌勞動力市場",
+            track1_title: "靈活性富裕階層",
+            track1_desc: "高學歷、高收入，享受地理與時間的自由。",
+            track2_title: "地點綁定階層",
+            track2_desc: "基礎服務人員，必須在場工作，靈活性低。",
+            s4_viz2_title: "「鄰近偏見」的代價",
+            s4_viz2_desc: "研究表明，選擇遠程工作的員工，其晉升機率可能僅為辦公室同事的...",
+            s4_viz2_kpi: "一半",
+            s4_viz2_caption: "這種「看不見」的懲罰，對女性和看護者影響尤甚。",
+            s5_title: "前行之路：擘劃後通勤時代的藍圖",
+            s5_desc: "面對結構性變革，我們需要前瞻性的規劃與創新的策略，為城市、企業和個人導航。",
+            s5_viz_title: "新城市模型：「15分鐘城市」",
+            s5_viz_desc: "核心理念是創建自給自足的社區，讓居民在15分鐘步行或騎行範圍內，滿足居住、工作、商業、醫療、教育和休閒等所有日常需求。",
+            city_1: "居住", city_2: "工作", city_3: "商業", city_4: "醫療", city_5: "休閒",
+            s5_accordion_title: "關鍵利益相關者的戰略建議",
+            acc_title1: "對城市領導者與政策制定者",
+            acc_title2: "對房地產投資者與開發商",
+            acc_title3: "對雇主",
+            recommendations: {
+                policyMakers: ["擁抱多中心化：將城市規劃重心從單一CBD轉向活力節點網絡。","推動適應性再利用：促進辦公樓改造，並強制納入可負擔住房。","重塑公共交通：為後通勤時代重新設計公共交通，發展全天候服務。","促進公平增長：利用數據識別並投資於設施匱乏的社區。"],
+                developers: ["識別擱淺資產：認識到B/C級辦公樓的風險，轉向改造與再開發。","投資新興熱點：重點投資郊區的混合用途城鎮中心。","優先考慮靈活性：在設計中納入共享辦公空間和可變戶型。"],
+                employers: ["制定明確的混合策略：將辦公室重新定義為協作與創新中心。","消除鄰近偏見：通過培訓和客觀績效指標，確保晉升公平性。","投資員工福祉：建立明確工作界限，提供心理健康支持。"]
+            },
+            footer_source: "資料來源：《大解綁：遠程辦公如何重塑城市、生活方式與新經濟地理》綜合報告。",
+            footer_credit: "互動式報告由 AI 基於源報告生成 | 2025年6月",
+            charts: {
+                wfhDays: { label: '全球平均每週在家工作天數' },
+                sorting: {
+                    income: { label: '混合辦公比例 (%)', caption: '在英國，高收入群體獲得混合辦公機會的比例，是低收入群體的5倍以上。' },
+                    education: { label: '混合辦公比例 (%)', caption: '在英國，擁有大學學歷者獲得混合辦公的機會，是沒有資質者的10倍之多。' },
+                    experience: { label: '混合辦公比例 (%)', caption: '在美國，資深專業人士獲得混合辦公的機會遠高於入門級員工，靈活性本身已成為一種職業特權。' }
+                },
+                transportImpact: { labels: ['公共交通客流', '汽車行駛里程'], label: '影響 (%)' },
+                spendingShift: { labels: ['商品支出', '服務支出'], label: '較疫情前增長 (%)' }
+            }
+        },
+        en: {
+            title: "The Great Unbundling: How Remote Work Reshapes Cities, Lifestyles, & the New Economic Geography",
+            subtitle: "The COVID-19 pandemic acted as an irreversible catalyst, unbundling 'work' from a specific 'place' and triggering profound ripple effects that are defining a new era. This report analyzes the various facets of this structural shift.",
+            s1_title: "The New Reality: A Revolution Stabilized",
+            s1_desc: "Remote work is not a fleeting trend; data shows it's a permanent feature of the global labor market. This newfound flexibility, however, is not shared equally, revealing and deepening a new social divide.",
+            s1_chart1_title: "Global Work-From-Home (WFH) Days Have Stabilized",
+            s1_chart1_desc: "The average number of WFH days per week plateaued after 2023, proving the durability of hybrid work.",
+            s1_kpi1_title: "Dominant Model",
+            s1_kpi1_desc: "of US employees have adopted a <strong class='font-semibold'>hybrid model</strong>",
+            s1_kpi2_title: "Employee Preference",
+            s1_kpi2_desc: "of global employees prefer a <strong class='font-semibold'>hybrid setup</strong>",
+            s1_chart2_title: "The Great Sorting: Who Gets to Work Remotely?",
+            btn_income: "By Income",
+            btn_education: "By Education",
+            btn_experience: "By Experience",
+            s2_title: "Urban Reshuffle: The Donut Effect & The Core's Crisis",
+            s2_desc: "When the daily commute is no longer a necessity, people and economic activity begin to flow from expensive city centers to the spacious suburbs, sparking a profound urban spatial revolution.",
+            s2_viz_title: "The Donut Effect: Urban Spatial Restructuring",
+            donut_suburbs: "Suburbs (Population Inflow)",
+            donut_center: "City Center<br>(Population Outflow)",
+            s2_viz_desc: "Up to <strong>3/5</strong> of households move only to the suburbs of the same city, proving most people still need a connection to the urban core.",
+            s2_kpi1_title: "The Office Market Crisis",
+            s2_kpi1_desc: "Increase in available Manhattan office space supply since March 2020.",
+            s2_kpi2_title: "Solution: Adaptive Reuse",
+            reuse_1: "Vacant Office",
+            reuse_2: "Adaptive Conversion",
+            reuse_3: "New Housing",
+            s3_title: "Ripple Effects: Reshaping Daily Life and Economy",
+            s3_desc: "The shift in work patterns is like a stone cast into a lake, with ripples spreading to every aspect of transportation, consumption, and even personal values.",
+            s3_chart1_title: "The Collapse of Commuting",
+            s3_chart1_desc: "For every <strong>1%</strong> drop in on-site workers, car mileage decreases by about 1%, but public transit ridership plummets by <strong>2.3%</strong>, pushing it toward a fiscal cliff.",
+            s3_chart2_title: "The Shift in Consumer Spending",
+            s3_chart2_desc: "Spending has massively shifted from downtown 'services' to 'goods' for enhancing home life.",
+            s4_title: "A Two-Track Future: A Question of Equity",
+            s4_desc: "The remote work revolution has exacerbated social inequality, creating a 'flexibility-rich' class and a 'place-bound' class, posing challenges to career progression and social fairness.",
+            s4_viz1_title: "The Two-Track Labor Market",
+            track1_title: "Flexibility-Rich",
+            track1_desc: "Highly educated, high-income, enjoying geographic and temporal freedom.",
+            track2_title: "Place-Bound",
+            track2_desc: "Essential service workers, must be physically present, low flexibility.",
+            s4_viz2_title: "The Cost of 'Proximity Bias'",
+            s4_viz2_desc: "Studies show that employees who choose to work remotely may have a promotion rate of only...",
+            s4_viz2_kpi: "Half",
+            s4_viz2_caption: "This 'invisible' penalty disproportionately affects women and caregivers.",
+            s5_title: "The Path Forward: A Blueprint for the Post-Commute Era",
+            s5_desc: "Facing structural change, we need forward-thinking planning and innovative strategies to navigate for our cities, businesses, and individuals.",
+            s5_viz_title: "The New Urban Model: The '15-Minute City'",
+            s5_viz_desc: "The core idea is to create self-sufficient neighborhoods where residents can meet all their daily needs—living, working, shopping, healthcare, education, and leisure—within a 15-minute walk or bike ride.",
+            city_1: "Live", city_2: "Work", city_3: "Shop", city_4: "Health", city_5: "Leisure",
+            s5_accordion_title: "Strategic Recommendations for Key Stakeholders",
+            acc_title1: "For City Leaders & Policymakers",
+            acc_title2: "For Real Estate Investors & Developers",
+            acc_title3: "For Employers",
+            recommendations: {
+                policyMakers: ["Embrace Polycentricity: Shift urban planning from a single CBD to a network of vibrant nodes.","Drive Adaptive Reuse: Promote office conversions with mandatory affordable housing.","Reinvent Public Transit: Redesign transit for a post-commute era with all-day service.","Foster Equitable Growth: Use data to identify and invest in under-resourced communities."],
+                developers: ["Identify Stranded Assets: Recognize B/C-class offices as risks and pivot to conversion and redevelopment.","Invest in New Hotspots: Focus on mixed-use town centers in suburbs.","Prioritize Flexibility: Design with co-working spaces and adaptable floor plans."],
+                employers: ["Define an Intentional Hybrid Strategy: Reimagine the office as a hub for collaboration, not solo tasks.","Combat Proximity Bias: Ensure fairness in promotions with training and objective metrics.","Invest in Employee Well-being: Set clear boundaries to prevent burnout and provide mental health support."]
+            },
+            footer_source: "Source: Synthesis report on 'The Great Unbundling: How Remote Work is Reshaping Cities, Lifestyles, and the New Economic Geography'.",
+            footer_credit: "Interactive report generated by AI based on source report | June 2025",
+            charts: {
+                wfhDays: { label: 'Global Average WFH Days per Week' },
+                sorting: {
+                    income: { label: 'Hybrid Work Share (%)', caption: 'In the UK, high-income earners are over 5 times more likely to have hybrid work arrangements than low-income earners.' },
+                    education: { label: 'Hybrid Work Share (%)', caption: 'In the UK, those with a university degree are 10 times more likely to work hybrid than those with no qualifications.' },
+                    experience: { label: 'Hybrid Work Share (%)', caption: 'In the US, senior professionals are far more likely to have hybrid opportunities than entry-level staff, making flexibility a career perk.' }
+                },
+                transportImpact: { labels: ['Public Transit Ridership', 'Vehicle Miles Traveled'], label: 'Impact (%)' },
+                spendingShift: { labels: ['Goods Spending', 'Services Spending'], label: 'Growth vs. Pre-Pandemic (%)' }
+            }
+        }
+    };
+
+    const reportData = {
+        charts: {
+            wfhDays: { labels: ['2022', '2023', '2024-25 (穩定)'], data: [1.6, 1.33, 1.27] },
+            sorting: {
+                income: { labels: ['年收入 > £50k', '年收入 < £20k'], data: [45, 8] },
+                education: { labels: ['大學學歷', '無資質'], data: [41, 4] },
+                experience: { labels: ['資深 (>5年)', '入門級 (0-2年)'], data: [31, 18] }
+            },
+            transportImpact: { data: [-2.3, -1] },
+            spendingShift: { data: [20, 7.6] }
+        }
+    };
+    
+    let currentLang = 'zh';
+    const chartInstances = {};
+
+    function updateContent(lang) {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.getElementById('lang-toggle').textContent = lang === 'zh' ? 'English' : '中文';
+        
+        const elements = document.querySelectorAll('[data-lang-key]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (langData[lang][key]) {
+                el.innerHTML = langData[lang][key];
+            }
+        });
+        
+        const policyList = document.getElementById('policy-makers-list');
+        policyList.innerHTML = '';
+        langData[lang].recommendations.policyMakers.forEach(item => {
+            policyList.innerHTML += `<li>${item}</li>`;
+        });
+        
+        const devList = document.getElementById('developers-list');
+        devList.innerHTML = '';
+        langData[lang].recommendations.developers.forEach(item => {
+            devList.innerHTML += `<li>${item}</li>`;
+        });
+
+        const empList = document.getElementById('employers-list');
+        empList.innerHTML = '';
+        langData[lang].recommendations.employers.forEach(item => {
+            empList.innerHTML += `<li>${item}</li>`;
+        });
+
+        renderAllCharts(lang);
+    }
+    
+    const chartConfig = {
+        fontFamily: "'Noto Sans TC', 'Roboto', sans-serif",
+        primaryColor: '#4A5568',
+        secondaryColor: '#A0AEC0',
+        dangerColor: '#E53E3E'
+    };
+    
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                titleFont: { size: 14, family: chartConfig.fontFamily },
+                bodyFont: { size: 12, family: chartConfig.fontFamily },
+                padding: 10,
+                callbacks: {
+                    title: (tooltipItems) => {
+                        let label = tooltipItems[0].label;
+                        if (Array.isArray(label)) return label.join(' ');
+                        return label;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: { ticks: { color: chartConfig.primaryColor, font: { family: chartConfig.fontFamily } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { ticks: { color: chartConfig.primaryColor, font: { family: chartConfig.fontFamily } }, grid: { display: false } }
+        }
+    };
+    
+    function renderSortingChart(type, lang) {
+        const chartLang = langData[lang].charts.sorting[type];
+        const chartData = reportData.charts.sorting[type];
+        if (chartInstances.sorting) chartInstances.sorting.destroy();
+        
+        const ctx = document.getElementById('sortingChart').getContext('2d');
+        chartInstances.sorting = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: chartLang.label,
+                    data: chartData.data,
+                    backgroundColor: [chartConfig.primaryColor, chartConfig.secondaryColor],
+                    barPercentage: 0.5,
+                }]
+            },
+            options: { ...commonOptions, indexAxis: 'y', scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, grid: { display: false } } } }
+        });
+        document.getElementById('sorting-chart-caption').textContent = chartLang.caption;
+
+        ['income', 'education', 'experience'].forEach(btnType => {
+            const button = document.getElementById(`show${btnType.charAt(0).toUpperCase() + btnType.slice(1)}Chart`);
+            button.classList.toggle('bg-slate-600', btnType === type);
+            button.classList.toggle('text-white', btnType === type);
+            button.classList.toggle('bg-white', btnType !== type);
+            button.classList.toggle('text-gray-900', btnType !== type);
+        });
+    }
+    
+    function renderAllCharts(lang) {
+        Object.values(chartInstances).forEach(chart => chart.destroy());
+
+        const wfhDaysCtx = document.getElementById('wfhDaysChart').getContext('2d');
+        chartInstances.wfhDays = new Chart(wfhDaysCtx, {
+            type: 'line',
+            data: {
+                labels: reportData.charts.wfhDays.labels,
+                datasets: [{
+                    label: langData[lang].charts.wfhDays.label,
+                    data: reportData.charts.wfhDays.data,
+                    borderColor: chartConfig.primaryColor,
+                    backgroundColor: 'rgba(74, 85, 104, 0.1)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: { ...commonOptions, plugins: {...commonOptions.plugins, legend: { display: true, position: 'bottom', labels: {font: {family: chartConfig.fontFamily}} } } }
+        });
+        
+        renderSortingChart('income', lang);
+
+        const transportCtx = document.getElementById('transportImpactChart').getContext('2d');
+        chartInstances.transport = new Chart(transportCtx, {
+            type: 'bar',
+            data: {
+                labels: langData[lang].charts.transportImpact.labels,
+                datasets: [{
+                    label: langData[lang].charts.transportImpact.label,
+                    data: reportData.charts.transportImpact.data,
+                    backgroundColor: [chartConfig.dangerColor, chartConfig.secondaryColor]
+                }]
+            },
+            options: { ...commonOptions, indexAxis: 'y', scales: {...commonOptions.scales, x: { ...commonOptions.scales.x, ticks: {...commonOptions.scales.x.ticks, callback: (v) => v + '%' } }, y: {...commonOptions.scales.y, grid: {display: false}} } }
+        });
+
+        const spendingCtx = document.getElementById('spendingShiftChart').getContext('2d');
+        chartInstances.spending = new Chart(spendingCtx, {
+            type: 'bar',
+            data: {
+                labels: langData[lang].charts.spendingShift.labels,
+                datasets: [{
+                    label: langData[lang].charts.spendingShift.label,
+                    data: reportData.charts.spendingShift.data,
+                    backgroundColor: [chartConfig.primaryColor, chartConfig.secondaryColor],
+                }]
+            },
+            options: {...commonOptions, scales: {...commonOptions.scales, y: {...commonOptions.scales.y, ticks: {...commonOptions.scales.y.ticks, callback: (v) => v + '%'}}}}
+        });
+    }
+
+    function setupInteractions() {
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateContent(currentLang);
+        });
+
+        document.getElementById('showIncomeChart').addEventListener('click', () => renderSortingChart('income', currentLang));
+        document.getElementById('showEducationChart').addEventListener('click', () => renderSortingChart('education', currentLang));
+        document.getElementById('showExperienceChart').addEventListener('click', () => renderSortingChart('experience', currentLang));
+
+        document.querySelectorAll('.accordion-header').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('span:last-child');
+                
+                document.querySelectorAll('.accordion-content').forEach(otherContent => {
+                    if (otherContent !== content && otherContent.style.maxHeight) {
+                        otherContent.style.maxHeight = null;
+                        otherContent.previousElementSibling.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                } 
+            });
+        });
+    }
+    
+    updateContent(currentLang);
+    setupInteractions();
+});
+</script>
+</body>
+</html>
