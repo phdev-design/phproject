@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灰色的地球：探索全球高齡化的政策與未來</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Accents -->
+    <!-- Application Structure Plan: A thematic, single-page explorer designed for non-linear exploration. The structure progresses from a high-level overview ('The Great Divide') to detailed comparisons ('Policy Models'), then to future opportunities ('Cooperation Space') and conclusions. This is more engaging than a linear report, allowing users to dive into topics of interest via a sticky navigation bar. Key interactions include an animated aging speed chart and an interactive long-term care (LTC) model comparator, chosen to make the report's most data-rich and comparative sections digestible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        1. Aging Speed (Report Info) -> Goal: Show timeline difference -> Viz: Line Chart (Chart.js/Canvas) -> Interaction: Hover for details -> Justification: More impactful than text for showing rapid vs. slow transitions.
+        2. LTC Models (Table 1) -> Goal: Compare country policies -> Viz: Interactive HTML cards/tabs -> Interaction: Click country to see its detailed model -> Justification: Transforms a static table into an exploratory tool.
+        3. Cooperation Channels -> Goal: Explain interconnected opportunities -> Viz: Interactive HTML/CSS diagram -> Interaction: Click node to expand text -> Justification: More engaging and spatially organized than a list.
+        4. Key Stats -> Goal: Inform with quick facts -> Viz: Highlighted "Stat Cards" -> Interaction: Static -> Justification: Breaks up text and emphasizes key data.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #F8F9FA;
+            color: #343A40;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #4A90E2;
+            border-bottom-color: #4A90E2;
+        }
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tab-button.active {
+            background-color: #4A90E2;
+            color: white;
+        }
+        .country-button.active {
+            background-color: #4A90E2;
+            color: white;
+            border-color: #4A90E2;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Header -->
+    <header id="home" class="w-full h-screen flex flex-col items-center justify-center text-center bg-white px-4">
+        <h1 data-lang-key="header.title" class="text-4xl md:text-6xl font-bold text-gray-800 mb-4"></h1>
+        <p data-lang-key="header.subtitle" class="text-lg md:text-2xl text-gray-600 max-w-3xl"></p>
+        <a href="#divide" data-lang-key="header.explore" class="mt-8 px-8 py-3 bg-blue-500 text-white font-semibold rounded-full shadow-lg hover:bg-blue-600 transition duration-300"></a>
+    </header>
+
+    <!-- Sticky Navigation -->
+    <nav class="sticky top-0 bg-white/80 backdrop-blur-md shadow-md z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex justify-center items-center flex-grow space-x-4 md:space-x-8">
+                    <a href="#home" data-lang-key="nav.home" class="nav-link px-2 py-1 text-gray-600 font-medium"></a>
+                    <a href="#divide" data-lang-key="nav.divide" class="nav-link px-2 py-1 text-gray-600 font-medium"></a>
+                    <a href="#models" data-lang-key="nav.models" class="nav-link px-2 py-1 text-gray-600 font-medium"></a>
+                    <a href="#cooperation" data-lang-key="nav.cooperation" class="nav-link px-2 py-1 text-gray-600 font-medium"></a>
+                    <a href="#future" data-lang-key="nav.future" class="nav-link px-2 py-1 text-gray-600 font-medium"></a>
+                </div>
+                <button id="lang-toggle" class="px-3 py-1.5 border rounded-full text-sm font-medium text-gray-600 hover:bg-gray-200 transition">EN / 中文</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <!-- Section 1: The Great Divide -->
+        <section id="divide" class="py-16 md:py-24 fade-in-section">
+            <div class="text-center mb-12">
+                <h2 data-lang-key="divide.title" class="text-3xl md:text-4xl font-bold mb-4"></h2>
+                <p data-lang-key="divide.subtitle" class="text-lg text-gray-600 max-w-3xl mx-auto"></p>
+            </div>
+
+            <div class="bg-white p-4 sm:p-6 md:p-8 rounded-xl shadow-lg">
+                <h3 data-lang-key="divide.chartTitle" class="text-xl md:text-2xl font-bold text-center mb-2"></h3>
+                <p data-lang-key="divide.chartSubtitle" class="text-center text-gray-500 mb-6"></p>
+                <div class="chart-container">
+                    <canvas id="agingSpeedChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mt-12">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 data-lang-key="divide.developed.title" class="text-2xl font-bold mb-4 text-blue-600"></h3>
+                    <p data-lang-key="divide.developed.p" class="mb-4 text-gray-600"></p>
+                    <ul class="space-y-2 list-disc list-inside">
+                        <li data-lang-key="divide.developed.li1"></li>
+                        <li data-lang-key="divide.developed.li2"></li>
+                        <li data-lang-key="divide.developed.li3"></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 data-lang-key="divide.developing.title" class="text-2xl font-bold mb-4 text-orange-500"></h3>
+                    <p data-lang-key="divide.developing.p" class="mb-4 text-gray-600"></p>
+                     <ul class="space-y-2 list-disc list-inside">
+                        <li data-lang-key="divide.developing.li1"></li>
+                        <li data-lang-key="divide.developing.li2"></li>
+                        <li data-lang-key="divide.developing.li3"></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Policy Models -->
+        <section id="models" class="py-16 md:py-24 fade-in-section">
+            <div class="text-center mb-12">
+                <h2 data-lang-key="models.title" class="text-3xl md:text-4xl font-bold mb-4"></h2>
+                <p data-lang-key="models.subtitle" class="text-lg text-gray-600 max-w-3xl mx-auto"></p>
+            </div>
+
+            <div id="ltc-interactive-section" class="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
+                 <h3 data-lang-key="models.ltc.title" class="text-2xl font-bold text-center mb-6"></h3>
+                <p data-lang-key="models.ltc.subtitle" class="text-center text-gray-500 mb-8"></p>
+                 <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8">
+                     <button class="country-button px-4 py-2 border rounded-full transition duration-300" data-country="germany">德國 🇩🇪</button>
+                     <button class="country-button px-4 py-2 border rounded-full transition duration-300" data-country="japan">日本 🇯🇵</button>
+                     <button class="country-button px-4 py-2 border rounded-full transition duration-300" data-country="thailand">泰國 🇹🇭</button>
+                     <button class="country-button px-4 py-2 border rounded-full transition duration-300" data-country="china">中國 🇨🇳</button>
+                 </div>
+                 <div id="ltc-content" class="min-h-[300px] bg-gray-50 rounded-lg p-6 transition-opacity duration-500">
+                 </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Cooperation Space -->
+        <section id="cooperation" class="py-16 md:py-24 fade-in-section">
+            <div class="text-center mb-12">
+                <h2 data-lang-key="cooperation.title" class="text-3xl md:text-4xl font-bold mb-4"></h2>
+                <p data-lang-key="cooperation.subtitle" class="text-lg text-gray-600 max-w-3xl mx-auto"></p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="text-4xl mb-4">🧠</div>
+                    <h3 data-lang-key="cooperation.knowledge.title" class="text-2xl font-bold mb-3"></h3>
+                    <p data-lang-key="cooperation.knowledge.p" class="text-gray-600"></p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="text-4xl mb-4">🤖</div>
+                    <h3 data-lang-key="cooperation.tech.title" class="text-2xl font-bold mb-3"></h3>
+                    <p data-lang-key="cooperation.tech.p" class="text-gray-600"></p>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <div class="text-4xl mb-4">🌍</div>
+                    <h3 data-lang-key="cooperation.labor.title" class="text-2xl font-bold mb-3"></h3>
+                    <p data-lang-key="cooperation.labor.p" class="text-gray-600"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: The Future -->
+        <section id="future" class="py-16 md:py-24 fade-in-section">
+            <div class="text-center mb-12">
+                <h2 data-lang-key="future.title" class="text-3xl md:text-4xl font-bold mb-4"></h2>
+                <p data-lang-key="future.subtitle" class="text-lg text-gray-600 max-w-3xl mx-auto"></p>
+            </div>
+
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 data-lang-key="future.developed.title" class="text-xl font-bold mb-4"></h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li data-lang-key="future.developed.li1"></li>
+                        <li data-lang-key="future.developed.li2"></li>
+                        <li data-lang-key="future.developed.li3"></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 data-lang-key="future.developing.title" class="text-xl font-bold mb-4"></h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li data-lang-key="future.developing.li1"></li>
+                        <li data-lang-key="future.developing.li2"></li>
+                        <li data-lang-key="future.developing.li3"></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 data-lang-key="future.orgs.title" class="text-xl font-bold mb-4"></h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700">
+                        <li data-lang-key="future.orgs.li1"></li>
+                        <li data-lang-key="future.orgs.li2"></li>
+                        <li data-lang-key="future.orgs.li3"></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-8">
+        <p data-lang-key="footer.p1"></p>
+        <p data-lang-key="footer.p2" class="text-sm text-gray-400 mt-2"></p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const translations = {
+                en: {
+                    title: "The Grey Planet: Exploring Global Aging Policies & Futures",
+                    header: {
+                        title: "The Grey Planet",
+                        subtitle: "A World in Transition: Exploring Policy Differences and Future Cooperation in Responding to Population Aging in Developed and Developing Countries.",
+                        explore: "Start Exploring"
+                    },
+                    nav: {
+                        home: "Home",
+                        divide: "Two Speeds",
+                        models: "Policy Models",
+                        cooperation: "Cooperation",
+                        future: "Future Outlook"
+                    },
+                    divide: {
+                        title: "Two Speeds of Aging",
+                        subtitle: "Developed countries aged slowly after becoming rich, while developing countries face the urgent challenge of 'getting old before getting rich.' The speed of aging fundamentally determines policy priorities and paths.",
+                        chartTitle: "Aging Process Comparison: From 7% to 14%",
+                        chartSubtitle: "Comparing the time required to double the proportion of the population aged 65+",
+                        developed: {
+                            title: "Aging After Affluence",
+                            p: "Developed countries featured a long, gradual demographic transition, providing a valuable window to accumulate wealth and build comprehensive welfare states (e.g., pensions, healthcare).",
+                            li1: "<strong>Challenge:</strong> Managing mature systems, ensuring fiscal sustainability.",
+                            li2: "<strong>Policy Core:</strong> Adjusting existing pension systems, developing professional long-term care, promoting healthy aging.",
+                            li3: "<strong>Status:</strong> A manageable, long-term planning issue."
+                        },
+                        developing: {
+                            title: "Old Before Rich",
+                            p: "Developing countries are experiencing a highly compressed demographic transition, forced to address vast social security and care needs on a less stable economic foundation.",
+                            li1: "<strong>Challenge:</strong> Short demographic dividend window, need to rapidly build safety nets.",
+                            li2: "<strong>Policy Core:</strong> Expanding basic coverage, finding low-cost solutions, leveraging existing systems.",
+                            li3: "<strong>Status:</strong> An urgent, potentially crisis-inducing development challenge."
+                        }
+                    },
+                    models: {
+                        title: "Key Policy Model Comparison",
+                        subtitle: "Explore national strategies in the core areas of pensions, long-term care, and labor markets. Developed countries focus on 'sustainability reforms,' while developing nations prioritize establishing 'foundational safety nets.'",
+                        ltc: {
+                           title: "Interactive Comparison: Long-Term Care (LTC) Systems",
+                           subtitle: "Click a country below to view its unique long-term care model. This interactive module transforms the report's table into a dynamic tool, clearly showing strategic differences in funding, eligibility, benefits, and the role of the family."
+                        }
+                    },
+                    cooperation: {
+                        title: "A New Landscape of Global Cooperation",
+                        subtitle: "Aging has fostered global interdependence beyond traditional aid models. Cooperation unfolds through knowledge transfer, technology diffusion, and labor mobility, forming a complex network of partnerships.",
+                        knowledge: {
+                            title: "Knowledge Transfer",
+                            p: "Moving from simple 'policy copying' to 'adaptive learning.' International organizations and bilateral agreements foster experience sharing, helping nations build cost-effective, high-performance care models suited to their contexts."
+                        },
+                        tech: {
+                            title: "Technology Diffusion",
+                            p: "The 'Silver Economy' and 'Age-Tech' create a multi-trillion dollar global market. Developed countries innovate, developing countries provide markets, creating vast potential for technology transfer."
+                        },
+                        labor: {
+                            title: "Labor Mobility",
+                            p: "The most direct interdependence. Developed countries face care worker shortages, while developing countries have a trained workforce, leading to bilateral labor agreements and associated challenges."
+                        }
+                    },
+                    future: {
+                        title: "Navigating Hurdles, Creating a Shared Future",
+                        subtitle: "Cooperation potential is immense but must overcome geopolitical, cultural, and economic barriers. An interdependent aging future requires all actors to build more inclusive, adaptive, and culturally sensitive cooperation frameworks.",
+                        developed: {
+                           title: "Recommendations for Developed Countries",
+                           li1: "<strong>Promote Adaptive Policy Learning:</strong> Support two-way, context-sensitive policy dialogues.",
+                           li2: "<strong>Foster Inclusive Tech Innovation:</strong> Invest in R&D to lower the cost and improve accessibility of 'Age-Tech.'",
+                           li3: "<strong>Build Ethical Labor Partnerships:</strong> Co-develop 'Global Skill Partnerships' to mitigate brain drain."
+                        },
+                        developing: {
+                           title: "Recommendations for Developing Countries",
+                           li1: "<strong>Focus on 'Good Enough' Solutions:</strong> Leverage and strengthen existing institutional advantages rather than chasing high-cost models.",
+                           li2: "<strong>Maximize the 'Demographic Dividend':</strong> Focus resources on education and health to build capital for the future.",
+                           li3: "<strong>Develop Integrated National Strategies:</strong> Establish inter-ministerial coordination to integrate policies across sectors."
+                        },
+                        orgs: {
+                           title: "Recommendations for International Organizations",
+                           li1: "<strong>Act as Knowledge Brokers:</strong> Vigorously support 'South-South cooperation' to share pragmatic experiences.",
+                           li2: "<strong>Set Global Norms and Standards:</strong> Lead in developing ethical guidelines for technology and labor migration.",
+                           li3: "<strong>Invest in High-Quality Data:</strong> Support countries in building robust data collection and monitoring systems."
+                        }
+                    },
+                    footer: {
+                        p1: "Interactive analysis based on the report 'The Grey Planet: Divergent Policies and Cooperation Imperatives in an Aging World.'",
+                        p2: "This is a conceptual application for demonstration purposes only."
+                    },
+                    chartData: {
+                        label: 'Years required for 65+ population to increase from 7% to 14%',
+                        xLabel: 'Years Required',
+                        countries: ['France', 'Sweden', 'USA', 'Brazil', 'China', 'Thailand']
+                    },
+                    ltcData: {
+                        germany: {
+                            title: "Germany: Social Insurance Model",
+                            points: [
+                                "<strong>Funding:</strong> Mandatory social insurance, co-funded by employers and employees.",
+                                "<strong>Eligibility:</strong> Care need levels (Pflegegrad) assessed based on functional limitations.",
+                                "<strong>Benefits:</strong> Mix of cash benefits (Pflegegeld) and in-kind services, formally supporting family caregivers.",
+                                "<strong>Core Idea:</strong> Treats long-term care as a social risk, socialized through a structured insurance system."
+                            ]
+                        },
+                        japan: {
+                            title: "Japan: Comprehensive System Model",
+                            points: [
+                                "<strong>Funding:</strong> Mandatory social insurance (Kaigo Hoken), funded by premiums and general taxes.",
+                                "<strong>Eligibility:</strong> Care need levels certified by municipal committees.",
+                                "<strong>Benefits:</strong> Primarily in-kind services, providing comprehensive professional options to reduce family burden.",
+                                "<strong>Core Idea:</strong> A state-led, systemic reform to manage the crisis of a 'super-aged' society."
+                            ]
+                        },
+                        thailand: {
+                            title: "Thailand: Leveraging Universalism",
+                            points: [
+                                "<strong>Funding:</strong> Mainly from general taxation (via UHC), supplemented by local funds.",
+                                "<strong>Eligibility:</strong> Based on age, specific needs, and ADL scores.",
+                                "<strong>Benefits:</strong> Specific items (e.g., diapers), UHC services, and heavy reliance on the Village Health Volunteer network.",
+                                "<strong>Core Idea:</strong> Use the existing strong primary healthcare system as a platform for cost-effective community care."
+                            ]
+                        },
+                        china: {
+                            title: "China: The Challenge of Scale",
+                            points: [
+                                "<strong>Funding:</strong> State investment, private payment, and positioning the 'silver economy' as a growth engine.",
+                                "<strong>Eligibility:</strong> Varies by locality; focus on disabled and low-income elders.",
+                                "<strong>Benefits:</strong> Idealized '90-7-3' model; focus on home and community-based infrastructure.",
+                                "<strong>Core Idea:</strong> Emphasizes filial piety, reinforcing the family as the core pillar to cope with 'getting old before rich' and the '4-2-1' family structure."
+                            ]
+                        }
+                    }
+                },
+                zh: {
+                    title: "灰色的地球：探索全球高齡化的政策與未來",
+                    header: {
+                        title: "灰色的地球",
+                        subtitle: "一個轉型中的世界：探索已開發與發展中國家在應對人口老齡化浪潮中的政策差異與未來合作空間。",
+                        explore: "開始探索"
+                    },
+                    nav: {
+                        home: "首頁",
+                        divide: "兩種速度",
+                        models: "政策模型",
+                        cooperation: "合作空間",
+                        future: "未來展望"
+                    },
+                    divide: {
+                        title: "兩種速度的高齡化",
+                        subtitle: "已開發國家在富裕後緩慢高齡化，而發展中國家則面臨「未富先老」的急迫挑戰。高齡化的速度，從根本上決定了政策的優先順序與選擇路徑。",
+                        chartTitle: "高齡化進程比較：從7%到14%",
+                        chartSubtitle: "比較65歲以上人口比例倍增所需的時間",
+                        developed: {
+                            title: "富裕後高齡",
+                            p: "已開發國家的特徵是漫長且漸進的人口轉型，為其積累財富和建立完善的福利國家（如退休金、健保體系）提供了寶貴的時間窗口。",
+                            li1: "<strong>挑戰：</strong>管理成熟體系、確保財政可持續性。",
+                            li2: "<strong>政策核心：</strong>調整現有退休金制度、發展專業長期照護、促進健康高齡化。",
+                            li3: "<strong>狀態：</strong>一個可管理的長期規劃議題。"
+                        },
+                        developing: {
+                            title: "未富先老",
+                            p: "發展中國家正經歷一場被極度壓縮的人口轉型，必須在經濟基礎尚不穩固時，就應對龐大的社會安全與照護需求。",
+                            li1: "<strong>挑戰：</strong>人口紅利窗口短暫、需快速建立安全網。",
+                            li2: "<strong>政策核心：</strong>擴大基礎覆蓋、尋找低成本方案、槓桿利用現有制度。",
+                            li3: "<strong>狀態：</strong>一個緊迫的、甚至可能引發危機的發展挑戰。"
+                        }
+                    },
+                    models: {
+                        title: "關鍵政策模型比較",
+                        subtitle: "探索各國在退休金、長期照護和勞動力市場三大核心領域的應對策略。已開發國家專注於「可持續性改革」，而發展中國家則致力於建立「基礎安全網」。",
+                        ltc: {
+                           title: "互動比較：長期照護 (LTC) 體系",
+                           subtitle: "點擊下方國家，查看其獨特的長期照護模式。此互動模組旨在將報告中的表格轉化為一個動態的探索工具，清晰地展示不同國家在資金、資格、給付和家庭角色方面的策略差異。"
+                        }
+                    },
+                    cooperation: {
+                        title: "全球合作的新圖景",
+                        subtitle: "高齡化催生了超越傳統援助模式的全球相互依存。合作主要透過知識轉移、技術擴散和勞動力流動三個渠道展開，形成一個複雜的夥伴關係網絡。",
+                        knowledge: {
+                            title: "知識轉移",
+                            p: "從單純的「政策複製」走向「適應性學習」。國際組織、雙邊協定促進經驗分享，幫助各國建立符合自身國情的低成本、高效能照護模式。"
+                        },
+                        tech: {
+                            title: "技術擴散",
+                            p: "「銀髮經濟」與「高齡科技」創造了數萬億美元的全球市場。已開發國家創新，發展中國家提供市場，為技術轉移創造了巨大合作潛力。"
+                        },
+                        labor: {
+                            title: "勞動力流動",
+                            p: "最直接的相互依賴。已開發國家面臨照護人力短缺，而發展中國家擁有訓練有素的勞動力，催生了雙邊勞務協定，也帶來了挑戰。"
+                        }
+                    },
+                    future: {
+                        title: "駕馭障礙，共創未來",
+                        subtitle: "合作潛力巨大，但仍需克服地緣政治、文化差異和經濟鴻溝等障礙。一個相互依存的全球高齡化未來，需要所有行動者建立更具包容性、適應性和文化敏感性的合作框架。",
+                        developed: {
+                           title: "對已開發國家的建議",
+                           li1: "<strong>推動適應性政策學習：</strong>支持雙向、注重情境的政策對話。",
+                           li2: "<strong>促進普惠性技術創新：</strong>投資於降低「高齡科技」成本與可及性的研發。",
+                           li3: "<strong>建立道德勞動力夥伴關係：</strong>合作建立「全球技能夥伴關係」，減輕人才外流影響。"
+                        },
+                        developing: {
+                           title: "對發展中國家的建議",
+                           li1: "<strong>專注於「足夠好」的方案：</strong>利用並加強現有制度優勢，而非盲目追高。",
+                           li2: "<strong>最大化利用「人口紅利」：</strong>集中資源投資於教育、健康，為未來儲備資本。",
+                           li3: "<strong>制定整合性國家戰略：</strong>建立跨部門協調機制，整合各領域政策。"
+                        },
+                        orgs: {
+                           title: "對國際組織的建議",
+                           li1: "<strong>擔當知識的掮客：</strong>大力支持「南南合作」，分享務實經驗。",
+                           li2: "<strong>制定全球標準與準則：</strong>在科技和勞工遷移領域牽頭制定道德規範。",
+                           li3: "<strong>持續投資於高質量數據：</strong>支持各國建立完善的數據收集與監測體系。"
+                        }
+                    },
+                    footer: {
+                        p1: "基於報告《灰色的地球：高齡化世界中的分歧政策與合作要務》建立的互動式分析。",
+                        p2: "此為概念性應用程式，僅供演示用途。"
+                    },
+                    chartData: {
+                        label: '65歲以上人口從7%增至14%所需年數',
+                        xLabel: '所需年數',
+                        countries: ['法國', '瑞典', '美國', '巴西', '中國', '泰國']
+                    },
+                    ltcData: {
+                        germany: {
+                            title: "德國：社會保險模式",
+                            points: [
+                                "<strong>資金機制:</strong> 強制性社會保險，由勞資雙方共同繳費。",
+                                "<strong>資格標準:</strong> 根據功能限制評估的照護需求等級 (Pflegegrad)。",
+                                "<strong>主要給付:</strong> 現金給付 (Pflegegeld) 與實物服務的混合模式，正式支持家庭照護者。",
+                                "<strong>核心理念:</strong> 將長期照護作為一種社會風險，透過結構化保險體系進行社會化管理。"
+                            ]
+                        },
+                        japan: {
+                            title: "日本：全面系統模式",
+                            points: [
+                                "<strong>資金機制:</strong> 強制性社會保險 (介護保險)，資金來自保費和一般稅收。",
+                                "<strong>資格標準:</strong> 由地方委員會認證的照護需求等級。",
+                                "<strong>主要給付:</strong> 以實物服務為主，提供全面的專業照護選項，旨在減輕家庭負擔。",
+                                "<strong>核心理念:</strong> 國家主導的系統性改革，應對「超高齡」社會的危機。"
+                            ]
+                        },
+                        thailand: {
+                            title: "泰國：槓桿利用普世性制度",
+                            points: [
+                                "<strong>資金機制:</strong> 主要來自一般稅收 (透過全民健保 UHC)，輔以地方資金。",
+                                "<strong>資格標準:</strong> 基於年齡、特定需求和日常生活活動能力 (ADL) 分數。",
+                                "<strong>主要給付:</strong> 特定物品 (如紙尿褲)、UHC 服務，並高度依賴鄉村衛生志工網絡。",
+                                "<strong>核心理念:</strong> 利用現有強大的初級衛生保健系統作為平台，提供具成本效益的社區照護。"
+                            ]
+                        },
+                        china: {
+                            title: "中國：規模的挑戰",
+                            points: [
+                                "<strong>資金機制:</strong> 國家投資、私人支付，並將「銀髮經濟」定位為增長引擎。",
+                                "<strong>資格標準:</strong> 因地而異，重點關注失能和低收入長者。",
+                                "<strong>主要給付:</strong> 推行理想化的「90-7-3」模式，重點發展居家和社區基礎設施。",
+                                "<strong>核心理念:</strong> 強調孝道文化，鞏固家庭為核心支柱，以應對「未富先老」和「4-2-1」家庭結構的挑戰。"
+                            ]
+                        }
+                    }
+                }
+            };
+            
+            let currentLang = 'zh';
+            let agingSpeedChart;
+            const ctx = document.getElementById('agingSpeedChart').getContext('2d');
+            
+            function createOrUpdateChart(lang) {
+                const chartData = translations[lang].chartData;
+                const data = {
+                    labels: chartData.countries,
+                    datasets: [{
+                        label: chartData.label,
+                        data: [115, 85, 69, 26, 25, 22],
+                        backgroundColor: [
+                            '#60A5FA', '#60A5FA', '#60A5FA',
+                            '#F97316', '#F97316', '#F97316'
+                        ],
+                        borderColor: [
+                            '#3B82F6', '#3B82F6', '#3B82F6',
+                            '#EA580C', '#EA580C', '#EA580C'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+                
+                if (agingSpeedChart) {
+                    agingSpeedChart.destroy();
+                }
+
+                agingSpeedChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.raw + (lang === 'zh' ? ' 年' : ' Years');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: chartData.xLabel }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const ltcContentDiv = document.getElementById('ltc-content');
+            const countryButtons = document.querySelectorAll('.country-button');
+            let activeCountry = 'germany';
+
+            function displayLtcContent(country, lang) {
+                const data = translations[lang].ltcData[country];
+                if (!data) return;
+
+                ltcContentDiv.style.opacity = 0;
+                
+                setTimeout(() => {
+                    let contentHtml = `<h4 class="text-xl font-bold mb-4">${data.title}</h4>`;
+                    contentHtml += '<ul class="space-y-3 list-disc list-inside text-gray-700">';
+                    data.points.forEach(point => {
+                        contentHtml += `<li>${point}</li>`;
+                    });
+                    contentHtml += '</ul>';
+                    ltcContentDiv.innerHTML = contentHtml;
+                    ltcContentDiv.style.opacity = 1;
+                }, 300);
+
+                countryButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.country === country);
+                });
+            }
+
+            function switchLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.title = translations[lang].title;
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    const keys = key.split('.');
+                    let text = translations[lang];
+                    keys.forEach(k => {
+                        if (text) text = text[k];
+                    });
+                    if (text) {
+                        el.innerHTML = text;
+                    }
+                });
+                
+                createOrUpdateChart(lang);
+                displayLtcContent(activeCountry, lang);
+            }
+
+            countryButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    activeCountry = button.dataset.country;
+                    displayLtcContent(activeCountry, currentLang);
+                });
+            });
+            
+            document.getElementById('lang-toggle').addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+
+            // Initial load
+            switchLanguage('zh');
+
+            // --- Scrollspy & Fade-in Animations ---
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 70) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
