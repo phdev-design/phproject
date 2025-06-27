@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang="pageTitle">元宇宙的雙重挑戰：互動式報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA uses a thematic, non-linear structure. It starts with a hero section introducing the two core themes: Digital Divide and Addiction. Users can choose their entry point. The main content is divided into two major interactive sections: 'The Challenges,' which uses clickable cards and charts to break down the problems, and 'The Solutions,' which uses a filter-like button system to explore the multi-stakeholder framework. This structure was chosen to transform the dense, linear report into an engaging, user-driven exploratory experience, making complex relationships between problems and solutions more digestible. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Table 1 (Digital Divide Comparison) -> Goal: Compare Web 2.0 vs. Metaverse -> Viz/Method: Interactive HTML/CSS cards (3 levels) -> Interaction: Click to reveal detailed comparison -> Justification: Breaks down a dense table into digestible, user-initiated chunks. More engaging than a static table. -> Library/Method: Vanilla JS.
+        - Report Info: VR vs. Internet user count -> Goal: Show the scale of the access divide -> Viz/Method: Bar Chart -> Interaction: Hover for tooltips -> Justification: Clear, immediate visual representation of numerical disparity. -> Library/Method: Chart.js.
+        - Report Info: Addiction Mechanism (Presence, Embodiment) -> Goal: Explain the psychological process -> Viz/Method: HTML/CSS flowchart -> Interaction: Static visual aid -> Justification: Simplifies a complex psychological concept into an easy-to-follow visual flow. -> Library/Method: Tailwind CSS.
+        - Report Info: Table 2 (Solutions Framework) -> Goal: Detail stakeholder responsibilities -> Viz/Method: Interactive button-based filter -> Interaction: Click stakeholder to display their specific solutions -> Justification: Allows users to focus on one area of the solution at a time, making the framework less overwhelming. -> Library/Method: Vanilla JS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .active-tab {
+            border-color: #0891b2; /* cyan-600 */
+            color: #0891b2;
+            font-weight: 700;
+        }
+        .solution-btn.active {
+            background-color: #0891b2; /* cyan-600 */
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        #lang-switcher {
+            border: 1px solid #0891b2;
+            color: #0891b2;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-cyan-700" data-lang="headerTitle">元宇宙的雙重未來</h1>
+            <div class="flex items-center space-x-4 sm:space-x-6">
+                <ul class="flex space-x-4 sm:space-x-6 text-sm sm:text-base">
+                    <li><a href="#challenges" class="text-slate-600 hover:text-cyan-600 transition-colors" data-lang="navChallenges">核心挑戰</a></li>
+                    <li><a href="#solutions" class="text-slate-600 hover:text-cyan-600 transition-colors" data-lang="navSolutions">解決藍圖</a></li>
+                    <li><a href="#conclusion" class="text-slate-600 hover:text-cyan-600 transition-colors" data-lang="navConclusion">報告結論</a></li>
+                </ul>
+                <button id="lang-switcher" class="text-xs font-bold py-1 px-3 rounded-full transition-colors duration-300 hover:bg-cyan-600 hover:text-white">
+                    English
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12 sm:py-16">
+
+        <section class="text-center mb-20">
+            <h2 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4" data-lang="heroTitle">是加劇不平等，還是促進包容？</h2>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto mb-8" data-lang="heroSubtitle">
+                元宇宙的崛起帶來了革命性的願景，但也潛藏著加劇數位鴻溝與催生新型網路成癮的巨大風險。本報告旨在剖析這兩大挑戰，並提出一個確保其健康發展的行動框架。
+            </p>
+            <div class="flex justify-center space-x-4">
+                <a href="#challenges" class="bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-cyan-700 transition-all shadow-md" data-lang="heroButton">探索核心挑戰</a>
+            </div>
+        </section>
+
+        <section id="challenges" class="mb-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-900" data-lang="challengesTitle">核心挑戰：鴻溝與成癮</h3>
+                <p class="text-slate-600 mt-2 max-w-2xl mx-auto" data-lang="challengesSubtitle">元宇宙在技術、心理和經濟層面都帶來了前所未有的挑戰。了解這兩大核心問題是尋找解決方案的第一步。</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+                
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h4 class="text-2xl font-bold mb-4 text-cyan-800" data-lang="divideTitle">一、加深的數位鴻溝</h4>
+                    <p class="text-slate-600 mb-6" data-lang="divideDesc">元宇宙不僅延續，更在「近用」、「技能」與「成果」三個層次上，全面放大現有的數位不平等。這將系統性地將弱勢群體排除在未來的社會與經濟生活之外。</p>
+                    
+                    <div id="divide-tabs" class="mb-4 border-b border-slate-200 flex space-x-4">
+                        <button data-divide="access" class="divide-tab py-2 px-1 border-b-2 transition-colors duration-300" data-lang="divideTabAccess">近用鴻溝</button>
+                        <button data-divide="skills" class="divide-tab py-2 px-1 border-b-2 transition-colors duration-300" data-lang="divideTabSkills">技能鴻溝</button>
+                        <button data-divide="outcomes" class="divide-tab py-2 px-1 border-b-2 transition-colors duration-300" data-lang="divideTabOutcomes">成果鴻溝</button>
+                    </div>
+
+                    <div id="divide-content" class="bg-slate-50 p-4 rounded-lg min-h-[220px]">
+                    </div>
+
+                    <p class="text-slate-600 mt-6 mb-4 text-center font-semibold" data-lang="chartTitle">巨大的近用差距</p>
+                    <div class="chart-container">
+                        <canvas id="userGapChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg border border-slate-200">
+                    <h4 class="text-2xl font-bold mb-4 text-amber-800" data-lang="addictionTitle">二、沉浸的成癮風險</h4>
+                    <p class="text-slate-600 mb-6" data-lang="addictionDesc">透過「臨在感」與「化身」的結合，元宇宙能強力刺激大腦的多巴胺獎勵系統，其成癮潛力可能遠超現有的社群媒體和電玩遊戲。</p>
+                    
+                    <div class="bg-amber-50 p-4 rounded-lg text-center">
+                        <h5 class="font-bold text-amber-900 mb-2" data-lang="addictionMechanismTitle">成癮的神經心理學機制</h5>
+                        <div class="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-2 text-sm">
+                            <div class="bg-white p-2 rounded-md shadow-sm" data-lang="addictionMechStep1">沉浸式體驗<br>(臨在感+化身)</div>
+                            <div class="font-bold text-amber-600 text-2xl">→</div>
+                            <div class="bg-white p-2 rounded-md shadow-sm" data-lang="addictionMechStep2">強力刺激大腦<br>多巴胺獎勵系統</div>
+                            <div class="font-bold text-amber-600 text-2xl">→</div>
+                             <div class="bg-white p-2 rounded-md shadow-sm" data-lang="addictionMechStep3">形成強迫性<br>行為迴路</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 text-center bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+                        <p class="font-bold" data-lang="addictionFact">初步研究顯示，VR遊戲的成癮趨勢比PC遊戲高出</p>
+                        <p class="text-5xl font-bold my-2">44%</p>
+                    </div>
+
+                     <div class="mt-6">
+                        <h5 class="font-bold text-amber-900 mb-2 text-center" data-lang="paradoxTitle">治療的悖論：既是問題也是解方</h5>
+                        <p class="text-slate-600 text-sm mb-4" data-lang="paradoxDesc">弔詭的是，賦予元宇宙成癮潛力的VR技術，本身也是一種強大的心理治療工具，已被廣泛應用於恐懼症、PTSD和成癮治療的暴露療法中。</p>
+                        <div class="grid grid-cols-2 gap-4 text-center text-sm">
+                            <div class="p-3 bg-red-50 rounded-lg">
+                                <p class="font-bold text-red-800" data-lang="paradoxRiskTitle">風險</p>
+                                <p class="text-slate-600" data-lang="paradoxRiskDesc">最大化使用者停留時間，鼓勵衝動行為。</p>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-lg">
+                                <p class="font-bold text-green-800" data-lang="paradoxPotentialTitle">潛力</p>
+                                <p class="text-slate-600" data-lang="paradoxPotentialDesc">在可控環境中，進行目標導向的心理治療。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="mb-16">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-slate-900" data-lang="solutionsTitle">解決藍圖：多方協作的行動框架</h3>
+                <p class="text-slate-600 mt-2 max-w-3xl mx-auto" data-lang="solutionsSubtitle">應對元宇宙的挑戰需要政府、企業、教育機構和個人的共同努力。點擊下方利害關係人，查看他們的關鍵責任與行動策略。</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8">
+                <button class="solution-btn font-semibold py-2 px-5 rounded-full bg-white shadow-md hover:bg-cyan-50 transition-all duration-300" data-stakeholder="government" data-lang="solutionBtnGov">🏛️ 政府與監管機構</button>
+                <button class="solution-btn font-semibold py-2 px-5 rounded-full bg-white shadow-md hover:bg-cyan-50 transition-all duration-300" data-stakeholder="business" data-lang="solutionBtnBiz">🏢 企業與開發者</button>
+                <button class="solution-btn font-semibold py-2 px-5 rounded-full bg-white shadow-md hover:bg-cyan-50 transition-all duration-300" data-stakeholder="education" data-lang="solutionBtnEdu">🎓 教育機構</button>
+                <button class="solution-btn font-semibold py-2 px-5 rounded-full bg-white shadow-md hover:bg-cyan-50 transition-all duration-300" data-stakeholder="individual" data-lang="solutionBtnInd">👥 個人與公民社會</button>
+            </div>
+
+            <div id="solution-content" class="bg-white p-6 sm:p-8 rounded-xl shadow-lg border border-slate-200 min-h-[300px]">
+            </div>
+        </section>
+
+        <section id="conclusion" class="bg-cyan-800 text-white p-8 rounded-2xl shadow-xl">
+             <h3 class="text-3xl font-bold mb-4 text-center" data-lang="conclusionTitle">結論：汲取過往教訓，為未來設立護欄</h3>
+             <p class="text-cyan-200 mb-4" data-lang="conclusionP1">
+                 回顧網際網路的發展，我們深知在技術浪潮初期被動應對的代價。元宇宙的預設軌跡確實存在加劇不平等和催生新成癮的風險，但未來並非注定。
+             </p>
+             <p class="text-cyan-100 font-semibold" data-lang="conclusionP2">
+                 關鍵在於我們能否從被動的技術接受者，轉變為主動的社會建構者。透過政府、企業、教育和公民社會的協同行動，我們可以引導元宇宙走向一個更公平、更健康、更具包容性的未來。今日的抉擇，將決定元宇宙是成為分裂社會的工具，還是促進人類共同繁榮的平台。
+             </p>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8">
+        <p class="text-slate-500 text-sm" data-lang="footerText">此互動式報告內容基於《元宇宙的雙重未來》研究報告。</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        let currentLang = 'zh';
+        let userGapChart;
+
+        const content = {
+            zh: {
+                pageTitle: '元宇宙的雙重挑戰：互動式報告',
+                headerTitle: '元宇宙的雙重未來',
+                navChallenges: '核心挑戰',
+                navSolutions: '解決藍圖',
+                navConclusion: '報告結論',
+                heroTitle: '是加劇不平等，還是促進包容？',
+                heroSubtitle: '元宇宙的崛起帶來了革命性的願景，但也潛藏著加劇數位鴻溝與催生新型網路成癮的巨大風險。本報告旨在剖析這兩大挑戰，並提出一個確保其健康發展的行動框架。',
+                heroButton: '探索核心挑戰',
+                challengesTitle: '核心挑戰：鴻溝與成癮',
+                challengesSubtitle: '元宇宙在技術、心理和經濟層面都帶來了前所未有的挑戰。了解這兩大核心問題是尋找解決方案的第一步。',
+                divideTitle: '一、加深的數位鴻溝',
+                divideDesc: '元宇宙不僅延續，更在「近用」、「技能」與「成果」三個層次上，全面放大現有的數位不平等。這將系統性地將弱勢群體排除在未來的社會與經濟生活之外。',
+                divideTabAccess: '近用鴻溝',
+                divideTabSkills: '技能鴻溝',
+                divideTabOutcomes: '成果鴻溝',
+                chartTitle: '巨大的近用差距',
+                addictionTitle: '二、沉浸的成癮風險',
+                addictionDesc: '透過「臨在感」與「化身」的結合，元宇宙能強力刺激大腦的多巴胺獎勵系統，其成癮潛力可能遠超現有的社群媒體和電玩遊戲。',
+                addictionMechanismTitle: '成癮的神經心理學機制',
+                addictionMechStep1: '沉浸式體驗<br>(臨在感+化身)',
+                addictionMechStep2: '強力刺激大腦<br>多巴胺獎勵系統',
+                addictionMechStep3: '形成強迫性<br>行為迴路',
+                addictionFact: '初步研究顯示，VR遊戲的成癮趨勢比PC遊戲高出',
+                paradoxTitle: '治療的悖論：既是問題也是解方',
+                paradoxDesc: '弔詭的是，賦予元宇宙成癮潛力的VR技術，本身也是一種強大的心理治療工具，已被廣泛應用於恐懼症、PTSD和成癮治療的暴露療法中。',
+                paradoxRiskTitle: '風險',
+                paradoxRiskDesc: '最大化使用者停留時間，鼓勵衝動行為。',
+                paradoxPotentialTitle: '潛力',
+                paradoxPotentialDesc: '在可控環境中，進行目標導向的心理治療。',
+                solutionsTitle: '解決藍圖：多方協作的行動框架',
+                solutionsSubtitle: '應對元宇宙的挑戰需要政府、企業、教育機構和個人的共同努力。點擊下方利害關係人，查看他們的關鍵責任與行動策略。',
+                solutionBtnGov: '🏛️ 政府與監管機構',
+                solutionBtnBiz: '🏢 企業與開發者',
+                solutionBtnEdu: '🎓 教育機構',
+                solutionBtnInd: '👥 個人與公民社會',
+                conclusionTitle: '結論：汲取過往教訓，為未來設立護欄',
+                conclusionP1: '回顧網際網路的發展，我們深知在技術浪潮初期被動應對的代價。元宇宙的預設軌跡確實存在加劇不平等和催生新成癮的風險，但未來並非注定。',
+                conclusionP2: '關鍵在於我們能否從被動的技術接受者，轉變為主動的社會建構者。透過政府、企業、教育和公民社會的協同行動，我們可以引導元宇宙走向一個更公平、更健康、更具包容性的未來。今日的抉擇，將決定元宇宙是成為分裂社會的工具，還是促進人類共同繁榮的平台。',
+                footerText: '此互動式報告內容基於《元宇宙的雙重未來》研究報告。',
+                divideData: {
+                    access: {
+                        title: '第一層：近用鴻溝 (Access Divide)',
+                        description: '不再僅僅是能否上網，而是能否負擔進入沉浸式世界所需的昂貴硬體，以及支援即時互動的超高速網路。',
+                        web2_title: 'Web 2.0 時代',
+                        meta_title: '元宇宙時代',
+                        comparison: { web2: '擁有智慧型手機；基本寬頻網路。', metaverse: '高效能VR/AR頭戴裝置、觸覺回饋套裝；超高速、低延遲的5G或光纖網路。' }
+                    },
+                    skills: {
+                        title: '第二層：技能鴻溝 (Skills Divide)',
+                        description: '從基本的電腦操作，演變為更複雜的「元宇宙素養」，包含三維空間導航、虛擬化身表達、數位資產管理等全新技能。',
+                        web2_title: 'Web 2.0 時代',
+                        meta_title: '元宇宙時代',
+                        comparison: { web2: '數位素養：使用瀏覽器、搜尋引擎、社群媒體。', metaverse: '元宇宙素養：3D空間導航、虛擬化身創建、3D內容創作、NFT管理等。' }
+                    },
+                    outcomes: {
+                        title: '第三層：成果鴻溝 (Outcome Divide)',
+                        description: '差距從能否獲取資訊，擴大到能否參與新興的虛擬經濟、接受沉浸式教育與醫療，避免被主流虛擬社交平台排除。',
+                        web2_title: 'Web 2.0 時代',
+                        meta_title: '元宇宙時代',
+                        comparison: { web2: '利用網路獲取政府服務、線上求職、遠距學習。', metaverse: '參與虛擬經濟、接受沉浸式教育與培訓、獲得先進遠距醫療服務。' }
+                    }
+                },
+                solutionData: {
+                    government: {
+                        title: '🏛️ 政府與監管機構',
+                        divideTitle: '應對數位鴻溝',
+                        addictionTitle: '應對網路成癮',
+                        divide: ['將寬頻視為公共事業，投資偏鄉與低收入地區網路建設。', '設立數位公平法案，提供硬體與網路費用補貼。', '更新無障礙法規，確保平台對身心障礙人士的可用性。'],
+                        addiction: ['資助關於元宇宙成癮的長期追蹤研究。', '制定具約束力的倫理設計準則。', '立法限制或禁止剝削性設計（如戰利品箱）。']
+                    },
+                    business: {
+                        title: '🏢 企業與開發者',
+                        divideTitle: '應對數位鴻溝',
+                        addictionTitle: '應對網路成癮',
+                        divide: ['將「無障礙設計」作為產品開發的核心原則。', '提供低成本硬體選項或基於雲端的串流解決方案。', '支持開放的互通性標準，避免形成封閉的「圍牆花園」。'],
+                        addiction: ['實施「人性化技術」原則，設計旨在有限使用而非無限沉迷的體驗。', '提供清晰的警告標示與易用的時間/消費管理工具。', '為高風險使用者提供指向專業幫助的資源。']
+                    },
+                    education: {
+                        title: '🎓 教育機構',
+                        divideTitle: '應對數位鴻溝',
+                        addictionTitle: '應對網路成癮',
+                        divide: ['在各級教育中整合「元宇宙素養」課程。', '課程內容應涵蓋技術操作、數位公民、虛擬經濟和批判性思維。', '投資教師培訓計畫，使其具備相關教學能力。'],
+                        addiction: ['將數位福祉（Digital Wellbeing）納入健康教育課程。', '教導學生識別成癮跡象、管理螢幕時間。', '培養學生批判性地分析虛擬環境的設計與商業模式。']
+                    },
+                    individual: {
+                        title: '👥 個人與公民社會',
+                        divideTitle: '應對數位鴻溝',
+                        addictionTitle: '應對網路成癮',
+                        divide: ['公民社會組織應持續倡議數位公平政策。', '推廣「數位領航員」等社群互助計畫。', '使用者應團結起來，要求更高的透明度和保護措施。'],
+                        addiction: ['主動實踐數位自我照護，如設定科技禁區、監控使用時間。', '優先保障睡眠、運動和現實世界的社交。', '家長應與孩子開放對話，共同制定家庭數位使用規則。']
+                    }
+                },
+                chartLabels: ['元宇宙使用者 (億)', '網際網路使用者 (億)'],
+                chartDatasetLabel: '使用者數量（億）',
+                chartXAxisLabel: '使用者數量（億）'
+            },
+            en: {
+                pageTitle: 'The Dual Challenge of the Metaverse: An Interactive Report',
+                headerTitle: 'The Dual Future of the Metaverse',
+                navChallenges: 'Core Challenges',
+                navSolutions: 'Solutions Blueprint',
+                navConclusion: 'Conclusion',
+                heroTitle: 'Deepening Inequality or Fostering Inclusion?',
+                heroSubtitle: 'The rise of the metaverse presents a revolutionary vision, but also harbors significant risks of exacerbating the digital divide and creating new forms of internet addiction. This report aims to dissect these two challenges and propose a framework for its healthy development.',
+                heroButton: 'Explore Core Challenges',
+                challengesTitle: 'Core Challenges: Divide and Addiction',
+                challengesSubtitle: 'The metaverse presents unprecedented challenges on technological, psychological, and economic levels. Understanding these two core issues is the first step toward finding solutions.',
+                divideTitle: '1. The Deepening Digital Divide',
+                divideDesc: 'The metaverse not only continues but amplifies existing digital inequality across three levels: access, skills, and outcomes. This will systematically exclude vulnerable groups from future social and economic life.',
+                divideTabAccess: 'Access Divide',
+                divideTabSkills: 'Skills Divide',
+                divideTabOutcomes: 'Outcome Divide',
+                chartTitle: 'The Vast Access Gap',
+                addictionTitle: '2. The Risk of Immersive Addiction',
+                addictionDesc: 'Through the combination of "presence" and "embodiment," the metaverse can powerfully stimulate the brain\'s dopamine reward system, with an addictive potential that may far exceed existing social media and video games.',
+                addictionMechanismTitle: 'The Neuropsychological Mechanism of Addiction',
+                addictionMechStep1: 'Immersive Experience<br>(Presence + Embodiment)',
+                addictionMechStep2: 'Powerful Stimulation of Brain\'s<br>Dopamine Reward System',
+                addictionMechStep3: 'Formation of Compulsive<br>Behavioral Loop',
+                addictionFact: 'Preliminary studies show the addiction trend for VR games is higher than PC games by',
+                paradoxTitle: 'The Treatment Paradox: Both Problem and Solution',
+                paradoxDesc: 'Paradoxically, the VR technology that gives the metaverse its addictive potential is also a powerful tool for psychotherapy, widely used in exposure therapy for phobias, PTSD, and addiction treatment.',
+                paradoxRiskTitle: 'Risk',
+                paradoxRiskDesc: 'Maximizes user retention time, encourages impulsive behavior.',
+                paradoxPotentialTitle: 'Potential',
+                paradoxPotentialDesc: 'Conducts goal-oriented psychotherapy in a controlled environment.',
+                solutionsTitle: 'Solutions Blueprint: A Multi-Stakeholder Action Framework',
+                solutionsSubtitle: 'Addressing the challenges of the metaverse requires a concerted effort from governments, businesses, educational institutions, and individuals. Click on the stakeholders below to view their key responsibilities and action strategies.',
+                solutionBtnGov: '🏛️ Government & Regulators',
+                solutionBtnBiz: '🏢 Corporations & Developers',
+                solutionBtnEdu: '🎓 Educational Institutions',
+                solutionBtnInd: '👥 Individuals & Civil Society',
+                conclusionTitle: 'Conclusion: Learning from the Past to Build Guardrails for the Future',
+                conclusionP1: 'Looking back at the development of the internet, we know the cost of passive responses in the early stages of a tech wave. The default trajectory of the metaverse indeed risks exacerbating inequality and fostering new addictions, but the future is not set in stone.',
+                conclusionP2: 'The key is whether we can shift from being passive technology recipients to active social architects. Through the coordinated action of government, business, education, and civil society, we can guide the metaverse toward a fairer, healthier, and more inclusive future. Today\'s choices will determine whether the metaverse becomes a tool that divides society or a platform that promotes human prosperity.',
+                footerText: 'This interactive report is based on the research paper "The Dual Future of the Metaverse."',
+                divideData: {
+                    access: {
+                        title: 'Level 1: Access Divide',
+                        description: 'It is no longer just about being able to get online, but about affording the expensive hardware required to enter immersive worlds and the ultra-high-speed internet to support real-time interaction.',
+                        web2_title: 'Web 2.0 Era',
+                        meta_title: 'Metaverse Era',
+                        comparison: { web2: 'Own a smartphone; basic broadband internet.', metaverse: 'High-performance VR/AR headsets, haptic feedback suits; ultra-high-speed, low-latency 5G or fiber optic internet.' }
+                    },
+                    skills: {
+                        title: 'Level 2: Skills Divide',
+                        description: 'Evolves from basic computer operation to more complex "metaverse literacy," including 3D spatial navigation, virtual avatar expression, and digital asset management.',
+                        web2_title: 'Web 2.0 Era',
+                        meta_title: 'Metaverse Era',
+                        comparison: { web2: 'Digital literacy: use browsers, search engines, social media.', metaverse: 'Metaverse literacy: 3D spatial navigation, avatar creation, 3D content creation, NFT management, etc.' }
+                    },
+                    outcomes: {
+                        title: 'Level 3: Outcome Divide',
+                        description: 'The gap widens from being able to access information to being able to participate in the emerging virtual economy, receive immersive education and healthcare, and avoid exclusion from mainstream virtual social platforms.',
+                        web2_title: 'Web 2.0 Era',
+                        meta_title: 'Metaverse Era',
+                        comparison: { web2: 'Use the internet for government services, online job searching, remote learning.', metaverse: 'Participate in the virtual economy, receive immersive education and training, access advanced remote medical services.' }
+                    }
+                },
+                solutionData: {
+                    government: {
+                        title: '🏛️ Government & Regulators',
+                        divideTitle: 'Addressing the Digital Divide',
+                        addictionTitle: 'Addressing Internet Addiction',
+                        divide: ['Treat broadband as a public utility, investing in rural and low-income area network infrastructure.', 'Establish digital equity acts to provide subsidies for hardware and internet fees.', 'Update accessibility regulations to ensure platform usability for people with disabilities.'],
+                        addiction: ['Fund long-term tracking studies on metaverse addiction.', 'Develop binding ethical design guidelines.', 'Legislate to restrict or ban exploitative designs (e.g., loot boxes).']
+                    },
+                    business: {
+                        title: '🏢 Corporations & Developers',
+                        divideTitle: 'Addressing the Digital Divide',
+                        addictionTitle: 'Addressing Internet Addiction',
+                        divide: ['Make "Accessibility by Design" a core principle of product development.', 'Offer low-cost hardware options or cloud-based streaming solutions.', 'Support open interoperability standards to avoid creating "walled gardens."'],
+                        addiction: ['Implement "Humane Technology" principles, designing for finite use, not infinite engagement.', 'Provide clear warning labels and easy-to-use time/spending management tools.', 'Offer resources pointing high-risk users to professional help.']
+                    },
+                    education: {
+                        title: '🎓 Educational Institutions',
+                        divideTitle: 'Addressing the Digital Divide',
+                        addictionTitle: 'Addressing Internet Addiction',
+                        divide: ['Integrate "metaverse literacy" courses across all education levels.', 'Curriculum should cover technical operation, digital citizenship, virtual economics, and critical thinking.', 'Invest in teacher training programs to equip them with relevant teaching capabilities.'],
+                        addiction: ['Incorporate "Digital Wellbeing" into health education curricula.', 'Teach students to recognize signs of addiction and manage screen time.', 'Foster critical analysis of the design and business models of virtual environments.']
+                    },
+                    individual: {
+                        title: '👥 Individuals & Civil Society',
+                        divideTitle: 'Addressing the Digital Divide',
+                        addictionTitle: 'Addressing Internet Addiction',
+                        divide: ['Civil society organizations should continuously advocate for digital equity policies.', 'Promote community support programs like "Digital Navigators."', 'Users should unite to demand greater transparency and protection measures.'],
+                        addiction: ['Actively practice digital self-care, such as setting tech-free zones and monitoring usage time.', 'Prioritize sleep, exercise, and real-world social interactions.', 'Parents should have open conversations with children to jointly establish family digital use rules.']
+                    }
+                },
+                chartLabels: ['Metaverse Users (Billions)', 'Internet Users (Billions)'],
+                chartDatasetLabel: 'Number of Users (Billions)',
+                chartXAxisLabel: 'Number of Users (Billions)'
+            }
+        };
+
+        const langSwitcher = document.getElementById('lang-switcher');
+        
+        function updateAllText(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const elements = document.querySelectorAll('[data-lang]');
+            elements.forEach(el => {
+                const key = el.dataset.lang;
+                if (content[lang][key]) {
+                    el.innerHTML = content[lang][key];
+                }
+            });
+            langSwitcher.textContent = lang === 'zh' ? 'English' : '中文';
+        }
+
+        const divideTabs = document.querySelectorAll('.divide-tab');
+        const divideContentEl = document.getElementById('divide-content');
+
+        function updateDivideContent(key, lang) {
+            const data = content[lang].divideData[key];
+            divideContentEl.innerHTML = `
+                <h5 class="font-bold text-slate-800 mb-2">${data.title}</h5>
+                <p class="text-sm text-slate-600 mb-4">${data.description}</p>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-white p-2 rounded">
+                        <p class="font-semibold text-gray-500">${data.web2_title}</p>
+                        <p>${data.comparison.web2}</p>
+                    </div>
+                    <div class="bg-white p-2 rounded">
+                         <p class="font-semibold text-cyan-700">${data.meta_title}</p>
+                        <p>${data.comparison.metaverse}</p>
+                    </div>
+                </div>
+            `;
+            divideTabs.forEach(t => {
+                t.classList.toggle('active-tab', t.dataset.divide === key);
+                t.classList.toggle('text-slate-500', t.dataset.divide !== key);
+            });
+        }
+
+        const solutionBtns = document.querySelectorAll('.solution-btn');
+        const solutionContentEl = document.getElementById('solution-content');
+
+        function updateSolutionContent(key, lang) {
+            const data = content[lang].solutionData[key];
+            solutionContentEl.innerHTML = `
+                <h4 class="text-2xl font-bold mb-6 text-center">${data.title}</h4>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h5 class="font-bold text-cyan-700 mb-2 border-b-2 border-cyan-200 pb-1">${data.divideTitle}</h5>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            ${data.divide.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-amber-700 mb-2 border-b-2 border-amber-200 pb-1">${data.addictionTitle}</h5>
+                        <ul class="list-disc list-inside space-y-2 text-slate-600 text-sm">
+                            ${data.addiction.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            solutionBtns.forEach(b => {
+                b.classList.toggle('active', b.dataset.stakeholder === key);
+            });
+        }
+
+        function createChart(lang) {
+            if (userGapChart) {
+                userGapChart.destroy();
+            }
+            const ctx = document.getElementById('userGapChart').getContext('2d');
+            userGapChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: content[lang].chartLabels,
+                    datasets: [{
+                        label: content[lang].chartDatasetLabel,
+                        data: [0.171, 5.2], // Data in billions
+                        backgroundColor: ['rgba(251, 146, 60, 0.6)', 'rgba(22, 163, 74, 0.6)'],
+                        borderColor: ['rgba(251, 146, 60, 1)', 'rgba(22, 163, 74, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw * 100} 百萬`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: content[lang].chartXAxisLabel }
+                        }
+                    }
+                }
+            });
+             // Quick fix for data display: 1.71 -> 0.171, 52 -> 5.2 to represent billions properly
+            userGapChart.data.datasets[0].data = [0.171, 5.2];
+            userGapChart.options.plugins.tooltip.callbacks.label = function(context) {
+                 return `${context.dataset.label}: ${context.raw} 億`;
+            };
+            if (lang === 'en') {
+                 userGapChart.options.plugins.tooltip.callbacks.label = function(context) {
+                     return `${context.dataset.label}: ${context.raw} billion`;
+                 };
+            }
+            userGapChart.update();
+        }
+        
+        function updateUI(lang) {
+            updateAllText(lang);
+            const activeDivideTab = document.querySelector('.divide-tab.active-tab')?.dataset.divide || 'access';
+            updateDivideContent(activeDivideTab, lang);
+            const activeSolutionBtn = document.querySelector('.solution-btn.active')?.dataset.stakeholder || 'government';
+            updateSolutionContent(activeSolutionBtn, lang);
+            createChart(lang);
+        }
+
+        langSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateUI(currentLang);
+        });
+        
+        divideTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                updateDivideContent(tab.dataset.divide, currentLang);
+            });
+        });
+
+        solutionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                updateSolutionContent(btn.dataset.stakeholder, currentLang);
+            });
+        });
+
+        updateUI(currentLang);
+
+    });
+    </script>
+</body>
+</html>
