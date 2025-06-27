@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可解釋性AI (XAI) 與倫理設計資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 45vh;
+        }
+        .flowchart-arrow {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #0077C0;
+        }
+        .pyramid-level {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="relative text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-[#005082] mb-2" data-lang-key="mainTitle"></h1>
+            <p class="text-lg md:text-xl text-[#0077C0] max-w-4xl mx-auto" data-lang-key="subTitle"></p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-[#0077C0] text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-[#005082] transition-colors">EN</button>
+        </header>
+
+        <main class="space-y-12">
+            
+            <section id="intro" class="text-center">
+                 <div class="bg-white rounded-lg shadow-xl p-8 max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold text-[#005082] mb-4" data-lang-key="introTitle"></h2>
+                    <p class="text-lg text-gray-600 mb-6" data-lang-key="introParagraph"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="performanceVsTransparencyChart"></canvas>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="text-xl font-bold text-[#0077C0] mb-3" data-lang-key="tradeoffTitle"></h3>
+                            <p class="text-gray-600" data-lang-key="tradeoffParagraph"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="what-is-xai">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-[#005082] mb-8" data-lang-key="whatIsXaiTitle"></h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-blue-50 border-l-4 border-[#00A1E4] p-6 rounded-lg">
+                            <h3 class="text-2xl font-bold text-[#0077C0] mb-2" data-lang-key="interpretabilityTitle"></h3>
+                            <p class="font-bold mb-2" data-lang-key="interpretabilitySubtitle"></p>
+                            <p class="text-gray-700" data-lang-key="interpretabilityParagraph"></p>
+                        </div>
+                        <div class="bg-blue-50 border-l-4 border-[#0077C0] p-6 rounded-lg">
+                            <h3 class="text-2xl font-bold text-[#0077C0] mb-2" data-lang-key="explainabilityTitle"></h3>
+                            <p class="font-bold mb-2" data-lang-key="explainabilitySubtitle"></p>
+                            <p class="text-gray-700" data-lang-key="explainabilityParagraph"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="techniques">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-[#005082] mb-4" data-lang-key="techniquesTitle"></h2>
+                    <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto" data-lang-key="techniquesParagraph"></p>
+                    <div class="chart-container h-96 md:h-[50vh]">
+                        <canvas id="xaiTechniquesChart"></canvas>
+                    </div>
+                     <p class="text-center text-gray-500 mt-4 text-sm" data-lang-key="techniquesCaption"></p>
+                </div>
+            </section>
+
+            <section id="fat-framework">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-[#005082] mb-8" data-lang-key="fatTitle"></h2>
+                    <div class="flex flex-col items-center space-y-8">
+                        <div class="bg-[#0077C0] text-white rounded-full w-32 h-32 flex items-center justify-center text-3xl font-bold shadow-lg">XAI</div>
+                        <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+                            <div class="bg-gray-100 p-6 rounded-lg shadow-md text-center">
+                                <h3 class="text-2xl font-bold text-[#005082] mb-2" data-lang-key="fatF"></h3>
+                                <p class="text-gray-700" data-lang-key="fatFPara"></p>
+                            </div>
+                            <div class="bg-gray-100 p-6 rounded-lg shadow-md text-center">
+                                <h3 class="text-2xl font-bold text-[#005082] mb-2" data-lang-key="fatA"></h3>
+                                <p class="text-gray-700" data-lang-key="fatAPara"></p>
+                            </div>
+                            <div class="bg-gray-100 p-6 rounded-lg shadow-md text-center">
+                                <h3 class="text-2xl font-bold text-[#005082] mb-2" data-lang-key="fatT"></h3>
+                                <p class="text-gray-700" data-lang-key="fatTPara"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="governance">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-[#005082] mb-8" data-lang-key="governanceTitle"></h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                        <div>
+                            <h3 class="text-2xl font-bold text-center text-[#0077C0] mb-6" data-lang-key="nistTitle"></h3>
+                            <div class="flex flex-col items-center space-y-2">
+                                <div class="bg-[#005082] text-white rounded-lg shadow-md p-4 w-full max-w-md text-center"><strong data-lang-key="nist1Title"></strong><br><span class="text-sm" data-lang-key="nist1Desc"></span></div>
+                                <div class="flowchart-arrow">↓</div>
+                                <div class="bg-[#0077C0] text-white rounded-lg shadow-md p-4 w-full max-w-md text-center"><strong data-lang-key="nist2Title"></strong><br><span class="text-sm" data-lang-key="nist2Desc"></span></div>
+                                <div class="flowchart-arrow">↓</div>
+                                <div class="bg-[#00A1E4] text-white rounded-lg shadow-md p-4 w-full max-w-md text-center"><strong data-lang-key="nist3Title"></strong><br><span class="text-sm" data-lang-key="nist3Desc"></span></div>
+                                <div class="flowchart-arrow">↓</div>
+                                <div class="bg-[#333333] text-white rounded-lg shadow-md p-4 w-full max-w-md text-center"><strong data-lang-key="nist4Title"></strong><br><span class="text-sm" data-lang-key="nist4Desc"></span></div>
+                            </div>
+                             <p class="text-center text-gray-600 mt-4 text-sm" data-lang-key="nistCaption"></p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-center text-[#0077C0] mb-6" data-lang-key="euTitle"></h3>
+                             <div class="flex flex-col items-center space-y-1">
+                                <div class="pyramid-level w-2/5" style="background-color: #be123c;" data-lang-key="euRisk1"></div>
+                                <div class="pyramid-level w-3/5" style="background-color: #f97316;" data-lang-key="euRisk2"></div>
+                                <div class="pyramid-level w-4/5" style="background-color: #eab308;" data-lang-key="euRisk3"></div>
+                                <div class="pyramid-level w-full" style="background-color: #22c55e;" data-lang-key="euRisk4"></div>
+                            </div>
+                            <p class="text-center text-gray-600 mt-4 text-sm" data-lang-key="euCaption"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+             <section id="applications">
+                <div class="bg-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-[#005082] mb-8" data-lang-key="appsTitle"></h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="border rounded-lg p-6">
+                            <h3 class="text-2xl font-bold text-[#0077C0] mb-4" data-lang-key="appFinanceTitle"></h3>
+                            <p class="text-gray-600 mb-6" data-lang-key="appFinancePara"></p>
+                            <div class="flex justify-around text-center">
+                                <div>
+                                    <p class="text-4xl font-black text-[#00A1E4]">-25%</p>
+                                    <p class="text-gray-600" data-lang-key="appFinanceStat1"></p>
+                                </div>
+                                <div>
+                                    <p class="text-4xl font-black text-[#00A1E4]">+30%</p>
+                                    <p class="text-gray-600" data-lang-key="appFinanceStat2"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-6">
+                             <h3 class="text-2xl font-bold text-[#0077C0] mb-4" data-lang-key="appHealthTitle"></h3>
+                             <p class="text-gray-600 mb-6" data-lang-key="appHealthPara"></p>
+                            <div class="bg-gray-200 rounded-lg p-4 h-32 flex items-center justify-center">
+                                <p class="text-gray-500" data-lang-key="appHealthPlaceholder"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <section id="challenges">
+                <div class="bg-red-50 border-l-4 border-red-500 rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center text-red-800 mb-6" data-lang-key="challengesTitle"></h2>
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div class="text-center">
+                            <p class="text-8xl md:text-9xl font-black text-red-600">0.7%</p>
+                            <p class="text-xl font-bold text-red-700 mt-2" data-lang-key="challengeStatTitle"></p>
+                            <p class="text-gray-600 mt-2" data-lang-key="challengeStatPara"></p>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-red-700 mb-3" data-lang-key="paradoxTitle"></h3>
+                            <p class="text-gray-700 mb-4" data-lang-key="paradoxPara1"></p>
+                            <p class="text-gray-700 font-bold" data-lang-key="paradoxPara2"></p>
+                             <div class="mt-6">
+                                <h4 class="font-bold text-lg text-red-700" data-lang-key="futureTitle"></h4>
+                                <ul class="list-disc list-inside text-gray-700 space-y-1 mt-2">
+                                    <li data-lang-key="future1"></li>
+                                    <li data-lang-key="future2"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 py-8 border-t border-gray-300">
+            <p class="text-gray-600" data-lang-key="footer1"></p>
+            <p class="text-sm text-gray-500 mt-2" data-lang-key="footer2"></p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const translations = {
+        zh: {
+            mainTitle: "從黑箱到玻璃箱",
+            subTitle: "探索可解釋性人工智慧 (XAI) 如何融合倫理設計，打造更值得信賴的未來",
+            introTitle: "AI的透明度危機",
+            introParagraph: "許多最先進的AI系統，如同「黑箱」，其決策過程極其複雜，難以理解。當AI應用於金融、醫療等高風險領域時，這種不透明性嚴重侵蝕了信任、問責與安全。",
+            tradeoffTitle: "性能與透明度的權衡",
+            tradeoffParagraph: "傳統上，模型的性能與其透明度成反比。性能最強大的深度神經網路往往最不透明，而結構簡單的線性模型則易於理解但性能受限。XAI的目標正是要打破這種權衡。",
+            whatIsXaiTitle: "解鎖黑箱：XAI 的兩大路徑",
+            interpretabilityTitle: "可詮釋性 (Interpretability)",
+            interpretabilitySubtitle: "“白箱”模型",
+            interpretabilityParagraph: "指模型本身結構透明，人類能從本質上理解其 **如何** 運作。例如決策樹或線性迴歸。目標是「依設計詮釋」，從一開始就避免黑箱。",
+            explainabilityTitle: "可解釋性 (Explainability)",
+            explainabilitySubtitle: "事後解釋 (Post-hoc)",
+            explainabilityParagraph: "指為已存在的黑箱模型提供事後解釋，說明其 **為何** 做出特定預測，即使內部機制不透明。LIME和SHAP是典型工具。",
+            techniquesTitle: "XAI 技術工具箱",
+            techniquesParagraph: "不同的XAI技術各有千秋，適用於不同的模型和解釋需求。了解它們的優劣是成功實施XAI的第一步。",
+            techniquesCaption: "上圖比較了三種主流事後解釋技術的特性。LIME易於理解但可能不穩定；SHAP理論基礎堅實但計算成本高；Grad-CAM則專精於為電腦視覺模型提供視覺化解釋。",
+            fatTitle: "倫理的交匯點：XAI 作為 FAT 原則的實踐橋樑",
+            fatF: "公平 (F)",
+            fatFPara: "利用XAI審計模型，偵測並緩解對特定群體的偏見，確保決策的公正性。",
+            fatA: "問責 (A)",
+            fatAPara: "當AI出錯時，XAI提供可追溯的決策路徑，幫助劃定責任歸屬，避免「責任擴散」。",
+            fatT: "透明 (T)",
+            fatTPara: "XAI打開AI「黑箱」，讓使用者、開發者和監管者都能理解其決策邏輯，建立信任。",
+            governanceTitle: "從原則到實踐：治理框架與法規",
+            nistTitle: "NIST AI 風險管理框架 (AI RMF)",
+            nist1Title: "1. 治理 (Govern)",
+            nist1Desc: "建立風險管理文化與問責機制",
+            nist2Title: "2. 映射 (Map)",
+            nist2Desc: "在具體情境中識別風險",
+            nist3Title: "3. 測量 (Measure)",
+            nist3Desc: "分析、評估和追蹤風險",
+            nist4Title: "4. 管理 (Manage)",
+            nist4Desc: "對風險進行優先排序和處理",
+            nistCaption: "一個動態的、貫穿AI生命週期的風險管理流程，旨在幫助組織系統性地應對AI風險。",
+            euTitle: "歐盟 AI 法案風險金字塔",
+            euRisk1: "不可接受風險<br>(禁止)",
+            euRisk2: "高風險<br>(嚴格監管, 需XAI)",
+            euRisk3: "有限風險<br>(透明度義務)",
+            euRisk4: "最小風險<br>(無額外義務)",
+            euCaption: "全球首個全面性的AI法律框架，對高風險AI系統的透明度和可解釋性提出了強制性法律要求。",
+            appsTitle: "XAI 在行動：高風險領域的應用",
+            appFinanceTitle: "金融：信用評分",
+            appFinancePara: "在信貸審批中，XAI為每個決策生成「理由碼」，不僅滿足了《公平信用機會法》等法規要求，也增強了客戶信任。Equifax的NeuroDecision™技術就是一個成功案例。",
+            appFinanceStat1: "違約預測錯誤率",
+            appFinanceStat2: "客戶滿意度",
+            appHealthTitle: "醫療：醫學影像診斷",
+            appHealthPara: "在放射學中，Grad-CAM等視覺化工具生成「熱力圖」，標示出AI模型診斷疾病時所關注的影像區域，幫助醫生驗證AI的發現，建立「人在迴路」的協同決策模式。",
+            appHealthPlaceholder: "[此處為Grad-CAM熱力圖的示意圖]",
+            challengesTitle: "未來的挑戰：解釋的極限與風險",
+            challengeStatTitle: "的人類使用者研究",
+            challengeStatPara: "在一項對超過18,000篇XAI論文的回顧中，僅有0.7%包含了真實的人類使用者研究。這意味著絕大多數「可解釋」工具的有效性從未得到實際驗證。",
+            paradoxTitle: "「可解釋性悖論」",
+            paradoxPara1: "一個看似合理但錯誤的解釋，可能誤導使用者過度信賴一個壞的AI系統。反之，一個品質低劣的解釋，也可能讓使用者拒絕一個好的AI建議。",
+            paradoxPara2: "一個壞的解釋，可能比沒有解釋更危險。",
+            futureTitle: "未來方向：",
+            future1: "<strong>以人為本的XAI (HCXAI)</strong>：將焦點從模型轉向使用者，關注解釋的可用性與有效性。",
+            future2: "<strong>本質可詮釋的神經網路</strong>：開發本身結構就透明的高性能模型，徹底消除黑箱。",
+            footer1: "本資訊圖表內容基於《從黑箱到玻璃箱：可解釋性人工智慧與倫理設計的融合》報告。",
+            footer2: "© 2025 XAI倫理研究倡議",
+            chart1_xaxis: "透明度 (高 -> 低)",
+            chart1_yaxis: "模型性能 (低 -> 高)",
+            chart1_model1: "線性迴歸",
+            chart1_model2: "決策樹",
+            chart1_model3: "梯度提升機",
+            chart1_model4: "深度神經網路",
+            chart2_title: "XAI 事後解釋技術比較 (評分 1-10)",
+            chart2_label1: "模型適用性 (廣 -> 專)",
+            chart2_label2: "解釋範疇 (全域 -> 局部)",
+            chart2_label3: "計算成本 (低 -> 高)",
+        },
+        en: {
+            mainTitle: "From Black Box to Glass Box",
+            subTitle: "Exploring how Explainable AI (XAI) merges with ethical design to build a more trustworthy future",
+            introTitle: "The Transparency Crisis in AI",
+            introParagraph: "Many state-of-the-art AI systems operate as 'black boxes,' with decision-making processes so complex they are difficult to understand. When applied in high-stakes domains like finance and healthcare, this opacity severely erodes trust, accountability, and safety.",
+            tradeoffTitle: "The Performance vs. Transparency Trade-off",
+            tradeoffParagraph: "Traditionally, a model's performance is inversely related to its transparency. The most powerful deep neural networks are often the least transparent, while simpler models are easy to understand but have limited performance. XAI aims to break this trade-off.",
+            whatIsXaiTitle: "Unlocking the Black Box: Two Paths of XAI",
+            interpretabilityTitle: "Interpretability",
+            interpretabilitySubtitle: "'White-box' Models",
+            interpretabilityParagraph: "Refers to a model whose internal structure is transparent, allowing humans to intrinsically understand **how** it works. Examples include decision trees or linear regression. The goal is 'interpretable by design,' avoiding the black box from the start.",
+            explainabilityTitle: "Explainability",
+            explainabilitySubtitle: "Post-hoc Explanations",
+            explainabilityParagraph: "Refers to providing post-hoc explanations for an existing black box model, explaining **why** it made a specific prediction, even if its internal mechanisms remain opaque. LIME and SHAP are typical tools.",
+            techniquesTitle: "The XAI Tech Toolbox",
+            techniquesParagraph: "Different XAI techniques have their own strengths and weaknesses, suitable for various models and explanation needs. Understanding them is the first step to successful XAI implementation.",
+            techniquesCaption: "The chart above compares the characteristics of three major post-hoc explanation techniques. LIME is intuitive but can be unstable; SHAP is theoretically sound but computationally expensive; Grad-CAM specializes in providing visual explanations for computer vision models.",
+            fatTitle: "The Ethical Intersection: XAI as a Bridge for FAT Principles",
+            fatF: "Fairness (F)",
+            fatFPara: "Use XAI to audit models, detecting and mitigating biases against specific groups to ensure decisional justice.",
+            fatA: "Accountability (A)",
+            fatAPara: "When AI errs, XAI provides a traceable decision path, helping to assign responsibility and avoid 'accountability diffusion.'",
+            fatT: "Transparency (T)",
+            fatTPara: "XAI opens the AI 'black box,' allowing users, developers, and regulators to understand its decision logic, thereby building trust.",
+            governanceTitle: "From Principles to Practice: Governance Frameworks & Regulations",
+            nistTitle: "NIST AI Risk Management Framework (AI RMF)",
+            nist1Title: "1. Govern",
+            nist1Desc: "Establish a risk management culture and accountability mechanisms.",
+            nist2Title: "2. Map",
+            nist2Desc: "Identify risks within a specific context.",
+            nist3Title: "3. Measure",
+            nist3Desc: "Analyze, assess, and track risks.",
+            nist4Title: "4. Manage",
+            nist4Desc: "Prioritize and address risks.",
+            nistCaption: "A dynamic, lifecycle-based risk management process designed to help organizations systematically address AI risks.",
+            euTitle: "EU AI Act Risk Pyramid",
+            euRisk1: "Unacceptable Risk<br>(Banned)",
+            euRisk2: "High-Risk<br>(Strict regulation, XAI required)",
+            euRisk3: "Limited Risk<br>(Transparency obligations)",
+            euRisk4: "Minimal Risk<br>(No extra obligations)",
+            euCaption: "The world's first comprehensive legal framework for AI, imposing mandatory transparency and explainability requirements on high-risk AI systems.",
+            appsTitle: "XAI in Action: Applications in High-Stakes Domains",
+            appFinanceTitle: "Finance: Credit Scoring",
+            appFinancePara: "In credit approval, XAI generates 'reason codes' for each decision, satisfying regulations like the Equal Credit Opportunity Act and enhancing customer trust. Equifax's NeuroDecision™ is a prime example.",
+            appFinanceStat1: "Default Prediction Errors",
+            appFinanceStat2: "Customer Satisfaction",
+            appHealthTitle: "Healthcare: Medical Imaging Diagnosis",
+            appHealthPara: "In radiology, visualization tools like Grad-CAM generate 'heatmaps' showing where the AI model is looking, helping doctors validate AI findings and creating a 'human-in-the-loop' collaborative model.",
+            appHealthPlaceholder: "[Illustrative placeholder for a Grad-CAM heatmap]",
+            challengesTitle: "Future Challenges: The Limits and Risks of Explanation",
+            challengeStatTitle: "Human User Studies",
+            challengeStatPara: "In a review of over 18,000 XAI papers, only 0.7% included actual human user studies. This means the effectiveness of most 'explainable' tools has never been empirically validated.",
+            paradoxTitle: "The 'Explainability Paradox'",
+            paradoxPara1: "A plausible but incorrect explanation might mislead a user into over-trusting a bad AI system. Conversely, a poor-quality explanation might cause a user to reject a good AI recommendation.",
+            paradoxPara2: "A bad explanation can be more dangerous than no explanation at all.",
+            futureTitle: "Future Directions:",
+            future1: "<strong>Human-Centered XAI (HCXAI)</strong>: Shift focus from the model to the user, concentrating on the usability and effectiveness of explanations.",
+            future2: "<strong>Intrinsically Interpretable Neural Networks</strong>: Develop high-performance models that are transparent by design, eliminating the black box entirely.",
+            footer1: "This infographic is based on the report 'From Black Box to Glass Box: Integrating Explainable AI with Ethical Design.'",
+            footer2: "© 2025 XAI Ethics Initiative",
+            chart1_xaxis: "Transparency (High -> Low)",
+            chart1_yaxis: "Model Performance (Low -> High)",
+            chart1_model1: "Linear Regression",
+            chart1_model2: "Decision Tree",
+            chart1_model3: "Gradient Boosting",
+            chart1_model4: "Deep Neural Network",
+            chart2_title: "XAI Post-hoc Technique Comparison (Rating 1-10)",
+            chart2_label1: "Model Applicability (Broad -> Specific)",
+            chart2_label2: "Explanation Scope (Global -> Local)",
+            chart2_label3: "Computational Cost (Low -> High)",
+        }
+    };
+    
+    let currentLang = 'zh';
+    let charts = {};
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        if (Array.isArray(label)) {
+            return label.join(' ');
+        } else {
+            return label;
+        }
+    };
+    
+    const brilliantBlues = {
+        primary: '#00A1E4',
+        secondary: '#0077C0',
+        tertiary: '#005082',
+        accent: '#F2F2F2',
+        dark: '#333333'
+    };
+
+    function renderCharts(lang) {
+        if (charts.performanceVsTransparency) charts.performanceVsTransparency.destroy();
+        const performanceVsTransparencyCtx = document.getElementById('performanceVsTransparencyChart').getContext('2d');
+        charts.performanceVsTransparency = new Chart(performanceVsTransparencyCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: translations[lang].chart1_model1, data: [{x: 8, y: 3}], backgroundColor: brilliantBlues.primary, pointRadius: 10, pointHoverRadius: 12,
+                }, {
+                    label: translations[lang].chart1_model2, data: [{x: 7, y: 5}], backgroundColor: brilliantBlues.primary, pointRadius: 10, pointHoverRadius: 12,
+                }, {
+                    label: translations[lang].chart1_model3, data: [{x: 3, y: 8}], backgroundColor: brilliantBlues.secondary, pointRadius: 10, pointHoverRadius: 12,
+                }, {
+                    label: translations[lang].chart1_model4, data: [{x: 2, y: 9}], backgroundColor: brilliantBlues.tertiary, pointRadius: 10, pointHoverRadius: 12,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: translations[lang].chart1_xaxis, font: { size: 14 }}, min: 0, max: 10 },
+                    y: { title: { display: true, text: translations[lang].chart1_yaxis, font: { size: 14 }}, min: 0, max: 10 }
+                },
+                plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => c.dataset.label }}}
+            }
+        });
+
+        if (charts.xaiTechniques) charts.xaiTechniques.destroy();
+        const xaiTechniquesCtx = document.getElementById('xaiTechniquesChart').getContext('2d');
+        charts.xaiTechniques = new Chart(xaiTechniquesCtx, {
+            type: 'bar',
+            data: {
+                labels: [translations[lang].chart2_label1, translations[lang].chart2_label2, translations[lang].chart2_label3],
+                datasets: [
+                    { label: 'LIME', data: [9, 3, 3], backgroundColor: brilliantBlues.primary },
+                    { label: 'SHAP', data: [7, 8, 8], backgroundColor: brilliantBlues.secondary },
+                    { label: 'Grad-CAM', data: [2, 2, 4], backgroundColor: brilliantBlues.tertiary }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                scales: { x: { beginAtZero: true, max: 10, ticks: { display: false }}, y: { ticks: { font: { size: 14 }}} },
+                plugins: {
+                    title: { display: true, text: translations[lang].chart2_title, font: { size: 16 }, padding: { bottom: 20 }},
+                    legend: { position: 'top' },
+                    tooltip: { callbacks: { title: tooltipTitleCallback }}
+                }
+            }
+        });
+    }
+
+    function switchLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        const switcher = document.getElementById('lang-switcher');
+        switcher.textContent = lang === 'zh' ? 'EN' : '中';
+
+        renderCharts(lang);
+    }
+
+    document.getElementById('lang-switcher').addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        switchLanguage(newLang);
+    });
+
+    switchLanguage('zh'); // Initial load in Chinese
+});
+</script>
+
+</body>
+</html>
