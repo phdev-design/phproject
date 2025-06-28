@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：迎向健康長壽的未來</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Deep Ocean Dark Mode -->
+    <!-- Application Structure Plan: The application is structured as a single-page dashboard with a fixed top navigation bar allowing users to jump between three core thematic sections: '立即應對' (AgeTech), '根本治療' (Geroscience), and '未來展望' (Longevity Society). This non-linear, thematic structure was chosen over the report's original linear format to enhance user exploration and engagement. Users can immediately access the area most relevant to them. 'AgeTech' uses an interactive card grid to present technologies. 'Geroscience' features an interactive diagram for the 'Hallmarks of Aging' and a dynamic chart for therapies. 'Longevity Society' uses counters and expandable cards for economic and ethical topics. This design prioritizes usability by breaking down dense information into digestible, interactive chunks. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Global aging stats & Caregiver ratio. -> Goal: Inform. -> Viz: Dynamic stat counters. -> Interaction: Animate on scroll. -> Justification: Quickly conveys the scale of the problem. -> Library: Vanilla JS.
+        - Report Info: AgeTech categories (Table 1). -> Goal: Organize/Compare. -> Viz: Interactive card grid. -> Interaction: Click to expand for details. -> Justification: Allows users to explore different technologies without being overwhelmed. -> Library: Vanilla JS + Tailwind.
+        - Report Info: Hallmarks of Aging. -> Goal: Organize/Inform. -> Viz: HTML/CSS grid diagram. -> Interaction: Hover/Click to reveal description. -> Justification: Transforms a list into an engaging, explorable visual framework. -> Library: Vanilla JS + Tailwind.
+        - Report Info: Anti-aging therapies (Table 2). -> Goal: Compare. -> Viz: Bar Chart. -> Interaction: Filter by category (Senolytics, Metabolic, etc.). -> Justification: Provides a clear comparison of therapy types and their development status. -> Library: Chart.js.
+        - Report Info: China anti-aging market projection. -> Goal: Show Change. -> Viz: Line Chart. -> Justification: Clearly visualizes the economic trend over time. -> Library: Chart.js.
+        - Report Info: Ethical dilemmas. -> Goal: Compare perspectives. -> Viz: Expandable content cards. -> Interaction: Click to reveal different facets of the debate. -> Justification: Presents complex ethical arguments in a structured, easy-to-digest format. -> Library: Vanilla JS + Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #121826;
+            color: #E5E7EB;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #5EEAD4;
+            border-bottom-color: #5EEAD4;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(94, 234, 212, 0.1), 0 4px 6px -2px rgba(94, 234, 212, 0.05);
+        }
+        .hallmark-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .hallmark-card:hover, .hallmark-card.active {
+            background-color: #374151;
+            transform: scale(1.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-gray-900/80 backdrop-blur-md shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-white" data-translate="header_title">健康長壽的未來</h1>
+            <div class="flex items-center">
+                <div class="hidden md:flex space-x-8 text-gray-300">
+                    <a href="#home" class="nav-link pb-1 active" data-translate="nav_home">導言</a>
+                    <a href="#agetech" class="nav-link pb-1" data-translate="nav_agetech">立即應對：銀髮科技</a>
+                    <a href="#geroscience" class="nav-link pb-1" data-translate="nav_geroscience">根本治療：老年科學</a>
+                    <a href="#society" class="nav-link pb-1" data-translate="nav_society">未來展望：長壽社會</a>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-[#5EEAD4] focus:border-[#5EEAD4] block w-full p-2.5">
+                        <option value="home" data-translate="nav_home">導言</option>
+                        <option value="agetech" data-translate="nav_agetech">銀髮科技</option>
+                        <option value="geroscience" data-translate="nav_geroscience">老年科學</option>
+                        <option value="society" data-translate="nav_society">未來展望：長壽社會</option>
+                    </select>
+                </div>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 bg-gray-700 text-white rounded-md text-sm font-semibold hover:bg-gray-600 transition">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="home" class="content-section active fade-in text-center">
+            <h2 class="text-3xl md:text-5xl font-bold text-[#5EEAD4] mb-4" data-translate="home_title">迎向百歲時代</h2>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-400 mb-8" data-translate="home_subtitle">科技賦能與生物革新，正共同驅動一場前所未有的健康長壽革命。這不僅是挑戰，更是催化深刻創新的強大動力。</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto text-left">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold mb-2 text-white" data-translate="home_wave_title">全球高齡化浪潮</h3>
+                    <p class="text-gray-400 mb-4" data-translate="home_wave_desc">世界正以前所未有的速度邁向超高齡社會，傳統的照護模式與社會體系面臨巨大挑戰。</p>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <p class="text-3xl font-bold text-[#5EEAD4]" id="population-stat">0%</p>
+                            <p class="text-sm text-gray-500" data-translate="home_stat1_label">2050年全球60歲以上人口佔比</p>
+                        </div>
+                        <div>
+                            <p class="text-3xl font-bold text-[#5EEAD4]" id="caregiver-stat">0:1</p>
+                            <p class="text-sm text-gray-500" data-translate="home_stat2_label">2030年照護者與80歲長者比例</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-md">
+                    <h3 class="text-2xl font-bold mb-2 text-white" data-translate="home_solution_title">雙軌並行的解方</h3>
+                    <p class="text-gray-400 mb-4" data-translate="home_solution_desc">應對此挑戰的最有效路徑，在於兩大領域的交匯點：應用科技改善當下，並透過科學研究延緩衰老根源。</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <span class="text-xl text-[#5EEAD4] mr-3">🚀</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-200" data-translate="home_agetech_title">銀髮科技 (AgeTech)</h4>
+                                <p class="text-sm text-gray-500" data-translate="home_agetech_desc">提升生活品質、安全與獨立自主。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-xl text-[#5EEAD4] mr-3">🔬</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-200" data-translate="home_gero_title">老年科學 (Geroscience)</h4>
+                                <p class="text-sm text-gray-500" data-translate="home_gero_desc">干預衰老根源，延長健康餘命。</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+             <p class="mt-8 text-gray-500 max-w-3xl mx-auto" data-translate="home_footer">本互動報告將帶您深入探索這兩大前沿領域的發展，剖析其對個人、社會及經濟的深遠影響。請點擊上方導覽以開始您的探索之旅。</p>
+        </section>
+
+        <section id="agetech" class="content-section fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#5EEAD4] mb-2" data-translate="agetech_title">立即應對：銀髮科技革命</h2>
+                <p class="text-lg max-w-3xl mx-auto text-gray-400" data-translate="agetech_subtitle">本節將探討創新科技如何重塑高齡者的日常生活。從改造居家環境到遠距健康管理，銀髮科技正為「在地安養」的願景提供堅實的技術支撐。點擊下方卡片以了解更多細節。</p>
+            </div>
+
+            <div id="agetech-cards-container" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <section id="geroscience" class="content-section fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#5EEAD4] mb-2" data-translate="gero_title">根本治療：老年科學前沿</h2>
+                <p class="text-lg max-w-3xl mx-auto text-gray-400" data-translate="gero_subtitle">本節將深入衰老的生物學根源，揭示科學家如何解構衰老機制，並開發旨在延長「健康餘命」的劃時代療法。我們不再僅是管理衰老的後果，而是直接干預過程本身。</p>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-center mb-4 text-white" data-translate="gero_hallmarks_title">衰老的九大生物學標誌</h3>
+                <p class="text-center text-gray-400 mb-6" data-translate="gero_hallmarks_desc">衰老是多種分子與細胞損傷累積的結果。理解這些相互關聯的標誌，是開發抗衰老療法的路線圖。點擊或將滑鼠移至任一標誌上查看說明。</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div id="hallmarks-grid" class="col-span-2 md:col-span-2 grid grid-cols-3 gap-2">
+                    </div>
+                    <div id="hallmark-details" class="bg-gray-700 p-4 rounded-lg flex items-center justify-center">
+                        <p class="text-gray-400 text-center" data-translate="gero_hallmarks_placeholder">請選擇一個標誌查看詳情</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-center mb-2 text-white" data-translate="gero_therapies_title">新興抗衰老療法一覽</h3>
+                <p class="text-center text-gray-400 mb-4" data-translate="gero_therapies_desc">基於對衰老標誌的理解，科學界正開發多種靶向療法。下圖展示了部分主要候選療法的潛在益處與風險評分（1-5分，分數越高代表潛力/風險越大）。</p>
+                <div class="flex justify-center mb-4">
+                    <select id="therapy-filter" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-[#5EEAD4] focus:border-[#5EEAD4] p-2.5">
+                        <option value="all" data-translate="filter_all">所有類別</option>
+                        <option value="Senolytics" data-translate="filter_senolytics">衰老細胞裂解</option>
+                        <option value="Metabolic" data-translate="filter_metabolic">代謝干預</option>
+                        <option value="Regenerative" data-translate="filter_regenerative">再生醫學</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="therapiesChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="society" class="content-section fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#5EEAD4] mb-2" data-translate="society_title">未來展望：長壽社會的機遇與挑戰</h2>
+                <p class="text-lg max-w-3xl mx-auto text-gray-400" data-translate="society_subtitle">一個更長壽、更健康的時代，將對全球經濟、社會結構及倫理價值觀帶來全面衝擊。本節將探討我們需要共同面對的宏觀議題。</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white" data-translate="society_economy_title">銀髮經濟的崛起</h3>
+                     <p class="text-center text-gray-400 mb-4" data-translate="society_economy_desc">高齡化催生了龐大的新興市場，同時也將顛覆我們對工作、退休與教育的傳統認知。</p>
+                    <div class="chart-container h-80 max-h-[40vh]">
+                        <canvas id="economyChart"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-sm text-gray-500" data-translate="society_economy_chart_label">中國抗衰老產業市場規模預測（單位：萬億人民幣）</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl shadow-lg flex flex-col justify-center">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-white" data-translate="society_pressure_title">系統性壓力</h3>
+                     <p class="text-center text-gray-400 mb-6" data-translate="society_pressure_desc">長壽社會對現有公共服務體系造成巨大壓力，若不改革可能引發嚴重的社會問題。</p>
+                     <div class="space-y-4">
+                        <div class="flex items-start">
+                            <span class="text-2xl text-red-400 mr-4">⚠️</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-200" data-translate="society_pressure1_title">照護人力危機</h4>
+                                <p class="text-sm text-gray-500" data-translate="society_pressure1_desc">專業與家庭照護者供給嚴重短缺。</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                             <span class="text-2xl text-red-400 mr-4">⚠️</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-200" data-translate="society_pressure2_title">醫療成本上升</h4>
+                                <p class="text-sm text-gray-500" data-translate="society_pressure2_desc">新興高價療法與失能群體增加帶來財政負擔。</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start">
+                             <span class="text-2xl text-red-400 mr-4">⚠️</span>
+                            <div>
+                                <h4 class="font-semibold text-gray-200" data-translate="society_pressure3_title">養老金體系風險</h4>
+                                <p class="text-sm text-gray-500" data-translate="society_pressure3_desc">傳統精算模型面臨資金耗盡的困境。</p>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-4 text-white" data-translate="society_ethics_title">倫理的羅盤：三大核心詰問</h3>
+                <p class="text-center text-gray-400 mb-6" data-translate="society_ethics_desc">追求長壽的旅程不僅是科學探索，更是深刻的倫理實驗。我們必須謹慎航行，確保科技為全人類增進福祉。點擊下方問題展開探討。</p>
+                <div id="ethics-container" class="space-y-4 max-w-4xl mx-auto">
+                </div>
+            </div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    let currentLang = 'zh';
+
+    const translations = {
+        zh: {
+            header_title: "健康長壽的未來",
+            nav_home: "導言",
+            nav_agetech: "立即應對：銀髮科技",
+            nav_geroscience: "根本治療：老年科學",
+            nav_society: "未來展望：長壽社會",
+            home_title: "迎向百歲時代",
+            home_subtitle: "科技賦能與生物革新，正共同驅動一場前所未有的健康長壽革命。這不僅是挑戰，更是催化深刻創新的強大動力。",
+            home_wave_title: "全球高齡化浪潮",
+            home_wave_desc: "世界正以前所未有的速度邁向超高齡社會，傳統的照護模式與社會體系面臨巨大挑戰。",
+            home_stat1_label: "2050年全球60歲以上人口佔比",
+            home_stat2_label: "2030年照護者與80歲長者比例",
+            home_solution_title: "雙軌並行的解方",
+            home_solution_desc: "應對此挑戰的最有效路徑，在於兩大領域的交匯點：應用科技改善當下，並透過科學研究延緩衰老根源。",
+            home_agetech_title: "銀髮科技 (AgeTech)",
+            home_agetech_desc: "提升生活品質、安全與獨立自主。",
+            home_gero_title: "老年科學 (Geroscience)",
+            home_gero_desc: "干預衰老根源，延長健康餘命。",
+            home_footer: "本互動報告將帶您深入探索這兩大前沿領域的發展，剖析其對個人、社會及經濟的深遠影響。請點擊上方導覽以開始您的探索之旅。",
+            agetech_title: "立即應對：銀髮科技革命",
+            agetech_subtitle: "本節將探討創新科技如何重塑高齡者的日常生活。從改造居家環境到遠距健康管理，銀髮科技正為「在地安養」的願景提供堅實的技術支撐。點擊下方卡片以了解更多細節。",
+            gero_title: "根本治療：老年科學前沿",
+            gero_subtitle: "本節將深入衰老的生物學根源，揭示科學家如何解構衰老機制，並開發旨在延長「健康餘命」的劃時代療法。我們不再僅是管理衰老的後果，而是直接干預過程本身。",
+            gero_hallmarks_title: "衰老的九大生物學標誌",
+            gero_hallmarks_desc: "衰老是多種分子與細胞損傷累積的結果。理解這些相互關聯的標誌，是開發抗衰老療法的路線圖。點擊或將滑鼠移至任一標誌上查看說明。",
+            gero_hallmarks_placeholder: "請選擇一個標誌查看詳情",
+            gero_therapies_title: "新興抗衰老療法一覽",
+            gero_therapies_desc: "基於對衰老標誌的理解，科學界正開發多種靶向療法。下圖展示了部分主要候選療法的潛在益處與風險評分（1-5分，分數越高代表潛力/風險越大）。",
+            filter_all: "所有類別",
+            filter_senolytics: "衰老細胞裂解",
+            filter_metabolic: "代謝干預",
+            filter_regenerative: "再生醫學",
+            society_title: "未來展望：長壽社會的機遇與挑戰",
+            society_subtitle: "一個更長壽、更健康的時代，將對全球經濟、社會結構及倫理價值觀帶來全面衝擊。本節將探討我們需要共同面對的宏觀議題。",
+            society_economy_title: "銀髮經濟的崛起",
+            society_economy_desc: "高齡化催生了龐大的新興市場，同時也將顛覆我們對工作、退休與教育的傳統認知。",
+            society_economy_chart_label: "中國抗衰老產業市場規模預測（單位：萬億人民幣）",
+            society_pressure_title: "系統性壓力",
+            society_pressure_desc: "長壽社會對現有公共服務體系造成巨大壓力，若不改革可能引發嚴重的社會問題。",
+            society_pressure1_title: "照護人力危機",
+            society_pressure1_desc: "專業與家庭照護者供給嚴重短缺。",
+            society_pressure2_title: "醫療成本上升",
+            society_pressure2_desc: "新興高價療法與失能群體增加帶來財政負擔。",
+            society_pressure3_title: "養老金體系風險",
+            society_pressure3_desc: "傳統精算模型面臨資金耗盡的困境。",
+            society_ethics_title: "倫理的羅盤：三大核心詰問",
+            society_ethics_desc: "追求長壽的旅程不僅是科學探索，更是深刻的倫理實驗。我們必須謹慎航行，確保科技為全人類增進福祉。點擊下方問題展開探討。",
+            charts: {
+                therapies: {
+                    benefit_label: "潛在益處",
+                    risk_label: "已知風險/挑戰",
+                    y_axis_label: "評分 (1-5)"
+                },
+                economy: {
+                    label: "市場規模 (萬億人民幣)"
+                }
+            }
+        },
+        en: {
+            header_title: "The Future of Healthy Longevity",
+            nav_home: "Introduction",
+            nav_agetech: "Immediate Solutions: AgeTech",
+            nav_geroscience: "Fundamental Cures: Geroscience",
+            nav_society: "Future Outlook: Longevity Society",
+            home_title: "Embracing the Centenarian Era",
+            home_subtitle: "Technological empowerment and biological innovation are driving an unprecedented revolution in healthy longevity. This is not just a challenge, but a powerful catalyst for profound innovation.",
+            home_wave_title: "The Global Aging Wave",
+            home_wave_desc: "The world is rapidly moving towards a super-aged society, posing immense challenges to traditional care models and social systems.",
+            home_stat1_label: "Global population over 60 by 2050",
+            home_stat2_label: "Carer to person over 80 ratio by 2030",
+            home_solution_title: "A Dual-Track Solution",
+            home_solution_desc: "The most effective path to address this challenge lies at the intersection of two fields: applying technology to improve the present and slowing aging's roots through scientific research.",
+            home_agetech_title: "AgeTech",
+            home_agetech_desc: "Improving quality of life, safety, and independence.",
+            home_gero_title: "Geroscience",
+            home_gero_desc: "Intervening in the root causes of aging to extend healthspan.",
+            home_footer: "This interactive report will guide you through these two cutting-edge fields, analyzing their profound impact on individuals, society, and the economy. Click the navigation above to begin your exploration.",
+            agetech_title: "Immediate Solutions: The AgeTech Revolution",
+            agetech_subtitle: "This section explores how innovative technology is reshaping the daily lives of older adults. From retrofitting homes to remote health management, AgeTech is providing the solid technological foundation for 'aging in place'. Click the cards below for more details.",
+            gero_title: "Fundamental Cures: The Geroscience Frontier",
+            gero_subtitle: "This section delves into the biological roots of aging, revealing how scientists are deconstructing its mechanisms and developing revolutionary therapies aimed at extending 'healthspan'. We are moving beyond managing the consequences of aging to directly intervening in the process itself.",
+            gero_hallmarks_title: "The Nine Hallmarks of Aging",
+            gero_hallmarks_desc: "Aging results from the accumulation of various molecular and cellular damages. Understanding these interconnected hallmarks is the roadmap for developing anti-aging therapies. Click or hover over any hallmark to see its description.",
+            gero_hallmarks_placeholder: "Select a hallmark to see details.",
+            gero_therapies_title: "Emerging Anti-Aging Therapies",
+            gero_therapies_desc: "Based on the understanding of aging hallmarks, the scientific community is developing various targeted therapies. The chart below shows the potential benefits and risk scores (1-5, higher is more) of some leading candidates.",
+            filter_all: "All Categories",
+            filter_senolytics: "Senolytics",
+            filter_metabolic: "Metabolic Interventions",
+            filter_regenerative: "Regenerative Medicine",
+            society_title: "Future Outlook: Opportunities & Challenges of a Longevity Society",
+            society_subtitle: "An era of longer, healthier lives will have a comprehensive impact on the global economy, social structures, and ethical values. This section explores the macroeconomic issues we must face together.",
+            society_economy_title: "The Rise of the Silver Economy",
+            society_economy_desc: "Aging is creating a massive new market and will also upend our traditional understanding of work, retirement, and education.",
+            society_economy_chart_label: "China's Anti-Aging Industry Market Size Forecast (in Trillion RMB)",
+            society_pressure_title: "Systemic Pressures",
+            society_pressure_desc: "A longevity society places immense pressure on existing public service systems, which could lead to serious social problems without reform.",
+            society_pressure1_title: "Caregiving Labor Crisis",
+            society_pressure1_desc: "Severe shortage in the supply of professional and family caregivers.",
+            society_pressure2_title: "Rising Healthcare Costs",
+            society_pressure2_desc: "New high-cost therapies and a growing disabled population create a financial burden.",
+            society_pressure3_title: "Pension System Risks",
+            society_pressure3_desc: "Traditional actuarial models face the risk of fund depletion.",
+            society_ethics_title: "The Ethical Compass: Three Core Questions",
+            society_ethics_desc: "The pursuit of longevity is not just a scientific quest but a profound ethical experiment. We must navigate carefully to ensure technology enhances well-being for all humanity. Click the questions below to explore.",
+            charts: {
+                therapies: {
+                    benefit_label: "Potential Benefit",
+                    risk_label: "Known Risk/Challenge",
+                    y_axis_label: "Score (1-5)"
+                },
+                economy: {
+                    label: "Market Size (Trillion RMB)"
+                }
+            }
+        }
+    };
+
+    const data = {
+        zh: {
+            agetech: [
+                { category: "基礎輔具", icon: "🚶", title: "輔助科技與環境適應化", summary: "構成在地安養的第一道防線，解決最直接的物理風險，是導入更複雜智慧科技的必要前提。", details: "包含移動、日常生活、溝通三大類輔具，以及住家無障礙改造。<strong>效益：</strong>維持自主、降低跌倒、維護尊嚴、減輕照護者負擔。<strong>挑戰：</strong>需專業評估、部分長者有抗拒心理、成本與客製化需求。" },
+                { category: "智慧環境", icon: "🏠", title: "智慧家庭系統", summary: "將居住環境從被動空間轉變為主動、響應式的支持系統，實現從『反應式』輔助到『預防性』支持的轉變。", details: "透過物聯網(IoT)實現自動化與遠程控制（燈光、空調）及主動式安全防護（火災、瓦斯偵測）。<strong>效益：</strong>提升便利性、降低認知負荷、提升居家安全。<strong>挑戰：</strong>設定複雜、品牌互通性差、成本高、需穩定網路。" },
+                { category: "社交連結", icon: "🤖", title: "社交機器人與AI夥伴", summary: "旨在填補高齡者在情感與社交互動上的缺口，緩解社會孤立與孤獨感。", details: "如 ElliQ，能主動發起對話、推薦活動、提醒用藥，成為多功能家庭助手。<strong>效益：</strong>緩解孤獨感、提供實用輔助。<strong>挑戰：</strong>成本高、數據隱私擔憂、可能無法滿足真實社交需求、存在『催化』而非『取代』人際關係的設計悖論。" },
+                { category: "健康監測", icon: "❤️", title: "穿戴式健康感測器", summary: "賦予個體持續、客觀監測自身健康狀況的能力，催生『數位生物標記』概念，實現預防醫學。", details: "可24小時追蹤心率、血壓、血氧、活動量，並具備穿戴式與非穿戴式跌倒偵測及風險預測功能。<strong>效益：</strong>實現主動健康管理、早期發現異常。<strong>挑戰：</strong>數據解讀困難、電池續航、隱私擔憂。" },
+                { category: "遠距照護", icon: "💻", title: "遠距醫療平台", summary: "利用通訊科技打破醫療服務的地理限制，成為傳統醫療強而有力的補充與延伸。", details: "提供線上視訊問診、健康諮詢等服務。未來趨勢是與線下醫療、社區照護結合的混合模式。<strong>效益：</strong>提升醫療可及性、節省成本、降低傳染風險。<strong>挑戰：</strong>無法物理檢查、數位落差、法規與健保給付不完善。" },
+                { category: "設計與信任", icon: "🤝", title: "以人為本的設計與信任", summary: "克服科技普及障礙的關鍵，在於友善的體驗與深層次的信任。", details: "設計需從使用者需求出發，與長者『共創』。信任建立需超越技術承諾，關注長者對自主權與隱私的深層擔憂，重塑『賦能』而非『監控』的價值主張。<strong>挑戰：</strong>解決『隱私-自主權悖論』，建立透明、使用者可控的信任框架。" }
+            ],
+            hallmarks: [
+                { id: 'genomic', title: '基因組不穩定', icon: '🧬', details: 'DNA損傷累積速度超過修復能力，導致基因突變，損害細胞功能。' },
+                { id: 'telomere', title: '端粒磨損', icon: '🔚', details: '染色體末端的保護帽縮短，使細胞無法安全分裂，進入衰老。' },
+                { id: 'epigenetic', title: '表觀遺傳改變', icon: '🧬', details: '調控基因開關的模式變得混亂，擾亂細胞的正常功能。' },
+                { id: 'proteostasis', title: '蛋白質穩態喪失', icon: '🔗', details: '功能失常或有毒的蛋白質在細胞內堆積，引發疾病。' },
+                { id: 'nutrient', title: '營養感應失調', icon: '🍎', details: '細胞過度促進生長而非修復，加速老化過程。熱量限制是主要干預手段。' },
+                { id: 'mitochondrial', title: '粒線體功能障礙', icon: '⚡️', details: '細胞能量工廠效率下降，產生更多有害副產物，形成惡性循環。' },
+                { id: 'senescence', title: '細胞衰老', icon: '🧟', details: '受損細胞（殭屍細胞）停止分裂但分泌促炎分子，製造慢性發炎環境。' },
+                { id: 'stem', title: '幹細胞耗竭', icon: '💧', details: '組織修復與再生的源泉減少，導致再生能力減弱。' },
+                { id: 'communication', title: '細胞間通訊改變', icon: '💬', details: '慢性發炎信號干擾正常組織功能，並可能「傳染」衰老。' }
+            ],
+            therapies: [
+                { category: 'Senolytics', name: 'D+Q', benefit: 4, risk: 3, description: '達沙替尼+槲皮素：最早發現的組合之一，能清除特定衰老細胞。' },
+                { category: 'Senolytics', name: 'Fisetin', benefit: 3, risk: 2, description: '非瑟酮：一種天然類黃酮，被認為是有效的天然衰老細胞裂解物。' },
+                { category: 'Metabolic', name: 'Metformin', benefit: 3, risk: 2, description: '二甲雙胍：廉價的糖尿病藥物，模擬熱量限制，TAME試驗將是里程碑。' },
+                { category: 'Metabolic', name: 'Rapamycin', benefit: 5, risk: 4, description: '雷帕霉素：強力的mTOR抑制劑，是首個被證實能穩定延長小鼠壽命的藥物。' },
+                { category: 'Regenerative', name: 'MSCs', benefit: 4, risk: 3, description: '間質幹細胞：透過替換、抗發炎、分泌生長因子來修復組織。' },
+                { category: 'Regenerative', name: 'Gene Therapy', benefit: 5, risk: 5, description: '基因療法：最具前瞻性，旨在從基因層面逆轉衰老，但挑戰巨大。' }
+            ],
+            ethics: [
+                { title: "長壽鴻溝：我們會創造一個雙層社會嗎？", icon: "⚖️", content: "最令人憂慮的問題是，昂貴的抗衰老療法可能成為富人專利，導致一個『長壽的富裕階級』與『短命的普通大眾』並存的社會。這不僅體現在個人之間，也可能擴大全球國與國之間的健康不平等，引發關於『分配正義』的核心詰問。" },
+                { title: "資源分配：我們該優先考慮什麼？", icon: "📊", content: "在資源有限的現實下，社會應優先投入延長『健康餘命』（提升生活品質）還是單純延長『生命餘命』（可能延長痛苦）？如何劃定『治療』與『增強』的界線？大幅延長壽命是否會加劇人口過剩與地球資源壓力？這些都是棘手的倫理難題。" },
+                { title: "生命意義：更長的人生會更空虛嗎？", icon: "🤔", content: "過長的生命是否會變得乏味、失去意義？有哲學家認為，正是死亡的存在才賦予生命以價值和緊迫感。一個百歲老人成為常態的社會，將如何改變家庭結構與代際關係？這既可能讓人們更關注長遠未來，也可能因權力固化導致社會停滯。" }
+            ]
+        },
+        en: {
+            agetech: [
+                { category: "Basic Aids", icon: "🚶", title: "Assistive Tech & Environment Adaptation", summary: "The first line of defense for aging in place, solving immediate physical risks and a prerequisite for adopting more complex smart technologies.", details: "Includes mobility, daily living, and communication aids, plus home accessibility modifications. <strong>Benefits:</strong> Maintains autonomy, reduces falls, preserves dignity, lessens caregiver burden. <strong>Challenges:</strong> Requires professional assessment, some seniors are resistant, cost, and customization needs." },
+                { category: "Smart Environment", icon: "🏠", title: "Smart Home Systems", summary: "Transforms the living environment from a passive space to an active, responsive support system, shifting from 'reactive' assistance to 'preventive' support.", details: "Enables automation and remote control (lights, AC) and active safety protection (fire, gas detection) via IoT. <strong>Benefits:</strong> Increases convenience, reduces cognitive load, enhances home safety. <strong>Challenges:</strong> Complex setup, poor brand interoperability, high cost, requires stable internet." },
+                { category: "Social Connection", icon: "🤖", title: "Social Robots & AI Companions", summary: "Aims to fill the gap in emotional and social interaction for older adults, alleviating social isolation and loneliness.", details: "Like ElliQ, it proactively initiates conversations, suggests activities, and reminds about medication, acting as a multifunctional home assistant. <strong>Benefits:</strong> Alleviates loneliness, provides practical assistance. <strong>Challenges:</strong> High cost, data privacy concerns, may not fulfill the need for genuine social connection, and the design paradox of 'catalyzing' versus 'replacing' human interaction." },
+                { category: "Health Monitoring", icon: "❤️", title: "Wearable Health Sensors", summary: "Empowers individuals to continuously and objectively monitor their health, giving rise to the concept of 'digital biomarkers' for preventive medicine.", details: "24/7 tracking of heart rate, blood pressure, blood oxygen, activity levels, with both wearable and non-wearable fall detection and risk prediction. <strong>Benefits:</strong> Enables proactive health management, early detection of anomalies. <strong>Challenges:</strong> Difficulty in data interpretation, battery life, privacy concerns." },
+                { category: "Remote Care", icon: "💻", title: "Telehealth Platforms", summary: "Uses communication technology to break down geographical barriers to healthcare, serving as a powerful supplement and extension to traditional medicine.", details: "Offers online video consultations and health advice. The future trend is a hybrid model integrating with offline medical and community care. <strong>Benefits:</strong> Improves accessibility, saves costs, reduces infection risk. <strong>Challenges:</strong> Inability to perform physical exams, digital divide, incomplete regulations, and insurance reimbursement issues." },
+                { category: "Design & Trust", icon: "🤝", title: "Human-Centered Design & Trust", summary: "The key to overcoming technology adoption barriers lies in a friendly user experience and deep-seated trust.", details: "Design must start from user needs, co-creating with seniors. Trust building must go beyond technical promises to address deep concerns about autonomy and privacy, reframing the value proposition as 'empowerment' not 'surveillance'. <strong>Challenge:</strong> Solving the 'privacy-autonomy paradox' by creating a transparent, user-controlled trust framework." }
+            ],
+            hallmarks: [
+                { id: 'genomic', title: 'Genomic Instability', icon: '🧬', details: 'The rate of DNA damage accumulation exceeds repair capacity, leading to mutations that impair cell function.' },
+                { id: 'telomere', title: 'Telomere Attrition', icon: '🔚', details: 'The protective caps at the ends of chromosomes shorten, preventing safe cell division and leading to senescence.' },
+                { id: 'epigenetic', title: 'Epigenetic Alterations', icon: '🧬', details: 'The patterns that regulate gene expression become disorganized, disrupting normal cell function.' },
+                { id: 'proteostasis', title: 'Loss of Proteostasis', icon: '🔗', details: 'Dysfunctional or toxic proteins accumulate within cells, triggering diseases.' },
+                { id: 'nutrient', title: 'Deregulated Nutrient Sensing', icon: '🍎', details: 'Cells excessively promote growth instead of repair, accelerating the aging process. Caloric restriction is a primary intervention.' },
+                { id: 'mitochondrial', title: 'Mitochondrial Dysfunction', icon: '⚡️', details: 'The cell\'s power plants become less efficient, producing more harmful byproducts and creating a vicious cycle.' },
+                { id: 'senescence', title: 'Cellular Senescence', icon: '🧟', details: 'Damaged ("zombie") cells stop dividing but secrete pro-inflammatory molecules, creating a chronic inflammatory environment.' },
+                { id: 'stem', title: 'Stem Cell Exhaustion', icon: '💧', details: 'The source for tissue repair and regeneration diminishes, leading to a reduced regenerative capacity.' },
+                { id: 'communication', title: 'Altered Intercellular Communication', icon: '💬', details: 'Chronic inflammatory signals interfere with normal tissue function and can "infect" nearby healthy cells with senescence.' }
+            ],
+            therapies: [
+                { category: 'Senolytics', name: 'D+Q', benefit: 4, risk: 3, description: 'Dasatinib + Quercetin: One of the first discovered combinations, effective at clearing specific senescent cells.' },
+                { category: 'Senolytics', name: 'Fisetin', benefit: 3, risk: 2, description: 'A natural flavonoid, considered one of the most potent natural senolytics.' },
+                { category: 'Metabolic', name: 'Metformin', benefit: 3, risk: 2, description: 'An inexpensive diabetes drug that mimics caloric restriction; the TAME trial will be a landmark.' },
+                { category: 'Metabolic', name: 'Rapamycin', benefit: 5, risk: 4, description: 'A potent mTOR inhibitor, the first drug shown to robustly extend lifespan in mice.' },
+                { category: 'Regenerative', name: 'MSCs', benefit: 4, risk: 3, description: 'Mesenchymal Stem Cells: Repair tissue by replacement, anti-inflammatory action, and secreting growth factors.' },
+                { category: 'Regenerative', name: 'Gene Therapy', benefit: 5, risk: 5, description: 'The most forward-looking approach, aiming to reverse aging at the genetic level, but with immense challenges.' }
+            ],
+            ethics: [
+                { title: "The Longevity Divide: Will We Create a Two-Tiered Society?", icon: "⚖️", content: "The most alarming concern is that expensive anti-aging therapies could become a privilege of the rich, leading to a society of a 'long-lived wealthy class' and a 'short-lived general public'. This could widen health inequality not just between individuals but also between nations, raising core questions of 'distributive justice'." },
+                { title: "Resource Allocation: What Should We Prioritize?", icon: "📊", content: "With limited resources, should society prioritize extending 'healthspan' (quality of life) or merely 'lifespan' (potentially prolonging suffering)? Where do we draw the line between 'treatment' and 'enhancement'? Would drastically longer lives exacerbate overpopulation and resource strain? These are tough ethical dilemmas." },
+                { title: "The Meaning of Life: Would a Longer Life Be Emptier?", icon: "🤔", content: "Could a much longer life become boring and meaningless? Some philosophers argue that it is the existence of death that gives life value and urgency. How would a society where centenarians are the norm change family structures and intergenerational relationships? It could foster long-term thinking but also lead to social stagnation if power becomes entrenched." }
+            ]
+        }
+    };
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mobileNav = document.getElementById('mobile-nav');
+    const sections = document.querySelectorAll('.content-section');
+    const langSwitcher = document.getElementById('lang-switcher');
+
+    function navigateTo(id) {
+        sections.forEach(section => section.classList.remove('active'));
+        const activeSection = document.getElementById(id);
+        if (activeSection) activeSection.classList.add('active');
+
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.hash === '#' + id) link.classList.add('active');
+        });
+        mobileNav.value = id;
+    }
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = e.target.hash.substring(1);
+            navigateTo(targetId);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+
+    mobileNav.addEventListener('change', (e) => {
+        navigateTo(e.target.value);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    function animateCounter(element, target, duration, isRatio = false) {
+        let start = 0;
+        const stepTime = Math.abs(Math.floor(duration / target));
+        const timer = setInterval(() => {
+            start += 1;
+            if (isRatio) {
+                element.textContent = `${(target - start + 1).toFixed(1)}:1`;
+            } else {
+                element.textContent = `${start}%`;
+            }
+            if (start === target) {
+                clearInterval(timer);
+                if (isRatio) element.textContent = '4.1:1';
+                else element.textContent = '20%';
+            }
+        }, stepTime);
+    }
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const populationStat = document.getElementById('population-stat');
+                const caregiverStat = document.getElementById('caregiver-stat');
+                animateCounter(populationStat, 20, 1500);
+                animateCounter(caregiverStat, 3, 1500, true);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    observer.observe(document.getElementById('home'));
+
+    const agetechContainer = document.getElementById('agetech-cards-container');
+    function renderAgeTechCards(lang) {
+        agetechContainer.innerHTML = '';
+        data[lang].agetech.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'bg-gray-800 p-5 rounded-lg shadow-md card cursor-pointer';
+            card.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <span class="text-3xl mr-4">${item.icon}</span>
+                    <h3 class="text-xl font-bold text-white">${item.title}</h3>
+                </div>
+                <p class="text-gray-400 summary-text">${item.summary}</p>
+                <div class="text-gray-300 text-sm mt-2 details-text hidden">${item.details}</div>
+            `;
+            agetechContainer.appendChild(card);
+            card.addEventListener('click', () => {
+                card.querySelector('.summary-text').classList.toggle('hidden');
+                card.querySelector('.details-text').classList.toggle('hidden');
+                card.classList.toggle('ring-2');
+                card.classList.toggle('ring-[#5EEAD4]');
+            });
+        });
+    }
+
+    const hallmarksGrid = document.getElementById('hallmarks-grid');
+    const hallmarkDetails = document.getElementById('hallmark-details');
+    function renderHallmarks(lang) {
+        hallmarksGrid.innerHTML = '';
+        data[lang].hallmarks.forEach(hallmark => {
+            const card = document.createElement('div');
+            card.className = 'hallmark-card bg-gray-700 p-3 rounded-md flex flex-col items-center justify-center text-center';
+            card.innerHTML = `<div class="text-2xl mb-1">${hallmark.icon}</div><h4 class="text-sm font-semibold">${hallmark.title}</h4>`;
+            const showDetails = () => {
+                document.querySelectorAll('.hallmark-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                hallmarkDetails.innerHTML = `<div class="p-2 fade-in"><h4 class="font-bold text-lg mb-2 text-white">${hallmark.title}</h4><p class="text-gray-300">${hallmark.details}</p></div>`;
+            };
+            card.addEventListener('click', showDetails);
+            card.addEventListener('mouseover', showDetails);
+            hallmarksGrid.appendChild(card);
+        });
+    }
+
+    const ethicsContainer = document.getElementById('ethics-container');
+    function renderEthicsCards(lang) {
+        ethicsContainer.innerHTML = '';
+        data[lang].ethics.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'border border-gray-700 rounded-lg';
+            div.innerHTML = `
+                <button class="w-full text-left p-4 flex justify-between items-center bg-gray-700 hover:bg-gray-600 transition">
+                    <span class="font-semibold flex items-center"><span class="text-2xl mr-3">${item.icon}</span> ${item.title}</span>
+                    <span class="transform transition-transform text-2xl text-[#5EEAD4]">+</span>
+                </button>
+                <div class="p-4 bg-gray-800 border-t border-gray-700 hidden">
+                    <p class="text-gray-400">${item.content}</p>
+                </div>
+            `;
+            ethicsContainer.appendChild(div);
+            const button = div.querySelector('button');
+            const content = div.querySelector('.p-4');
+            const icon = button.querySelector('.transform');
+            button.addEventListener('click', () => {
+                const isHidden = content.classList.contains('hidden');
+                content.classList.toggle('hidden');
+                icon.textContent = isHidden ? '−' : '+';
+                icon.classList.toggle('rotate-90', isHidden);
+            });
+        });
+    }
+
+    let therapiesChart, economyChart;
+    const chartTextColor = '#E5E7EB';
+    const chartGridColor = 'rgba(255, 255, 255, 0.1)';
+
+    function renderTherapiesChart(lang, filter = 'all') {
+        const ctx = document.getElementById('therapiesChart').getContext('2d');
+        const chartData = data[lang].therapies;
+        const langData = translations[lang];
+        const filteredData = filter === 'all' ? chartData : chartData.filter(t => t.category === filter);
+
+        if (therapiesChart) therapiesChart.destroy();
+        
+        therapiesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: filteredData.map(t => t.name),
+                datasets: [
+                    { label: langData.charts.therapies.benefit_label, data: filteredData.map(t => t.benefit), backgroundColor: 'rgba(94, 234, 212, 0.6)', borderColor: 'rgba(94, 234, 212, 1)', borderWidth: 1 },
+                    { label: langData.charts.therapies.risk_label, data: filteredData.map(t => t.risk), backgroundColor: 'rgba(248, 113, 113, 0.6)', borderColor: 'rgba(248, 113, 113, 1)', borderWidth: 1 }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false, responsive: true,
+                scales: {
+                    y: { beginAtZero: true, max: 5, title: { display: true, text: langData.charts.therapies.y_axis_label, color: chartTextColor }, grid: { color: chartGridColor }, ticks: { color: chartTextColor } },
+                    x: { grid: { color: chartGridColor }, ticks: { color: chartTextColor } }
+                },
+                plugins: {
+                    tooltip: { callbacks: { afterLabel: (context) => filteredData[context.dataIndex].description } },
+                    legend: { position: 'top', labels: { color: chartTextColor } }
+                }
+            }
+        });
+    }
+    document.getElementById('therapy-filter').addEventListener('change', (e) => renderTherapiesChart(currentLang, e.target.value));
+
+    function renderEconomyChart(lang) {
+        const ctx = document.getElementById('economyChart').getContext('2d');
+        const langData = translations[lang];
+        if (economyChart) economyChart.destroy();
+        economyChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2024', '2030', '2035'],
+                datasets: [{ label: langData.charts.economy.label, data: [0.6, 2.5, 4.6], fill: true, backgroundColor: 'rgba(94, 234, 212, 0.2)', borderColor: '#5EEAD4', tension: 0.1 }]
+            },
+            options: {
+                 maintainAspectRatio: false, responsive: true,
+                 scales: {
+                    y: { beginAtZero: true, grid: { color: chartGridColor }, ticks: { color: chartTextColor } },
+                    x: { grid: { color: chartGridColor }, ticks: { color: chartTextColor } }
+                 },
+                 plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    function switchLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        langSwitcher.textContent = lang === 'zh' ? 'EN' : '中';
+
+        document.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.getAttribute('data-translate');
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        
+        renderAgeTechCards(lang);
+        renderHallmarks(lang);
+        renderEthicsCards(lang);
+        renderTherapiesChart(lang, document.getElementById('therapy-filter').value);
+        renderEconomyChart(lang);
+    }
+    
+    langSwitcher.addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        switchLanguage(newLang);
+    });
+
+    // Initial render
+    switchLanguage('zh');
+});
+</script>
+
+</body>
+</html>
