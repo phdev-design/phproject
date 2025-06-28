@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：美國健達出奇蛋禁令解析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Stone -->
+    <!-- Application Structure Plan: The application is designed as a single-page, tab-based dashboard. This non-linear structure allows users to immediately grasp the core "Double Ban" concept on the homepage and then freely explore specific areas of interest (Legal, Safety, History, etc.) without a mandatory linear progression. This information architecture prioritizes user-driven discovery over a passive reading experience. The key interaction is the main navigation, which switches between thematic content panes, making complex information digestible and accessible. This structure was chosen to transform a dense report into an engaging, explorable tool, answering the main question upfront while offering deep-dives on demand. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: The "Double Ban" (FDA & CPSC). Goal: Inform/Compare. Viz/Method: Two interactive HTML cards on the homepage. Interaction: Click to navigate. Justification: Immediately communicates the report's central thesis. Library/Method: Vanilla JS, Tailwind.
+        - Report Info: 1938 FD&C Act "Practical Functional Value" exception. Goal: Explain/Organize. Viz/Method: Interactive HTML diagram comparing a lollipop and a Kinder egg. Interaction: Button toggle. Justification: Simplifies a complex legal distinction. Library/Method: Vanilla JS, Tailwind.
+        - Report Info: Border seizure statistics. Goal: Inform/Impact. Viz/Method: A single-bar Chart.js chart. Interaction: Tooltip on hover. Justification: Gives numerical data visual weight and impact. Library/Method: Chart.js.
+        - Report Info: Kinder Surprise vs. Kinder Joy. Goal: Compare. Viz/Method: Side-by-side visual comparison with a toggle. Interaction: Clickable switch. Justification: Clearly illustrates the product design solution that enabled US market entry. Library/Method: Vanilla JS, Tailwind.
+        - Report Info: US vs. EU regulations. Goal: Compare/Organize. Viz/Method: Styled HTML table. Interaction: None. Justification: The table format is optimal for presenting structured comparative data clearly. Library/Method: HTML, Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 320px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+        }
+        .nav-button.active {
+            color: #ea580c;
+            border-bottom-color: #ea580c;
+            transform: translateY(-2px);
+        }
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .content-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-slate-700">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-7xl relative">
+        
+        <div class="absolute top-4 right-4 md:top-8 md:right-8 z-10">
+            <button id="lang-toggle" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded hover:bg-slate-300 transition-colors text-sm">English</button>
+        </div>
+
+        <header class="text-center mb-8">
+            <h1 data-translate-key="mainTitle" class="text-3xl md:text-4xl font-bold text-orange-600">一份「攙雜」的甜點</h1>
+            <p data-translate-key="subTitle" class="text-lg md:text-xl mt-2 text-slate-600">美國禁止健達出奇蛋的互動式解析</p>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-slate-200 mb-8 flex-wrap">
+            <button data-view="home" class="nav-button active text-sm md:text-base font-semibold px-4 py-3 border-b-4 border-transparent" data-translate-key="navHome">總覽：雙重禁令</button>
+            <button data-view="law" class="nav-button text-sm md:text-base font-semibold px-4 py-3 border-b-4 border-transparent" data-translate-key="navLaw">法律解析</button>
+            <button data-view="safety" class="nav-button text-sm md:text-base font-semibold px-4 py-3 border-b-4 border-transparent" data-translate-key="navSafety">安全風險</button>
+            <button data-view="history" class="nav-button text-sm md:text-base font-semibold px-4 py-3 border-b-4 border-transparent" data-translate-key="navHistory">歷史與執法</button>
+            <button data-view="solution" class="nav-button text-sm md:text-base font-semibold px-4 py-3 border-b-4 border-transparent" data-translate-key="navSolution">解決方案與比較</button>
+        </nav>
+
+        <main id="content-container">
+            <!-- Home View -->
+            <section id="view-home" class="content-section active">
+                <div class="text-center mb-8">
+                     <p data-translate-key="homeIntro" class="max-w-3xl mx-auto text-base md:text-lg">健達出奇蛋在美國的禁令並非單一原因造成，而是觸犯了兩部獨立的聯邦法律，由兩個不同的政府機構執行。本節將帶您快速了解構成此禁令的兩大核心支柱：食品法規的限制與玩具安全的考量。您可以點擊下方的卡片，深入探索每個面向。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-orange-500 hover:shadow-xl transition-shadow cursor-pointer" onclick="navigateTo('law')">
+                        <h3 class="text-xl font-bold mb-2 text-orange-600 flex items-center">
+                            <span class="text-3xl mr-3">⚖️</span>
+                            <span data-translate-key="homeFdaTitle">食品藥物管理局 (FDA)</span>
+                        </h3>
+                        <h4 data-translate-key="homeFdaSubTitle" class="font-semibold text-lg mb-2">根本性障礙：1938年《食品法》</h4>
+                        <p data-translate-key="homeFdaDesc">根據這部古老的法律，任何將「非營養性物體」（如玩具）完全「包覆」在內的糖果，都被定義為「攙雜食品」，本身就是非法的。這個禁令與玩具是否危險無關，而是針對產品的結構設計。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-sky-500 hover:shadow-xl transition-shadow cursor-pointer" onclick="navigateTo('safety')">
+                        <h3 class="text-xl font-bold mb-2 text-sky-600 flex items-center">
+                            <span class="text-3xl mr-3">👶</span>
+                            <span data-translate-key="homeCpscTitle">消費品安全委員會 (CPSC)</span>
+                        </h3>
+                        <h4 data-translate-key="homeCpscSubTitle" class="font-semibold text-lg mb-2">潛在風險：小零件窒息危險</h4>
+                        <p data-translate-key="homeCpscDesc">CPSC認定，蛋內的微型玩具對三歲以下兒童構成嚴重的窒息風險。由於巧克力蛋對幼兒有極強的吸引力，即使有警語，也無法充分消除風險，因此被視為應禁止的危險物質。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Law View -->
+            <section id="view-law" class="content-section">
+                 <div class="text-left mb-8 max-w-4xl mx-auto">
+                    <h2 data-translate-key="lawTitle" class="text-2xl font-bold text-orange-600 mb-4">根本性禁令：1938年《聯邦食品、藥品和化妝品法》</h2>
+                    <p data-translate-key="lawIntro" class="text-base md:text-lg">健達出奇蛋面臨的最根本障礙，是一部比它早誕生36年的法律。本節將解析《FD&C法案》第402(d)(1)條款如何從根本上定義了該產品的非法性，並透過互動比較，解釋為何棒棒糖合法，而出奇蛋卻不行。</p>
+                </div>
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 data-translate-key="lawClauseTitle" class="font-bold text-xl mb-2">第402(d)(1)條款：「攙雜食品」的定義</h3>
+                            <p data-translate-key="lawClauseDesc" class="mb-4">該條款規定，若糖果「部分或完全包覆了任何非營養性物體」，即被視為攙雜食品。這是一項「本身違法」的規定，禁止的是「包覆」這一行為，與物體是否危險無關。</p>
+                            <h4 data-translate-key="lawExceptionTitle" class="font-semibold text-lg mb-2">關鍵的例外：「實用功能價值」</h4>
+                            <p data-translate-key="lawExceptionDesc">法律允許非營養性物體的存在，前提是它具有「實用功能價值」（如棒棒糖的棍子）。然而，出奇蛋的玩具是獎品，不具備食用功能，因此不適用此例外。</p>
+                        </div>
+                        <div class="border-2 border-slate-200 rounded-lg p-4 text-center">
+                            <div id="law-comparison-container"></div>
+                            <div class="mt-4">
+                                <button id="toggle-law-view" class="bg-orange-500 text-white font-bold py-2 px-4 rounded hover:bg-orange-600 transition-colors" data-translate-key="lawToggleButton">切換比較</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Safety View -->
+            <section id="view-safety" class="content-section">
+                <div class="text-left mb-8 max-w-4xl mx-auto">
+                    <h2 data-translate-key="safetyTitle" class="text-2xl font-bold text-sky-600 mb-4">窒息危險：消費品安全委員會 (CPSC) 的立場</h2>
+                    <p data-translate-key="safetyIntro" class="text-base md:text-lg">除了食品法，健達出奇蛋還面臨來自CPSC的第二道禁令。本節將解釋CPSC如何使用「小零件法規」和「吸引力原則」來認定該產品對幼兒構成不可接受的窒息風險，即使包裝上有警示標語。</p>
+                </div>
+                <div class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 data-translate-key="safetyRegulationTitle" class="font-bold text-xl mb-2">《小零件法規》</h3>
+                            <p data-translate-key="safetyRegulationDesc" class="mb-4">CPSC使用一個標準化的「小零件測試筒」來模擬幼兒喉嚨的大小。任何能完全裝進此圓筒的玩具或其零件，都被禁止出現在給三歲以下兒童的產品中。出奇蛋的玩具零件顯然無法通過此測試。</p>
+                            <h4 data-translate-key="safetyPrincipleTitle" class="font-semibold text-lg mb-2">「吸引力原則」</h4>
+                            <p data-translate-key="safetyPrincipleDesc">CPSC認為，一顆巧克力蛋對幼兒具有無法抗拒的誘惑。因此，即使包裝上標明「適合3歲以上」，也無法有效防止幼兒接觸到危險的小零件。產品的吸引力超越了標籤的警示作用。</p>
+                        </div>
+                        <div class="border-2 border-slate-200 rounded-lg p-4 text-center flex flex-col items-center justify-center h-full">
+                            <h4 data-translate-key="safetyDiagramTitle" class="font-bold mb-2">小零件測試筒 (示意圖)</h4>
+                            <div class="flex items-center space-x-4">
+                                <div class="bg-slate-300 w-16 h-24 rounded-lg flex items-center justify-center p-1">
+                                    <p class="text-xs font-mono text-white">Cylinder</p>
+                                </div>
+                                <span class="text-4xl text-sky-500">→</span>
+                                <div class="w-8 h-8 bg-red-500 rounded-full animate-pulse"></div>
+                            </div>
+                            <p data-translate-key="safetyDiagramCaption" class="mt-4 text-sm text-red-600 font-semibold">危險！玩具零件可完全放入測試筒。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- History View -->
+            <section id="view-history" class="content-section">
+                 <div class="text-left mb-8 max-w-4xl mx-auto">
+                    <h2 data-translate-key="historyTitle" class="text-2xl font-bold text-slate-700 mb-4">執法歷史：從召回到邊境查緝</h2>
+                    <p data-translate-key="historyIntro" class="text-base md:text-lg">對健達出奇蛋的禁令並非紙上談兵。本節將回顧幾個關鍵的歷史事件，包括1997年的召回和雀巢的法律挑戰，這些事件鞏固了禁令的地位。同時，圖表將展示邊境執法的驚人規模。</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 data-translate-key="historyEventsTitle" class="font-bold text-xl mb-4">關鍵歷史事件</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-orange-500 font-bold text-lg mr-3">1997</span>
+                                <div><span data-translate-key="historyEvent1Title" class="font-semibold">CPSC首次召回：</span><span data-translate-key="historyEvent1Desc">CPSC與進口商合作，以「窒息危險」為由，自願召回約5,000顆健達出奇蛋，確立了監管先例。</span></div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-orange-500 font-bold text-lg mr-3">1997</span>
+                                <div><span data-translate-key="historyEvent2Title" class="font-semibold">雀巢的挑戰：</span><span data-translate-key="historyEvent2Desc">競爭對手雀巢推出類似產品，即使可能符合CPSC的安全標準，仍被FDA以違反1938年《食品法》為由勒令下架，證明了食品法是最終障礙。</span></div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-orange-500 font-bold text-lg mr-3">2011</span>
+                                <div><span data-translate-key="historyEvent3Title" class="font-semibold">邊境執法高峰：</span><span data-translate-key="historyEvent3Desc">美國海關與邊境保護局（CBP）在此年度查獲超過60,000顆非法攜帶入境的健達出奇蛋，顯示了執法的嚴格性。</span></div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 data-translate-key="historyChartTitle" class="font-bold text-xl mb-4 text-center">邊境查獲數量 (2011財年)</h3>
+                        <div class="chart-container">
+                            <canvas id="seizureChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Solution View -->
+            <section id="view-solution" class="content-section">
+                <div class="text-left mb-8 max-w-4xl mx-auto">
+                    <h2 data-translate-key="solutionTitle" class="text-2xl font-bold text-green-600 mb-4">監管驅動的創新：解決方案與法規比較</h2>
+                    <p data-translate-key="solutionIntro" class="text-base md:text-lg">面對堅固的法律壁壘，製造商費列羅並未放棄，而是透過產品創新找到了進入美國市場的鑰匙。本節將互動地比較「出奇蛋」與其合法替代品「奇趣蛋」的設計差異，並透過表格對比美國與歐盟截然不同的監管哲學。</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 data-translate-key="solutionCompareTitle" class="font-bold text-xl mb-4">產品設計的比較：出奇蛋 vs. 奇趣蛋</h3>
+                        <div id="solution-comparison-container" class="border-2 border-slate-200 rounded-lg p-4 mb-4 min-h-[200px] flex items-center justify-center">
+                        </div>
+                        <div class="flex items-center justify-center">
+                            <span data-translate-key="solutionSurpriseLabel" class="mr-2 font-semibold">出奇蛋</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" value="" id="solution-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                            </label>
+                            <span data-translate-key="solutionJoyLabel" class="ml-2 font-semibold">奇趣蛋 (合法版)</span>
+                        </div>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-lg overflow-x-auto">
+                        <h3 data-translate-key="solutionTableTitle" class="font-bold text-xl mb-4">監管哲學對比：美國 vs. 歐盟</h3>
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th data-translate-key="tableHeaderFeature" class="p-3 font-semibold">特徵</th>
+                                    <th data-translate-key="tableHeaderUS" class="p-3 font-semibold">美國</th>
+                                    <th data-translate-key="tableHeaderEU" class="p-3 font-semibold">歐盟</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td data-translate-key="tableRowPrinciple" class="p-3 font-semibold">核心原則</td>
+                                    <td data-translate-key="tableUSPrinciple" class="p-3">絕對禁止</td>
+                                    <td data-translate-key="tableEUPrinciple" class="p-3">風險管理</td>
+                                </tr>
+                                <tr class="border-b bg-stone-50">
+                                    <td data-translate-key="tableRowObject" class="p-3 font-semibold">對包覆物體的處理</td>
+                                    <td data-translate-key="tableUSObject" class="p-3">本身違法</td>
+                                    <td data-translate-key="tableEUObject" class="p-3">允許 (需符合安全標準)</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td data-translate-key="tableRowLabel" class="p-3 font-semibold">警示標籤的角色</td>
+                                    <td data-translate-key="tableUSLabel" class="p-3">被視為不足以消除風險</td>
+                                    <td data-translate-key="tableEULabel" class="p-3">風險管理的核心工具</td>
+                                </tr>
+                                <tr class="bg-stone-50">
+                                    <td data-translate-key="tableRowResult" class="p-3 font-semibold">最終結果</td>
+                                    <td data-translate-key="tableUSResult" class="p-3 text-red-600 font-bold">禁止</td>
+                                    <td data-translate-key="tableEUResult" class="p-3 text-green-600 font-bold">允許</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const translations = {
+            mainTitle: { zh: '一份「攙雜」的甜點', en: 'An "Adulterated" Confection' },
+            subTitle: { zh: '美國禁止健達出奇蛋的互動式解析', en: 'An Interactive Analysis of the US Kinder Surprise Ban' },
+            navHome: { zh: '總覽：雙重禁令', en: 'Overview: The Double Ban' },
+            navLaw: { zh: '法律解析', en: 'Legal Analysis' },
+            navSafety: { zh: '安全風險', en: 'Safety Risks' },
+            navHistory: { zh: '歷史與執法', en: 'History & Enforcement' },
+            navSolution: { zh: '解決方案與比較', en: 'Solution & Comparison' },
+            homeIntro: { zh: '健達出奇蛋在美國的禁令並非單一原因造成，而是觸犯了兩部獨立的聯邦法律，由兩個不同的政府機構執行。本節將帶您快速了解構成此禁令的兩大核心支柱：食品法規的限制與玩具安全的考量。您可以點擊下方的卡片，深入探索每個面向。', en: 'The ban on Kinder Surprise in the U.S. is not due to a single reason but a violation of two separate federal laws enforced by two different government agencies. This section provides a quick overview of the two core pillars of this ban: food regulation restrictions and toy safety concerns. You can click the cards below to explore each aspect in depth.' },
+            homeFdaTitle: { zh: '食品藥物管理局 (FDA)', en: 'Food and Drug Administration (FDA)' },
+            homeFdaSubTitle: { zh: '根本性障礙：1938年《食品法》', en: 'The Fundamental Barrier: The 1938 Food Act' },
+            homeFdaDesc: { zh: '根據這部古老的法律，任何將「非營養性物體」（如玩具）完全「包覆」在內的糖果，都被定義為「攙雜食品」，本身就是非法的。這個禁令與玩具是否危險無關，而是針對產品的結構設計。', en: 'Under this old law, any confectionery that fully "embeds" a "non-nutritive object" (like a toy) is defined as "adulterated food" and is inherently illegal. This ban is unrelated to whether the toy is dangerous; it targets the product\'s structural design.' },
+            homeCpscTitle: { zh: '消費品安全委員會 (CPSC)', en: 'Consumer Product Safety Commission (CPSC)' },
+            homeCpscSubTitle: { zh: '潛在風險：小零件窒息危險', en: 'Potential Risk: Small Parts Choking Hazard' },
+            homeCpscDesc: { zh: 'CPSC認定，蛋內的微型玩具對三歲以下兒童構成嚴重的窒息風險。由於巧克力蛋對幼兒有極強的吸引力，即使有警語，也無法充分消除風險，因此被視為應禁止的危險物質。', en: 'The CPSC determined that the miniature toys inside the egg pose a serious choking hazard to children under three. Due to the strong appeal of the chocolate egg to young children, warnings are considered insufficient to mitigate the risk, thus it is deemed a banned hazardous substance.' },
+            lawTitle: { zh: '根本性禁令：1938年《聯邦食品、藥品和化妝品法》', en: 'The Fundamental Ban: The 1938 Federal Food, Drug, and Cosmetic Act' },
+            lawIntro: { zh: '健達出奇蛋面臨的最根本障礙，是一部比它早誕生36年的法律。本節將解析《FD&C法案》第402(d)(1)條款如何從根本上定義了該產品的非法性，並透過互動比較，解釋為何棒棒糖合法，而出奇蛋卻不行。', en: 'The most fundamental obstacle for Kinder Surprise is a law enacted 36 years before its creation. This section will analyze how Section 402(d)(1) of the FD&C Act fundamentally defines the product\'s illegality and uses an interactive comparison to explain why lollipops are legal, but Kinder eggs are not.' },
+            lawClauseTitle: { zh: '第402(d)(1)條款：「攙雜食品」的定義', en: 'Section 402(d)(1): The Definition of "Adulterated Food"' },
+            lawClauseDesc: { zh: '該條款規定，若糖果「部分或完全包覆了任何非營養性物體」，即被視為攙雜食品。這是一項「本身違法」的規定，禁止的是「包覆」這一行為，與物體是否危險無關。', en: 'This clause states that a confectionery shall be deemed "adulterated" if it "has partially or completely imbedded in it any nonnutritive object." This is a "per se" violation, banning the act of embedding itself, regardless of whether the object is dangerous.' },
+            lawExceptionTitle: { zh: '關鍵的例外：「實用功能價值」', en: 'The Key Exception: "Practical Functional Value"' },
+            lawExceptionDesc: { zh: '法律允許非營養性物體的存在，前提是它具有「實用功能價值」（如棒棒糖的棍子）。然而，出奇蛋的玩具是獎品，不具備食用功能，因此不適用此例外。', en: 'The law permits non-nutritive objects if they have "practical functional value" (e.g., a lollipop stick). However, the toy in a Kinder egg is a prize and has no functional purpose for consumption, so this exception does not apply.' },
+            lawToggleButton: { zh: '切換比較', en: 'Toggle Comparison' },
+            lawKinderTitle: { zh: '健達出奇蛋 (非法)', en: 'Kinder Surprise (Illegal)' },
+            lawKinderDesc: { zh: '玩具被「完全包覆」在巧克力內，不具備實用功能，違反《FD&C法案》。', en: 'The toy is "completely imbedded" in the chocolate, has no functional value, and violates the FD&C Act.' },
+            lawLollipopTitle: { zh: '棒棒糖 (合法)', en: 'Lollipop (Legal)' },
+            lawLollipopDesc: { zh: '棍子具有「實用功能價值」，是用來拿取和食用的工具，符合法律例外條款。', en: 'The stick has "practical functional value" as a tool for holding and eating the candy, meeting the legal exception.' },
+            safetyTitle: { zh: '窒息危險：消費品安全委員會 (CPSC) 的立場', en: 'Choking Hazard: The Stance of the CPSC' },
+            safetyIntro: { zh: '除了食品法，健達出奇蛋還面臨來自CPSC的第二道禁令。本節將解釋CPSC如何使用「小零件法規」和「吸引力原則」來認定該產品對幼兒構成不可接受的窒息風險，即使包裝上有警示標語。', en: 'Beyond food law, Kinder Surprise faces a second ban from the CPSC. This section explains how the CPSC uses the "Small Parts Regulation" and the "Attractiveness Doctrine" to deem the product an unacceptable choking risk for young children, even with warning labels.' },
+            safetyRegulationTitle: { zh: '《小零件法規》', en: 'The Small Parts Regulation' },
+            safetyRegulationDesc: { zh: 'CPSC使用一個標準化的「小零件測試筒」來模擬幼兒喉嚨的大小。任何能完全裝進此圓筒的玩具或其零件，都被禁止出現在給三歲以下兒童的產品中。出奇蛋的玩具零件顯然無法通過此測試。', en: 'The CPSC uses a standardized "small parts test cylinder" to simulate a young child\'s throat. Any toy or part that fits completely inside this cylinder is banned from products for children under three. Kinder Surprise toy parts clearly fail this test.' },
+            safetyPrincipleTitle: { zh: '「吸引力原則」', en: 'The "Attractiveness Doctrine"' },
+            safetyPrincipleDesc: { zh: 'CPSC認為，一顆巧克力蛋對幼兒具有無法抗拒的誘惑。因此，即使包裝上標明「適合3歲以上」，也無法有效防止幼兒接觸到危險的小零件。產品的吸引力超越了標籤的警示作用。', en: 'The CPSC argues that a chocolate egg is irresistibly attractive to a young child. Therefore, even a "3+" age label is ineffective at preventing access to the hazardous small parts. The product\'s appeal overrides the label\'s warning.' },
+            safetyDiagramTitle: { zh: '小零件測試筒 (示意圖)', en: 'Small Parts Test Cylinder (Diagram)' },
+            safetyDiagramCaption: { zh: '危險！玩具零件可完全放入測試筒。', en: 'Danger! Toy part fits completely inside the cylinder.' },
+            historyTitle: { zh: '執法歷史：從召回到邊境查緝', en: 'Enforcement History: From Recalls to Border Seizures' },
+            historyIntro: { zh: '對健達出奇蛋的禁令並非紙上談兵。本節將回顧幾個關鍵的歷史事件，包括1997年的召回和雀巢的法律挑戰，這些事件鞏固了禁令的地位。同時，圖表將展示邊境執法的驚人規模。', en: 'The ban on Kinder Surprise was not merely theoretical. This section reviews key historical events, including the 1997 recall and Nestlé\'s legal challenge, which solidified the ban. The chart also shows the staggering scale of border enforcement.' },
+            historyEventsTitle: { zh: '關鍵歷史事件', en: 'Key Historical Events' },
+            historyEvent1Title: { zh: 'CPSC首次召回：', en: 'First CPSC Recall:' },
+            historyEvent1Desc: { zh: 'CPSC與進口商合作，以「窒息危險」為由，自願召回約5,000顆健達出奇蛋，確立了監管先例。', en: 'The CPSC, working with an importer, voluntarily recalled about 5,000 Kinder eggs due to "choking hazards," setting a regulatory precedent.' },
+            historyEvent2Title: { zh: '雀巢的挑戰：', en: 'The Nestlé Challenge:' },
+            historyEvent2Desc: { zh: '競爭對手雀巢推出類似產品，即使可能符合CPSC的安全標準，仍被FDA以違反1938年《食品法》為由勒令下架，證明了食品法是最終障礙。', en: 'Rival Nestlé launched a similar product. Even though it might have met CPSC safety standards, the FDA ordered it off shelves for violating the 1938 Food Act, proving the food law was the ultimate barrier.' },
+            historyEvent3Title: { zh: '邊境執法高峰：', en: 'Peak Border Enforcement:' },
+            historyEvent3Desc: { zh: '美國海關與邊境保護局（CBP）在此年度查獲超過60,000顆非法攜帶入境的健達出奇蛋，顯示了執法的嚴格性。', en: 'U.S. Customs and Border Protection (CBP) seized over 60,000 illegally imported Kinder eggs in this fiscal year, showing the strictness of enforcement.' },
+            historyChartTitle: { zh: '邊境查獲數量 (2011財年)', en: 'Border Seizure Count (FY 2011)' },
+            chartLabel: { zh: '查獲的健達出奇蛋數量', en: 'Number of Seized Kinder Eggs' },
+            solutionTitle: { zh: '監管驅動的創新：解決方案與法規比較', en: 'Regulation-Driven Innovation: The Solution and a Comparison' },
+            solutionIntro: { zh: '面對堅固的法律壁壘，製造商費列羅並未放棄，而是透過產品創新找到了進入美國市場的鑰匙。本節將互動地比較「出奇蛋」與其合法替代品「奇趣蛋」的設計差異，並透過表格對比美國與歐盟截然不同的監管哲學。', en: 'Facing a solid legal barrier, manufacturer Ferrero did not give up but found the key to the U.S. market through product innovation. This section interactively compares the design differences between "Surprise" and its legal alternative "Joy," and contrasts the vastly different regulatory philosophies of the U.S. and EU.' },
+            solutionCompareTitle: { zh: '產品設計的比較：出奇蛋 vs. 奇趣蛋', en: 'Product Design Comparison: Surprise vs. Joy' },
+            solutionSurpriseLabel: { zh: '出奇蛋', en: 'Surprise' },
+            solutionJoyLabel: { zh: '奇趣蛋 (合法版)', en: 'Joy (Legal Version)' },
+            solutionSurpriseTitle: { zh: '健達出奇蛋 (Kinder Surprise)', en: 'Kinder Surprise' },
+            solutionSurpriseDesc: { zh: '結構：玩具膠囊被巧克力「完全包覆」，直接違反美國食品法。', en: 'Structure: The toy capsule is "completely imbedded" in chocolate, directly violating U.S. food law.' },
+            solutionJoyTitle: { zh: '健達奇趣蛋 (Kinder Joy)', en: 'Kinder Joy' },
+            solutionJoyDesc: { zh: '結構：食品和玩具分置於兩個獨立密封的半球，規避了「包覆」的法律問題。', en: 'Structure: Food and toy are in two separate, sealed halves, circumventing the legal issue of being "imbedded."' },
+            solutionTableTitle: { zh: '監管哲學對比：美國 vs. 歐盟', en: 'Regulatory Philosophy: U.S. vs. EU' },
+            tableHeaderFeature: { zh: '特徵', en: 'Feature' },
+            tableHeaderUS: { zh: '美國', en: 'United States' },
+            tableHeaderEU: { zh: '歐盟', en: 'European Union' },
+            tableRowPrinciple: { zh: '核心原則', en: 'Core Principle' },
+            tableUSPrinciple: { zh: '絕對禁止', en: 'Absolute Prohibition' },
+            tableEUPrinciple: { zh: '風險管理', en: 'Risk Management' },
+            tableRowObject: { zh: '對包覆物體的處理', en: 'Treatment of Imbedded Objects' },
+            tableUSObject: { zh: '本身違法', en: 'Per Se Illegal' },
+            tableEUObject: { zh: '允許 (需符合安全標準)', en: 'Allowed (if safety standards are met)' },
+            tableRowLabel: { zh: '警示標籤的角色', en: 'Role of Warning Labels' },
+            tableUSLabel: { zh: '被視為不足以消除風險', en: 'Considered insufficient to mitigate risk' },
+            tableEULabel: { zh: '風險管理的核心工具', en: 'A core tool for risk management' },
+            tableRowResult: { zh: '最終結果', en: 'Final Outcome' },
+            tableUSResult: { zh: '禁止', en: 'Banned' },
+            tableEUResult: { zh: '允許', en: 'Allowed' }
+        };
+
+        const appData = {
+            law: {
+                kinder: { icon: '🥚' },
+                lollipop: { icon: '🍭' }
+            },
+            solution: {
+                surprise: { icon: '🚫' },
+                joy: { icon: '✅' }
+            },
+            seizureData: {
+                year: 2011,
+                count: 60000
+            }
+        };
+
+        let currentLanguage = 'zh';
+        let currentLawView = 'kinder';
+        let seizureChartInstance = null;
+        
+        const contentContainer = document.getElementById('content-container');
+        const navButtons = document.querySelectorAll('.nav-button');
+        const lawComparisonContainer = document.getElementById('law-comparison-container');
+        const toggleLawViewButton = document.getElementById('toggle-law-view');
+        const solutionComparisonContainer = document.getElementById('solution-comparison-container');
+        const solutionToggle = document.getElementById('solution-toggle');
+        const langToggleButton = document.getElementById('lang-toggle');
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.dataset.translateKey;
+                if (translations[key] && translations[key][lang]) {
+                    el.innerText = translations[key][lang];
+                }
+            });
+            
+            langToggleButton.innerText = lang === 'zh' ? 'English' : '中文';
+            
+            renderLawComparison(currentLawView);
+            renderSolutionComparison(solutionToggle.checked);
+            
+            if (seizureChartInstance) {
+                seizureChartInstance.destroy();
+                renderSeizureChart();
+            } else if (document.getElementById('view-history').classList.contains('active')) {
+                 renderSeizureChart();
+            }
+        }
+
+        function navigateTo(view) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(`view-${view}`).classList.add('active');
+            
+            navButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.view === view);
+            });
+
+            if (view === 'history' && !seizureChartInstance) {
+                renderSeizureChart();
+            }
+        }
+        
+        function renderLawComparison(view) {
+            const data = appData.law[view];
+            const titleKey = view === 'kinder' ? 'lawKinderTitle' : 'lawLollipopTitle';
+            const descKey = view === 'kinder' ? 'lawKinderDesc' : 'lawLollipopDesc';
+
+            lawComparisonContainer.innerHTML = `
+                <div class="text-6xl mb-2">${data.icon}</div>
+                <h4 class="font-bold text-lg">${translations[titleKey][currentLanguage]}</h4>
+                <p class="text-sm text-slate-600">${translations[descKey][currentLanguage]}</p>
+            `;
+        }
+        
+        function renderSolutionComparison(isJoy) {
+            const data = isJoy ? appData.solution.joy : appData.solution.surprise;
+            const titleKey = isJoy ? 'solutionJoyTitle' : 'solutionSurpriseTitle';
+            const descKey = isJoy ? 'solutionJoyDesc' : 'solutionSurpriseDesc';
+
+            solutionComparisonContainer.innerHTML = `
+                 <div class="text-center">
+                    <div class="text-5xl mb-2">${data.icon}</div>
+                    <h4 class="font-bold text-lg">${translations[titleKey][currentLanguage]}</h4>
+                    <p class="text-sm text-slate-600 mt-2">${translations[descKey][currentLanguage]}</p>
+                </div>
+            `;
+        }
+
+        function renderSeizureChart() {
+            if (seizureChartInstance) {
+                seizureChartInstance.destroy();
+            }
+            const ctx = document.getElementById('seizureChart').getContext('2d');
+            const data = appData.seizureData;
+            seizureChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [data.year],
+                    datasets: [{
+                        label: translations.chartLabel[currentLanguage],
+                        data: [data.count],
+                        backgroundColor: 'rgba(234, 88, 12, 0.6)',
+                        borderColor: 'rgba(234, 88, 12, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat().format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value / 1000 + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                navigateTo(button.dataset.view);
+            });
+        });
+        
+        toggleLawViewButton.addEventListener('click', () => {
+            currentLawView = (currentLawView === 'kinder') ? 'lollipop' : 'kinder';
+            renderLawComparison(currentLawView);
+        });
+
+        solutionToggle.addEventListener('change', (event) => {
+            renderSolutionComparison(event.target.checked);
+        });
+
+        langToggleButton.addEventListener('click', () => {
+            const newLang = currentLanguage === 'zh' ? 'en' : 'zh';
+            setLanguage(newLang);
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('zh'); 
+            navigateTo('home');
+        });
+    </script>
+</body>
+</html>
