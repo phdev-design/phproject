@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式像素藝術演進史：從16位元到3D革命</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Console Hues -->
+    <!-- Application Structure Plan: A thematic, single-page scrolling journey. The user can either flow through the eras chronologically or use the sticky navigation to jump to a specific point. The core of the application is the interactive comparison dashboards for the 16-bit and 32/64-bit eras. This structure transforms the report's linear text into an engaging, non-linear exploration, allowing users to actively compare hardware and see the direct impact on aesthetics. This is more usable than a static report as it promotes discovery and makes complex technical data digestible through visualization and direct interaction. A language switcher is added for broader accessibility. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: SNES vs. Genesis specs & aesthetics. -> Goal: Compare. -> Viz/Method: Side-by-side layout with a shared, dynamic bar chart (Chart.js) and text panels. -> Interaction: Buttons to select a console, which updates chart highlights and detailed text/image content. -> Justification: Actively engages the user in the "console war" comparison, making the differences in color and power immediately apparent.
+        - Report Info: PS1 vs. Saturn vs. N64 specs. -> Goal: Compare. -> Viz/Method: Bar chart (Chart.js) for polygon performance. -> Interaction: Hovering over bars could show tooltips with exact figures. -> Justification: Polygon count was the key metric of this era; a chart provides the clearest comparison.
+        - Report Info: Core concepts (Dithering, Pre-rendering). -> Goal: Inform. -> Viz/Method: Styled HTML/CSS cards with an interactive dithering example made of divs. -> Interaction: Visual demonstration instead of just text. -> Justification: Makes abstract technical concepts tangible and easier to grasp.
+        - Report Info: Modern pixel art. -> Goal: Change/Evolution. -> Viz/Method: Gallery-style cards. -> Interaction: Simple, clear presentation of modern examples. -> Justification: Shows the legacy and evolution of the art form in a clean, modern layout.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8; /* Warm neutral background */
+            color: #4B4B4B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link.active {
+            color: #A5694B; /* Warm accent */
+            border-bottom-color: #A5694B;
+        }
+        .console-btn {
+            transition: all 0.3s ease;
+        }
+        .console-btn.active {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <nav id="navbar" class="sticky top-0 z-50 bg-[#FDFBF8]/80 backdrop-blur-md shadow-sm">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-1 flex justify-center items-center space-x-4 md:space-x-8">
+                    <a href="#intro" class="nav-link text-gray-600 hover:text-black border-b-2 border-transparent pb-1" data-lang-key="navIntro">開端</a>
+                    <a href="#era-16bit" class="nav-link text-gray-600 hover:text-black border-b-2 border-transparent pb-1" data-lang-key="nav16bit">16位元時代</a>
+                    <a href="#era-32bit" class="nav-link text-gray-600 hover:text-black border-b-2 border-transparent pb-1" data-lang-key="nav32bit">3D革命</a>
+                    <a href="#era-modern" class="nav-link text-gray-600 hover:text-black border-b-2 border-transparent pb-1" data-lang-key="navModern">現代復興</a>
+                </div>
+                <button id="lang-switcher" class="text-sm font-medium text-stone-600 hover:text-stone-900 bg-stone-200/50 px-3 py-1 rounded-md transition">English</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="intro" class="text-center my-16 scroll-mt-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-800 mb-4" data-lang-key="mainTitle">像素光譜</h1>
+            <h2 class="text-xl md:text-2xl text-stone-600 mb-8" data-lang-key="subTitle">一場關於位元、色彩與創造力的互動式探索</h2>
+            <p class="max-w-3xl mx-auto text-lg text-stone-700 leading-relaxed" data-lang-key="introParagraph">
+                像素藝術不僅僅是懷舊的方塊圖形，它是一門誕生於技術限制、在限制中綻放創意的藝術學科。本頁將帶您穿越遊戲主機的黃金時代，從16位元的雙雄爭霸，到32/64位元引爆的3D革命，最終看見像素如何在當代以嶄新面貌重生。請捲動頁面，或點擊上方導覽，開始您的探索之旅。
+            </p>
+        </section>
+
+        <div class="space-y-24 md:space-y-32">
+
+            <section id="principles" class="scroll-mt-20">
+                <h3 class="text-3xl font-bold text-center text-stone-800 mb-4" data-lang-key="principlesTitle">像素的靈魂</h3>
+                <p class="text-lg text-center text-stone-600 max-w-2xl mx-auto mb-12" data-lang-key="principlesParagraph">在踏入位元戰爭之前，讓我們先了解構成像素藝術美學的基石。這些技巧源於早期硬體的嚴苛限制，卻也因此定義了一種獨特的視覺語言。</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-3" data-lang-key="paletteTitle">有限的調色盤</h4>
+                        <p class="text-stone-600 leading-relaxed" data-lang-key="paletteParagraph">早期硬體一次只能顯示極少數量的顏色。這迫使藝術家成為色彩大師，精準選擇每種色調以最大化視覺衝擊力與清晰度。每一個顏色都有其存在的意義。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-3" data-lang-key="ditheringTitle">抖動 (Dithering) 的幻術</h4>
+                        <p class="text-stone-600 mb-4" data-lang-key="ditheringParagraph">為了創造比硬體允許的更多的色彩幻覺，藝術家們手動排列不同顏色的像素，以特定模式創造出漸層或新色調的錯覺。下面是一個簡化的範例：</p>
+                        <div class="flex items-center justify-center space-x-4">
+                            <div class="w-16 h-16 bg-blue-600 rounded"></div>
+                            <span class="text-2xl font-bold">+</span>
+                            <div class="w-16 h-16 bg-red-600 rounded"></div>
+                            <span class="text-2xl font-bold">=</span>
+                            <div class="w-16 h-16 grid grid-cols-4 grid-rows-4 rounded overflow-hidden" style="background-image: repeating-conic-gradient(from 45deg, #4F46E5 0% 25%, #DC2626 25% 50%); background-size: 8px 8px;"></div>
+                            <p class="text-stone-600 text-sm" data-lang-key="ditheringResult">(創造出紫色的感覺)</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="era-16bit" class="scroll-mt-20">
+                <h3 class="text-3xl font-bold text-center text-stone-800 mb-4" data-lang-key="era16bitTitle">16位元黃金時代：限制的交響曲</h3>
+                <p class="text-lg text-center text-stone-600 max-w-3xl mx-auto mb-12" data-lang-key="era16bitParagraph">
+                    「16位元」一詞，主要指主機CPU的處理能力，而非其色彩深度。這個時代由兩大巨頭主宰：超級任天堂 (SNES) 與 SEGA Genesis。它們的硬體差異，直接催生了兩種截然不同的美學哲學。點擊下方主機，探索它們的獨特之處。
+                </p>
+                
+                <div class="flex justify-center space-x-6 mb-8">
+                    <button id="btn-snes" class="console-btn active bg-gray-200 p-4 rounded-xl shadow-md w-40 h-24 flex items-center justify-center" onclick="update16BitComparison('snes')">
+                        <span class="text-2xl font-bold text-gray-700">SNES</span>
+                    </button>
+                    <button id="btn-genesis" class="console-btn bg-gray-800 p-4 rounded-xl shadow-md w-40 h-24 flex items-center justify-center" onclick="update16BitComparison('genesis')">
+                        <span class="text-2xl font-bold text-white">GENESIS</span>
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div id="console-details" class="bg-white p-8 rounded-xl shadow-lg fade-in">
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h4 class="text-xl font-bold text-center text-stone-700 mb-4" data-lang-key="specsCompareTitle">硬體規格對比</h4>
+                        <div class="chart-container">
+                            <canvas id="snesVsGenesisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="era-32bit" class="scroll-mt-20">
+                <h3 class="text-3xl font-bold text-center text-stone-800 mb-4" data-lang-key="era32bitTitle">3D革命：32/64位元維度躍遷</h3>
+                <p class="text-lg text-center text-stone-600 max-w-3xl mx-auto mb-12" data-lang-key="era32bitParagraph">
+                    從16位元到32/64位元，是一次圖形技術的典範轉移。衡量標準從「能顯示多少顏色」，變成了「每秒能渲染多少多邊形」。這是一個從2D精靈圖邁向即時3D世界的時代，由PlayStation、Saturn和Nintendo 64引領。
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-2" data-lang-key="polygonTitle">多邊形</h4>
+                        <p class="text-stone-600" data-lang-key="polygonParagraph">構成3D物件的基本平面，是這個時代的視覺基石。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-2" data-lang-key="textureTitle">紋理映射</h4>
+                        <p class="text-stone-600" data-lang-key="textureParagraph">將2D圖像（紋理）貼在3D多邊形上，賦予世界細節與真實感。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md text-center">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-2" data-lang-key="trueColorTitle">24位元真彩色</h4>
+                        <p class="text-stone-600" data-lang-key="trueColorParagraph">可顯示約1670萬種顏色，色彩數量不再是藝術創作的限制。</p>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-5 gap-8 items-center">
+                    <div class="md:col-span-2 bg-white p-8 rounded-xl shadow-lg">
+                        <h4 class="text-2xl font-bold text-stone-700 mb-3" data-lang-key="peak2dTitle">2D藝術的巔峰</h4>
+                        <p class="text-stone-600 leading-relaxed mb-4" data-lang-key="peak2dParagraph">32位元主機的強大機能，也將2D像素藝術推向了前所未有的高度。例如《惡魔城：月下夜想曲》利用了PlayStation龐大的記憶體，創造出巨大、細節豐富、動畫極其流暢的角色，這是16位元時代無法想像的。</p>
+                        <div class="w-full h-40 bg-gray-700 rounded-lg flex items-center justify-center">
+                           <p class="text-white text-lg font-mono">Castlevania: SOTN</p>
+                        </div>
+                    </div>
+                     <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-lg">
+                        <h4 class="text-xl font-bold text-center text-stone-700 mb-4" data-lang-key="polyCompareTitle">多邊形渲染效能對比</h4>
+                        <div class="chart-container" style="max-width: 800px; height: 350px;">
+                            <canvas id="polygonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="era-modern" class="scroll-mt-20">
+                <h3 class="text-3xl font-bold text-center text-stone-800 mb-4" data-lang-key="modernEraTitle">現代復興：新復古美學</h3>
+                <p class="text-lg text-center text-stone-600 max-w-3xl mx-auto mb-12" data-lang-key="modernEraParagraph">
+                    在圖形能力近乎無限的今天，像素藝術為何依然蓬勃發展？它已從技術限制演變為一種刻意的風格選擇。現代遊戲借用16位元的視覺語法，同時利用當代硬體的強大性能，創造出在原始主機上絕不可能實現的「新復古」美學。
+                </p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                         <div class="w-full h-48 bg-blue-300 flex items-center justify-center"><p class="text-white text-2xl font-mono">Celeste</p></div>
+                        <div class="p-6">
+                            <h4 class="text-2xl font-bold text-stone-700 mb-2" data-lang-key="celesteTitle">《蔚藍》 (Celeste)</h4>
+                            <p class="text-stone-600" data-lang-key="celesteParagraph">深受16位元風格啟發，卻運用了流暢的高幀率動畫、複雜的粒子效果與動態光照，這些都是現代技術的產物。</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="w-full h-48 bg-green-300 flex items-center justify-center"><p class="text-white text-2xl font-mono">Stardew Valley</p></div>
+                        <div class="p-6">
+                            <h4 class="text-2xl font-bold text-stone-700 mb-2" data-lang-key="stardewTitle">《星露谷物語》 (Stardew Valley)</h4>
+                            <p class="text-stone-600" data-lang-key="stardewParagraph">承襲了16位元RPG的美學，但使用了幾乎無限的調色盤、微妙的透明效果，並能在高解析度下流暢運行，遠超SNES的能力。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="text-center py-8 mt-16 border-t border-stone-200">
+        <p class="text-stone-500" data-lang-key="footerText">基於「像素光譜」報告的互動式呈現</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            const translations = {
+                'zh-Hant': {
+                    // Nav & General
+                    navIntro: '開端',
+                    nav16bit: '16位元時代',
+                    nav32bit: '3D革命',
+                    navModern: '現代復興',
+                    langSwitch: 'English',
+                    // Intro Section
+                    mainTitle: '像素光譜',
+                    subTitle: '一場關於位元、色彩與創造力的互動式探索',
+                    introParagraph: '像素藝術不僅僅是懷舊的方塊圖形，它是一門誕生於技術限制、在限制中綻放創意的藝術學科。本頁將帶您穿越遊戲主機的黃金時代，從16位元的雙雄爭霸，到32/64位元引爆的3D革命，最終看見像素如何在當代以嶄新面貌重生。請捲動頁面，或點擊上方導覽，開始您的探索之旅。',
+                    // Principles Section
+                    principlesTitle: '像素的靈魂',
+                    principlesParagraph: '在踏入位元戰爭之前，讓我們先了解構成像素藝術美學的基石。這些技巧源於早期硬體的嚴苛限制，卻也因此定義了一種獨特的視覺語言。',
+                    paletteTitle: '有限的調色盤',
+                    paletteParagraph: '早期硬體一次只能顯示極少數量的顏色。這迫使藝術家成為色彩大師，精準選擇每種色調以最大化視覺衝擊力與清晰度。每一個顏色都有其存在的意義。',
+                    ditheringTitle: '抖動 (Dithering) 的幻術',
+                    ditheringParagraph: '為了創造比硬體允許的更多的色彩幻覺，藝術家們手動排列不同顏色的像素，以特定模式創造出漸層或新色調的錯覺。下面是一個簡化的範例：',
+                    ditheringResult: '(創造出紫色的感覺)',
+                    // 16-bit Section
+                    era16bitTitle: '16位元黃金時代：限制的交響曲',
+                    era16bitParagraph: '「16位元」一詞，主要指主機CPU的處理能力，而非其色彩深度。這個時代由兩大巨頭主宰：超級任天堂 (SNES) 與 SEGA Genesis。它們的硬體差異，直接催生了兩種截然不同的美學哲學。點擊下方主機，探索它們的獨特之處。',
+                    specsCompareTitle: '硬體規格對比',
+                    snesName: '超級任天堂 (SNES)',
+                    snesTagline: '畫家的畫布',
+                    snesDescription: 'SNES擁有顯著的色彩優勢，總色盤高達32,768色，同螢幕可顯示256色。這使其成為開發畫面豐富、細節精緻、色彩絢麗遊戲的理想平台，催生了大量經典RPG。',
+                    genesisName: 'SEGA Genesis',
+                    genesisTagline: '飛人的跑道',
+                    genesisDescription: 'Genesis的設計哲學更側重速度。其CPU時脈速度遠超SNES，但色彩系統受限，總色盤僅512色，同螢幕顯示64色。這鼓勵了高對比度、快節奏的藝術風格，成為動作遊戲的溫床。',
+                    chartLabelPalette: '總色盤 (對數尺度)',
+                    chartLabelOnScreen: '同螢幕顯示色數',
+                    chartLabelCPU: 'CPU時脈速度 (MHz)',
+                    chartTooltipColorUnit: '色',
+                    // 32-bit Section
+                    era32bitTitle: '3D革命：32/64位元維度躍遷',
+                    era32bitParagraph: '從16位元到32/64位元，是一次圖形技術的典範轉移。衡量標準從「能顯示多少顏色」，變成了「每秒能渲染多少多邊形」。這是一個從2D精靈圖邁向即時3D世界的時代，由PlayStation、Saturn和Nintendo 64引領。',
+                    polygonTitle: '多邊形',
+                    polygonParagraph: '構成3D物件的基本平面，是這個時代的視覺基石。',
+                    textureTitle: '紋理映射',
+                    textureParagraph: '將2D圖像（紋理）貼在3D多邊形上，賦予世界細節與真實感。',
+                    trueColorTitle: '24位元真彩色',
+                    trueColorParagraph: '可顯示約1670萬種顏色，色彩數量不再是藝術創作的限制。',
+                    peak2dTitle: '2D藝術的巔峰',
+                    peak2dParagraph: '32位元主機的強大機能，也將2D像素藝術推向了前所未有的高度。例如《惡魔城：月下夜想曲》利用了PlayStation龐大的記憶體，創造出巨大、細節豐富、動畫極其流暢的角色，這是16位元時代無法想像的。',
+                    polyCompareTitle: '多邊形渲染效能對比',
+                    polyChartLabel: '多邊形/秒 (帶紋理與光照)',
+                    polyTooltipPrefix: '約',
+                    polyTooltipSuffix: '個',
+                    // Modern Section
+                    modernEraTitle: '現代復興：新復古美學',
+                    modernEraParagraph: '在圖形能力近乎無限的今天，像素藝術為何依然蓬勃發展？它已從技術限制演變為一種刻意的風格選擇。現代遊戲借用16位元的視覺語法，同時利用當代硬體的強大性能，創造出在原始主機上絕不可能實現的「新復古」美學。',
+                    celesteTitle: '《蔚藍》 (Celeste)',
+                    celesteParagraph: '深受16位元風格啟發，卻運用了流暢的高幀率動畫、複雜的粒子效果與動態光照，這些都是現代技術的產物。',
+                    stardewTitle: '《星露谷物語》 (Stardew Valley)',
+                    stardewParagraph: '承襲了16位元RPG的美學，但使用了幾乎無限的調色盤、微妙的透明效果，並能在高解析度下流暢運行，遠超SNES的能力。',
+                    // Footer
+                    footerText: '基於「像素光譜」報告的互動式呈現'
+                },
+                'en': {
+                    // Nav & General
+                    navIntro: 'Start',
+                    nav16bit: '16-bit Era',
+                    nav32bit: '3D Revolution',
+                    navModern: 'Modern Revival',
+                    langSwitch: '中文',
+                    // Intro Section
+                    mainTitle: 'The Pixel Spectrum',
+                    subTitle: 'An Interactive Exploration of Bits, Color, and Creativity',
+                    introParagraph: 'Pixel art is more than just nostalgic blocks; it\'s an artistic discipline born from technical limitations. This page will guide you through the golden age of consoles, from the 16-bit rivalry to the 3D revolution of the 32/64-bit era, and finally, witness how pixel art is reborn today. Scroll or use the navigation to begin your journey.',
+                    // Principles Section
+                    principlesTitle: 'The Soul of the Pixel',
+                    principlesParagraph: 'Before diving into the bit wars, let\'s understand the cornerstones of pixel art aesthetics. These techniques, born from hardware constraints, defined a unique visual language.',
+                    paletteTitle: 'Limited Palettes',
+                    paletteParagraph: 'Early hardware could only display a very small number of colors at once. This forced artists to become masters of color, choosing each hue to maximize visual impact and clarity. Every color mattered.',
+                    ditheringTitle: 'The Illusion of Dithering',
+                    ditheringParagraph: 'To create the illusion of more colors than the hardware allowed, artists manually arranged pixels of different colors in patterns to create the impression of gradients or new tones. Here is a simplified example:',
+                    ditheringResult: '(Creates a purple-ish feel)',
+                    // 16-bit Section
+                    era16bitTitle: 'The 16-bit Golden Age: A Symphony of Limitations',
+                    era16bitParagraph: 'The term "16-bit" primarily refers to the console\'s CPU, not its color depth. This era was dominated by two giants: the Super Nintendo (SNES) and the SEGA Genesis. Their hardware differences directly led to two distinct aesthetic philosophies. Click a console below to explore.',
+                    specsCompareTitle: 'Hardware Spec Comparison',
+                    snesName: 'Super Nintendo (SNES)',
+                    snesTagline: 'The Painter\'s Canvas',
+                    snesDescription: 'The SNES had a significant color advantage, with a total palette of 32,768 colors and 256 on-screen simultaneously. This made it ideal for developing lush, detailed, and colorful games, leading to a library rich in classic RPGs.',
+                    genesisName: 'SEGA Genesis',
+                    genesisTagline: 'The Sprinter\'s Track',
+                    genesisDescription: 'The Genesis was built for speed. Its CPU was much faster than the SNES, but its color system was limited to a 512-color total palette and 64 on-screen. This encouraged a high-contrast, fast-paced art style, making it a hotbed for action games.',
+                    chartLabelPalette: 'Total Palette (Log Scale)',
+                    chartLabelOnScreen: 'On-Screen Colors',
+                    chartLabelCPU: 'CPU Clock Speed (MHz)',
+                    chartTooltipColorUnit: 'colors',
+                    // 32-bit Section
+                    era32bitTitle: 'The 3D Revolution: A 32/64-bit Dimensional Leap',
+                    era32bitParagraph: 'The jump from 16-bit to 32/64-bit was a paradigm shift. The metric of power changed from "how many colors" to "how many polygons per second." This was the era of moving from 2D sprites to real-time 3D worlds, led by PlayStation, Saturn, and Nintendo 64.',
+                    polygonTitle: 'Polygons',
+                    polygonParagraph: 'The basic building blocks of 3D objects, the visual foundation of this era.',
+                    textureTitle: 'Texture Mapping',
+                    textureParagraph: 'Applying 2D images (textures) to 3D polygons to give the world detail and realism.',
+                    trueColorTitle: '24-bit True Color',
+                    trueColorParagraph: 'The ability to display ~16.7 million colors, effectively removing color count as a limitation.',
+                    peak2dTitle: 'The Apex of 2D Art',
+                    peak2dParagraph: 'The power of 32-bit consoles also pushed 2D pixel art to new heights. Games like Castlevania: SOTN used the PlayStation\'s vast memory for huge, detailed sprites with incredibly fluid animation, impossible in the 16-bit era.',
+                    polyCompareTitle: 'Polygon Performance Comparison',
+                    polyChartLabel: 'Polygons/sec (w/ textures & lighting)',
+                    polyTooltipPrefix: 'Approx.',
+                    polyTooltipSuffix: 'polys',
+                    // Modern Section
+                    modernEraTitle: 'Modern Revival: Neo-Retro Aesthetics',
+                    modernEraParagraph: 'In an age of near-infinite graphical power, why does pixel art thrive? It has evolved from a technical necessity into a deliberate stylistic choice. Modern games borrow the visual grammar of the 16-bit era while leveraging contemporary hardware to create a "Neo-Retro" aesthetic impossible on original consoles.',
+                    celesteTitle: 'Celeste',
+                    celesteParagraph: 'Deeply inspired by 16-bit style, but uses fluid high-framerate animation, complex particle effects, and dynamic lighting—all products of modern tech.',
+                    stardewTitle: 'Stardew Valley',
+                    stardewParagraph: 'Inherits the aesthetic of 16-bit RPGs, but uses a virtually limitless color palette, subtle transparency, and runs at high resolution, far beyond the SNES\'s capabilities.',
+                    // Footer
+                    footerText: 'An interactive presentation based on the "Pixel Spectrum" report'
+                }
+            };
+
+            let snesVsGenesisChart;
+            let polygonChart;
+            let currentLang = 'zh-Hant';
+            let currentConsole = 'snes';
+
+            function setLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh-Hant' ? 'zh-Hant' : 'en';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (translations[lang] && translations[lang][key]) {
+                        el.textContent = translations[lang][key];
+                    }
+                });
+
+                document.getElementById('lang-switcher').textContent = translations[lang].langSwitch;
+
+                recreateCharts(lang);
+                update16BitComparison(currentConsole); 
+            }
+            
+            function recreateCharts(lang) {
+                if (snesVsGenesisChart) {
+                    snesVsGenesisChart.destroy();
+                }
+                if (polygonChart) {
+                    polygonChart.destroy();
+                }
+                create16BitChart(lang);
+                createPolygonChart(lang);
+            }
+
+            function create16BitChart(lang) {
+                const ctx = document.getElementById('snesVsGenesisChart').getContext('2d');
+                const labels = [
+                    translations[lang].chartLabelPalette, 
+                    translations[lang].chartLabelOnScreen, 
+                    translations[lang].chartLabelCPU
+                ];
+                snesVsGenesisChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'SNES',
+                                data: [Math.log10(32768), 256, 3.58],
+                                backgroundColor: 'rgba(139, 92, 246, 0.6)',
+                                borderColor: 'rgba(139, 92, 246, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Genesis',
+                                data: [Math.log10(512), 64, 7.6],
+                                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                                borderColor: 'rgba(59, 130, 246, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: { x: { beginAtZero: true } },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        const colorUnit = translations[lang].chartTooltipColorUnit;
+                                        if (context.label === labels[0]) {
+                                            const originalValue = Math.pow(10, context.raw).toLocaleString();
+                                            label += `${originalValue} ${colorUnit}`;
+                                        } else if (context.label === labels[1]) {
+                                             label += `${context.raw.toLocaleString()} ${colorUnit}`;
+                                        } else {
+                                             label += `${context.raw} MHz`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function createPolygonChart(lang) {
+                const ctx = document.getElementById('polygonChart').getContext('2d');
+                polygonChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sony PlayStation', 'SEGA Saturn', 'Nintendo 64'],
+                        datasets: [{
+                            label: translations[lang].polyChartLabel,
+                            data: [90000, 140000, 150000],
+                            backgroundColor: ['rgba(100, 116, 139, 0.6)','rgba(51, 65, 85, 0.6)','rgba(225, 29, 72, 0.6)'],
+                            borderColor: ['rgba(100, 116, 139, 1)','rgba(51, 65, 85, 1)','rgba(225, 29, 72, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { callback: value => value / 1000 + 'k' } } },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${translations[lang].polyTooltipPrefix} ${context.raw.toLocaleString()} ${translations[lang].polyTooltipSuffix}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            window.update16BitComparison = function(consoleName) {
+                currentConsole = consoleName;
+                const detailsDiv = document.getElementById('console-details');
+
+                const name = translations[currentLang][`${consoleName}Name`];
+                const tagline = translations[currentLang][`${consoleName}Tagline`];
+                const description = translations[currentLang][`${consoleName}Description`];
+                const titleClass = consoleName === 'snes' ? 'text-purple-700' : 'text-blue-700';
+                const bgColor = consoleName === 'snes' ? 'bg-purple-100' : 'bg-blue-100';
+                const image = consoleName === 'snes' 
+                    ? 'https://placehold.co/400x200/E9D5FF/6B21A8?text=SNES+Style+RPG' 
+                    : 'https://placehold.co/400x200/DBEAFE/1D4ED8?text=Genesis+Action+Game';
+
+                detailsDiv.innerHTML = `
+                    <div class="p-4 rounded-lg ${bgColor} mb-4">
+                        <h4 class="text-2xl font-bold ${titleClass}">${name}</h4>
+                        <p class="text-lg font-semibold ${titleClass}">${tagline}</p>
+                    </div>
+                    <p class="text-stone-600 leading-relaxed mb-4">${description}</p>
+                    <img src="${image}" alt="${name} style art" class="w-full h-auto rounded-lg shadow-md object-cover">
+                `;
+                detailsDiv.classList.remove('fade-in');
+                void detailsDiv.offsetWidth; 
+                detailsDiv.classList.add('fade-in');
+
+                document.getElementById('btn-snes').classList.toggle('active', consoleName === 'snes');
+                document.getElementById('btn-genesis').classList.toggle('active', consoleName === 'genesis');
+
+                if (snesVsGenesisChart) {
+                    snesVsGenesisChart.data.datasets.forEach((dataset) => {
+                        if (dataset.label.toLowerCase().includes(consoleName)) {
+                            dataset.backgroundColor = dataset.borderColor.replace('1)', '0.8)');
+                        } else {
+                            dataset.backgroundColor = dataset.borderColor.replace('1)', '0.3)');
+                        }
+                    });
+                    snesVsGenesisChart.update();
+                }
+            }
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => observer.observe(section));
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                setLanguage(newLang);
+            });
+
+            setLanguage('zh-Hant'); 
+        });
+    </script>
+</body>
+</html>
