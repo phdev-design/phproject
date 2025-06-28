@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：探索可信賴AI (深色模式)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate Dark -->
+    <!-- Application Structure Plan: The application is designed as a single-page guided journey with a fixed top navigation bar allowing users to jump between three core thematic sections: 1. 解讀AI (Interpretability), 2. 實現公平 (Fairness), and 3. 對齊價值 (Alignment). This non-linear, thematic structure is chosen over the report's linear chapter format to empower users to explore topics based on their interest, fostering better engagement and comprehension. Key interactions include: a togglable Chart.js visualization for the COMPAS case to illustrate conflicting fairness definitions, interactive cards to compare XAI and alignment frameworks, and clickable diagrams for the bias mitigation lifecycle. This design transforms the static report into an exploratory tool, making complex concepts more accessible and memorable. Added bilingual (Chinese/English) support and a dark mode theme for improved accessibility and user comfort. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Accuracy-Interpretability Trade-off -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Static visual comparison -> Justification: Clearly visualizes the core challenge in XAI model selection.
+        - Report Info: COMPAS Case Study (FPR vs. Predictive Value) -> Goal: Compare/Explain Conflict -> Viz: Togglable Bar Chart (Chart.js) -> Interaction: User clicks buttons to switch between "ProPublica's View" and "Northpointe's View", dynamically updating the chart and explanatory text. -> Justification: This is the most critical interactive element. It actively engages the user in the central ethical dilemma of competing fairness metrics, making the abstract concept tangible and impactful.
+        - Report Info: Bias Mitigation Lifecycle (Table 6.1) -> Goal: Organize/Inform -> Viz: HTML/CSS Diagram -> Interaction: Clicking on a lifecycle stage reveals details in a separate panel. -> Justification: Structures a complex process into a clear, step-by-step interactive flow.
+        - Report Info: Value Alignment Frameworks (Table 9.1) -> Goal: Compare -> Viz: Interactive Cards (HTML/CSS) -> Interaction: Hovering or clicking on cards reveals detailed information. -> Justification: A clean and modern UI pattern for comparing multiple complex frameworks.
+        - Report Info: Governance Models (EU AI Act, NIST RMF) -> Goal: Compare -> Viz: Side-by-side HTML/CSS diagrams -> Interaction: None. -> Justification: A straightforward visual layout for comparing two distinct but related regulatory frameworks.
+        - Library/Method: Chart.js for all charts due to its simplicity, responsiveness, and canvas-based rendering. All other diagrams and interactive elements are built with HTML/CSS and vanilla JavaScript for performance and to meet the NO SVG/Mermaid requirement. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #e2e8f0; /* slate-200 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            border-bottom-color: #2dd4bf; /* teal-400 */
+            color: #2dd4bf; /* teal-400 */
+        }
+        .lang-switcher {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .lang-switcher.active {
+            color: #2dd4bf; /* teal-400 */
+            font-weight: 700;
+        }
+        .content-card {
+            background-color: #1e293b; /* slate-800 */
+            border: 1px solid #334155; /* slate-700 */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #14b8a6; /* teal-500 */
+            color: #ffffff;
+        }
+        .lifecycle-stage {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .lifecycle-stage.active, .lifecycle-stage:hover {
+            background-color: #334155; /* slate-700 */
+            border-left-color: #14b8a6; /* teal-500 */
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            max-height: 400px;
+            width: 100%;
+            max-width: 700px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-slate-900/80 backdrop-blur-lg shadow-md shadow-slate-950/50 sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-slate-100" data-key="header.title"></h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#interpretability" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300" data-key="nav.interpretability"></a>
+                            <a href="#fairness" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300" data-key="nav.fairness"></a>
+                            <a href="#alignment" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-300" data-key="nav.alignment"></a>
+                        </div>
+                    </div>
+                    <div class="ml-6 flex items-center text-sm">
+                        <span id="lang-zh" class="lang-switcher font-medium text-slate-400 hover:text-teal-400 active">中文</span>
+                        <span class="mx-1 text-slate-600">/</span>
+                        <span id="lang-en" class="lang-switcher font-medium text-slate-400 hover:text-teal-400">English</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <div class="text-center mb-12 md:mb-16">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-slate-100 tracking-tight" data-key="main.title"></h2>
+            <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-400" data-key="main.subtitle"></p>
+        </div>
+
+        <section id="interpretability" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-400" data-key="interpretability.sectionTitle"></h3>
+                <p class="mt-4 text-lg text-slate-400" data-key="interpretability.intro"></p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="content-card">
+                    <h4 class="text-xl font-bold mb-4 text-slate-100" data-key="interpretability.tradeoff.title"></h4>
+                    <p class="text-slate-300 mb-4" data-key="interpretability.tradeoff.desc"></p>
+                    <div class="chart-container h-64 sm:h-72">
+                        <canvas id="tradeoffChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h4 class="text-xl font-bold mb-4 text-slate-100" data-key="interpretability.xai.title"></h4>
+                    <p class="text-slate-300 mb-4" data-key="interpretability.xai.desc"></p>
+                    <div class="flex border-b border-slate-700 mb-4">
+                        <button class="xai-tab-button tab-button flex-1 py-2 px-4 text-slate-300 font-medium active" data-tab="xai-lime">LIME</button>
+                        <button class="xai-tab-button tab-button flex-1 py-2 px-4 text-slate-300 font-medium" data-tab="xai-shap">SHAP</button>
+                    </div>
+                    <div id="xai-content">
+                        <div id="xai-lime" class="xai-tab-pane">
+                            <h5 class="font-bold text-lg text-teal-400" data-key="interpretability.xai.lime.title"></h5>
+                            <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.core_principle"></strong> <span data-key="interpretability.xai.lime.principle"></span></p>
+                            <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.advantages"></strong> <span data-key="interpretability.xai.lime.advantages"></span></p>
+                            <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.limitations"></strong> <span data-key="interpretability.xai.lime.limitations"></span></p>
+                        </div>
+                        <div id="xai-shap" class="xai-tab-pane hidden">
+                             <h5 class="font-bold text-lg text-teal-400" data-key="interpretability.xai.shap.title"></h5>
+                             <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.core_principle"></strong> <span data-key="interpretability.xai.shap.principle"></span></p>
+                             <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.advantages"></strong> <span data-key="interpretability.xai.shap.advantages"></span></p>
+                             <p class="text-sm text-slate-400 mt-2"><strong class="text-slate-200" data-key="common.limitations"></strong> <span data-key="interpretability.xai.shap.limitations"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fairness" class="mb-16 md:mb-24 scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-400" data-key="fairness.sectionTitle"></h3>
+                <p class="mt-4 text-lg text-slate-400" data-key="fairness.intro"></p>
+            </div>
+            
+            <div class="content-card mb-8">
+                 <h4 class="text-xl font-bold text-center mb-2 text-slate-100" data-key="fairness.compas.title"></h4>
+                 <p class="text-slate-400 text-center max-w-2xl mx-auto mb-4" data-key="fairness.compas.desc"></p>
+                <div class="flex justify-center space-x-4 mb-4">
+                    <button id="propublicaBtn" class="tab-button py-2 px-5 rounded-full text-sm font-semibold active" data-key="fairness.compas.btn1"></button>
+                    <button id="northpointeBtn" class="tab-button py-2 px-5 rounded-full text-sm font-semibold" data-key="fairness.compas.btn2"></button>
+                </div>
+                 <div class="chart-container">
+                    <canvas id="compasChart"></canvas>
+                 </div>
+                 <div id="compas-explanation" class="mt-4 text-center max-w-3xl mx-auto p-4 bg-slate-800 rounded-lg">
+                    <p class="text-slate-300"></p>
+                 </div>
+            </div>
+
+            <div class="content-card">
+                <h4 class="text-xl font-bold text-center mb-4 text-slate-100" data-key="fairness.lifecycle.title"></h4>
+                <p class="text-slate-400 text-center max-w-2xl mx-auto mb-6" data-key="fairness.lifecycle.desc"></p>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1">
+                        <ul class="space-y-2">
+                            <li><div class="lifecycle-stage p-4 rounded-lg active" data-lifecycle="data-collection">
+                                <h5 class="font-bold text-slate-200" data-key="fairness.lifecycle.s1.title"></h5>
+                                <p class="text-sm text-slate-400" data-key="fairness.lifecycle.s1.subtitle"></p>
+                            </div></li>
+                             <li><div class="lifecycle-stage p-4 rounded-lg" data-lifecycle="preprocessing">
+                                <h5 class="font-bold text-slate-200" data-key="fairness.lifecycle.s2.title"></h5>
+                                <p class="text-sm text-slate-400" data-key="fairness.lifecycle.s2.subtitle"></p>
+                            </div></li>
+                             <li><div class="lifecycle-stage p-4 rounded-lg" data-lifecycle="inprocessing">
+                                <h5 class="font-bold text-slate-200" data-key="fairness.lifecycle.s3.title"></h5>
+                                <p class="text-sm text-slate-400" data-key="fairness.lifecycle.s3.subtitle"></p>
+                            </div></li>
+                            <li><div class="lifecycle-stage p-4 rounded-lg" data-lifecycle="postprocessing">
+                                <h5 class="font-bold text-slate-200" data-key="fairness.lifecycle.s4.title"></h5>
+                                <p class="text-sm text-slate-400" data-key="fairness.lifecycle.s4.subtitle"></p>
+                            </div></li>
+                            <li><div class="lifecycle-stage p-4 rounded-lg" data-lifecycle="monitoring">
+                                <h5 class="font-bold text-slate-200" data-key="fairness.lifecycle.s5.title"></h5>
+                                <p class="text-sm text-slate-400" data-key="fairness.lifecycle.s5.subtitle"></p>
+                            </div></li>
+                        </ul>
+                    </div>
+                    <div id="lifecycle-details" class="md:col-span-2 bg-slate-900/50 p-6 rounded-lg">
+                        <!-- JS will populate this -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="alignment" class="scroll-mt-20">
+            <div class="max-w-3xl mx-auto text-center mb-12">
+                <h3 class="text-3xl font-bold text-teal-400" data-key="alignment.sectionTitle"></h3>
+                <p class="mt-4 text-lg text-slate-400" data-key="alignment.intro"></p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-3 text-center mb-4">
+                     <h4 class="text-2xl font-bold text-slate-100" data-key="alignment.frameworks.title"></h4>
+                     <p class="text-slate-400 mt-2 max-w-2xl mx-auto" data-key="alignment.frameworks.desc"></p>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="font-bold text-xl text-teal-400" data-key="alignment.vsd.title"></h5>
+                    <p class="text-sm font-semibold mt-2 text-slate-300"><span data-key="common.core_principle"></span>: <span data-key="alignment.vsd.principle"></span></p>
+                    <p class="text-slate-400 mt-3" data-key="alignment.vsd.desc"></p>
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <p class="text-sm text-slate-200"><strong data-key="common.advantages"></strong> <span data-key="alignment.vsd.advantages"></span></p>
+                        <p class="text-sm text-slate-500 mt-1"><strong data-key="common.challenges"></strong> <span data-key="alignment.vsd.challenges"></span></p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="font-bold text-xl text-teal-400" data-key="alignment.rlhf.title"></h5>
+                    <p class="text-sm font-semibold mt-2 text-slate-300"><span data-key="common.core_principle"></span>: <span data-key="alignment.rlhf.principle"></span></p>
+                    <p class="text-slate-400 mt-3" data-key="alignment.rlhf.desc"></p>
+                    <div class="mt-4 pt-4 border-t border-slate-700">
+                        <p class="text-sm text-slate-200"><strong data-key="common.advantages"></strong> <span data-key="alignment.rlhf.advantages"></span></p>
+                        <p class="text-sm text-slate-500 mt-1"><strong data-key="common.challenges"></strong> <span data-key="alignment.rlhf.challenges"></span></p>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h5 class="font-bold text-xl text-teal-400" data-key="alignment.cai.title"></h5>
+                    <p class="text-sm font-semibold mt-2 text-slate-300"><span data-key="common.core_principle"></span>: <span data-key="alignment.cai.principle"></span></p>
+                    <p class="text-slate-400 mt-3" data-key="alignment.cai.desc"></p>
+                     <div class="mt-4 pt-4 border-t border-slate-700">
+                        <p class="text-sm text-slate-200"><strong data-key="common.advantages"></strong> <span data-key="alignment.cai.advantages"></span></p>
+                        <p class="text-sm text-slate-500 mt-1"><strong data-key="common.challenges"></strong> <span data-key="alignment.cai.challenges"></span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-950 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+            <p class="font-bold text-slate-200" data-key="footer.title"></p>
+            <p class="text-sm text-slate-400 mt-2 max-w-3xl mx-auto" data-key="footer.desc"></p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const translations = {
+                zh: {
+                    header: { title: '可信賴AI互動框架' },
+                    nav: { interpretability: '解讀AI', fairness: '實現公平', alignment: '對齊價值' },
+                    main: { title: '建構信任：一座通往可信賴AI的橋樑', subtitle: '本互動報告旨在剖析開發可信賴人工智慧的三大支柱：可解釋性、公平性與價值對齊。請捲動或使用上方導覽，開始您的探索之旅。' },
+                    interpretability: {
+                        sectionTitle: '第一部分：解讀AI',
+                        intro: '如果我們不理解AI為何做出特定決策，我們就無法真正信任它。本部分將深入探討「黑盒子」問題，並介紹使AI決策透明化的關鍵技術與概念，這是實現控制與問責的基礎。',
+                        tradeoff: {
+                            title: '準確性 vs. 可解釋性權衡',
+                            desc: '在選擇模型時，開發者常面臨一個核心權衡：模型的預測準確性越高（如深度神經網路），其內部決策過程往往越不透明（黑盒子）；反之，結構簡單的模型（如決策樹）雖易於解釋，但可能無法處理複雜的數據關係。',
+                            label_interpretability: '可解釋性',
+                            label_accuracy: '準確性 (潛力)'
+                        },
+                        xai: {
+                            title: 'XAI實踐者工具箱',
+                            desc: '對於複雜的「黑盒子」模型，我們可以使用「事後解釋」工具來探究其決策。點擊下方頁籤，比較兩種主流的模型通用方法：LIME和SHAP。',
+                            lime: { title: 'LIME (局部可解釋模型無關解釋)', principle: '在單一預測的「局部」範圍內，用一個簡單的代理模型（如線性迴歸）去擬合複雜模型的行為。', advantages: '直觀，易於解釋單一預測，適用於任何模型。', limitations: '解釋可能不穩定，對擾動方式敏感。'},
+                            shap: { title: 'SHAP (夏普利加性解釋)', principle: '基於合作賽局理論的夏普利值，公平地分配每個特徵對最終預測的貢獻。', advantages: '具備堅實理論基礎，提供一致的局部與全域解釋。', limitations: '計算成本高昂，特別是對於大規模數據。'}
+                        }
+                    },
+                    fairness: {
+                        sectionTitle: '第二部分：實現公平',
+                        intro: 'AI偏見並非機器的惡意，而是數據、演算法與人類決策中系統性誤差的反映。本部分透過震驚業界的COMPAS案例，揭示「公平」的複雜性，並探討在整個AI生命週期中緩解偏見的策略。',
+                        compas: {
+                            title: '互動案例：COMPAS的困境',
+                            desc: '美國法院曾使用COMPAS演算法評估被告再犯風險，但ProPublica的調查指控其存在種族偏見。爭議的核心在於對「公平」的定義截然不同。請點擊下方按鈕，切換兩種觀點，觀察數據如何呈現出兩種相互矛盾的「公平」。',
+                            btn1: 'ProPublica視角 (錯誤率)',
+                            btn2: '演算法開發商視角 (校準)',
+                            chart_label: '百分比 (%)',
+                            propublica: { labels: ['被錯誤標記為高風險的黑人被告', '被錯誤標記為高風險的白人被告'], values: [45, 23], explanation: 'ProPublica的分析核心是比較不同族群的「偽陽性率」。他們發現，在那些最終沒有再犯的被告中，黑人被告被錯誤地標記為「高風險」的可能性（45%）幾乎是白人被告（23%）的兩倍。這構成了系統性的偏見。'},
+                            northpointe: { labels: ['評分為7分的黑人被告實際再犯率', '評分為7分的白人被告實際再犯率'], values: [61, 60], explanation: '開發商Northpointe則指出，其系統是經過「校準」的。對於任何一個給定的風險評分（例如7分），不同族群的實際再犯率幾乎相同。他們認為這才是公平，因為分數的意義對所有人都一樣。'}
+                        },
+                        lifecycle: {
+                            title: '偏見緩解的生命週期方法',
+                            desc: '緩解偏見需要一個貫穿AI開發始末的系統性策略。點擊左側的生命週期階段，查看對應的關鍵目標與技術。',
+                            s1: { title: '1. 數據收集與標註', subtitle: '確保數據的代表性與準確性。', details: '此階段的目標是從源頭上確保數據的品質。關鍵實踐包括：<ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>數據來源多樣化：</strong>避免單一來源導致的系統性偏差。</li><li><strong>審計數據集：</strong>檢查數據分佈，識別代表性不足的群體。</li><li><strong>修正不正確標籤：</strong>錯誤的標籤會直接誤導模型。</li><li><strong>多元化標註團隊：</strong>不同背景的標註員可以減少認知偏見。</li></ul>' },
+                            s2: { title: '2. 前期處理', subtitle: '在訓練前平衡數據分佈。', details: '在模型訓練前，直接對數據進行干預以緩解偏見。主要技術有：<ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>重採樣：</strong>透過對少數群體「過採樣」或對多數群體「欠採樣」來平衡數據。</li><li><strong>合成數據生成 (SMOTE)：</strong>為少數群體創建新的、人工合成的數據點。</li><li><strong>重加權：</strong>為不同群體的數據點分配不同的權重，以平衡其在訓練中的影響力。</li></ul><strong>相關工具：</strong> AI Fairness 360, Fairlearn' },
+                            s3: { title: '3. 中期處理', subtitle: '在訓練中嵌入公平性約束。', details: '在模型訓練過程中修改演算法，使其學習更公平的決策模式。主要技術有：<ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>公平感知演算法：</strong>將公平性指標直接納入模型的優化目標。</li><li><strong>對抗性去偏：</strong>訓練一個「對手」模型來迫使主模型學習與敏感屬性無關的特徵。</li><li><strong>公平性正規化：</strong>在模型的損失函數中加入懲罰項，懲罰不公平的預測。</li></ul>' },
+                            s4: { title: '4. 後期處理', subtitle: '調整模型輸出以滿足公平標準。', details: '在模型訓練完成後，對其輸出結果進行調整以滿足公平性要求。主要技術有：<ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>決策閾值調整：</strong>為不同的群體設定不同的決策閾值，以平衡錯誤率，直接回應COMPAS困境中揭示的權衡問題。</li><li><strong>校準預測機率：</strong>調整模型的機率輸出，使其更符合真實世界的機率。</li></ul>' },
+                            s5: { title: '5. 監控與部署', subtitle: '持續追蹤與評估模型的公平性。', details: '公平性不是一次性的工作，而是一個持續的過程。關鍵實踐包括：<ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>持續監控公平性指標：</strong>追蹤模型在真實世界中的表現，防止「模型漂移」。</li><li><strong>定期審計：</strong>由內部或第三方進行獨立的公平性評估。</li><li><strong>建立申訴與補救機制：</strong>為受AI決策負面影響的用戶提供清晰的申訴管道。</li></ul>' }
+                        }
+                    },
+                    alignment: {
+                        sectionTitle: '第三部分：對齊價值',
+                        intro: '最終的挑戰是確保AI的目標與人類的價值觀、倫理原則保持一致。本部分探討「價值對齊」問題，並介紹從設計理念到訓練方法，如何主動地將倫理嵌入AI系統。',
+                        frameworks: { title: '價值對齊框架比較', desc: '不同的方法試圖解決AI價值對齊的挑戰。從主動設計到透過回饋訓練，每種方法都有其獨特的優勢與局限。' },
+                        vsd: { title: '價值敏感設計 (VSD)', principle: '主動嵌入價值', desc: '一種系統性的方法論，旨在從技術設計的最早階段就主動地將人類價值觀嵌入其中。它透過概念、實證和技術三方迭代調查，預防倫理問題，而不僅是事後補救。', advantages: '從源頭預防問題，考慮廣泛社會影響。', challenges: '過程耗時，需跨學科專業知識。' },
+                        rlhf: { title: '從人類回饋中強化學習 (RLHF)', principle: '模仿人類偏好', desc: '業界主流的LLM微調技術。透過收集大量人類對模型輸出的偏好數據，訓練一個「獎勵模型」，再用強化學習引導主模型生成更符合人類偏好的內容。', advantages: '當前最成熟有效的方法，能顯著改善模型行為。', challenges: '成本高，易受標註員偏見影響，可能導致「獎勵駭客」。' },
+                        cai: { title: '憲法AI (CAI)', principle: '遵循明確原則', desc: '由Anthropic提出，用一套預定義的原則（「憲法」）取代大規模人類標註。AI根據憲法進行自我批判和修正，從而學習符合倫理的行為。', advantages: '可擴展性強，成本低，原則透明可審查。', challenges: '「誰來制定憲法」是核心難題，可能缺乏民主代表性。' }
+                    },
+                    footer: { title: '走向可信賴的AI', desc: '開發可信賴的AI並非單一的技術問題，而是一個需要在技術嚴謹性、前瞻性設計和穩健治理三方面持續努力的社會-技術挑戰。這是一條從反應式修復走向主動式建構的道路。' },
+                    common: { core_principle: '核心原則', advantages: '優勢：', challenges: '挑戰：', limitations: '關鍵限制：' }
+                },
+                en: {
+                    header: { title: 'Trustworthy AI Interactive Framework' },
+                    nav: { interpretability: 'Interpretability', fairness: 'Fairness', alignment: 'Alignment' },
+                    main: { title: 'Building Trust: A Bridge to Trustworthy AI', subtitle: 'This interactive report analyzes the three pillars of developing trustworthy AI: interpretability, fairness, and value alignment. Scroll or use the navigation above to begin your exploration.' },
+                    interpretability: {
+                        sectionTitle: 'Part 1: Interpretability',
+                        intro: 'We cannot truly trust AI if we don\'t understand why it makes certain decisions. This section delves into the "black box" problem and introduces key techniques and concepts for making AI decisions transparent, which is fundamental to achieving control and accountability.',
+                        tradeoff: {
+                            title: 'Accuracy vs. Interpretability Trade-off',
+                            desc: 'When selecting a model, developers often face a core trade-off: the higher a model\'s predictive accuracy (like deep neural networks), the less transparent its internal decision-making process tends to be (a "black box"). Conversely, simpler models (like decision trees) are easy to explain but may not handle complex data relationships.',
+                            label_interpretability: 'Interpretability',
+                            label_accuracy: 'Accuracy (Potential)'
+                        },
+                        xai: {
+                            title: 'The XAI Practitioner\'s Toolkit',
+                            desc: 'For complex "black box" models, we can use "post-hoc explanation" tools to investigate their decisions. Click the tabs below to compare two mainstream model-agnostic methods: LIME and SHAP.',
+                            lime: { title: 'LIME (Local Interpretable Model-agnostic Explanations)', principle: 'Approximates the behavior of a complex model in the "local" vicinity of a single prediction using a simple, interpretable surrogate model (e.g., linear regression).', advantages: 'Intuitive, easy to explain a single prediction, applicable to any model.', limitations: 'Explanations can be unstable and sensitive to the perturbation method.' },
+                            shap: { title: 'SHAP (SHapley Additive exPlanations)', principle: 'Based on Shapley values from cooperative game theory, it fairly distributes the contribution of each feature to the final prediction.', advantages: 'Has a solid theoretical foundation, providing consistent local and global explanations.', limitations: 'Computationally expensive, especially for large datasets.' }
+                        }
+                    },
+                    fairness: {
+                        sectionTitle: 'Part 2: Fairness',
+                        intro: 'AI bias is not machine malice, but a reflection of systemic errors in data, algorithms, and human decisions. This section uses the industry-shaking COMPAS case to reveal the complexity of "fairness" and explores strategies for mitigating bias throughout the entire AI lifecycle.',
+                        compas: {
+                            title: 'Interactive Case: The COMPAS Dilemma',
+                            desc: 'US courts used the COMPAS algorithm to assess defendants\' recidivism risk, but a ProPublica investigation alleged it was racially biased. The core of the dispute lies in starkly different definitions of "fairness". Click the buttons below to switch between the two perspectives and observe how the data presents two conflicting versions of "fairness".',
+                            btn1: 'ProPublica\'s View (Error Rates)',
+                            btn2: 'Developer\'s View (Calibration)',
+                            chart_label: 'Percentage (%)',
+                            propublica: { labels: ['Black defendants wrongly labeled high-risk', 'White defendants wrongly labeled high-risk'], values: [45, 23], explanation: 'ProPublica\'s analysis focuses on comparing "False Positive Rates" across groups. They found that among defendants who did NOT re-offend, Black defendants were nearly twice as likely (45%) as white defendants (23%) to be incorrectly labeled "high-risk." This constitutes systemic bias.' },
+                            northpointe: { labels: ['Recidivism rate for Black defendants with score 7', 'Recidivism rate for White defendants with score 7'], values: [61, 60], explanation: 'The developer, Northpointe, argued its system was "calibrated." For any given risk score (e.g., 7), the actual recidivism rate was nearly identical for both groups. They argued this is true fairness, as the score means the same thing for everyone.' }
+                        },
+                        lifecycle: {
+                            title: 'The Bias Mitigation Lifecycle',
+                            desc: 'Mitigating bias requires a systematic strategy throughout the AI development process. Click on a lifecycle stage on the left to view its key goals and techniques.',
+                            s1: { title: '1. Data Collection & Labeling', subtitle: 'Ensure data representativeness and accuracy.', details: 'The goal of this stage is to ensure data quality at the source. Key practices include: <ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>Diversifying data sources:</strong> Avoid systemic bias from a single origin.</li><li><strong>Auditing datasets:</strong> Check data distributions to identify underrepresented groups.</li><li><strong>Correcting inaccurate labels:</strong> Wrong labels directly mislead the model.</li><li><strong>Diversifying annotation teams:</strong> Different backgrounds can reduce cognitive biases.</li></ul>' },
+                            s2: { title: '2. Pre-Processing', subtitle: 'Balance data distribution before training.', details: 'Directly intervening on the data before model training to mitigate bias. Key techniques include: <ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>Resampling:</strong> Balancing data by "oversampling" minority groups or "undersampling" majority groups.</li><li><strong>Synthetic data generation (SMOTE):</strong> Creating new, artificial data points for minority groups.</li><li><strong>Reweighing:</strong> Assigning different weights to data points from different groups to balance their influence in training.</li></ul><strong>Related Tools:</strong> AI Fairness 360, Fairlearn' },
+                            s3: { title: '3. In-Processing', subtitle: 'Embed fairness constraints during training.', details: 'Modifying the algorithm during training to learn fairer decision patterns. Key techniques include: <ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>Fairness-aware algorithms:</strong> Including fairness metrics directly in the model\'s optimization objective.</li><li><strong>Adversarial debiasing:</strong> Training an "adversary" model to force the main model to learn representations independent of sensitive attributes.</li><li><strong>Fairness regularization:</strong> Adding a penalty term to the model\'s loss function that penalizes unfair predictions.</li></ul>' },
+                            s4: { title: '4. Post-Processing', subtitle: 'Adjust model output to meet fairness criteria.', details: 'Adjusting the model\'s output after it has been trained to meet fairness requirements. Key techniques include: <ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>Decision threshold adjustment:</strong> Setting different decision thresholds for different groups to balance error rates, directly addressing the trade-offs revealed in the COMPAS dilemma.</li><li><strong>Calibrating predicted probabilities:</strong> Adjusting the model\'s probability outputs to better reflect real-world probabilities.</li></ul>' },
+                            s5: { title: '5. Monitoring & Deployment', subtitle: 'Continuously track and evaluate model fairness.', details: 'Fairness is an ongoing process, not a one-time fix. Key practices include: <ul class="list-disc list-inside mt-2 text-slate-400"><li><strong>Continuous monitoring of fairness metrics:</strong> Tracking the model\'s performance in the real world to prevent "model drift."</li><li><strong>Regular audits:</strong> Independent fairness assessments by internal or third-party teams.</li><li><strong>Establishing grievance and redress mechanisms:</strong> Providing clear channels for users negatively affected by AI decisions to appeal.</li></ul>' }
+                        }
+                    },
+                    alignment: {
+                        sectionTitle: 'Part 3: Alignment',
+                        intro: 'The ultimate challenge is to ensure that AI\'s goals are consistent with human values and ethical principles. This section explores the "value alignment" problem and introduces methods, from design philosophy to training techniques, for proactively embedding ethics into AI systems.',
+                        frameworks: { title: 'Value Alignment Frameworks Comparison', desc: 'Different approaches attempt to solve the challenge of AI value alignment. From proactive design to training with feedback, each method has its unique strengths and limitations.' },
+                        vsd: { title: 'Value Sensitive Design (VSD)', principle: 'Proactive Value Embedding', desc: 'A systematic methodology to proactively embed human values into technology from the earliest design stages. It uses conceptual, empirical, and technical investigations to prevent ethical issues, not just fix them later.', advantages: 'Prevents problems at the source, considers broad societal impact.', challenges: 'Time-consuming, requires interdisciplinary expertise.' },
+                        rlhf: { title: 'Reinforcement Learning from Human Feedback (RLHF)', principle: 'Imitating Human Preferences', desc: 'The mainstream technique for fine-tuning LLMs. It involves collecting vast amounts of human preference data on model outputs to train a "reward model," then using reinforcement learning to guide the main model to generate content that aligns with these preferences.', advantages: 'The most mature and effective method currently, significantly improves model behavior.', challenges: 'Costly, susceptible to annotator biases, and can lead to "reward hacking."' },
+                        cai: { title: 'Constitutional AI (CAI)', principle: 'Adhering to Explicit Principles', desc: 'Proposed by Anthropic, it replaces large-scale human labeling with a predefined set of principles (a "constitution"). The AI learns ethical behavior through self-critique and revision based on this constitution.', advantages: 'Highly scalable, low cost, principles are transparent and reviewable.', challenges: 'The question of "who writes the constitution" is a core challenge, potentially lacking democratic representation.' }
+                    },
+                    footer: { title: 'Towards Trustworthy AI', desc: 'Developing trustworthy AI is not a singular technical problem, but a socio-technical challenge requiring sustained effort in technical rigor, forward-thinking design, and robust governance. It is a journey from reactive fixing to proactive building.' },
+                    common: { core_principle: 'Core Principle', advantages: 'Advantages:', challenges: 'Challenges:', limitations: 'Key Limitations:' }
+                }
+            };
+            
+            let currentLang = 'zh';
+            let tradeoffChart, compasChart;
+            let currentCompasView = 'propublica';
+            let currentLifecycleStage = 'data-collection';
+
+            const chartTextColor = '#cbd5e1'; // slate-300
+            const chartGridColor = 'rgba(71, 85, 105, 0.5)'; // slate-600 with opacity
+
+            const updateTextContent = () => {
+                document.querySelectorAll('[data-key]').forEach(el => {
+                    const key = el.dataset.key;
+                    const keys = key.split('.');
+                    let text = translations[currentLang];
+                    try {
+                        keys.forEach(k => { text = text[k]; });
+                        if (typeof text === 'string') {
+                           el.innerHTML = text;
+                        }
+                    } catch (e) {
+                        // console.warn(`Translation key not found: ${key}`);
+                    }
+                });
+                document.documentElement.lang = currentLang === 'zh' ? 'zh-TW' : 'en';
+            };
+            
+            const createTradeoffChart = () => {
+                if (tradeoffChart) tradeoffChart.destroy();
+                const ctx = document.getElementById('tradeoffChart').getContext('2d');
+                const chartData = translations[currentLang].interpretability.tradeoff;
+                tradeoffChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Linear Regression', 'Decision Tree', 'Random Forest', 'Deep Neural Network'],
+                        datasets: [{
+                            label: chartData.label_interpretability,
+                            data: [9, 8, 5, 2],
+                            backgroundColor: 'rgba(45, 212, 191, 0.6)', // teal-400
+                            borderColor: 'rgba(45, 212, 191, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: chartData.label_accuracy,
+                            data: [6, 7, 9, 10],
+                            backgroundColor: 'rgba(251, 146, 60, 0.6)', // orange-400
+                            borderColor: 'rgba(251, 146, 60, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { 
+                            y: { beginAtZero: true, max: 10, ticks: { color: chartTextColor }, grid: { color: chartGridColor }}, 
+                            x: { ticks: { color: chartTextColor }, grid: { color: chartGridColor }}
+                        },
+                        plugins: { legend: { labels: { color: chartTextColor }}, tooltip: { mode: 'index', intersect: false }}
+                    }
+                });
+            };
+            
+            const createCompasChart = () => {
+                if (compasChart) compasChart.destroy();
+                const data = translations[currentLang].fairness.compas[currentCompasView];
+                const chartLabel = translations[currentLang].fairness.compas.chart_label;
+                const ctx = document.getElementById('compasChart').getContext('2d');
+                compasChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: chartLabel,
+                            data: data.values,
+                            backgroundColor: ['rgba(96, 165, 250, 0.6)', 'rgba(248, 113, 113, 0.6)'], // blue-400, red-400
+                            borderColor: ['rgba(96, 165, 250, 1)', 'rgba(248, 113, 113, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: { 
+                            x: { beginAtZero: true, max: currentCompasView === 'propublica' ? 50 : 70, ticks: { color: chartTextColor }, grid: { color: chartGridColor }},
+                            y: { ticks: { color: chartTextColor }, grid: { color: 'transparent' }}
+                        },
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${c.dataset.label}: ${c.raw}%`}}}
+                    }
+                });
+                document.querySelector('#compas-explanation p').textContent = data.explanation;
+            };
+            
+            document.getElementById('propublicaBtn').addEventListener('click', (e) => {
+                currentCompasView = 'propublica';
+                createCompasChart();
+                e.target.classList.add('active');
+                document.getElementById('northpointeBtn').classList.remove('active');
+            });
+            
+            document.getElementById('northpointeBtn').addEventListener('click', (e) => {
+                currentCompasView = 'northpointe';
+                createCompasChart();
+                e.target.classList.add('active');
+                document.getElementById('propublicaBtn').classList.remove('active');
+            });
+
+            document.querySelectorAll('.xai-tab-button').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.xai-tab-button').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.xai-tab-pane').forEach(pane => pane.classList.add('hidden'));
+                    document.getElementById(tab.dataset.tab).classList.remove('hidden');
+                });
+            });
+
+            const updateLifecycleDetails = () => {
+                const data = translations[currentLang].fairness.lifecycle['s' + (Array.from(document.querySelectorAll('.lifecycle-stage')).findIndex(el => el.dataset.lifecycle === currentLifecycleStage) + 1)];
+                const detailsContainer = document.getElementById('lifecycle-details');
+                detailsContainer.innerHTML = `<h5 class="text-xl font-bold text-teal-400 mb-2">${data.title}</h5><div class="text-slate-300">${data.details}</div>`;
+            };
+            
+            document.querySelectorAll('.lifecycle-stage').forEach(stage => {
+                stage.addEventListener('click', () => {
+                    document.querySelectorAll('.lifecycle-stage').forEach(s => s.classList.remove('active'));
+                    stage.classList.add('active');
+                    currentLifecycleStage = stage.dataset.lifecycle;
+                    updateLifecycleDetails();
+                });
+            });
+
+            const onScroll = () => {
+                let currentSection = '';
+                document.querySelectorAll('section').forEach(section => {
+                    if (pageYOffset >= section.offsetTop - 80) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSection}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            const setLanguage = (lang) => {
+                currentLang = lang;
+                document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+                document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+                
+                updateTextContent();
+                createTradeoffChart();
+                createCompasChart();
+                updateLifecycleDetails();
+            };
+
+            document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
+            document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+            
+            window.addEventListener('scroll', onScroll);
+
+            // Initial Load
+            setLanguage('zh');
+            onScroll();
+        });
+    </script>
+</body>
+</html>
