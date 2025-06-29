@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：最後的公域</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The SPA employs a problem-oriented, thematic structure instead of a linear report format. It starts with a hero section summarizing the three core crises (Resources, Military, Environment) and uses a sticky navigation bar to guide users through dedicated, interactive sections. This structure is designed for non-linear exploration, allowing users to grasp the interconnected nature of the issues. Key interactions include: 1) Clickable cards to reveal detailed information on space resources. 2) An interactive toggle-based comparison of the Artemis Accords vs. ILRS to highlight the geopolitical split. 3) A radar chart for visualizing and comparing the military capabilities of major powers. 4) A dynamic line chart for space debris growth and a visual diagram explaining the Kessler Syndrome. 5) A tabbed interface for exploring proposed solutions. This design prioritizes usability and comprehension by breaking down complex topics into digestible, interactive modules. A language switcher has been added for EN/ZH accessibility. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key space resources (Moon ice, asteroids). Goal: Inform & Compare. Viz: Clickable HTML/CSS cards. Interaction: Click to reveal details. Justification: Organizes distinct topics clearly. Library: Vanilla JS.
+        - Report Info: Artemis Accords vs. ILRS comparison (Table 1). Goal: Compare. Viz: Interactive HTML/CSS toggle view. Interaction: Switch between accords to compare specific principles. Justification: More engaging and direct comparison than a static table. Library: Vanilla JS.
+        - Report Info: Anti-space capabilities (Table 2). Goal: Compare. Viz: Radar Chart. Interaction: Hover tooltips provide details. Justification: Offers a potent visual summary of relative strengths across multiple domains. Library: Chart.js.
+        - Report Info: Space debris growth and sources. Goal: Show Change & Proportion. Viz: Line Chart (growth), Donut Chart (sources). Interaction: Animated rendering, tooltips. Justification: Effectively visualizes quantitative data trends and composition. Library: Chart.js.
+        - Report Info: Dual-use dilemma, Kessler Syndrome. Goal: Explain Complex Concepts. Viz: Styled HTML/CSS diagrams. Interaction: Static visual aids. Justification: Simplifies abstract concepts for quick understanding. Method: HTML/CSS with Tailwind.
+        - Report Info: Policy solutions. Goal: Organize. Viz: Tabbed HTML/CSS interface. Interaction: Click tabs to switch content. Justification: Neatly categorizes diverse solutions without cluttering the page. Library: Vanilla JS.
+        - All text elements are now sourced from a central JS object to support bilingual (ZH/EN) functionality.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', 'Roboto', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .active-nav { color: #2a9d8f; font-weight: 700; }
+        .inactive-nav { color: #4b5563; }
+        .tab-active { background-color: #2a9d8f; color: white; }
+        .tab-inactive { background-color: #e5e7eb; color: #374151; }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-slate-800" data-lang-key="mainTitle">最後的公域</h1>
+            <div class="hidden md:flex items-center space-x-6 text-lg font-medium">
+                <a href="#intro" class="inactive-nav hover:text-[#2a9d8f] transition-colors duration-300" data-lang-key="navIntro">導覽</a>
+                <a href="#resources" class="inactive-nav hover:text-[#2a9d8f] transition-colors duration-300" data-lang-key="navResources">資源爭奪</a>
+                <a href="#militarization" class="inactive-nav hover:text-[#2a9d8f] transition-colors duration-300" data-lang-key="navMilitarization">軍事威脅</a>
+                <a href="#environment" class="inactive-nav hover:text-[#2a9d8f] transition-colors duration-300" data-lang-key="navEnvironment">環境危機</a>
+                <a href="#solutions" class="inactive-nav hover:text-[#2a9d8f] transition-colors duration-300" data-lang-key="navSolutions">未來之路</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 border-2 border-slate-400 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">EN / 中</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500">
+                <div class="w-6 h-0.5 bg-slate-800 mb-1"></div>
+                <div class="w-6 h-0.5 bg-slate-800 mb-1"></div>
+                <div class="w-6 h-0.5 bg-slate-800"></div>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-white py-2">
+            <a href="#intro" class="block text-center py-2 text-lg font-medium text-gray-700 hover:bg-slate-100" data-lang-key="navIntroMobile">導覽</a>
+            <a href="#resources" class="block text-center py-2 text-lg font-medium text-gray-700 hover:bg-slate-100" data-lang-key="navResourcesMobile">資源爭奪</a>
+            <a href="#militarization" class="block text-center py-2 text-lg font-medium text-gray-700 hover:bg-slate-100" data-lang-key="navMilitarizationMobile">軍事威脅</a>
+            <a href="#environment" class="block text-center py-2 text-lg font-medium text-gray-700 hover:bg-slate-100" data-lang-key="navEnvironmentMobile">環境危機</a>
+            <a href="#solutions" class="block text-center py-2 text-lg font-medium text-gray-700 hover:bg-slate-100" data-lang-key="navSolutionsMobile">未來之路</a>
+            <button id="lang-switcher-mobile" class="mt-2 mx-auto block px-3 py-1 border-2 border-slate-400 rounded-full text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">EN / 中</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="intro" class="text-center min-h-[80vh] flex flex-col justify-center items-center">
+            <h2 class="text-4xl md:text-6xl font-bold text-slate-900 leading-tight" data-lang-key="heroTitle">最後的公域，正處於十字路口</h2>
+            <p class="mt-6 text-lg md:text-xl max-w-3xl text-gray-600" data-lang-key="heroSubtitle">
+                新一輪的太空競賽已然展開。對地外資源的渴望、太空軍事化的幽靈，以及日益惡化的軌道環境，正共同將人類的太空活動推向一個危險的臨界點。本互動報告旨在剖析這場多面向的危機，並探索通往可持續未來的合作路徑。
+            </p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+                <a href="#resources" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-[#264653]" data-lang-key="card1Title">資源爭奪</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="card1Text">一場新「淘金熱」正在上演，月球水冰與小行星礦物成為地緣政治博弈的新籌碼。</p>
+                </a>
+                <a href="#militarization" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-[#264653]" data-lang-key="card2Title">軍事威脅</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="card2Text">反衛星武器與「殺傷網」的發展，使太空可能成為未來大國衝突的第一戰場。</p>
+                </a>
+                <a href="#environment" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                    <h3 class="text-2xl font-bold text-[#264653]" data-lang-key="card3Title">環境危機</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="card3Text">失控的太空碎片正將關鍵軌道推向「凱斯勒效應」的災難邊緣。</p>
+                </a>
+            </div>
+        </section>
+
+        <section id="resources" class="py-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900" data-lang-key="resourcesTitle">新天體淘金熱</h2>
+            <p class="text-center mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="resourcesIntro">
+                本節闡明當前太空活動背後的經濟與戰略驅動因素。這些「獎品」不僅定義了競賽的目標，也為後續的法律與安全衝突埋下了伏筆。點擊下方卡片，探索關鍵太空資源的價值。
+            </p>
+
+            <div id="resource-cards" class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="resource-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-slate-100 transition" data-resource="moon">
+                    <h3 class="text-xl font-bold text-[#264653]" data-lang-key="resourceMoonTitle">🌕 月球水冰</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="resourceMoonText">未來的「太空加油站」，是前往火星及更深遠太空的關鍵。</p>
+                </div>
+                <div class="resource-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-slate-100 transition" data-resource="asteroid">
+                    <h3 class="text-xl font-bold text-[#264653]" data-lang-key="resourceAsteroidTitle">☄️ 小行星礦物</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="resourceAsteroidText">漂浮的礦藏，富含地球稀缺的高價值鉑族金屬。</p>
+                </div>
+                <div class="resource-card bg-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-slate-100 transition" data-resource="orbit">
+                    <h3 class="text-xl font-bold text-[#264653]" data-lang-key="resourceOrbitTitle">🛰️ 軌道位置</h3>
+                    <p class="mt-2 text-gray-500" data-lang-key="resourceOrbitText">有限的自然資源，是通訊、廣播和觀測的黃金地段。</p>
+                </div>
+            </div>
+
+            <div id="resource-details" class="mt-8 p-8 bg-white rounded-lg shadow-inner min-h-[200px] flex items-center justify-center">
+                <p class="text-gray-500 text-lg" data-lang-key="resourceDetailsPlaceholder">點擊上方卡片以查看詳細資訊。</p>
+            </div>
+
+            <div class="mt-20">
+                <h3 class="text-2xl md:text-3xl font-bold text-center text-slate-800" data-lang-key="comparisonTitle">天國之路的分岔口</h3>
+                <p class="text-center mt-3 max-w-3xl mx-auto text-gray-600" data-lang-key="comparisonIntro">圍繞資源權益的法律解釋分歧，已在地緣政治上分裂為兩大陣營。使用下方的切換器，比較由美國主導的《阿提米絲協議》與中俄主導的「國際月球科研站」的核心差異。</p>
+                <div class="mt-8 max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+                    <div class="flex justify-center mb-6">
+                        <div class="flex bg-gray-200 rounded-full p-1">
+                            <button id="show-artemis" class="comparison-toggle tab-active px-6 py-2 text-lg font-semibold rounded-full focus:outline-none" data-lang-key="artemisBtn">阿提米絲協議</button>
+                            <button id="show-ilrs" class="comparison-toggle tab-inactive px-6 py-2 text-lg font-semibold rounded-full focus:outline-none" data-lang-key="ilrsBtn">國際月球科研站</button>
+                        </div>
+                    </div>
+                    <div id="comparison-content"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="militarization" class="py-20 bg-slate-100 -mx-4 md:-mx-8 px-4 md:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900" data-lang-key="militarizationTitle">天堂的武器化</h2>
+            <p class="text-center mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="militarizationIntro">
+                經濟競爭與法律模糊性助長了太空軍備競賽。現代軍隊對太空資產的高度依賴，使得太空成為潛在衝突的制高點。下圖展示了主要大國在關鍵反太空能力上的發展態勢。
+            </p>
+            <div class="mt-12 chart-container">
+                <canvas id="capabilitiesChart"></canvas>
+            </div>
+             <div class="mt-12 max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6">
+                <h4 class="text-xl font-bold text-center text-[#e76f51]" data-lang-key="dualUseTitle">軍民兩用的內在挑戰</h4>
+                <p class="mt-3 text-gray-600" data-lang-key="dualUseText">防止太空武器化的最大困境在於，幾乎所有先進太空技術都具有軍民兩用性。一顆設計用於清除碎片的「清潔」衛星，其技術與一顆用於攻擊的「捕食者」衛星可能完全相同。這種模糊性使得軍備控制談判極其困難，並引發了各方在防禦性舉措的掩護下發展進攻性能力的安全困境。</p>
+            </div>
+        </section>
+
+        <section id="environment" class="py-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900" data-lang-key="environmentTitle">軌道公地的悲劇</h2>
+            <p class="text-center mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="environmentIntro">
+                太空環境正因人類活動而面臨無聲的危機。數以萬計的碎片以驚人速度環繞地球，不僅威脅現役衛星，更可能引發一場名為「凱斯勒效應」的災難性連鎖反應，使關鍵軌道永久失效。
+            </p>
+            <div class="mt-12 grid md:grid-cols-2 gap-12 items-center">
+                <div class="chart-container h-[300px] md:h-[350px]">
+                     <h3 class="text-xl font-bold text-center mb-4 text-slate-800" data-lang-key="debrisChartTitle">可追蹤太空碎片數量趨勢</h3>
+                    <canvas id="debrisChart"></canvas>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold text-center text-[#2a9d8f]" data-lang-key="kesslerTitle">凱斯勒效應：災難的連鎖反應</h3>
+                    <div class="mt-4 space-y-3 text-gray-600">
+                        <p><strong data-lang-key="kesslerStep1Title">第一步：臨界密度</strong> - <span data-lang-key="kesslerStep1Text">某一軌道上的碎片數量達到飽和的臨界點。</span></p>
+                        <p><strong data-lang-key="kesslerStep2Title">第二步：初始碰撞</strong> - <span data-lang-key="kesslerStep2Text">一次隨機碰撞（例如，一顆報廢衛星撞上另一塊碎片）產生了更多的新碎片。</span></p>
+                        <p><strong data-lang-key="kesslerStep3Title">第三步：連鎖反應</strong> - <span data-lang-key="kesslerStep3Text">新產生的碎片雲顯著增加了後續碰撞的機率，引發更多碰撞，碎片數量呈指數級增長。</span></p>
+                        <p><strong data-lang-key="kesslerStep4Title">最終結果：</strong> <span data-lang-key="kesslerStep4Text">軌道被碎片徹底污染，在數百甚至數千年的時間內都無法安全使用。</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20">
+                 <h3 class="text-2xl md:text-3xl font-bold text-center text-slate-800" data-lang-key="dilemmaTitle">清潔工的困境</h3>
+                <p class="text-center mt-3 max-w-3xl mx-auto text-gray-600" data-lang-key="dilemmaIntro">主動碎片清除（ADR）技術雖已出現，但其部署卻面臨法律與安全的雙重障礙。</p>
+                <div class="mt-8 grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-red-500">
+                        <h4 class="text-lg font-bold" data-lang-key="dilemma1Title">軍民兩用問題</h4>
+                        <p class="mt-2" data-lang-key="dilemma1Text">能捕獲碎片的「清潔工」衛星，也能捕獲正常運作的衛星，使其成為潛在武器。</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+                        <h4 class="text-lg font-bold" data-lang-key="dilemma2Title">所有權問題</h4>
+                        <p class="mt-2" data-lang-key="dilemma2Text">根據《外太空條約》，報廢衛星仍屬其發射國。未經許可的清理行動等同於侵犯他國財產。</p>
+                    </div>
+                </div>
+                 <p class="text-center mt-6 max-w-3xl mx-auto text-gray-600 font-semibold" data-lang-key="dilemmaConclusion">這個「死結」意味著，沒有國家願意讓潛在對手以「清理垃圾」為名，部署一支可能威脅自身太空資產的「清潔艦隊」。</p>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-20 bg-slate-100 -mx-4 md:-mx-8 px-4 md:px-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900" data-lang-key="solutionsTitle">擘劃可持續的未來</h2>
+            <p class="text-center mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="solutionsIntro">
+                單一的全球條約在當前地緣政治氣候下已難實現。未來必須採取一種更靈活、務實的多中心治理模式，結合法律、規範、技術與市場的力量，共同維護這一最後的公域。
+            </p>
+            <div class="mt-12 max-w-4xl mx-auto">
+                <div class="flex flex-wrap justify-center border-b border-gray-300">
+                    <button class="solution-tab tab-active px-4 py-3 text-lg font-semibold focus:outline-none" data-tab="governance" data-lang-key="solutionTab1">多中心治理</button>
+                    <button class="solution-tab tab-inactive px-4 py-3 text-lg font-semibold focus:outline-none" data-tab="trust" data-lang-key="solutionTab2">建立信任</button>
+                    <button class="solution-tab tab-inactive px-4 py-3 text-lg font-semibold focus:outline-none" data-tab="market" data-lang-key="solutionTab3">市場驅動</button>
+                     <button class="solution-tab tab-inactive px-4 py-3 text-lg font-semibold focus:outline-none" data-tab="tech" data-lang-key="solutionTab4">循環經濟</button>
+                </div>
+                <div id="solution-content" class="mt-6 bg-white p-6 rounded-b-lg shadow-md min-h-[250px]">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8 text-center">
+        <p data-lang-key="footerText1">本互動式報告基於「最後的公域：駕馭外太空的競爭、衝突與保育」戰略分析報告創建。</p>
+        <p class="mt-2 text-sm text-slate-400" data-lang-key="footerText2">僅用於演示目的。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // --- LANGUAGE DATA ---
+            const translations = {
+                zh: {
+                    mainTitle: "最後的公域",
+                    navIntro: "導覽", navResources: "資源爭奪", navMilitarization: "軍事威脅", navEnvironment: "環境危機", navSolutions: "未來之路",
+                    navIntroMobile: "導覽", navResourcesMobile: "資源爭奪", navMilitarizationMobile: "軍事威脅", navEnvironmentMobile: "環境危機", navSolutionsMobile: "未來之路",
+                    heroTitle: "最後的公域，正處於十字路口",
+                    heroSubtitle: "新一輪的太空競賽已然展開。對地外資源的渴望、太空軍事化的幽靈，以及日益惡化的軌道環境，正共同將人類的太空活動推向一個危險的臨界點。本互動報告旨在剖析這場多面向的危機，並探索通往可持續未來的合作路徑。",
+                    card1Title: "資源爭奪", card1Text: "一場新「淘金熱」正在上演，月球水冰與小行星礦物成為地緣政治博弈的新籌碼。",
+                    card2Title: "軍事威脅", card2Text: "反衛星武器與「殺傷網」的發展，使太空可能成為未來大國衝突的第一戰場。",
+                    card3Title: "環境危機", card3Text: "失控的太空碎片正將關鍵軌道推向「凱斯勒效應」的災難邊緣。",
+                    resourcesTitle: "新天體淘金熱",
+                    resourcesIntro: "本節闡明當前太空活動背後的經濟與戰略驅動因素。這些「獎品」不僅定義了競賽的目標，也為後續的法律與安全衝突埋下了伏筆。點擊下方卡片，探索關鍵太空資源的價值。",
+                    resourceMoonTitle: "🌕 月球水冰", resourceMoonText: "未來的「太空加油站」，是前往火星及更深遠太空的關鍵。",
+                    resourceAsteroidTitle: "☄️ 小行星礦物", resourceAsteroidText: "漂浮的礦藏，富含地球稀缺的高價值鉑族金屬。",
+                    resourceOrbitTitle: "🛰️ 軌道位置", resourceOrbitText: "有限的自然資源，是通訊、廣播和觀測的黃金地段。",
+                    resourceDetailsPlaceholder: "點擊上方卡片以查看詳細資訊。",
+                    resourceMoonDetailsTitle: "🌕 月球水冰：太空經濟的基石",
+                    resourceMoonDetailsContent: "近期最具戰略意義的資源。水冰可電解為氫和氧，是最高效的火箭推進劑。掌握其開採技術意味著月球可成為前往火星的「太空加油站」，從根本上改變太空探索的經濟模式。主要集中在月球兩極的永久陰影區。",
+                    resourceAsteroidDetailsTitle: "☄️ 小行星礦物：漂浮的寶藏",
+                    resourceAsteroidDetailsContent: "近地小行星富含水、矽、鎳、鐵等工業原料，更有地球稀缺的鉑族金屬。私人公司如 AstroForge 正積極開發採礦技術，旨在獲取這些高價值礦物，開啟太空製造（ISRU）的新時代。",
+                    resourceOrbitDetailsTitle: "🛰️ 軌道位置與頻率：有限的戰略資產",
+                    resourceOrbitDetailsContent: "地球靜止軌道（GEO）是一種有限的自然資源。其同步特性使其成為通信、廣播和氣象衛星的理想位置。可用「槽位」有限，早在1976年《波哥大宣言》就預示了未來因空間資源引發的爭端。",
+                    comparisonTitle: "天國之路的分岔口",
+                    comparisonIntro: "圍繞資源權益的法律解釋分歧，已在地緣政治上分裂為兩大陣營。使用下方的切換器，比較由美國主導的《阿提米絲協議》與中俄主導的「國際月球科研站」的核心差異。",
+                    artemisBtn: "阿提米絲協議", ilrsBtn: "國際月球科研站",
+                    artemisContent: `<h4 class="text-xl font-bold text-center mb-4 text-[#2a9d8f]">美國主導之《阿提米絲協議》</h4><ul class="space-y-3 text-gray-700"><li><strong>核心理念：</strong>務實合作，為月球探索建立廣泛聯盟。</li><li><strong>資源立場：</strong><span class="font-bold text-green-600">明確允許資源開採</span>，認為其不構成國家佔有。允許設立「安全區」保護作業。</li><li><strong>治理模式：</strong>以美國為中心的「軸輻式」雙邊協議網絡，被批評繞過聯合國框架。</li><li><strong>主要簽署方：</strong>日本、英國、印度、韓國等超過39個國家。</li></ul>`,
+                    ilrsContent: `<h4 class="text-xl font-bold text-center mb-4 text-[#e76f51]">中俄主導之國際月球科研站（ILRS）</h4><ul class="space-y-3 text-gray-700"><li><strong>核心理念：</strong>專注於建立一個永久性的、自主運作的科學研究基地。</li><li><strong>資源立場：</strong><span class="font-bold text-red-600">立場模糊但傾向反對單邊開採</span>，與「人類共同繼承財產」觀點一致，倡導建立國際共享機制。</li><li><strong>治理模式：</strong>一個多邊合作計畫，宣稱對所有感興趣國家開放，強調聯合國中心地位。</li><li><strong>主要合作夥伴：</strong>委內瑞拉、巴基斯坦、埃及等超過13個合作夥伴。</li></ul>`,
+                    militarizationTitle: "天堂的武器化",
+                    militarizationIntro: "經濟競爭與法律模糊性助長了太空軍備競賽。現代軍隊對太空資產的高度依賴，使得太空成為潛在衝突的制高點。下圖展示了主要大國在關鍵反太空能力上的發展態勢。",
+                    capabilitiesChartLabels: ['地基反衛(DA-ASAT)', '共軌威脅', '定向能武器', '網路與電子戰', '情監偵(ISR)網絡', '天基核武(研發)'],
+                    capabilitiesChartUSA: "美國", capabilitiesChartChina: "中國", capabilitiesChartRussia: "俄羅斯",
+                    dualUseTitle: "軍民兩用的內在挑戰",
+                    dualUseText: "防止太空武器化的最大困境在於，幾乎所有先進太空技術都具有軍民兩用性。一顆設計用於清除碎片的「清潔」衛星，其技術與一顆用於攻擊的「捕食者」衛星可能完全相同。這種模糊性使得軍備控制談判極其困難，並引發了各方在防禦性舉措的掩護下發展進攻性能力的安全困境。",
+                    environmentTitle: "軌道公地的悲劇",
+                    environmentIntro: "太空環境正因人類活動而面臨無聲的危機。數以萬計的碎片以驚人速度環繞地球，不僅威脅現役衛星，更可能引發一場名為「凱斯勒效應」的災難性連鎖反應，使關鍵軌道永久失效。",
+                    debrisChartTitle: "可追蹤太空碎片數量趨勢",
+                    debrisChartLabel: "大於10公分的可追蹤碎片數量",
+                    debrisChartYears: ['1980', '1990', '2000', '2010', '2020', '2025 (預測)'],
+                    kesslerTitle: "凱斯勒效應：災難的連鎖反應",
+                    kesslerStep1Title: "第一步：臨界密度", kesslerStep1Text: "某一軌道上的碎片數量達到飽和的臨界點。",
+                    kesslerStep2Title: "第二步：初始碰撞", kesslerStep2Text: "一次隨機碰撞（例如，一顆報廢衛星撞上另一塊碎片）產生了更多的新碎片。",
+                    kesslerStep3Title: "第三步：連鎖反應", kesslerStep3Text: "新產生的碎片雲顯著增加了後續碰撞的機率，引發更多碰撞，碎片數量呈指數級增長。",
+                    kesslerStep4Title: "最終結果：", kesslerStep4Text: "軌道被碎片徹底污染，在數百甚至數千年的時間內都無法安全使用。",
+                    dilemmaTitle: "清潔工的困境",
+                    dilemmaIntro: "主動碎片清除（ADR）技術雖已出現，但其部署卻面臨法律與安全的雙重障礙。",
+                    dilemma1Title: "軍民兩用問題", dilemma1Text: "能捕獲碎片的「清潔工」衛星，也能捕獲正常運作的衛星，使其成為潛在武器。",
+                    dilemma2Title: "所有權問題", dilemma2Text: "根據《外太空條約》，報廢衛星仍屬其發射國。未經許可的清理行動等同於侵犯他國財產。",
+                    dilemmaConclusion: "這個「死結」意味著，沒有國家願意讓潛在對手以「清理垃圾」為名，部署一支可能威脅自身太空資產的「清潔艦隊」。",
+                    solutionsTitle: "擘劃可持續的未來",
+                    solutionsIntro: "單一的全球條約在當前地緣政治氣候下已難實現。未來必須採取一種更靈活、務實的多中心治理模式，結合法律、規範、技術與市場的力量，共同維護這一最後的公域。",
+                    solutionTab1: "多中心治理", solutionTab2: "建立信任", solutionTab3: "市場驅動", solutionTab4: "循環經濟",
+                    solutionContentGovernance: `<h4 class="text-xl font-bold mb-3 text-[#264653]">採納多中心治理模型</h4><p class="text-gray-600">承認單一全球條約的困境，轉而尋求一種多層次的治理方法，結合：</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>強化《外太空條約》：</strong>重申其核心原則的普適性。</li><li><strong>由下而上建立規範：</strong>積極推動非約束性的行為準則，作為近期降低風險的務實步驟。</li><li><strong>整合私人部門：</strong>正式將商業公司、民間社會代表等納入治理討論。</li></ul>`,
+                    solutionContentTrust: `<h4 class="text-xl font-bold mb-3 text-[#264653]">透明與建立信任措施 (TCBMs)</h4><p class="text-gray-600">鑑於軍備控制談判的僵局，TCBMs是當前最有希望取得進展的途徑，旨在透過增加透明度來減少誤判風險。</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>資訊交換：</strong>定期公佈太空政策、軌道數據和發射前通報。</li><li><strong>風險通報：</strong>在進行軌道機動或發現碰撞風險時及時通知相關方。</li><li><strong>全球SSA網絡：</strong>建立一個全球共享、開放的太空態勢感知（SSA）數據網絡，是所有信任措施的基礎。</li></ul>`,
+                    solutionContentMarket: `<h4 class="text-xl font-bold mb-3 text-[#264653]">解決「清潔工的困境」</h4><p class="text-gray-600">為了解決法律與安全上的「死結」，需要啟動專門的多邊對話，為「主動碎片清除」（ADR）制定詳細的法律與安全協議。</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>目標是創建一個框架，允許經過授權、受國際監督的ADR任務得以執行。</li><li>克服軍民兩用和所有權的雙重障礙。</li></ul>`,
+                    solutionContentTech: `<h4 class="text-xl font-bold mb-3 text-[#264653]">投資於循環太空經濟</h4><p class="text-gray-600">各國政府應利用政策和資金，激勵可持續太空技術的發展，創建一個新的生態系統。</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>衛星延壽：</strong>延長衛星在軌服務時間。</li><li><strong>在軌加注與維修：</strong>發展在太空為衛星補充燃料和進行維修的能力。</li><li><strong>回收與再利用：</strong>將報廢衛星和碎片視為可再利用的資源，而非需要處理的威脅。</li></ul>`,
+                    footerText1: "本互動式報告基於「最後的公域：駕馭外太空的競爭、衝突與保育」戰略分析報告創建。",
+                    footerText2: "僅用於演示目的。",
+                },
+                en: {
+                    mainTitle: "The Final Frontier",
+                    navIntro: "Intro", navResources: "Resources", navMilitarization: "Military", navEnvironment: "Environment", navSolutions: "Solutions",
+                    navIntroMobile: "Intro", navResourcesMobile: "Resources", navMilitarizationMobile: "Military", navEnvironmentMobile: "Environment", navSolutionsMobile: "Solutions",
+                    heroTitle: "The Final Frontier is at a Crossroads",
+                    heroSubtitle: "A new space race has begun. The desire for extraterrestrial resources, the specter of space militarization, and a deteriorating orbital environment are pushing human space activities to a dangerous tipping point. This interactive report dissects this multi-faceted crisis and explores collaborative paths toward a sustainable future.",
+                    card1Title: "Resource Scramble", card1Text: "A new 'gold rush' is underway, with lunar water ice and asteroid minerals becoming new chips in the geopolitical game.",
+                    card2Title: "Military Threat", card2Text: "The development of anti-satellite weapons and 'kill webs' could make space the first battlefield in future great power conflicts.",
+                    card3Title: "Environmental Crisis", card3Text: "Uncontrolled space debris is pushing key orbits to the brink of a catastrophic 'Kessler Syndrome'.",
+                    resourcesTitle: "The New Celestial Gold Rush",
+                    resourcesIntro: "This section clarifies the economic and strategic drivers behind current space activities. These 'prizes' not only define the competition's goals but also set the stage for subsequent legal and security conflicts. Click the cards below to explore the value of key space resources.",
+                    resourceMoonTitle: "🌕 Lunar Water Ice", resourceMoonText: "The future 'gas station in space,' crucial for missions to Mars and beyond.",
+                    resourceAsteroidTitle: "☄️ Asteroid Minerals", resourceAsteroidText: "Floating ore deposits, rich in high-value platinum-group metals scarce on Earth.",
+                    resourceOrbitTitle: "🛰️ Orbital Slots", resourceOrbitText: "A finite natural resource, the prime real estate for communications, broadcasting, and observation.",
+                    resourceDetailsPlaceholder: "Click a card above to see details.",
+                    resourceMoonDetailsTitle: "🌕 Lunar Water Ice: Cornerstone of the Space Economy",
+                    resourceMoonDetailsContent: "The most strategically significant resource in the near term. Water ice can be electrolyzed into hydrogen and oxygen, the most efficient rocket propellants. Mastering its extraction means the Moon can become a 'gas station' for missions to Mars, fundamentally changing space exploration economics. Primarily concentrated in permanently shadowed regions at the lunar poles.",
+                    resourceAsteroidDetailsTitle: "☄️ Asteroid Minerals: Floating Treasures",
+                    resourceAsteroidDetailsContent: "Near-Earth asteroids are rich in industrial materials like water, silicon, nickel, and iron, as well as platinum-group metals rare on Earth. Private companies like AstroForge are actively developing mining technologies to access these high-value minerals, heralding a new era of In-Situ Resource Utilization (ISRU).",
+                    resourceOrbitDetailsTitle: "🛰️ Orbital Slots & Frequencies: A Finite Strategic Asset",
+                    resourceOrbitDetailsContent: "The Geostationary Orbit (GEO) is a limited natural resource. Its synchronous nature makes it ideal for communications, broadcasting, and weather satellites. Available 'slots' are limited, and the 1976 Bogotá Declaration foreshadowed future disputes over this finite spatial resource.",
+                    comparisonTitle: "A Fork in the Celestial Road",
+                    comparisonIntro: "Diverging legal interpretations of resource rights have fractured the geopolitical landscape into two major camps. Use the toggle below to compare the core differences between the US-led Artemis Accords and the China-Russia-led ILRS.",
+                    artemisBtn: "Artemis Accords", ilrsBtn: "ILRS",
+                    artemisContent: `<h4 class="text-xl font-bold text-center mb-4 text-[#2a9d8f]">US-led Artemis Accords</h4><ul class="space-y-3 text-gray-700"><li><strong>Core Philosophy:</strong> Pragmatic cooperation; building a broad coalition for lunar exploration.</li><li><strong>Stance on Resources:</strong> <span class="font-bold text-green-600">Explicitly permits resource extraction,</span> stating it does not constitute national appropriation. Allows 'safety zones' to protect operations.</li><li><strong>Governance Model:</strong> A 'hub-and-spoke' network of bilateral agreements centered on the US, criticized for bypassing UN frameworks.</li><li><strong>Key Signatories:</strong> Japan, UK, India, South Korea, and over 39 other nations.</li></ul>`,
+                    ilrsContent: `<h4 class="text-xl font-bold text-center mb-4 text-[#e76f51]">China-Russia-led ILRS</h4><ul class="space-y-3 text-gray-700"><li><strong>Core Philosophy:</strong> Focused on establishing a permanent, autonomous scientific research base.</li><li><strong>Stance on Resources:</strong> <span class="font-bold text-red-600">Ambiguous but leans against unilateral extraction,</span> aligning with the 'common heritage of mankind' principle, advocating for an international sharing mechanism.</li><li><strong>Governance Model:</strong> A multilateral project, open to all interested nations, emphasizing the centrality of the UN.</li><li><strong>Key Partners:</strong> Venezuela, Pakistan, Egypt, and over 13 other partners.</li></ul>`,
+                    militarizationTitle: "The Weaponization of Paradise",
+                    militarizationIntro: "Economic competition and legal ambiguity fuel a space arms race. Modern militaries' heavy reliance on space assets makes space the ultimate high ground in potential conflicts. The chart below illustrates the development of key counter-space capabilities by major powers.",
+                    capabilitiesChartLabels: ['DA-ASAT', 'Co-orbital Threats', 'Directed Energy', 'Cyber & EW', 'ISR Networks', 'Nuclear (R&D)'],
+                    capabilitiesChartUSA: "USA", capabilitiesChartChina: "China", capabilitiesChartRussia: "Russia",
+                    dualUseTitle: "The Inherent Dual-Use Challenge",
+                    dualUseText: "The primary obstacle to preventing space weaponization is that nearly all advanced space technology is inherently dual-use. A 'cleaner' satellite designed to remove debris could have identical technology to a 'predator' satellite for attack. This ambiguity makes arms control negotiations extremely difficult and fuels a security dilemma where defensive moves are perceived as offensive threats.",
+                    environmentTitle: "Tragedy of the Orbital Commons",
+                    environmentIntro: "The space environment faces a silent crisis from human activity. Tens of thousands of debris pieces orbit Earth at incredible speeds, threatening not only active satellites but also risking a catastrophic chain reaction known as the 'Kessler Syndrome,' which could render key orbits permanently unusable.",
+                    debrisChartTitle: "Trackable Space Debris Growth",
+                    debrisChartLabel: "Number of trackable debris objects > 10cm",
+                    debrisChartYears: ['1980', '1990', '2000', '2010', '2020', '2025 (est.)'],
+                    kesslerTitle: "Kessler Syndrome: A Chain Reaction of Disaster",
+                    kesslerStep1Title: "Step 1: Critical Density", kesslerStep1Text: "The number of debris objects in an orbit reaches a critical saturation point.",
+                    kesslerStep2Title: "Step 2: Initial Collision", kesslerStep2Text: "A random collision (e.g., a defunct satellite hitting another piece of debris) creates many more new pieces.",
+                    kesslerStep3Title: "Step 3: Chain Reaction", kesslerStep3Text: "The new debris cloud significantly increases the probability of subsequent collisions, leading to exponential growth in debris.",
+                    kesslerStep4Title: "Step 4: The End Result", kesslerStep4Text: "The orbit becomes completely polluted with debris, rendering it unsafe for use for hundreds or even thousands of years.",
+                    dilemmaTitle: "The Janitor's Dilemma",
+                    dilemmaIntro: "Although Active Debris Removal (ADR) technology exists, its deployment faces dual legal and security hurdles.",
+                    dilemma1Title: "Dual-Use Problem", dilemma1Text: "A 'janitor' satellite that can capture debris can also capture a functioning satellite, making it a potential weapon.",
+                    dilemma2Title: "Ownership Problem", dilemma2Text: "Under the Outer Space Treaty, a defunct satellite still belongs to its launching state. Unauthorized removal is tantamount to trespassing on another country's property.",
+                    dilemmaConclusion: "This 'catch-22' means no nation is willing to let a potential adversary deploy a fleet of 'janitors' that could threaten its own space assets under the guise of cleaning up trash.",
+                    solutionsTitle: "Charting a Sustainable Future",
+                    solutionsIntro: "A single global treaty is unfeasible in the current geopolitical climate. The future requires a more flexible, pragmatic, polycentric governance model, combining law, norms, technology, and market forces to preserve this final commons.",
+                    solutionTab1: "Polycentric Governance", solutionTab2: "Build Trust", solutionTab3: "Market-Driven", solutionTab4: "Circular Economy",
+                    solutionContentGovernance: `<h4 class="text-xl font-bold mb-3 text-[#264653]">Adopt a Polycentric Governance Model</h4><p class="text-gray-600">Acknowledge the impasse of a single global treaty and pursue a multi-layered approach that combines:</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>Strengthening the Outer Space Treaty:</strong> Reaffirming the universality of its core principles.</li><li><strong>Bottom-Up Norm Building:</strong> Actively promoting non-binding codes of conduct as a pragmatic step to reduce risks in the near term.</li><li><strong>Integrating the Private Sector:</strong> Formally including commercial companies and civil society representatives in governance discussions.</li></ul>`,
+                    solutionContentTrust: `<h4 class="text-xl font-bold mb-3 text-[#264653]">Transparency and Confidence-Building Measures (TCBMs)</h4><p class="text-gray-600">Given the stalemate in arms control, TCBMs are the most promising avenue for progress, aiming to reduce the risk of miscalculation through increased transparency.</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>Information Exchange:</strong> Regular publication of space policies, orbital data, and pre-launch notifications.</li><li><strong>Risk Notifications:</strong> Timely communication to relevant parties when planning orbital maneuvers or detecting collision risks.</li><li><strong>Global SSA Network:</strong> Establishing a globally shared, open Space Situational Awareness (SSA) data network is fundamental to all trust-building efforts.</li></ul>`,
+                    solutionContentMarket: `<h4 class="text-xl font-bold mb-3 text-[#264653]">Solving the 'Janitor's Dilemma'</h4><p class="text-gray-600">To resolve the legal and security deadlock, a dedicated multilateral dialogue is needed to develop detailed legal and safety protocols for Active Debris Removal (ADR).</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li>The goal is to create a framework that allows authorized, internationally supervised ADR missions to proceed.</li><li>This would overcome the dual barriers of the dual-use problem and ownership rights.</li></ul>`,
+                    solutionContentTech: `<h4 class="text-xl font-bold mb-3 text-[#264653]">Invest in a Circular Space Economy</h4><p class="text-gray-600">Governments should use policy and funding to incentivize the development of sustainable space technologies, creating a new ecosystem.</p><ul class="list-disc list-inside mt-2 space-y-1 text-gray-600"><li><strong>Satellite Life Extension:</strong> Extending the operational life of satellites in orbit.</li><li><strong>On-Orbit Refueling and Servicing:</strong> Developing the capability to refuel and repair satellites in space.</li><li><strong>Recycling and Reuse:</strong> Treating defunct satellites and debris as reusable resources rather than threats to be disposed of.</li></ul>`,
+                    footerText1: "This interactive report was created based on the strategic analysis report 'The Final Frontier: Navigating Competition, Conflict, and Conservation in Outer Space.'",
+                    footerText2: "For demonstration purposes only.",
+                }
+            };
+
+            let currentLang = 'zh';
+            let capabilitiesChart, debrisChart;
+            const resourceDetails = document.getElementById('resource-details');
+            const comparisonContent = document.getElementById('comparison-content');
+            const solutionContent = document.getElementById('solution-content');
+
+            function switchLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                
+                // --- Translate all elements with data-lang-key ---
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+
+                // --- Re-initialize interactive content ---
+                updateResourceDetails(null); // Reset to placeholder
+                updateComparisonView(document.querySelector('.comparison-toggle.tab-active').id);
+                updateSolutionView(document.querySelector('.solution-tab.tab-active').dataset.tab);
+                
+                // --- Re-render charts ---
+                createCapabilitiesChart();
+                createDebrisChart();
+            }
+
+            // --- MOBILE MENU ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            mobileMenu.addEventListener('click', (e) => {
+                 if(e.target.tagName === 'A') {
+                     mobileMenu.classList.add('hidden');
+                 }
+            });
+
+
+            // --- SCROLLSPY ---
+            const navLinks = document.querySelectorAll('header nav a');
+            const sections = document.querySelectorAll('main section');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 70) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active-nav');
+                    link.classList.add('inactive-nav');
+                    if (link.href && link.href.includes(current)) {
+                        link.classList.add('active-nav');
+                        link.classList.remove('inactive-nav');
+                    }
+                });
+            });
+
+            // --- RESOURCE CARDS ---
+            function updateResourceDetails(resourceKey) {
+                if (!resourceKey) {
+                    resourceDetails.innerHTML = `<p class="text-gray-500 text-lg" data-lang-key="resourceDetailsPlaceholder">${translations[currentLang].resourceDetailsPlaceholder}</p>`;
+                    return;
+                }
+                const keyMap = {
+                    moon: { title: 'resourceMoonDetailsTitle', content: 'resourceMoonDetailsContent' },
+                    asteroid: { title: 'resourceAsteroidDetailsTitle', content: 'resourceAsteroidDetailsContent' },
+                    orbit: { title: 'resourceOrbitDetailsTitle', content: 'resourceOrbitDetailsContent' }
+                };
+                const data = keyMap[resourceKey];
+                resourceDetails.innerHTML = `
+                    <div class="text-left">
+                        <h4 class="text-2xl font-bold text-[#264653]">${translations[currentLang][data.title]}</h4>
+                        <p class="mt-3 text-gray-600 text-lg">${translations[currentLang][data.content]}</p>
+                    </div>`;
+            }
+            document.querySelectorAll('.resource-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    updateResourceDetails(card.dataset.resource);
+                });
+            });
+
+            // --- COMPARISON TOGGLE ---
+            function updateComparisonView(targetId) {
+                document.querySelectorAll('.comparison-toggle').forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('tab-inactive');
+                });
+                document.getElementById(targetId).classList.add('tab-active');
+                document.getElementById(targetId).classList.remove('tab-inactive');
+                
+                const contentKey = targetId === 'show-artemis' ? 'artemisContent' : 'ilrsContent';
+                comparisonContent.innerHTML = translations[currentLang][contentKey];
+            }
+            document.querySelectorAll('.comparison-toggle').forEach(toggle => {
+                toggle.addEventListener('click', (e) => updateComparisonView(e.target.id));
+            });
+
+            // --- CHARTS ---
+            function createCapabilitiesChart() {
+                if (capabilitiesChart) capabilitiesChart.destroy();
+                const ctx = document.getElementById('capabilitiesChart').getContext('2d');
+                capabilitiesChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: translations[currentLang].capabilitiesChartLabels,
+                        datasets: [{
+                            label: translations[currentLang].capabilitiesChartUSA,
+                            data: [7, 8, 7, 9, 10, 5],
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)', borderColor: 'rgb(54, 162, 235)', pointBackgroundColor: 'rgb(54, 162, 235)',
+                        }, {
+                            label: translations[currentLang].capabilitiesChartChina,
+                            data: [8, 7, 6, 8, 9, 3],
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)', borderColor: 'rgb(255, 99, 132)', pointBackgroundColor: 'rgb(255, 99, 132)',
+                        }, {
+                            label: translations[currentLang].capabilitiesChartRussia,
+                            data: [8, 8, 7, 8, 6, 8],
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)', borderColor: 'rgb(75, 192, 192)', pointBackgroundColor: 'rgb(75, 192, 192)',
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: { r: { angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, pointLabels: { font: { size: 12 } }, ticks: { backdropColor: 'rgba(255, 255, 255, 0.75)', stepSize: 2 }, suggestedMin: 0, suggestedMax: 10 } },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+            }
+
+            function createDebrisChart() {
+                if (debrisChart) debrisChart.destroy();
+                const ctx = document.getElementById('debrisChart').getContext('2d');
+                debrisChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: translations[currentLang].debrisChartYears,
+                        datasets: [{
+                            label: translations[currentLang].debrisChartLabel,
+                            data: [5000, 7000, 9000, 16000, 25000, 30000],
+                            fill: true, backgroundColor: 'rgba(233, 196, 106, 0.2)', borderColor: '#e9c46a', tension: 0.3
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            
+            // --- SOLUTION TABS ---
+            function updateSolutionView(targetTab) {
+                document.querySelectorAll('.solution-tab').forEach(t => {
+                    t.classList.remove('tab-active');
+                    t.classList.add('tab-inactive');
+                });
+                const selectedTab = document.querySelector(`.solution-tab[data-tab="${targetTab}"]`);
+                selectedTab.classList.add('tab-active');
+                selectedTab.classList.remove('tab-inactive');
+
+                const contentKeyMap = {
+                    governance: 'solutionContentGovernance',
+                    trust: 'solutionContentTrust',
+                    market: 'solutionContentMarket',
+                    tech: 'solutionContentTech'
+                };
+                solutionContent.innerHTML = translations[currentLang][contentKeyMap[targetTab]];
+            }
+            document.querySelectorAll('.solution-tab').forEach(tab => {
+                tab.addEventListener('click', (e) => updateSolutionView(e.target.dataset.tab));
+            });
+
+            // --- LANGUAGE SWITCHER EVENT LISTENERS ---
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
+            });
+            document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+                switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
+            });
+
+
+            // --- INITIAL LOAD ---
+            switchLanguage('zh'); // Load Chinese by default
+        });
+    </script>
+</body>
+</html>
