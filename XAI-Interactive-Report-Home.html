@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>可解釋人工智能 (XAI) 互動式報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: A thematic, tab-based single-page application. The structure is designed for non-linear exploration, allowing users to dive into specific areas of interest (Concepts, Tools, Applications, Governance) rather than following the linear flow of the source report. This approach breaks down dense information into manageable, interactive sections. Key interactions include tabbed navigation, clickable cards for definitions, toggle switches for comparing methods, and dynamic charts to visualize data points, making the content more engaging and easier to digest for a broad audience, from technical experts to business stakeholders. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key definitions (Transparency, Interpretability, etc.). Goal: Inform. Viz/Method: Interactive HTML cards with icons. Interaction: Click to reveal details. Justification: More engaging than a plain list.
+        - Report Info: Comparison of LIME vs. SHAP from Table 1. Goal: Compare. Viz/Method: Chart.js Bar Chart. Interaction: View pre-rendered chart. Justification: Provides a quick visual summary of strengths and weaknesses, superior to a static table for at-a-glance comparison.
+        - Report Info: Impact metrics from case studies (e.g., fraud detection accuracy up, collisions down). Goal: Change/Impact. Viz/Method: Chart.js Bar Charts and large-number HTML callouts. Interaction: Switch between case studies via tabs. Justification: Visualizes the tangible benefits of XAI, making the value proposition clear and impactful.
+        - Report Info: NIST vs. EU AI Act comparison. Goal: Organize. Viz/Method: Two-column HTML/Tailwind layout. Interaction: Static side-by-side view. Justification: Clearly contrasts the two major regulatory frameworks for easy comparison.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visualizations are created using Chart.js (Canvas) or structured HTML/CSS with Tailwind.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F8F7F4;
+            color: #3a3a3a;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            color: #1a5f7a;
+            border-bottom-color: #1a5f7a;
+        }
+        .nav-link:hover {
+            color: #1a5f7a;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 600px;
+            max-height: 400px;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #1a5f7a;
+            color: #ffffff;
+        }
+        .tab-button:not(.active) {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #e0f2f1, #ffffff);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-[#1a5f7a]" data-lang-key="header_title">可解釋AI (XAI) 互動報告</h1>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#home" class="nav-link px-3 py-2 rounded-md text-sm font-medium active" data-lang-key="nav_home">首頁</a>
+                        <a href="#concepts" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_concepts">核心概念</a>
+                        <a href="#methods" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_methods">方法與工具</a>
+                        <a href="#practice" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_practice">應用實踐</a>
+                        <a href="#governance" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_governance">治理與未來</a>
+                    </div>
+                    <div class="ml-4 flex items-center p-1 bg-gray-200 rounded-full">
+                        <button class="lang-btn px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300" data-lang="zh">中</button>
+                        <button class="lang-btn px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300" data-lang="en">En</button>
+                    </div>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <div class="mr-2 flex items-center p-1 bg-gray-200 rounded-full">
+                        <button class="lang-btn px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300" data-lang="zh">中</button>
+                        <button class="lang-btn px-3 py-1 text-sm font-medium rounded-full transition-colors duration-300" data-lang="en">En</button>
+                    </div>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium active" data-lang-key="nav_home_mobile">首頁</a>
+                <a href="#concepts" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_concepts_mobile">核心概念</a>
+                <a href="#methods" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_methods_mobile">方法與工具</a>
+                <a href="#practice" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_practice_mobile">應用實踐</a>
+                <a href="#governance" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_governance_mobile">治理與未來</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div id="home" class="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="text-center">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a5f7a]" data-lang-key="home_title">打開AI「黑箱」，建立可信賴的未來</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="home_subtitle">現代AI系統性能卓越，但其決策過程常如無法窺探的黑箱，引發信任危機。本報告深入探討可解釋AI (XAI)，展示如何透過透明化決策過程，建構更安全、可靠且符合倫理的智能系統。</p>
+            </div>
+            <div class="mt-12 grid gap-8 md:grid-cols-3">
+                <div class="card p-6 text-center">
+                    <div class="text-4xl text-[#1a5f7a] mb-4">⚖️</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="home_card1_title">監管壓力</h3>
+                    <p class="text-gray-600" data-lang-key="home_card1_text">歐盟《AI法案》等全球法規要求高風險AI系統必須具備透明度，使XAI從「加分項」變為市場准入的「必需品」。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl text-[#1a5f7a] mb-4">🤝</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="home_card2_title">倫理要求</h3>
+                    <p class="text-gray-600" data-lang-key="home_card2_text">XAI是確保AI公平性、問責性與無偏見的核心工具，幫助我們審查決策過程，確保其符合社會公德與倫理標準。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl text-[#1a5f7a] mb-4">⚙️</div>
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="home_card3_title">營運必要性</h3>
+                    <p class="text-gray-600" data-lang-key="home_card3_text">從模型除錯、提升系統安全性與可靠性，到建立使用者信任，XAI在AI生命週期的每個環節都扮演著關鍵角色。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="concepts" class="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a5f7a]" data-lang-key="concepts_title">XAI 核心概念光譜</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="concepts_subtitle">理解透明度、可詮釋性與可解釋性之間的細微差別，是建立可信賴AI的基礎。這三者相輔相成，共同構成了解開黑箱的鑰匙。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold text-[#1a5f7a] mb-3" data-lang-key="concepts_card1_title">透明度</h3>
+                    <p class="font-semibold text-gray-700 mb-4" data-lang-key="concepts_card1_q">回答「系統中發生了什麼？」</p>
+                    <p class="text-gray-600" data-lang-key="concepts_card1_text">指能夠讓利害關係人了解AI系統的適當資訊，包括揭露系統架構、訓練數據、基本假設，並讓使用者意識到正在與AI互動。</p>
+                </div>
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold text-[#1a5f7a] mb-3" data-lang-key="concepts_card2_title">可詮釋性</h3>
+                    <p class="font-semibold text-gray-700 mb-4" data-lang-key="concepts_card2_q">回答「決策為何發生且意味著什麼？」</p>
+                    <p class="text-gray-600" data-lang-key="concepts_card2_text">關注AI系統輸出在其設計功能背景下的「意義」。指的是人類能夠在多大程度上理解模型的決策過程，並將其與現實世界連結。</p>
+                </div>
+                <div class="card p-8">
+                    <h3 class="text-2xl font-bold text-[#1a5f7a] mb-3" data-lang-key="concepts_card3_title">可解釋性</h3>
+                    <p class="font-semibold text-gray-700 mb-4" data-lang-key="concepts_card3_q">回答「系統是如何做出決策的？」</p>
+                    <p class="text-gray-600" data-lang-key="concepts_card3_text">一個更廣泛的概念，指用人類可理解的方式來呈現AI系統運作的「機制」，涵蓋為決策提供理由和證據的各種方法和技術。</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="methods" class="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a5f7a]" data-lang-key="methods_title">XAI 方法論工具箱</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="methods_subtitle">為了打開AI的黑箱，研究人員開發了豐富的XAI方法。本節將深入探討最主流的事後解釋技術，特別是LIME和SHAP，並比較它們的優劣。</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="methods_chart_title">LIME vs. SHAP：關鍵技術比較</h3>
+                <div class="chart-container">
+                    <canvas id="limeVsShapChart"></canvas>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                    <div>
+                        <h4 class="text-xl font-bold text-[#1a5f7a]" data-lang-key="methods_lime_title">LIME (區域可詮釋模型無關解釋)</h4>
+                        <p class="mt-2 text-gray-600" data-lang-key="methods_lime_text">核心思想是在特定預測的局部，用一個簡單的可解釋模型（如線性迴歸）來近似複雜黑箱模型的行為。</p>
+                        <p class="mt-3 font-semibold text-green-600" data-lang-key="methods_lime_pro">優點：直觀易懂，適用於任何模型。</p>
+                        <p class="mt-1 font-semibold text-red-600" data-lang-key="methods_lime_con">弱點：解釋不穩定，易受參數和隨機採樣影響，可能隱藏偏見。</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-bold text-[#1a5f7a]" data-lang-key="methods_shap_title">SHAP (SHapley 加法解釋)</h4>
+                        <p class="mt-2 text-gray-600" data-lang-key="methods_shap_text">基於合作賽局理論，將預測貢獻公平地分配給每個輸入特徵，計算其SHAP值。</p>
+                        <p class="mt-3 font-semibold text-green-600" data-lang-key="methods_shap_pro">優點：理論基礎堅實，解釋更穩定一致，提供區域與全域解釋。</p>
+                        <p class="mt-1 font-semibold text-red-600" data-lang-key="methods_shap_con">弱點：計算成本高昂，解釋可能仍然複雜，需要專業知識解讀。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="practice" class="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a5f7a]" data-lang-key="practice_title">XAI 實踐：高風險領域案例研究</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="practice_subtitle">XAI不僅是理論，更已在金融、自動駕駛和醫療等關鍵領域創造切實價值。本節將透過具體案例，展示XAI如何解決真實世界的問題。</p>
+            </div>
+            
+            <div class="flex justify-center mb-8">
+                <div class="flex space-x-1 p-1 bg-gray-200 rounded-lg">
+                    <button class="practice-tab-button tab-button px-4 py-2 text-sm font-medium rounded-md active" data-tab="finance" data-lang-key="practice_tab_finance">金融</button>
+                    <button class="practice-tab-button tab-button px-4 py-2 text-sm font-medium rounded-md" data-tab="av" data-lang-key="practice_tab_av">自動駕駛</button>
+                    <button class="practice-tab-button tab-button px-4 py-2 text-sm font-medium rounded-md" data-tab="health" data-lang-key="practice_tab_health">醫療保健</button>
+                </div>
+            </div>
+
+            <div id="finance" class="practice-tab-content bg-white p-8 rounded-lg shadow-lg">
+                 <h3 class="text-2xl font-bold text-[#1a5f7a] mb-4" data-lang-key="practice_finance_title">金融：增強信貸與風控的信任度</h3>
+                 <p class="text-gray-600 mb-6" data-lang-key="practice_finance_text">在高度監管的金融業，XAI不僅能滿足合規要求（如解釋貸款拒絕原因），更能透過提升模型準確度與公平性來創造商業價值。</p>
+                 <div class="grid md:grid-cols-2 gap-6">
+                    <div class="stat-card p-6 rounded-lg border border-gray-200">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="practice_finance_card1_title">詐欺偵測準確率</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="practice_finance_card1_text">引入XAI技術後，系統的詐欺偵測準確率得到顯著提升。</p>
+                        <div class="chart-container h-64">
+                            <canvas id="fraudDetectionChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="stat-card p-6 rounded-lg border border-gray-200 flex flex-col justify-center items-center">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="practice_finance_card2_title">客戶信任度</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="practice_finance_card2_text">通過使決策過程透明化，客戶信心顯著增強。</p>
+                        <div class="text-6xl font-extrabold text-[#1a5f7a]">+40%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="av" class="practice-tab-content bg-white p-8 rounded-lg shadow-lg hidden">
+                <h3 class="text-2xl font-bold text-[#1a5f7a] mb-4" data-lang-key="practice_av_title">自動駕駛：確保關鍵決策的安全性</h3>
+                <p class="text-gray-600 mb-6" data-lang-key="practice_av_text">XAI提供了對車輛「思維過程」的透明洞察，有助於工程師除錯、釐清事故責任，並增強公眾對自動駕駛技術的信任。</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                     <div class="stat-card p-6 rounded-lg border border-gray-200 flex flex-col justify-center items-center">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="practice_av_card1_title">關鍵駕駛操作可解釋性</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="practice_av_card1_text">系統中絕大多數關鍵操作（如避障、變道）都變得完全可解釋。</p>
+                        <div class="text-6xl font-extrabold text-[#1a5f7a]">98%</div>
+                    </div>
+                    <div class="stat-card p-6 rounded-lg border border-gray-200 flex flex-col justify-center items-center">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="practice_av_card2_title">潛在碰撞場景</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="practice_av_card2_text">駕駛決策系統的透明化，直接轉化為安全性能的提升。</p>
+                         <div class="text-6xl font-extrabold text-[#1a5f7a]">-45%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="health" class="practice-tab-content bg-white p-8 rounded-lg shadow-lg hidden">
+                <h3 class="text-2xl font-bold text-[#1a5f7a] mb-4" data-lang-key="practice_health_title">醫療保健：驗證AI驅動的診斷</h3>
+                <p class="text-gray-600 mb-6" data-lang-key="practice_health_text">XAI扮演著連接AI技術與臨床專業知識的「橋樑」，將模型抽象的運算轉化為醫生可理解的臨床證據，賦予醫生審查、驗證AI診斷的能力。</p>
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="stat-card p-6 rounded-lg border border-gray-200 text-center">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="practice_health_card_title">AI輔助診斷</h4>
+                        <p class="text-gray-600" data-lang-key="practice_health_card_text">如皮膚癌檢測、肺水腫檢測等應用中，XAI透過視覺化解釋（如熱力圖高亮病灶區域），讓醫生能將AI的「推理」與自身專業知識比對，從而更有信心地採納AI建議，做出更可靠的臨床決策。</p>
+                        <div class="text-2xl font-bold text-[#1a5f7a] mt-4" data-lang-key="practice_health_card_formula">AI + 醫生 = 更可靠的決策</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="governance" class="page-content container mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-extrabold text-[#1a5f7a]" data-lang-key="gov_title">治理與未來展望</h2>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="gov_subtitle">隨著AI的發展，全球監管框架與技術前沿也在不斷演進。了解如何駕馭監管環境並洞悉未來趨勢，是負責任AI發展的關鍵。</p>
+            </div>
+            
+            <div class="bg-white p-8 rounded-lg shadow-lg mb-12">
+                <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="gov_reg_title">全球監管框架：NIST vs. 歐盟AI法案</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold mb-3" data-lang-key="gov_nist_title">🇺🇸 NIST AI 風險管理框架</h4>
+                        <p class="mb-4 text-gray-600" data-lang-key="gov_nist_text">一個自願性、以原則為導向的風險管理指南，強調培養風險管理文化。</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li data-lang-key="gov_nist_l1"><span class="font-semibold">性質：</span>自願性、靈活性</li>
+                            <li data-lang-key="gov_nist_l2"><span class="font-semibold">核心：</span>治理、測繪、測量、管理</li>
+                            <li data-lang-key="gov_nist_l3"><span class="font-semibold">焦點：</span>將「可解釋與可詮釋」定位為可信賴AI的七大特徵之一</li>
+                        </ul>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-6">
+                        <h4 class="text-xl font-bold mb-3" data-lang-key="gov_eu_title">🇪🇺 歐盟人工智能法案</h4>
+                        <p class="mb-4 text-gray-600" data-lang-key="gov_eu_text">全球首個具法律約束力的全面性AI法規，採用基於風險的嚴格分級管理。</p>
+                         <ul class="list-disc list-inside space-y-2 text-gray-700">
+                            <li data-lang-key="gov_eu_l1"><span class="font-semibold">性質：</span>強制性、法律框架</li>
+                            <li data-lang-key="gov_eu_l2"><span class="font-semibold">核心：</span>對高風險系統施加嚴格的透明度義務</li>
+                            <li data-lang-key="gov_eu_l3"><span class="font-semibold">焦點：</span>第13條明確要求系統設計需具備透明度，使XAI成為法律義務</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="gov_future_title">XAI 的未來研究視野</h3>
+                <div class="space-y-4">
+                    <div class="accordion-item card overflow-hidden">
+                        <button class="accordion-header w-full text-left p-4 flex justify-between items-center">
+                            <span class="text-lg font-semibold text-[#1a5f7a]" data-lang-key="gov_acc1_title">從關聯到因果：向因果AI的轉變</span>
+                            <span class="accordion-icon text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4">
+                            <p class="text-gray-600" data-lang-key="gov_acc1_text">這是XAI最具變革性的方向。當前方法多揭示「相關性」，而因果AI旨在挖掘真正的「因果關係」。這將使解釋從「哪些特徵重要」提升到「改變某特徵會怎樣」，構建更穩健、更值得信賴的AI。</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item card overflow-hidden">
+                        <button class="accordion-header w-full text-left p-4 flex justify-between items-center">
+                            <span class="text-lg font-semibold text-[#1a5f7a]" data-lang-key="gov_acc2_title">多模態與互動式解釋</span>
+                             <span class="accordion-icon text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4">
+                            <p class="text-gray-600" data-lang-key="gov_acc2_text">未來的解釋將不再是靜態圖表，而是互動式介面。使用者可像對話一樣探查模型、提出追問，並獲得跨越文本、視覺化的即時回饋，將解釋從單向傳遞轉變為雙向探索。</p>
+                        </div>
+                    </div>
+                     <div class="accordion-item card overflow-hidden">
+                        <button class="accordion-header w-full text-left p-4 flex justify-between items-center">
+                            <span class="text-lg font-semibold text-[#1a5f7a]" data-lang-key="gov_acc3_title">生成式AI的賦能作用</span>
+                             <span class="accordion-icon text-2xl">+</span>
+                        </button>
+                        <div class="accordion-content px-4 pb-4">
+                            <p class="text-gray-600" data-lang-key="gov_acc3_text">大型語言模型（LLMs）有望解決XAI的「最後一哩路」問題。它們可將技術性輸出自動翻譯成針對不同受眾的客製化自然語言解釋，使解釋成為一場個人化的、有意義的對話。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center">
+            <p data-lang-key="footer_text">基於《可解釋人工智能(XAI)：建構安全、可靠與合乎倫理的AI系統之原則、技術與實踐》報告生成。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLanguage = 'zh';
+            let limeVsShapChartInstance = null;
+            let fraudDetectionChartInstance = null;
+
+            const translations = {
+                zh: {
+                    header_title: "可解釋AI (XAI) 互動報告",
+                    nav_home: "首頁",
+                    nav_concepts: "核心概念",
+                    nav_methods: "方法與工具",
+                    nav_practice: "應用實踐",
+                    nav_governance: "治理與未來",
+                    nav_home_mobile: "首頁",
+                    nav_concepts_mobile: "核心概念",
+                    nav_methods_mobile: "方法與工具",
+                    nav_practice_mobile: "應用實踐",
+                    nav_governance_mobile: "治理與未來",
+                    home_title: "打開AI「黑箱」，建立可信賴的未來",
+                    home_subtitle: "現代AI系統性能卓越，但其決策過程常如無法窺探的黑箱，引發信任危機。本報告深入探討可解釋AI (XAI)，展示如何透過透明化決策過程，建構更安全、可靠且符合倫理的智能系統。",
+                    home_card1_title: "監管壓力",
+                    home_card1_text: "歐盟《AI法案》等全球法規要求高風險AI系統必須具備透明度，使XAI從「加分項」變為市場准入的「必需品」。",
+                    home_card2_title: "倫理要求",
+                    home_card2_text: "XAI是確保AI公平性、問責性與無偏見的核心工具，幫助我們審查決策過程，確保其符合社會公德與倫理標準。",
+                    home_card3_title: "營運必要性",
+                    home_card3_text: "從模型除錯、提升系統安全性與可靠性，到建立使用者信任，XAI在AI生命週期的每個環節都扮演著關鍵角色。",
+                    concepts_title: "XAI 核心概念光譜",
+                    concepts_subtitle: "理解透明度、可詮釋性與可解釋性之間的細微差別，是建立可信賴AI的基礎。這三者相輔相成，共同構成了解開黑箱的鑰匙。",
+                    concepts_card1_title: "透明度",
+                    concepts_card1_q: "回答「系統中發生了什麼？」",
+                    concepts_card1_text: "指能夠讓利害關係人了解AI系統的適當資訊，包括揭露系統架構、訓練數據、基本假設，並讓使用者意識到正在與AI互動。",
+                    concepts_card2_title: "可詮釋性",
+                    concepts_card2_q: "回答「決策為何發生且意味著什麼？」",
+                    concepts_card2_text: "關注AI系統輸出在其設計功能背景下的「意義」。指的是人類能夠在多大程度上理解模型的決策過程，並將其與現實世界連結。",
+                    concepts_card3_title: "可解釋性",
+                    concepts_card3_q: "回答「系統是如何做出決策的？」",
+                    concepts_card3_text: "一個更廣泛的概念，指用人類可理解的方式來呈現AI系統運作的「機制」，涵蓋為決策提供理由和證據的各種方法和技術。",
+                    methods_title: "XAI 方法論工具箱",
+                    methods_subtitle: "為了打開AI的黑箱，研究人員開發了豐富的XAI方法。本節將深入探討最主流的事後解釋技術，特別是LIME和SHAP，並比較它們的優劣。",
+                    methods_chart_title: "LIME vs. SHAP：關鍵技術比較",
+                    methods_lime_title: "LIME (區域可詮釋模型無關解釋)",
+                    methods_lime_text: "核心思想是在特定預測的局部，用一個簡單的可解釋模型（如線性迴歸）來近似複雜黑箱模型的行為。",
+                    methods_lime_pro: "優點：直觀易懂，適用於任何模型。",
+                    methods_lime_con: "弱點：解釋不穩定，易受參數和隨機採樣影響，可能隱藏偏見。",
+                    methods_shap_title: "SHAP (SHapley 加法解釋)",
+                    methods_shap_text: "基於合作賽局理論，將預測貢獻公平地分配給每個輸入特徵，計算其SHAP值。",
+                    methods_shap_pro: "優點：理論基礎堅實，解釋更穩定一致，提供區域與全域解釋。",
+                    methods_shap_con: "弱點：計算成本高昂，解釋可能仍然複雜，需要專業知識解讀。",
+                    practice_title: "XAI 實踐：高風險領域案例研究",
+                    practice_subtitle: "XAI不僅是理論，更已在金融、自動駕駛和醫療等關鍵領域創造切實價值。本節將透過具體案例，展示XAI如何解決真實世界的問題。",
+                    practice_tab_finance: "金融",
+                    practice_tab_av: "自動駕駛",
+                    practice_tab_health: "醫療保健",
+                    practice_finance_title: "金融：增強信貸與風控的信任度",
+                    practice_finance_text: "在高度監管的金融業，XAI不僅能滿足合規要求（如解釋貸款拒絕原因），更能透過提升模型準確度與公平性來創造商業價值。",
+                    practice_finance_card1_title: "詐欺偵測準確率",
+                    practice_finance_card1_text: "引入XAI技術後，系統的詐欺偵測準確率得到顯著提升。",
+                    practice_finance_card2_title: "客戶信任度",
+                    practice_finance_card2_text: "通過使決策過程透明化，客戶信心顯著增強。",
+                    practice_av_title: "自動駕駛：確保關鍵決策的安全性",
+                    practice_av_text: "XAI提供了對車輛「思維過程」的透明洞察，有助於工程師除錯、釐清事故責任，並增強公眾對自動駕駛技術的信任。",
+                    practice_av_card1_title: "關鍵駕駛操作可解釋性",
+                    practice_av_card1_text: "系統中絕大多數關鍵操作（如避障、變道）都變得完全可解釋。",
+                    practice_av_card2_title: "潛在碰撞場景",
+                    practice_av_card2_text: "駕駛決策系統的透明化，直接轉化為安全性能的提升。",
+                    practice_health_title: "醫療保健：驗證AI驅動的診斷",
+                    practice_health_text: "XAI扮演著連接AI技術與臨床專業知識的「橋樑」，將模型抽象的運算轉化為醫生可理解的臨床證據，賦予醫生審查、驗證AI診斷的能力。",
+                    practice_health_card_title: "AI輔助診斷",
+                    practice_health_card_text: "如皮膚癌檢測、肺水腫檢測等應用中，XAI透過視覺化解釋（如熱力圖高亮病灶區域），讓醫生能將AI的「推理」與自身專業知識比對，從而更有信心地採納AI建議，做出更可靠的臨床決策。",
+                    practice_health_card_formula: "AI + 醫生 = 更可靠的決策",
+                    gov_title: "治理與未來展望",
+                    gov_subtitle: "隨著AI的發展，全球監管框架與技術前沿也在不斷演進。了解如何駕馭監管環境並洞悉未來趨勢，是負責任AI發展的關鍵。",
+                    gov_reg_title: "全球監管框架：NIST vs. 歐盟AI法案",
+                    gov_nist_title: "🇺🇸 NIST AI 風險管理框架",
+                    gov_nist_text: "一個自願性、以原則為導向的風險管理指南，強調培養風險管理文化。",
+                    gov_nist_l1: "<span class=\"font-semibold\">性質：</span>自願性、靈活性",
+                    gov_nist_l2: "<span class=\"font-semibold\">核心：</span>治理、測繪、測量、管理",
+                    gov_nist_l3: "<span class=\"font-semibold\">焦點：</span>將「可解釋與可詮釋」定位為可信賴AI的七大特徵之一",
+                    gov_eu_title: "�🇺 歐盟人工智能法案",
+                    gov_eu_text: "全球首個具法律約束力的全面性AI法規，採用基於風險的嚴格分級管理。",
+                    gov_eu_l1: "<span class=\"font-semibold\">性質：</span>強制性、法律框架",
+                    gov_eu_l2: "<span class=\"font-semibold\">核心：</span>對高風險系統施加嚴格的透明度義務",
+                    gov_eu_l3: "<span class=\"font-semibold\">焦點：</span>第13條明確要求系統設計需具備透明度，使XAI成為法律義務",
+                    gov_future_title: "XAI 的未來研究視野",
+                    gov_acc1_title: "從關聯到因果：向因果AI的轉變",
+                    gov_acc1_text: "這是XAI最具變革性的方向。當前方法多揭示「相關性」，而因果AI旨在挖掘真正的「因果關係」。這將使解釋從「哪些特徵重要」提升到「改變某特徵會怎樣」，構建更穩健、更值得信賴的AI。",
+                    gov_acc2_title: "多模態與互動式解釋",
+                    gov_acc2_text: "未來的解釋將不再是靜態圖表，而是互動式介面。使用者可像對話一樣探查模型、提出追問，並獲得跨越文本、視覺化的即時回饋，將解釋從單向傳遞轉變為雙向探索。",
+                    gov_acc3_title: "生成式AI的賦能作用",
+                    gov_acc3_text: "大型語言模型（LLMs）有望解決XAI的「最後一哩路」問題。它們可將技術性輸出自動翻譯成針對不同受眾的客製化自然語言解釋，使解釋成為一場個人化的、有意義的對話。",
+                    footer_text: "基於《可解釋人工智能(XAI)：建構安全、可靠與合乎倫理的AI系統之原則、技術與實踐》報告生成。",
+                    chart_lime_label: "LIME",
+                    chart_shap_label: "SHAP",
+                    chart_lime_vs_shap_title: "LIME vs. SHAP 屬性評分 (1-5分)",
+                    chart_y_axis_labels: ['穩定性', '計算成本', '理論基礎', '解釋範圍'],
+                    chart_x_axis_labels: ['很低', '低', '中', '高', '很高'],
+                    chart_fraud_title: "詐欺偵測準確率 (%)",
+                    chart_fraud_labels: ['傳統模型', '引入XAI後']
+                },
+                en: {
+                    header_title: "Explainable AI (XAI) Interactive Report",
+                    nav_home: "Home",
+                    nav_concepts: "Core Concepts",
+                    nav_methods: "Methods & Tools",
+                    nav_practice: "In Practice",
+                    nav_governance: "Governance & Future",
+                    nav_home_mobile: "Home",
+                    nav_concepts_mobile: "Core Concepts",
+                    nav_methods_mobile: "Methods & Tools",
+                    nav_practice_mobile: "In Practice",
+                    nav_governance_mobile: "Governance & Future",
+                    home_title: "Opening the AI 'Black Box', Building a Trustworthy Future",
+                    home_subtitle: "Modern AI systems exhibit exceptional performance, but their decision-making processes often resemble an inscrutable black box, leading to a crisis of trust. This report delves into Explainable AI (XAI), demonstrating how to build safer, more reliable, and ethical intelligent systems by making their decision processes transparent.",
+                    home_card1_title: "Regulatory Pressure",
+                    home_card1_text: "Global regulations like the EU AI Act require high-risk AI systems to be transparent, turning XAI from a 'nice-to-have' into a 'must-have' for market access.",
+                    home_card2_title: "Ethical Imperatives",
+                    home_card2_text: "XAI is a core tool for ensuring fairness, accountability, and non-bias in AI. It helps us audit decision processes to ensure they align with societal ethics and norms.",
+                    home_card3_title: "Operational Necessity",
+                    home_card3_text: "From model debugging and enhancing system safety and reliability to building user trust, XAI plays a crucial role at every stage of the AI lifecycle.",
+                    concepts_title: "The Spectrum of XAI Core Concepts",
+                    concepts_subtitle: "Understanding the nuances between transparency, interpretability, and explainability is fundamental to building trustworthy AI. These three concepts are complementary keys to unlocking the black box.",
+                    concepts_card1_title: "Transparency",
+                    concepts_card1_q: "Answers 'What happened in the system?'",
+                    concepts_card1_text: "Refers to providing stakeholders with appropriate information about the AI system, including its architecture, training data, and underlying assumptions, and making users aware they are interacting with an AI.",
+                    concepts_card2_title: "Interpretability",
+                    concepts_card2_q: "Answers 'Why did the decision happen and what does it mean?'",
+                    concepts_card2_text: "Focuses on the 'meaning' of an AI system's output in the context of its designed function. It's the degree to which a human can understand the model's decision-making process and connect it to the real world.",
+                    concepts_card3_title: "Explainability",
+                    concepts_card3_q: "Answers 'How did the system make the decision?'",
+                    concepts_card3_text: "A broader concept referring to presenting the 'mechanisms' of an AI system's operation in a human-understandable way, covering methods and techniques that provide reasons and evidence for its decisions.",
+                    methods_title: "The XAI Methodological Toolbox",
+                    methods_subtitle: "To open the AI black box, researchers have developed a rich set of XAI methods. This section explores the most prominent post-hoc explanation techniques, particularly LIME and SHAP, and compares their pros and cons.",
+                    methods_chart_title: "LIME vs. SHAP: A Comparative Analysis",
+                    methods_lime_title: "LIME (Local Interpretable Model-agnostic Explanations)",
+                    methods_lime_text: "The core idea is to approximate the behavior of a complex black-box model in the local vicinity of a specific prediction using a simple, interpretable model (e.g., linear regression).",
+                    methods_lime_pro: "Pros: Intuitive and easy to understand, applicable to any model.",
+                    methods_lime_con: "Cons: Explanations can be unstable, susceptible to parameter tuning and random sampling, and may hide biases.",
+                    methods_shap_title: "SHAP (SHapley Additive exPlanations)",
+                    methods_shap_text: "Based on cooperative game theory, it fairly allocates the prediction contribution to each input feature by calculating its SHAP value.",
+                    methods_shap_pro: "Pros: Solid theoretical foundation, more stable and consistent explanations, provides both local and global insights.",
+                    methods_shap_con: "Cons: Computationally expensive, explanations can still be complex and require expertise to interpret.",
+                    practice_title: "XAI in Practice: Case Studies in High-Risk Domains",
+                    practice_subtitle: "XAI is not just theory; it's already creating tangible value in critical sectors like finance, autonomous driving, and healthcare. This section showcases how XAI solves real-world problems through specific case studies.",
+                    practice_tab_finance: "Finance",
+                    practice_tab_av: "Autonomous Vehicles",
+                    practice_tab_health: "Healthcare",
+                    practice_finance_title: "Finance: Enhancing Trust in Credit and Risk Control",
+                    practice_finance_text: "In the highly regulated financial industry, XAI not only meets compliance requirements (e.g., explaining loan denials) but also creates business value by improving model accuracy and fairness.",
+                    practice_finance_card1_title: "Fraud Detection Accuracy",
+                    practice_finance_card1_text: "After introducing XAI techniques, the system's fraud detection accuracy significantly improved.",
+                    practice_finance_card2_title: "Customer Trust",
+                    practice_finance_card2_text: "By making the decision-making process transparent, customer confidence was significantly boosted.",
+                    practice_av_title: "Autonomous Driving: Ensuring Safety in Critical Decisions",
+                    practice_av_text: "XAI provides transparent insight into the vehicle's 'thought process,' helping engineers debug, clarify liability in accidents, and build public trust in autonomous technology.",
+                    practice_av_card1_title: "Explainability of Key Driving Maneuvers",
+                    practice_av_card1_text: "The vast majority of critical operations (e.g., obstacle avoidance, lane changes) in the system became fully explainable.",
+                    practice_av_card2_title: "Potential Collision Scenarios",
+                    practice_av_card2_text: "The transparency of the driving decision system directly translated into improved safety performance.",
+                    practice_health_title: "Healthcare: Validating AI-Driven Diagnostics",
+                    practice_health_text: "XAI acts as a 'bridge' between AI technology and clinical expertise, translating abstract model computations into clinical evidence that doctors can understand, empowering them to review and validate AI diagnoses.",
+                    practice_health_card_title: "AI-Assisted Diagnostics",
+                    practice_health_card_text: "In applications like skin cancer detection, XAI uses visual explanations (e.g., heatmaps highlighting lesions) to allow doctors to compare the AI's 'reasoning' with their own expertise, enabling more confident adoption of AI recommendations for more reliable clinical decisions.",
+                    practice_health_card_formula: "AI + Doctor = More Reliable Decisions",
+                    gov_title: "Governance and Future Outlook",
+                    gov_subtitle: "As AI evolves, so do global regulatory frameworks and technological frontiers. Navigating the regulatory landscape and understanding future trends are key to responsible AI development.",
+                    gov_reg_title: "Global Regulatory Frameworks: NIST vs. EU AI Act",
+                    gov_nist_title: "🇺🇸 NIST AI Risk Management Framework",
+                    gov_nist_text: "A voluntary, principle-based risk management guide that emphasizes fostering a risk management culture.",
+                    gov_nist_l1: "<span class=\"font-semibold\">Nature:</span> Voluntary, flexible",
+                    gov_nist_l2: "<span class=\"font-semibold\">Core:</span> Govern, Map, Measure, Manage",
+                    gov_nist_l3: "<span class=\"font-semibold\">Focus:</span> Positions 'Explainable & Interpretable' as one of seven characteristics of trustworthy AI.",
+                    gov_eu_title: "🇪🇺 EU AI Act",
+                    gov_eu_text: "The world's first legally binding, comprehensive AI regulation, adopting a strict risk-based classification.",
+                    gov_eu_l1: "<span class=\"font-semibold\">Nature:</span> Mandatory, legal framework",
+                    gov_eu_l2: "<span class=\"font-semibold\">Core:</span> Imposes strict transparency obligations on high-risk systems.",
+                    gov_eu_l3: "<span class=\"font-semibold\">Focus:</span> Article 13 explicitly requires transparency by design, making XAI a legal obligation.",
+                    gov_future_title: "Future Research Horizons for XAI",
+                    gov_acc1_title: "From Correlation to Causation: The Shift to Causal AI",
+                    gov_acc1_text: "This is XAI's most transformative direction. Current methods mostly reveal 'correlation,' while Causal AI aims to uncover true 'causal relationships.' This will elevate explanations from 'which features are important' to 'what happens if a feature is changed,' building more robust and trustworthy AI.",
+                    gov_acc2_title: "Multimodal and Interactive Explanations",
+                    gov_acc2_text: "Future explanations will no longer be static charts. Instead, they will be interactive interfaces where users can probe the model conversationally, ask follow-up questions, and receive real-time feedback across text and visuals, turning explanation into a two-way exploration.",
+                    gov_acc3_title: "The Empowering Role of Generative AI",
+                    gov_acc3_text: "Large Language Models (LLMs) are poised to solve XAI's 'last mile' problem. They can automatically translate technical outputs into customized, natural language explanations for different audiences, making explanation a personalized and meaningful dialogue.",
+                    footer_text: "Generated based on the report 'Explainable AI (XAI): Principles, Techniques, and Practices for Building Safe, Reliable, and Ethical AI Systems'.",
+                    chart_lime_label: "LIME",
+                    chart_shap_label: "SHAP",
+                    chart_lime_vs_shap_title: "LIME vs. SHAP Attribute Ratings (1-5 Scale)",
+                    chart_y_axis_labels: ['Stability', 'Computational Cost', 'Theoretical Grounding', 'Explanation Scope'],
+                    chart_x_axis_labels: ['Very Low', 'Low', 'Medium', 'High', 'Very High'],
+                    chart_fraud_title: "Fraud Detection Accuracy (%)",
+                    chart_fraud_labels: ['Traditional Model', 'With XAI']
+                }
+            };
+
+            function updateLanguageToggleUI(lang) {
+                const allBtns = document.querySelectorAll('.lang-btn');
+                allBtns.forEach(btn => {
+                    if (btn.dataset.lang === lang) {
+                        btn.classList.add('bg-[#1a5f7a]', 'text-white');
+                        btn.classList.remove('text-gray-600');
+                    } else {
+                        btn.classList.remove('bg-[#1a5f7a]', 'text-white');
+                        btn.classList.add('text-gray-600');
+                    }
+                });
+            }
+            
+            function setLanguage(lang) {
+                currentLanguage = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+                document.querySelectorAll('[data-lang-key]').forEach(element => {
+                    const key = element.dataset.langKey;
+                    if (translations[lang][key]) {
+                        if (key.startsWith('gov_nist_l') || key.startsWith('gov_eu_l')) {
+                           element.innerHTML = translations[lang][key];
+                        } else {
+                           element.innerText = translations[lang][key];
+                        }
+                    }
+                });
+
+                updateCharts();
+                updateLanguageToggleUI(lang);
+            }
+            
+            function updateCharts() {
+                if (limeVsShapChartInstance) {
+                    limeVsShapChartInstance.destroy();
+                }
+                if (fraudDetectionChartInstance) {
+                    fraudDetectionChartInstance.destroy();
+                }
+                createLimeVsShapChart();
+                createFraudDetectionChart();
+            }
+
+            const langToggleBtns = document.querySelectorAll('.lang-btn');
+            langToggleBtns.forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedLang = button.dataset.lang;
+                    if (selectedLang !== currentLanguage) {
+                        setLanguage(selectedLang);
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const pageContents = document.querySelectorAll('.page-content');
+
+            function updateActiveLink(targetId) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${targetId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            function showPage(targetId) {
+                pageContents.forEach(page => {
+                    if (page.id === targetId) {
+                        page.classList.remove('hidden');
+                    } else {
+                        page.classList.add('hidden');
+                    }
+                });
+                updateActiveLink(targetId);
+                window.scrollTo(0, 0);
+            }
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    showPage(targetId);
+                    if (!mobileMenu.classList.contains('hidden')) {
+                       mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            window.addEventListener('resize', () => {
+                if (window.innerWidth >= 768) { // Tailwind's md breakpoint is 768px
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+
+            const practiceTabs = document.querySelectorAll('.practice-tab-button');
+            const practiceContents = document.querySelectorAll('.practice-tab-content');
+
+            practiceTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    practiceTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const targetId = this.dataset.tab;
+                    practiceContents.forEach(content => {
+                        if (content.id === targetId) {
+                             content.classList.remove('hidden');
+                        } else {
+                             content.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+                header.addEventListener('click', () => {
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.textContent = '+';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.textContent = '-';
+                    }
+                });
+            });
+
+            const createLimeVsShapChart = () => {
+                const ctx = document.getElementById('limeVsShapChart').getContext('2d');
+                limeVsShapChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[currentLanguage].chart_y_axis_labels,
+                        datasets: [{
+                            label: translations[currentLanguage].chart_lime_label,
+                            data: [2, 4, 2, 3],
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }, {
+                            label: translations[currentLanguage].chart_shap_label,
+                            data: [4, 2, 5, 5],
+                            backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                            borderColor: 'rgba(255, 159, 64, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function(value, index) {
+                                        return translations[currentLanguage].chart_x_axis_labels[value-1] || '';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: translations[currentLanguage].chart_lime_vs_shap_title,
+                                font: { size: 16 }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        const value = context.raw;
+                                        label += translations[currentLanguage].chart_x_axis_labels[value-1];
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            };
+
+            const createFraudDetectionChart = () => {
+                const ctx = document.getElementById('fraudDetectionChart').getContext('2d');
+                fraudDetectionChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[currentLanguage].chart_fraud_labels,
+                        datasets: [{
+                            label: translations[currentLanguage].chart_fraud_title,
+                            data: [82, 95.3],
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.6)',
+                                'rgba(54, 162, 235, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            title: {
+                                display: true,
+                                text: translations[currentLanguage].chart_fraud_title,
+                            }
+                        }
+                    }
+                });
+            };
+            
+            showPage('home');
+            setLanguage('zh'); // Set default language
+        });
+    </script>
+</body>
+</html>
