@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" style="scroll-behavior: smooth;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：AI在教育領域的革命</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: 本應用採用單頁滾動式設計，頂部設有固定導覽列，便於在不同主題區塊間快速跳轉。此結構旨在將線性報告轉化為非線性的探索體驗。使用者可以從宏觀的「AI生態系統」概覽開始，深入探討「技術核心」，接著權衡「成效與挑戰」，最後展望「未來趨勢」。每個區塊都採用了最適化的互動設計（如分頁、圖表、摺疊面板），目的是將複雜的資訊變得直觀易懂，引導使用者主動探索而非被動閱讀，從而提升對報告內容的理解與吸收效率。 -->
+    <!-- Visualization & Content Choices: 
+        1. AI生態系統 (報告1.3節): 目標: 組織。方式: 使用HTML/Tailwind製作的三欄式卡片佈局，直觀展示「學習者、教育者、機構」三層AI堆疊。互動: 卡片懸停效果。理由: 將核心概念模型視覺化，比文字列表更清晰。
+        2. 學習成效統合分析 (報告5.1節，表2): 目標: 比較。方式: 使用Chart.js繪製響應式長條圖。互動: 滑鼠懸停時顯示詳細效果量數據。理由: 將關鍵量化證據以最直觀的方式呈現，衝擊力強於表格。庫: Chart.js。
+        3. 人機互動設計準則 (報告3.3節，表1): 目標: 組織。方式: 採用可展開/收合的摺疊面板 (Accordion)。互動: 點擊標題可查看詳細應用實例。理由: 將18條原則濃縮，避免資訊過載，鼓勵使用者逐項探索。方法: HTML/Tailwind + JS。
+        4. 倫理挑戰的二元性 (報告6節): 目標: 比較。方式: 使用HTML/Tailwind Grid製作左右對比的卡片，展示「個人化vs隱私」等核心衝突。理由: 視覺上強化了報告中提到的倫理權衡困境。
+        5. AI模型訓練流程 (報告4.1節): 目標: 告知。方式: 使用HTML/Tailwind製作的流程圖。理由: 將抽象的五步驟流程具象化，更易理解。
+        -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #FDFBF7;
+            color: #374151;
+        }
+        body.lang-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.lang-en {
+            font-family: 'Roboto', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488;
+            border-bottom-color: #0d9488;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #0d9488;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .accordion-header:hover {
+            background-color: #f3f4f6;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased lang-zh">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-teal-700" data-lang-key="headerTitle">AI教育革命</h1>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700" data-lang-key="navOverview">總覽</a>
+                        <a href="#ecosystem" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700" data-lang-key="navEcosystem">AI生態系統</a>
+                        <a href="#tech-core" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700" data-lang-key="navTechCore">技術核心</a>
+                        <a href="#impact" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700" data-lang-key="navImpact">成效與挑戰</a>
+                        <a href="#future" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700" data-lang-key="navFuture">未來展望</a>
+                    </div>
+                    <button id="lang-switcher" class="ml-6 px-3 py-1.5 border border-teal-600 text-teal-600 rounded-md text-sm font-semibold hover:bg-teal-50 transition-colors">
+                        EN
+                    </button>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <button id="lang-switcher-mobile" class="mr-2 px-3 py-1.5 border border-teal-600 text-teal-600 rounded-md text-sm font-semibold hover:bg-teal-50 transition-colors">
+                        EN
+                    </button>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-teal-700 hover:bg-gray-100 focus:outline-none">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#overview" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700" data-lang-key="navOverviewMobile">總覽</a>
+                <a href="#ecosystem" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700" data-lang-key="navEcosystemMobile">AI生態系統</a>
+                <a href="#tech-core" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700" data-lang-key="navTechCoreMobile">技術核心</a>
+                <a href="#impact" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700" data-lang-key="navImpactMobile">成效與挑戰</a>
+                <a href="#future" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700" data-lang-key="navFutureMobile">未來展望</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="text-center my-12 md:my-16">
+            <h2 class="text-3xl md:text-5xl font-bold tracking-tight text-gray-800" data-lang-key="mainTitle">
+                人工智慧在教育領域的革命
+            </h2>
+            <p class="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-gray-600" data-lang-key="mainSubtitle">
+                教育正處於一場由AI催化的根本性範式轉移之中。本報告將深入剖析AI如何建構一個高度個人化、互動化與適性化的學習未來，並探討其帶來的機遇、挑戰與策略。
+            </p>
+            <p class="mt-4 max-w-3xl mx-auto text-base text-gray-500" data-lang-key="mainScrollPrompt">
+                向下滾動或使用頂部導覽列，開始您的探索之旅。
+            </p>
+        </section>
+
+        <!-- Section 2: AI Ecosystem -->
+        <section id="ecosystem" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800" data-lang-key="ecoTitle">AI教育生態系統：一個三層堆疊模型</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="ecoSubtitle">
+                    AI在教育的應用已形成一個多維度的生態系統，可被理解為一個相互關聯的三層架構，分別為學習者、教育者與機構管理者賦能。
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-teal-100 text-teal-600 mx-auto mb-4 text-3xl">🧑‍🎓</div>
+                    <h4 class="text-xl font-bold mb-2" data-lang-key="ecoLearnerTitle">賦能學習者</h4>
+                    <p class="text-gray-600" data-lang-key="ecoLearnerDesc">打破「齊步走」的傳統模式，提供量身定制的學習體驗。</p>
+                    <ul class="mt-4 space-y-2 text-left text-gray-700">
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><strong data-lang-key="ecoLearnerPoint1Title">適性學習平台：</strong><span data-lang-key="ecoLearnerPoint1Desc">動態調整內容、難度與節奏。</span></li>
+                        <li class="flex items-start"><span class="text-teal-500 mr-2">✔</span><strong data-lang-key="ecoLearnerPoint2Title">智慧家教系統：</strong><span data-lang-key="ecoLearnerPoint2Desc">提供虛擬一對一的即時指導與回饋。</span></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 text-amber-600 mx-auto mb-4 text-3xl">👩‍🏫</div>
+                    <h4 class="text-xl font-bold mb-2" data-lang-key="ecoEducatorTitle">賦能教育者</h4>
+                    <p class="text-gray-600" data-lang-key="ecoEducatorDesc">從輔助工具轉變為教學與行政的智慧合作夥伴。</p>
+                     <ul class="mt-4 space-y-2 text-left text-gray-700">
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✔</span><strong data-lang-key="ecoEducatorPoint1Title">自動化行政：</strong><span data-lang-key="ecoEducatorPoint1Desc">批改作業、出試卷，釋放教師時間。</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✔</span><strong data-lang-key="ecoEducatorPoint2Title">內容生成：</strong><span data-lang-key="ecoEducatorPoint2Desc">快速創作教案、教材與多媒體內容。</span></li>
+                        <li class="flex items-start"><span class="text-amber-500 mr-2">✔</span><strong data-lang-key="ecoEducatorPoint3Title">數據洞察：</strong><span data-lang-key="ecoEducatorPoint3Desc">掌握學情，識別知識盲點，優化教學。</span></li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <div class="flex items-center justify-center h-16 w-16 rounded-full bg-sky-100 text-sky-600 mx-auto mb-4 text-3xl">🏫</div>
+                    <h4 class="text-xl font-bold mb-2" data-lang-key="ecoInstitutionTitle">賦能機構</h4>
+                    <p class="text-gray-600" data-lang-key="ecoInstitutionDesc">提升管理效率，支持基於數據的宏觀戰略決策。</p>
+                    <ul class="mt-4 space-y-2 text-left text-gray-700">
+                        <li class="flex items-start"><span class="text-sky-500 mr-2">✔</span><strong data-lang-key="ecoInstitutionPoint1Title">學生輟學預警：</strong><span data-lang-key="ecoInstitutionPoint1Desc">及早發現風險，提供支持。</span></li>
+                        <li class="flex items-start"><span class="text-sky-500 mr-2">✔</span><strong data-lang-key="ecoInstitutionPoint2Title">資源優化分配：</strong><span data-lang-key="ecoInstitutionPoint2Desc">輔助招生、預算制定等決策。</span></li>
+                        <li class="flex items-start"><span class="text-sky-500 mr-2">✔</span><strong data-lang-key="ecoInstitutionPoint3Title">高效知識管理：</strong><span data-lang-key="ecoInstitutionPoint3Desc">整合海量資訊，提升行政效率。</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Tech Core -->
+        <section id="tech-core" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800" data-lang-key="techTitle">個人化的引擎：技術核心揭秘</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="techSubtitle">
+                    個人化學習的實現依賴於一個強大的數據與演算法基礎設施。從數據的收集、處理，到學生模型的建立，再到互動工具的開發，每一步都至關重要。
+                </p>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                 <h4 class="text-2xl font-bold mb-6 text-center" data-lang-key="techDataLifecycleTitle">EdTech的數據生命週期</h4>
+                 <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4 text-center">
+                    <div class="flex-1 p-4 bg-gray-50 rounded-lg"><p class="text-3xl">①</p><p class="font-semibold mt-2" data-lang-key="techDataStep1">數據收集</p></div>
+                    <div class="text-2xl text-gray-400 transform md:rotate-0 rotate-90">→</div>
+                    <div class="flex-1 p-4 bg-gray-50 rounded-lg"><p class="text-3xl">②</p><p class="font-semibold mt-2" data-lang-key="techDataStep2">整合與清理</p></div>
+                    <div class="text-2xl text-gray-400 transform md:rotate-0 rotate-90">→</div>
+                     <div class="flex-1 p-4 bg-gray-50 rounded-lg"><p class="text-3xl">③</p><p class="font-semibold mt-2" data-lang-key="techDataStep3">安全儲存</p></div>
+                    <div class="text-2xl text-gray-400 transform md:rotate-0 rotate-90">→</div>
+                    <div class="flex-1 p-4 bg-gray-50 rounded-lg"><p class="text-3xl">④</p><p class="font-semibold mt-2" data-lang-key="techDataStep4">即時分析</p></div>
+                     <div class="text-2xl text-gray-400 transform md:rotate-0 rotate-90">→</div>
+                    <div class="flex-1 p-4 bg-teal-50 rounded-lg"><p class="text-3xl text-teal-600">⑤</p><p class="font-semibold mt-2 text-teal-700" data-lang-key="techDataStep5">可操作洞察</p></div>
+                 </div>
+            </div>
+            
+            <div class="bg-white p-8 rounded-xl shadow-lg mb-12">
+                <h4 class="text-2xl font-bold mb-6 text-center" data-lang-key="techStudentModelTitle">學生建模：創建動態的個人畫像</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h5 class="font-bold text-lg text-teal-700" data-lang-key="techModelStateTitle">認知狀態</h5>
+                        <p class="text-gray-600 mt-1" data-lang-key="techModelStateDesc">「學生知道什麼？」追蹤知識點掌握程度，構建知識圖譜。</p>
+                    </div>
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h5 class="font-bold text-lg text-amber-700" data-lang-key="techModelAffectiveTitle">情感狀態</h5>
+                        <p class="text-gray-600 mt-1" data-lang-key="techModelAffectiveDesc">「學生感覺如何？」推斷困惑、挫敗等情緒，維持學習動機。</p>
+                    </div>
+                     <div class="border border-gray-200 p-4 rounded-lg">
+                        <h5 class="font-bold text-lg text-sky-700" data-lang-key="techModelMetacognitiveTitle">後設認知技能</h5>
+                        <p class="text-gray-600 mt-1" data-lang-key="techModelMetacognitiveDesc">「學生如何學習？」理解學習風格、偏好與策略。</p>
+                    </div>
+                    <div class="border border-gray-200 p-4 rounded-lg">
+                        <h5 class="font-bold text-lg text-indigo-700" data-lang-key="techModelBehavioralTitle">行為模式</h5>
+                        <p class="text-gray-600 mt-1" data-lang-key="techModelBehavioralDesc">「學生如何互動？」分析作答時間、求助頻率等習慣。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h4 class="text-2xl font-bold mb-6 text-center" data-lang-key="techHciTitle">打造下一代互動工具：關鍵設計原則</h4>
+                <p class="text-center text-gray-600 mb-6 max-w-2xl mx-auto" data-lang-key="techHciDesc">一個強大的AI演算法，必須搭配優良的人機互動(HCI)設計。以下是微軟提出的18項設計準則在教育工具中的應用實例。點擊各階段標題展開查看。</p>
+                <div id="hci-accordion" class="space-y-2"></div>
+            </div>
+        </section>
+
+        <!-- Section 4: Impact & Challenges -->
+        <section id="impact" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800" data-lang-key="impactTitle">成效評估與內在挑戰</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="impactSubtitle">
+                    AI教育工具在提升學業成就上效果顯著，但也引發了關於倫理、公平與師生關係的深刻挑戰。我們必須在擁抱技術紅利的同時，正視其潛在風險。
+                </p>
+            </div>
+
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg mb-12">
+                <h4 class="text-2xl font-bold mb-2 text-center" data-lang-key="impactChartTitle">量化影響：AI對學業成就的效果量</h4>
+                <p class="text-center text-gray-500 mb-6" data-lang-key="impactChartDesc">統合分析(Meta-Analysis)顯示，AI教學干預普遍有正面效果（效果量 > 0）。效果量越大，影響越顯著。</p>
+                <div class="chart-container">
+                    <canvas id="effectSizeChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h5 class="text-xl font-bold mb-4 text-center" data-lang-key="impactChallenge1Title">師生關係的演變</h5>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r pr-4"><h6 class="font-semibold text-green-600" data-lang-key="impactChallenge1Pro">🤝 關係增強</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge1ProDesc">AI解放教師行政工作，讓教師有更多時間進行有溫度的、深入的個人化交流。</p></div>
+                        <div><h6 class="font-semibold text-red-600" data-lang-key="impactChallenge1Con">🤖 去個人化風險</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge1ConDesc">過度依賴AI回答與批改，可能削弱直接的人際互動，缺乏情感支持。</p></div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h5 class="text-xl font-bold mb-4 text-center" data-lang-key="impactChallenge2Title">演算法的公平性</h5>
+                     <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r pr-4"><h6 class="font-semibold text-green-600" data-lang-key="impactChallenge2Pro">🎯 公平的追求</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge2ProDesc">透過提高演算法的透明度與可解釋性(XAI)，對抗偏見，確保問責。</p></div>
+                        <div><h6 class="font-semibold text-red-600" data-lang-key="impactChallenge2Con">📦 「黑盒子」偏見</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge2ConDesc">若訓練數據含偏見，AI會學習並放大，可能對特定背景學生造成系統性不公。</p></div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h5 class="text-xl font-bold mb-4 text-center" data-lang-key="impactChallenge3Title">數據隱私的悖論</h5>
+                     <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r pr-4"><h6 class="font-semibold text-green-600" data-lang-key="impactChallenge3Pro">🛡️ 履行保護義務</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge3ProDesc">建立嚴格數據治理框架，實行知情同意，並採用加密、匿名化等技術手段。</p></div>
+                        <div><h6 class="font-semibold text-red-600" data-lang-key="impactChallenge3Con">📊 數據利用需求</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge3ConDesc">個人化學習依賴海量、精細的學生數據，帶來數據洩露與濫用的巨大風險。</p></div>
+                    </div>
+                </div>
+                 <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h5 class="text-xl font-bold mb-4 text-center" data-lang-key="impactChallenge4Title">學術誠信的衝擊</h5>
+                     <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r pr-4"><h6 class="font-semibold text-green-600" data-lang-key="impactChallenge4Pro">🧠 增強高階思維</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge4ProDesc">改革評量方式，從知識複述轉向專案式學習、口頭辯論等，培養批判性思維。</p></div>
+                        <div><h6 class="font-semibold text-red-600" data-lang-key="impactChallenge4Con">✍️ 認知卸載風險</h6><p class="text-sm text-gray-600 mt-2" data-lang-key="impactChallenge4ConDesc">生成式AI帶來作弊便利，更隱蔽的風險是學生過度依賴AI，思考能力萎縮。</p></div>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8 bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-4 rounded-r-lg">
+                <p class="font-bold" data-lang-key="impactPhenomenonTitle">一個深刻的現象：表現與感知的差距</p>
+                <p class="mt-2" data-lang-key="impactPhenomenonDesc">研究發現，AI對學生的客觀學習成就（表現）有高影響，但對主觀學習感知（如滿意度）影響較小。這警示開發者：一個成功的產品必須兼顧演算法效率與使用者體驗，忽略情感因素的工具難以獲得長期成功。</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Future Outlook -->
+        <section id="future" class="my-16 md:my-24 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-gray-800" data-lang-key="futureTitle">2025年的地平線：未來軌跡與戰略</h3>
+                <p class="mt-4 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="futureSubtitle">
+                    AI正從「工具」演變為「夥伴」，AI素養將成為核心能力。面對未來，教育工作者、機構與開發者都需要採取積極的戰略。
+                </p>
+            </div>
+            
+            <h4 class="text-2xl font-bold text-center mb-8" data-lang-key="futureTrendsTitle">2025年的四大關鍵趨勢</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="bg-white p-6 rounded-lg shadow-md"><h5 class="font-bold text-lg text-teal-700" data-lang-key="futureTrend1Title">🤖 AI成為學習夥伴</h5><p class="text-gray-600 mt-2" data-lang-key="futureTrend1Desc">AI將不只回答問題，更能與學生辯論、共創專案，成為嵌入學習過程的「學伴」。</p></div>
+                <div class="bg-white p-6 rounded-lg shadow-md"><h5 class="font-bold text-lg text-amber-700" data-lang-key="futureTrend2Title">💡 AI素養成核心素養</h5><p class="text-gray-600 mt-2" data-lang-key="futureTrend2Desc">批判性地使用AI將成為基礎能力，教育體系需將其全面融入課程。</p></div>
+                 <div class="bg-white p-6 rounded-lg shadow-md"><h5 class="font-bold text-lg text-sky-700" data-lang-key="futureTrend3Title">🎓 規模化的AI家教</h5><p class="text-gray-600 mt-2" data-lang-key="futureTrend3Desc">「為每人配備AI家教」的願景正走向現實，有望打破優質教育資源的時空限制。</p></div>
+                <div class="bg-white p-6 rounded-lg shadow-md"><h5 class="font-bold text-lg text-indigo-700" data-lang-key="futureTrend4Title">📱 AI教育硬體百花齊放</h5><p class="text-gray-600 mt-2" data-lang-key="futureTrend4Desc">新一代智慧學習機、便攜式AI設備和益智玩具將大量湧現，滿足碎片化學習需求。</p></div>
+            </div>
+
+             <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h4 class="text-2xl font-bold text-center mb-6" data-lang-key="futureRecommendationsTitle">戰略建議</h4>
+                <div>
+                    <div class="flex border-b">
+                        <button data-tab="tab-educators" class="tab-button flex-1 py-3 px-4 font-semibold text-gray-700 rounded-t-lg active" data-lang-key="futureTabEducators">對教育工作者與機構</button>
+                        <button data-tab="tab-developers" class="tab-button flex-1 py-3 px-4 font-semibold text-gray-700 rounded-t-lg" data-lang-key="futureTabDevelopers">對開發者與創新者</button>
+                    </div>
+                    <div id="tab-educators" class="tab-content py-6">
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><strong class="bg-teal-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">1</strong><div><strong class="text-gray-800" data-lang-key="futureEduPoint1Title">制定務實政策：</strong><span data-lang-key="futureEduPoint1Desc">從「禁止」轉向「引導」，定義合理使用，鼓勵用AI增強學習深度。</span></div></li>
+                            <li class="flex items-start"><strong class="bg-teal-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">2</strong><div><strong class="text-gray-800" data-lang-key="futureEduPoint2Title">投資教師培訓：</strong><span data-lang-key="futureEduPoint2Desc">提供高品質、與工作結合的培訓，提升教師的AI整合與診斷能力。</span></div></li>
+                            <li class="flex items-start"><strong class="bg-teal-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">3</strong><div><strong class="text-gray-800" data-lang-key="futureEduPoint3Title">改革評量方式：</strong><span data-lang-key="futureEduPoint3Desc">減少知識複述任務，增加專案式學習、口頭辯論等高階思維評量。</span></div></li>
+                            <li class="flex items-start"><strong class="bg-teal-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">4</strong><div><strong class="text-gray-800" data-lang-key="futureEduPoint4Title">營造協作文化：</strong><span data-lang-key="futureEduPoint4Desc">將AI從「答案機」轉變為「創意夥伴」，設計人機協作的學習活動。</span></div></li>
+                        </ul>
+                    </div>
+                    <div id="tab-developers" class="tab-content py-6 hidden">
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><strong class="bg-amber-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">1</strong><div><strong class="text-gray-800" data-lang-key="futureDevPoint1Title">堅持以人為本：</strong><span data-lang-key="futureDevPoint1Desc">遵循HCI原則，建立信任，保障控制權，創造愉悅的學習體驗。</span></div></li>
+                            <li class="flex items-start"><strong class="bg-amber-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">2</strong><div><strong class="text-gray-800" data-lang-key="futureDevPoint2Title">為「人在迴路中」設計：</strong><span data-lang-key="futureDevPoint2Desc">設計理念是「增強教師」，而非「取代」，賦予教師最終決定權。</span></div></li>
+                            <li class="flex items-start"><strong class="bg-amber-600 text-white rounded-full h-6 w-6 text-center flex-shrink-0 mr-3">3</strong><div><strong class="text-gray-800" data-lang-key="futureDevPoint3Title">擁抱倫理設計：</strong><span data-lang-key="futureDevPoint3Desc">從第一天起就將隱私保護和公平性審計融入開發流程。</span></div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-8 bg-sky-100 border-l-4 border-sky-500 text-sky-800 p-4 rounded-r-lg">
+                <p class="font-bold" data-lang-key="futureConclusionTitle">結論：迎接「人類技能溢價」時代</p>
+                <p class="mt-2" data-lang-key="futureConclusionDesc">AI正接管常規性腦力勞動，這反而凸顯了人類獨特能力的價值：批判性思維、創造力、複雜溝通與團隊協作。教育的核心任務將從知識的灌輸，轉向對這些珍貴「人類技能」的刻意培養。未來的教育，將是人機協同，釋放人類的創造力，專注於那些定義人性光輝的、更高層次的智力與情感活動。</p>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-sm">
+            <p data-lang-key="footerCredit">本互動式報告內容基於《人工智慧在教育領域的革命：建構個人化與互動式學習的未來》報告編制。</p>
+            <p class="mt-2 opacity-70" data-lang-key="footerCopyright">© 2025 AI教育洞察。保留所有權利。</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        let currentLanguage = 'zh';
+        let effectSizeChartInstance = null;
+        
+        const translations = {
+            zh: {
+                headerTitle: "AI教育革命",
+                navOverview: "總覽",
+                navEcosystem: "AI生態系統",
+                navTechCore: "技術核心",
+                navImpact: "成效與挑戰",
+                navFuture: "未來展望",
+                mainTitle: "人工智慧在教育領域的革命",
+                mainSubtitle: "教育正處於一場由AI催化的根本性範式轉移之中。本報告將深入剖析AI如何建構一個高度個人化、互動化與適性化的學習未來，並探討其帶來的機遇、挑戰與策略。",
+                mainScrollPrompt: "向下滾動或使用頂部導覽列，開始您的探索之旅。",
+                ecoTitle: "AI教育生態系統：一個三層堆疊模型",
+                ecoSubtitle: "AI在教育的應用已形成一個多維度的生態系統，可被理解為一個相互關聯的三層架構，分別為學習者、教育者與機構管理者賦能。",
+                ecoLearnerTitle: "賦能學習者",
+                ecoLearnerDesc: "打破「齊步走」的傳統模式，提供量身定制的學習體驗。",
+                ecoLearnerPoint1Title: "適性學習平台：",
+                ecoLearnerPoint1Desc: "動態調整內容、難度與節奏。",
+                ecoLearnerPoint2Title: "智慧家教系統：",
+                ecoLearnerPoint2Desc: "提供虛擬一對一的即時指導與回饋。",
+                ecoEducatorTitle: "賦能教育者",
+                ecoEducatorDesc: "從輔助工具轉變為教學與行政的智慧合作夥伴。",
+                ecoEducatorPoint1Title: "自動化行政：",
+                ecoEducatorPoint1Desc: "批改作業、出試卷，釋放教師時間。",
+                ecoEducatorPoint2Title: "內容生成：",
+                ecoEducatorPoint2Desc: "快速創作教案、教材與多媒體內容。",
+                ecoEducatorPoint3Title: "數據洞察：",
+                ecoEducatorPoint3Desc: "掌握學情，識別知識盲點，優化教學。",
+                ecoInstitutionTitle: "賦能機構",
+                ecoInstitutionDesc: "提升管理效率，支持基於數據的宏觀戰略決策。",
+                ecoInstitutionPoint1Title: "學生輟學預警：",
+                ecoInstitutionPoint1Desc: "及早發現風險，提供支持。",
+                ecoInstitutionPoint2Title: "資源優化分配：",
+                ecoInstitutionPoint2Desc: "輔助招生、預算制定等決策。",
+                ecoInstitutionPoint3Title: "高效知識管理：",
+                ecoInstitutionPoint3Desc: "整合海量資訊，提升行政效率。",
+                techTitle: "個人化的引擎：技術核心揭秘",
+                techSubtitle: "個人化學習的實現依賴於一個強大的數據與演算法基礎設施。從數據的收集、處理，到學生模型的建立，再到互動工具的開發，每一步都至關重要。",
+                techDataLifecycleTitle: "EdTech的數據生命週期",
+                techDataStep1: "數據收集",
+                techDataStep2: "整合與清理",
+                techDataStep3: "安全儲存",
+                techDataStep4: "即時分析",
+                techDataStep5: "可操作洞察",
+                techStudentModelTitle: "學生建模：創建動態的個人畫像",
+                techModelStateTitle: "認知狀態",
+                techModelStateDesc: "「學生知道什麼？」追蹤知識點掌握程度，構建知識圖譜。",
+                techModelAffectiveTitle: "情感狀態",
+                techModelAffectiveDesc: "「學生感覺如何？」推斷困惑、挫敗等情緒，維持學習動機。",
+                techModelMetacognitiveTitle: "後設認知技能",
+                techModelMetacognitiveDesc: "「學生如何學習？」理解學習風格、偏好與策略。",
+                techModelBehavioralTitle: "行為模式",
+                techModelBehavioralDesc: "「學生如何互動？」分析作答時間、求助頻率等習慣。",
+                techHciTitle: "打造下一代互動工具：關鍵設計原則",
+                techHciDesc: "一個強大的AI演算法，必須搭配優良的人機互動(HCI)設計。以下是微軟提出的18項設計準則在教育工具中的應用實例。點擊各階段標題展開查看。",
+                impactTitle: "成效評估與內在挑戰",
+                impactSubtitle: "AI教育工具在提升學業成就上效果顯著，但也引發了關於倫理、公平與師生關係的深刻挑戰。我們必須在擁抱技術紅利的同時，正視其潛在風險。",
+                impactChartTitle: "量化影響：AI對學業成就的效果量",
+                impactChartDesc: "統合分析(Meta-Analysis)顯示，AI教學干預普遍有正面效果（效果量 > 0）。效果量越大，影響越顯著。",
+                impactChartLabel: "效果量 (Hedges's g)",
+                impactChartXAxis: "效果量 (值越大影響越顯著)",
+                impactChartDataLabels: ['生成式AI (大學)', '廣泛AI應用 (綜合)', 'AI應用 (小學數學)'],
+                impactChallenge1Title: "師生關係的演變",
+                impactChallenge1Pro: "🤝 關係增強",
+                impactChallenge1ProDesc: "AI解放教師行政工作，讓教師有更多時間進行有溫度的、深入的個人化交流。",
+                impactChallenge1Con: "🤖 去個人化風險",
+                impactChallenge1ConDesc: "過度依賴AI回答與批改，可能削弱直接的人際互動，缺乏情感支持。",
+                impactChallenge2Title: "演算法的公平性",
+                impactChallenge2Pro: "🎯 公平的追求",
+                impactChallenge2ProDesc: "透過提高演算法的透明度與可解釋性(XAI)，對抗偏見，確保問責。",
+                impactChallenge2Con: "📦 「黑盒子」偏見",
+                impactChallenge2ConDesc: "若訓練數據含偏見，AI會學習並放大，可能對特定背景學生造成系統性不公。",
+                impactChallenge3Title: "數據隱私的悖論",
+                impactChallenge3Pro: "🛡️ 履行保護義務",
+                impactChallenge3ProDesc: "建立嚴格數據治理框架，實行知情同意，並採用加密、匿名化等技術手段。",
+                impactChallenge3Con: "📊 數據利用需求",
+                impactChallenge3ConDesc: "個人化學習依賴海量、精細的學生數據，帶來數據洩露與濫用的巨大風險。",
+                impactChallenge4Title: "學術誠信的衝擊",
+                impactChallenge4Pro: "🧠 增強高階思維",
+                impactChallenge4ProDesc: "改革評量方式，從知識複述轉向專案式學習、口頭辯論等，培養批判性思維。",
+                impactChallenge4Con: "✍️ 認知卸載風險",
+                impactChallenge4ConDesc: "生成式AI帶來作弊便利，更隱蔽的風險是學生過度依賴AI，思考能力萎縮。",
+                impactPhenomenonTitle: "一個深刻的現象：表現與感知的差距",
+                impactPhenomenonDesc: "研究發現，AI對學生的客觀學習成就（表現）有高影響，但對主觀學習感知（如滿意度）影響較小。這警示開發者：一個成功的產品必須兼顧演算法效率與使用者體驗，忽略情感因素的工具難以獲得長期成功。",
+                futureTitle: "2025年的地平線：未來軌跡與戰略",
+                futureSubtitle: "AI正從「工具」演變為「夥伴」，AI素養將成為核心能力。面對未來，教育工作者、機構與開發者都需要採取積極的戰略。",
+                futureTrendsTitle: "2025年的四大關鍵趨勢",
+                futureTrend1Title: "🤖 AI成為學習夥伴",
+                futureTrend1Desc: "AI將不只回答問題，更能與學生辯論、共創專案，成為嵌入學習過程的「學伴」。",
+                futureTrend2Title: "💡 AI素養成核心素養",
+                futureTrend2Desc: "批判性地使用AI將成為基礎能力，教育體系需將其全面融入課程。",
+                futureTrend3Title: "🎓 規模化的AI家教",
+                futureTrend3Desc: "「為每人配備AI家教」的願景正走向現實，有望打破優質教育資源的時空限制。",
+                futureTrend4Title: "📱 AI教育硬體百花齊放",
+                futureTrend4Desc: "新一代智慧學習機、便攜式AI設備和益智玩具將大量湧現，滿足碎片化學習需求。",
+                futureRecommendationsTitle: "戰略建議",
+                futureTabEducators: "對教育工作者與機構",
+                futureTabDevelopers: "對開發者與創新者",
+                futureEduPoint1Title: "制定務實政策：",
+                futureEduPoint1Desc: "從「禁止」轉向「引導」，定義合理使用，鼓勵用AI增強學習深度。",
+                futureEduPoint2Title: "投資教師培訓：",
+                futureEduPoint2Desc: "提供高品質、與工作結合的培訓，提升教師的AI整合與診斷能力。",
+                futureEduPoint3Title: "改革評量方式：",
+                futureEduPoint3Desc: "減少知識複述任務，增加專案式學習、口頭辯論等高階思維評量。",
+                futureEduPoint4Title: "營造協作文化：",
+                futureEduPoint4Desc: "將AI從「答案機」轉變為「創意夥伴」，設計人機協作的學習活動。",
+                futureDevPoint1Title: "堅持以人為本：",
+                futureDevPoint1Desc: "遵循HCI原則，建立信任，保障控制權，創造愉悅的學習體驗。",
+                futureDevPoint2Title: "為「人在迴路中」設計：",
+                futureDevPoint2Desc: "設計理念是「增強教師」，而非「取代」，賦予教師最終決定權。",
+                futureDevPoint3Title: "擁抱倫理設計：",
+                futureDevPoint3Desc: "從第一天起就將隱私保護和公平性審計融入開發流程。",
+                futureConclusionTitle: "結論：迎接「人類技能溢價」時代",
+                futureConclusionDesc: "AI正接管常規性腦力勞動，這反而凸顯了人類獨特能力的價值：批判性思維、創造力、複雜溝通與團隊協作。教育的核心任務將從知識的灌輸，轉向對這些珍貴「人類技能」的刻意培養。未來的教育，將是人機協同，釋放人類的創造力，專注於那些定義人性光輝的、更高層次的智力與情感活動。",
+                footerCredit: "本互動式報告內容基於《人工智慧在教育領域的革命：建構個人化與互動式學習的未來》報告編制。",
+                footerCopyright: "© 2025 AI教育洞察。保留所有權利。",
+                hciData: [
+                    { stage: '初始階段 (INITIALLY)', guidelines: [{ id: '01', name: '清楚說明系統能做什麼', example: '一個AI寫作助教在首次使用時應明確告知：「我可以幫你檢查文法、提供同義詞建議和調整語氣，但我無法幫你構思全新的論文主題。」' }, { id: '02', name: '清楚說明系統能做得多好', example: '一個AI自動評分系統應顯示：「我的評分準確率約為95%，對於某些主觀性較強的題目，建議仍需教師複核。」' }] },
+                    { stage: '互動期間 (DURING INTERACTION)', guidelines: [{ id: '03', name: '根據情境調整服務時間', example: 'AI輔導機器人在偵測到學生連續3分鐘沒有任何操作且停留在同一道難題上時，才主動跳出提示，而不是在學生剛開始思考時就打擾。' }, { id: '04', name: '顯示與情境相關的資訊', example: '當學生在學習「光合作用」章節時，AI推薦的補充閱讀材料應優先顯示與葉綠素、細胞呼吸相關的內容。' }, { id: '05', name: '符合相關的社會規範', example: '在一個協作學習環境中，AI虛擬夥伴的發言應遵循輪流、禮貌的對話規則，而不是隨意打斷其他學生的發言。' }, { id: '06', name: '減輕社會偏見', example: '一個AI歷史學習工具在介紹某一歷史事件時，應主動呈現來自不同國家或不同立場的多種觀點，避免強化單一敘事。' }] },
+                    { stage: '出錯時 (WHEN WRONG)', guidelines: [{ id: '07', name: '支援高效的調用', example: '學生可以隨時透過點擊一個清晰的「？」按鈕或語音命令來喚醒AI問答功能。' }, { id: '08', name: '支援高效的解除', example: 'AI提供的學習建議以一個可輕易點擊「X」關閉的小卡片形式出現，而不是強制性的彈出視窗。' }, { id: '09', name: '支援高效的修正', example: 'AI自動批改出錯時，應提供一個「撤銷修改」按鈕，並可選擇「回報錯誤」。' }, { id: '10', name: '存疑時限制服務範圍', example: 'AI數學解題工具在不確定學生思路時，應提供多個可能的解題步驟選項供參考，而不是武斷地給出單一解法。' }, { id: '11', name: '清楚說明系統為何這樣做', example: 'AI推薦系統在推送新單元時，應附上解釋：「根據你已掌握『勾股定理』，我們推薦你學習『三角函數入門』。」' }] },
+                    { stage: '隨著時間推移 (OVER TIME)', guidelines: [{ id: '12', name: '記住最近的互動', example: '學生問完「什麼是粒線體？」後，可以接著問「那它和細胞核有什麼不同？」，AI應能理解「它」指的是「粒線體」。' }, { id: '13', name: '從使用者行為中學習', example: '系統發現某學生總是跳過影片教學，偏好閱讀文字稿，未來會優先推送文字類型的材料。' }, { id: '14', name: '謹慎更新和適應', example: '當AI學習到新的使用者偏好後，介面佈局或推薦邏輯應逐步微調，而不是突然變得面目全非。' }, { id: '15', name: '鼓勵細粒度回饋', example: '在每次互動後，提供「👍」和「👎」按鈕，讓使用者可以輕鬆地提供回饋。' }, { id: '16', name: '傳達使用者行為的後果', example: '當使用者關閉了「難題挑戰」功能後，系統應立即提示：「好的，未來將不再為您推薦超出當前水平的挑戰題。」' }, { id: '17', name: '提供全局控制', example: '在設定頁面中，允許使用者自主設定AI的介入程度，如「僅在我主動提問時提供幫助」。' }, { id: '18', name: '通知使用者變更', example: '當AI助教新增了「模擬辯論」功能時，系統應在使用者登入時透過簡潔的通知告知。' }] }
+                ]
+            },
+            en: {
+                headerTitle: "AI in Education",
+                navOverview: "Overview",
+                navEcosystem: "AI Ecosystem",
+                navTechCore: "Tech Core",
+                navImpact: "Impact & Challenges",
+                navFuture: "Future Outlook",
+                mainTitle: "The Revolution of AI in Education",
+                mainSubtitle: "Education is in the midst of a fundamental paradigm shift catalyzed by AI. This report delves into how AI is constructing a highly personalized, interactive, and adaptive learning future, exploring the opportunities, challenges, and strategies it brings.",
+                mainScrollPrompt: "Scroll down or use the navigation bar to begin your exploration.",
+                ecoTitle: "The AI Education Ecosystem: A Three-Layer Stack Model",
+                ecoSubtitle: "AI's application in education has formed a multidimensional ecosystem, understood as an interconnected three-layer architecture empowering learners, educators, and institutional administrators.",
+                ecoLearnerTitle: "Empowering Learners",
+                ecoLearnerDesc: "Breaking the 'one-size-fits-all' traditional model to provide tailored learning experiences.",
+                ecoLearnerPoint1Title: "Adaptive Learning Platforms:",
+                ecoLearnerPoint1Desc: "Dynamically adjust content, difficulty, and pace.",
+                ecoLearnerPoint2Title: "Intelligent Tutoring Systems:",
+                ecoLearnerPoint2Desc: "Provide virtual one-on-one real-time guidance and feedback.",
+                ecoEducatorTitle: "Empowering Educators",
+                ecoEducatorDesc: "Transforming from an auxiliary tool to a smart partner in teaching and administration.",
+                ecoEducatorPoint1Title: "Administrative Automation:",
+                ecoEducatorPoint1Desc: "Grade assignments, create tests, freeing up teacher time.",
+                ecoEducatorPoint2Title: "Content Generation:",
+                ecoEducatorPoint2Desc: "Quickly create lesson plans, materials, and multimedia content.",
+                ecoEducatorPoint3Title: "Data-driven Insights:",
+                ecoEducatorPoint3Desc: "Understand student progress, identify knowledge gaps, and optimize teaching.",
+                ecoInstitutionTitle: "Empowering Institutions",
+                ecoInstitutionDesc: "Enhancing management efficiency and supporting data-driven strategic decisions.",
+                ecoInstitutionPoint1Title: "Student Dropout Prediction:",
+                ecoInstitutionPoint1Desc: "Identify at-risk students early to provide support.",
+                ecoInstitutionPoint2Title: "Resource Optimization:",
+                ecoInstitutionPoint2Desc: "Assist in admissions, budgeting, and other decisions.",
+                ecoInstitutionPoint3Title: "Efficient Knowledge Management:",
+                ecoInstitutionPoint3Desc: "Integrate vast amounts of information to boost administrative efficiency.",
+                techTitle: "The Engine of Personalization: Unveiling the Tech Core",
+                techSubtitle: "The realization of personalized learning relies on a robust data and algorithm infrastructure. From data collection and processing to student modeling and interactive tool development, every step is crucial.",
+                techDataLifecycleTitle: "The Data Lifecycle in EdTech",
+                techDataStep1: "Data Collection",
+                techDataStep2: "Integration & Cleaning",
+                techDataStep3: "Secure Storage",
+                techDataStep4: "Real-time Analysis",
+                techDataStep5: "Actionable Insights",
+                techStudentModelTitle: "Student Modeling: Creating a Dynamic Personal Profile",
+                techModelStateTitle: "Cognitive State",
+                techModelStateDesc: "'What does the student know?' Tracks mastery of knowledge points to build a knowledge graph.",
+                techModelAffectiveTitle: "Affective State",
+                techModelAffectiveDesc: "'How does the student feel?' Infers emotions like confusion or frustration to maintain motivation.",
+                techModelMetacognitiveTitle: "Metacognitive Skills",
+                techModelMetacognitiveDesc: "'How does the student learn?' Understands learning styles, preferences, and strategies.",
+                techModelBehavioralTitle: "Behavioral Patterns",
+                techModelBehavioralDesc: "'How does the student interact?' Analyzes response time, help requests, and other habits.",
+                techHciTitle: "Building Next-Gen Interactive Tools: Key Design Principles",
+                techHciDesc: "A powerful AI algorithm must be paired with excellent Human-Computer Interaction (HCI) design. Here are examples of Microsoft's 18 design guidelines applied to educational tools. Click each stage to expand.",
+                impactTitle: "Evaluating Efficacy and Inherent Challenges",
+                impactSubtitle: "AI educational tools show significant effects in improving academic achievement but also raise profound challenges regarding ethics, fairness, and teacher-student relationships. We must embrace the benefits while addressing the potential risks.",
+                impactChartTitle: "Quantitative Impact: Effect Size of AI on Academic Achievement",
+                impactChartDesc: "Meta-analyses show that AI-based teaching interventions generally have a positive effect (effect size > 0). The larger the effect size, the more significant the impact.",
+                impactChartLabel: "Effect Size (Hedges's g)",
+                impactChartXAxis: "Effect Size (Larger value indicates greater impact)",
+                impactChartDataLabels: ['Generative AI (University)', 'Broad AI Applications (General)', 'AI in Primary Math'],
+                impactChallenge1Title: "Evolution of Teacher-Student Relationships",
+                impactChallenge1Pro: "🤝 Enhanced Relationships",
+                impactChallenge1ProDesc: "AI frees teachers from administrative tasks, allowing more time for warm, in-depth, personalized interactions.",
+                impactChallenge1Con: "🤖 Risk of Depersonalization",
+                impactChallenge1ConDesc: "Over-reliance on AI for answers and grading can weaken direct human interaction and emotional support.",
+                impactChallenge2Title: "Algorithmic Fairness",
+                impactChallenge2Pro: "🎯 Pursuit of Fairness",
+                impactChallenge2ProDesc: "Counteract bias and ensure accountability by increasing algorithmic transparency and explainability (XAI).",
+                impactChallenge2Con: "📦 'Black Box' Bias",
+                impactChallenge2ConDesc: "If training data contains biases, AI will learn and amplify them, potentially disadvantaging certain student groups.",
+                impactChallenge3Title: "The Data Privacy Paradox",
+                impactChallenge3Pro: "🛡️ Fulfilling Protection Duties",
+                impactChallenge3ProDesc: "Establish strict data governance, enforce informed consent, and use encryption and anonymization techniques.",
+                impactChallenge3Con: "📊 Need for Data Utilization",
+                impactChallenge3ConDesc: "Personalized learning relies on vast, detailed student data, creating huge risks of data breaches and misuse.",
+                impactChallenge4Title: "Impact on Academic Integrity",
+                impactChallenge4Pro: "� Fostering Higher-Order Thinking",
+                impactChallenge4ProDesc: "Reform assessments from knowledge recall to project-based learning and debates to cultivate critical thinking.",
+                impactChallenge4Con: "✍️ Risk of Cognitive Offloading",
+                impactChallenge4ConDesc: "Generative AI facilitates cheating, but a subtler risk is student over-reliance, leading to atrophied thinking skills.",
+                impactPhenomenonTitle: "A Profound Phenomenon: The Performance-Perception Gap",
+                impactPhenomenonDesc: "Studies find AI has a high impact on students' objective learning achievement (performance) but a smaller impact on subjective learning perceptions (e.g., satisfaction). This warns developers: a successful product must balance algorithmic efficiency with user experience.",
+                futureTitle: "The 2025 Horizon: Future Trajectories and Strategies",
+                futureSubtitle: "AI is evolving from a 'tool' to a 'partner,' and AI literacy is becoming a core competency. Educators, institutions, and developers need to adopt proactive strategies for the future.",
+                futureTrendsTitle: "Four Key Trends for 2025",
+                futureTrend1Title: "🤖 AI as a Learning Partner",
+                futureTrend1Desc: "AI will not just answer questions but also debate with students and co-create projects, becoming an embedded 'study buddy'.",
+                futureTrend2Title: "💡 AI Literacy as a Core Competency",
+                futureTrend2Desc: "Critically using AI will become a fundamental skill, requiring its full integration into curricula.",
+                futureTrend3Title: "🎓 AI Tutors at Scale",
+                futureTrend3Desc: "The vision of 'an AI tutor for every learner' is becoming a reality, potentially breaking barriers to quality education.",
+                futureTrend4Title: "📱 A Cambrian Explosion of AI Ed-Hardware",
+                futureTrend4Desc: "A new generation of smart learning devices and educational toys will emerge to meet fragmented learning needs.",
+                futureRecommendationsTitle: "Strategic Recommendations",
+                futureTabEducators: "For Educators & Institutions",
+                futureTabDevelopers: "For Developers & Innovators",
+                futureEduPoint1Title: "Develop Pragmatic Policies:",
+                futureEduPoint1Desc: "Shift from 'banning' to 'guiding,' defining appropriate use and encouraging AI to deepen learning.",
+                futureEduPoint2Title: "Invest in Teacher Training:",
+                futureEduPoint2Desc: "Provide high-quality, job-embedded training to enhance teachers' AI integration and diagnostic skills.",
+                futureEduPoint3Title: "Reform Assessment Methods:",
+                futureEduPoint3Desc: "Move away from recall tasks toward assessments of higher-order thinking like projects and debates.",
+                futureEduPoint4Title: "Foster a Collaborative Culture:",
+                futureEduPoint4Desc: "Turn AI from an 'answer machine' into a 'creative partner' by designing human-AI collaborative activities.",
+                futureDevPoint1Title: "Adhere to Human-Centered Design:",
+                futureDevPoint1Desc: "Follow HCI principles to build trust, ensure control, and create a delightful learning experience.",
+                futureDevPoint2Title: "Design for Human-in-the-Loop:",
+                futureDevPoint2Desc: "The design philosophy should be to 'augment teachers,' not 'replace them,' giving them the final say.",
+                futureDevPoint3Title: "Embrace Ethical Design:",
+                futureDevPoint3Desc: "Integrate privacy by design and fairness audits into the development process from day one.",
+                futureConclusionTitle: "Conclusion: Welcoming the 'Human Skills Premium' Era",
+                futureConclusionDesc: "As AI takes over routine cognitive labor, the value of unique human abilities—critical thinking, creativity, complex communication, and collaboration—is highlighted. The core mission of education will shift from knowledge instillation to cultivating these precious 'human skills.' The future of education is human-AI collaboration, unleashing human creativity for higher-level intellectual and emotional pursuits.",
+                footerCredit: "This interactive report is based on the findings from 'The Revolution of AI in Education: Building a Future of Personalized and Interactive Learning'.",
+                footerCopyright: "© 2025 AI in Education Insights. All rights reserved.",
+                hciData: [
+                    { stage: 'INITIALLY', guidelines: [{ id: '01', name: 'Make clear what the system can do', example: 'An AI writing assistant should state upfront: "I can check your grammar, suggest synonyms, and adjust tone, but I cannot brainstorm a new thesis for you."' }, { id: '02', name: 'Make clear how well the system can do what it can do', example: 'An auto-grading system should display: "My scoring accuracy is about 95%. For highly subjective questions, teacher review is recommended."' }] },
+                    { stage: 'DURING INTERACTION', guidelines: [{ id: '03', name: 'Time services to when the user needs them', example: 'An AI tutor only offers a hint after detecting a student has been stuck on a difficult problem for 3 minutes, not when they just begin to think.' }, { id: '04', name: 'Show contextually relevant information', example: 'When a student is on the "Photosynthesis" chapter, AI-recommended readings should prioritize related topics like chlorophyll and cellular respiration.' }, { id: '05', name: 'Match relevant social norms', example: 'In a collaborative setting, an AI virtual partner should follow turn-taking and polite conversational rules, rather than interrupting other students.' }, { id: '06', name: 'Mitigate social biases', example: 'An AI history tool should present multiple perspectives from different countries or groups when covering a historical event to avoid reinforcing a single narrative.' }] },
+                    { stage: 'WHEN WRONG', guidelines: [{ id: '07', name: 'Support efficient invocation', example: 'Students can summon the AI Q&A function anytime by clicking a clear "?" button or using a voice command.' }, { id: '08', name: 'Support efficient dismissal', example: 'AI learning suggestions appear as small cards that can be easily closed with an "X," rather than as mandatory pop-ups.' }, { id: '09', name: 'Support efficient correction', example: 'When auto-grading makes a mistake, an "Undo Correction" button should be available, along with an option to "Report Error."' }, { id: '10', name: 'Scope services when in doubt', example: 'When unsure of a student\'s method, an AI math solver should offer several possible solution paths for reference, not just one "correct" answer.' }, { id: '11', name: 'Make clear why the system did what it did', example: 'When recommending a new unit, an AI system should explain: "Based on your mastery of the Pythagorean theorem, we recommend you start Trigonometry."' }] },
+                    { stage: 'OVER TIME', guidelines: [{ id: '12', name: 'Remember recent interactions', example: 'After a student asks "What is a mitochondrion?", they can follow up with "How is it different from a nucleus?" and the AI understands "it" refers to the mitochondrion.' }, { id: '13', name: 'Learn from user behavior', example: 'If the system notices a student always skips video lessons for text transcripts, it will prioritize text-based materials in the future.' }, { id: '14', name: 'Update and adapt carefully', example: 'When the AI learns a new user preference, the UI or recommendation logic should be adjusted gradually, not in a single, disorienting update.' }, { id: '15', name: 'Encourage granular feedback', example: 'After each interaction, provide "👍" and "👎" buttons, allowing users to give easy feedback.' }, { id: '16', name: 'Convey the consequences of user actions', example: 'When a user disables the "challenge problems" feature, the system should immediately confirm: "OK, we will no longer recommend advanced problems."' }, { id: '17', name: 'Provide global controls', example: 'In a settings menu, allow users to configure the AI\'s level of intervention, such as "Only help when I ask" or "Proactively offer hints."' }, { id: '18', name: 'Notify users about changes', example: 'When a new feature like "Mock Debate" is added to the AI assistant, the system should inform the user with a concise notification upon login.' }] }
+                ]
+            }
+        };
+
+        function createEffectSizeChart(lang) {
+            if (effectSizeChartInstance) {
+                effectSizeChartInstance.destroy();
+            }
+            const ctx = document.getElementById('effectSizeChart').getContext('2d');
+            effectSizeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: translations[lang].impactChartDataLabels,
+                    datasets: [{
+                        label: translations[lang].impactChartLabel,
+                        data: [0.533, 0.6, 0.351], 
+                        backgroundColor: ['rgba(13, 148, 136, 0.6)','rgba(217, 119, 6, 0.6)','rgba(14, 165, 233, 0.6)'],
+                        borderColor: ['rgba(13, 148, 136, 1)','rgba(217, 119, 6, 1)','rgba(14, 165, 233, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { beginAtZero: true, title: { display: true, text: translations[lang].impactChartXAxis } } }
+                }
+            });
+        }
+        
+        function createHciAccordion(lang) {
+            const hciData = translations[lang].hciData;
+            const accordionContainer = document.getElementById('hci-accordion');
+            accordionContainer.innerHTML = ''; // Clear previous content
+            hciData.forEach((section, index) => {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.innerHTML = `
+                    <div class="accordion-header bg-gray-100 p-4 rounded-lg flex justify-between items-center">
+                        <h5 class="font-bold text-lg">${section.stage}</h5>
+                        <span class="transform transition-transform duration-300">${index === 0 ? '−' : '+'}</span>
+                    </div>
+                    <div class="accordion-content" ${index === 0 ? 'style="max-height: 1000px;"' : ''}>
+                        <div class="p-4 border border-t-0 border-gray-200 rounded-b-lg">
+                            <ul class="space-y-3">
+                                ${section.guidelines.map(g => `
+                                    <li class="flex items-start">
+                                        <span class="font-bold text-teal-600 mr-3 w-5">${g.id}.</span>
+                                        <div>
+                                            <strong class="text-gray-800">${g.name}：</strong>
+                                            <span class="text-gray-600">${g.example}</span>
+                                        </div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                `;
+                accordionContainer.appendChild(sectionDiv);
+            });
+        }
+
+        function updateContent(lang) {
+            document.body.className = `antialiased lang-${lang}`;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                let key = el.getAttribute('data-lang-key');
+                let mobileKey;
+                if(key.endsWith('Mobile')) {
+                    mobileKey = key;
+                    key = key.replace('Mobile', '');
+                }
+                if (translations[lang][key]) {
+                   el.innerHTML = translations[lang][key];
+                }
+                 if (mobileKey && translations[lang][key]) {
+                   el.innerHTML = translations[lang][key];
+                }
+            });
+            createEffectSizeChart(lang);
+            createHciAccordion(lang);
+        }
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+            const buttonText = currentLanguage === 'zh' ? 'EN' : '中';
+            document.getElementById('lang-switcher').textContent = buttonText;
+            document.getElementById('lang-switcher-mobile').textContent = buttonText;
+            updateContent(currentLanguage);
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', toggleLanguage);
+        document.getElementById('lang-switcher-mobile').addEventListener('click', toggleLanguage);
+        
+        updateContent(currentLanguage);
+
+        // Accordion click listener
+        document.getElementById('hci-accordion').addEventListener('click', function(e) {
+            const header = e.target.closest('.accordion-header');
+            if (!header) return;
+            const content = header.nextElementSibling;
+            const symbol = header.querySelector('span');
+            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                content.style.maxHeight = '0px'; symbol.textContent = '+';
+            } else {
+                document.querySelectorAll('.accordion-content').forEach(item => item.style.maxHeight = '0px');
+                document.querySelectorAll('.accordion-header span').forEach(item => item.textContent = '+');
+                content.style.maxHeight = content.scrollHeight + "px";
+                symbol.textContent = '−';
+            }
+        });
+
+        // Tabs for recommendations
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                tabContents.forEach(content => {
+                    content.id === tabId ? content.classList.remove('hidden') : content.classList.add('hidden');
+                });
+            });
+        });
+
+        // Mobile Menu
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Active Nav Link on scroll
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 80) { current = section.getAttribute('id'); }
+            });
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === current) { link.classList.add('active'); }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
