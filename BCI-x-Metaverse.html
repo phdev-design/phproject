@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：腦機接口與元宇宙的未來</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: The application is designed with a top-down, thematic structure rather than mirroring the report's linear chapters. This encourages user exploration. It starts with a high-level 'Overview' (including key stats and market forecast), then allows users to drill down into 'Core Technology' (using interactive diagrams), 'Market Landscape' (with filterable company cards), 'Future Applications' (in a tabbed view), and finally 'Challenges & Outlook' (with an interactive timeline). This non-linear approach, guided by a sticky navigation bar, aims to make the dense information more accessible and engaging by allowing users to choose their own path through the content. -->
+    <!-- Visualization & Content Choices: 
+        - Market Forecast (Report Info: $2.1B in 2023 -> $4.5B in 2029) -> Goal: Show Change -> Viz: Line Chart (Chart.js) -> Interaction: Hover tooltips -> Justification: Clearly visualizes growth trend over time.
+        - BCI Classification (Report Info: Invasive, Partially Invasive, Non-Invasive) -> Goal: Organize/Inform -> Viz: Interactive HTML/CSS cards -> Interaction: Click to reveal details -> Justification: Simplifies a core concept into a digestible, interactive format.
+        - BCI Workflow (Report Info: 3-stage process) -> Goal: Organize -> Viz: HTML/CSS Flexbox diagram -> Interaction: Static visual flow -> Justification: Clearly illustrates a process without user input.
+        - Company Comparison (Report Info: Table 1) -> Goal: Compare/Organize -> Viz: Filterable HTML/CSS cards -> Interaction: Buttons to filter by type (Invasive/Non-Invasive) -> Justification: Transforms a static table into an engaging exploration tool.
+        - Interaction Mode Comparison (Report Info: Table 2) -> Goal: Compare -> Viz: Styled HTML table -> Interaction: Static -> Justification: A direct and effective way to present comparative data.
+        - Future Roadmap (Report Info: Short, Mid, Long-term outlook) -> Goal: Show Change -> Viz: Vertical timeline with HTML/CSS -> Interaction: Static -> Justification: More visually compelling than a simple list for showing progression over time.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .chart-container { position: relative; width: 100%; max-width: 700px; margin-left: auto; margin-right: auto; height: 300px; max-height: 400px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; } }
+        .nav-link { transition: color 0.3s ease; }
+        .nav-link:hover { color: #0d9488; }
+        .active-tab { border-color: #0d9488; color: #0d9488; }
+        .inactive-tab { border-color: transparent; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .company-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .company-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800">
+
+    <header class="sticky top-0 bg-stone-50/80 backdrop-blur-lg z-50 shadow-sm">
+        <nav class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-xl font-bold text-teal-700" data-lang-key="headerTitle">BCI x 元宇宙</div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#overview" class="nav-link" data-lang-key="navOverview">總覽</a>
+                    <a href="#tech" class="nav-link" data-lang-key="navTech">核心技術</a>
+                    <a href="#market" class="nav-link" data-lang-key="navMarket">市場格局</a>
+                    <a href="#apps" class="nav-link" data-lang-key="navApps">未來應用</a>
+                    <a href="#challenges" class="nav-link" data-lang-key="navChallenges">挑戰與展望</a>
+                    <button id="lang-toggle" class="ml-4 px-3 py-1 border border-teal-600 text-teal-600 rounded-full text-sm hover:bg-teal-600 hover:text-white transition-colors">EN</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-16">
+        
+        <section id="hero" class="text-center mb-16 md:mb-24">
+            <h1 class="text-4xl md:text-6xl font-bold mb-4 text-teal-800" data-lang-key="heroTitle">後物理介面</h1>
+            <p class="text-lg md:text-xl text-stone-600 max-w-3xl mx-auto" data-lang-key="heroSubtitle">探索腦機介面如何重塑我們與數位世界的連結，開啟一個基於意圖的直接互動新時代。</p>
+        </section>
+
+        <div class="space-y-16 md:space-y-24">
+
+            <section id="overview">
+                <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="overviewTitle">一切的開端：概覽與潛力</h2>
+                <p class="text-center text-stone-600 mb-12 max-w-2xl mx-auto" data-lang-key="overviewIntro">本節將為您呈現腦機介面（BCI）技術的核心價值與市場潛力。BCI不僅是下一個技術迭代，更是一種典範轉移，預示著我們將從依賴物理工具的互動，走向一個能與數位世界心靈相通的未來。透過關鍵數據，我們將一窺這個變革性市場的增長軌跡。</p>
+                <div class="grid md:grid-cols-3 gap-8 mb-12 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <p class="text-4xl font-bold text-teal-600" id="market-size-2029">$45億</p>
+                        <p class="text-stone-500 mt-2" data-lang-key="statMarketSize">2029年預計市場規模</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <p class="text-4xl font-bold text-teal-600" id="cagr">14.2%</p>
+                        <p class="text-stone-500 mt-2" data-lang-key="statCAGR">年均複合增長率</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <p class="text-4xl font-bold text-teal-600" id="paradigm-shift" data-lang-key="statParadigm">典範轉移</p>
+                        <p class="text-stone-500 mt-2" data-lang-key="statParadigmDesc">從物理代理到意念控制</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="chartTitle">全球BCI市場增長預測 (2023-2029)</h3>
+                    <div class="chart-container">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tech">
+                <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="techTitle">解構未來：核心技術解析</h2>
+                <p class="text-center text-stone-600 mb-12 max-w-2xl mx-auto" data-lang-key="techIntro">要理解BCI如何改變一切，我們必須先了解其運作原理以及它將融入的元宇宙是什麼。本節將分解這兩項核心技術，透過互動式圖解，清晰呈現BCI的分類、工作流程，以及當前元宇宙互動方式的局限性，從而突顯BCI的革命性潛力。</p>
+                
+                <div class="border-b border-stone-200 mb-8 flex justify-center space-x-4 md:space-x-8">
+                    <button data-tab="bci" class="tech-tab active-tab text-lg font-semibold py-2 px-4 border-b-2" data-lang-key="techTabBCI">腦機介面 (BCI)</button>
+                    <button data-tab="metaverse" class="tech-tab inactive-tab text-lg font-semibold py-2 px-4 border-b-2" data-lang-key="techTabMetaverse">元宇宙 (Metaverse)</button>
+                </div>
+
+                <div id="bci-content" class="tech-content active">
+                    <div class="space-y-12">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="bciClassTitle">BCI 系統分類</h3>
+                            <p class="text-center text-stone-600 mb-8 max-w-2xl mx-auto" data-lang-key="bciClassIntro">BCI依據感測器植入的侵入性程度分為三類。點擊下方卡片以了解更多。</p>
+                            <div class="grid md:grid-cols-3 gap-8">
+                                <div class="bci-type-card cursor-pointer p-6 bg-white rounded-lg shadow-md border-2 border-transparent hover:border-teal-500" data-type="invasive">
+                                    <h4 class="text-xl font-bold mb-2 text-center" data-lang-key="invasiveTitle">侵入式 BCI</h4>
+                                    <p class="text-sm text-stone-500 text-center" data-lang-key="invasiveSub">電極直接植入大腦，信號品質最高，但風險也最大。</p>
+                                    <p class="bci-type-desc hidden mt-4 text-stone-700" data-lang-key="invasiveDesc">通過外科手術將微電極陣列植入大腦皮層，能捕捉到最清晰、最精確的神經信號。主要應用於恢復重度癱瘓患者的運動與通訊功能。代表公司：Neuralink、Blackrock Neurotech。</p>
+                                </div>
+                                <div class="bci-type-card cursor-pointer p-6 bg-white rounded-lg shadow-md border-2 border-transparent hover:border-teal-500" data-type="partially-invasive">
+                                     <h4 class="text-xl font-bold mb-2 text-center" data-lang-key="partialTitle">部分侵入式 BCI</h4>
+                                     <p class="text-sm text-stone-500 text-center" data-lang-key="partialSub">電極置於顱骨內但腦組織外，平衡風險與信號品質。</p>
+                                     <p class="bci-type-desc hidden mt-4 text-stone-700" data-lang-key="partialDesc">例如Synchron的Stentrode技術，將電極通過血管輸送到大腦附近，無需開顱手術，風險較低，同時能獲得比非侵入式更好的信號。這是一種兼顧安全與效能的創新方案。</p>
+                                </div>
+                                <div class="bci-type-card cursor-pointer p-6 bg-white rounded-lg shadow-md border-2 border-transparent hover:border-teal-500" data-type="non-invasive">
+                                     <h4 class="text-xl font-bold mb-2 text-center" data-lang-key="nonInvasiveTitle">非侵入式 BCI</h4>
+                                     <p class="text-sm text-stone-500 text-center" data-lang-key="nonInvasiveSub">感測器置於頭皮，安全無創，是消費級應用的主流。</p>
+                                     <p class="bci-type-desc hidden mt-4 text-stone-700" data-lang-key="nonInvasiveDesc">最常見的是腦電圖(EEG)，通過頭戴設備測量大腦電活動。優點是成本低、風險無、易於使用，但信號易受干擾，解析度較低。代表公司：Emotiv、NeuroSky。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-2xl font-bold mb-4 text-center" data-lang-key="workflowTitle">BCI 工作流程</h3>
+                            <div class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0">
+                                <div class="p-6 bg-white rounded-lg shadow-md text-center w-full md:w-1/4">
+                                    <p class="text-teal-600 text-2xl mb-2">①</p>
+                                    <h4 class="font-bold" data-lang-key="wfStep1">信號採集</h4>
+                                    <p class="text-sm text-stone-600 mt-1" data-lang-key="wfDesc1">使用感測器（如EEG）測量大腦活動。</p>
+                                </div>
+                                <div class="text-2xl text-teal-500 p-2 transform md:-rotate-0 rotate-90">→</div>
+                                <div class="p-6 bg-white rounded-lg shadow-md text-center w-full md:w-1/3">
+                                    <p class="text-teal-600 text-2xl mb-2">②</p>
+                                    <h4 class="font-bold" data-lang-key="wfStep2">特徵提取與轉譯</h4>
+                                    <p class="text-sm text-stone-600 mt-1" data-lang-key="wfDesc2">演算法分析信號，解碼用戶意圖並轉為指令。</p>
+                                </div>
+                                <div class="text-2xl text-teal-500 p-2 transform md:-rotate-0 rotate-90">→</div>
+                                <div class="p-6 bg-white rounded-lg shadow-md text-center w-full md:w-1/4">
+                                     <p class="text-teal-600 text-2xl mb-2">③</p>
+                                     <h4 class="font-bold" data-lang-key="wfStep3">設備輸出與反饋</h4>
+                                     <p class="text-sm text-stone-600 mt-1" data-lang-key="wfDesc3">外部設備執行指令，並向用戶提供反饋。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="metaverse-content" class="tech-content">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold mb-4" data-lang-key="metaverseLimitsTitle">當前元宇宙互動的局限</h3>
+                        <p class="text-stone-600 mb-8 max-w-3xl mx-auto" data-lang-key="metaverseLimitsIntro">目前的元宇宙互動依賴於物理代理——我們必須通過身體動作來傳達意圖。這些方式雖然不斷進步，但都存在間接性和物理疲勞等根本局限。BCI的目標正是要超越這些代理，實現直接的意圖傳輸。</p>
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">🎮</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioController">控制器</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">🖐️</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioGesture">手勢追蹤</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">👁️</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioEye">眼動追蹤</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">🗣️</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioVoice">語音互動</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">👋</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioHaptics">觸覺反饋</p>
+                            </div>
+                            <div class="p-4 bg-white rounded-lg shadow-md text-center">
+                                <span class="text-4xl">🏃</span>
+                                <p class="font-semibold mt-2" data-lang-key="ioBody">身體追蹤</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="market">
+                 <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="marketTitle">群雄逐鹿：BCI 市場格局</h2>
+                 <p class="text-center text-stone-600 mb-12 max-w-2xl mx-auto" data-lang-key="marketIntro">BCI 市場並非鐵板一塊，而是呈現出清晰的二元結構。一端是高風險、高投入的侵入式技術巨頭，專注於醫療突破；另一端則是面向大眾的非侵入式技術先鋒，致力於消費級應用。使用下方的篩選器，探索這個充滿活力的競爭領域中的主要參與者。</p>
+                 <div class="flex justify-center space-x-4 mb-8">
+                     <button class="filter-btn bg-teal-600 text-white py-2 px-4 rounded-lg" data-filter="all" data-lang-key="filterAll">所有公司</button>
+                     <button class="filter-btn bg-white text-teal-600 border border-teal-600 py-2 px-4 rounded-lg" data-filter="invasive" data-lang-key="filterInvasive">侵入式</button>
+                     <button class="filter-btn bg-white text-teal-600 border border-teal-600 py-2 px-4 rounded-lg" data-filter="non-invasive" data-lang-key="filterNonInvasive">非侵入式</button>
+                 </div>
+                 <div id="company-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 </div>
+            </section>
+
+            <section id="apps">
+                <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="appsTitle">從治療到娛樂：BCI 的應用光譜</h2>
+                <p class="text-center text-stone-600 mb-12 max-w-2xl mx-auto" data-lang-key="appsIntro">BCI的潛力遠不止於醫療。從幫助殘障人士恢復功能，到創造前所未有的遊戲體驗，再到重塑我們的工作與學習方式，這項技術將滲透到社會的各個層面。點擊不同領域，探索BCI將如何改變我們的世界。</p>
+                 <div class="max-w-4xl mx-auto">
+                    <div class="flex flex-col md:flex-row">
+                        <div class="w-full md:w-1/3">
+                            <div data-app="medical" class="app-tab p-6 text-center cursor-pointer bg-teal-100 border-l-4 border-teal-600">
+                                <h3 class="text-xl font-bold" data-lang-key="appMedicalTitle">醫療與輔助</h3>
+                                <p class="text-sm mt-2 text-stone-600" data-lang-key="appMedicalSub">恢復功能，重獲尊嚴</p>
+                            </div>
+                            <div data-app="gaming" class="app-tab p-6 text-center cursor-pointer bg-white">
+                                <h3 class="text-xl font-bold" data-lang-key="appGamingTitle">遊戲與娛樂</h3>
+                                <p class="text-sm mt-2 text-stone-600" data-lang-key="appGamingSub">前所未有的沉浸感</p>
+                            </div>
+                            <div data-app="work" class="app-tab p-6 text-center cursor-pointer bg-white">
+                                <h3 class="text-xl font-bold" data-lang-key="appWorkTitle">工作與教育</h3>
+                                <p class="text-sm mt-2 text-stone-600" data-lang-key="appWorkSub">提升效率與體驗</p>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-2/3 p-8 bg-white rounded-r-lg">
+                           <div id="app-content-display">
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="challenges">
+                <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="challengesTitle">前路漫漫：挑戰與未來展望</h2>
+                <p class="text-center text-stone-600 mb-12 max-w-2xl mx-auto" data-lang-key="challengesIntro">儘管前景廣闊，BCI的普及之路依然充滿挑戰。從技術瓶頸、嚴峻的安全威脅到深刻的倫理困境，我們需要謹慎前行。本節將探討這些障礙，並通過一份發展路線圖，展望BCI技術從現在到2040年的未來。</p>
+                <div class="grid lg:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="challengesSubTitle1">主要挑戰</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge1Title">⚙️ 技術與工程障礙</h4>
+                                <p class="text-sm text-stone-600 mt-1" data-lang-key="challenge1Desc">信號微弱、帶寬有限、硬體舒適度與生物相容性是核心難題。從嘈雜的大腦活動中提取準確意圖，如同在暴風雨中聽清耳語。</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge2Title">🛡️ 網絡安全與隱私</h4>
+                                <p class="text-sm text-stone-600 mt-1" data-lang-key="challenge2Desc">威脅已超越數據洩露，直指「大腦竊聽」和「思想劫持」。保護思想的私密性與自主權，是前所未有的安全挑戰。</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow">
+                                <h4 class="font-bold text-lg" data-lang-key="challenge3Title">⚖️ 神經倫理與治理</h4>
+                                <p class="text-sm text-stone-600 mt-1" data-lang-key="challenge3Desc">當技術從「治療」走向「增強」，可能引發「神經鴻溝」，加劇社會不公。認知自由、個人身份等哲學問題亟待解答。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="roadmapTitle">發展路線圖</h3>
+                        <div class="relative border-l-2 border-teal-200 pl-8">
+                             <div class="mb-8">
+                                <div class="absolute w-4 h-4 bg-teal-600 rounded-full -left-2 border-2 border-white"></div>
+                                <p class="font-bold text-teal-700" data-lang-key="roadmap1Term">短期 (2025-2029)</p>
+                                <p class="text-stone-600 text-sm" data-lang-key="roadmap1Desc">非侵入式BCI主導消費市場利基應用（遊戲、健康）。侵入式BCI在臨床試驗中取得關鍵進展。</p>
+                            </div>
+                             <div class="mb-8">
+                                <div class="absolute w-4 h-4 bg-teal-600 rounded-full -left-2 border-2 border-white"></div>
+                                <p class="font-bold text-teal-700" data-lang-key="roadmap2Term">中期 (2030-2039)</p>
+                                <p class="text-stone-600 text-sm" data-lang-key="roadmap2Desc">第一代醫療用侵入式BCI獲批上市。非侵入式BCI開始整合到主流消費電子產品中。</p>
+                            </div>
+                             <div>
+                                <div class="absolute w-4 h-4 bg-teal-600 rounded-full -left-2 border-2 border-white"></div>
+                                <p class="font-bold text-teal-700" data-lang-key="roadmap3Term">長期 (2040+)</p>
+                                <p class="text-stone-600 text-sm" data-lang-key="roadmap3Desc">技術趨於無縫、雙向，模糊思想與行動的界限。關於「人類增強」的倫理辯論成為核心社會議題。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="bg-stone-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-8 text-center text-stone-400">
+            <p data-lang-key="footerDesc">這是一份基於「後物理介面：腦機介面技術及其對元宇宙變革性潛力的深度分析」報告所創建的互動式網頁應用。</p>
+            <p class="text-sm mt-2" data-lang-key="footerNote">僅供演示與教育目的。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    let currentLang = 'zh';
+    let marketChart;
+
+    const translations = {
+        zh: {
+            headerTitle: "BCI x 元宇宙",
+            navOverview: "總覽",
+            navTech: "核心技術",
+            navMarket: "市場格局",
+            navApps: "未來應用",
+            navChallenges: "挑戰與展望",
+            heroTitle: "後物理介面",
+            heroSubtitle: "探索腦機介面如何重塑我們與數位世界的連結，開啟一個基於意圖的直接互動新時代。",
+            overviewTitle: "一切的開端：概覽與潛力",
+            overviewIntro: "本節將為您呈現腦機介面（BCI）技術的核心價值與市場潛力。BCI不僅是下一個技術迭代，更是一種典範轉移，預示著我們將從依賴物理工具的互動，走向一個能與數位世界心靈相通的未來。透過關鍵數據，我們將一窺這個變革性市場的增長軌跡。",
+            statMarketSize: "2029年預計市場規模",
+            statCAGR: "年均複合增長率",
+            statParadigm: "典範轉移",
+            statParadigmDesc: "從物理代理到意念控制",
+            chartTitle: "全球BCI市場增長預測 (2023-2029)",
+            chartLabel: "全球BCI市場規模 (億美元)",
+            techTitle: "解構未來：核心技術解析",
+            techIntro: "要理解BCI如何改變一切，我們必須先了解其運作原理以及它將融入的元宇宙是什麼。本節將分解這兩項核心技術，透過互動式圖解，清晰呈現BCI的分類、工作流程，以及當前元宇宙互動方式的局限性，從而突顯BCI的革命性潛力。",
+            techTabBCI: "腦機介面 (BCI)",
+            techTabMetaverse: "元宇宙 (Metaverse)",
+            bciClassTitle: "BCI 系統分類",
+            bciClassIntro: "BCI依據感測器植入的侵入性程度分為三類。點擊下方卡片以了解更多。",
+            invasiveTitle: "侵入式 BCI",
+            invasiveSub: "電極直接植入大腦，信號品質最高，但風險也最大。",
+            invasiveDesc: "通過外科手術將微電極陣列植入大腦皮層，能捕捉到最清晰、最精確的神經信號。主要應用於恢復重度癱瘓患者的運動與通訊功能。代表公司：Neuralink、Blackrock Neurotech。",
+            partialTitle: "部分侵入式 BCI",
+            partialSub: "電極置於顱骨內但腦組織外，平衡風險與信號品質。",
+            partialDesc: "例如Synchron的Stentrode技術，將電極通過血管輸送到大腦附近，無需開顱手術，風險較低，同時能獲得比非侵入式更好的信號。這是一種兼顧安全與效能的創新方案。",
+            nonInvasiveTitle: "非侵入式 BCI",
+            nonInvasiveSub: "感測器置於頭皮，安全無創，是消費級應用的主流。",
+            nonInvasiveDesc: "最常見的是腦電圖(EEG)，通過頭戴設備測量大腦電活動。優點是成本低、風險無、易於使用，但信號易受干擾，解析度較低。代表公司：Emotiv、NeuroSky。",
+            workflowTitle: "BCI 工作流程",
+            wfStep1: "信號採集",
+            wfDesc1: "使用感測器（如EEG）測量大腦活動。",
+            wfStep2: "特徵提取與轉譯",
+            wfDesc2: "演算法分析信號，解碼用戶意圖並轉為指令。",
+            wfStep3: "設備輸出與反饋",
+            wfDesc3: "外部設備執行指令，並向用戶提供反饋。",
+            metaverseLimitsTitle: "當前元宇宙互動的局限",
+            metaverseLimitsIntro: "目前的元宇宙互動依賴於物理代理——我們必須通過身體動作來傳達意圖。這些方式雖然不斷進步，但都存在間接性和物理疲勞等根本局限。BCI的目標正是要超越這些代理，實現直接的意圖傳輸。",
+            ioController: "控制器",
+            ioGesture: "手勢追蹤",
+            ioEye: "眼動追蹤",
+            ioVoice: "語音互動",
+            ioHaptics: "觸覺反饋",
+            ioBody: "身體追蹤",
+            marketTitle: "群雄逐鹿：BCI 市場格局",
+            marketIntro: "BCI 市場並非鐵板一塊，而是呈現出清晰的二元結構。一端是高風險、高投入的侵入式技術巨頭，專注於醫療突破；另一端則是面向大眾的非侵入式技術先鋒，致力於消費級應用。使用下方的篩選器，探索這個充滿活力的競爭領域中的主要參與者。",
+            filterAll: "所有公司",
+            filterInvasive: "侵入式",
+            filterNonInvasive: "非侵入式",
+            appsTitle: "從治療到娛樂：BCI 的應用光譜",
+            appsIntro: "BCI的潛力遠不止於醫療。從幫助殘障人士恢復功能，到創造前所未有的遊戲體驗，再到重塑我們的工作與學習方式，這項技術將滲透到社會的各個層面。點擊不同領域，探索BCI將如何改變我們的世界。",
+            appMedicalTitle: "醫療與輔助",
+            appMedicalSub: "恢復功能，重獲尊嚴",
+            appGamingTitle: "遊戲與娛樂",
+            appGamingSub: "前所未有的沉浸感",
+            appWorkTitle: "工作與教育",
+            appWorkSub: "提升效率與體驗",
+            challengesTitle: "前路漫漫：挑戰與未來展望",
+            challengesIntro: "儘管前景廣闊，BCI的普及之路依然充滿挑戰。從技術瓶頸、嚴峻的安全威脅到深刻的倫理困境，我們需要謹慎前行。本節將探討這些障礙，並通過一份發展路線圖，展望BCI技術從現在到2040年的未來。",
+            challengesSubTitle1: "主要挑戰",
+            challenge1Title: "⚙️ 技術與工程障礙",
+            challenge1Desc: "信號微弱、帶寬有限、硬體舒適度與生物相容性是核心難題。從嘈雜的大腦活動中提取準確意圖，如同在暴風雨中聽清耳語。",
+            challenge2Title: "🛡️ 網絡安全與隱私",
+            challenge2Desc: "威脅已超越數據洩露，直指「大腦竊聽」和「思想劫持」。保護思想的私密性與自主權，是前所未有的安全挑戰。",
+            challenge3Title: "⚖️ 神經倫理與治理",
+            challenge3Desc: "當技術從「治療」走向「增強」，可能引發「神經鴻溝」，加劇社會不公。認知自由、個人身份等哲學問題亟待解答。",
+            roadmapTitle: "發展路線圖",
+            roadmap1Term: "短期 (2025-2029)",
+            roadmap1Desc: "非侵入式BCI主導消費市場利基應用（遊戲、健康）。侵入式BCI在臨床試驗中取得關鍵進展。",
+            roadmap2Term: "中期 (2030-2039)",
+            roadmap2Desc: "第一代醫療用侵入式BCI獲批上市。非侵入式BCI開始整合到主流消費電子產品中。",
+            roadmap3Term: "長期 (2040+)",
+            roadmap3Desc: "技術趨於無縫、雙向，模糊思想與行動的界限。關於「人類增強」的倫理辯論成為核心社會議題。",
+            footerDesc: "這是一份基於「後物理介面：腦機介面技術及其對元宇宙變革性潛力的深度分析」報告所創建的互動式網頁應用。",
+            footerNote: "僅供演示與教育目的。"
+        },
+        en: {
+            headerTitle: "BCI x Metaverse",
+            navOverview: "Overview",
+            navTech: "Core Tech",
+            navMarket: "Market",
+            navApps: "Applications",
+            navChallenges: "Challenges",
+            heroTitle: "The Post-Physical Interface",
+            heroSubtitle: "Exploring how Brain-Computer Interfaces will reshape our connection to the digital world, heralding an era of direct, intent-based interaction.",
+            overviewTitle: "The Big Picture: Overview & Potential",
+            overviewIntro: "This section presents the core value and market potential of Brain-Computer Interface (BCI) technology. BCI is not just the next technological iteration but a paradigm shift, signaling a future where we move from interactions reliant on physical tools to a direct communion with the digital world. Through key data, we will glimpse the growth trajectory of this transformative market.",
+            statMarketSize: "Projected Market Size by 2029",
+            statCAGR: "Compound Annual Growth Rate",
+            statParadigm: "Paradigm Shift",
+            statParadigmDesc: "From Physical Proxies to Mind Control",
+            chartTitle: "Global BCI Market Growth Forecast (2023-2029)",
+            chartLabel: "Global BCI Market Size (in Billions USD)",
+            techTitle: "Deconstructing the Future: Core Technology Deep Dive",
+            techIntro: "To understand how BCI changes everything, we must first understand its operating principles and the metaverse it will integrate into. This section breaks down these two core technologies, using interactive diagrams to clearly present BCI classification, workflow, and the limitations of current metaverse interaction methods, thereby highlighting BCI's revolutionary potential.",
+            techTabBCI: "Brain-Computer Interface (BCI)",
+            techTabMetaverse: "Metaverse",
+            bciClassTitle: "BCI System Classification",
+            bciClassIntro: "BCIs are categorized into three types based on the invasiveness of sensor implantation. Click the cards below to learn more.",
+            invasiveTitle: "Invasive BCI",
+            invasiveSub: "Electrodes directly implanted in the brain, offering the highest signal quality but also the greatest risk.",
+            invasiveDesc: "Microelectrode arrays are surgically implanted into the cerebral cortex to capture the clearest, most precise neural signals. Primarily used to restore motor and communication functions in severely paralyzed patients. Representative companies: Neuralink, Blackrock Neurotech.",
+            partialTitle: "Partially Invasive BCI",
+            partialSub: "Electrodes placed inside the skull but outside brain tissue, balancing risk and signal quality.",
+            partialDesc: "For example, Synchron's Stentrode technology delivers electrodes via blood vessels near the brain, avoiding open-brain surgery. This offers lower risk while achieving better signals than non-invasive methods, presenting a balanced solution for safety and performance.",
+            nonInvasiveTitle: "Non-Invasive BCI",
+            nonInvasiveSub: "Sensors placed on the scalp, safe and non-surgical, mainstream for consumer-grade applications.",
+            nonInvasiveDesc: "The most common is Electroencephalography (EEG), which measures brain electrical activity via a headset. Advantages are low cost, no risk, and ease of use, but signals are prone to interference and have lower resolution. Representative companies: Emotiv, NeuroSky.",
+            workflowTitle: "BCI Workflow",
+            wfStep1: "Signal Acquisition",
+            wfDesc1: "Sensors (e.g., EEG) measure brain activity.",
+            wfStep2: "Feature Extraction & Translation",
+            wfDesc2: "Algorithms analyze signals to decode user intent into commands.",
+            wfStep3: "Device Output & Feedback",
+            wfDesc3: "External devices execute commands and provide feedback to the user.",
+            metaverseLimitsTitle: "Limitations of Current Metaverse Interaction",
+            metaverseLimitsIntro: "Current metaverse interactions rely on physical proxies—we must convey intent through physical actions. While these methods are improving, they have fundamental limitations like indirectness and physical fatigue. BCI aims to transcend these proxies for direct intent transmission.",
+            ioController: "Controllers",
+            ioGesture: "Gesture Tracking",
+            ioEye: "Eye Tracking",
+            ioVoice: "Voice Interaction",
+            ioHaptics: "Haptic Feedback",
+            ioBody: "Body Tracking",
+            marketTitle: "The Players: BCI Market Landscape",
+            marketIntro: "The BCI market is not monolithic but shows a clear dual structure. At one end are high-risk, high-investment invasive tech giants focused on medical breakthroughs; at the other are pioneers of non-invasive tech for the masses, dedicated to consumer applications. Use the filters below to explore the key players in this dynamic competitive field.",
+            filterAll: "All Companies",
+            filterInvasive: "Invasive",
+            filterNonInvasive: "Non-Invasive",
+            appsTitle: "From Therapy to Entertainment: The BCI Application Spectrum",
+            appsIntro: "BCI's potential extends far beyond medicine. From helping disabled individuals regain function to creating unprecedented gaming experiences and reshaping how we work and learn, this technology will permeate all levels of society. Click on different areas to explore how BCI will change our world.",
+            appMedicalTitle: "Medical & Assistive",
+            appMedicalSub: "Restoring function, regaining dignity",
+            appGamingTitle: "Gaming & Entertainment",
+            appGamingSub: "Unprecedented immersion",
+            appWorkTitle: "Work & Education",
+            appWorkSub: "Enhancing efficiency & experience",
+            challengesTitle: "The Road Ahead: Challenges & Future Outlook",
+            challengesIntro: "Despite its vast promise, the path to widespread BCI adoption is fraught with challenges. From technical bottlenecks and severe security threats to profound ethical dilemmas, we must proceed with caution. This section will explore these obstacles and, through a development roadmap, look ahead to the future of BCI technology to 2040.",
+            challengesSubTitle1: "Key Challenges",
+            challenge1Title: "⚙️ Technical & Engineering Hurdles",
+            challenge1Desc: "Weak signals, limited bandwidth, hardware comfort, and biocompatibility are core issues. Extracting accurate intent from noisy brain activity is like hearing a whisper in a storm.",
+            challenge2Title: "🛡️ Cybersecurity & Privacy",
+            challenge2Desc: "Threats go beyond data breaches to 'brain-tapping' and 'thought-hijacking'. Protecting the privacy and autonomy of thought is an unprecedented security challenge.",
+            challenge3Title: "⚖️ Neuroethics & Governance",
+            challenge3Desc: "As technology moves from 'therapy' to 'enhancement,' it could create a 'neuro-divide,' exacerbating social inequality. Philosophical questions of cognitive liberty and personal identity need answers.",
+            roadmapTitle: "Development Roadmap",
+            roadmap1Term: "Short-Term (2025-2029)",
+            roadmap1Desc: "Non-invasive BCIs dominate niche consumer markets (gaming, wellness). Invasive BCIs achieve key milestones in clinical trials.",
+            roadmap2Term: "Mid-Term (2030-2039)",
+            roadmap2Desc: "First-generation medical invasive BCIs receive regulatory approval. Non-invasive BCIs begin integrating into mainstream consumer electronics.",
+            roadmap3Term: "Long-Term (2040+)",
+            roadmap3Desc: "Technology matures towards seamless, bidirectional interfaces, blurring the lines between thought and action. Ethical debates on 'human enhancement' become central societal issues.",
+            footerDesc: "This is an interactive web application created based on the report 'The Post-Physical Interface: A Deep Dive into Brain-Computer Interface Technology and Its Transformative Potential for the Metaverse'.",
+            footerNote: "For demonstration and educational purposes only."
+        }
+    };
+    
+    const companiesData = {
+        zh: [
+            { name: 'Neuralink', type: 'invasive', tech: 'N1晶片與柔性「線程」', market: '醫療（癱瘓、失明）、長期（人機共生）', milestone: '2024年完成首例人體植入' },
+            { name: 'Synchron', type: 'invasive', tech: 'Stentrode™血管內支架電極', market: '醫療（癱瘓，如ALS）', milestone: '首家獲FDA批准進行永久植入BCI居家試驗的公司' },
+            { name: 'Blackrock Neurotech', type: 'invasive', tech: 'Utah Array微電極陣列', market: '醫療、研究', milestone: '已在超過40名人類受試者中植入' },
+            { name: 'Precision Neuroscience', type: 'invasive', tech: 'Layer 7柔性皮層介面', market: '醫療（神經系統疾病）', milestone: '旨在提供比Neuralink侵入性更小的方案' },
+            { name: 'Emotiv', type: 'non-invasive', tech: '高精度EEG感測器', market: '消費者（健康、遊戲）、研究', milestone: '領先的非侵入式EEG設備製造商' },
+            { name: 'OpenBCI', type: 'non-invasive', tech: '開源生物感測硬體', market: '研究、開發者、創客', milestone: '致力於打造與VR/AR集成的開源平台' },
+        ],
+        en: [
+            { name: 'Neuralink', type: 'invasive', tech: 'N1 chip and flexible "threads"', market: 'Medical (paralysis, blindness), Long-term (human-AI symbiosis)', milestone: 'Completed first human implantation in 2024' },
+            { name: 'Synchron', type: 'invasive', tech: 'Stentrode™ endovascular stent electrode', market: 'Medical (paralysis, e.g., ALS)', milestone: 'First company to receive FDA approval for at-home trials of a permanent implantable BCI' },
+            { name: 'Blackrock Neurotech', type: 'invasive', tech: 'Utah Array microelectrode array', market: 'Medical, Research', milestone: 'Implanted in over 40 human subjects' },
+            { name: 'Precision Neuroscience', type: 'invasive', tech: 'Layer 7 flexible cortical interface', market: 'Medical (neurological diseases)', milestone: 'Aims to provide a less invasive solution than Neuralink' },
+            { name: 'Emotiv', type: 'non-invasive', tech: 'High-resolution EEG sensors', market: 'Consumer (wellness, gaming), Research', milestone: 'Leading manufacturer of non-invasive EEG devices' },
+            { name: 'OpenBCI', type: 'non-invasive', tech: 'Open-source biosensing hardware', market: 'Research, Developers, Makers', milestone: 'Focused on creating an open platform for integration with VR/AR' },
+        ]
+    };
+    
+    const appContents = {
+        zh: {
+            medical: { title: '醫療與輔助技術', content: '這是BCI最緊迫的應用。對於因ALS、脊髓損傷或中風而癱瘓的患者，BCI提供了繞過受損神經通路的希望，使他們能用思想控制義肢、輪椅和通訊設備。此外，BCI結合VR的神經康復訓練，可通過增強大腦可塑性，加速運動功能的恢復。' },
+            gaming: { title: '遊戲與娛樂', content: 'BCI將帶來免手持的遊戲控制，讓玩家用「念力」施放魔法，創造前所未有的沉浸感。更具革命性的是適應性遊戲：系統能監測玩家的情緒與專注度，即時調整遊戲難度與情節，提供獨一無二的個人化體驗。' },
+            work: { title: '工作與教育', content: '在協作虛擬環境中，BCI能監測學生的專注度以優化學習路徑，也能讓飛行員或交易員等專業人士進行免手持控制，提升決策效率。它還有望通過監測認知負荷來預防職業倦怠，提升工作場所的安全與效率。' }
+        },
+        en: {
+            medical: { title: 'Medical & Assistive Technology', content: 'This is the most urgent application for BCI. For patients paralyzed by ALS, spinal cord injury, or stroke, BCI offers hope by bypassing damaged neural pathways, allowing them to control prosthetics, wheelchairs, and communication devices with their thoughts. Furthermore, BCI combined with VR for neurorehabilitation can accelerate motor function recovery by enhancing brain plasticity.' },
+            gaming: { title: 'Gaming & Entertainment', content: 'BCI will enable hands-free game control, allowing players to cast spells with their mind, creating unprecedented immersion. More revolutionary is adaptive gaming: the system can monitor a player\'s emotions and focus, adjusting game difficulty and plot in real-time for a unique, personalized experience.' },
+            work: { title: 'Work & Education', content: 'In collaborative virtual environments, BCI can monitor student focus to optimize learning paths or allow professionals like pilots and traders to perform hands-free control, enhancing decision-making efficiency. It also promises to prevent burnout by monitoring cognitive load, improving safety and efficiency in the workplace.' }
+        }
+    };
+    
+    const langToggleBtn = document.getElementById('lang-toggle');
+
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        langToggleBtn.textContent = lang === 'zh' ? 'EN' : '中';
+
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        updateChart(lang);
+        renderCompanies(document.querySelector('.filter-btn.bg-teal-600').dataset.filter);
+        updateAppContent(document.querySelector('.app-tab.bg-teal-100').dataset.app);
+    };
+    
+    langToggleBtn.addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        switchLanguage(newLang);
+    });
+
+    const marketChartCtx = document.getElementById('marketChart').getContext('2d');
+    const marketChartData = {
+        labels: ['2023', '2024', '2025', '2026', '2027', '2028', '2029'],
+        datasets: [{
+            label: translations[currentLang].chartLabel,
+            data: [21, 23.98, 27.38, 31.27, 35.71, 40.78, 45],
+            fill: true,
+            backgroundColor: 'rgba(13, 148, 136, 0.2)',
+            borderColor: 'rgb(13, 148, 136)',
+            tension: 0.4
+        }]
+    };
+    const marketChartConfig = {
+        type: 'line',
+        data: marketChartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: false, ticks: { callback: (value) => currentLang === 'zh' ? `$${value}億` : `$${value}B` } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    };
+    marketChart = new Chart(marketChartCtx, marketChartConfig);
+
+    function updateChart(lang) {
+        marketChart.data.datasets[0].label = translations[lang].chartLabel;
+        marketChart.options.scales.y.ticks.callback = (value) => lang === 'zh' ? `$${value}億` : `$${value}B`;
+        marketChart.update();
+    }
+    
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetElement = document.querySelector(link.getAttribute('href'));
+            if (targetElement) {
+                window.scrollTo({ top: targetElement.offsetTop - 80, behavior: 'smooth' });
+            }
+        });
+    });
+
+    const techTabs = document.querySelectorAll('.tech-tab');
+    techTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            techTabs.forEach(t => t.classList.replace('active-tab', 'inactive-tab'));
+            tab.classList.replace('inactive-tab', 'active-tab');
+            document.querySelectorAll('.tech-content').forEach(content => {
+                content.classList.toggle('active', content.id === `${tab.dataset.tab}-content`);
+            });
+        });
+    });
+
+    document.querySelectorAll('.bci-type-card').forEach(card => {
+        card.addEventListener('click', () => card.querySelector('.bci-type-desc').classList.toggle('hidden'));
+    });
+    
+    const companyGrid = document.getElementById('company-grid');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
+    const renderCompanies = (filter) => {
+        companyGrid.innerHTML = '';
+        const companies = companiesData[currentLang];
+        const filteredCompanies = filter === 'all' ? companies : companies.filter(c => c.type === filter);
+        
+        filteredCompanies.forEach(company => {
+            const card = document.createElement('div');
+            card.className = 'company-card bg-white p-6 rounded-lg shadow-md';
+            const typeText = currentLang === 'zh' ? (company.type === 'invasive' ? '侵入式' : '非侵入式') : company.type;
+            const techLabel = currentLang === 'zh' ? '核心技術' : 'Core Tech';
+            const marketLabel = currentLang === 'zh' ? '目標市場' : 'Target Market';
+            const milestoneLabel = currentLang === 'zh' ? '里程碑' : 'Milestone';
+            
+            card.innerHTML = `
+                <h4 class="text-xl font-bold text-teal-700">${company.name}</h4>
+                <span class="text-xs font-semibold uppercase px-2 py-1 rounded-full ${company.type === 'invasive' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">${typeText}</span>
+                <p class="mt-4 text-stone-600"><strong class="text-stone-800">${techLabel}：</strong>${company.tech}</p>
+                <p class="mt-2 text-stone-600"><strong class="text-stone-800">${marketLabel}：</strong>${company.market}</p>
+                <p class="mt-2 text-stone-600"><strong class="text-stone-800">${milestoneLabel}：</strong>${company.milestone}</p>
+            `;
+            companyGrid.appendChild(card);
+        });
+    };
+    
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.dataset.filter;
+            filterBtns.forEach(b => {
+                b.classList.remove('bg-teal-600', 'text-white');
+                b.classList.add('bg-white', 'text-teal-600', 'border', 'border-teal-600');
+            });
+            btn.classList.add('bg-teal-600', 'text-white');
+            btn.classList.remove('bg-white', 'text-teal-600', 'border', 'border-teal-600');
+            renderCompanies(filter);
+        });
+    });
+
+    const appTabs = document.querySelectorAll('.app-tab');
+    const appContentDisplay = document.getElementById('app-content-display');
+
+    const updateAppContent = (app) => {
+        const newContent = appContents[currentLang][app];
+        appContentDisplay.innerHTML = `<h4 class="text-2xl font-bold mb-4">${newContent.title}</h4><p class="text-stone-700">${newContent.content}</p>`;
+    }
+    
+    appTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const app = tab.dataset.app;
+            appTabs.forEach(t => {
+                t.classList.remove('bg-teal-100', 'border-l-4', 'border-teal-600');
+                t.classList.add('bg-white');
+            });
+            tab.classList.add('bg-teal-100', 'border-l-4', 'border-teal-600');
+            tab.classList.remove('bg-white');
+            updateAppContent(app);
+        });
+    });
+
+    // Initial Render
+    switchLanguage('zh');
+});
+</script>
+</body>
+</html>
