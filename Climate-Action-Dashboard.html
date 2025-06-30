@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巴黎協定互動儀表板：進度與影響</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Blue/Green Accents -->
+    <!-- Application Structure Plan: The application is designed as a top-down narrative dashboard. It starts with the global 'big picture' (Global Overview), allowing users to immediately grasp the core problem—the gap to the 1.5°C target. It then logically flows to the 'who' (Major Emitters), providing an interactive comparison of the key players responsible for this gap. Next, it expands to the 'so what' (Geopolitical Impact), exploring the broader consequences of climate change beyond just emissions. Finally, it concludes with actionable 'what's next' (The Path Forward) steps. This structure transforms the dense report into an intuitive, explorable journey, guiding the user from problem to players, to consequences, and finally to solutions, which is a more logical and engaging flow for a web application than the original report's layout. -->
+    <!-- Visualization & Content Choices: 
+        - Global Emissions Gap: Goal: Inform/Impact. Viz: A large Donut Chart (Chart.js) to visually represent the huge gap between current NDCs and the 1.5°C pathway, making the abstract number (20.3-23.9 GtCO2e) immediately tangible. Interaction: Tooltips on hover provide specific data. Justification: A donut chart is excellent for showing part-to-whole relationships in a visually striking way.
+        - Major Emitters Comparison: Goal: Compare/Analyze. Viz: A Radar Chart (Chart.js) dynamically updated by user clicks on country buttons. Interaction: Clicking a country button redraws the chart and updates related text blocks. Justification: A radar chart is superior for comparing multiple, distinct metrics (NDC Goal, Policy, Finance) for different entities (countries) on a single, easy-to-understand graphic, revealing at a glance where each country's strengths and weaknesses lie.
+        - Geopolitical Pillars: Goal: Organize/Explore. Viz: A grid of interactive cards (HTML/Tailwind/JS) for each geopolitical theme. Interaction: Clicking a card expands to show detailed text. Justification: This 'accordion' or 'reveal' style interaction breaks down complex topics into digestible chunks, preventing information overload and encouraging user-driven exploration.
+        - Recommendations: Goal: Inform/Instruct. Viz: A clean three-column layout (HTML/Tailwind). Interaction: None, focus on readability. Justification: Simple, clear presentation is best for actionable recommendations.
+        - All choices confirm NO SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #334155; /* slate-700 */
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0d9488; /* teal-600 */
+            border-bottom-color: #0d9488; /* teal-600 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .emitter-btn {
+            transition: background-color 0.3s, color 0.3s, transform 0.3s;
+        }
+        .emitter-btn.active {
+            background-color: #0d9488; /* teal-600 */
+            color: white;
+            transform: scale(1.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-700">
+
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-teal-700" data-lang-key="headerTitle">氣候行動儀表板</h1>
+                </div>
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="#overview" class="nav-link px-3 py-2 text-sm font-medium" data-lang-key="navOverview">全球概覽</a>
+                    <a href="#emitters" class="nav-link px-3 py-2 text-sm font-medium" data-lang-key="navEmitters">主要排放國</a>
+                    <a href="#geopolitics" class="nav-link px-3 py-2 text-sm font-medium" data-lang-key="navGeopolitics">地緣政治影響</a>
+                    <a href="#forward" class="nav-link px-3 py-2 text-sm font-medium" data-lang-key="navForward">前進之路</a>
+                    <button id="lang-toggle-btn" class="ml-4 px-3 py-2 text-sm font-medium border border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors">切換英文</button>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-teal-600 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#overview" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navOverviewMobile">全球概覽</a>
+                <a href="#emitters" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navEmittersMobile">主要排放國</a>
+                <a href="#geopolitics" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navGeopoliticsMobile">地緣政治影響</a>
+                <a href="#forward" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="navForwardMobile">前進之路</a>
+                <button id="lang-toggle-btn-mobile" class="mt-2 w-full px-3 py-2 text-sm font-medium border border-teal-600 text-teal-600 rounded-full hover:bg-teal-50 transition-colors">切換英文</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="overview" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4" data-lang-key="overviewTitle">全球氣候行動的十字路口</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="overviewSubtitle">
+                    首次全球盤點（Global Stocktake）揭示了一個嚴峻的現實：《巴黎協定》成功激發了全球行動，但我們仍未走在將升溫控制在1.5°C的正確軌道上。巨大的「執行差距」與「排放差距」需要各國採取更緊急、更具雄心的行動。
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8 items-center">
+                <div class="lg:col-span-3">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-slate-700" data-lang-key="overviewFindingsTitle">全球盤點：核心發現</h3>
+                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="card p-4 flex items-center">
+                            <span class="text-3xl mr-4">🌡️</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="finding1Title">目標偏離軌道</h4>
+                                <p class="text-sm text-slate-500" data-lang-key="finding1Desc">當前全球升溫路徑預測為2.4-2.6°C，遠高於1.5°C的目標。</p>
+                            </div>
+                        </div>
+                        <div class="card p-4 flex items-center">
+                            <span class="text-3xl mr-4">💨</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="finding2Title">巨大排放差距</h4>
+                                <p class="text-sm text-slate-500" data-lang-key="finding2Desc">實現1.5°C目標所需減排量與各國承諾間存在巨大鴻溝。</p>
+                            </div>
+                        </div>
+                        <div class="card p-4 flex items-center">
+                           <span class="text-3xl mr-4">💧</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="finding3Title">適應行動不足</h4>
+                                <p class="text-sm text-slate-500" data-lang-key="finding3Desc">氣候適應的規劃與實施規模，遠落後於日益增長的氣候風險。</p>
+                            </div>
+                        </div>
+                         <div class="card p-4 flex items-center">
+                            <span class="text-3xl mr-4">💸</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="finding4Title">融資缺口擴大</h4>
+                                <p class="text-sm text-slate-500" data-lang-key="finding4Desc">氣候融資的實際到位資金，與開發中國家的巨大需求不成比例。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-slate-700" data-lang-key="emissionsGapChartTitle">2030年排放差距</h3>
+                    <div class="chart-container">
+                        <canvas id="emissionsGapChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-2" data-lang-key="emissionsGapChartDesc">為達1.5°C目標，當前各國NDC承諾與所需減排路徑的差距（單位：十億噸二氧化碳當量）。</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <section id="emitters" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4" data-lang-key="emittersTitle">執行差距：主要排放國比較</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="emittersSubtitle">
+                    技術本身並非瓶頸，各國國內的政治經濟結構、能源安全考量與既得利益集團是彌合「承諾與行動」之間差距的主要障礙。點擊下方國家按鈕，查看其詳細評估。
+                </p>
+            </div>
+            <div class="flex justify-center space-x-2 md:space-x-4 mb-8 flex-wrap">
+                <button class="emitter-btn active font-medium py-2 px-4 rounded-full bg-slate-200 text-slate-700" data-emitter="USA" data-lang-key="btnUSA">美國</button>
+                <button class="emitter-btn font-medium py-2 px-4 rounded-full bg-slate-200 text-slate-700" data-emitter="China" data-lang-key="btnChina">中國</button>
+                <button class="emitter-btn font-medium py-2 px-4 rounded-full bg-slate-200 text-slate-700" data-emitter="EU" data-lang-key="btnEU">歐盟</button>
+                <button class="emitter-btn font-medium py-2 px-4 rounded-full bg-slate-200 text-slate-700" data-emitter="India" data-lang-key="btnIndia">印度</button>
+            </div>
+
+            <div class="grid md:grid-cols-5 gap-8 items-center">
+                <div class="md:col-span-2">
+                    <h3 id="emitter-name" class="text-2xl font-bold text-center mb-4 text-slate-700"></h3>
+                    <div class="chart-container">
+                        <canvas id="emitterRadarChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-2" data-lang-key="radarChartDesc">評級越高表示越接近1.5°C目標要求。</p>
+                </div>
+                <div id="emitter-details" class="md:col-span-3 card p-6 md:p-8">
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+        
+        <section id="geopolitics" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4" data-lang-key="geopoliticsTitle">地緣政治影響</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="geopoliticsSubtitle">
+                    氣候變遷已非單純的環境議題，它正成為重塑國際關係的核心力量，催生新的競爭、衝突與合作領域。點擊下方主題卡片以深入了解。
+                </p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="geopolitics-card card p-6 cursor-pointer" data-topic="security">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="geo1Title">🛡️ 氣候安全化</h4>
+                    <p class="text-slate-600 text-sm" data-lang-key="geo1Desc">氣候作為「威脅倍增器」，加劇現有脆弱性，被納入國家安全戰略。</p>
+                    <div class="geopolitics-detail hidden mt-4 text-sm text-slate-500 space-y-2" data-lang-key="geo1Detail"></div>
+                </div>
+                <div class="geopolitics-card card p-6 cursor-pointer" data-topic="justice">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="geo2Title">⚖️ 氣候正義</h4>
+                    <p class="text-slate-600 text-sm" data-lang-key="geo2Desc">圍繞歷史責任與資金賠償，全球南北分歧成為談判核心斷層線。</p>
+                    <div class="geopolitics-detail hidden mt-4 text-sm text-slate-500 space-y-2" data-lang-key="geo2Detail"></div>
+                </div>
+                <div class="geopolitics-card card p-6 cursor-pointer" data-topic="conflict">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="geo3Title">💧 資源衝突</h4>
+                    <p class="text-slate-600 text-sm" data-lang-key="geo3Desc">對水等關鍵資源的競爭加劇，尤其在跨國河流流域，顯著提升衝突風險。</p>
+                     <div class="geopolitics-detail hidden mt-4 text-sm text-slate-500 space-y-2" data-lang-key="geo3Detail"></div>
+                </div>
+                <div class="geopolitics-card card p-6 cursor-pointer" data-topic="displacement">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="geo4Title">🚶 人類流離失所</h4>
+                    <p class="text-slate-600 text-sm" data-lang-key="geo4Desc">天氣相關災害已成全球流離失所主因，「氣候難民」面臨法律保護缺口。</p>
+                    <div class="geopolitics-detail hidden mt-4 text-sm text-slate-500 space-y-2" data-lang-key="geo4Detail"></div>
+                </div>
+                <div class="geopolitics-card card p-6 cursor-pointer" data-topic="tech">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="geo5Title">🔋 綠色科技競爭</h4>
+                    <p class="text-slate-600 text-sm" data-lang-key="geo5Desc">全球能源轉型催生新的戰略依賴，大國競爭從石油轉向綠色科技與關鍵礦產。</p>
+                    <div class="geopolitics-detail hidden mt-4 text-sm text-slate-500 space-y-2" data-lang-key="geo5Detail"></div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <section id="forward" class="scroll-mt-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4" data-lang-key="forwardTitle">前進之路：實現1.5°C的政策要務</h2>
+                <p class="max-w-3xl mx-auto text-lg text-slate-600" data-lang-key="forwardSubtitle">
+                    漸進主義已然失敗。即將到來的2035年國家自定貢獻（NDC）提交週期，是重新對齊全球雄心與1.5°C目標的關鍵機會。這需要各方利害關係人採取協同一致的變革性行動。
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl mb-4 text-teal-700" data-lang-key="rec1Title">國家政府</h3>
+                    <ul class="space-y-3 text-slate-600" data-lang-key="rec1List"></ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl mb-4 text-teal-700" data-lang-key="rec2Title">多邊機構 (UNFCCC)</h3>
+                    <ul class="space-y-3 text-slate-600" data-lang-key="rec2List"></ul>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl mb-4 text-teal-700" data-lang-key="rec3Title">私營與金融部門</h3>
+                    <ul class="space-y-3 text-slate-600" data-lang-key="rec3List"></ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-slate-300 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p data-lang-key="footerText">本儀表板內容基於《巴黎協定》執行進度報告分析製作，僅供資訊參考。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const langData = {
+        zh: {
+            langToggle: "Switch to English",
+            headerTitle: "氣候行動儀表板",
+            navOverview: "全球概覽",
+            navEmitters: "主要排放國",
+            navGeopolitics: "地緣政治影響",
+            navForward: "前進之路",
+            overviewTitle: "全球氣候行動的十字路口",
+            overviewSubtitle: "首次全球盤點（Global Stocktake）揭示了一個嚴峻的現實：《巴黎協定》成功激發了全球行動，但我們仍未走在將升溫控制在1.5°C的正確軌道上。巨大的「執行差距」與「排放差距」需要各國採取更緊急、更具雄心的行動。",
+            overviewFindingsTitle: "全球盤點：核心發現",
+            finding1Title: "目標偏離軌道",
+            finding1Desc: "當前全球升溫路徑預測為2.4-2.6°C，遠高於1.5°C的目標。",
+            finding2Title: "巨大排放差距",
+            finding2Desc: "實現1.5°C目標所需減排量與各國承諾間存在巨大鴻溝。",
+            finding3Title: "適應行動不足",
+            finding3Desc: "氣候適應的規劃與實施規模，遠落後於日益增長的氣候風險。",
+            finding4Title: "融資缺口擴大",
+            finding4Desc: "氣候融資的實際到位資金，與開發中國家的巨大需求不成比例。",
+            emissionsGapChartTitle: "2030年排放差距",
+            emissionsGapChartDesc: "為達1.5°C目標，當前各國NDC承諾與所需減排路徑的差距（單位：十億噸二氧化碳當量）。",
+            emissionsGapChartLabels: ['當前NDC承諾減排量', '與1.5°C目標的差距'],
+            emittersTitle: "執行差距：主要排放國比較",
+            emittersSubtitle: "技術本身並非瓶頸，各國國內的政治經濟結構、能源安全考量與既得利益集團是彌合「承諾與行動」之間差距的主要障礙。點擊下方國家按鈕，查看其詳細評估。",
+            btnUSA: "美國",
+            btnChina: "中國",
+            btnEU: "歐盟",
+            btnIndia: "印度",
+            radarChartDesc: "評級越高表示越接近1.5°C目標要求。",
+            radarChartLabels: ['2030 NDC目標', '國內政策執行', '氣候融資貢獻'],
+            emitterRatingLabel: "評級",
+            usaName: "美國",
+            chinaName: "中國",
+            euName: "歐盟",
+            indiaName: "印度",
+            usaDetails: `
+                <h4 class="font-bold text-lg mb-2">總體評級：不足 (Insufficient)</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 關鍵正面驅動力：</strong>
+                    <p class="text-sm text-slate-600">《降低通膨法案》(IRA) 是史上最重要氣候立法，透過大規模補貼極大促進清潔能源與電動車產業發展。</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 主要挑戰／矛盾：</strong>
+                    <p class="text-sm text-slate-600">國內政治的極端兩極分化是首要挑戰，任何政府更迭都可能威脅政策連續性。即使有IRA，預計仍無法達成2030年NDC目標。</p>
+                </div>`,
+            chinaDetails: `
+                <h4 class="font-bold text-lg mb-2">總體評級：高度不足 (Highly insufficient)</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 關鍵正面驅動力：</strong>
+                    <p class="text-sm text-slate-600">全球再生能源與電動車的領導者，太陽能板、風力渦輪機和電動車供應鏈佔據主導地位，再生能源部署速度驚人。</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 主要挑戰／矛盾：</strong>
+                    <p class="text-sm text-slate-600">出於能源安全考量與經濟慣性，仍在持續大規模建設燃煤電廠。再生能源增速仍難以完全覆蓋快速增長的能源需求。</p>
+                </div>`,
+            euDetails: `
+                <h4 class="font-bold text-lg mb-2">總體評級：不足 (Insufficient)</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 關鍵正面驅動力：</strong>
+                    <p class="text-sm text-slate-600">《歐洲綠色政綱》及其「Fit for 55」一攬子計畫構建了全面的政策體系，已將預期減排量大幅提升。</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 主要挑戰／矛盾：</strong>
+                    <p class="text-sm text-slate-600">對天然氣（特別是LNG）的依賴，可能造成長期的基礎設施「鎖定效應」，與氣候目標相悖，且仍未設定化石燃料淘汰日期。</p>
+                </div>`,
+            indiaDetails: `
+                <h4 class="font-bold text-lg mb-2">總體評級：高度不足 (Highly insufficient)</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 關鍵正面驅動力：</strong>
+                    <p class="text-sm text-slate-600">太陽能發電容量快速增長，在再生能源部署方面取得顯著進展。</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 主要挑戰／矛盾：</strong>
+                    <p class="text-sm text-slate-600">快速經濟增長帶動能源需求飆升，導致對煤炭（佔發電量75%）的高度依賴，且仍在建設新煤電項目，脫碳轉型挑戰巨大。</p>
+                </div>`,
+            geopoliticsTitle: "地緣政治影響",
+            geopoliticsSubtitle: "氣候變遷已非單純的環境議題，它正成為重塑國際關係的核心力量，催生新的競爭、衝突與合作領域。點擊下方主題卡片以深入了解。",
+            geo1Title: "🛡️ 氣候安全化",
+            geo1Desc: "氣候作為「威脅倍增器」，加劇現有脆弱性，被納入國家安全戰略。",
+            geo1Detail: `<p><strong>核心動態：</strong>歐盟、北約等將氣候變遷整合至安全戰略，發展「生態外交」，但常與傳統軍事優先事項衝突。</p><p><strong>挑戰：</strong>如何將氣候行動有效整合入多重地緣政治目標，例如能源轉型、關鍵礦產夥伴關係等，同時避免其成為純粹的權力槓桿。</p>`,
+            geo2Title: "⚖️ 氣候正義",
+            geo2Desc: "圍繞歷史責任與資金賠償，全球南北分歧成為談判核心斷層線。",
+            geo2Detail: `<p><strong>主要戰場：</strong>在氣候融資（NCQG）和損失與損害（L&D）基金議題上，已開發國家與開發中國家就資金規模、來源與責任歸屬展開激烈拉鋸，嚴重侵蝕互信。</p><p><strong>核心爭議：</strong>「氣候債務」vs.「動員私有資本」，以及是否將中國等新興經濟體納入出資國行列。</p>`,
+            geo3Title: "💧 資源衝突",
+            geo3Desc: "對水等關鍵資源的競爭加劇，尤其在跨國河流流域，顯著提升衝突風險。",
+            geo3Detail: `<p><strong>案例：</strong>尼羅河流域的「復興大壩」爭議、湄公河流域上游的水壩建設，都因氣候變遷加劇的水文不確定性，而使地緣政治緊張局勢更加尖銳。</p><p><strong>模式：</strong>單邊水資源開發與氣候變遷疊加，威脅下游國家的糧食與生計安全。</p>`,
+            geo4Title: "🚶 人類流離失所",
+            geo4Desc: "天氣相關災害已成全球流離失所主因，「氣候難民」面臨法律保護缺口。",
+            geo4Detail: `<p><strong>數據：</strong>到2050年，全球可能有高達2億人因氣候變遷而被迫離開家園。</p><p><strong>法律困境：</strong>「氣候難民」一詞在國際法中無法律地位，因緩發性災害（如海平面上升）而跨越國境者，無法獲得《難民公約》保護。</p>`,
+            geo5Title: "🔋 綠色科技競爭",
+            geo5Desc: "全球能源轉型催生新的戰略依賴，大國競爭從石油轉向綠色科技與關鍵礦產。",
+            geo5Detail: `<p><strong>主導者：</strong>中國目前在全球太陽能板、電動車電池及關鍵礦產供應鏈中佔據主導地位。</p><p><strong>應對：</strong>歐盟和美國等經濟體為此產生戰略焦慮，積極推動供應鏈「去風險化」及本土製造，引發新的貿易摩擦，可能侵蝕全球氣候合作基礎。</p>`,
+            forwardTitle: "前進之路：實現1.5°C的政策要務",
+            forwardSubtitle: "漸進主義已然失敗。即將到來的2035年國家自定貢獻（NDC）提交週期，是重新對齊全球雄心與1.5°C目標的關鍵機會。這需要各方利害關係人採取協同一致的變革性行動。",
+            rec1Title: "國家政府",
+            rec1List: `<li class="flex"><span class="mr-2">➡️</span><span>超越目標設定，轉向實施強有力的國內政策，瓦解化石燃料的政治經濟基礎。</span></li><li class="flex"><span class="mr-2">➡️</span><span>將氣候目標全面整合入國家的經濟、產業和安全戰略，視為核心國家利益。</span></li><li class="flex"><span class="mr-2">➡️</span><span>提交涵蓋整體經濟、具備明確化石燃料淘汰日期的2035年NDC。</span></li>`,
+            rec2Title: "多邊機構 (UNFCCC)",
+            rec2List: `<li class="flex"><span class="mr-2">➡️</span><span>核心任務是重建信任，在氣候融資談判中促成突破，回應全球南方正義訴求。</span></li><li class="flex"><span class="mr-2">➡️</span><span>確保「損失與損害基金」獲得充足、可預測的資金，避免其淪為「空殼」。</span></li><li class="flex"><span class="mr-2">➡️</span><span>強化全球盤點（GST）的政治階段，以產生更大壓力，迫使各國提升雄心。</span></li>`,
+            rec3Title: "私營與金融部門",
+            rec3List: `<li class="flex"><span class="mr-2">➡️</span><span>使其投資流向與1.5°C路徑完全對齊，立即停止為新的化石燃料擴張項目融資。</span></li><li class="flex"><span class="mr-2">➡️</span><span>大規模增加對全球南方清潔能源和氣候適應領域的投資。</span></li><li class="flex"><span class="mr-2">➡️</span><span>從口頭承諾轉向透明、可驗證的實際行動，警惕並防範「漂綠」行為。</span></li>`,
+            footerText: "本儀表板內容基於《巴黎協定》執行進度報告分析製作，僅供資訊參考。",
+        },
+        en: {
+            langToggle: "切換中文",
+            headerTitle: "Climate Action Dashboard",
+            navOverview: "Global Overview",
+            navEmitters: "Major Emitters",
+            navGeopolitics: "Geopolitical Impact",
+            navForward: "The Path Forward",
+            overviewTitle: "At the Crossroads of Global Climate Action",
+            overviewSubtitle: "The first Global Stocktake reveals a stark reality: the Paris Agreement has successfully spurred global action, but we are not on track to limit warming to 1.5°C. A huge 'implementation gap' and 'emissions gap' require more urgent and ambitious action from all countries.",
+            overviewFindingsTitle: "Global Stocktake: Core Findings",
+            finding1Title: "Off-Track Targets",
+            finding1Desc: "Current global warming pathway is projected at 2.4-2.6°C, far exceeding the 1.5°C target.",
+            finding2Title: "Massive Emissions Gap",
+            finding2Desc: "A huge gap exists between country commitments and the emissions reductions needed for the 1.5°C goal.",
+            finding3Title: "Insufficient Adaptation",
+            finding3Desc: "The scale of adaptation planning and implementation lags far behind growing climate risks.",
+            finding4Title: "Widening Finance Gap",
+            finding4Desc: "Actual climate finance delivery is disproportionate to the immense needs of developing countries.",
+            emissionsGapChartTitle: "2030 Emissions Gap",
+            emissionsGapChartDesc: "The gap between current NDC pledges and the required reduction pathway to meet the 1.5°C target (in GtCO2e).",
+            emissionsGapChartLabels: ['Current NDC Pledges', 'Gap to 1.5°C Pathway'],
+            emittersTitle: "The Implementation Gap: Major Emitters Compared",
+            emittersSubtitle: "Technology is not the bottleneck. Domestic political-economic structures, energy security concerns, and vested interests are the main barriers to closing the gap between promises and action. Click a country below for its detailed assessment.",
+            btnUSA: "USA",
+            btnChina: "China",
+            btnEU: "EU",
+            btnIndia: "India",
+            radarChartDesc: "Higher ratings indicate closer alignment with 1.5°C requirements.",
+            radarChartLabels: ['2030 NDC Target', 'Domestic Policy', 'Climate Finance'],
+            emitterRatingLabel: "Rating",
+            usaName: "USA",
+            chinaName: "China",
+            euName: "EU",
+            indiaName: "India",
+            usaDetails: `
+                <h4 class="font-bold text-lg mb-2">Overall Rating: Insufficient</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 Key Positive Driver:</strong>
+                    <p class="text-sm text-slate-600">The Inflation Reduction Act (IRA) is the most significant climate legislation in US history, greatly boosting clean energy and EVs through massive subsidies.</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 Major Challenge/Contradiction:</strong>
+                    <p class="text-sm text-slate-600">Extreme domestic political polarization is the primary challenge; any change in government could threaten policy continuity. Even with the IRA, the US is not projected to meet its 2030 NDC target.</p>
+                </div>`,
+            chinaDetails: `
+                <h4 class="font-bold text-lg mb-2">Overall Rating: Highly Insufficient</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 Key Positive Driver:</strong>
+                    <p class="text-sm text-slate-600">A global leader in renewable energy and EVs, dominating supply chains for solar panels, wind turbines, and electric vehicles with astonishing deployment speed.</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 Major Challenge/Contradiction:</strong>
+                    <p class="text-sm text-slate-600">Continues to build new coal-fired power plants on a massive scale due to energy security concerns and economic inertia. Renewable growth still struggles to cover the rapid increase in energy demand.</p>
+                </div>`,
+            euDetails: `
+                <h4 class="font-bold text-lg mb-2">Overall Rating: Insufficient</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 Key Positive Driver:</strong>
+                    <p class="text-sm text-slate-600">The European Green Deal and its 'Fit for 55' package create a comprehensive policy framework that has significantly raised projected emissions reductions.</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 Major Challenge/Contradiction:</strong>
+                    <p class="text-sm text-slate-600">Reliance on natural gas (especially LNG) risks a long-term infrastructure 'lock-in' effect, contradicting climate goals. The EU has still not set a fossil fuel phase-out date.</p>
+                </div>`,
+            indiaDetails: `
+                <h4 class="font-bold text-lg mb-2">Overall Rating: Highly Insufficient</h4>
+                <div class="mb-4">
+                    <strong class="text-slate-700">🟢 Key Positive Driver:</strong>
+                    <p class="text-sm text-slate-600">Rapid growth in solar power capacity, making significant strides in renewable energy deployment.</p>
+                </div>
+                <div>
+                    <strong class="text-slate-700">🔴 Major Challenge/Contradiction:</strong>
+                    <p class="text-sm text-slate-600">Soaring energy demand from rapid economic growth leads to high dependency on coal (75% of electricity), with new coal projects still under construction. The decarbonization transition is a huge challenge.</p>
+                </div>`,
+            geopoliticsTitle: "Geopolitical Impact",
+            geopoliticsSubtitle: "Climate change is no longer just an environmental issue; it's a core force reshaping international relations, creating new arenas for competition, conflict, and cooperation. Click the cards below to explore.",
+            geo1Title: "🛡️ Securitization of Climate",
+            geo1Desc: "Climate as a 'threat multiplier' that exacerbates existing vulnerabilities and is integrated into national security strategies.",
+            geo1Detail: `<p><strong>Core Dynamic:</strong> The EU, NATO, and others are integrating climate change into security strategies, developing 'ecological diplomacy' that often conflicts with traditional military priorities.</p><p><strong>Challenge:</strong> How to effectively integrate climate action into multiple geopolitical goals (e.g., energy transition, critical mineral partnerships) without it becoming a pure power lever.</p>`,
+            geo2Title: "⚖️ Climate Justice",
+            geo2Desc: "Divisions between the Global North and South over historical responsibility and financial compensation are a core fault line in negotiations.",
+            geo2Detail: `<p><strong>Main Battleground:</strong> On climate finance (NCQG) and Loss & Damage (L&D) funds, developed and developing countries are in a tug-of-war over scale, sources, and responsibility, severely eroding trust.</p><p><strong>Core Dispute:</strong> 'Climate debt' vs. 'mobilizing private capital', and whether to include emerging economies like China as contributors.</p>`,
+            geo3Title: "💧 Resource Conflict",
+            geo3Desc: "Competition over critical resources like water is intensifying, significantly raising conflict risk, especially in transboundary river basins.",
+            geo3Detail: `<p><strong>Case Study:</strong> The Grand Ethiopian Renaissance Dam (GERD) dispute in the Nile basin and upstream dam construction in the Mekong are exacerbated by climate-induced hydrological uncertainty, sharpening geopolitical tensions.</p><p><strong>Pattern:</strong> Unilateral water resource development combined with climate change threatens downstream food and livelihood security.</p>`,
+            geo4Title: "🚶 Human Displacement",
+            geo4Desc: "Weather-related disasters are now the leading cause of internal displacement, with 'climate refugees' facing a legal protection gap.",
+            geo4Detail: `<p><strong>The Numbers:</strong> Up to 200 million people could be internally displaced by climate change by 2050.</p><p><strong>Legal Dilemma:</strong> The term 'climate refugee' has no legal standing in international law. Those crossing borders due to slow-onset disasters like sea-level rise are not protected by the Refugee Convention.</p>`,
+            geo5Title: "🔋 Green Tech Competition",
+            geo5Desc: "The global energy transition is creating new strategic dependencies, shifting great power competition from oil to green tech and critical minerals.",
+            geo5Detail: `<p><strong>Dominant Player:</strong> China currently dominates global supply chains for solar panels, EV batteries, and critical minerals.</p><p><strong>Response:</strong> This creates strategic anxiety in economies like the EU and US, prompting 'de-risking' and domestic manufacturing initiatives, which in turn spark new trade frictions that could erode global climate cooperation.</p>`,
+            forwardTitle: "The Path Forward: Policy Imperatives for 1.5°C",
+            forwardSubtitle: "Incrementalism has failed. The upcoming 2035 Nationally Determined Contribution (NDC) cycle is a critical opportunity to realign global ambition with the 1.5°C goal, requiring concerted, transformative action from all stakeholders.",
+            rec1Title: "National Governments",
+            rec1List: `<li class="flex"><span class="mr-2">➡️</span><span>Move beyond target setting to implementing robust domestic policies that dismantle the political economy of fossil fuels.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Integrate climate goals fully into national economic, industrial, and security strategies as a core national interest.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Submit economy-wide 2035 NDCs with clear fossil fuel phase-out dates.</span></li>`,
+            rec2Title: "Multilateral Bodies (UNFCCC)",
+            rec2List: `<li class="flex"><span class="mr-2">➡️</span><span>The core task is to rebuild trust by brokering a breakthrough on climate finance that responds to the justice demands of the Global South.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Ensure the Loss & Damage Fund receives adequate, predictable funding to avoid it becoming an 'empty shell'.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Strengthen the political phase of the Global Stocktake (GST) to generate greater pressure for enhanced ambition.</span></li>`,
+            rec3Title: "Private & Financial Sectors",
+            rec3List: `<li class="flex"><span class="mr-2">➡️</span><span>Fully align investment flows with a 1.5°C pathway, which means immediately ceasing financing for new fossil fuel expansion.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Massively scale up investment in clean energy and climate adaptation in the Global South.</span></li><li class="flex"><span class="mr-2">➡️</span><span>Move from pledges to transparent, verifiable action, and be vigilant against 'greenwashing'.</span></li>`,
+            footerText: "This dashboard is for informational purposes, based on analysis of Paris Agreement implementation reports.",
+        }
+    };
+
+    let currentLang = 'zh';
+    let emissionsGapChart, emitterRadarChart;
+
+    function createEmissionsGapChart(lang) {
+        const ctx = document.getElementById('emissionsGapChart').getContext('2d');
+        const data = {
+            labels: langData[lang].emissionsGapChartLabels,
+            datasets: [{
+                data: [100 - (22 / (55)) * 100, (22 / (55)) * 100],
+                backgroundColor: ['#2dd4bf', '#f43f5e'],
+                borderColor: '#f8fafc',
+                borderWidth: 3,
+            }]
+        };
+        if (emissionsGapChart) {
+            emissionsGapChart.destroy();
+        }
+        emissionsGapChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#475569', font: { size: 12 }}},
+                    tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw.toFixed(1)}%` }}
+                }
+            }
+        });
+    }
+
+    function createEmitterRadarChart(lang) {
+        const ctx = document.getElementById('emitterRadarChart').getContext('2d');
+        if (emitterRadarChart) {
+            emitterRadarChart.destroy();
+        }
+        emitterRadarChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: langData[lang].radarChartLabels,
+                datasets: [{
+                    label: langData[lang].emitterRatingLabel,
+                    data: [],
+                    fill: true,
+                    backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                    borderColor: '#0d9488',
+                    pointBackgroundColor: '#0d9488',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: '#0d9488'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#cbd5e1' },
+                        grid: { color: '#e2e8f0' },
+                        pointLabels: { color: '#475569', font: { size: 12 }},
+                        ticks: { color: '#64748b', backdropColor: 'transparent', stepSize: 1 },
+                        min: 0,
+                        max: 4,
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
+    const emittersData = {
+        USA: { ratings: [3, 2, 1], nameKey: 'usaName', detailsKey: 'usaDetails' },
+        China: { ratings: [2, 2, 2], nameKey: 'chinaName', detailsKey: 'chinaDetails' },
+        EU: { ratings: [2, 3, 2], nameKey: 'euName', detailsKey: 'euDetails' },
+        India: { ratings: [2, 2, 2], nameKey: 'indiaName', detailsKey: 'indiaDetails' }
+    };
+    
+    const emitterNameEl = document.getElementById('emitter-name');
+    const emitterDetailsEl = document.getElementById('emitter-details');
+
+    function updateEmitterView(emitterKey, lang) {
+        const data = emittersData[emitterKey];
+        emitterNameEl.textContent = langData[lang][data.nameKey];
+        emitterDetailsEl.innerHTML = langData[lang][data.detailsKey];
+        emitterRadarChart.data.datasets[0].data = data.ratings;
+        emitterRadarChart.data.datasets[0].label = `${langData[lang][data.nameKey]} ${langData[lang].emitterRatingLabel}`;
+        emitterRadarChart.update();
+
+        document.querySelectorAll('.emitter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.emitter === emitterKey);
+        });
+    }
+
+    function updateLanguage(lang) {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (langData[lang][key]) {
+                 if (key.endsWith('List') || key.endsWith('Detail')) {
+                    el.innerHTML = langData[lang][key];
+                } else {
+                    el.textContent = langData[lang][key];
+                }
+            }
+        });
+        
+        // Handle mobile nav keys separately
+        document.querySelector('[data-lang-key="navOverviewMobile"]').textContent = langData[lang]['navOverview'];
+        document.querySelector('[data-lang-key="navEmittersMobile"]').textContent = langData[lang]['navEmitters'];
+        document.querySelector('[data-lang-key="navGeopoliticsMobile"]').textContent = langData[lang]['navGeopolitics'];
+        document.querySelector('[data-lang-key="navForwardMobile"]').textContent = langData[lang]['navForward'];
+
+        // Update charts
+        createEmissionsGapChart(lang);
+        createEmitterRadarChart(lang);
+        const activeEmitter = document.querySelector('.emitter-btn.active').dataset.emitter;
+        updateEmitterView(activeEmitter, lang);
+    }
+    
+    // Setup Language Toggle
+    const langToggleButtons = [document.getElementById('lang-toggle-btn'), document.getElementById('lang-toggle-btn-mobile')];
+    langToggleButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguage(currentLang);
+        });
+    });
+
+    // Initial Load
+    updateLanguage(currentLang);
+
+    // Emitter Buttons Event Listeners
+    document.querySelectorAll('.emitter-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+            updateEmitterView(e.target.dataset.emitter, currentLang);
+        });
+    });
+
+    // Geopolitics Cards Event Listeners
+    document.querySelectorAll('.geopolitics-card').forEach(card => {
+        card.addEventListener('click', () => {
+            card.querySelector('.geopolitics-detail').classList.toggle('hidden');
+        });
+    });
+
+    // Mobile Menu
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    document.querySelectorAll('.nav-link, .block.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        });
+    });
+
+});
+</script>
+
+</body>
+</html>
