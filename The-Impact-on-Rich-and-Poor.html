@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式累退稅分析儀 | Interactive Regressive Tax Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Base: #F5F5F4, Text: #374151, Accent: #4F46E5) -->
+    <!-- Application Structure Plan: The SPA uses a guided, interactive dashboard structure instead of a linear report format. It starts with a core "Impact Simulator" to immediately answer the user's primary question about the differential impact of regressive tax. This is supported by tabbed sections for foundational definitions and examples, and expandable accordions for deeper, optional content (social impact, policy solutions). This design prioritizes hands-on learning and user-driven exploration over passive reading, making a complex economic topic more intuitive and engaging. The flow is designed to go from a practical demonstration to theoretical understanding. -->
+    <!-- Visualization & Content Choices: 1. Tax Type Comparison: Goal: Compare. Method: HTML/CSS styled cards in a flexbox layout. Interaction: Hover effects. Justification: A simple, clear visual distinction without the overhead of a chart for a simple concept. 2. Impact Simulator: Goal: Demonstrate/Compare. Method: Input fields for income/spending, with a dynamic Chart.js bar chart. Interaction: Real-time updates to the chart and text summaries as user modifies inputs. Justification: This is the most effective way to show the core principle of regressive tax—that the *effective rate* is higher for the poor. It's interactive and directly answers the user's question. Library: Chart.js. 3. Common Examples: Goal: Organize/Inform. Method: A grid of clickable cards. Interaction: Clicking a card reveals detailed info in a modal window. Justification: This organizes distinct pieces of information cleanly, preventing initial information overload while allowing easy access to details. 4. Deeper Topics: Goal: Inform. Method: HTML/CSS accordion. Interaction: Click to expand/collapse. Justification: Hides secondary, text-heavy information by default to keep the main interface clean, allowing users to opt-in to more detail. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F5F5F4; /* stone-100 */
+            color: #374151; /* gray-700 */
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            border-color: #4F46E5; /* indigo-600 */
+            color: #4F46E5;
+            background-color: #EEF2FF; /* indigo-100 */
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .accordion-item.open .accordion-content {
+            max-height: 1000px;
+        }
+        .accordion-item.open .accordion-arrow {
+            transform: rotate(180deg);
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl sm:text-3xl font-bold text-gray-800 tracking-wider" data-lang-key="headerTitle"></h1>
+                <p class="mt-1 text-gray-500" data-lang-key="headerSubtitle"></p>
+            </div>
+            <button id="lang-switcher" class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition">English</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <div id="tabs-container" class="mb-8">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                    <button id="tab-btn-simulator" class="tab-button whitespace-nowrap py-3 px-2 sm:px-4 border-b-2 font-medium text-sm sm:text-base text-gray-500 hover:text-indigo-600 hover:border-indigo-300 active" data-lang-key="tabSimulator"></button>
+                    <button id="tab-btn-definition" class="tab-button whitespace-nowrap py-3 px-2 sm:px-4 border-b-2 font-medium text-sm sm:text-base text-gray-500 hover:text-indigo-600 hover:border-indigo-300" data-lang-key="tabDefinition"></button>
+                    <button id="tab-btn-examples" class="tab-button whitespace-nowrap py-3 px-2 sm:px-4 border-b-2 font-medium text-sm sm:text-base text-gray-500 hover:text-indigo-600 hover:border-indigo-300" data-lang-key="tabExamples"></button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content">
+            <!-- Simulator Tab -->
+            <section id="tab-panel-simulator" class="space-y-8">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-900" data-lang-key="simTitle"></h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="simSubtitle"></p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div>
+                            <label for="lowIncome" class="block text-sm font-medium text-gray-700" data-lang-key="simLowIncomeLabel"></label>
+                            <input type="number" id="lowIncome" value="2000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                        </div>
+                        <div>
+                            <label for="highIncome" class="block text-sm font-medium text-gray-700" data-lang-key="simHighIncomeLabel"></label>
+                            <input type="number" id="highIncome" value="10000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                        </div>
+                        <div>
+                            <label for="salesTax" class="block text-sm font-medium text-gray-700" data-lang-key="simSalesTaxLabel"></label>
+                            <input type="number" id="salesTax" value="7" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                        </div>
+                        <div class="md:col-span-3">
+                             <label for="spending" class="block text-sm font-medium text-gray-700" data-lang-key="simSpendingLabel"></label>
+                             <p class="text-xs text-gray-500 mb-1" data-lang-key="simSpendingSublabel"></p>
+                            <input type="range" id="spending" min="500" max="5000" value="1500" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>$500</span>
+                                <span class="font-bold text-indigo-600">$<span id="spendingValue">1500</span></span>
+                                <span>$5000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container mb-6">
+                        <canvas id="taxImpactChart"></canvas>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+                        <div class="bg-indigo-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-gray-800" data-lang-key="simLowIncomeResultTitle"></h3>
+                            <p class="text-2xl font-bold text-indigo-700"><span id="lowIncomeRate">5.25</span>%</p>
+                            <p class="text-sm text-gray-600" data-lang-key="simEffectiveRate"></p>
+                            <p class="text-xs text-gray-500 mt-1"><span data-lang-key="simTaxPaid"></span> $<span id="lowIncomeTax">105</span></p>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                             <h3 class="font-semibold text-gray-800" data-lang-key="simHighIncomeResultTitle"></h3>
+                             <p class="text-2xl font-bold text-amber-700"><span id="highIncomeRate">1.05</span>%</p>
+                             <p class="text-sm text-gray-600" data-lang-key="simEffectiveRate"></p>
+                             <p class="text-xs text-gray-500 mt-1"><span data-lang-key="simTaxPaid"></span> $<span id="highIncomeTax">105</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Definition Tab -->
+            <section id="tab-panel-definition" class="hidden space-y-8">
+                 <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-900" data-lang-key="defTitle"></h2>
+                    <p class="mt-2 max-w-3xl mx-auto text-lg text-gray-600" data-lang-key="defSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover border-t-4 border-red-500">
+                        <h3 class="text-xl font-bold text-red-700" data-lang-key="defRegressiveTitle"></h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="defRegressiveDesc"></p>
+                        <p class="mt-4 text-sm font-semibold" data-lang-key="defKeyFeature"></p>
+                        <p class="text-sm text-gray-500" data-lang-key="defRegressiveFeature"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover border-t-4 border-blue-500">
+                        <h3 class="text-xl font-bold text-blue-700" data-lang-key="defProportionalTitle"></h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="defProportionalDesc"></p>
+                        <p class="mt-4 text-sm font-semibold" data-lang-key="defKeyFeature"></p>
+                        <p class="text-sm text-gray-500" data-lang-key="defProportionalFeature"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover border-t-4 border-green-500">
+                        <h3 class="text-xl font-bold text-green-700" data-lang-key="defProgressiveTitle"></h3>
+                        <p class="mt-2 text-gray-600" data-lang-key="defProgressiveDesc"></p>
+                         <p class="mt-4 text-sm font-semibold" data-lang-key="defKeyFeature"></p>
+                        <p class="text-sm text-gray-500" data-lang-key="defProgressiveFeature"></p>
+                    </div>
+                </div>
+                <div class="bg-indigo-50 p-6 rounded-2xl">
+                    <h3 class="text-lg font-semibold text-indigo-800" data-lang-key="defReasonTitle"></h3>
+                    <p class="mt-2 text-gray-700" data-lang-key="defReasonDesc"></p>
+                </div>
+            </section>
+
+            <!-- Examples Tab -->
+            <section id="tab-panel-examples" class="hidden space-y-8">
+                 <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-900" data-lang-key="exTitle"></h2>
+                    <p class="mt-2 max-w-2xl mx-auto text-lg text-gray-600" data-lang-key="exSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover cursor-pointer" onclick="openModal('salesTax')">
+                        <h3 class="text-lg font-bold text-gray-800" data-lang-key="exSalesTaxTitle"></h3>
+                        <p class="mt-2 text-gray-600 text-sm" data-lang-key="exSalesTaxDesc"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover cursor-pointer" onclick="openModal('exciseTax')">
+                        <h3 class="text-lg font-bold text-gray-800" data-lang-key="exExciseTaxTitle"></h3>
+                        <p class="mt-2 text-gray-600 text-sm" data-lang-key="exExciseTaxDesc"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover cursor-pointer" onclick="openModal('payrollTax')">
+                        <h3 class="text-lg font-bold text-gray-800" data-lang-key="exPayrollTaxTitle"></h3>
+                        <p class="mt-2 text-gray-600 text-sm" data-lang-key="exPayrollTaxDesc"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-md card-hover cursor-pointer" onclick="openModal('propertyTax')">
+                        <h3 class="text-lg font-bold text-gray-800" data-lang-key="exPropertyTaxTitle"></h3>
+                        <p class="mt-2 text-gray-600 text-sm" data-lang-key="exPropertyTaxDesc"></p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl shadow-md card-hover cursor-pointer" onclick="openModal('pollTax')">
+                        <h3 class="text-lg font-bold text-gray-800" data-lang-key="exPollTaxTitle"></h3>
+                        <p class="mt-2 text-gray-600 text-sm" data-lang-key="exPollTaxDesc"></p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Deeper Impact & Solutions -->
+        <section class="mt-16 bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+             <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900" data-lang-key="impactTitle"></h2>
+                <p class="mt-2 max-w-3xl mx-auto text-lg text-gray-600" data-lang-key="impactSubtitle"></p>
+            </div>
+            <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                <div class="accordion-item border border-gray-200 rounded-lg">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none">
+                        <span data-lang-key="impactAccordion1Title"></span>
+                        <span class="accordion-arrow transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-gray-200 text-gray-600" data-lang-key="impactAccordion1Content"></div>
+                </div>
+                <div class="accordion-item border border-gray-200 rounded-lg">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none">
+                        <span data-lang-key="impactAccordion2Title"></span>
+                        <span class="accordion-arrow transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-gray-200 text-gray-600" data-lang-key="impactAccordion2Content"></div>
+                </div>
+                 <div class="accordion-item border border-gray-200 rounded-lg">
+                    <button class="accordion-header w-full flex justify-between items-center p-4 text-left font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 focus:outline-none">
+                        <span data-lang-key="impactAccordion3Title"></span>
+                        <span class="accordion-arrow transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content p-4 border-t border-gray-200 text-gray-600" data-lang-key="impactAccordion3Content"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-16 bg-gray-800 text-white">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p class="text-sm text-gray-300" data-lang-key="footerText1"></p>
+            <p class="text-xs text-gray-400 mt-1" data-lang-key="footerText2"></p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-30 opacity-0 pointer-events-none">
+        <div id="modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="modal-title" class="text-2xl font-bold text-gray-900"></h2>
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+                </div>
+                <div id="modal-body" class="text-gray-600 prose max-w-none"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 1. Language Data Store
+        const langData = {
+            headerTitle: { zh: '探索累退稅：對貧富的影響', en: 'Exploring Regressive Tax: The Impact on Rich and Poor' },
+            headerSubtitle: { zh: '一個互動指南，揭示不同稅制如何影響我們的社會', en: 'An interactive guide to how tax systems affect our society' },
+            tabSimulator: { zh: '衝擊模擬器', en: 'Impact Simulator' },
+            tabDefinition: { zh: '核心概念', en: 'Core Concepts' },
+            tabExamples: { zh: '常見實例', en: 'Common Examples' },
+            simTitle: { zh: '累退稅衝擊模擬器', en: 'Regressive Tax Impact Simulator' },
+            simSubtitle: { zh: '親手操作，看看固定的銷售稅率如何對不同收入的家庭產生截然不同的「實質稅負」。調整下方參數，觀察圖表的即時變化。', en: 'See firsthand how a flat sales tax creates a different "real tax burden" for different incomes. Adjust the parameters below to see the chart update in real-time.' },
+            simLowIncomeLabel: { zh: '低收入家庭月收入 ($)', en: 'Low-Income Family Monthly Income ($)' },
+            simHighIncomeLabel: { zh: '高收入家庭月收入 ($)', en: 'High-Income Family Monthly Income ($)' },
+            simSalesTaxLabel: { zh: '消費稅率 (%)', en: 'Sales Tax Rate (%)' },
+            simSpendingLabel: { zh: '每月生活必需品開銷 ($)', en: 'Monthly Spending on Necessities ($)' },
+            simSpendingSublabel: { zh: '假設兩家庭在此項目的花費相同，這突顯了低收入家庭的消費佔所得比例較高。', en: 'Assuming both families spend the same on necessities, highlighting that this spending is a larger portion of the low-income family\'s budget.' },
+            simLowIncomeResultTitle: { zh: '低收入家庭', en: 'Low-Income Family' },
+            simHighIncomeResultTitle: { zh: '高收入家庭', en: 'High-Income Family' },
+            simEffectiveRate: { zh: '實質稅負率', en: 'Effective Tax Rate' },
+            simTaxPaid: { zh: '支付稅款', en: 'Tax Paid' },
+            defTitle: { zh: '稅制光譜：三種核心類型', en: 'The Tax Spectrum: Three Core Types' },
+            defSubtitle: { zh: '稅收制度主要分為三類，其核心區別在於稅負如何隨著所得變化。這不僅是經濟學問題，更反映了社會對「公平」的價值判斷。', en: 'Tax systems are mainly divided into three types, differing in how the tax burden changes with income. This is not just an economic issue, but a reflection of societal values on "fairness".' },
+            defRegressiveTitle: { zh: '累退稅 (Regressive)', en: 'Regressive Tax' },
+            defRegressiveDesc: { zh: '隨著所得增加，稅款佔所得的比例反而**下降**。這意味著，低所得者承擔了不成比例的稅務重擔。', en: 'As income increases, the proportion of income paid in tax **decreases**. This means lower-income individuals bear a disproportionately heavy tax burden.' },
+            defKeyFeature: { zh: '關鍵特徵：', en: 'Key Feature:' },
+            defRegressiveFeature: { zh: '對窮人更苛刻。', en: 'Harsher on the poor.' },
+            defProportionalTitle: { zh: '比例稅 (Proportional)', en: 'Proportional Tax' },
+            defProportionalDesc: { zh: '無論所得高低，所有人都按**相同比例**繳稅。這常被稱為「單一稅率稅」(Flat Tax)。', en: 'Everyone pays the **same percentage** of their income, regardless of how high or low it is. Often called a "Flat Tax".' },
+            defProportionalFeature: { zh: '表面上的平等。', en: 'Equal on the surface.' },
+            defProgressiveTitle: { zh: '累進稅 (Progressive)', en: 'Progressive Tax' },
+            defProgressiveDesc: { zh: '隨著所得增加，稅款佔所得的比例也隨之**上升**。高所得者承擔更高比例的稅負。', en: 'As income increases, the proportion of income paid in tax also **increases**. Higher-income individuals bear a higher proportional tax burden.' },
+            defProgressiveFeature: { zh: '能力越大，責任越大。', en: 'Greater ability, greater responsibility.' },
+            defReasonTitle: { zh: '核心原因：為何會產生累退效應？', en: 'The Core Reason: Why Does the Regressive Effect Occur?' },
+            defReasonDesc: { zh: '關鍵在於**邊際消費傾向 (MPC)** 的差異。低收入家庭必須將絕大部分收入用於購買生活必需品（高消費傾向），而高收入家庭則能將大部分收入用於儲蓄和投資（低消費傾向）。由於銷售稅等是針對「消費」而非「所得」課徵，因此稅收自然而然地對低收入群體造成了更沉重的負擔。', en: 'The key is the difference in the **Marginal Propensity to Consume (MPC)**. Low-income families must spend most of their income on necessities (high MPC), while high-income families can save and invest a larger portion (low MPC). Since sales tax targets "consumption" not "income," it naturally burdens lower-income groups more heavily.' },
+            exTitle: { zh: '生活中的累退稅', en: 'Regressive Taxes in Daily Life' },
+            exSubtitle: { zh: '累退稅以多種形式存在於我們的日常生活中，有些非常明顯，有些則較為隱蔽。點擊下方卡片，了解它們的運作方式。', en: 'Regressive taxes exist in many forms in our daily lives, some obvious, some hidden. Click the cards below to learn how they work.' },
+            exSalesTaxTitle: { zh: '銷售稅 / 增值稅', en: 'Sales Tax / VAT' },
+            exSalesTaxDesc: { zh: '對商品和服務課徵的統一稅率，是最常見的累退稅形式。', en: 'A uniform tax on goods and services, the most common form of regressive tax.' },
+            exExciseTaxTitle: { zh: '消費稅 / 罪惡稅', en: 'Excise Tax / "Sin" Tax' },
+            exExciseTaxDesc: { zh: '針對菸、酒、汽油等特定商品課稅，旨在改變消費行為。', en: 'Targets specific goods like tobacco, alcohol, and gas to influence consumer behavior.' },
+            exPayrollTaxTitle: { zh: '薪資稅 (有上限)', en: 'Payroll Tax (with a cap)' },
+            exPayrollTaxDesc: { zh: '僅對特定薪資上限內的收入課稅，如社會安全稅。', en: 'Taxed only on income up to a certain ceiling, like Social Security tax.' },
+            exPropertyTaxTitle: { zh: '財產稅', en: 'Property Tax' },
+            exPropertyTaxDesc: { zh: '基於財產價值而非收入課稅，理論上具有累退性。', en: 'Based on property value, not income, making it regressive in theory.' },
+            exPollTaxTitle: { zh: '人頭稅', en: 'Poll Tax' },
+            exPollTaxDesc: { zh: '對每個人課徵固定金額，是最極端的累退稅形式。', en: 'A fixed amount charged to every individual, the most extreme regressive tax.' },
+            impactTitle: { zh: '深層影響與政策解方', en: 'Deeper Impacts & Policy Solutions' },
+            impactSubtitle: { zh: '累退稅的影響超越個人財務，觸及社會結構的根本。了解其帶來的挑戰以及可能的政策應對方案。', en: 'The impact of regressive tax goes beyond personal finance to the very fabric of society. Understand the challenges it poses and potential policy responses.' },
+            impactAccordion1Title: { zh: '對貧富階層的差異化衝擊', en: 'Differentiated Impact on Rich and Poor' },
+            impactAccordion1Content: { zh: '<p><strong>對低所得階層：</strong>直接侵蝕用於基本生活所需的可支配所得，加劇貧困並阻礙社會流動。他們有限收入的更大部分被稅款佔據，降低了儲蓄、投資教育或應對突發事件的能力。</p><br><p><strong>對高所得階層：</strong>負擔相對微不足道，基本不影響其生活水平或儲蓄能力。支持者認為，由於不對儲蓄和投資課稅，這能激勵他們將更多資金投入市場，促進經濟增長。</p>', en: '<p><strong>For low-income groups:</strong> It directly erodes disposable income needed for basic necessities, exacerbating poverty and hindering social mobility. A larger portion of their limited income is consumed by taxes, reducing their ability to save, invest in education, or handle emergencies.</p><br><p><strong>For high-income groups:</strong> The burden is relatively negligible and does not significantly affect their standard of living or ability to save. Proponents argue that by not taxing savings and investments, it incentivizes them to put more capital into the market, promoting economic growth.</p>' },
+            impactAccordion2Title: { zh: '擴大的社會影響：不平等與性別', en: 'Broader Social Impacts: Inequality & Gender' },
+            impactAccordion2Content: { zh: '<p><strong>擴大貧富差距：</strong>累退稅從窮人身上拿走相對更多的錢，從富人身上拿走相對更少的錢，主動加劇了所得與財富不均。</p><br><p><strong>性別維度：</strong>由於女性在全球低收入工作者中佔比過高，且常承擔家庭採購責任，累退稅對女性造成不成比例的傷害。此外，依賴累退稅可能導致公共服務（如托兒、醫療）資金削減，將更多無償照護壓力轉嫁回女性身上。</p>', en: '<p><strong>Widening wealth gap:</strong> By taking proportionally more from the poor and less from the rich, regressive taxes actively worsen income and wealth inequality.</p><br><p><strong>The gender dimension:</strong> Women are disproportionately harmed by regressive taxes as they are overrepresented in low-wage jobs globally and often bear the responsibility for household purchasing. Furthermore, reliance on regressive taxes can lead to cuts in public services (like childcare and healthcare), shifting more unpaid care work back onto women.</p>' },
+            impactAccordion3Title: { zh: '減緩累退性的政策工具', en: 'Policy Tools to Mitigate Regressivity' },
+            impactAccordion3Content: { zh: '<p>一個國家的整體稅制可以設計用來抵銷某些稅種的負面效應。常見的工具包括：</p><ul class="list-disc list-inside mt-2 space-y-2"><li><strong>豁免與零稅率：</strong>對食品、藥品等基本必需品不課徵銷售稅。</li><li><strong>可退稅的稅收抵免：</strong>向低收入家庭提供直接的現金補助或稅收抵免，以補償他們支付的消費稅。</li><li><strong>奢侈品稅：</strong>對豪車、珠寶等奢侈品課徵更高的稅率，為稅制增添累進元素。</li></ul>', en: '<p>A country\'s overall tax system can be designed to offset the negative effects of certain taxes. Common tools include:</p><ul class="list-disc list-inside mt-2 space-y-2"><li><strong>Exemptions and Zero-Rating:</strong> Not applying sales tax to essential goods like food and medicine.</li><li><strong>Refundable Tax Credits:</strong> Providing direct cash payments or tax credits to low-income families to compensate for the sales tax they pay.</li><li><strong>Luxury Taxes:</strong> Imposing higher taxes on luxury items like high-end cars and jewelry to add a progressive element to the tax system.</li></ul>' },
+            footerText1: { zh: '稅制設計是在效率、簡便與公平之間尋求平衡的藝術。', en: 'Tax system design is the art of balancing efficiency, simplicity, and fairness.' },
+            footerText2: { zh: '此互動應用程式旨在促進對公共政策的理解與討論。', en: 'This interactive application aims to promote understanding and discussion of public policy.' },
+            chartLabel: { zh: '實質稅負率 (%)', en: 'Effective Tax Rate (%)' },
+            chartLowIncome: { zh: '低收入家庭', en: 'Low-Income Family' },
+            chartHighIncome: { zh: '高收入家庭', en: 'High-Income Family' },
+            modal: {
+                salesTax: {
+                    title: { zh: "銷售稅 / 增值稅", en: "Sales Tax / VAT" },
+                    content: { zh: `<p>這類稅收對大部分商品和服務以統一稅率課徵。由於低收入家庭將其收入的更大部分用於消費，而高收入家庭則將更大部分用於儲蓄和投資，因此銷售稅佔用了窮人更大比例的收入，產生了顯著的累退效應。</p>`, en: `<p>These taxes are levied at a uniform rate on most goods and services. Because low-income households spend a larger portion of their income on consumption while high-income households save and invest more, sales tax consumes a larger percentage of a poor person's income, creating a significant regressive effect.</p>` }
+                },
+                exciseTax: {
+                    title: { zh: "消費稅 / 罪惡稅", en: "Excise Tax / 'Sin' Tax" },
+                    content: { zh: `<p>專門針對菸草、酒精、汽油等特定商品課徵的稅。其累退性通常更嚴重，因為數據顯示，低收入群體在這些商品上的花費佔其收入的比例往往更高。這在追求公共健康目標（如戒菸）與加劇經濟不平等之間造成了政策衝突。</p>`, en: `<p>Taxes specifically targeting certain goods like tobacco, alcohol, and gasoline. Their regressivity is often more severe because data shows that low-income groups tend to spend a higher proportion of their income on these items. This creates a policy conflict between pursuing public health goals (like smoking cessation) and exacerbating economic inequality.</p>` }
+                },
+                payrollTax: {
+                    title: { zh: "薪資稅 (有上限)", en: "Payroll Tax (with a cap)" },
+                    content: { zh: `<p>以美國的社會安全稅為例，此稅只對特定薪資上限內的收入課徵。一個年薪百萬的人和一個年薪十萬的人，可能只需對同樣上限的薪資繳稅。這導致高收入者的有效稅率遠低於中等收入者。此外，資本利得等非薪資收入通常不需繳納此稅，進一步加劇了其累退性。</p>`, en: `<p>Using the U.S. Social Security tax as an example, this tax is only levied on income up to a certain cap. A person earning $1 million a year might pay the tax on the same income base as someone earning $100,000. This results in a much lower effective tax rate for the high earner. Furthermore, non-wage income like capital gains is often exempt, further increasing its regressivity.</p>` }
+                },
+                propertyTax: {
+                    title: { zh: "財產稅", en: "Property Tax" },
+                    content: { zh: `<p>由於稅基是財產的估定價值而非所有者的收入，理論上是累退的。擁有同等價值房產的兩個人，無論收入差距多大，都需支付相同的稅款。但在實踐中，由於高收入者通常擁有更昂貴的房產，其累退性相對較弱，也存在較多爭議。</p>`, en: `<p>Because the tax base is the assessed value of property rather than the owner's income, it is theoretically regressive. Two people owning equally valued properties pay the same tax regardless of their income difference. In practice, however, its regressivity is considered weaker as high-income individuals typically own much more valuable property, leading to ongoing debate.</p>` }
+                },
+                pollTax: {
+                    title: { zh: "人頭稅", en: "Poll Tax" },
+                    content: { zh: `<p>對每位公民課徵固定金額的稅，完全不考慮其收入或財富。這是最純粹、最極端的累退稅形式。英國曾在1990年推行此稅，引發了大規模社會抗議並最終廢除，成為稅收公平性議題中的經典案例。</p>`, en: `<p>A tax of a fixed amount levied on every citizen, regardless of their income or wealth. This is the purest and most extreme form of a regressive tax. Its implementation in the UK in 1990 led to widespread protests and its eventual repeal, serving as a classic case study on tax fairness.</p>` }
+                }
+            }
+        };
+        
+        // 2. State and Elements
+        let currentLang = 'zh';
+        const langSwitcherBtn = document.getElementById('lang-switcher');
+        const lowIncomeInput = document.getElementById('lowIncome');
+        const highIncomeInput = document.getElementById('highIncome');
+        const salesTaxInput = document.getElementById('salesTax');
+        const spendingInput = document.getElementById('spending');
+        const spendingValue = document.getElementById('spendingValue');
+        const lowIncomeRateEl = document.getElementById('lowIncomeRate');
+        const lowIncomeTaxEl = document.getElementById('lowIncomeTax');
+        const highIncomeRateEl = document.getElementById('highIncomeRate');
+        const highIncomeTaxEl = document.getElementById('highIncomeTax');
+        const chartCtx = document.getElementById('taxImpactChart').getContext('2d');
+        let taxImpactChart;
+
+        // 3. Core Functions
+        function updateLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            langSwitcherBtn.textContent = lang === 'zh' ? 'English' : '中文';
+            
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[key] && langData[key][lang]) {
+                    el.innerHTML = langData[key][lang];
+                }
+            });
+            
+            // Update chart and calculations with new labels
+            calculateImpact();
+        }
+
+        function calculateImpact() {
+            const lowIncome = parseFloat(lowIncomeInput.value) || 0;
+            const highIncome = parseFloat(highIncomeInput.value) || 0;
+            const taxRate = parseFloat(salesTaxInput.value) || 0;
+            const spending = parseFloat(spendingInput.value) || 0;
+
+            const taxPaid = spending * (taxRate / 100);
+
+            const lowIncomeEffectiveRate = lowIncome > 0 ? (taxPaid / lowIncome) * 100 : 0;
+            const highIncomeEffectiveRate = highIncome > 0 ? (taxPaid / highIncome) * 100 : 0;
+            
+            spendingValue.textContent = spending;
+            
+            lowIncomeRateEl.textContent = lowIncomeEffectiveRate.toFixed(2);
+            lowIncomeTaxEl.textContent = taxPaid.toFixed(2);
+            highIncomeRateEl.textContent = highIncomeEffectiveRate.toFixed(2);
+            highIncomeTaxEl.textContent = taxPaid.toFixed(2);
+
+            updateChart(lowIncomeEffectiveRate, highIncomeEffectiveRate);
+        }
+
+        function updateChart(lowRate, highRate) {
+            const labels = [langData.chartLowIncome[currentLang], langData.chartHighIncome[currentLang]];
+            const label = langData.chartLabel[currentLang];
+
+            if (taxImpactChart) {
+                taxImpactChart.data.labels = labels;
+                taxImpactChart.data.datasets[0].label = label;
+                taxImpactChart.data.datasets[0].data = [lowRate, highRate];
+                taxImpactChart.options.scales.y.title.text = label;
+                taxImpactChart.update();
+            } else {
+                initializeChart(labels, label);
+                taxImpactChart.data.datasets[0].data = [lowRate, highRate];
+                taxImpactChart.update();
+            }
+        }
+
+        function initializeChart(labels, label) {
+            if (taxImpactChart) {
+                taxImpactChart.destroy();
+            }
+            taxImpactChart = new Chart(chartCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: [0, 0],
+                        backgroundColor: ['rgba(79, 70, 229, 0.7)', 'rgba(217, 119, 6, 0.7)'],
+                        borderColor: ['rgba(79, 70, 229, 1)', 'rgba(217, 119, 6, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, title: { display: true, text: label } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let lbl = context.dataset.label || '';
+                                    if (lbl) { lbl += ': '; }
+                                    if (context.parsed.y !== null) { lbl += context.parsed.y.toFixed(2) + '%'; }
+                                    return lbl;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function openModal(id) {
+            const data = langData.modal[id];
+            if (!data) return;
+
+            document.getElementById('modal-title').textContent = data.title[currentLang];
+            document.getElementById('modal-body').innerHTML = data.content[currentLang];
+            
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
+            
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                 modal.classList.add('pointer-events-none');
+            }, 300);
+        }
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab-button');
+            const panels = document.querySelectorAll('#tab-content > section');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetPanelId = 'tab-panel-' + tab.id.split('-')[2];
+                    panels.forEach(panel => {
+                        panel.id === targetPanelId ? panel.classList.remove('hidden') : panel.classList.add('hidden');
+                    });
+                });
+            });
+        }
+
+        function setupAccordions() {
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('open');
+                });
+            });
+        }
+
+        // 4. Event Listeners
+        window.onload = () => {
+            [lowIncomeInput, highIncomeInput, salesTaxInput, spendingInput].forEach(input => {
+                input.addEventListener('input', calculateImpact);
+            });
+            
+            langSwitcherBtn.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(newLang);
+            });
+
+            document.getElementById('modal').addEventListener('click', (e) => {
+                if (e.target.id === 'modal') closeModal();
+            });
+
+            setupTabs();
+            setupAccordions();
+            updateLanguage('zh'); // Initial language setup
+        };
+    </script>
+</body>
+</html>
