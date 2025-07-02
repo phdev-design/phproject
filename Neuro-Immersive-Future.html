@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神經沉浸式未來：互動式分析報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: The application is designed as a thematic, non-linear dashboard to transform the dense report into an engaging, user-driven experience. Instead of a linear scroll, it uses a sticky navigation bar and anchor links to allow users to jump to sections of interest. The core structure includes: 1) An 'Overview' with key findings as interactive cards for immediate insight. 2) A tabbed 'Pillars' section to compare and contrast VR/AR, BCI, and Metaverse concepts side-by-side, which is more effective than a long text description. 3) A 'Convergence' section using visual diagrams (HTML/CSS) to show relationships. 4) An 'Ethics' section with an accordion UI to manage text-heavy content without overwhelming the user. 5) An interactive 'Timeline' for future projections. This structure prioritizes usability and exploration over mirroring the report's static, linear format. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: VR/AR Headset Comparison (Table 1) -> Goal: Compare -> Viz/Presentation: Interactive Horizontal Bar Chart -> Interaction: Dropdown to switch metrics (Price, Resolution) -> Justification: Allows direct, user-controlled comparison of key specs, more dynamic than a static table. -> Library: Chart.js/Canvas.
+        - Report Info: BCI Invasive vs. Non-invasive -> Goal: Compare/Organize -> Viz/Presentation: Two-column layout with clickable buttons -> Interaction: Click to highlight and display detailed pros/cons -> Justification: Visually represents the 'Great Divide' and simplifies the core trade-off for easy understanding. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Metaverse Centralized vs. Decentralized -> Goal: Compare/Organize -> Viz/Presentation: Clickable cards -> Interaction: Click to show details -> Justification: Clearly frames the 'ideological battle' for the user. -> Library/Method: HTML/CSS/JS.
+        - Report Info: BCI Market Growth Data -> Goal: Show Change -> Viz/Presentation: Vertical Bar Chart -> Interaction: Static view with tooltips -> Justification: A standard and clear way to visualize market projections over time. -> Library: Chart.js/Canvas.
+        - Report Info: Ethical Challenges (Neurorights, Neurosecurity) -> Goal: Organize/Inform -> Viz/Presentation: Accordion UI -> Interaction: Click to expand/collapse -> Justification: Manages dense text effectively, allowing users to focus on one topic at a time without overwhelming scroll. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Future Timeline -> Goal: Show Change/Organize -> Viz/Presentation: Interactive Timeline -> Interaction: Click on a time period to filter and view milestones -> Justification: Makes future projections digestible and easy to navigate. -> Library/Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+        .tab-button {
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .timeline-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .bci-choice-btn.active {
+            background-color: #007bff;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-sm shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 id="main-title" class="text-xl md:text-2xl font-bold text-gray-800"></h1>
+            <div class="flex items-center">
+                <div class="hidden md:flex space-x-8 mr-8">
+                    <a href="#overview" class="nav-link py-2" data-lang-key="nav.overview"></a>
+                    <a href="#pillars" class="nav-link py-2" data-lang-key="nav.pillars"></a>
+                    <a href="#convergence" class="nav-link py-2" data-lang-key="nav.convergence"></a>
+                    <a href="#ethics" class="nav-link py-2" data-lang-key="nav.ethics"></a>
+                    <a href="#timeline" class="nav-link py-2" data-lang-key="nav.timeline"></a>
+                </div>
+                <button id="lang-switcher" class="px-3 py-1 border rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition">EN</button>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="#overview" data-lang-key="nav.overview"></option>
+                    <option value="#pillars" data-lang-key="nav.pillars"></option>
+                    <option value="#convergence" data-lang-key="nav.convergence"></option>
+                    <option value="#ethics" data-lang-key="nav.ethics"></option>
+                    <option value="#timeline" data-lang-key="nav.timeline"></option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Hero Section -->
+        <section class="text-center my-8 md:my-16">
+            <h2 class="text-3xl md:text-5xl font-bold text-gray-900 mb-4" data-lang-key="hero.title"></h2>
+            <p class="max-w-3xl mx-auto text-gray-600 text-lg" data-lang-key="hero.subtitle"></p>
+        </section>
+
+        <!-- Overview / Key Findings -->
+        <section id="overview" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-8" data-lang-key="overview.title"></h3>
+            <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto" data-lang-key="overview.intro"></p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🥽</span>
+                        <h4 class="font-bold text-xl" data-lang-key="overview.card1.title"></h4>
+                    </div>
+                    <p class="text-gray-700" data-lang-key="overview.card1.text"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🧠</span>
+                        <h4 class="font-bold text-xl" data-lang-key="overview.card2.title"></h4>
+                    </div>
+                    <p class="text-gray-700" data-lang-key="overview.card2.text"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🌐</span>
+                        <h4 class="font-bold text-xl" data-lang-key="overview.card3.title"></h4>
+                    </div>
+                    <p class="text-gray-700" data-lang-key="overview.card3.text"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">⚖️</span>
+                        <h4 class="font-bold text-xl" data-lang-key="overview.card4.title"></h4>
+                    </div>
+                    <p class="text-gray-700" data-lang-key="overview.card4.text"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Three Pillars -->
+        <section id="pillars" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2" data-lang-key="pillars.title"></h3>
+            <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto" data-lang-key="pillars.intro"></p>
+            <div class="bg-white p-4 sm:p-8 rounded-xl shadow-2xl">
+                <div class="mb-8 border-b border-gray-200">
+                    <div class="flex flex-wrap -mb-px justify-center" id="pillars-tabs-buttons">
+                        <button class="tab-button text-lg font-medium p-4 rounded-t-lg border-b-2 border-transparent" data-tab="vr-ar" data-lang-key="pillars.tab1"></button>
+                        <button class="tab-button text-lg font-medium p-4 rounded-t-lg border-b-2 border-transparent" data-tab="bci" data-lang-key="pillars.tab2"></button>
+                        <button class="tab-button text-lg font-medium p-4 rounded-t-lg border-b-2 border-transparent" data-tab="metaverse" data-lang-key="pillars.tab3"></button>
+                    </div>
+                </div>
+
+                <div id="pillars-tabs-content">
+                    <!-- VR/AR Tab -->
+                    <div id="vr-ar-content" class="tab-content hidden">
+                        <p class="text-center text-gray-600 mb-8" data-lang-key="pillars.vr_ar.intro"></p>
+                        <div class="flex justify-center items-center mb-4">
+                            <label for="headset-metric-selector" class="mr-2 font-medium" data-lang-key="pillars.vr_ar.metric_label"></label>
+                            <select id="headset-metric-selector" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2">
+                                <option value="price" data-lang-key="pillars.vr_ar.metric_price"></option>
+                                <option value="resolution" data-lang-key="pillars.vr_ar.metric_resolution"></option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="headset-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- BCI Tab -->
+                    <div id="bci-content" class="tab-content hidden">
+                        <p class="text-center text-gray-600 mb-8" data-lang-key="pillars.bci.intro"></p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                            <div id="invasive-bci-btn" class="bci-choice-btn p-6 border rounded-lg cursor-pointer transition-all duration-300 text-center">
+                                <h4 class="text-2xl font-bold mb-2" data-lang-key="pillars.bci.invasive.title"></h4>
+                                <p class="text-sm text-gray-500" data-lang-key="pillars.bci.invasive.subtitle"></p>
+                            </div>
+                            <div id="noninvasive-bci-btn" class="bci-choice-btn p-6 border rounded-lg cursor-pointer transition-all duration-300 text-center">
+                                <h4 class="text-2xl font-bold mb-2" data-lang-key="pillars.bci.noninvasive.title"></h4>
+                                <p class="text-sm text-gray-500" data-lang-key="pillars.bci.noninvasive.subtitle"></p>
+                            </div>
+                        </div>
+                        <div id="bci-details" class="mt-8 p-6 bg-gray-50 rounded-lg"></div>
+                    </div>
+
+                    <!-- Metaverse Tab -->
+                    <div id="metaverse-content" class="tab-content hidden">
+                       <p class="text-center text-gray-600 mb-8" data-lang-key="pillars.metaverse.intro"></p>
+                       <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <div class="metaverse-choice-card p-6 border-2 border-transparent rounded-lg cursor-pointer bg-gray-100 hover:border-blue-500 transition" data-type="centralized">
+                               <h4 class="font-bold text-xl mb-2" data-lang-key="pillars.metaverse.centralized.title"></h4>
+                               <p class="text-gray-600" data-lang-key="pillars.metaverse.centralized.text"></p>
+                               <p class="font-semibold mt-2" data-lang-key="pillars.metaverse.centralized.example"></p>
+                           </div>
+                           <div class="metaverse-choice-card p-6 border-2 border-transparent rounded-lg cursor-pointer bg-gray-100 hover:border-blue-500 transition" data-type="decentralized">
+                               <h4 class="font-bold text-xl mb-2" data-lang-key="pillars.metaverse.decentralized.title"></h4>
+                               <p class="text-gray-600" data-lang-key="pillars.metaverse.decentralized.text"></p>
+                               <p class="font-semibold mt-2" data-lang-key="pillars.metaverse.decentralized.example"></p>
+                           </div>
+                       </div>
+                       <div id="metaverse-details" class="mt-8 p-6 bg-gray-50 rounded-lg min-h-[150px]"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Convergence & Use Cases -->
+        <section id="convergence" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2" data-lang-key="convergence.title"></h3>
+            <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto" data-lang-key="convergence.intro"></p>
+            <div class="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center">
+                <div class="flex items-center space-x-4 text-xl md:text-2xl font-bold">
+                    <span>VR / AR</span>
+                    <span class="text-blue-500">+</span>
+                    <span>BCI</span>
+                    <span class="text-blue-500">=</span>
+                    <span data-lang-key="convergence.equation_result"></span>
+                </div>
+                <div class="w-full border-t my-8"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
+                    <div class="p-6 bg-blue-50 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="convergence.card1.title"></h4>
+                        <p class="text-gray-700" data-lang-key="convergence.card1.text"></p>
+                    </div>
+                     <div class="p-6 bg-green-50 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="convergence.card2.title"></h4>
+                        <p class="text-gray-700" data-lang-key="convergence.card2.text"></p>
+                    </div>
+                </div>
+                <h4 class="font-bold text-xl text-center mt-12 mb-6" data-lang-key="convergence.use_cases_title"></h4>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <div class="p-4 bg-gray-100 rounded-lg" data-lang-key="convergence.use_case1"></div>
+                    <div class="p-4 bg-gray-100 rounded-lg" data-lang-key="convergence.use_case2"></div>
+                    <div class="p-4 bg-gray-100 rounded-lg" data-lang-key="convergence.use_case3"></div>
+                    <div class="p-4 bg-gray-100 rounded-lg" data-lang-key="convergence.use_case4"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ethics & The Human Imperative -->
+        <section id="ethics" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2" data-lang-key="ethics.title"></h3>
+            <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto" data-lang-key="ethics.intro"></p>
+            <div class="max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg">
+                        <span data-lang-key="ethics.accordion1.title"></span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-gray-700" data-lang-key="ethics.accordion1.text"></p>
+                        <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600" data-lang-key="ethics.accordion1.list"></ul>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg">
+                        <span data-lang-key="ethics.accordion2.title"></span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-gray-700" data-lang-key="ethics.accordion2.text"></p>
+                        <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600" data-lang-key="ethics.accordion2.list"></ul>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg shadow-md">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-lg">
+                        <span data-lang-key="ethics.accordion3.title"></span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-5 pb-5">
+                        <p class="text-gray-700" data-lang-key="ethics.accordion3.text"></p>
+                        <ul class="list-disc list-inside mt-4 space-y-2 text-gray-600" data-lang-key="ethics.accordion3.list"></ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline -->
+        <section id="timeline" class="my-12 md:my-20 scroll-mt-20">
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-2" data-lang-key="timeline.title"></h3>
+            <p class="text-center text-gray-600 mb-12 max-w-4xl mx-auto" data-lang-key="timeline.intro"></p>
+            <div class="flex justify-center flex-wrap gap-4 mb-8">
+                <button class="timeline-btn px-4 py-2 border rounded-full transition" data-period="near" data-lang-key="timeline.btn_near"></button>
+                <button class="timeline-btn px-4 py-2 border rounded-full transition" data-period="mid" data-lang-key="timeline.btn_mid"></button>
+                <button class="timeline-btn px-4 py-2 border rounded-full transition" data-period="long" data-lang-key="timeline.btn_long"></button>
+            </div>
+            <div id="timeline-content-area" class="bg-white p-8 rounded-xl shadow-lg min-h-[300px]"></div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center py-8 border-t">
+        <p class="text-gray-500" data-lang-key="footer.text"></p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let currentLang = 'zh';
+
+        const langData = {
+            zh: {
+                page_title: '神經沉浸式未來：互動式分析報告',
+                main_title: '神經沉浸式未來',
+                nav: {
+                    overview: '總覽',
+                    pillars: '三大支柱',
+                    convergence: '融合與應用',
+                    ethics: '倫理與未來',
+                    timeline: '發展時間線',
+                },
+                hero: {
+                    title: '解構下一代人機互動',
+                    subtitle: '本報告深入分析虛擬現實(VR)、增強現實(AR)與腦機接口(BCI)的融合，如何共同塑造一個被稱為「元宇宙」的全新數位領域。這不僅是技術的疊加，而是一場根本性的人機互動範式轉移。'
+                },
+                overview: {
+                    title: '核心發現',
+                    intro: '這份互動式報告旨在揭示VR/AR、BCI與元宇宙融合的四大核心趨勢。以下是關鍵摘要，您可以點擊每個主題深入探索。這些發現共同描繪了一個充滿潛力但也伴隨嚴峻挑戰的「神經沉浸式」未來。',
+                    card1: { title: '硬體市場兩極分化', text: '市場明顯分為兩條路徑：以Apple Vision Pro為代表的超高端「空間計算」設備，和以Meta Quest 3為代表的平價娛樂設備。這預示著元宇宙體驗可能出現分層。' },
+                    card2: { title: 'BCI的核心權衡', text: 'BCI領域由「侵入式」技術的高頻寬與「非侵入式」技術的安全性之間的根本矛盾所主導。AI的進步是克服此障礙、釋放BCI潛力的關鍵。' },
+                    card3: { title: '元宇宙的意識形態之爭', text: '當前的「原型元宇宙」在中心化（如Meta）與去中心化（如Decentraland）兩種架構間競爭。結果將決定未來是開放互通還是封閉的「圍牆花園」。' },
+                    card4: { title: '神經權利的迫切需求', text: '當大腦成為可聯網的接口，「精神隱私」等基本人權面臨威脅。建立明確的「神經權利」框架與發展「神經安全」領域已是當務之急。' }
+                },
+                pillars: {
+                    title: '三大技術支柱',
+                    intro: '神經沉浸式的未來建立在三個相互關聯的技術支柱之上：沉浸層（VR/AR）、神經指令層（BCI）和統一平台（元宇宙）。本節提供了一個互動式的探索界面，讓您能夠深入了解每個支柱的關鍵技術、市場動態和核心挑戰。',
+                    tab1: '沉浸層: VR/AR',
+                    tab2: '神經指令層: BCI',
+                    tab3: '統一平台: 元宇宙',
+                    vr_ar: {
+                        intro: 'VR/AR硬體是進入數位世界的窗口。當前市場呈現出高端生產力工具與平價娛樂設備的兩極分化。透過下方的互動圖表，您可以比較主流頭戴裝置的關鍵規格。',
+                        metric_label: '比較指標:',
+                        metric_price: '價格 (美元)',
+                        metric_resolution: '解析度 (單眼像素)',
+                        chart_price_label: '價格 (美元)',
+                        chart_resolution_label: '解析度 (單眼像素)',
+                    },
+                    bci: {
+                        intro: 'BCI技術是人機互動的終極前沿，但它面臨著一個核心權衡：高風險的侵入式技術提供高保真度信號，而安全的非侵入式技術則信號較弱。點擊下方按鈕以探索兩者差異。',
+                        invasive: { title: '侵入式 BCI', subtitle: '高風險，高回報' },
+                        noninvasive: { title: '非侵入式 BCI', subtitle: '安全便捷，信號較弱' },
+                        details: {
+                            invasive: {
+                                title: '侵入式 BCI 詳解',
+                                content: `<p><strong>技術：</strong>皮層腦電圖(ECoG)、皮層內微電極陣列。</p><p><strong>優點：</strong>信號保真度高、空間和時間解析度極佳。</p><p><strong>缺點：</strong>需要高風險手術、存在組織損傷可能、成本高昂。</p><p><strong>代表公司：</strong>Neuralink, Blackrock Neurotech, Paradromics.</p><p><strong>核心應用：</strong>恢復癱瘓者的運動、語言和通訊功能。</p>`
+                            },
+                            noninvasive: {
+                                title: '非侵入式 BCI 詳解',
+                                content: `<p><strong>技術：</strong>腦電圖(EEG)、功能性近紅外光譜(fNIRS)。</p><p><strong>優點：</strong>安全、成本相對較低、便攜。</p><p><strong>缺點：</strong>信噪比低（信號弱）、空間解析度差、易受干擾。</p><p><strong>代表公司：</strong>Emotiv, Neurable, NeuroSky.</p><p><strong>核心應用：</strong>消費級健康監測、市場研究、簡單的遊戲控制。</p>`
+                            }
+                        }
+                    },
+                    metaverse: {
+                        intro: '元宇宙代表著一個持久、共享的虛擬空間，但其未來架構存在兩種截然不同的願景。點擊下方卡片，了解中心化與去中心化平台之間的意識形態之爭。',
+                        centralized: { title: '中心化平台', text: '由單一公司控制，提供統一、精緻但封閉的生態系統。', example: '代表: Meta Horizon Worlds' },
+                        decentralized: { title: '去中心化平台', text: '建立在區塊鏈上，強調用戶所有權、開放性和治理。', example: '代表: Decentraland' },
+                        details: {
+                            centralized: {
+                                title: '中心化平台詳解',
+                                pros: ['體驗精緻統一', '開發工具完善', '易於管理和變現'],
+                                cons: ['封閉生態系統 (圍牆花園)', '用戶數據和資產由公司控制', '缺乏互通性'],
+                                governance: '由單一公司制定規則和治理。',
+                                pros_label: '優點',
+                                cons_label: '缺點',
+                                governance_label: '治理模式:'
+                            },
+                            decentralized: {
+                                title: '去中心化平台詳解',
+                                pros: ['用戶真正擁有數位資產 (NFTs)', '開放、可互通的潛力', '由社群 (DAO) 治理'],
+                                cons: ['技術尚不成熟', '用戶體驗較差', '監管不確定性'],
+                                governance: '由去中心化自治組織 (DAO) 進行社群治理。',
+                                pros_label: '優點',
+                                cons_label: '缺點',
+                                governance_label: '治理模式:'
+                            }
+                        }
+                    }
+                },
+                convergence: {
+                    title: '偉大融合與未來應用',
+                    intro: '當這三大技術支柱匯集時，它們將創造出全新的互動範式與應用場景。BCI 不再只是被動的指令接收者，VR 也不僅僅是個顯示器，它們共同構成了一個能夠理解並回應我們內在狀態的神經沉浸式環境。',
+                    equation_result: '神經沉浸式元宇宙',
+                    card1: { title: 'BCI 作為終極輸入', text: 'BCI 有望超越實體控制器，將使用者的意圖直接轉化為虛擬世界中的行動，實現真正的「解放雙手」互動。更重要的是，它能測量情感與認知狀態，創建「神經自適應」體驗。' },
+                    card2: { title: 'VR 作為神經調節平台', text: 'VR 為 BCI 訓練提供了受控、引人入勝的環境。豐富的多感官回饋有助於使用者學會調節大腦信號，這在神經康復等領域顯示出巨大潛力，幫助重塑神經通路。' },
+                    use_cases_title: '未來用例展望',
+                    use_case1: '🤖 神經自適應娛樂',
+                    use_case2: '🏭 無縫工業AR',
+                    use_case3: '❤️ 先進認知療法',
+                    use_case4: '💼 工作的未來'
+                },
+                ethics: {
+                    title: '倫理與未來：人類的當務之急',
+                    intro: '當我們建立與人腦的直接技術連結時，也產生了前所未有的倫理挑戰。保護人類自由的「最後避難所」——心靈本身——面臨直接威脅。本節探討了為應對這些挑戰而必須建立的倫理和人權框架。',
+                    accordion1: {
+                        title: '⚖️ 神經權利 (Neurorights)',
+                        text: '現有的人權框架不足以應對神經技術帶來的獨特挑戰。這催生了對一套新的、特定的「神經權利」的呼籲，主要包括：',
+                        list: ['<strong>精神隱私：</strong> 保護個人大腦活動數據，免於被商品化、駭侵或進行「神經監控」的權利。', '<strong>個人認同：</strong> 保護個人自我感和心理連續性，免受外部技術未經同意的改變。', '<strong>認知自由：</strong> 控制自身認知過程，免受外部操縱，並保護自由意志的權利。']
+                    },
+                    accordion2: {
+                        title: '🛡️ 神經安全 (Neurosecurity)',
+                        text: '當大腦成為一個聯網設備時，它也成為了攻擊目標。神經安全是一個致力於保護大腦和神經數據免受侵害的新興領域。其威脅包括：',
+                        list: ['<strong>數據盜竊：</strong> 竊取高度敏感的神經數據，用於勒索、歧視或行銷。', '<strong>惡意大腦駭侵：</strong> 透過受損的BCI直接操縱使用者的感知、情緒或決策。', '<strong>對抗性AI：</strong> 利用AI創造刺激，在潛意識層面對使用者進行商業或政治操縱。']
+                    },
+                    accordion3: {
+                        title: '🌍 社會影響',
+                        text: '這些技術的普及將對社會結構產生深遠影響，引發新的挑戰：',
+                        list: ['<strong>神經數位鴻溝：</strong> 昂貴的認知增強技術可能在「增強者」與「未增強者」之間造成新的、深刻的不平等。', '<strong>真實性與成就：</strong> 如果認知增強變得普遍，它是否會貶低天賦和努力的價值？', '<strong>現實的本質：</strong> 隨著物理與虛擬世界界線的模糊，我們對現實、人際關係和體驗本質的共同理解將如何改變？']
+                    }
+                },
+                timeline: {
+                    title: '顛覆的十年：發展時間線',
+                    intro: '未來十年的發展將是關鍵。我們預測了從現在到 2035 年之後，硬體、BCI 和元宇宙領域的可能里程碑。點擊下方按鈕，探索不同階段的技術演進。',
+                    btn_near: '近期 (2025-2028)',
+                    btn_mid: '中期 (2029-2032)',
+                    btn_long: '長期 (2033-2035+)',
+                    content: {
+                        near: {
+                            title: '近期 (2025-2028)',
+                            list: ['<strong>硬體:</strong> MR頭戴裝置實現主流採用 (價格低於$1000)。蘋果發布更輕便的Vision型號。', '<strong>BCI:</strong> 侵入式BCI人體試驗公佈長期數據。非侵入式BCI作為認知回饋整合到利基VR遊戲中。', '<strong>元宇宙:</strong> 平台持續碎片化。Roblox/Fortnite等平台上的使用者生成內容增長。']
+                        },
+                        mid: {
+                            title: '中期 (2029-2032)',
+                            list: ['<strong>硬體:</strong> 適合全天佩戴的AR眼鏡出現。VR頭戴裝置達到「視網膜解析度」。', '<strong>BCI:</strong> 首代用於特定醫療應用的侵入式BCI獲FDA批准。非侵入式BCI實現可靠的低複雜度指令控制。', '<strong>融合:</strong> 首批真正的「神經自適應」遊戲和培訓應用在主流VR平台推出。']
+                        },
+                        long: {
+                            title: '長期 (2033-2035+)',
+                            list: ['<strong>硬體:</strong> AR與VR界線完全模糊，單一設備可實現完整的現實-虛擬連續光譜。', '<strong>BCI:</strong> 微創或高保真非侵入式BCI成為消費級應用的可行選擇。早期的「讀/寫」BCI原型出現。', '<strong>神經沉浸式元宇宙:</strong> 概念固化，BCI成為高端體驗的標準輸入方式。「神經權利」國際條約進入辯論。']
+                        }
+                    }
+                },
+                footer: {
+                    text: '基於「神經沉浸式未來：元宇宙中VR、AR與BCI融合之分析報告」生成。'
+                }
+            },
+            en: {
+                page_title: 'Neuro-Immersive Future: An Interactive Analysis Report',
+                main_title: 'Neuro-Immersive Future',
+                nav: {
+                    overview: 'Overview',
+                    pillars: 'Three Pillars',
+                    convergence: 'Convergence & Apps',
+                    ethics: 'Ethics & Future',
+                    timeline: 'Development Timeline',
+                },
+                hero: {
+                    title: 'Deconstructing Next-Gen Human-Computer Interaction',
+                    subtitle: 'This report analyzes the convergence of Virtual Reality (VR), Augmented Reality (AR), and Brain-Computer Interfaces (BCI) in shaping a new digital realm known as the "Metaverse." This is not just a technological stack but a fundamental paradigm shift in human-computer interaction.'
+                },
+                overview: {
+                    title: 'Key Findings',
+                    intro: 'This interactive report aims to reveal the four core trends in the fusion of VR/AR, BCI, and the Metaverse. Below are key summaries you can click to explore. Together, these findings paint a picture of a "neuro-immersive" future full of potential but also fraught with serious challenges.',
+                    card1: { title: 'Hardware Market Polarization', text: 'The market is clearly splitting into two paths: ultra-high-end "spatial computing" devices like the Apple Vision Pro, and affordable entertainment-focused headsets like the Meta Quest 3. This signals a potential stratification of Metaverse experiences.' },
+                    card2: { title: 'The Core BCI Trade-off', text: 'The BCI field is dominated by a fundamental conflict between the high bandwidth of "invasive" tech and the safety of "non-invasive" tech. AI advancement is key to overcoming this hurdle and unlocking BCI\'s potential.' },
+                    card3: { title: 'The Metaverse\'s Ideological Battle', text: 'The current "proto-metaverses" are competing between centralized (e.g., Meta) and decentralized (e.g., Decentraland) architectures. The outcome will determine if the future is open and interoperable or a series of closed "walled gardens."' },
+                    card4: { title: 'The Urgent Need for Neurorights', text: 'When the brain becomes a networkable interface, fundamental human rights like "mental privacy" are threatened. Establishing a clear "neurorights" framework and developing "neurosecurity" is now imperative.' }
+                },
+                pillars: {
+                    title: 'The Three Technological Pillars',
+                    intro: 'The neuro-immersive future is built on three interconnected pillars: the Immersion Layer (VR/AR), the Neural Command Layer (BCI), and the Unifying Platform (Metaverse). This section provides an interactive interface to explore the key technologies, market dynamics, and core challenges of each pillar.',
+                    tab1: 'Immersion: VR/AR',
+                    tab2: 'Neural Command: BCI',
+                    tab3: 'Platform: Metaverse',
+                    vr_ar: {
+                        intro: 'VR/AR hardware is the window to the digital world. The current market shows a polarization between high-end productivity tools and affordable entertainment devices. Use the interactive chart below to compare key specs of major headsets.',
+                        metric_label: 'Compare Metric:',
+                        metric_price: 'Price (USD)',
+                        metric_resolution: 'Resolution (per eye, pixels)',
+                        chart_price_label: 'Price (USD)',
+                        chart_resolution_label: 'Resolution (per eye, pixels)',
+                    },
+                    bci: {
+                        intro: 'BCI technology is the ultimate frontier of HCI, but it faces a core trade-off: high-risk invasive tech offers high-fidelity signals, while safe non-invasive tech has weaker signals. Click the buttons below to explore the differences.',
+                        invasive: { title: 'Invasive BCI', subtitle: 'High Risk, High Reward' },
+                        noninvasive: { title: 'Non-Invasive BCI', subtitle: 'Safe & Convenient, Weaker Signal' },
+                        details: {
+                            invasive: {
+                                title: 'Invasive BCI Details',
+                                content: `<p><strong>Technology:</strong> Electrocorticography (ECoG), Intracortical microelectrode arrays.</p><p><strong>Pros:</strong> High signal fidelity, excellent spatial and temporal resolution.</p><p><strong>Cons:</strong> Requires high-risk surgery, potential for tissue damage, very expensive.</p><p><strong>Key Players:</strong> Neuralink, Blackrock Neurotech, Paradromics.</p><p><strong>Core Application:</strong> Restoring movement, speech, and communication for paralyzed individuals.</p>`
+                            },
+                            noninvasive: {
+                                title: 'Non-Invasive BCI Details',
+                                content: `<p><strong>Technology:</strong> Electroencephalography (EEG), Functional near-infrared spectroscopy (fNIRS).</p><p><strong>Pros:</strong> Safe, relatively low cost, portable.</p><p><strong>Cons:</strong> Low signal-to-noise ratio (weak signal), poor spatial resolution, susceptible to artifacts.</p><p><strong>Key Players:</strong> Emotiv, Neurable, NeuroSky.</p><p><strong>Core Application:</strong> Consumer wellness tracking, market research, simple game control.</p>`
+                            }
+                        }
+                    },
+                    metaverse: {
+                        intro: 'The Metaverse represents a persistent, shared virtual space, but two distinct visions for its future architecture exist. Click the cards below to understand the ideological battle between centralized and decentralized platforms.',
+                        centralized: { title: 'Centralized Platforms', text: 'Controlled by a single company, offering a unified, polished, but closed ecosystem.', example: 'Example: Meta Horizon Worlds' },
+                        decentralized: { title: 'Decentralized Platforms', text: 'Built on blockchain, emphasizing user ownership, openness, and governance.', example: 'Example: Decentraland' },
+                        details: {
+                            centralized: {
+                                title: 'Centralized Platform Details',
+                                pros: ['Polished and unified experience', 'Mature development tools', 'Easy to manage and monetize'],
+                                cons: ['Closed ecosystem (walled garden)', 'User data and assets controlled by the company', 'Lack of interoperability'],
+                                governance: 'Governed by the rules and policies of a single corporation.',
+                                pros_label: 'Pros',
+                                cons_label: 'Cons',
+                                governance_label: 'Governance Model:'
+                            },
+                            decentralized: {
+                                title: 'Decentralized Platform Details',
+                                pros: ['True ownership of digital assets (NFTs)', 'Potential for openness and interoperability', 'Community governance via DAOs'],
+                                cons: ['Technology is still immature', 'Poorer user experience', 'Regulatory uncertainty'],
+                                governance: 'Governed by a Decentralized Autonomous Organization (DAO).',
+                                pros_label: 'Pros',
+                                cons_label: 'Cons',
+                                governance_label: 'Governance Model:'
+                            }
+                        }
+                    }
+                },
+                convergence: {
+                    title: 'The Great Convergence & Future Applications',
+                    intro: 'When these three pillars converge, they will create entirely new interaction paradigms and applications. BCI is no longer a passive receiver, and VR is not just a display; together, they form a neuro-immersive environment that can understand and respond to our internal state.',
+                    equation_result: 'Neuro-Immersive Metaverse',
+                    card1: { title: 'BCI as the Ultimate Input', text: 'BCI promises to transcend physical controllers, translating user intent directly into action in the virtual world for a true "hands-free" experience. More importantly, it can measure emotional and cognitive states to create "neuro-adaptive" experiences.' },
+                    card2: { title: 'VR as a Neuro-Modulation Platform', text: 'VR provides a controlled, engaging environment for BCI training. Rich, multi-sensory feedback helps users learn to modulate their brain signals, showing great potential in neuro-rehabilitation to help remap neural pathways.' },
+                    use_cases_title: 'Future Use Case Outlook',
+                    use_case1: '🤖 Neuro-adaptive Entertainment',
+                    use_case2: '🏭 Seamless Industrial AR',
+                    use_case3: '❤️ Advanced Cognitive Therapy',
+                    use_case4: '💼 The Future of Work'
+                },
+                ethics: {
+                    title: 'Ethics & The Future: The Human Imperative',
+                    intro: 'When we create a direct technological link to the human brain, we also create unprecedented ethical challenges. The "last refuge" of human freedom—the mind itself—is directly threatened. This section explores the ethical and human rights frameworks that must be built to meet these challenges.',
+                    accordion1: {
+                        title: '⚖️ Neurorights',
+                        text: 'Existing human rights frameworks are insufficient for the unique challenges of neurotechnology. This has led to calls for a new, specific set of "Neurorights," primarily including:',
+                        list: ['<strong>Mental Privacy:</strong> The right to protect personal brain activity data from being commercialized, hacked, or used for "neuro-surveillance".', '<strong>Personal Identity:</strong> The right to protect one\'s sense of self and psychological continuity from non-consensual alteration by external technologies.', '<strong>Cognitive Liberty:</strong> The right to control one\'s own cognitive processes, free from external manipulation, and to protect free will.']
+                    },
+                    accordion2: {
+                        title: '🛡️ Neurosecurity',
+                        text: 'When the brain becomes a networked device, it also becomes a target. Neurosecurity is an emerging field dedicated to protecting the brain and neural data from harm. Threats include:',
+                        list: ['<strong>Data Theft:</strong> Stealing highly sensitive neural data for blackmail, discrimination, or marketing.', '<strong>Malicious Brain-Hacking:</strong> Directly manipulating a user\'s perception, emotions, or decisions through a compromised BCI.', '<strong>Adversarial AI:</strong> Using AI to create stimuli that subconsciously manipulate users for commercial or political ends.']
+                    },
+                    accordion3: {
+                        title: '🌍 Societal Impact',
+                        text: 'The proliferation of these technologies will have profound impacts on social structures, raising new challenges:',
+                        list: ['<strong>The Neuro-Digital Divide:</strong> Expensive cognitive enhancement tech could create a new, profound inequality between the "enhanced" and "unenhanced".', '<strong>Authenticity and Achievement:</strong> If cognitive enhancement becomes common, does it devalue natural talent and effort?', '<strong>The Nature of Reality:</strong> As the lines blur between physical and virtual worlds, how will our shared understanding of reality, relationships, and experience change?']
+                    }
+                },
+                timeline: {
+                    title: 'A Decade of Disruption: Development Timeline',
+                    intro: 'The next decade will be critical. We forecast potential milestones in hardware, BCI, and the metaverse from now through 2035+. Click the buttons below to explore the technological evolution at different stages.',
+                    btn_near: 'Near-Term (2025-2028)',
+                    btn_mid: 'Mid-Term (2029-2032)',
+                    btn_long: 'Long-Term (2033-2035+)',
+                    content: {
+                        near: {
+                            title: 'Near-Term (2025-2028)',
+                            list: ['<strong>Hardware:</strong> Mainstream adoption of MR headsets (sub-$1000 price point). Apple releases a lighter Vision model.', '<strong>BCI:</strong> Long-term data from invasive BCI human trials is published. Non-invasive BCI is integrated into niche VR games as cognitive feedback.', '<strong>Metaverse:</strong> Continued platform fragmentation. Growth of user-generated content on platforms like Roblox/Fortnite.']
+                        },
+                        mid: {
+                            title: 'Mid-Term (2029-2032)',
+                            list: ['<strong>Hardware:</strong> All-day wearable AR glasses emerge. VR headsets achieve "retinal resolution".', '<strong>BCI:</strong> First-generation invasive BCIs receive FDA approval for specific medical applications. Non-invasive BCIs achieve reliable low-complexity command control.', '<strong>Convergence:</strong> First true "neuro-adaptive" games and training apps launch on mainstream VR platforms.']
+                        },
+                        long: {
+                            title: 'Long-Term (2033-2035+)',
+                            list: ['<strong>Hardware:</strong> The line between AR and VR blurs completely, with single devices enabling the full reality-virtuality continuum.', '<strong>BCI:</strong> Minimally invasive or high-fidelity non-invasive BCIs become viable options for consumer applications. Early "read/write" BCI prototypes emerge.', '<strong>Neuro-Immersive Metaverse:</strong> The concept solidifies, with BCI as a standard input for high-end experiences. First international treaties on "neurorights" are debated.']
+                        }
+                    }
+                },
+                footer: {
+                    text: 'Generated based on the "Neuro-Immersive Future: An Analysis of VR, AR, and BCI Convergence in the Metaverse" report.'
+                }
+            }
+        };
+
+        const headsetRawData = {
+            labels: ['Apple Vision Pro', 'Meta Quest 3', 'PlayStation VR2', 'Valve Index'],
+            datasets: {
+                price: { data: [3499, 499, 549, 999], backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)' },
+                resolution: { data: [3660 * 3200, 2064 * 2208, 2000 * 2040, 1440 * 1600], backgroundColor: 'rgba(255, 99, 132, 0.6)', borderColor: 'rgba(255, 99, 132, 1)' }
+            }
+        };
+
+        function renderLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const data = langData[lang];
+            document.title = data.page_title;
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                const keys = key.split('.');
+                let value = data;
+                keys.forEach(k => {
+                    value = value ? value[k] : `[${key}]`;
+                });
+                
+                if (key.includes('.list')) {
+                    el.innerHTML = value.map(item => `<li>${item}</li>`).join('');
+                } else {
+                    el.innerHTML = value;
+                }
+            });
+
+            document.getElementById('main-title').textContent = data.main_title;
+            
+            // Update dynamic content
+            const activeTab = document.querySelector('.tab-button.active')?.dataset.tab;
+            if (activeTab) {
+                if(activeTab === 'vr-ar') createOrUpdateChart(document.getElementById('headset-metric-selector').value, lang);
+                if(activeTab === 'bci') updateBciDetails(document.querySelector('.bci-choice-btn.active')?.id.split('-')[0], lang);
+                if(activeTab === 'metaverse') updateMetaverseDetails(document.querySelector('.metaverse-choice-card.border-blue-500')?.dataset.type, lang);
+            }
+            
+            const activeTimeline = document.querySelector('.timeline-btn.active')?.dataset.period;
+            if(activeTimeline) updateTimeline(activeTimeline, lang);
+        }
+        
+        const langSwitcher = document.getElementById('lang-switcher');
+        langSwitcher.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            langSwitcher.textContent = currentLang === 'zh' ? 'EN' : '中文';
+            renderLanguage(currentLang);
+        });
+
+        // --- Chart.js ---
+        const ctx = document.getElementById('headset-chart').getContext('2d');
+        let headsetChart;
+
+        function formatLabel(value) {
+             if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+             return value;
+        }
+
+        function createOrUpdateChart(metric, lang) {
+            if (headsetChart) headsetChart.destroy();
+            
+            const labels = langData[lang].pillars.vr_ar;
+            const datasetInfo = headsetRawData.datasets[metric];
+
+            headsetChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: headsetRawData.labels,
+                    datasets: [{
+                        label: metric === 'price' ? labels.chart_price_label : labels.chart_resolution_label,
+                        data: datasetInfo.data,
+                        backgroundColor: datasetInfo.backgroundColor,
+                        borderColor: datasetInfo.borderColor,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.x !== null) {
+                                        if (metric === 'price') {
+                                           label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.x);
+                                        } else {
+                                           label += new Intl.NumberFormat('en-US').format(context.parsed.x) + ' px';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: { display: true, text: metric === 'price' ? labels.chart_price_label : labels.chart_resolution_label },
+                            ticks: { callback: formatLabel }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('headset-metric-selector').addEventListener('change', function (e) {
+            createOrUpdateChart(e.target.value, currentLang);
+        });
+
+        // --- Tabs ---
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                tabContents.forEach(content => {
+                    content.classList.toggle('hidden', content.id !== `${tab}-content`);
+                });
+                
+                if(tab === 'vr-ar') createOrUpdateChart(document.getElementById('headset-metric-selector').value, currentLang);
+                if(tab === 'bci') updateBciDetails(document.querySelector('.bci-choice-btn.active')?.id.split('-')[0] || 'invasive', currentLang);
+                if(tab === 'metaverse') updateMetaverseDetails(document.querySelector('.metaverse-choice-card.border-blue-500')?.dataset.type || 'centralized', currentLang);
+            });
+        });
+
+        // --- BCI Details ---
+        const invasiveBtn = document.getElementById('invasive-bci-btn');
+        const nonInvasiveBtn = document.getElementById('noninvasive-bci-btn');
+        const bciDetailsContainer = document.getElementById('bci-details');
+
+        function updateBciDetails(type, lang) {
+            if (!type) return;
+            const data = langData[lang].pillars.bci.details[type];
+            bciDetailsContainer.innerHTML = `<h5 class="text-xl font-bold mb-4">${data.title}</h5><div class="space-y-2 text-gray-700">${data.content}</div>`;
+            invasiveBtn.classList.toggle('active', type === 'invasive');
+            nonInvasiveBtn.classList.toggle('active', type === 'noninvasive');
+        }
+        invasiveBtn.addEventListener('click', () => updateBciDetails('invasive', currentLang));
+        nonInvasiveBtn.addEventListener('click', () => updateBciDetails('noninvasive', currentLang));
+
+        // --- Metaverse Details ---
+        const metaverseCards = document.querySelectorAll('.metaverse-choice-card');
+        const metaverseDetailsContainer = document.getElementById('metaverse-details');
+        
+        function updateMetaverseDetails(type, lang) {
+            if (!type) return;
+            const data = langData[lang].pillars.metaverse.details[type];
+            metaverseDetailsContainer.innerHTML = `
+                <h5 class="text-xl font-bold mb-4">${data.title}</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><h6 class="font-semibold">${data.pros_label}</h6><ul class="list-disc list-inside text-green-700">${data.pros.map(p => `<li>${p}</li>`).join('')}</ul></div>
+                    <div><h6 class="font-semibold">${data.cons_label}</h6><ul class="list-disc list-inside text-red-700">${data.cons.map(c => `<li>${c}</li>`).join('')}</ul></div>
+                </div>
+                <p class="mt-4"><strong class="font-semibold">${data.governance_label}</strong> ${data.governance}</p>
+            `;
+            metaverseCards.forEach(card => {
+                card.classList.toggle('border-blue-500', card.dataset.type === type);
+                card.classList.toggle('bg-blue-50', card.dataset.type === type);
+            });
+        }
+        metaverseCards.forEach(card => {
+            card.addEventListener('click', () => updateMetaverseDetails(card.dataset.type, currentLang));
+        });
+        
+        // --- Accordion ---
+        const accordionHeaders = document.querySelectorAll('.accordion-header');
+        accordionHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const content = header.nextElementSibling;
+                const icon = header.querySelector('.accordion-icon');
+                const isOpening = !content.style.maxHeight;
+
+                accordionHeaders.forEach(otherHeader => {
+                    otherHeader.nextElementSibling.style.maxHeight = null;
+                    otherHeader.querySelector('.accordion-icon').style.transform = 'rotate(0deg)';
+                });
+                
+                if (isOpening) {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    icon.style.transform = 'rotate(180deg)';
+                }
+            });
+        });
+
+        // --- Timeline ---
+        const timelineButtons = document.querySelectorAll('.timeline-btn');
+        const timelineContentArea = document.getElementById('timeline-content-area');
+
+        function updateTimeline(period, lang) {
+            const data = langData[lang].timeline.content[period];
+            timelineContentArea.innerHTML = `<h4 class="font-bold text-xl mb-4">${data.title}</h4><ul class="list-disc list-inside space-y-3">${data.list.map(item => `<li>${item}</li>`).join('')}</ul>`;
+            timelineButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
+        }
+        timelineButtons.forEach(btn => {
+            btn.addEventListener('click', () => updateTimeline(btn.dataset.period, currentLang));
+        });
+
+        // --- Navigation ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section[id]');
+        const mobileNav = document.getElementById('mobile-nav');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.id;
+                    navLinks.forEach(link => {
+                        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                    });
+                    mobileNav.value = `#${id}`;
+                }
+            });
+        }, { rootMargin: '-30% 0px -70% 0px' });
+
+        sections.forEach(section => observer.observe(section));
+        mobileNav.addEventListener('change', (e) => { window.location.href = e.target.value; });
+
+        // --- Initial state setup ---
+        renderLanguage(currentLang);
+        document.querySelector('.tab-button[data-tab="vr-ar"]').click();
+        updateBciDetails('invasive', currentLang);
+        updateMetaverseDetails('centralized', currentLang);
+        updateTimeline('near', currentLang);
+        document.querySelector('.accordion-header').click();
+    });
+    </script>
+</body>
+</html>
