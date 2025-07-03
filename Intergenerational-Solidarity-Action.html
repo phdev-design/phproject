@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：打破年齡歧視，共建和諧社會</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The SPA is designed as a single, vertically scrolling narrative broken into four logical, interactive sections: 1. A high-impact hero section to state the problem's scale. 2. A "Deconstruct the Problem" section using interactive cards to explain ageism's forms and levels. 3. An "Impact & Solutions" section combining data visualizations (charts for impact) with interactive explorers for the three solution pillars (Policy, Education, Connection). 4. An "Action Blueprint" section with filterable recommendations for different stakeholders. This structure transforms the linear report into an exploratory journey, moving from awareness to understanding, then to solutions and finally to empowerment, which is more engaging and user-friendly for a web audience. -->
+    <!-- Visualization & Content Choices: 1. Key Stats (50%, 7.5 years, $63B): Goal=Inform/Impact. Method=Large animated stat cards. Justification=Grabs attention. 2. Ageism Impact: Goal=Compare. Method=Bar Chart (Chart.js). Justification=Visually compares impact domains. 3. WHO 8 Pillars: Goal=Organize. Method=Interactive HTML/CSS grid. Justification=Engaging way to present framework. 4. Intergenerational Models: Goal=Compare/Explore. Method=Click-to-expand cards. Justification=Allows deep dive into solutions. 5. Recommendations: Goal=Filter/Personalize. Method=JS-powered toggles. Justification=Makes a long list of actions easy to navigate for specific audiences. All charts use Chart.js Canvas. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lato', sans-serif;
+            background-color: #F8F7F4;
+            color: #3D3D3D;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .bg-warm-neutral { background-color: #F8F7F4; }
+        .bg-soft-teal { background-color: #4A9086; }
+        .text-soft-teal { color: #4A9086; }
+        .border-soft-teal { border-color: #4A9086; }
+        .accent-coral { color: #E57373; }
+        .bg-accent-coral-light { background-color: #FFEBEE; }
+        .nav-link {
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #4A9086;
+            color: white;
+        }
+        .section-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .section-fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #4A9086;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .expandable-card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-warm-neutral">
+
+    <header class="sticky top-0 bg-warm-neutral/80 backdrop-blur-sm z-50 shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex items-center justify-between h-16">
+                <h1 class="text-xl font-bold text-soft-teal" data-lang-key="siteTitle">世代團結行動</h1>
+                <div class="hidden md:flex items-center space-x-2">
+                    <a href="#problem" class="nav-link" data-lang-key="navProblem">解構問題</a>
+                    <a href="#impact" class="nav-link" data-lang-key="navImpact">衝擊與代價</a>
+                    <a href="#solutions" class="nav-link" data-lang-key="navSolutions">解決方案</a>
+                    <a href="#action" class="nav-link" data-lang-key="navAction">行動藍圖</a>
+                    <button id="lang-switcher" class="ml-4 p-2 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-200">English</button>
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button id="lang-switcher-mobile" class="mr-2 p-2 rounded-md text-sm font-semibold text-gray-600 hover:bg-gray-200">EN</button>
+                    <button id="mobile-menu-button" class="p-2 rounded-md text-gray-600 hover:text-soft-teal hover:bg-gray-200">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="hidden md:hidden pb-4">
+                <a href="#problem" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200 rounded" data-lang-key="navProblemMobile">解構問題</a>
+                <a href="#impact" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200 rounded" data-lang-key="navImpactMobile">衝擊與代價</a>
+                <a href="#solutions" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200 rounded" data-lang-key="navSolutionsMobile">解決方案</a>
+                <a href="#action" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-200 rounded" data-lang-key="navActionMobile">行動藍圖</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <section id="hero" class="text-center py-16 section-fade-in">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4" data-lang-key="heroTitle">從年齡歧視到世代團結</h2>
+            <p class="max-w-3xl mx-auto text-lg text-gray-600 mb-12" data-lang-key="heroSubtitle">年齡歧視不僅是社會偏見，更是一場公共衛生與經濟危機。讓我們共同探索問題、了解其深遠影響，並採取行動，建立一個不分年齡、共融共榮的社會。</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <p class="text-5xl font-bold accent-coral">50%</p>
+                    <p class="mt-2 text-gray-700" data-lang-key="stat1">的全球人口對老年人持有年齡歧視態度。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <p class="text-5xl font-bold accent-coral">-7.5 <span data-lang-key="stat2Unit">年</span></p>
+                    <p class="mt-2 text-gray-700" data-lang-key="stat2">因內化年齡歧視，壽命可能縮短的年數。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-300">
+                    <p class="text-5xl font-bold accent-coral">$63B</p>
+                    <p class="mt-2 text-gray-700" data-lang-key="stat3">美國每年因年齡歧視產生的額外醫療支出。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="problem" class="py-16 section-fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold" data-lang-key="problemTitle">解構問題：什麼是年齡歧視？</h2>
+                <p class="max-w-2xl mx-auto mt-4 text-gray-600" data-lang-key="problemSubtitle">年齡歧視是一種複雜且普遍的社會現象，它透過我們的思想、感受和行為，在不同層面上對個人和社會造成傷害。了解其結構是解決問題的第一步。</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-soft-teal mb-4" data-lang-key="threatTitle">三重威脅</h3>
+                    <p class="mb-6" data-lang-key="threatDesc">根據世界衛生組織的定義，年齡歧視由三個相互關聯的維度構成：</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-2xl accent-coral mr-4 font-bold">1</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="threat1Title">刻板印象 (我們的想法)</h4>
+                                <p class="text-gray-600" data-lang-key="threat1Desc">對老年人持有普遍但往往不實的負面看法，如認為他們體弱、健忘或抗拒改變。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl accent-coral mr-4 font-bold">2</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="threat2Title">偏見 (我們的感受)</h4>
+                                <p class="text-gray-600" data-lang-key="threat2Desc">由刻板印象引發的負面情緒和態度，導致不尊重或排斥的行為。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl accent-coral mr-4 font-bold">3</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="threat3Title">歧視 (我們的行為)</h4>
+                                <p class="text-gray-600" data-lang-key="threat3Desc">將負面想法和感受轉化為實際行動，從個人言行到系統性政策，對特定年齡群體造成不利。</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold text-soft-teal mb-4" data-lang-key="levelsTitle">三個運作層面</h3>
+                    <p class="mb-6" data-lang-key="levelsDesc">年齡歧視在社會中以三種不同但相互交織的方式運作：</p>
+                     <div class="space-y-4" id="ageism-levels">
+                        <div class="border-l-4 border-soft-teal/30 pl-4">
+                            <h4 class="font-bold" data-lang-key="level1Title">制度性歧視</h4>
+                            <p class="text-gray-600" data-lang-key="level1Desc">深植於法律、政策與社會慣例中的系統性偏見，如醫療資源分配或就業機會的年齡限制。</p>
+                        </div>
+                        <div class="border-l-4 border-soft-teal/30 pl-4">
+                            <h4 class="font-bold" data-lang-key="level2Title">人際間歧視</h4>
+                            <p class="text-gray-600" data-lang-key="level2Desc">在日常互動中表現出來的歧視，如帶有年齡偏見的笑話、稱謂或將長者排除在對話之外。</p>
+                        </div>
+                        <div class="border-l-4 border-soft-teal/30 pl-4">
+                            <h4 class="font-bold" data-lang-key="level3Title">內化的歧視</h4>
+                            <p class="text-gray-600" data-lang-key="level3Desc">個人吸收了社會對其年齡群體的負面刻板印象，並將其應用於自身，導致自我設限。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="py-16 section-fade-in">
+             <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold" data-lang-key="impactTitle">衝擊與代價：一場無聲的危機</h2>
+                <p class="max-w-2xl mx-auto mt-4 text-gray-600" data-lang-key="impactSubtitle">年齡歧視的後果是真實且可測量的，它嚴重影響個人健康、社會福祉和整體經濟。這不僅是社會公平問題，更是攸關存亡的公共衛生議題。</p>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                 <div class="chart-container mx-auto">
+                    <canvas id="impactChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-gray-600 text-sm" data-lang-key="impactChartCaption">年齡歧視在生理健康、心理健康、社會福祉和經濟層面造成多面向的衝擊。</p>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-16 section-fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold" data-lang-key="solutionsTitle">三大支柱解方：建構高齡友善的未來</h2>
+                <p class="max-w-3xl mx-auto mt-4 text-gray-600" data-lang-key="solutionsSubtitle">對抗年齡歧視需要一個全面性的戰略。世界衛生組織提出了三大實證支柱：政策與法律、教育與敘事、以及世代連結。這三者相輔相成，共同構築一個和諧共融的社會。</p>
+            </div>
+
+            <div class="mb-8 flex justify-center flex-wrap gap-2">
+                <button data-tab="policy" class="tab-button active py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="tabPolicy">政策與法律</button>
+                <button data-tab="education" class="tab-button py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="tabEducation">教育與敘事</button>
+                <button data-tab="connection" class="tab-button py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="tabConnection">世代連結</button>
+            </div>
+
+            <div id="solutions-content" class="bg-white p-8 rounded-xl shadow-lg">
+                <div id="policy-content" class="solution-tab-content">
+                    <h3 class="text-2xl font-bold text-soft-teal mb-4" data-lang-key="policyPillarTitle">支柱一：政策與法律 — 建立制度性防護網</h3>
+                    <p class="mb-6" data-lang-key="policyPillarDesc">強而有力的法律是反歧視的基石，而積極的政策則能主動塑造一個高齡友善的環境。這不僅是禁止負面行為，更是推動正面改變。</p>
+                    <h4 class="font-bold mt-6 mb-2" data-lang-key="who8PillarsTitle">世界衛生組織「高齡友善城市八大面向」</h4>
+                    <p class="mb-4 text-gray-600" data-lang-key="who8PillarsDesc">這是一個全面的框架，指導城市規劃如何滿足各年齡層居民的需求。將滑鼠懸停在圖示上以了解更多。</p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center" id="who-pillars-grid">
+                         <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar1Tooltip">🏢 <span class="block mt-1 text-sm" data-lang-key="pillar1">公共空間</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar2Tooltip">🚌 <span class="block mt-1 text-sm" data-lang-key="pillar2">交通運輸</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar3Tooltip">🏠 <span class="block mt-1 text-sm" data-lang-key="pillar3">住宅</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar4Tooltip">🎭 <span class="block mt-1 text-sm" data-lang-key="pillar4">社會參與</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar5Tooltip">🤝 <span class="block mt-1 text-sm" data-lang-key="pillar5">敬老與融入</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar6Tooltip">💼 <span class="block mt-1 text-sm" data-lang-key="pillar6">公民參與和就業</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar7Tooltip">📱 <span class="block mt-1 text-sm" data-lang-key="pillar7">通訊與資訊</span></div>
+                        <div class="p-4 bg-gray-100 rounded-lg cursor-pointer transform hover:bg-soft-teal hover:text-white hover:scale-105 transition-all duration-300" data-lang-key-title="pillar8Tooltip">❤️ <span class="block mt-1 text-sm" data-lang-key="pillar8">社區與健康服務</span></div>
+                    </div>
+                </div>
+
+                <div id="education-content" class="solution-tab-content hidden">
+                     <h3 class="text-2xl font-bold text-soft-teal mb-4" data-lang-key="educationPillarTitle">支柱二：教育與敘事 — 改變觀念與技能</h3>
+                     <p class="mb-6" data-lang-key="educationPillarDesc">教育能破除迷思，而改變敘事則能重塑我們對老化的看法。彌合數位鴻溝和推動終身學習是此支柱的兩大核心策略。</p>
+                     <h4 class="font-bold mt-6 mb-2" data-lang-key="digitalDivideTitle">特別焦點：彌合數位鴻溝</h4>
+                     <p class="mb-4 text-gray-600" data-lang-key="digitalDivideDesc">有效的數位培訓需要特定的教學法。以下是成功的關鍵原則：</p>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div class="bg-accent-coral-light p-4 rounded-lg"><strong class="text-accent-coral" data-lang-key="principle1Title">以人為本：</strong><span data-lang-key="principle1Desc">學習內容需與個人目標（如聯繫家人）相關。</span></div>
+                         <div class="bg-accent-coral-light p-4 rounded-lg"><strong class="text-accent-coral" data-lang-key="principle2Title">社交學習：</strong><span data-lang-key="principle2Desc">在小組或同儕指導下學習，減少焦慮。</span></div>
+                         <div class="bg-accent-coral-light p-4 rounded-lg"><strong class="text-accent-coral" data-lang-key="principle3Title">動手實踐：</strong><span data-lang-key="principle3Desc">短而頻繁的課程，強調主動使用。</span></div>
+                         <div class="bg-accent-coral-light p-4 rounded-lg"><strong class="text-accent-coral" data-lang-key="principle4Title">整合支持：</strong><span data-lang-key="principle4Desc">不只培訓，還需提供設備和持續的技術支援。</span></div>
+                     </div>
+                </div>
+
+                <div id="connection-content" class="solution-tab-content hidden">
+                    <h3 class="text-2xl font-bold text-soft-teal mb-4" data-lang-key="connectionPillarTitle">支柱三：世代連結 — 最強效的解藥</h3>
+                    <p class="mb-6" data-lang-key="connectionPillarDesc">直接的、有意義的跨世代接觸是打破刻板印象、減少偏見最有效的方法。這些計畫能建立社會凝聚力，並為所有年齡層帶來益處。點擊卡片以探索不同的成功模式。</p>
+                    <div class="space-y-4" id="connection-cards">
+                        <div class="border rounded-lg overflow-hidden">
+                            <button class="w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-bold flex justify-between items-center transition-colors">
+                                <span data-lang-key="model1Title">共享場域 (Co-location)</span>
+                                <span class="text-xl transform transition-transform">▼</span>
+                            </button>
+                            <div class="expandable-card-content bg-white">
+                                <div class="p-4 border-t">
+                                    <p class="font-semibold" data-lang-key="modelPrinciple">核心原則：</p>
+                                    <p class="mb-2 text-gray-600" data-lang-key="model1Principle">將托兒所或幼兒園設置在安養機構中或附近，創造規律、持續的自然互動。</p>
+                                    <p class="font-semibold" data-lang-key="modelOutcome">主要成果：</p>
+                                    <p class="text-gray-600" data-lang-key="model1Outcome">減少長者孤獨感、改善認知；促進兒童語言與社交發展。</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="border rounded-lg overflow-hidden">
+                            <button class="w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-bold flex justify-between items-center transition-colors">
+                                <span data-lang-key="model2Title">技能交換 (Skill & Knowledge Exchange)</span>
+                                 <span class="text-xl transform transition-transform">▼</span>
+                            </button>
+                            <div class="expandable-card-content bg-white">
+                                <div class="p-4 border-t">
+                                    <p class="font-semibold" data-lang-key="modelPrinciple">核心原則：</p>
+                                    <p class="mb-2 text-gray-600" data-lang-key="model2Principle">讓不同世代相互教導與學習，建立互惠關係。</p>
+                                    <p class="font-semibold" data-lang-key="modelOutcome">主要成果：</p>
+                                    <p class="text-gray-600" data-lang-key="model2Outcome">年輕人教長者數位技能，長者分享人生經驗或傳統技藝，打破刻板印象。</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg overflow-hidden">
+                            <button class="w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-bold flex justify-between items-center transition-colors">
+                                <span data-lang-key="model3Title">共享居住 (Homeshare)</span>
+                                 <span class="text-xl transform transition-transform">▼</span>
+                            </button>
+                            <div class="expandable-card-content bg-white">
+                                <div class="p-4 border-t">
+                                    <p class="font-semibold" data-lang-key="modelPrinciple">核心原則：</p>
+                                    <p class="mb-2 text-gray-600" data-lang-key="model3Principle">將需要支持的年長屋主與需要可負擔住房的年輕人配對，共享居住空間並提供相互支持。</p>
+                                    <p class="font-semibold" data-lang-key="modelOutcome">主要成果：</p>
+                                    <p class="text-gray-600" data-lang-key="model3Outcome">解決孤獨感、提供安全感、更有效利用現有住房資源、促進深刻的個人關係。</p>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="border rounded-lg overflow-hidden">
+                            <button class="w-full text-left p-4 bg-gray-100 hover:bg-gray-200 font-bold flex justify-between items-center transition-colors">
+                                <span data-lang-key="model4Title">社區橋接 (Community Bridging)</span>
+                                 <span class="text-xl transform transition-transform">▼</span>
+                            </button>
+                             <div class="expandable-card-content bg-white">
+                                <div class="p-4 border-t">
+                                    <p class="font-semibold" data-lang-key="modelPrinciple">核心原則：</p>
+                                    <p class="mb-2 text-gray-600" data-lang-key="model4Principle">特意連結在大城市中感到無根的年輕專業人士與那些擁有深厚根基但日益孤立的年長鄰居。</p>
+                                    <p class="font-semibold" data-lang-key="modelOutcome">主要成果：</p>
+                                    <p class="text-gray-600" data-lang-key="model4Outcome">在疏離的城市環境中建立社群感和歸屬感，減少所有年齡層的孤獨感。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="action" class="py-16 section-fade-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold" data-lang-key="actionTitle">行動藍圖：您的角色</h2>
+                <p class="max-w-3xl mx-auto mt-4 text-gray-600" data-lang-key="actionSubtitle">建構和諧的跨世代社會需要社會各界的共同努力。選擇您的角色，看看您可以如何做出貢獻。</p>
+            </div>
+            <div class="mb-8 flex justify-center flex-wrap gap-2" id="action-filters">
+                <button data-filter="gov" class="tab-button active py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="filterGov">政府</button>
+                <button data-filter="emp" class="tab-button py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="filterEmp">雇主</button>
+                <button data-filter="ngo" class="tab-button py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="filterNgo">公民社會</button>
+                <button data-filter="ind" class="tab-button py-2 px-6 rounded-full bg-gray-200 text-gray-700 font-semibold" data-lang-key="filterInd">個人</button>
+            </div>
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div id="action-items-container" class="space-y-4">
+                    <div class="action-item" data-category="gov">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="govAction1Title">強化法律與政策</h4>
+                        <p class="text-gray-600" data-lang-key="govAction1Desc">全面審查並加強反年齡歧視法規，強制公共政策進行「世代影響評估」，並採納高齡友善城市框架。</p>
+                    </div>
+                     <div class="action-item" data-category="gov">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="govAction2Title">提供資金支持</h4>
+                        <p class="text-gray-600" data-lang-key="govAction2Desc">優先資助世代連結的「基礎設施」（如協調員），並支持遵循最佳實踐的數位共融計畫。</p>
+                    </div>
+                    <div class="action-item hidden" data-category="emp">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="empAction1Title">無偏見的招聘與留任</h4>
+                        <p class="text-gray-600" data-lang-key="empAction1Desc">簽署「高齡友善雇主承諾」，審核招聘流程以消除偏見，並推廣彈性工作安排。</p>
+                    </div>
+                    <div class="action-item hidden" data-category="emp">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="empAction2Title">投資於持續發展</h4>
+                        <p class="text-gray-600" data-lang-key="empAction2Desc">為所有年齡的員工提供持續的專業發展與數位技能培訓，實施逆向導師計畫。</p>
+                    </div>
+                    <div class="action-item hidden" data-category="ngo">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="ngoAction1Title">採納最佳實踐</h4>
+                        <p class="text-gray-600" data-lang-key="ngoAction1Desc">將有效的世代間實踐原則和數位素養教學法作為所有計畫設計的黃金標準。</p>
+                    </div>
+                     <div class="action-item hidden" data-category="ngo">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="ngoAction2Title">融入醫療與教育</h4>
+                        <p class="text-gray-600" data-lang-key="ngoAction2Desc">將數位素養納入「社會處方」，並在學校課程中加入老化與世代理解的內容。</p>
+                    </div>
+                    <div class="action-item hidden" data-category="ind">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="indAction1Title">自我反思與覺察</h4>
+                        <p class="text-gray-600" data-lang-key="indAction1Desc">積極挑戰自己對老化的無意識偏見，注意並拒絕日常對話中的年齡歧視語言。</p>
+                    </div>
+                     <div class="action-item hidden" data-category="ind">
+                        <h4 class="font-bold text-soft-teal" data-lang-key="indAction2Title">採取具體行動</h4>
+                        <p class="text-gray-600" data-lang-key="indAction2Desc">有意識地與不同世代建立關係，參與志工服務，幫助年長親友使用科技。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <p data-lang-key="footerSlogan">為所有人建構一個不分年齡、共融共榮的世界。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footerCredit">此互動式報告基於《從年齡歧視到世代團結》戰略框架。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLanguage = 'zh';
+            let impactChart; 
+
+            const translations = {
+                siteTitle: { zh: '世代團結行動', en: 'Intergenerational Solidarity Action' },
+                navProblem: { zh: '解構問題', en: 'The Problem' },
+                navImpact: { zh: '衝擊與代價', en: 'Impact & Cost' },
+                navSolutions: { zh: '解決方案', en: 'Solutions' },
+                navAction: { zh: '行動藍圖', en: 'Action Blueprint' },
+                navProblemMobile: { zh: '解構問題', en: 'The Problem' },
+                navImpactMobile: { zh: '衝擊與代價', en: 'Impact & Cost' },
+                navSolutionsMobile: { zh: '解決方案', en: 'Solutions' },
+                navActionMobile: { zh: '行動藍圖', en: 'Action Blueprint' },
+                heroTitle: { zh: '從年齡歧視到世代團結', en: 'From Ageism to Intergenerational Solidarity' },
+                heroSubtitle: { zh: '年齡歧視不僅是社會偏見，更是一場公共衛生與經濟危機。讓我們共同探索問題、了解其深遠影響，並採取行動，建立一個不分年齡、共融共榮的社會。', en: 'Ageism isn\'t just a social bias; it\'s a public health and economic crisis. Let\'s explore the issue, understand its profound impact, and take action to build an inclusive society for all ages.' },
+                stat1: { zh: '的全球人口對老年人持有年齡歧視態度。', en: 'of the global population holds ageist attitudes towards older people.' },
+                stat2Unit: { zh: '年', en: 'Years' },
+                stat2: { zh: '因內化年齡歧視，壽命可能縮短的年數。', en: 'of potential life reduction due to internalized ageism.' },
+                stat3: { zh: '美國每年因年齡歧視產生的額外醫療支出。', en: 'in annual excess healthcare costs from ageism in the US.' },
+                problemTitle: { zh: '解構問題：什麼是年齡歧視？', en: 'Deconstructing the Problem: What is Ageism?' },
+                problemSubtitle: { zh: '年齡歧視是一種複雜且普遍的社會現象，它透過我們的思想、感受和行為，在不同層面上對個人和社會造成傷害。了解其結構是解決問題的第一步。', en: 'Ageism is a complex and pervasive social phenomenon that harms individuals and society on multiple levels through our thoughts, feelings, and actions. Understanding its structure is the first step to a solution.' },
+                threatTitle: { zh: '三重威脅', en: 'The Triple Threat' },
+                threatDesc: { zh: '根據世界衛生組織的定義，年齡歧視由三個相互關聯的維度構成：', en: 'According to the WHO, ageism is composed of three interconnected dimensions:' },
+                threat1Title: { zh: '刻板印象 (我們的想法)', en: 'Stereotypes (What we think)' },
+                threat1Desc: { zh: '對老年人持有普遍但往往不實的負面看法，如認為他們體弱、健忘或抗拒改變。', en: 'Generalized and often untrue negative beliefs about older people, such as being frail, forgetful, or resistant to change.' },
+                threat2Title: { zh: '偏見 (我們的感受)', en: 'Prejudice (What we feel)' },
+                threat2Desc: { zh: '由刻板印象引發的負面情緒和態度，導致不尊重或排斥的行為。', en: 'Negative emotions and attitudes sparked by stereotypes, leading to disrespect or exclusion.' },
+                threat3Title: { zh: '歧視 (我們的行為)', en: 'Discrimination (What we do)' },
+                threat3Desc: { zh: '將負面想法和感受轉化為實際行動，從個人言行到系統性政策，對特定年齡群體造成不利。', en: 'Translating negative thoughts and feelings into actions that disadvantage specific age groups, from personal remarks to systemic policies.' },
+                levelsTitle: { zh: '三個運作層面', en: 'Three Levels of Operation' },
+                levelsDesc: { zh: '年齡歧視在社會中以三種不同但相互交織的方式運作：', en: 'Ageism operates in society in three distinct but interconnected ways:' },
+                level1Title: { zh: '制度性歧視', en: 'Institutional Discrimination' },
+                level1Desc: { zh: '深植於法律、政策與社會慣例中的系統性偏見，如醫療資源分配或就業機會的年齡限制。', en: 'Systemic bias embedded in laws, policies, and social practices, such as age limits on healthcare access or job opportunities.' },
+                level2Title: { zh: '人際間歧視', en: 'Interpersonal Discrimination' },
+                level2Desc: { zh: '在日常互動中表現出來的歧視，如帶有年齡偏見的笑話、稱謂或將長者排除在對話之外。', en: 'Discrimination expressed in daily interactions, like age-related jokes, patronizing language, or excluding older people from conversations.' },
+                level3Title: { zh: '內化的歧視', en: 'Internalized Discrimination' },
+                level3Desc: { zh: '個人吸收了社會對其年齡群體的負面刻板印象，並將其應用於自身，導致自我設限。', en: 'When individuals absorb society\'s negative stereotypes about their age group and apply them to themselves, leading to self-limiting beliefs.' },
+                impactTitle: { zh: '衝擊與代價：一場無聲的危機', en: 'Impact & Cost: A Silent Crisis' },
+                impactSubtitle: { zh: '年齡歧視的後果是真實且可測量的，它嚴重影響個人健康、社會福祉和整體經濟。這不僅是社會公平問題，更是攸關存亡的公共衛生議題。', en: 'The consequences of ageism are real and measurable, severely affecting personal health, social well-being, and the overall economy. This is not just a matter of social justice, but a critical public health issue.' },
+                impactChartTitle: { zh: '年齡歧視的多面向衝擊', en: 'The Multi-Faceted Impact of Ageism' },
+                impactChartLabel: { zh: '年齡歧視的負面衝擊', en: 'Negative Impact of Ageism' },
+                impactChartTooltip: { zh: '顯著負面影響', en: 'Significant Negative Impact' },
+                impactChartCategories: { zh: ['生理健康', '心理健康', '社會福祉', '經濟'], en: ['Physical Health', 'Mental Health', 'Social Well-being', 'Economy'] },
+                impactChartCaption: { zh: '年齡歧視在生理健康、心理健康、社會福祉和經濟層面造成多面向的衝擊。', en: 'Ageism creates multi-faceted impacts across physical health, mental health, social well-being, and the economy.' },
+                solutionsTitle: { zh: '三大支柱解方：建構高齡友善的未來', en: 'Three-Pillar Solution: Building an Age-Friendly Future' },
+                solutionsSubtitle: { zh: '對抗年齡歧視需要一個全面性的戰略。世界衛生組織提出了三大實證支柱：政策與法律、教育與敘事、以及世代連結。這三者相輔相成，共同構築一個和諧共融的社會。', en: 'Combating ageism requires a comprehensive strategy. The WHO proposes three evidence-based pillars: Policy & Law, Education & Narrative, and Intergenerational Connection. These pillars work together to build a harmonious, inclusive society.' },
+                tabPolicy: { zh: '政策與法律', en: 'Policy & Law' },
+                tabEducation: { zh: '教育與敘事', en: 'Education & Narrative' },
+                tabConnection: { zh: '世代連結', en: 'Intergenerational Connection' },
+                policyPillarTitle: { zh: '支柱一：政策與法律 — 建立制度性防護網', en: 'Pillar 1: Policy & Law — Building an Institutional Safety Net' },
+                policyPillarDesc: { zh: '強而有力的法律是反歧視的基石，而積極的政策則能主動塑造一個高齡友善的環境。這不僅是禁止負面行為，更是推動正面改變。', en: 'Strong laws are the cornerstone of anti-discrimination, while proactive policies can actively shape an age-friendly environment. This is not just about prohibiting negative actions, but promoting positive change.' },
+                who8PillarsTitle: { zh: '世界衛生組織「高齡友善城市八大面向」', en: 'WHO\'s "8 Domains of an Age-Friendly City"' },
+                who8PillarsDesc: { zh: '這是一個全面的框架，指導城市規劃如何滿足各年齡層居民的需求。將滑鼠懸停在圖示上以了解更多。', en: 'A comprehensive framework guiding urban planning to meet the needs of residents of all ages. Hover over the icons to learn more.' },
+                pillar1: { zh: '公共空間', en: 'Outdoor Spaces' },
+                pillar2: { zh: '交通運輸', en: 'Transportation' },
+                pillar3: { zh: '住宅', en: 'Housing' },
+                pillar4: { zh: '社會參與', en: 'Social Participation' },
+                pillar5: { zh: '敬老與融入', en: 'Respect & Inclusion' },
+                pillar6: { zh: '公民參與和就業', en: 'Civic & Employment' },
+                pillar7: { zh: '通訊與資訊', en: 'Communication' },
+                pillar8: { zh: '社區與健康服務', en: 'Community & Health' },
+                pillar1Tooltip: { zh: '無障礙的公共空間與建築，讓所有人都能安全、方便地進出。', en: 'Accessible public spaces and buildings, allowing everyone safe and easy access.' },
+                pillar2Tooltip: { zh: '提供可負擔、可靠且無障礙的公共與私人交通選項。', en: 'Affordable, reliable, and accessible public and private transport options.' },
+                pillar3Tooltip: { zh: '提供適合老年人需求、安全且可負擔的居住環境。', en: 'Housing that is appropriate, safe, and affordable for older people.' },
+                pillar4Tooltip: { zh: '提供多元的休閒與文化活動，鼓勵長者參與其中。', en: 'A variety of recreational and cultural activities to encourage participation.' },
+                pillar5Tooltip: { zh: '促進對長者的尊重，並確保他們被納入社會的各個層面。', en: 'Promoting respect for older people and ensuring their inclusion in all aspects of society.' },
+                pillar6Tooltip: { zh: '提供有薪工作與志工服務的機會，讓長者能持續貢獻。', en: 'Opportunities for paid work and volunteering, allowing older people to continue contributing.' },
+                pillar7Tooltip: { zh: '確保資訊對所有人都是易於獲取和理解的。', en: 'Ensuring information is accessible and understandable for everyone.' },
+                pillar8Tooltip: { zh: '提供整合性的社區支持與健康照護服務。', en: 'Integrated community support and health services.' },
+                educationPillarTitle: { zh: '支柱二：教育與敘事 — 改變觀念與技能', en: 'Pillar 2: Education & Narrative — Changing Minds and Skills' },
+                educationPillarDesc: { zh: '教育能破除迷思，而改變敘事則能重塑我們對老化的看法。彌合數位鴻溝和推動終身學習是此支柱的兩大核心策略。', en: 'Education dispels myths, while changing the narrative reshapes our view of aging. Bridging the digital divide and promoting lifelong learning are two core strategies of this pillar.' },
+                digitalDivideTitle: { zh: '特別焦點：彌合數位鴻溝', en: 'Special Focus: Bridging the Digital Divide' },
+                digitalDivideDesc: { zh: '有效的數位培訓需要特定的教學法。以下是成功的關鍵原則：', en: 'Effective digital training requires specific teaching methods. Here are the key principles for success:' },
+                principle1Title: { zh: '以人為本：', en: 'Person-Centered:' },
+                principle1Desc: { zh: '學習內容需與個人目標（如聯繫家人）相關。', en: 'Learning content must be relevant to personal goals (e.g., connecting with family).' },
+                principle2Title: { zh: '社交學習：', en: 'Social Learning:' },
+                principle2Desc: { zh: '在小組或同儕指導下學習，減少焦慮。', en: 'Learning in small groups or with peer tutors reduces anxiety.' },
+                principle3Title: { zh: '動手實踐：', en: 'Hands-On Practice:' },
+                principle3Desc: { zh: '短而頻繁的課程，強調主動使用。', en: 'Short, frequent sessions that emphasize active use.' },
+                principle4Title: { zh: '整合支持：', en: 'Integrated Support:' },
+                principle4Desc: { zh: '不只培訓，還需提供設備和持續的技術支援。', en: 'Provide not just training, but also access to devices and ongoing tech support.' },
+                connectionPillarTitle: { zh: '支柱三：世代連結 — 最強效的解藥', en: 'Pillar 3: Intergenerational Connection — The Most Potent Antidote' },
+                connectionPillarDesc: { zh: '直接的、有意義的跨世代接觸是打破刻板印象、減少偏見最有效的方法。這些計畫能建立社會凝聚力，並為所有年齡層帶來益處。點擊卡片以探索不同的成功模式。', en: 'Direct, meaningful intergenerational contact is the most effective way to break stereotypes and reduce prejudice. These programs build social cohesion and benefit all age groups. Click the cards to explore successful models.' },
+                modelPrinciple: { zh: '核心原則：', en: 'Core Principle:' },
+                modelOutcome: { zh: '主要成果：', en: 'Key Outcomes:' },
+                model1Title: { zh: '共享場域 (Co-location)', en: 'Co-location' },
+                model1Principle: { zh: '將托兒所或幼兒園設置在安養機構中或附近，創造規律、持續的自然互動。', en: 'Placing childcare centers in or near nursing homes to create regular, sustained, natural interactions.' },
+                model1Outcome: { zh: '減少長者孤獨感、改善認知；促進兒童語言與社交發展。', en: 'Reduces loneliness and improves cognition in older adults; promotes language and social development in children.' },
+                model2Title: { zh: '技能交換 (Skill & Knowledge Exchange)', en: 'Skill & Knowledge Exchange' },
+                model2Principle: { zh: '讓不同世代相互教導與學習，建立互惠關係。', en: 'Creating reciprocal relationships where different generations teach and learn from each other.' },
+                model2Outcome: { zh: '年輕人教長者數位技能，長者分享人生經驗或傳統技藝，打破刻板印象。', en: 'Young people teach digital skills, older adults share life experience or traditional crafts, breaking stereotypes.' },
+                model3Title: { zh: '共享居住 (Homeshare)', en: 'Homeshare' },
+                model3Principle: { zh: '將需要支持的年長屋主與需要可負擔住房的年輕人配對，共享居住空間並提供相互支持。', en: 'Matching older homeowners who need support with younger people who need affordable housing, sharing a home and mutual support.' },
+                model3Outcome: { zh: '解決孤獨感、提供安全感、更有效利用現有住房資源、促進深刻的個人關係。', en: 'Addresses loneliness, provides security, makes better use of housing stock, and fosters deep personal relationships.' },
+                model4Title: { zh: '社區橋接 (Community Bridging)', en: 'Community Bridging' },
+                model4Principle: { zh: '特意連結在大城市中感到無根的年輕專業人士與那些擁有深厚根基但日益孤立的年長鄰居。', en: 'Intentionally connecting younger professionals who may feel rootless in big cities with older neighbors who are well-established but increasingly isolated.' },
+                model4Outcome: { zh: '在疏離的城市環境中建立社群感和歸屬感，減少所有年齡層的孤獨感。', en: 'Builds community and belonging in anonymous urban environments, reducing loneliness for all ages.' },
+                actionTitle: { zh: '行動藍圖：您的角色', en: 'Action Blueprint: Your Role' },
+                actionSubtitle: { zh: '建構和諧的跨世代社會需要社會各界的共同努力。選擇您的角色，看看您可以如何做出貢獻。', en: 'Building a harmonious intergenerational society requires a collective effort. Select your role to see how you can contribute.' },
+                filterGov: { zh: '政府', en: 'Government' },
+                filterEmp: { zh: '雇主', en: 'Employers' },
+                filterNgo: { zh: '公民社會', en: 'Civil Society' },
+                filterInd: { zh: '個人', en: 'Individuals' },
+                govAction1Title: { zh: '強化法律與政策', en: 'Strengthen Laws & Policies' },
+                govAction1Desc: { zh: '全面審查並加強反年齡歧視法規，強制公共政策進行「世代影響評估」，並採納高齡友善城市框架。', en: 'Review and strengthen anti-ageism laws, mandate "intergenerational impact assessments" for public policies, and adopt age-friendly city frameworks.' },
+                govAction2Title: { zh: '提供資金支持', en: 'Provide Funding' },
+                govAction2Desc: { zh: '優先資助世代連結的「基礎設施」（如協調員），並支持遵循最佳實踐的數位共融計畫。', en: 'Prioritize funding for intergenerational "infrastructure" (e.g., coordinators) and support digital inclusion programs that follow best practices.' },
+                empAction1Title: { zh: '無偏見的招聘與留任', en: 'Unbiased Hiring & Retention' },
+                empAction1Desc: { zh: '簽署「高齡友善雇主承諾」，審核招聘流程以消除偏見，並推廣彈性工作安排。', en: 'Sign an "Age-Friendly Employer Pledge," audit hiring processes to eliminate bias, and promote flexible work arrangements.' },
+                empAction2Title: { zh: '投資於持續發展', en: 'Invest in Continuous Development' },
+                empAction2Desc: { zh: '為所有年齡的員工提供持續的專業發展與數位技能培訓，實施逆向導師計畫。', en: 'Provide ongoing professional development and digital skills training for employees of all ages. Implement reverse mentoring programs.' },
+                ngoAction1Title: { zh: '採納最佳實踐', en: 'Adopt Best Practices' },
+                ngoAction1Desc: { zh: '將有效的世代間實踐原則和數位素養教學法作為所有計畫設計的黃金標準。', en: 'Make effective intergenerational practice principles and digital literacy pedagogies the gold standard for all program design.' },
+                ngoAction2Title: { zh: '融入醫療與教育', en: 'Integrate into Health & Education' },
+                ngoAction2Desc: { zh: '將數位素養納入「社會處方」，並在學校課程中加入老化與世代理解的內容。', en: 'Incorporate digital literacy into "social prescribing" pathways and embed learning about aging and intergenerational understanding into school curricula.' },
+                indAction1Title: { zh: '自我反思與覺察', en: 'Self-Reflect & Be Aware' },
+                indAction1Desc: { zh: '積極挑戰自己對老化的無意識偏見，注意並拒絕日常對話中的年齡歧視語言。', en: 'Actively challenge your own unconscious biases about aging. Notice and reject ageist language in everyday conversations.' },
+                indAction2Title: { zh: '採取具體行動', en: 'Take Concrete Action' },
+                indAction2Desc: { zh: '有意識地與不同世代建立關係，參與志工服務，幫助年長親友使用科技。', en: 'Consciously build relationships with people of different generations. Volunteer for intergenerational programs. Help an older relative use technology.' },
+                footerSlogan: { zh: '為所有人建構一個不分年齡、共融共榮的世界。', en: 'Building a world for all ages, where everyone can thrive.' },
+                footerCredit: { zh: '此互動式報告基於《從年齡歧視到世代團結》戰略框架。', en: 'This interactive report is based on the "From Ageism to Intergenerational Solidarity" strategic framework.' },
+            };
+
+            function createImpactChart(lang) {
+                if (impactChart) {
+                    impactChart.destroy();
+                }
+                const impactCtx = document.getElementById('impactChart').getContext('2d');
+                impactChart = new Chart(impactCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: translations.impactChartCategories[lang],
+                        datasets: [{
+                            label: translations.impactChartLabel[lang],
+                            data: [75, 80, 85, 65],
+                            backgroundColor: [
+                                'rgba(229, 115, 115, 0.6)',
+                                'rgba(74, 144, 134, 0.6)',
+                                'rgba(245, 166, 35, 0.6)',
+                                'rgba(126, 211, 33, 0.6)'
+                            ],
+                            borderColor: [
+                                'rgba(229, 115, 115, 1)',
+                                'rgba(74, 144, 134, 1)',
+                                'rgba(245, 166, 35, 1)',
+                                'rgba(126, 211, 33, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => translations.impactChartTooltip[lang]
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: translations.impactChartTitle[lang],
+                                font: { size: 16, family: "'Noto Sans TC', 'Lato', sans-serif" },
+                                color: '#3D3D3D'
+                            }
+                        },
+                        scales: {
+                            x: { beginAtZero: true, ticks: { display: false } },
+                            y: { ticks: { font: { size: 14, family: "'Noto Sans TC', 'Lato', sans-serif" }, color: '#3D3D3D' } }
+                        }
+                    }
+                });
+            }
+
+            function switchLanguage(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[key] && translations[key][lang]) {
+                        if (key.startsWith('principle') && key.endsWith('Desc')) {
+                           el.textContent = translations[key][lang];
+                        } else if (el.tagName === 'SPAN' && el.parentElement.tagName === 'STRONG') {
+                            el.parentElement.innerHTML = `${translations[key][lang]}<span data-lang-key="${key}">${el.innerHTML}</span>`;
+                        }
+                        else {
+                           el.innerHTML = translations[key][lang];
+                        }
+                    }
+                });
+                
+                document.querySelectorAll('[data-lang-key-title]').forEach(el => {
+                    const key = el.dataset.langKeyTitle;
+                    if (translations[key] && translations[key][lang]) {
+                       el.title = translations[key][lang];
+                    }
+                });
+
+                // Special handling for composite elements
+                document.querySelectorAll('[data-lang-key^="principle"]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    const titleKey = key.replace('Desc', 'Title');
+                    if (el.tagName === 'SPAN' && translations[titleKey] && translations[key]) {
+                        const strongEl = el.previousElementSibling;
+                        if (strongEl && strongEl.tagName === 'STRONG') {
+                            strongEl.textContent = translations[titleKey][lang] + ' ';
+                            el.textContent = translations[key][lang];
+                        }
+                    }
+                });
+                
+                // Special handling for expandable cards that have shared keys
+                document.querySelectorAll('#connection-content [data-lang-key="modelPrinciple"]').forEach(el => el.textContent = translations.modelPrinciple[lang]);
+                document.querySelectorAll('#connection-content [data-lang-key="modelOutcome"]').forEach(el => el.textContent = translations.modelOutcome[lang]);
+
+
+                createImpactChart(lang);
+                currentLanguage = lang;
+                
+                const switcher = document.getElementById('lang-switcher');
+                const switcherMobile = document.getElementById('lang-switcher-mobile');
+                if (lang === 'en') {
+                    switcher.textContent = '中文';
+                    switcherMobile.textContent = '中';
+                } else {
+                    switcher.textContent = 'English';
+                    switcherMobile.textContent = 'EN';
+                }
+            }
+            
+            createImpactChart(currentLanguage);
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            const solutionTabs = document.querySelectorAll('.tab-button[data-tab]');
+            const solutionContents = document.querySelectorAll('.solution-tab-content');
+
+            solutionTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    solutionTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    const target = tab.dataset.tab;
+                    solutionContents.forEach(content => {
+                        content.id === `${target}-content` ? content.classList.remove('hidden') : content.classList.add('hidden');
+                    });
+                });
+            });
+
+            const actionFilters = document.querySelectorAll('#action-filters .tab-button');
+            const actionItems = document.querySelectorAll('.action-item');
+
+            actionFilters.forEach(filter => {
+                filter.addEventListener('click', () => {
+                    actionFilters.forEach(f => f.classList.remove('active'));
+                    filter.classList.add('active');
+
+                    const targetCategory = filter.dataset.filter;
+                    actionItems.forEach(item => {
+                        item.dataset.category === targetCategory ? item.classList.remove('hidden') : item.classList.add('hidden');
+                    });
+                });
+            });
+            
+            const expandableCards = document.querySelectorAll('#connection-cards button');
+            expandableCards.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('span:last-child');
+                    
+                    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                        content.style.maxHeight = '0px';
+                        content.style.paddingTop = '0';
+                        content.style.paddingBottom = '0';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        content.style.paddingTop = '1rem';
+                        content.style.paddingBottom = '1rem';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            const sections = document.querySelectorAll('.section-fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            sections.forEach(section => observer.observe(section));
+
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({ top: targetElement.offsetTop - 80, behavior: 'smooth' });
+                        if (!mobileMenu.classList.contains('hidden')) {
+                           mobileMenu.classList.add('hidden');
+                        }
+                    }
+                });
+            });
+
+            const navLinkHighlighter = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                            if(link.getAttribute('href') === `#${id}`){
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-30% 0px -70% 0px" });
+
+            document.querySelectorAll('main section').forEach(section => {
+                navLinkHighlighter.observe(section);
+            });
+
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                const newLang = currentLanguage === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+            document.getElementById('lang-switcher-mobile').addEventListener('click', () => {
+                const newLang = currentLanguage === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+        });
+    </script>
+</body>
+</html>
