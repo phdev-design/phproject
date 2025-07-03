@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英國高齡化社會的挑戰：互動式報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Slate -->
+    <!-- Application Structure Plan: The SPA is designed as an interactive dashboard, not a linear report. It starts with a high-level "Overview" section presenting the core thesis of an "interconnected crisis" through key stats and a central visual metaphor. Subsequent sections ("Pension Crisis", "Healthcare Plight", "Social Isolation") provide deep-dives using interactive elements like tabs and charts to make data digestible. It concludes with "Integrated Solutions". This non-linear, thematic structure is chosen for better usability, allowing users to explore the interconnected issues in a more engaging, self-directed way, rather than passively reading through chapters. The goal is to facilitate understanding of the relationships between the different challenges. -->
+    <!-- Visualization & Content Choices: 
+        - Pension Savings Gap: Goal: Compare -> Viz: Bar Chart -> Interaction: Hover for details -> Justification: More impactful than a table for showing the scale of under-saving. Library: Chart.js.
+        - NHS Satisfaction: Goal: Compare proportions -> Viz: Doughnut Chart -> Interaction: Hover for percentages -> Justification: Excellent for showing parts of a whole, clearly communicating low satisfaction levels. Library: Chart.js.
+        - NHS/Social Care Cycle: Goal: Explain a process -> Viz: HTML/CSS Flowchart -> Interaction: Click to reveal details -> Justification: Visually maps the complex feedback loop, making it easier to grasp than text alone. Method: HTML/CSS/JS.
+        - Loneliness Health Risks: Goal: Show relationships -> Viz: Interactive Cards -> Interaction: Hover to highlight risk -> Justification: Turns dry stats into an engaging discovery element. Method: HTML/CSS/JS.
+        - Digital Divide: Goal: Compare -> Viz: Bar Chart -> Interaction: Hover for details -> Justification: Clearly shows the disparity across age groups. Library: Chart.js.
+        - All diagrams and icons are built with HTML/CSS/Unicode to adhere to the NO SVG constraint. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F8F7F4;
+            color: #2D3748;
+        }
+        body.lang-zh {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        body.lang-en {
+            font-family: 'Lato', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #2C5282;
+            border-bottom-color: #2C5282;
+        }
+        .tab-button {
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #4A5568;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .flowchart-step {
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .flowchart-step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="antialiased lang-zh">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800" data-lang-key="headerTitle">英國高齡化社會的挑戰</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#overview" class="nav-link pb-1" data-lang-key="navOverview">總覽</a>
+                <a href="#pensions" class="nav-link pb-1" data-lang-key="navPensions">養老金危機</a>
+                <a href="#health" class="nav-link pb-1" data-lang-key="navHealth">醫療困境</a>
+                <a href="#isolation" class="nav-link pb-1" data-lang-key="navIsolation">社會孤立</a>
+                <a href="#solutions" class="nav-link pb-1" data-lang-key="navSolutions">綜合解方</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1.5 text-sm font-medium bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">English</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                 <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="#overview" data-lang-key="navOverview">總覽</option>
+                    <option value="#pensions" data-lang-key="navPensions">養老金危機</option>
+                    <option value="#health" data-lang-key="navHealth">醫療困境</option>
+                    <option value="#isolation" data-lang-key="navIsolation">社會孤立</option>
+                    <option value="#solutions" data-lang-key="navSolutions">綜合解方</option>
+                </select>
+                <button id="lang-switcher-mobile" class="ml-2 px-3 py-1.5 text-sm font-medium bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="overview" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-3xl md:text-5xl font-bold text-gray-800 mb-4" data-lang-key="overviewTitle">一場環環相扣的危機</h2>
+                <p class="max-w-3xl mx-auto text-gray-600 md:text-lg mb-12" data-lang-key="overviewSubtitle">
+                    英國正處於一場深刻的人口結構轉變中。養老金、醫療保健與社會融入這三大挑戰並非獨立存在，而是相互強化，共同構成了一個複雜的危機。本報告將揭示這些挑戰如何交織，並探討確保未來所有人都能過上更美好生活的統一策略。
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <p class="text-4xl font-bold text-blue-800 mb-2">25%</p>
+                        <p class="text-gray-700" data-lang-key="statPopulation">預計到2050年，65歲以上人口將佔總人口的比例</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <p class="text-4xl font-bold text-blue-800 mb-2">87%</p>
+                        <p class="text-gray-700" data-lang-key="statPensionGap">中等收入員工的養老金儲蓄率未達到15%的適足基準</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <p class="text-4xl font-bold text-blue-800 mb-2">19%</p>
+                        <p class="text-gray-700" data-lang-key="statNhsSatisfaction">公眾對國家醫療服務體系(NHS)的整體滿意度 (2024)</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <p class="text-4xl font-bold text-blue-800 mb-2">1/14</p>
+                        <p class="text-gray-700" data-lang-key="statLoneliness">65歲以上長者「經常」感到孤獨的比例</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="interconnectedTitle">危機的相互關聯性</h3>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-[-40px]">
+                    <div class="w-48 h-48 rounded-full bg-blue-200/50 border-2 border-blue-400 flex items-center justify-center text-center p-4 shadow-lg">
+                        <span class="font-semibold text-blue-800" data-lang-key="circlePension">養老金收入不足</span>
+                    </div>
+                    <div class="w-48 h-48 rounded-full bg-red-200/50 border-2 border-red-400 flex items-center justify-center text-center p-4 shadow-lg">
+                         <span class="font-semibold text-red-800" data-lang-key="circleHealth">健康狀況不佳<br>& 醫療壓力</span>
+                    </div>
+                    <div class="w-48 h-48 rounded-full bg-yellow-200/50 border-2 border-yellow-400 flex items-center justify-center text-center p-4 shadow-lg">
+                         <span class="font-semibold text-yellow-800" data-lang-key="circleIsolation">社會孤立<br>& 連結斷裂</span>
+                    </div>
+                </div>
+                 <p class="max-w-3xl mx-auto text-gray-600 md:text-lg mt-8" data-lang-key="interconnectedDesc">
+                    這三個領域的問題相互影響，形成惡性循環：財務壓力加劇健康問題，而健康不佳和行動不便則導致社會孤立，孤獨感又反過來損害身心健康，進一步增加醫療系統的負擔。
+                </p>
+            </div>
+        </section>
+
+        <section id="pensions" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="pensionTitle">養老金危機：未來的財務安全網正在破裂</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="pensionSubtitle">
+                        英國的養老金體系正因儲蓄不足、風險轉嫁給個人以及自僱者保障缺口等結構性缺陷而面臨嚴峻挑戰。這不僅威脅著未來退休人員的生活品質，也對社會的穩定構成了潛在風險。
+                    </p>
+                </div>
+                
+                <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                    <div class="mb-10 lg:mb-0">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="pensionChartTitle">員工儲蓄差距懸殊</h3>
+                        <p class="text-gray-600 mb-6" data-lang-key="pensionChartDesc">
+                            自動加入機制雖提高了參與率，但大多數人的儲蓄率遠低於專家建議的適足水平。特別是中等收入者，其儲蓄率普遍偏低，這意味著他們退休後的生活水平將面臨大幅下降的風險。
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="pensionSavingsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="pensionTabsTitle">五大核心挑戰</h3>
+                        <div id="pension-tabs-buttons" class="flex flex-wrap gap-2 mb-4">
+                            <button data-tab="tab-saving" class="tab-button active px-4 py-2 text-sm font-medium rounded-md bg-gray-200 text-gray-700" data-lang-key="tabSaving">儲蓄不足</button>
+                            <button data-tab="tab-selfemployed" class="tab-button px-4 py-2 text-sm font-medium rounded-md bg-gray-200 text-gray-700" data-lang-key="tabSelfEmployed">自僱者鴻溝</button>
+                            <button data-tab="tab-dc" class="tab-button px-4 py-2 text-sm font-medium rounded-md bg-gray-200 text-gray-700" data-lang-key="tabDcRisk">DC風險</button>
+                            <button data-tab="tab-housing" class="tab-button px-4 py-2 text-sm font-medium rounded-md bg-gray-200 text-gray-700" data-lang-key="tabHousing">住房壓力</button>
+                            <button data-tab="tab-spa" class="tab-button px-4 py-2 text-sm font-medium rounded-md bg-gray-200 text-gray-700" data-lang-key="tabSpa">退休年齡</button>
+                        </div>
+                        <div id="pension-tabs-content" class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 min-h-[250px]">
+                            <div id="tab-saving" class="pension-tab-content">
+                                <h4 class="font-bold text-lg mb-2" data-lang-key="tabSavingTitle">儲蓄嚴重不足</h4>
+                                <p class="text-gray-600" data-lang-key="tabSavingContent">近350萬私營部門員工完全沒有養老金儲蓄。即使在有儲蓄的人中，高達87%的中等收入員工儲蓄率也低於被認為是適足水平的15%基準，這預示著未來普遍的退休貧困風險。</p>
+                            </div>
+                            <div id="tab-selfemployed" class="pension-tab-content hidden">
+                                <h4 class="font-bold text-lg mb-2" data-lang-key="tabSelfEmployedTitle">自僱人士的儲蓄鴻溝</h4>
+                                <p class="text-gray-600" data-lang-key="tabSelfEmployedContent">自僱人士的退休前景尤其黯淡。目前只有不到五分之一的人為養老金儲蓄，與過去相比大幅下降。他們正走向一場嚴重的退休危機，可能在晚年高度依賴國家福利。</p>
+                            </div>
+                            <div id="tab-dc" class="pension-tab-content hidden">
+                                <h4 class="font-bold text-lg mb-2" data-lang-key="tabDcRiskTitle">定額供款制(DC)的風險主導</h4>
+                                <p class="text-gray-600" data-lang-key="tabDcRiskContent">從雇主承擔風險的DB計畫轉向個人承擔所有投資和長壽風險的DC計畫，使退休人員面臨複雜且高風險的財務決策，而他們往往缺乏必要的金融知識來應對。</p>
+                            </div>
+                             <div id="tab-housing" class="pension-tab-content hidden">
+                                <h4 class="font-bold text-lg mb-2" data-lang-key="tabHousingTitle">住房與養老金的關聯</h4>
+                                <p class="text-gray-600" data-lang-key="tabHousingContent">越來越多的人在接近退休時仍居住在昂貴的私人租賃住房中，這與前幾代人高住房自有率的情況形成鮮明對比。高昂的租金侵蝕了本已不足的退休收入，加劇了財務困境。</p>
+                            </div>
+                            <div id="tab-spa" class="pension-tab-content hidden">
+                                <h4 class="font-bold text-lg mb-2" data-lang-key="tabSpaTitle">提高國家養老金年齡(SPA)的壓力</h4>
+                                <p class="text-gray-600" data-lang-key="tabSpaContent">提高SPA對健康狀況不佳或從事體力勞動而難以持續工作的人群造成了不成比例的傷害。研究顯示，SPA從65歲提高到66歲，使65歲人口的收入貧困率增加了一倍以上。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="health" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="healthTitle">醫療困境：在崩潰邊緣的NHS與社會照護</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="healthSubtitle">
+                        在需求不斷增長和資源長期受限的雙重壓力下，NHS正處於危機之中。更關鍵的是，資金嚴重不足的社會照護體系正在失效，其連鎖反應直接衝擊著醫院，形成一個破壞性的惡性循環。
+                    </p>
+                </div>
+                <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                    <div class="mb-10 lg:mb-0">
+                         <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="healthChartTitle">公眾滿意度跌至谷底 (2024)</h3>
+                        <p class="text-gray-600 mb-6" data-lang-key="healthChartDesc">
+                            公眾對NHS的信心已降至歷史低點。在急診等候時間、醫院預約和GP服務等關鍵領域，不滿意度極高。這反映了系統在滿足基本醫療需求方面所面臨的巨大挑戰。
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="nhsSatisfactionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="healthFlowchartTitle">社會照護崩潰的惡性循環</h3>
+                        <p class="text-gray-600 mb-4" data-lang-key="healthFlowchartDesc">點擊下方步驟，了解社會照護資金削減如何引發連鎖反應，最終加劇NHS危機。</p>
+                        <div id="flowchart-container" class="space-y-4">
+                            <div data-lang-key="flowStep1Text" data-text="地方政府對社會照護的經費削減，導致約140萬老年人的照護需求未被滿足。" class="flowchart-step bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center">
+                                <span class="text-2xl mr-4">1️⃣</span>
+                                <span class="font-medium" data-lang-key="flowStep1">削減社會照護資金</span>
+                            </div>
+                            <div class="flex justify-center"><span class="text-2xl text-gray-400">⬇️</span></div>
+                            <div data-lang-key="flowStep2Text" data-text="缺乏居家支持，導致老年人在健康狀況惡化時，更有可能被送往急診並住院。" class="flowchart-step bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center">
+                                <span class="text-2xl mr-4">2️⃣</span>
+                                <span class="font-medium" data-lang-key="flowStep2">不必要的醫院入院</span>
+                            </div>
+                             <div class="flex justify-center"><span class="text-2xl text-gray-400">⬇️</span></div>
+                            <div data-lang-key="flowStep3Text" data-text="出院後缺乏社會照護支援，導致病人在醫學上已適合出院卻無法離開，佔用了寶貴的病床資源。" class="flowchart-step bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center">
+                                <span class="text-2xl mr-4">3️⃣</span>
+                                <span class="font-medium" data-lang-key="flowStep3">延遲出院 (佔床)</span>
+                            </div>
+                             <div class="flex justify-center"><span class="text-2xl text-gray-400">⬇️</span></div>
+                            <div data-lang-key="flowStep4Text" data-text="佔床問題加劇了醫院的等候名單和急診擁堵，進一步降低了NHS的服務效率和公眾滿意度。" class="flowchart-step bg-white p-4 rounded-lg shadow border border-gray-200 flex items-center">
+                                <span class="text-2xl mr-4">4️⃣</span>
+                                <span class="font-medium" data-lang-key="flowStep4">NHS壓力劇增</span>
+                            </div>
+                        </div>
+                        <div id="flowchart-text" class="mt-4 bg-slate-100 p-4 rounded-lg text-gray-700 min-h-[100px]" data-lang-key="flowchartInitialText">
+                            點擊上方步驟查看詳細說明。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="isolation" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="isolationTitle">社會孤立：看不見的流行病</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="isolationSubtitle">
+                        孤獨感不僅僅是一種情感，它對老年人的身心健康構成嚴重威脅，其危害性堪比吸煙或肥胖。年齡歧視、交通不便和數位鴻溝等結構性障礙，正系統性地將老年人排除在社會生活之外。
+                    </p>
+                </div>
+                
+                 <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                    <div class="mb-10 lg:mb-0">
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="isolationHealthTitle">孤獨對健康的毀滅性影響</h3>
+                        <p class="text-gray-600 mb-6" data-lang-key="isolationHealthDesc">
+                            研究證實，長期的孤獨感會顯著增加患上多種嚴重疾病的風險，並對心理健康造成巨大傷害，同時也給醫療系統帶來額外壓力。
+                        </p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 text-center transition hover:shadow-xl">
+                                <p class="text-3xl font-bold text-red-600">+29%</p>
+                                <p class="text-gray-600 mt-1" data-lang-key="riskHeart">冠心病風險</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 text-center transition hover:shadow-xl">
+                                <p class="text-3xl font-bold text-red-600">+32%</p>
+                                <p class="text-gray-600 mt-1" data-lang-key="riskStroke">中風風險</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 text-center transition hover:shadow-xl">
+                                <p class="text-3xl font-bold text-red-600">+25%</p>
+                                <p class="text-gray-600 mt-1" data-lang-key="riskDementia">失智症風險</p>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg shadow border border-gray-200 text-center transition hover:shadow-xl">
+                                <p class="text-3xl font-bold text-red-600">9/10</p>
+                                <p class="text-gray-600 mt-1" data-lang-key="riskDepression">經常孤獨者同時感到憂鬱</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-lang-key="isolationChartTitle">結構性障礙：數位鴻溝</h3>
+                        <p class="text-gray-600 mb-6" data-lang-key="isolationChartDesc">
+                           隨著服務日益網路化，無法上網或缺乏數位技能的老年人正被拋在後面。年齡是數位排斥最強的預測因素，這加劇了他們的社會孤立。
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="digitalDivideChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-gray-800" data-lang-key="solutionsTitle">綜合解方：邁向統一的政策框架</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="solutionsSubtitle">
+                        應對環環相扣的危機，需要超越部門壁壘的戰略性思維。解決方案必須是綜合性的，從僅僅管理高齡化的「成本」，轉向投資於促進「健康老化」的社會基礎，將其視為經濟和社會發展的驅動力。
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">🏛️</span> <span data-lang-key="solution1Title">設立跨政府辦公室</span></h3>
+                        <p class="text-gray-600" data-lang-key="solution1Desc">成立一個常設的內閣級別機構，負責審核所有重大政策（如住房、交通）對高齡化人口的影響，打破部門壁壘，確保政策的協同性。</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">🏗️</span> <span data-lang-key="solution2Title">擴展基礎設施定義</span></h3>
+                        <p class="text-gray-600" data-lang-key="solution2Desc">國家基礎設施戰略必須超越道路和鐵路，明確地資助和優先考慮社區中心、無障礙公共空間等支持健康和福祉的「社會基礎設施」。</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">📈</span> <span data-lang-key="solution3Title">健康老化作為經濟目標</span></h3>
+                        <p class="text-gray-600" data-lang-key="solution3Desc">將政策重點從管理成本轉向投資，將充足的養老金、優質住房和無障礙社區視為提升經濟生產力、減少醫療需求的關鍵驅動力。</p>
+                    </div>
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-md border border-slate-200">
+                        <h3 class="text-xl font-bold mb-3 flex items-center"><span class="text-3xl mr-3">❤️</span> <span data-lang-key="solution4Title">發起反年齡歧視運動</span></h3>
+                        <p class="text-gray-600" data-lang-key="solution4Desc">由政府支持，發起一場持續的全國性運動，挑戰普遍存在的年齡歧視，為結構性改革奠定文化基礎，創造一個尊重所有年齡的社會。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-sm">
+            <p data-lang-key="footerCopyright">&copy; 2025 英國高齡化社會挑戰互動式報告</p>
+            <p class="text-gray-400 mt-1" data-lang-key="footerSource">基於公開研究報告綜合分析而成</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLang = 'zh';
+            const langData = {
+                zh: {
+                    headerTitle: '英國高齡化社會的挑戰',
+                    navOverview: '總覽',
+                    navPensions: '養老金危機',
+                    navHealth: '醫療困境',
+                    navIsolation: '社會孤立',
+                    navSolutions: '綜合解方',
+                    overviewTitle: '一場環環相扣的危機',
+                    overviewSubtitle: '英國正處於一場深刻的人口結構轉變中。養老金、醫療保健與社會融入這三大挑戰並非獨立存在，而是相互強化，共同構成了一個複雜的危機。本報告將揭示這些挑戰如何交織，並探討確保未來所有人都能過上更美好生活的統一策略。',
+                    statPopulation: '預計到2050年，65歲以上人口將佔總人口的比例',
+                    statPensionGap: '中等收入員工的養老金儲蓄率未達到15%的適足基準',
+                    statNhsSatisfaction: '公眾對國家醫療服務體系(NHS)的整體滿意度 (2024)',
+                    statLoneliness: '65歲以上長者「經常」感到孤獨的比例',
+                    interconnectedTitle: '危機的相互關聯性',
+                    circlePension: '養老金收入不足',
+                    circleHealth: '健康狀況不佳<br>& 醫療壓力',
+                    circleIsolation: '社會孤立<br>& 連結斷裂',
+                    interconnectedDesc: '這三個領域的問題相互影響，形成惡性循環：財務壓力加劇健康問題，而健康不佳和行動不便則導致社會孤立，孤獨感又反過來損害身心健康，進一步增加醫療系統的負擔。',
+                    pensionTitle: '養老金危機：未來的財務安全網正在破裂',
+                    pensionSubtitle: '英國的養老金體系正因儲蓄不足、風險轉嫁給個人以及自僱者保障缺口等結構性缺陷而面臨嚴峻挑戰。這不僅威脅著未來退休人員的生活品質，也對社會的穩定構成了潛在風險。',
+                    pensionChartTitle: '員工儲蓄差距懸殊',
+                    pensionChartDesc: '自動加入機制雖提高了參與率，但大多數人的儲蓄率遠低於專家建議的適足水平。特別是中等收入者，其儲蓄率普遍偏低，這意味著他們退休後的生活水平將面臨大幅下降的風險。',
+                    pensionTabsTitle: '五大核心挑戰',
+                    tabSaving: '儲蓄不足',
+                    tabSelfEmployed: '自僱者鴻溝',
+                    tabDcRisk: 'DC風險',
+                    tabHousing: '住房壓力',
+                    tabSpa: '退休年齡',
+                    tabSavingTitle: '儲蓄嚴重不足',
+                    tabSavingContent: '近350萬私營部門員工完全沒有養老金儲蓄。即使在有儲蓄的人中，高達87%的中等收入員工儲蓄率也低於被認為是適足水平的15%基準，這預示著未來普遍的退休貧困風險。',
+                    tabSelfEmployedTitle: '自僱人士的儲蓄鴻溝',
+                    tabSelfEmployedContent: '自僱人士的退休前景尤其黯淡。目前只有不到五分之一的人為養老金儲蓄，與過去相比大幅下降。他們正走向一場嚴重的退休危機，可能在晚年高度依賴國家福利。',
+                    tabDcRiskTitle: '定額供款制(DC)的風險主導',
+                    tabDcRiskContent: '從雇主承擔風險的DB計畫轉向個人承擔所有投資和長壽風險的DC計畫，使退休人員面臨複雜且高風險的財務決策，而他們往往缺乏必要的金融知識來應對。',
+                    tabHousingTitle: '住房與養老金的關聯',
+                    tabHousingContent: '越來越多的人在接近退休時仍居住在昂貴的私人租賃住房中，這與前幾代人高住房自有率的情況形成鮮明對比。高昂的租金侵蝕了本已不足的退休收入，加劇了財務困境。',
+                    tabSpaTitle: '提高國家養老金年齡(SPA)的壓力',
+                    tabSpaContent: '提高SPA對健康狀況不佳或從事體力勞動而難以持續工作的人群造成了不成比例的傷害。研究顯示，SPA從65歲提高到66歲，使65歲人口的收入貧困率增加了一倍以上。',
+                    healthTitle: '醫療困境：在崩潰邊緣的NHS與社會照護',
+                    healthSubtitle: '在需求不斷增長和資源長期受限的雙重壓力下，NHS正處於危機之中。更關鍵的是，資金嚴重不足的社會照護體系正在失效，其連鎖反應直接衝擊著醫院，形成一個破壞性的惡性循環。',
+                    healthChartTitle: '公眾滿意度跌至谷底 (2024)',
+                    healthChartDesc: '公眾對NHS的信心已降至歷史低點。在急診等候時間、醫院預約和GP服務等關鍵領域，不滿意度極高。這反映了系統在滿足基本醫療需求方面所面臨的巨大挑戰。',
+                    healthFlowchartTitle: '社會照護崩潰的惡性循環',
+                    healthFlowchartDesc: '點擊下方步驟，了解社會照護資金削減如何引發連鎖反應，最終加劇NHS危機。',
+                    flowchartInitialText: '點擊上方步驟查看詳細說明。',
+                    flowStep1: '削減社會照護資金',
+                    flowStep1Text: '地方政府對社會照護的經費削減，導致約140萬老年人的照護需求未被滿足。',
+                    flowStep2: '不必要的醫院入院',
+                    flowStep2Text: '缺乏居家支持，導致老年人在健康狀況惡化時，更有可能被送往急診並住院。',
+                    flowStep3: '延遲出院 (佔床)',
+                    flowStep3Text: '出院後缺乏社會照護支援，導致病人在醫學上已適合出院卻無法離開，佔用了寶貴的病床資源。',
+                    flowStep4: 'NHS壓力劇增',
+                    flowStep4Text: '佔床問題加劇了醫院的等候名單和急診擁堵，進一步降低了NHS的服務效率和公眾滿意度。',
+                    isolationTitle: '社會孤立：看不見的流行病',
+                    isolationSubtitle: '孤獨感不僅僅是一種情感，它對老年人的身心健康構成嚴重威脅，其危害性堪比吸煙或肥胖。年齡歧視、交通不便和數位鴻溝等結構性障礙，正系統性地將老年人排除在社會生活之外。',
+                    isolationHealthTitle: '孤獨對健康的毀滅性影響',
+                    isolationHealthDesc: '研究證實，長期的孤獨感會顯著增加患上多種嚴重疾病的風險，並對心理健康造成巨大傷害，同時也給醫療系統帶來額外壓力。',
+                    riskHeart: '冠心病風險',
+                    riskStroke: '中風風險',
+                    riskDementia: '失智症風險',
+                    riskDepression: '經常孤獨者同時感到憂鬱',
+                    isolationChartTitle: '結構性障礙：數位鴻溝',
+                    isolationChartDesc: '隨著服務日益網路化，無法上網或缺乏數位技能的老年人正被拋在後面。年齡是數位排斥最強的預測因素，這加劇了他們的社會孤立。',
+                    solutionsTitle: '綜合解方：邁向統一的政策框架',
+                    solutionsSubtitle: '應對環環相扣的危機，需要超越部門壁壘的戰略性思維。解決方案必須是綜合性的，從僅僅管理高齡化的「成本」，轉向投資於促進「健康老化」的社會基礎，將其視為經濟和社會發展的驅動力。',
+                    solution1Title: '設立跨政府辦公室',
+                    solution1Desc: '成立一個常設的內閣級別機構，負責審核所有重大政策（如住房、交通）對高齡化人口的影響，打破部門壁壘，確保政策的協同性。',
+                    solution2Title: '擴展基礎設施定義',
+                    solution2Desc: '國家基礎設施戰略必須超越道路和鐵路，明確地資助和優先考慮社區中心、無障礙公共空間等支持健康和福祉的「社會基礎設施」。',
+                    solution3Title: '健康老化作為經濟目標',
+                    solution3Desc: '將政策重點從管理成本轉向投資，將充足的養老金、優質住房和無障礙社區視為提升經濟生產力、減少醫療需求的關鍵驅動力。',
+                    solution4Title: '發起反年齡歧視運動',
+                    solution4Desc: '由政府支持，發起一場持續的全國性運動，挑戰普遍存在的年齡歧視，為結構性改革奠定文化基礎，創造一個尊重所有年齡的社會。',
+                    footerCopyright: '&copy; 2025 英國高齡化社會挑戰互動式報告',
+                    footerSource: '基於公開研究報告綜合分析而成',
+                    chartPensionTitle: '中等收入員工養老金儲蓄率不足情況',
+                    chartPensionLabel: '員工比例 (%)',
+                    chartPensionLabels: ['低於15%適足基準', '低於8%基準', '無任何儲蓄(私營)'],
+                    chartNhsTitle: '對NHS整體運作的滿意度',
+                    chartNhsLabels: ['滿意', '不滿意/中立'],
+                    chartDigitalTitle: '老年人口中的數位排斥現象',
+                    chartDigitalLabel: '不使用網路的比例 (%)',
+                    chartDigitalLabels: ['65歲以上', '75歲以上'],
+                },
+                en: {
+                    headerTitle: 'Challenges of an Ageing UK Society',
+                    navOverview: 'Overview',
+                    navPensions: 'Pension Crisis',
+                    navHealth: 'Healthcare Plight',
+                    navIsolation: 'Social Isolation',
+                    navSolutions: 'Integrated Solutions',
+                    overviewTitle: 'An Interconnected Crisis',
+                    overviewSubtitle: 'The UK is in the midst of a profound demographic shift. The challenges of pensions, healthcare, and social integration are not separate issues but are mutually reinforcing, forming a complex crisis. This report reveals how these challenges intertwine and explores unified strategies for a better future for all.',
+                    statPopulation: 'of the population will be over 65 by 2050',
+                    statPensionGap: 'of middle-income earners are not meeting the 15% adequacy benchmark for pension savings',
+                    statNhsSatisfaction: 'public satisfaction with the National Health Service (NHS) overall (2024)',
+                    statLoneliness: 'of people aged 65+ report "often" feeling lonely',
+                    interconnectedTitle: 'The Interconnectivity of the Crisis',
+                    circlePension: 'Pension<br>Insufficiency',
+                    circleHealth: 'Poor Health &<br>Healthcare Strain',
+                    circleIsolation: 'Social Isolation &<br>Disconnectedness',
+                    interconnectedDesc: 'Problems in these three areas influence each other, creating a vicious cycle: financial stress exacerbates health problems, while poor health and mobility lead to social isolation. Loneliness, in turn, harms physical and mental health, further burdening the healthcare system.',
+                    pensionTitle: 'The Pension Crisis: A Fraying Financial Safety Net',
+                    pensionSubtitle: 'The UK\'s pension system faces severe challenges from under-saving, risk transfer to individuals, and gaps in provision for the self-employed. This not only threatens the quality of life for future retirees but also poses a potential risk to social stability.',
+                    pensionChartTitle: 'Vast Disparities in Employee Savings',
+                    pensionChartDesc: 'While auto-enrolment has increased participation, most people\'s contribution rates are far below expert-recommended adequacy levels. This is especially true for middle-income earners, whose low savings rates mean they face a significant drop in their standard of living upon retirement.',
+                    pensionTabsTitle: 'Five Core Challenges',
+                    tabSaving: 'Under-saving',
+                    tabSelfEmployed: 'Self-employed Gap',
+                    tabDcRisk: 'DC Risk',
+                    tabHousing: 'Housing Pressure',
+                    tabSpa: 'State Pension Age',
+                    tabSavingTitle: 'Severe Under-saving',
+                    tabSavingContent: 'Nearly 3.5 million private sector employees have no pension savings at all. Even among those who do save, a staggering 87% of middle-income employees contribute below the 15% benchmark considered adequate, signaling a future risk of widespread retirement poverty.',
+                    tabSelfEmployedTitle: 'The Self-Employed Savings Chasm',
+                    tabSelfEmployedContent: 'The retirement prospects for the self-employed are particularly bleak. Currently, fewer than one in five are saving for a pension, a sharp decline from the past. They are heading towards a severe retirement crisis and may become heavily reliant on state benefits in old age.',
+                    tabDcRiskTitle: 'The Dominance of Defined Contribution (DC) Risk',
+                    tabDcRiskContent: 'The shift from Defined Benefit (DB) schemes, where employers bear the risk, to DC schemes, where individuals bear all investment and longevity risks, leaves retirees facing complex and high-stakes financial decisions, often without the necessary financial literacy.',
+                    tabHousingTitle: 'The Housing-Pension Link',
+                    tabHousingContent: 'A growing number of people are approaching retirement while still living in expensive private rented accommodation, a stark contrast to the high homeownership rates of previous generations. High rents erode already insufficient retirement incomes, exacerbating financial hardship.',
+                    tabSpaTitle: 'Pressure from Rising State Pension Age (SPA)',
+                    tabSpaContent: 'Increases in the SPA disproportionately harm those in poor health or in physically demanding jobs who struggle to remain in work. Research shows that raising the SPA from 65 to 66 more than doubled the income poverty rate for 65-year-olds.',
+                    healthTitle: 'The Healthcare Plight: An NHS & Social Care on the Brink',
+                    healthSubtitle: 'Under the dual pressures of growing demand and chronic resource constraints, the NHS is in crisis. Critically, the chronically underfunded social care system is failing, with knock-on effects that directly impact hospitals, creating a destructive vicious cycle.',
+                    healthChartTitle: 'Public Satisfaction Hits Rock Bottom (2024)',
+                    healthChartDesc: 'Public confidence in the NHS has plummeted to a historic low. Dissatisfaction is extremely high in key areas like A&E waits, hospital appointments, and GP services, reflecting the immense challenges the system faces in meeting basic healthcare needs.',
+                    healthFlowchartTitle: 'The Vicious Cycle of Social Care Collapse',
+                    healthFlowchartDesc: 'Click the steps below to see how cuts to social care funding trigger a chain reaction that ultimately exacerbates the NHS crisis.',
+                    flowchartInitialText: 'Click a step above to see the detailed explanation.',
+                    flowStep1: 'Cuts to Social Care Funding',
+                    flowStep1Text: 'Cuts to local authority social care funding have left the care needs of an estimated 1.4 million older people unmet.',
+                    flowStep2: 'Unnecessary Hospital Admissions',
+                    flowStep2Text: 'A lack of support at home means older people are more likely to be sent to A&E and admitted to hospital when their health deteriorates.',
+                    flowStep3: 'Delayed Discharges (Bed Blocking)',
+                    flowStep3Text: 'A lack of social care support post-discharge means patients who are medically fit to leave cannot, tying up valuable hospital beds.',
+                    flowStep4: 'Increased Pressure on NHS',
+                    flowStep4Text: 'Bed blocking worsens hospital waiting lists and A&E congestion, further driving down NHS efficiency and public satisfaction.',
+                    isolationTitle: 'Social Isolation: The Invisible Epidemic',
+                    isolationSubtitle: 'Loneliness is more than just an emotion; it is a serious threat to the physical and mental health of older people, as harmful as smoking or obesity. Structural barriers like ageism, poor transport, and the digital divide are systematically excluding older people from social life.',
+                    isolationHealthTitle: 'The Devastating Health Impacts of Loneliness',
+                    isolationHealthDesc: 'Research confirms that chronic loneliness significantly increases the risk of developing several serious illnesses and takes a huge toll on mental health, while also placing additional strain on the healthcare system.',
+                    riskHeart: 'Risk of Coronary Heart Disease',
+                    riskStroke: 'Risk of Stroke',
+                    riskDementia: 'Risk of Dementia',
+                    riskDepression: 'of the often lonely also feel depressed',
+                    isolationChartTitle: 'Structural Barriers: The Digital Divide',
+                    isolationChartDesc: 'As services move increasingly online, older people without internet access or digital skills are being left behind. Age is the strongest predictor of digital exclusion, which exacerbates their social isolation.',
+                    solutionsTitle: 'Integrated Solutions: Towards a Unified Policy Framework',
+                    solutionsSubtitle: 'Tackling an interconnected crisis requires strategic thinking that transcends departmental silos. Solutions must be integrated, shifting from merely managing the "costs" of ageing to investing in the societal foundations that promote "healthy ageing" as a driver of economic and social progress.',
+                    solution1Title: 'Establish a Cross-Government Office',
+                    solution1Desc: 'Create a permanent, cabinet-level body responsible for auditing the impact of all major policies (e.g., housing, transport) on the ageing population, breaking down departmental silos to ensure policy coherence.',
+                    solution2Title: 'Expand the Definition of Infrastructure',
+                    solution2Desc: 'The national infrastructure strategy must go beyond roads and rail to explicitly fund and prioritise the "social infrastructure" – community centres, accessible public spaces – that supports health and wellbeing.',
+                    solution3Title: 'Target Healthy Ageing as an Economic Goal',
+                    solution3Desc: 'Shift policy focus from cost management to investment, viewing adequate pensions, quality housing, and accessible communities as key drivers for boosting economic productivity and reducing healthcare demand.',
+                    solution4Title: 'Launch an Anti-Ageism Campaign',
+                    solution4Desc: 'A sustained, government-backed national campaign is needed to challenge pervasive ageism, laying the cultural groundwork for structural reforms and creating a society that values people of all ages.',
+                    footerCopyright: '&copy; 2025 Interactive Report on the Challenges of an Ageing UK Society',
+                    footerSource: 'Based on analysis of public research reports',
+                    chartPensionTitle: 'Under-saving for Pensions Among Middle-Income Earners',
+                    chartPensionLabel: 'Percentage of Employees (%)',
+                    chartPensionLabels: ['Below 15% Adequacy Benchmark', 'Below 8% Benchmark', 'No Savings (Private Sector)'],
+                    chartNhsTitle: 'Satisfaction with the NHS Running as a Whole',
+                    chartNhsLabels: ['Satisfied', 'Dissatisfied / Neutral'],
+                    chartDigitalTitle: 'Digital Exclusion Among Older Population',
+                    chartDigitalLabel: 'Percentage Not Using the Internet (%)',
+                    chartDigitalLabels: ['Aged 65+', 'Aged 75+'],
+                }
+            };
+
+            let charts = {};
+
+            function renderContent(lang) {
+                document.body.className = `antialiased lang-${lang}`;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (langData[lang][key]) {
+                        el.innerHTML = langData[lang][key];
+                    }
+                });
+                
+                const switcher = document.getElementById('lang-switcher');
+                const switcherMobile = document.getElementById('lang-switcher-mobile');
+                if (lang === 'zh') {
+                    switcher.textContent = 'English';
+                    switcherMobile.textContent = 'EN';
+                } else {
+                    switcher.textContent = '中文';
+                    switcherMobile.textContent = 'ZH';
+                }
+                
+                renderCharts(lang);
+            }
+
+            function renderCharts(lang) {
+                Object.values(charts).forEach(chart => chart.destroy());
+
+                const font_family = lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Lato', sans-serif";
+                Chart.defaults.font.family = font_family;
+
+                const pensionSavingsCtx = document.getElementById('pensionSavingsChart').getContext('2d');
+                charts.pension = new Chart(pensionSavingsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: langData[lang].chartPensionLabels,
+                        datasets: [{
+                            label: langData[lang].chartPensionLabel,
+                            data: [87, 61, 20],
+                            backgroundColor: ['#A0AEC0', '#718096', '#4A5568'],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { title: { display: true, text: langData[lang].chartPensionTitle }, legend: { display: false } },
+                        scales: { y: { beginAtZero: true, max: 100, ticks: { callback: value => value + '%' } } }
+                    }
+                });
+
+                const nhsSatisfactionCtx = document.getElementById('nhsSatisfactionChart').getContext('2d');
+                charts.nhs = new Chart(nhsSatisfactionCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: langData[lang].chartNhsLabels,
+                        datasets: [{ label: 'Public Satisfaction', data: [19, 81], backgroundColor: ['#63B3ED', '#E2E8F0'], hoverOffset: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: langData[lang].chartNhsTitle },
+                            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.parsed}%` } }
+                        }
+                    }
+                });
+
+                const digitalDivideCtx = document.getElementById('digitalDivideChart').getContext('2d');
+                charts.digital = new Chart(digitalDivideCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: langData[lang].chartDigitalLabels,
+                        datasets: [{
+                            label: langData[lang].chartDigitalLabel,
+                            data: [18, 29],
+                            backgroundColor: ['#A0AEC0', '#4A5568'],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 2,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                        plugins: { title: { display: true, text: langData[lang].chartDigitalTitle }, legend: { display: false } },
+                        scales: { x: { beginAtZero: true, max: 35, ticks: { callback: value => value + '%' } } }
+                    }
+                });
+            }
+
+            function toggleLanguage() {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                renderContent(currentLang);
+            }
+
+            document.getElementById('lang-switcher').addEventListener('click', toggleLanguage);
+            document.getElementById('lang-switcher-mobile').addEventListener('click', toggleLanguage);
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', (e) => {
+                window.location.hash = e.target.value;
+            });
+            
+            function setupTabs(containerId, contentClass) {
+                const buttons = document.querySelectorAll(`#${containerId}-buttons .tab-button`);
+                const contents = document.querySelectorAll(`#${containerId}-content .${contentClass}`);
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        buttons.forEach(btn => btn.classList.remove('active'));
+                        button.classList.add('active');
+                        contents.forEach(content => content.classList.add('hidden'));
+                        document.getElementById(button.dataset.tab).classList.remove('hidden');
+                    });
+                });
+            }
+
+            setupTabs('pension-tabs', 'pension-tab-content');
+
+            const flowchartSteps = document.querySelectorAll('.flowchart-step');
+            const flowchartText = document.getElementById('flowchart-text');
+            flowchartSteps.forEach(step => {
+                step.addEventListener('click', () => {
+                    const key = step.dataset.langKey;
+                    flowchartText.textContent = langData[currentLang][key];
+                    flowchartSteps.forEach(s => s.classList.remove('bg-blue-100', 'border-blue-400'));
+                    step.classList.add('bg-blue-100', 'border-blue-400');
+                });
+            });
+
+            renderContent(currentLang);
+        });
+    </script>
+</body>
+</html>
