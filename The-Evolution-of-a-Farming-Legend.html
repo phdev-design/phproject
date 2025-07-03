@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《牧場物語》演變史：一份互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Brilliant Blues -->
+    <!-- Application Structure Plan: The infographic follows a linear, narrative-driven structure, guiding the user chronologically and thematically through the history of Harvest Moon. 1. **Hero Section:** Grabs attention with a bold title and a summary of the game's impact. 2. **Core Pillars:** Uses four donut charts to visually represent the foundational gameplay loop. 3. **Founding Era:** A horizontal bar chart compares key features of early games, showing rapid evolution. 4. **The Great Schism:** A clear, non-interactive flowchart visualizes the brand split, a crucial point of clarification. 5. **Modernization & Influence:** A radar chart compares key modern features against Stardew Valley, illustrating the "reverse influence" effect. 6. **Future Outlook:** A concluding text section summarizes the series' current challenges. This top-to-bottom flow tells a coherent story, making the complex history digestible. -->
+    <!-- Visualization & Content Choices: 1. **Core Pillars:** Goal: Inform. Viz: Four Donut Charts (Chart.js). Justification: Quickly shows the four equal components of the core gameplay loop. 2. **Early Games (Table 1.1):** Goal: Compare. Viz: Horizontal Bar Chart (Chart.js). Justification: Better for comparing categories (games) across a few metrics (features) than a dense table. 3. **Brand Split:** Goal: Organize. Viz: HTML/CSS Flowchart. Justification: A static diagram is the clearest way to explain this complex but non-numeric process. NO SVG/Mermaid used. 4. **Modern Features vs. Stardew Valley (Table 4.1):** Goal: Compare/Relationships. Viz: Radar Chart (Chart.js). Justification: Excellent for comparing multiple entities (SOS vs. Stardew) across multiple common variables (features), showing where each "excels" and illustrating the competitive pressure. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F9FF; /* sky-50 */
+            color: #1E293B; /* slate-800 */
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 600px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 300px;
+            max-height: 400px;
+        }
+        .chart-container-large {
+            position: relative; 
+            width: 100%; 
+            max-width: 800px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 400px;
+            max-height: 50vh;
+        }
+         @media (min-width: 768px) {
+            .chart-container { height: 350px; }
+            .chart-container-large { height: 500px; }
+        }
+        .lang-btn.active {
+            background-color: #0284C7; /* sky-600 */
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+        <div class="flex justify-end mb-4">
+            <div class="flex border border-slate-300 rounded-lg p-1">
+                <button id="lang-zh" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md" data-lang="zh-Hant">中文</button>
+                <button id="lang-en" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md" data-lang="en">EN</button>
+            </div>
+        </div>
+
+        <header class="text-center my-8 md:my-16">
+            <h1 class="text-4xl md:text-6xl font-bold text-sky-700" data-lang-key="title"></h1>
+            <p class="mt-4 text-xl md:text-2xl font-semibold text-sky-900" data-lang-key="subtitle"></p>
+            <p class="mt-4 max-w-3xl mx-auto text-slate-600" data-lang-key="intro_p"></p>
+        </header>
+
+        <main class="space-y-16 md:space-y-24">
+
+            <section id="core-pillars">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-slate-800" data-lang-key="pillars_h2"></h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto" data-lang-key="pillars_p"></p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                        <div class="chart-container mx-auto h-48 sm:h-56">
+                            <canvas id="farmingChart"></canvas>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-blue-700" data-lang-key="pillar_farm_h3"></h3>
+                        <p class="text-sm text-slate-500 mt-1" data-lang-key="pillar_farm_p"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                        <div class="chart-container mx-auto h-48 sm:h-56">
+                            <canvas id="animalChart"></canvas>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-blue-700" data-lang-key="pillar_animal_h3"></h3>
+                        <p class="text-sm text-slate-500 mt-1" data-lang-key="pillar_animal_p"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                        <div class="chart-container mx-auto h-48 sm:h-56">
+                            <canvas id="communityChart"></canvas>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-blue-700" data-lang-key="pillar_community_h3"></h3>
+                        <p class="text-sm text-slate-500 mt-1" data-lang-key="pillar_community_p"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                        <div class="chart-container mx-auto h-48 sm:h-56">
+                            <canvas id="familyChart"></canvas>
+                        </div>
+                        <h3 class="text-xl font-bold mt-4 text-blue-700" data-lang-key="pillar_family_h3"></h3>
+                        <p class="text-sm text-slate-500 mt-1" data-lang-key="pillar_family_p"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="founding-era">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-slate-800" data-lang-key="era_h2"></h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto" data-lang-key="era_p"></p>
+                </div>
+                <div class="bg-white p-4 md:p-8 rounded-xl shadow-lg">
+                    <div class="chart-container-large">
+                        <canvas id="earlyGamesChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="brand-split">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-slate-800" data-lang-key="split_h2"></h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto" data-lang-key="split_p"></p>
+                </div>
+                <div class="bg-white p-6 md:p-10 rounded-xl shadow-lg">
+                    <div class="flex flex-col items-center space-y-4">
+                        <div class="p-4 bg-slate-100 rounded-lg text-center">
+                            <p class="font-semibold" data-lang-key="split_dev_title"></p>
+                            <p class="text-2xl font-bold text-blue-800">Marvelous</p>
+                            <p class="text-sm text-slate-500" data-lang-key="split_dev_subtitle"></p>
+                        </div>
+                        <div class="text-4xl text-sky-400">↓</div>
+                        <div class="w-full text-center p-4 bg-slate-100 rounded-lg">
+                             <p class="font-semibold" data-lang-key="split_partner_title"></p>
+                             <p class="text-xl font-bold text-cyan-700">Natsume Inc.</p>
+                             <p class="text-sm text-slate-500" data-lang-key="split_partner_subtitle"></p>
+                        </div>
+                        <div class="text-4xl text-sky-400">↓</div>
+                        <div class="w-full p-4 border-2 border-dashed border-red-400 rounded-lg text-center">
+                            <h3 class="text-xl font-bold text-red-600" data-lang-key="split_event"></h3>
+                        </div>
+                        <div class="text-4xl text-sky-400">↓</div>
+                        <div class="w-full grid md:grid-cols-2 gap-6 text-center">
+                            <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+                                 <p class="font-semibold" data-lang-key="split_marvelous_title"></p>
+                                 <p class="text-2xl font-bold text-blue-700 mt-2">Story of Seasons</p>
+                                 <p class="mt-1 text-slate-600" data-lang-key="split_marvelous_subtitle"></p>
+                            </div>
+                             <div class="p-4 bg-cyan-50 border-l-4 border-cyan-500 rounded-lg">
+                                 <p class="font-semibold" data-lang-key="split_natsume_title"></p>
+                                 <p class="text-2xl font-bold text-cyan-700 mt-2">Harvest Moon</p>
+                                 <p class="mt-1 text-slate-600" data-lang-key="split_natsume_subtitle"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="modernization">
+                 <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold text-slate-800" data-lang-key="modern_h2"></h2>
+                    <p class="mt-2 text-slate-600 max-w-2xl mx-auto" data-lang-key="modern_p"></p>
+                </div>
+                <div class="bg-white p-4 md:p-8 rounded-xl shadow-lg">
+                    <div class="chart-container-large">
+                        <canvas id="comparisonRadarChart"></canvas>
+                    </div>
+                     <div class="mt-6 text-sm text-slate-500 text-center">
+                        <p data-lang-key="modern_note"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="text-center my-12 md:my-20 border-t pt-8 border-slate-200">
+                <h2 class="text-3xl font-bold text-slate-800" data-lang-key="future_h2"></h2>
+                 <p class="mt-4 max-w-3xl mx-auto text-slate-600" data-lang-key="future_p"></p>
+            </footer>
+
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const translations = {
+        'zh-Hant': {
+            title: '一段農場傳奇的演變',
+            subtitle: '《牧場物語》系列深度剖析',
+            intro_p: '從一個革命性的「溫馨生活遊戲」理念，到影響全球的文化現象。《牧場物語》不僅開創了一個遊戲類型，更在時代的洪流中不斷蛻變。這份資訊圖表將帶您深入探索其核心玩法、關鍵轉折與未來的挑戰。',
+            pillars_h2: '溫馨生活的四大支柱',
+            pillars_p: '遊戲的核心建立在四大支柱之上，這些元素共同構成了一種獨特的體驗，讓玩家沉浸在一個節奏緩慢、充滿回報的田園生活中。',
+            pillar_farm_h3: '🌱 耕種作物',
+            pillar_farm_p: '播種、澆水、收穫，感受四季更迭與土地的回報。',
+            pillar_animal_h3: '🐄 飼養動物',
+            pillar_animal_p: '照顧可愛的動物，換來溫暖的蛋奶產品與心靈的慰藉。',
+            pillar_community_h3: '💬 社區互動',
+            pillar_community_p: '與性格各異的村民交流，參加季節祭典，建立深厚友誼。',
+            pillar_family_h3: '❤️ 建立家庭',
+            pillar_family_p: '追求心儀對象，步入婚姻，體驗人生的完整週期。',
+            era_h2: '奠基時代的快速演進 (1996-2003)',
+            era_p: '系列早期作品在短短數年內迅速迭代，不斷引入和完善核心機制。下圖比較了幾款關鍵早期作品的特徵，展示了從嚴格限制到逐步開放的設計哲學轉變。',
+            split_h2: '一個農場，兩個名號：2014年的品牌分裂',
+            split_p: '對於西方玩家而言，系列近代史因一場商業分裂而充滿困惑。以下的流程圖清楚地展示了正統系列如何更名，以及原名如何被用於全新開發的遊戲。',
+            split_dev_title: '日本開發商',
+            split_dev_subtitle: '《Bokujō Monogatari》系列創作者',
+            split_partner_title: '西方發行夥伴關係 (~2014)',
+            split_partner_subtitle: '負責本地化並持有"Harvest Moon"商標',
+            split_event: '2014年：合作結束',
+            split_marvelous_title: 'Marvelous (透過XSEED發行)',
+            split_marvelous_subtitle: '正統系列的<span class="font-bold">新名稱</span>',
+            split_natsume_title: 'Natsume Inc.',
+            split_natsume_subtitle: '保留舊名稱，<span class="font-bold">自行開發新作</span>',
+            modern_h2: '現代化與《星露谷物語》的逆向影響',
+            modern_p: '《星露谷物語》的成功，對其靈感來源產生了深遠影響。下方的雷達圖比較了現代《Story of Seasons》與《星露谷物語》在幾個關鍵系統上的異同，揭示了這種「逆向借鑒」的現象。',
+            modern_note: '圖表分數（1-5）基於報告中的定性描述進行綜合評估，5分代表該系統更為深入、流暢或受好評。',
+            future_h2: '農場的未來',
+            future_p: '如今，《Story of Seasons》面臨著在「傳承的重量」、「創新的需求」與「競爭的壓力」三者間尋求平衡的挑戰。系列的未來，取決於能否巧妙地融合現代特色，同時不失其獨特的「溫馨」靈魂，並在一個由自己開創、但已不再由自己獨霸的世界裡，重新定義其存在的意義。',
+            donut_farming: '耕種',
+            donut_animal: '飼養',
+            donut_community: '社區',
+            donut_family: '家庭',
+            bar_label_limit: '有時間限制',
+            bar_label_female: '可選女主角',
+            bar_label_rival: '有戀愛敵手',
+            bar_tooltip_yes: '是',
+            bar_tooltip_no: '否',
+            bar_game_1: '《牧場物語》/ SFC (1996)',
+            bar_game_2: '《牧場物語2》/ N64 (1999)',
+            bar_game_3: '《牧場物語GB》/ GB (1999)',
+            bar_game_4: ['《礦石鎮的夥伴們》', '/ GBA (2003)'],
+            radar_label_sos: 'Story of Seasons (現代)',
+            radar_label_sv: '星露谷物語',
+            radar_cat_1: '礦洞戰鬥',
+            radar_cat_2: '物品製作系統',
+            radar_cat_3: '博物館/捐贈',
+            radar_cat_4: '每日委託',
+            radar_cat_5: '庫存管理便利性',
+        },
+        'en': {
+            title: 'The Evolution of a Farming Legend',
+            subtitle: 'A Deep Dive into the Story of Seasons Series',
+            intro_p: 'From a revolutionary "heartwarming life game" concept to a global cultural phenomenon, Story of Seasons (formerly Harvest Moon) not only created a genre but has continuously evolved. This infographic explores its core gameplay, key turning points, and future challenges.',
+            pillars_h2: 'The Four Pillars of a Heartwarming Life',
+            pillars_p: 'The core of the game is built on four pillars. These elements combine to create a unique experience, immersing players in a slow-paced, rewarding pastoral life.',
+            pillar_farm_h3: '🌱 Crop Farming',
+            pillar_farm_p: 'Sow seeds, water them, and harvest to feel the changing seasons and the bounty of the land.',
+            pillar_animal_h3: '🐄 Animal Husbandry',
+            pillar_animal_p: 'Care for cute animals to receive warm products like eggs and milk, and find spiritual comfort.',
+            pillar_community_h3: '💬 Community Interaction',
+            pillar_community_p: 'Interact with villagers of diverse personalities, participate in seasonal festivals, and build deep friendships.',
+            pillar_family_h3: '❤️ Building a Family',
+            pillar_family_p: 'Pursue your love interest, get married, and experience the full cycle of life.',
+            era_h2: 'Rapid Evolution of the Founding Era (1996-2003)',
+            era_p: 'The series\' early entries iterated rapidly, introducing and refining core mechanics. The chart below compares key features of early titles, showing the design shift from strict limits to gradual openness.',
+            split_h2: 'One Farm, Two Names: The 2014 Brand Schism',
+            split_p: 'For Western players, the series\' modern history is confusing due to a business split. This flowchart clarifies how the original series was renamed and how the old name was used for new games.',
+            split_dev_title: 'Japanese Developer',
+            split_dev_subtitle: 'Creator of the "Bokujō Monogatari" series',
+            split_partner_title: 'Western Publishing Partnership (~2014)',
+            split_partner_subtitle: 'Handled localization and owned the "Harvest Moon" trademark',
+            split_event: '2014: Partnership Ends',
+            split_marvelous_title: 'Marvelous (via XSEED)',
+            split_marvelous_subtitle: 'The <span class="font-bold">new name</span> for the original series',
+            split_natsume_title: 'Natsume Inc.',
+            split_natsume_subtitle: 'Kept the old name, began <span class="font-bold">developing new games</span>',
+            modern_h2: 'Modernization & The Stardew Valley "Reverse-Influence"',
+            modern_p: 'The success of Stardew Valley profoundly influenced its inspiration. This radar chart compares modern Story of Seasons with Stardew Valley on key systems, revealing this "reverse-influence" phenomenon.',
+            modern_note: 'Chart scores (1-5) are based on qualitative descriptions from the report. A score of 5 represents a system that is deeper, more streamlined, or better-received.',
+            future_h2: 'The Future of the Farm',
+            future_p: 'Today, Story of Seasons faces the challenge of balancing three competing forces: the weight of its legacy, the need for innovation, and the pressure of competition. Its future depends on blending modern features without losing its unique "heartwarming" soul.',
+            donut_farming: 'Farming',
+            donut_animal: 'Animals',
+            donut_community: 'Community',
+            donut_family: 'Family',
+            bar_label_limit: 'Time Limit',
+            bar_label_female: 'Female PC Option',
+            bar_label_rival: 'Rival Marriages',
+            bar_tooltip_yes: 'Yes',
+            bar_tooltip_no: 'No',
+            bar_game_1: 'Harvest Moon / SFC (1996)',
+            bar_game_2: 'Harvest Moon 2 / N64 (1999)',
+            bar_game_3: 'Harvest Moon GB / GB (1999)',
+            bar_game_4: ['Friends of Mineral Town', '/ GBA (2003)'],
+            radar_label_sos: 'Story of Seasons (Modern)',
+            radar_label_sv: 'Stardew Valley',
+            radar_cat_1: 'Mine Combat',
+            radar_cat_2: 'Crafting System',
+            radar_cat_3: 'Museum/Donation',
+            radar_cat_4: 'Daily Quests',
+            radar_cat_5: 'QoL & Tracking',
+        }
+    };
+
+    let currentLanguage = 'zh-Hant';
+    let charts = [];
+
+    const palette = {
+        blue: '#0284C7', // sky-600
+        cyan: '#0891B2', // cyan-600
+        teal: '#0D9488', // teal-600
+        emerald: '#059669', // emerald-600
+        lightBlue: 'rgba(2, 132, 199, 0.2)',
+        lightCyan: 'rgba(8, 145, 178, 0.2)',
+        lightTeal: 'rgba(13, 148, 136, 0.2)',
+        lightEmerald: 'rgba(5, 150, 105, 0.2)',
+    };
+    
+    const destroyCharts = () => {
+        charts.forEach(chart => chart.destroy());
+        charts = [];
+    };
+
+    const createAllCharts = (lang) => {
+        destroyCharts();
+        const t = translations[lang];
+
+        const createDonutChart = (elementId, labelKey, color) => {
+            const ctx = document.getElementById(elementId).getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: [t[labelKey], ''],
+                    datasets: [{ data: [100, 25], backgroundColor: [color, '#E5E7EB'], borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '75%',
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
+                }
+            });
+            charts.push(chart);
+        };
+        
+        createDonutChart('farmingChart', 'donut_farming', palette.emerald);
+        createDonutChart('animalChart', 'donut_animal', palette.cyan);
+        createDonutChart('communityChart', 'donut_community', palette.teal);
+        createDonutChart('familyChart', 'donut_family', palette.blue);
+        
+        const earlyGamesCtx = document.getElementById('earlyGamesChart').getContext('2d');
+        const earlyGamesLabels = [t.bar_game_1, t.bar_game_2, t.bar_game_3, t.bar_game_4];
+        const earlyGamesChart = new Chart(earlyGamesCtx, {
+            type: 'bar',
+            data: {
+                labels: earlyGamesLabels,
+                datasets: [
+                    { label: t.bar_label_limit, data: [1, 1, 0, 0], backgroundColor: palette.lightBlue, borderColor: palette.blue, borderWidth: 2 },
+                    { label: t.bar_label_female, data: [0, 0, 1, 0], backgroundColor: palette.lightCyan, borderColor: palette.cyan, borderWidth: 2 },
+                    { label: t.bar_label_rival, data: [0, 1, 0, 1], backgroundColor: palette.lightTeal, borderColor: palette.teal, borderWidth: 2 }
+                ]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true, ticks: { display: false }, grid: { display: false } },
+                    y: { stacked: true, ticks: { font: { size: 14, weight: '500' }, color: '#334155' }, grid: { display: false } }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 14 } } },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                let label = tooltipItems[0].chart.data.labels[tooltipItems[0].dataIndex];
+                                return Array.isArray(label) ? label.join('') : label;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': ' + (context.raw > 0 ? t.bar_tooltip_yes : t.bar_tooltip_no); }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        charts.push(earlyGamesChart);
+        
+        const radarCtx = document.getElementById('comparisonRadarChart').getContext('2d');
+        const radarLabels = [t.radar_cat_1, t.radar_cat_2, t.radar_cat_3, t.radar_cat_4, t.radar_cat_5];
+        const radarChart = new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: radarLabels,
+                datasets: [
+                    { label: t.radar_label_sos, data: [2, 3, 3, 4, 3], fill: true, backgroundColor: palette.lightCyan, borderColor: palette.cyan, pointBackgroundColor: palette.cyan, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: palette.cyan },
+                    { label: t.radar_label_sv, data: [4, 5, 4, 4, 5], fill: true, backgroundColor: palette.lightBlue, borderColor: palette.blue, pointBackgroundColor: palette.blue, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: palette.blue }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                        pointLabels: { font: { size: 14 } },
+                        ticks: { backdropColor: 'transparent', stepSize: 1 },
+                        min: 0, max: 5
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 16 } } },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                let label = tooltipItems[0].chart.data.labels[tooltipItems[0].dataIndex];
+                                return Array.isArray(label) ? label.join('') : label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        charts.push(radarChart);
+    };
+
+    const translatePage = (lang) => {
+        currentLanguage = lang;
+        document.documentElement.lang = lang === 'zh-Hant' ? 'zh-Hant' : 'en';
+        
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`lang-${lang === 'zh-Hant' ? 'zh' : 'en'}`).classList.add('active');
+
+        createAllCharts(lang);
+    };
+
+    document.getElementById('lang-zh').addEventListener('click', () => translatePage('zh-Hant'));
+    document.getElementById('lang-en').addEventListener('click', () => translatePage('en'));
+
+    translatePage(currentLanguage);
+});
+</script>
+</body>
+</html>
