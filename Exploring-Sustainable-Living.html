@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索永續生活：一份互動式報告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Earthly Harmony -->
+    <!-- Application Structure Plan: 本應用程式採用主題式儀表板結構，而非報告的線性章節。結構分為五個可導航的區塊：「總覽」、「個人行動」、「綠色消費」、「社區力量」和「系統變革」。這種設計旨在將複雜的資訊分解為易於理解和互動的模組。使用者可以從任何感興趣的部分開始探索。「個人行動」區塊設計為核心互動功能——一個碳足跡計算圖表，直接將數據轉化為個人化體驗，增強使用者的參與感和行動力。其他區塊則使用卡片式、可點擊展開的設計，將表格和列表轉換為更具探索性的視覺元素。此結構優先考慮使用者體驗和資訊的易得性，引導使用者從認識概念到採取行動，再到理解更宏觀的系統性問題。 -->
+    <!-- Visualization & Content Choices: 報告中的關鍵數據和概念被轉化為互動式組件：1.「表格一：個人減碳行動」->目標：賦能使用者->呈現方式：互動式條形圖(Chart.js)與核取方塊->互動：使用者勾選行動，圖表即時更新其總減碳潛力->理由：將靜態數據轉化為個人化的、有遊戲感的計算器，提升參與度。 2.「表格二：漂綠識別」->目標：教育使用者->呈現方式：可翻轉的卡片(HTML/CSS/JS)->互動：點擊卡片揭示「漂綠」手法的解釋與驗證工具->理由：比靜態表格更具趣味性和記憶點。 3.「表格三：社區行動模式」->目標：展示多元的社區力量->呈現方式：響應式卡片網格(HTML/Tailwind/JS)->互動：點擊卡片展開詳細說明->理由：視覺上更吸引人，且在移動設備上更易於瀏覽。 4.「永續性螺旋模型」->目標：解釋抽象的系統關係->呈現方式：使用HTML/CSS構建的簡單流程圖->互動：無（保持簡潔）->理由：清晰地視覺化了個人與系統之間的動態回饋循環。所有視覺化均不使用SVG或Mermaid.js。 -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 32rem;
+            max-height: 70vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 24rem;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover {
+            color: #059669; /* emerald-600 */
+        }
+        .nav-link.active {
+            color: #047857; /* emerald-700 */
+            border-bottom: 2px solid #047857;
+        }
+        .action-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .tab-button.active {
+            background-color: #059669;
+            color: white;
+        }
+        .lang-switcher button.active {
+            background-color: #059669;
+            color: white;
+        }
+        .greenwash-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .greenwash-card.flipped .greenwash-card-inner {
+            transform: rotateY(180deg);
+        }
+        .greenwash-card-front, .greenwash-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+         .greenwash-card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-gray-800">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 data-lang-key="headerTitle" class="text-xl md:text-2xl font-bold text-emerald-700">探索永續生活</h1>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" data-lang-key="navOverview" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">總覽</a>
+                            <a href="#personal-action" data-lang-key="navPersonalAction" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">個人行動</a>
+                            <a href="#green-consumption" data-lang-key="navGreenConsumption" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">綠色消費</a>
+                            <a href="#community-power" data-lang-key="navCommunityPower" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">社區力量</a>
+                            <a href="#systemic-change" data-lang-key="navSystemicChange" class="nav-link px-3 py-2 text-sm font-medium text-gray-600 border-b-2 border-transparent">系統變革</a>
+                        </div>
+                    </div>
+                    <div class="lang-switcher ml-4 p-1 border rounded-full flex text-xs">
+                        <button data-lang="zh" class="px-3 py-1 rounded-full transition-colors duration-300">中</button>
+                        <button data-lang="en" class="px-3 py-1 rounded-full transition-colors duration-300">EN</button>
+                    </div>
+                    <div class="md:hidden ml-2">
+                        <select id="mobile-nav" class="bg-white border border-gray-300 rounded-md py-2 px-3 text-sm">
+                            <option value="#overview" data-lang-key="navOverview">總覽</option>
+                            <option value="#personal-action" data-lang-key="navPersonalAction">個人行動</option>
+                            <option value="#green-consumption" data-lang-key="navGreenConsumption">綠色消費</option>
+                            <option value="#community-power" data-lang-key="navCommunityPower">社區力量</option>
+                            <option value="#systemic-change" data-lang-key="navSystemicChange">系統變革</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="overview" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 data-lang-key="overviewTitle" class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">從個人實踐到系統性變革</h2>
+                <p data-lang-key="overviewSubtitle" class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-gray-600">永續生活不僅是一系列環保行為，而是一種與地球和諧共生的生活哲學。它要求我們在滿足當代需求的同時，不損害後代滿足其需求的能力。這份互動報告將帶您深入了解永續生活的核心理念、實踐路徑與挑戰。</p>
+                
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+                        <h3 data-lang-key="overviewPillar3Title" class="text-xl font-bold text-emerald-700">三支柱模型</h3>
+                        <p data-lang-key="overviewPillar3Desc" class="mt-2 text-gray-600">此框架將永續性視為三個不可或缺的支柱：<span class="font-semibold">環境保護</span>、<span class="font-semibold">社會公平</span>與<span class="font-semibold">經濟可行性</span>。它強調任何決策都需尋求三者間的動態平衡。</p>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-md border border-gray-200">
+                        <h3 data-lang-key="overviewDomain4Title" class="text-xl font-bold text-emerald-700">四領域模型</h3>
+                        <p data-lang-key="overviewDomain4Desc" class="mt-2 text-gray-600">此框架更進一步，認為永續性需要在四個交織的社會領域中協商：<span class="font-semibold">經濟</span>、<span class="font-semibold">生態</span>、<span class="font-semibold">政治</span>和<span class="font-semibold">文化</span>。它視永續為一個持續的過程，而非靜態目標。</p>
+                    </div>
+                </div>
+                 <div class="mt-12 bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-6 rounded-r-lg max-w-4xl mx-auto text-left">
+                    <h4 data-lang-key="overviewEthicalTitle" class="font-bold text-lg">倫理核心：社會公平與代際正義</h4>
+                    <p data-lang-key="overviewEthicalDesc" class="mt-2">真正的永續生活，必須將社會公平置於核心。若環保行動加劇了社會不平等，或將永續變為少數人的特權，便違背了其初衷。同時，我們是為子孫後代保管地球資源的管家，每一個選擇都應考慮其對未來的長遠影響。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="personal-action" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 data-lang-key="paTitle" class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">您的影響力：個人減碳行動</h2>
+                    <p data-lang-key="paSubtitle" class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-gray-600">個人日常選擇是溫室氣體排放的重要來源。雖然單一行動影響有限，但集體效應巨大。透過下方的互動圖表，探索不同行動的減碳潛力，看看您的選擇能為地球帶來多大的改變。</p>
+                </div>
+
+                <div class="mt-12 md:grid md:grid-cols-3 md:gap-8">
+                    <div class="md:col-span-1">
+                        <h3 data-lang-key="paChooseAction" class="text-xl font-semibold mb-4 text-center md:text-left">選擇您的行動</h3>
+                        <div id="action-tabs" class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                            <button class="tab-button text-sm font-medium px-4 py-2 rounded-full border border-gray-300 transition-colors duration-200" data-tab="energy" data-lang-key="paTabEnergy">能源</button>
+                            <button class="tab-button text-sm font-medium px-4 py-2 rounded-full border border-gray-300 transition-colors duration-200" data-tab="transport" data-lang-key="paTabTransport">交通</button>
+                            <button class="tab-button text-sm font-medium px-4 py-2 rounded-full border border-gray-300 transition-colors duration-200" data-tab="diet" data-lang-key="paTabDiet">飲食</button>
+                            <button class="tab-button text-sm font-medium px-4 py-2 rounded-full border border-gray-300 transition-colors duration-200" data-tab="consumption" data-lang-key="paTabConsumption">消費</button>
+                        </div>
+                        <div id="action-options" class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 mt-8 md:mt-0">
+                         <div class="text-center mb-4">
+                            <h3 data-lang-key="paYourReduction" class="text-xl font-semibold">您的年度預估減碳量</h3>
+                            <p class="text-4xl font-bold text-emerald-600 mt-1"><span id="total-reduction">0</span> <span data-lang-key="paUnitKg">公斤 CO₂e</span></p>
+                            <p class="text-sm text-gray-500 mt-1"><span data-lang-key="paCarEquivalentPrefix">約等於</span> <span id="car-equivalent">0</span> <span data-lang-key="paCarEquivalentSuffix">公里汽車行駛里程</span></p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="carbonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="green-consumption" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 data-lang-key="gcTitle" class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">智慧消費：識破「漂綠」陷阱</h2>
+                    <p data-lang-key="gcSubtitle" class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-gray-600">「漂綠」指企業透過誤導性環保宣傳來塑造正面形象。這不僅欺騙消費者，也傷害了真正致力於永續的企業。點擊下方卡片，學習如何辨識常見的漂綠手法，成為更明智的消費者。</p>
+                </div>
+
+                <div id="greenwashing-grid" class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="community-power" class="py-16 sm:py-24 bg-white">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 data-lang-key="cpTitle" class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">從個人到社群：集體行動的力量</h2>
+                    <p data-lang-key="cpSubtitle" class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-gray-600">個體力量有限，但當人們在社區中組織起來，便能產生巨大協同效應。社區氣候行動不僅解決環境問題，更能創造社會資本，增強鄰里關係。以下是一些常見且有效的社區行動模式。</p>
+                </div>
+
+                <div id="community-actions-grid" class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+
+        <section id="systemic-change" class="py-16 sm:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 data-lang-key="scTitle" class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">個人行動與系統變革的共生</h2>
+                    <p data-lang-key="scSubtitle" class="mt-4 max-w-3xl mx-auto text-lg leading-8 text-gray-600">有效的氣候行動，必須結合自下而上的個人努力與自上而下的系統轉型。兩者並非對立，而是相互依存、螺旋上升的關係。</p>
+                </div>
+                
+                <div class="mt-12 max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg border border-gray-200">
+                    <h3 data-lang-key="scSpiralTitle" class="text-2xl font-bold text-center text-emerald-700 mb-6">永續性螺旋模型</h3>
+                    <div class="relative flex flex-col items-center space-y-4">
+                        <div class="flex items-center w-full">
+                            <div class="flex-1 text-center p-4 bg-emerald-50 rounded-lg">
+                                <h4 data-lang-key="scSpiral1Title" class="font-bold">1. 個人行動</h4>
+                                <p data-lang-key="scSpiral1Desc" class="text-sm">少數先驅者採納新的永續行為。</p>
+                            </div>
+                            <div class="text-3xl text-emerald-400 mx-4">→</div>
+                            <div class="flex-1 text-center p-4 bg-emerald-50 rounded-lg">
+                                <h4 data-lang-key="scSpiral2Title" class="font-bold">2. 社區動員</h4>
+                                <p data-lang-key="scSpiral2Desc" class="text-sm">行為透過社群擴散，改變局部規範。</p>
+                            </div>
+                        </div>
+
+                        <div class="text-3xl text-emerald-400 transform rotate-90 md:rotate-0">↓</div>
+
+                        <div class="flex items-center w-full flex-col-reverse md:flex-row">
+                             <div class="flex-1 text-center p-4 bg-sky-50 rounded-lg">
+                                <h4 data-lang-key="scSpiral4Title" class="font-bold">4. 系統變革</h4>
+                                <p data-lang-key="scSpiral4Desc" class="text-sm">政策與市場創新，改變宏觀系統。</p>
+                            </div>
+                            <div class="text-3xl text-sky-400 mx-4">←</div>
+                            <div class="flex-1 text-center p-4 bg-sky-50 rounded-lg">
+                                <h4 data-lang-key="scSpiral3Title" class="font-bold">3. 社會壓力</h4>
+                                <p data-lang-key="scSpiral3Desc" class="text-sm">形成要求市場與政府回應的壓力。</p>
+                            </div>
+                        </div>
+
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl text-gray-300">🔄</div>
+                        
+                        <div class="text-center mt-6 p-4 bg-amber-50 rounded-lg border-t-4 border-amber-300 w-full">
+                           <h4 data-lang-key="scSpiralUpwardTitle" class="font-bold text-lg text-amber-800">螺旋上升</h4>
+                           <p data-lang-key="scSpiralUpwardDesc" class="text-sm text-amber-700 mt-1">變革後的系統反過來賦能更大規模的個人行動，開啟新一輪更高層次的循環。個人行動是系統變革的種子，而系統變革則是個人行動得以普及的土壤。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p data-lang-key="footerCredit">此互動式報告根據《永續生活：從個人實踐到系統性變革的綜合報告》生成。</p>
+            <p data-lang-key="footerGoal" class="text-sm text-gray-400 mt-2">旨在推廣永續生活理念，促進公眾理解與參與。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const translations = {
+                zh: {
+                    headerTitle: "探索永續生活",
+                    navOverview: "總覽",
+                    navPersonalAction: "個人行動",
+                    navGreenConsumption: "綠色消費",
+                    navCommunityPower: "社區力量",
+                    navSystemicChange: "系統變革",
+                    overviewTitle: "從個人實踐到系統性變革",
+                    overviewSubtitle: "永續生活不僅是一系列環保行為，而是一種與地球和諧共生的生活哲學。它要求我們在滿足當代需求的同時，不損害後代滿足其需求的能力。這份互動報告將帶您深入了解永續生活的核心理念、實踐路徑與挑戰。",
+                    overviewPillar3Title: "三支柱模型",
+                    overviewPillar3Desc: "此框架將永續性視為三個不可或缺的支柱：<span class='font-semibold'>環境保護</span>、<span class='font-semibold'>社會公平</span>與<span class='font-semibold'>經濟可行性</span>。它強調任何決策都需尋求三者間的動態平衡。",
+                    overviewDomain4Title: "四領域模型",
+                    overviewDomain4Desc: "此框架更進一步，認為永續性需要在四個交織的社會領域中協商：<span class='font-semibold'>經濟</span>、<span class='font-semibold'>生態</span>、<span class='font-semibold'>政治</span>和<span class='font-semibold'>文化</span>。它視永續為一個持續的過程，而非靜態目標。",
+                    overviewEthicalTitle: "倫理核心：社會公平與代際正義",
+                    overviewEthicalDesc: "真正的永續生活，必須將社會公平置於核心。若環保行動加劇了社會不平等，或將永續變為少數人的特權，便違背了其初衷。同時，我們是為子孫後代保管地球資源的管家，每一個選擇都應考慮其對未來的長遠影響。",
+                    paTitle: "您的影響力：個人減碳行動",
+                    paSubtitle: "個人日常選擇是溫室氣體排放的重要來源。雖然單一行動影響有限，但集體效應巨大。透過下方的互動圖表，探索不同行動的減碳潛力，看看您的選擇能為地球帶來多大的改變。",
+                    paChooseAction: "選擇您的行動",
+                    paTabEnergy: "能源",
+                    paTabTransport: "交通",
+                    paTabDiet: "飲食",
+                    paTabConsumption: "消費",
+                    paYourReduction: "您的年度預估減碳量",
+                    paUnitKg: "公斤 CO₂e",
+                    paCarEquivalentPrefix: "約等於",
+                    paCarEquivalentSuffix: "公里汽車行駛里程",
+                    chartLabel: "年度減碳量 (公斤 CO₂e)",
+                    chartXAxis: "公斤 CO₂e",
+                    gcTitle: "智慧消費：識破「漂綠」陷阱",
+                    gcSubtitle: "「漂綠」指企業透過誤導性環保宣傳來塑造正面形象。這不僅欺騙消費者，也傷害了真正致力於永續的企業。點擊下方卡片，學習如何辨識常見的漂綠手法，成為更明智的消費者。",
+                    gcClickToReveal: "(點擊查看應對方法)",
+                    gcVerifyTool: "✅ 驗證工具",
+                    cpTitle: "從個人到社群：集體行動的力量",
+                    cpSubtitle: "個體力量有限，但當人們在社區中組織起來，便能產生巨大協同效應。社區氣候行動不僅解決環境問題，更能創造社會資本，增強鄰里關係。以下是一些常見且有效的社區行動模式。",
+                    cpGoal: "目標：",
+                    cpActivities: "活動：",
+                    cpSuccess: "成功關鍵：",
+                    scTitle: "個人行動與系統變革的共生",
+                    scSubtitle: "有效的氣候行動，必須結合自下而上的個人努力與自上而下的系統轉型。兩者並非對立，而是相互依存、螺旋上升的關係。",
+                    scSpiralTitle: "永續性螺旋模型",
+                    scSpiral1Title: "1. 個人行動",
+                    scSpiral1Desc: "少數先驅者採納新的永續行為。",
+                    scSpiral2Title: "2. 社區動員",
+                    scSpiral2Desc: "行為透過社群擴散，改變局部規範。",
+                    scSpiral3Title: "3. 社會壓力",
+                    scSpiral3Desc: "形成要求市場與政府回應的壓力。",
+                    scSpiral4Title: "4. 系統變革",
+                    scSpiral4Desc: "政策與市場創新，改變宏觀系統。",
+                    scSpiralUpwardTitle: "螺旋上升",
+                    scSpiralUpwardDesc: "變革後的系統反過來賦能更大規模的個人行動，開啟新一輪更高層次的循環。個人行動是系統變革的種子，而系統變革則是個人行動得以普及的土壤。",
+                    footerCredit: "此互動式報告根據《永續生活：從個人實踐到系統性變革的綜合報告》生成。",
+                    footerGoal: "旨在推廣永續生活理念，促進公眾理解與參與。",
+                },
+                en: {
+                    headerTitle: "Exploring Sustainable Living",
+                    navOverview: "Overview",
+                    navPersonalAction: "Personal Action",
+                    navGreenConsumption: "Green Consumption",
+                    navCommunityPower: "Community Power",
+                    navSystemicChange: "Systemic Change",
+                    overviewTitle: "From Personal Practice to Systemic Change",
+                    overviewSubtitle: "Sustainable living is not just a series of eco-friendly actions, but a philosophy of living in harmony with the planet. It requires us to meet present needs without compromising the ability of future generations to meet theirs. This interactive report will guide you through its core concepts, practical paths, and challenges.",
+                    overviewPillar3Title: "The Three Pillars Model",
+                    overviewPillar3Desc: "This framework views sustainability as three indispensable pillars: <span class='font-semibold'>Environmental Protection</span>, <span class='font-semibold'>Social Equity</span>, and <span class='font-semibold'>Economic Viability</span>. It emphasizes seeking a dynamic balance among the three in any decision.",
+                    overviewDomain4Title: "The Four Domains Model",
+                    overviewDomain4Desc: "This framework goes further, suggesting sustainability must be negotiated in four intertwined social domains: <span class='font-semibold'>Economics</span>, <span class='font-semibold'>Ecology</span>, <span class='font-semibold'>Politics</span>, and <span class='font-semibold'>Culture</span>. It sees sustainability as a continuous process, not a static goal.",
+                    overviewEthicalTitle: "Ethical Core: Social Equity & Intergenerational Justice",
+                    overviewEthicalDesc: "True sustainable living must place social equity at its core. If environmental actions exacerbate social inequality or turn sustainability into a privilege for the few, they defy its original purpose. We are stewards of Earth's resources for future generations; every choice should consider its long-term impact.",
+                    paTitle: "Your Impact: Personal Carbon Reduction",
+                    paSubtitle: "Daily personal choices are a significant source of greenhouse gas emissions. While a single action's impact is limited, the collective effect is enormous. Use the interactive chart below to explore the carbon-saving potential of different actions and see how your choices can make a difference.",
+                    paChooseAction: "Choose Your Actions",
+                    paTabEnergy: "Energy",
+                    paTabTransport: "Transport",
+                    paTabDiet: "Diet",
+                    paTabConsumption: "Consumption",
+                    paYourReduction: "Your Estimated Annual Reduction",
+                    paUnitKg: "kg CO₂e",
+                    paCarEquivalentPrefix: "Equivalent to",
+                    paCarEquivalentSuffix: "km driven by car",
+                    chartLabel: "Annual Reduction (kg CO₂e)",
+                    chartXAxis: "kg CO₂e",
+                    gcTitle: "Wise Consumption: Spotting Greenwashing",
+                    gcSubtitle: "Greenwashing is when companies use misleading eco-friendly claims to build a positive image. This deceives consumers and harms genuinely sustainable businesses. Click the cards below to learn how to spot common greenwashing tactics and become a smarter consumer.",
+                    gcClickToReveal: "(Click to reveal how to respond)",
+                    gcVerifyTool: "✅ Verification Tool",
+                    cpTitle: "From Individual to Community: The Power of Collective Action",
+                    cpSubtitle: "Individual power is limited, but when people organize within their communities, they can create a huge synergistic effect. Community climate action not only solves environmental problems but also builds social capital and strengthens neighborhood ties. Here are some common and effective models.",
+                    cpGoal: "Goal: ",
+                    cpActivities: "Activities: ",
+                    cpSuccess: "Key to Success: ",
+                    scTitle: "The Symbiosis of Personal Action & Systemic Change",
+                    scSubtitle: "Effective climate action requires a combination of bottom-up personal efforts and top-down systemic transformation. The two are not in opposition but are interdependent, creating an upward spiral of change.",
+                    scSpiralTitle: "The Sustainability Spiral Model",
+                    scSpiral1Title: "1. Personal Action",
+                    scSpiral1Desc: "A few pioneers adopt new sustainable behaviors.",
+                    scSpiral2Title: "2. Community Mobilization",
+                    scSpiral2Desc: "Behaviors spread through social networks, shifting local norms.",
+                    scSpiral3Title: "3. Societal Pressure",
+                    scSpiral3Desc: "Builds pressure for markets and governments to respond.",
+                    scSpiral4Title: "4. Systemic Change",
+                    scSpiral4Desc: "Policy and market innovations alter the macro-system.",
+                    scSpiralUpwardTitle: "Upward Spiral",
+                    scSpiralUpwardDesc: "The transformed system, in turn, enables larger-scale personal action, starting a new, higher-level cycle. Personal action is the seed of systemic change, and systemic change is the soil in which it can flourish.",
+                    footerCredit: "This interactive report was generated based on the 'Comprehensive Report on Sustainable Living: From Personal Practice to Systemic Change'.",
+                    footerGoal: "Aims to promote the concept of sustainable living and encourage public understanding and participation.",
+                }
+            };
+
+            const personalActionsData = {
+                zh: {
+                    energy: [ { name: '更換30個LED燈泡', reduction: 1814, category: '能源' }, { name: '調整恆溫器(冬-1°C/夏+1°C)', reduction: 907, category: '能源' }, { name: '熱水器加裝隔熱並調低溫度', reduction: 839, category: '能源' }, { name: '拔掉不用的電器插頭', reduction: 50, category: '能源' } ],
+                    transport: [ { name: '實現無車生活', reduction: 2177, category: '交通' }, { name: '換成更節能的汽車', reduction: 1361, category: '交通' }, { name: '取消一趟中程往返航班', reduction: 327, category: '交通' }, { name: '每週減少16公里駕車', reduction: 227, category: '交通' } ],
+                    diet: [ { name: '轉向完全以植物為主的飲食', reduction: 1324, category: '飲食' }, { name: '減少一半的肉類攝取', reduction: 650, category: '飲食' }, { name: '堅持購買在地當季食物', reduction: 200, category: '飲食' }, { name: '杜絕食物浪費', reduction: 300, category: '飲食' } ],
+                    consumption: [ { name: '回收一半的家庭廢棄物', reduction: 1089, category: '消費' }, { name: '減少10%的過度包裝購買', reduction: 544, category: '消費' }, { name: '攜帶可重複使用的購物袋', reduction: 20, category: '消費' } ]
+                },
+                en: {
+                    energy: [ { name: 'Replace 30 LED bulbs', reduction: 1814, category: 'Energy' }, { name: 'Adjust thermostat (-1°C winter/+1°C summer)', reduction: 907, category: 'Energy' }, { name: 'Insulate & lower water heater temp', reduction: 839, category: 'Energy' }, { name: 'Unplug unused electronics', reduction: 50, category: 'Energy' } ],
+                    transport: [ { name: 'Live car-free', reduction: 2177, category: 'Transport' }, { name: 'Switch to a more efficient car', reduction: 1361, category: 'Transport' }, { name: 'Cancel one medium-haul round-trip flight', reduction: 327, category: 'Transport' }, { name: 'Drive 16 km less per week', reduction: 227, category: 'Transport' } ],
+                    diet: [ { name: 'Switch to a fully plant-based diet', reduction: 1324, category: 'Diet' }, { name: 'Halve meat consumption', reduction: 650, category: 'Diet' }, { name: 'Buy local and seasonal food', reduction: 200, category: 'Diet' }, { name: 'Eliminate food waste', reduction: 300, category: 'Diet' } ],
+                    consumption: [ { name: 'Recycle half of household waste', reduction: 1089, category: 'Consumption' }, { name: 'Reduce over-packaged purchases by 10%', reduction: 544, category: 'Consumption' }, { name: 'Use reusable shopping bags', reduction: 20, category: 'Consumption' } ]
+                }
+            };
+            
+            const greenwashingData = {
+                zh: [
+                    { tactic: '隱瞞權衡', example: '強調產品由回收材料製成，卻忽略其生產過程高耗能。', tool: '審查企業的生命週期評估報告，查詢第三方平台對其供應鏈的全面評價。', color: 'bg-red-100', accent: 'bg-red-500' },
+                    { tactic: '缺乏證明', example: '聲稱「節能50%」，但未提供任何數據或第三方認證。', tool: '要求企業提供具體數據，檢查是否有如「能源之星」等權威認證。', color: 'bg-orange-100', accent: 'bg-orange-500' },
+                    { tactic: '模糊空泛', example: '使用「全天然」、「環保」等無具體定義的詞語。', tool: '詢問企業對詞語的具體定義，判斷其宣稱的真實性。', color: 'bg-amber-100', accent: 'bg-amber-500' },
+                    { tactic: '無關緊要', example: '強調產品「不含氟氯碳化物」，而此物質早已被禁用。', tool: '了解相關法規，辨識該宣稱是否為行業普遍做法。', color: 'bg-yellow-100', accent: 'bg-yellow-500' },
+                    { tactic: '撒小謊或誇大', example: '將高油耗SUV稱為「更環保的選擇」，或做出虛假聲明。', tool: '交叉比對資訊，參考獨立評測報告，警惕合理化有害行為的宣傳。', color: 'bg-lime-100', accent: 'bg-lime-500' },
+                    { tactic: '偽造標籤', example: '企業自創看似官方的環保標章，營造獲得第三方認可的假象。', tool: '查詢標章發行機構的公信力，熟悉各領域的權威認證。', color: 'bg-green-100', accent: 'bg-green-500' },
+                ],
+                en: [
+                    { tactic: 'Hidden Trade-off', example: 'Highlights a product is made from recycled materials but ignores its high-energy manufacturing process.', tool: 'Review the company\'s Life Cycle Assessment (LCA) reports; check third-party platforms for a full supply chain evaluation.', color: 'bg-red-100', accent: 'bg-red-500' },
+                    { tactic: 'No Proof', example: 'Claims "50% more energy efficient" without providing any data or third-party certification.', tool: 'Request specific data from the company; check for reputable certifications like "Energy Star".', color: 'bg-orange-100', accent: 'bg-orange-500' },
+                    { tactic: 'Vagueness', example: 'Uses poorly defined terms like "all-natural" or "eco-friendly" without specific definitions.', tool: 'Ask the company for its specific definition of the terms to judge the claim\'s authenticity.', color: 'bg-amber-100', accent: 'bg-amber-500' },
+                    { tactic: 'Irrelevance', example: 'Emphasizes a product is "CFC-free," even though CFCs have long been banned by law.', tool: 'Understand relevant regulations to identify if the claim is a common industry practice.', color: 'bg-yellow-100', accent: 'bg-yellow-500' },
+                    { tactic: 'Fibbing / Lesser of Two Evils', example: 'Calls a gas-guzzling SUV a "greener choice" or makes outright false claims.', tool: 'Cross-reference information from various sources; consult independent product reviews; be wary of ads that rationalize harmful behavior.', color: 'bg-lime-100', accent: 'bg-lime-500' },
+                    { tactic: 'Worshipping False Labels', example: 'Creates a fake, official-looking eco-label to create the impression of a third-party endorsement.', tool: 'Research the label\'s issuing body for credibility; become familiar with major authoritative certifications in various fields.', color: 'bg-green-100', accent: 'bg-green-500' },
+                ]
+            };
+
+            const communityActionsData = {
+                zh: [
+                    { model: '在地食物系統', goal: '提升糧食安全、減少食物里程', activities: ['社區菜園', '社區冰箱', '農夫市集'], success: '穩定的土地使用權、強大的社區凝聚力', icon: '🥕' },
+                    { model: '資源共享與循環', goal: '減少廢棄物、推廣共享經濟', activities: ['維修咖啡館', '工具圖書館', '物品交換會'], success: '擁有技能的志願者、固定的活動場地', icon: '🔧' },
+                    { model: '社區能源', goal: '實現能源自主、分享綠能收益', activities: ['合作社太陽能電站', '社區風力發電機'], success: '專業技術支持、高昂的初期資本', icon: '💡' },
+                    { model: '自然保育', goal: '保護本地生物多樣性', activities: ['海灘/河流清理', '植樹活動', '棲息地維護'], success: '與環保專家合作、持續的組織動員', icon: '🌳' },
+                    { model: '綠色交通倡議', goal: '改善步行與自行車環境', activities: ['遊說倡議', '安全上學路徑計畫'], success: '對地方政策的深入了解、強大的溝通能力', icon: '🚲' }
+                ],
+                en: [
+                    { model: 'Local Food Systems', goal: 'Improve food security, reduce food miles', activities: ['Community gardens', 'Community fridges', 'Farmers\' markets'], success: 'Stable land tenure, strong community cohesion', icon: '🥕' },
+                    { model: 'Resource Sharing & Circulation', goal: 'Reduce waste, promote sharing economy', activities: ['Repair cafés', 'Tool libraries', 'Swap events'], success: 'Skilled volunteers, dedicated event space', icon: '🔧' },
+                    { model: 'Community Energy', goal: 'Achieve energy autonomy, share green energy profits', activities: ['Co-op solar plants', 'Community wind turbines'], success: 'Technical support, high initial capital', icon: '💡' },
+                    { model: 'Nature Conservation', goal: 'Protect local biodiversity', activities: ['Beach/river cleanups', 'Tree planting', 'Habitat maintenance'], success: 'Collaboration with experts, sustained mobilization', icon: '🌳' },
+                    { model: 'Green Transport Initiatives', goal: 'Improve walking and cycling environments', activities: ['Lobbying and advocacy', 'Safe Routes to School programs'], success: 'Deep understanding of local policy, strong communication skills', icon: '🚲' }
+                ]
+            };
+
+            let currentLanguage = 'zh';
+
+            const actionOptionsContainer = document.getElementById('action-options');
+            const totalReductionEl = document.getElementById('total-reduction');
+            const carEquivalentEl = document.getElementById('car-equivalent');
+            const actionTabsContainer = document.getElementById('action-tabs');
+            const greenwashingGrid = document.getElementById('greenwashing-grid');
+            const communityGrid = document.getElementById('community-actions-grid');
+
+            const ctx = document.getElementById('carbonChart').getContext('2d');
+            let carbonChart = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderColor: [], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
+
+            const categoryColors = {
+                '能源': 'rgba(251, 191, 36, 0.6)', 'Energy': 'rgba(251, 191, 36, 0.6)',
+                '交通': 'rgba(59, 130, 246, 0.6)', 'Transport': 'rgba(59, 130, 246, 0.6)',
+                '飲食': 'rgba(34, 197, 94, 0.6)', 'Diet': 'rgba(34, 197, 94, 0.6)',
+                '消費': 'rgba(139, 92, 246, 0.6)', 'Consumption': 'rgba(139, 92, 246, 0.6)',
+            };
+
+            function renderContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+
+                renderActionOptions(actionTabsContainer.querySelector('.active')?.dataset.tab || 'energy');
+                renderGreenwashingCards();
+                renderCommunityCards();
+                updateChart();
+            }
+
+            function updateChart() {
+                const langData = personalActionsData[currentLanguage];
+                const selectedActions = Array.from(actionOptionsContainer.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => {
+                        const [category, index] = cb.dataset.action.split('-');
+                        return langData[category][index];
+                    });
+
+                let totalReduction = selectedActions.reduce((sum, action) => sum + action.reduction, 0);
+                totalReductionEl.textContent = totalReduction.toFixed(0);
+                carEquivalentEl.textContent = (totalReduction / 0.14).toFixed(0);
+
+                carbonChart.data.labels = selectedActions.map(a => a.name);
+                carbonChart.data.datasets[0].data = selectedActions.map(a => a.reduction);
+                carbonChart.data.datasets[0].backgroundColor = selectedActions.map(a => categoryColors[a.category]);
+                carbonChart.data.datasets[0].borderColor = selectedActions.map(a => categoryColors[a.category].replace('0.6', '1'));
+                
+                carbonChart.options.plugins.tooltip.callbacks = {
+                    label: function(context) {
+                        return ` ${context.raw} ${translations[currentLanguage].paUnitKg}`;
+                    }
+                };
+                carbonChart.options.plugins.title = { display: true, text: translations[currentLanguage].chartLabel };
+                carbonChart.options.scales.x.title = { display: true, text: translations[currentLanguage].chartXAxis };
+                
+                carbonChart.update();
+            }
+
+            function renderActionOptions(category) {
+                if (!category) return;
+                actionOptionsContainer.innerHTML = '';
+                const langData = personalActionsData[currentLanguage];
+                langData[category].forEach((action, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center bg-gray-50 p-3 rounded-lg';
+                    div.innerHTML = `
+                        <input id="action-${category}-${index}" data-action="${category}-${index}" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                        <label for="action-${category}-${index}" class="ml-3 block text-sm font-medium text-gray-700">${action.name} <span class="text-xs text-gray-500">(${action.reduction} kg)</span></label>
+                    `;
+                    actionOptionsContainer.appendChild(div);
+                });
+                
+                actionOptionsContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.addEventListener('change', updateChart);
+                });
+            }
+
+            function renderGreenwashingCards() {
+                greenwashingGrid.innerHTML = '';
+                const langData = greenwashingData[currentLanguage];
+                langData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = `greenwash-card perspective-1000 h-64 cursor-pointer`;
+                    card.innerHTML = `
+                        <div class="greenwash-card-inner">
+                            <div class="greenwash-card-front ${item.color} shadow-md">
+                                <h3 class="text-2xl font-bold text-gray-800">${item.tactic}</h3>
+                                <p class="mt-4 text-gray-600">"${item.example}"</p>
+                                <p data-lang-key="gcClickToReveal" class="mt-4 text-sm font-semibold text-gray-700">${translations[currentLanguage].gcClickToReveal}</p>
+                            </div>
+                            <div class="greenwash-card-back ${item.accent} text-white shadow-lg">
+                                <h4 data-lang-key="gcVerifyTool" class="font-bold">${translations[currentLanguage].gcVerifyTool}</h4>
+                                <p class="mt-2 text-sm">${item.tool}</p>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => card.classList.toggle('flipped'));
+                    greenwashingGrid.appendChild(card);
+                });
+            }
+
+            function renderCommunityCards() {
+                communityGrid.innerHTML = '';
+                const langData = communityActionsData[currentLanguage];
+                const trans = translations[currentLanguage];
+                langData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'action-card bg-white p-6 rounded-lg shadow-md border border-gray-200';
+                    card.innerHTML = `
+                        <div class="flex items-center">
+                            <span class="text-4xl">${item.icon}</span>
+                            <h3 class="ml-4 text-xl font-bold text-emerald-700">${item.model}</h3>
+                        </div>
+                        <p class="mt-4 text-gray-600"><strong class="text-gray-800">${trans.cpGoal}</strong>${item.goal}</p>
+                        <p class="mt-2 text-gray-600"><strong class="text-gray-800">${trans.cpActivities}</strong>${item.activities.join('、 ')}</p>
+                        <p class="mt-2 text-sm text-gray-500 italic"><strong class="not-italic text-gray-600">${trans.cpSuccess}</strong>${item.success}</p>
+                    `;
+                    communityGrid.appendChild(card);
+                });
+            }
+
+            actionTabsContainer.addEventListener('click', (e) => {
+                if(e.target.tagName === 'BUTTON') {
+                    const tab = e.target.dataset.tab;
+                    actionTabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderActionOptions(tab);
+                }
+            });
+
+            const langSwitcher = document.querySelector('.lang-switcher');
+            langSwitcher.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const lang = e.target.dataset.lang;
+                    if (lang !== currentLanguage) {
+                        currentLanguage = lang;
+                        langSwitcher.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+                        renderContent(lang);
+                    }
+                }
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', () => { window.location.hash = mobileNav.value; });
+
+            const sections = document.querySelectorAll('main section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                        mobileNav.value = `#${entry.target.id}`;
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => observer.observe(section));
+            
+            // Initial setup
+            langSwitcher.querySelector(`button[data-lang="${currentLanguage}"]`).classList.add('active');
+            actionTabsContainer.querySelector('button').classList.add('active');
+            renderContent(currentLanguage);
+        });
+    </script>
+</body>
+</html>
