@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：AI歧視與就業變革</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The SPA is designed as a narrative journey, guiding the user from understanding the problem to exploring solutions. It deviates from the linear report structure for better engagement. It starts with a high-level summary (Hero), dives into the core concepts ("Anatomy of Bias") using interactive cards, shows concrete evidence ("Real-World Impact") via a case-study-driven tabbed interface, visualizes the macro trends ("Workforce Transformation") with dynamic charts, and finally, presents actionable strategies ("Path Forward") in a structured, expandable format. This thematic, task-oriented structure allows users to explore topics non-linearly, making complex information more digestible and engaging than a traditional document. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info: Distinguishing Bias vs. Discrimination. Goal: Inform/Clarify. Viz: Interactive HTML cards with icons (Unicode). Interaction: Hover/Click to reveal definitions. Justification: Quickly clarifies core concepts without dense text. Library: HTML/Tailwind/JS.
+        2. Report Info: Sources of Bias (Data, Algorithm, Human). Goal: Organize/Explain. Viz: Clickable HTML diagram. Interaction: Clicking a source reveals its sub-types and examples. Justification: Visually breaks down a complex lifecycle into manageable parts. Library: HTML/Tailwind/JS.
+        3. Report Info: Case Studies (Amazon, COMPAS). Goal: Compare/Impact. Viz: Tabbed content with cards. Interaction: User clicks tabs (Employment, Justice, etc.) to see relevant cases. Justification: Organizes diverse examples, preventing information overload and allowing focused exploration. Library: HTML/Tailwind/JS.
+        4. Report Info: Job market transformation (WEF data). Goal: Change/Compare. Viz: Donut Chart for job creation/destruction numbers and Radar Chart for future skill demand. Interaction: Animated charts with tooltips. Justification: Immediately conveys the scale of change and the shift in skill priorities more effectively than tables. Library: Chart.js.
+        5. Report Info: Multi-level governance framework. Goal: Organize/Inform. Viz: Accordion-style expandable list. Interaction: User clicks a level (Technical, Org, Policy) to expand and see details. Justification: Presents a dense, hierarchical framework in a clean, user-controlled manner. Library: HTML/Tailwind/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+        :lang(en) {
+            font-family: 'Roboto', sans-serif;
+        }
+        body {
+            background-color: #f8f7f4;
+            color: #3d3d3d;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #a37e62;
+            border-bottom-color: #a37e62;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tab.active {
+            border-color: #a37e62;
+            color: #a37e62;
+            background-color: #f8f7f4;
+        }
+    </style>
+</head>
+<body class="bg-[#f8f7f4] text-[#3d3d3d] antialiased">
+
+    <header class="bg-[#edeae5]/80 backdrop-blur-md sticky top-0 z-50 w-full shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-[#a37e62]" data-lang="header_title">AI的雙刃劍</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#intro" class="nav-link border-b-2 border-transparent pb-1" data-lang="nav_intro">導論</a>
+                <a href="#impact" class="nav-link border-b-2 border-transparent pb-1" data-lang="nav_impact">現實衝擊</a>
+                <a href="#workforce" class="nav-link border-b-2 border-transparent pb-1" data-lang="nav_workforce">勞動力變革</a>
+                <a href="#solutions" class="nav-link border-b-2 border-transparent pb-1" data-lang="nav_solutions">未來路徑</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 text-sm border border-[#a37e62] text-[#a37e62] rounded-full hover:bg-[#a37e62] hover:text-white transition-colors">English</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                 <button id="lang-switcher-mobile" class="mr-4 px-3 py-1 text-sm border border-[#a37e62] text-[#a37e62] rounded-full hover:bg-[#a37e62] hover:text-white transition-colors">English</button>
+                <button id="mobile-menu-button" class="text-2xl">☰</button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden bg-[#edeae5] text-center">
+            <a href="#intro" class="block py-2 px-4 text-sm hover:bg-[#dcd8d2]" data-lang="nav_intro_mobile">導論</a>
+            <a href="#impact" class="block py-2 px-4 text-sm hover:bg-[#dcd8d2]" data-lang="nav_impact_mobile">現實衝擊</a>
+            <a href="#workforce" class="block py-2 px-4 text-sm hover:bg-[#dcd8d2]" data-lang="nav_workforce_mobile">勞動力變革</a>
+            <a href="#solutions" class="block py-2 px-4 text-sm hover:bg-[#dcd8d2]" data-lang="nav_solutions_mobile">未來路徑</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        
+        <section id="hero" class="text-center py-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 text-[#a37e62]" data-lang="hero_title">駕馭雙刃劍</h2>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600" data-lang="hero_subtitle">剖析人工智慧歧視、勞動力轉型與公平的未來路徑圖。</p>
+            <p class="mt-6 max-w-4xl mx-auto text-base text-gray-500" data-lang="hero_desc">本報告旨在系統性剖析人工智慧（AI）所引發的三大交織挑戰：演算法偏見的根源、AI歧視的社會衝擊，以及自動化對全球就業結構的深遠變革。我們將探索其生成機制、現實案例，並提出一個邁向更公平、更具韌性智慧未來的多層次治理框架。</p>
+        </section>
+
+        <section id="intro" class="py-12 md:py-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#a37e62]" data-lang="intro_title">第一部分：演算法不公的剖析</h3>
+                <p class="mt-2 max-w-2xl mx-auto text-gray-600" data-lang="intro_desc">理解演算法不公，首先要釐清核心概念。本節將透過互動式卡片，解釋「偏見」如何轉化為「歧視」，並揭示偏見在AI生命週期中的三大來源。</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                    <h4 class="text-xl font-bold mb-4 text-center" data-lang="intro_concepts_title">關鍵概念辨析</h4>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                            <h5 class="font-bold text-lg flex items-center"><span class="text-2xl mr-2">📊</span> <span data-lang="intro_bias_title">統計性偏見 (Bias)</span></h5>
+                            <p class="text-sm mt-2 text-gray-700" data-lang="intro_bias_desc">在機器學習中，偏見是模型中的系統性誤差，是演算法學習和泛化的必要部分。它本質上是技術性且中性的。</p>
+                        </div>
+                        <div class="border border-gray-200 p-4 rounded-lg bg-gray-50">
+                            <h5 class="font-bold text-lg flex items-center"><span class="text-2xl mr-2">⚖️</span> <span data-lang="intro_discrimination_title">社會性歧視 (Discrimination)</span></h5>
+                            <p class="text-sm mt-2 text-gray-700" data-lang="intro_discrimination_desc">一個法律和倫理概念，指基於受保護特徵（如種族、性別）對個人進行不公平對待。它具有社會性、負面性，且取決於具體情境。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                    <h4 class="text-xl font-bold mb-4 text-center" data-lang="intro_sources_title">偏見的來源：AI生命週期</h4>
+                    <div id="bias-sources" class="space-y-3">
+                         <div class="bias-source-item cursor-pointer p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100" data-content="bias-data">
+                            <h5 class="font-bold flex items-center justify-between"><span data-lang="intro_source_data">💾 數據 (Data)</span> <span class="arrow">▼</span></h5>
+                            <div id="bias-data" class="bias-content hidden mt-2 text-sm space-y-2 pl-4 border-l-2 border-[#a37e62]">
+                                <p><strong data-lang="intro_source_data_1_h">歷史偏見：</strong> <span data-lang="intro_source_data_1_p">訓練數據反映了現實世界長期的社會偏見。</span></p>
+                                <p><strong data-lang="intro_source_data_2_h">代表性偏見：</strong> <span data-lang="intro_source_data_2_p">訓練數據未能均衡代表所有群體。</span></p>
+                                <p><strong data-lang="intro_source_data_3_h">測量偏見：</strong> <span data-lang="intro_source_data_3_p">使用了不恰當的代理指標（如用「逮捕記錄」代表「犯罪活動」）。</span></p>
+                            </div>
+                        </div>
+                        <div class="bias-source-item cursor-pointer p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100" data-content="bias-algo">
+                            <h5 class="font-bold flex items-center justify-between"><span data-lang="intro_source_algo">⚙️ 演算法 (Algorithm)</span> <span class="arrow">▼</span></h5>
+                             <div id="bias-algo" class="bias-content hidden mt-2 text-sm space-y-2 pl-4 border-l-2 border-[#a37e62]">
+                                <p><strong data-lang="intro_source_algo_1_h">演算法偏見：</strong> <span data-lang="intro_source_algo_1_p">模型本身的設計（如目標函數）引入了偏見。</span></p>
+                                <p><strong data-lang="intro_source_algo_2_h">評估偏見：</strong> <span data-lang="intro_source_algo_2_p">用於評估模型的基準不能代表真實世界。</span></p>
+                            </div>
+                        </div>
+                        <div class="bias-source-item cursor-pointer p-4 rounded-lg border border-gray-200 bg-gray-50 hover:bg-gray-100" data-content="bias-human">
+                            <h5 class="font-bold flex items-center justify-between"><span data-lang="intro_source_human">🧑‍💻 人為互動 (Human)</span> <span class="arrow">▼</span></h5>
+                             <div id="bias-human" class="bias-content hidden mt-2 text-sm space-y-2 pl-4 border-l-2 border-[#a37e62]">
+                                 <p><strong data-lang="intro_source_human_1_h">人類決策偏見：</strong> <span data-lang="intro_source_human_1_p">開發者或標註員將自身的刻板印象注入系統。</span></p>
+                                 <p><strong data-lang="intro_source_human_2_h">使用與詮釋偏見：</strong> <span data-lang="intro_source_human_2_p">使用者錯誤地詮釋或應用演算法的輸出。</span></p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 bg-white/50 p-6 rounded-lg shadow-md">
+                 <h4 class="text-xl font-bold mb-4 text-center flex items-center justify-center"><span class="text-2xl mr-2">🔬</span> <span data-lang="intro_intersectional_title">交織性偏見：當多重劣勢疊加</span></h4>
+                 <p class="text-center text-gray-600 mb-4" data-lang="intro_intersectional_desc">偏見並非簡單相加，而是相互強化。以人臉辨識為例，深膚色女性面臨的錯誤率遠高於單純膚色或性別的錯誤率總和。</p>
+                 <div class="chart-container mx-auto">
+                     <canvas id="genderShadesChart"></canvas>
+                 </div>
+                 <p class="text-xs text-center text-gray-500 mt-2" data-lang="intro_intersectional_source">資料來源：「性別光譜」(Gender Shades) 研究。圖表為示意，旨在說明錯誤率的巨大差異。</p>
+             </div>
+        </section>
+
+        <section id="impact" class="py-12 md:py-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#a37e62]" data-lang="impact_title">第二部分：數位閘門的守衛</h3>
+                <p class="mt-2 max-w-2xl mx-auto text-gray-600" data-lang="impact_desc">理論上的偏見在現實世界中轉化為具體的歧視。本節將透過具體案例，展示AI如何在就業、信貸、司法等關鍵領域，成為決定個人命運的「數位閘門守衛」。</p>
+            </div>
+            
+            <div>
+                <div class="flex justify-center border-b-2 border-gray-200 mb-8">
+                    <button class="tab active px-4 py-2 font-semibold border-b-2" data-tab="employment" data-lang="impact_tab_employment">就業招聘</button>
+                    <button class="tab px-4 py-2 font-semibold border-b-2 border-transparent" data-tab="credit" data-lang="impact_tab_credit">信貸審批</button>
+                    <button class="tab px-4 py-2 font-semibold border-b-2 border-transparent" data-tab="justice" data-lang="impact_tab_justice">刑事司法</button>
+                </div>
+
+                <div id="tab-content">
+                    <div id="employment-content" class="tab-pane">
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                                <h4 class="text-lg font-bold" data-lang="impact_case_amazon_title">案例：亞馬遜AI招聘工具</h4>
+                                <p class="text-sm mt-2 text-gray-600" data-lang="impact_case_amazon_desc">該工具學習了公司過去十年的履歷數據，由於數據中男性佔主導，演算法學會了懲罰履歷中出現「女性」相關詞彙（如「女子學院」）的候選人，系統性地過濾掉合格的女性求職者。</p>
+                                <div class="mt-4 p-3 bg-red-50 text-red-800 rounded-lg text-sm">
+                                    <p><strong data-lang="impact_mechanism">偏見機制：</strong> <span data-lang="impact_case_amazon_mech">歷史數據偏見</span></p>
+                                    <p><strong data-lang="impact_consequence">社會後果：</strong> <span data-lang="impact_case_amazon_cons">加劇科技行業的性別不平等。</span></p>
+                                </div>
+                            </div>
+                            <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                                <h4 class="text-lg font-bold" data-lang="impact_other_risks_title">其他招聘環節的風險</h4>
+                                <ul class="list-disc list-inside mt-2 text-sm text-gray-600 space-y-1">
+                                    <li><strong data-lang="impact_risk_1_h">廣告投放：</strong> <span data-lang="impact_risk_1_p">演算法可能根據刻板印象，將高薪技術崗位更多推送給男性。</span></li>
+                                    <li><strong data-lang="impact_risk_2_h">履歷篩選：</strong> <span data-lang="impact_risk_2_p">自動化系統可能因求職者履歷中的「空窗期」（如育兒假）而給予負面評價。</span></li>
+                                    <li><strong data-lang="impact_risk_3_h">薪資設定：</strong> <span data-lang="impact_risk_3_p">若基於歷史數據，AI會固化男女同工不同酬的現象。</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="credit-content" class="tab-pane hidden">
+                        <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                            <h4 class="text-lg font-bold" data-lang="impact_case_redlining_title">案例：數位時代的「紅線制度」</h4>
+                            <p class="text-sm mt-2 text-gray-600" data-lang="impact_case_redlining_desc">信貸演算法可能不直接使用種族資訊，但會利用與種族高度相關的「代理變數」進行決策。例如，郵遞區號、消費習慣、甚至使用的手機類型或電子郵件服務商，都可能成為判斷信用風險的依據，從而對特定族裔社區形成金融排斥。</p>
+                            <div class="mt-4 p-3 bg-yellow-50 text-yellow-800 rounded-lg text-sm">
+                                <p><strong data-lang="impact_mechanism_2">偏見機制：</strong> <span data-lang="impact_case_redlining_mech">代理變數的隱蔽歧視</span></p>
+                                <p><strong data-lang="impact_consequence_2">社會後果：</strong> <span data-lang="impact_case_redlining_cons">限制少數族裔獲得信貸的機會，擴大貧富差距。</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="justice-content" class="tab-pane hidden">
+                        <div class="bg-white/50 p-6 rounded-lg shadow-md card">
+                            <h4 class="text-lg font-bold" data-lang="impact_case_compas_title">案例：COMPAS再犯風險評估系統</h4>
+                            <p class="text-sm mt-2 text-gray-600" data-lang="impact_case_compas_desc">ProPublica的調查發現，該系統在預測再犯風險時，對非裔美國人被告的「假陽性率」（即錯誤預測為高風險）幾乎是白人被告的兩倍。這意味著一個無辜的黑人比無辜的白人更有可能被系統貼上「危險」標籤，影響其保釋和量刑決定。</p>
+                            <div class="mt-4 p-3 bg-blue-50 text-blue-800 rounded-lg text-sm">
+                                <p><strong data-lang="impact_mechanism_3">偏見機制：</strong> <span data-lang="impact_case_compas_mech">訓練數據反映了司法系統的歷史偏見</span></p>
+                                <p><strong data-lang="impact_consequence_3">社會後果：</strong> <span data-lang="impact_case_compas_cons">可能導致對少數族裔更嚴厲的處罰，加劇司法不公。</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="workforce" class="py-12 md:py-20 bg-white/50 rounded-lg shadow-inner scroll-mt-20">
+             <div class="text-center mb-12 px-4">
+                <h3 class="text-3xl font-bold text-[#a37e62]" data-lang="workforce_title">第三部分：勞動力的結構性變革</h3>
+                <p class="mt-2 max-w-2xl mx-auto text-gray-600" data-lang="workforce_desc">AI與自動化正重塑全球勞動力市場。這並非工作總量的終結，而是一場深刻的結構性重組。本節透過數據視覺化，揭示工作崗位的消亡與新生，以及未來技能需求的轉變。</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-12 items-center px-4">
+                <div class="text-center">
+                    <h4 class="text-xl font-bold mb-4" data-lang="workforce_job_change_title">工作崗位的淨變化 (至2025年)</h4>
+                    <p class="text-sm text-gray-600 mb-4" data-lang="workforce_job_change_desc">根據世界經濟論壇預測，雖然大量常規性工作將被取代，但新興領域將創造更多工作崗位，挑戰在於勞動力的技能轉型。</p>
+                    <div class="chart-container">
+                        <canvas id="jobChangeChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-gray-500 mt-2" data-lang="workforce_job_change_source">資料來源：世界經濟論壇《未來工作報告》。</p>
+                </div>
+                <div class="text-center">
+                    <h4 class="text-xl font-bold mb-4" data-lang="workforce_skills_title">未來工作的核心技能版圖</h4>
+                    <p class="text-sm text-gray-600 mb-4" data-lang="workforce_skills_desc">未來市場將高度重視那些機器難以替代的能力。過去的標準化技能正迅速貶值，三類新技能變得至關重要。</p>
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-gray-500 mt-2" data-lang="workforce_skills_source">資料來源：綜合多家機構報告分析。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="solutions" class="py-12 md:py-20 scroll-mt-20">
+            <div class="text-center mb-12">
+                <h3 class="text-3xl font-bold text-[#a37e62]" data-lang="solutions_title">第四部分：邁向公平的智慧未來</h3>
+                <p class="mt-2 max-w-2xl mx-auto text-gray-600" data-lang="solutions_desc">應對AI挑戰需要一個整合性的治理路徑。單一的技術修復或政策干預遠遠不夠。本節展示了一個結合技術、組織與公共政策的多層次解決方案框架。</p>
+            </div>
+            
+            <div id="solutions-accordion" class="max-w-4xl mx-auto space-y-4">
+                <div class="solution-item bg-white/50 rounded-lg shadow-md">
+                    <button class="w-full text-left p-4 font-bold text-lg flex justify-between items-center hover:bg-gray-100 rounded-t-lg">
+                        <span data-lang="solutions_tech_title">🛠️ 技術層面：打造更公平的演算法</span>
+                        <span class="arrow">▼</span>
+                    </button>
+                    <div class="solution-content hidden p-4 border-t border-gray-200 text-sm">
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong data-lang="solutions_tech_1_h">公平感知機器學習 (Fairness-Aware ML):</strong> <span data-lang="solutions_tech_1_p">在AI生命週期的前、中、後處理階段嵌入公平性考量，如對數據重加權或在模型中加入公平性約束。</span></li>
+                            <li><strong data-lang="solutions_tech_2_h">可解釋性AI (XAI):</strong> <span data-lang="solutions_tech_2_p">使用LIME、SHAP等技術打開「黑盒子」，解釋模型決策，為受影響者提供申訴依據，實現「解釋權」。</span></li>
+                            <li><strong data-lang="solutions_tech_3_h">針對大型語言模型 (LLM) 的策略:</strong> <span data-lang="solutions_tech_3_p">開發專門的去偏方法，如「反事實數據增強」，以消除性別、種族等刻板印象。</span></li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="solution-item bg-white/50 rounded-lg shadow-md">
+                    <button class="w-full text-left p-4 font-bold text-lg flex justify-between items-center hover:bg-gray-100 rounded-t-lg">
+                        <span data-lang="solutions_org_title">🏢 組織/企業層面：超越技術修復</span>
+                        <span class="arrow">▼</span>
+                    </button>
+                    <div class="solution-content hidden p-4 border-t border-gray-200 text-sm">
+                       <ul class="list-disc list-inside space-y-2">
+                           <li><strong data-lang="solutions_org_1_h">演算法稽核與影響力評估:</strong> <span data-lang="solutions_org_1_p">將演算法稽核制度化，定期進行獨立、嚴格的偏見檢測，如紐約市的法律要求。</span></li>
+                           <li><strong data-lang="solutions_org_2_h">擁抱多元與包容:</strong> <span data-lang="solutions_org_2_p">建立多元化的開發團隊，並讓受影響的社群參與AI的設計與評估過程。</span></li>
+                           <li><strong data-lang="solutions_org_3_h">確保人類在迴圈中的監督權:</strong> <span data-lang="solutions_org_3_p">在高風險決策中，保留人類專家對AI建議的最終審查、解釋和否決權。</span></li>
+                       </ul>
+                    </div>
+                </div>
+                 <div class="solution-item bg-white/50 rounded-lg shadow-md">
+                    <button class="w-full text-left p-4 font-bold text-lg flex justify-between items-center hover:bg-gray-100 rounded-t-lg">
+                        <span data-lang="solutions_policy_title">🏛️ 公共政策/法律層面：構建負責任的生態</span>
+                        <span class="arrow">▼</span>
+                    </button>
+                    <div class="solution-content hidden p-4 border-t border-gray-200 text-sm">
+                        <ul class="list-disc list-inside space-y-2">
+                           <li><strong data-lang="solutions_policy_1_h">風險分級監管:</strong> <span data-lang="solutions_policy_1_p">借鑒歐盟《人工智慧法案》，對不同風險等級的AI應用制定不同強度的監管要求，禁止「不可接受風險」的應用。</span></li>
+                           <li><strong data-lang="solutions_policy_2_h">投資於人與社會保障:</strong> <span data-lang="solutions_policy_2_p">政府應大規模投資於技能再培訓與終身學習，並強化社會安全網，為轉型中的勞動者提供支持。</span></li>
+                           <li><strong data-lang="solutions_policy_3_h">促進公私協力與國際合作:</strong> <span data-lang="solutions_policy_3_p">建立跨部門、跨國界的合作機制，共同制定倫理標準，分享最佳實踐。</span></li>
+                       </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#edeae5] mt-16">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500 text-sm">
+            <p data-lang="footer_credit">此互動式報告根據《駕馭雙刃劍：人工智慧歧視、勞動力轉型與公平未來路徑圖》報告內容製作。</p>
+            <p data-lang="footer_source">所有數據與案例分析均來源於原報告。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const langData = {
+                zh: {
+                    header_title: 'AI的雙刃劍',
+                    nav_intro: '導論', nav_impact: '現實衝擊', nav_workforce: '勞動力變革', nav_solutions: '未來路徑',
+                    nav_intro_mobile: '導論', nav_impact_mobile: '現實衝擊', nav_workforce_mobile: '勞動力變革', nav_solutions_mobile: '未來路徑',
+                    hero_title: '駕馭雙刃劍',
+                    hero_subtitle: '剖析人工智慧歧視、勞動力轉型與公平的未來路徑圖。',
+                    hero_desc: '本報告旨在系統性剖析人工智慧（AI）所引發的三大交織挑戰：演算法偏見的根源、AI歧視的社會衝擊，以及自動化對全球就業結構的深遠變革。我們將探索其生成機制、現實案例，並提出一個邁向更公平、更具韌性智慧未來的多層次治理框架。',
+                    intro_title: '第一部分：演算法不公的剖析',
+                    intro_desc: '理解演算法不公，首先要釐清核心概念。本節將透過互動式卡片，解釋「偏見」如何轉化為「歧視」，並揭示偏見在AI生命週期中的三大來源。',
+                    intro_concepts_title: '關鍵概念辨析',
+                    intro_bias_title: '統計性偏見 (Bias)',
+                    intro_bias_desc: '在機器學習中，偏見是模型中的系統性誤差，是演算法學習和泛化的必要部分。它本質上是技術性且中性的。',
+                    intro_discrimination_title: '社會性歧視 (Discrimination)',
+                    intro_discrimination_desc: '一個法律和倫理概念，指基於受保護特徵（如種族、性別）對個人進行不公平對待。它具有社會性、負面性，且取決於具體情境。',
+                    intro_sources_title: '偏見的來源：AI生命週期',
+                    intro_source_data: '💾 數據 (Data)',
+                    intro_source_data_1_h: '歷史偏見：', intro_source_data_1_p: '訓練數據反映了現實世界長期的社會偏見。',
+                    intro_source_data_2_h: '代表性偏見：', intro_source_data_2_p: '訓練數據未能均衡代表所有群體。',
+                    intro_source_data_3_h: '測量偏見：', intro_source_data_3_p: '使用了不恰當的代理指標（如用「逮捕記錄」代表「犯罪活動」）。',
+                    intro_source_algo: '⚙️ 演算法 (Algorithm)',
+                    intro_source_algo_1_h: '演算法偏見：', intro_source_algo_1_p: '模型本身的設計（如目標函數）引入了偏見。',
+                    intro_source_algo_2_h: '評估偏見：', intro_source_algo_2_p: '用於評估模型的基準不能代表真實世界。',
+                    intro_source_human: '🧑‍💻 人為互動 (Human)',
+                    intro_source_human_1_h: '人類決策偏見：', intro_source_human_1_p: '開發者或標註員將自身的刻板印象注入系統。',
+                    intro_source_human_2_h: '使用與詮釋偏見：', intro_source_human_2_p: '使用者錯誤地詮釋或應用演算法的輸出。',
+                    intro_intersectional_title: '交織性偏見：當多重劣勢疊加',
+                    intro_intersectional_desc: '偏見並非簡單相加，而是相互強化。以人臉辨識為例，深膚色女性面臨的錯誤率遠高於單純膚色或性別的錯誤率總和。',
+                    intro_intersectional_source: '資料來源：「性別光譜」(Gender Shades) 研究。圖表為示意，旨在說明錯誤率的巨大差異。',
+                    impact_title: '第二部分：數位閘門的守衛',
+                    impact_desc: '理論上的偏見在現實世界中轉化為具體的歧視。本節將透過具體案例，展示AI如何在就業、信貸、司法等關鍵領域，成為決定個人命運的「數位閘門守衛」。',
+                    impact_tab_employment: '就業招聘', impact_tab_credit: '信貸審批', impact_tab_justice: '刑事司法',
+                    impact_case_amazon_title: '案例：亞馬遜AI招聘工具',
+                    impact_case_amazon_desc: '該工具學習了公司過去十年的履歷數據，由於數據中男性佔主導，演算法學會了懲罰履歷中出現「女性」相關詞彙（如「女子學院」）的候選人，系統性地過濾掉合格的女性求職者。',
+                    impact_mechanism: '偏見機制：', impact_case_amazon_mech: '歷史數據偏見',
+                    impact_consequence: '社會後果：', impact_case_amazon_cons: '加劇科技行業的性別不平等。',
+                    impact_other_risks_title: '其他招聘環節的風險',
+                    impact_risk_1_h: '廣告投放：', impact_risk_1_p: '演算法可能根據刻板印象，將高薪技術崗位更多推送給男性。',
+                    impact_risk_2_h: '履歷篩選：', impact_risk_2_p: '自動化系統可能因求職者履歷中的「空窗期」（如育兒假）而給予負面評價。',
+                    impact_risk_3_h: '薪資設定：', impact_risk_3_p: '若基於歷史數據，AI會固化男女同工不同酬的現象。',
+                    impact_case_redlining_title: '案例：數位時代的「紅線制度」',
+                    impact_case_redlining_desc: '信貸演算法可能不直接使用種族資訊，但會利用與種族高度相關的「代理變數」進行決策。例如，郵遞區號、消費習慣、甚至使用的手機類型或電子郵件服務商，都可能成為判斷信用風險的依據，從而對特定族裔社區形成金融排斥。',
+                    impact_mechanism_2: '偏見機制：', impact_case_redlining_mech: '代理變數的隱蔽歧視',
+                    impact_consequence_2: '社會後果：', impact_case_redlining_cons: '限制少數族裔獲得信貸的機會，擴大貧富差距。',
+                    impact_case_compas_title: '案例：COMPAS再犯風險評估系統',
+                    impact_case_compas_desc: 'ProPublica的調查發現，該系統在預測再犯風險時，對非裔美國人被告的「假陽性率」（即錯誤預測為高風險）幾乎是白人被告的兩倍。這意味著一個無辜的黑人比無辜的白人更有可能被系統貼上「危險」標籤，影響其保釋和量刑決定。',
+                    impact_mechanism_3: '偏見機制：', impact_case_compas_mech: '訓練數據反映了司法系統的歷史偏見',
+                    impact_consequence_3: '社會後果：', impact_case_compas_cons: '可能導致對少數族裔更嚴厲的處罰，加劇司法不公。',
+                    workforce_title: '第三部分：勞動力的結構性變革',
+                    workforce_desc: 'AI與自動化正重塑全球勞動力市場。這並非工作總量的終結，而是一場深刻的結構性重組。本節透過數據視覺化，揭示工作崗位的消亡與新生，以及未來技能需求的轉變。',
+                    workforce_job_change_title: '工作崗位的淨變化 (至2025年)',
+                    workforce_job_change_desc: '根據世界經濟論壇預測，雖然大量常規性工作將被取代，但新興領域將創造更多工作崗位，挑戰在於勞動力的技能轉型。',
+                    workforce_job_change_source: '資料來源：世界經濟論壇《未來工作報告》。',
+                    workforce_skills_title: '未來工作的核心技能版圖',
+                    workforce_skills_desc: '未來市場將高度重視那些機器難以替代的能力。過去的標準化技能正迅速貶值，三類新技能變得至關重要。',
+                    workforce_skills_source: '資料來源：綜合多家機構報告分析。',
+                    solutions_title: '第四部分：邁向公平的智慧未來',
+                    solutions_desc: '應對AI挑戰需要一個整合性的治理路徑。單一的技術修復或政策干預遠遠不夠。本節展示了一個結合技術、組織與公共政策的多層次解決方案框架。',
+                    solutions_tech_title: '🛠️ 技術層面：打造更公平的演算法',
+                    solutions_tech_1_h: '公平感知機器學習 (Fairness-Aware ML):', solutions_tech_1_p: '在AI生命週期的前、中、後處理階段嵌入公平性考量，如對數據重加權或在模型中加入公平性約束。',
+                    solutions_tech_2_h: '可解釋性AI (XAI):', solutions_tech_2_p: '使用LIME、SHAP等技術打開「黑盒子」，解釋模型決策，為受影響者提供申訴依據，實現「解釋權」。',
+                    solutions_tech_3_h: '針對大型語言模型 (LLM) 的策略:', solutions_tech_3_p: '開發專門的去偏方法，如「反事實數據增強」，以消除性別、種族等刻板印象。',
+                    solutions_org_title: '🏢 組織/企業層面：超越技術修復',
+                    solutions_org_1_h: '演算法稽核與影響力評估:', solutions_org_1_p: '將演算法稽核制度化，定期進行獨立、嚴格的偏見檢測，如紐約市的法律要求。',
+                    solutions_org_2_h: '擁抱多元與包容:', solutions_org_2_p: '建立多元化的開發團隊，並讓受影響的社群參與AI的設計與評估過程。',
+                    solutions_org_3_h: '確保人類在迴圈中的監督權:', solutions_org_3_p: '在高風險決策中，保留人類專家對AI建議的最終審查、解釋和否決權。',
+                    solutions_policy_title: '🏛️ 公共政策/法律層面：構建負責任的生態',
+                    solutions_policy_1_h: '風險分級監管:', solutions_policy_1_p: '借鑒歐盟《人工智慧法案》，對不同風險等級的AI應用制定不同強度的監管要求，禁止「不可接受風險」的應用。',
+                    solutions_policy_2_h: '投資於人與社會保障:', solutions_policy_2_p: '政府應大規模投資於技能再培訓與終身學習，並強化社會安全網，為轉型中的勞動者提供支持。',
+                    solutions_policy_3_h: '促進公私協力與國際合作:', solutions_policy_3_p: '建立跨部門、跨國界的合作機制，共同制定倫理標準，分享最佳實踐。',
+                    footer_credit: '此互動式報告根據《駕馭雙刃劍：人工智慧歧視、勞動力轉型與公平未來路徑圖》報告內容製作。',
+                    footer_source: '所有數據與案例分析均來源於原報告。',
+                    chart_gender_shades_label: '人臉辨識錯誤率（示意）',
+                    chart_gender_shades_x_axis: '錯誤率 (%)',
+                    chart_gender_shades_tooltip: '錯誤率',
+                    chart_gender_shades_categories: ['淺膚色男性', '淺膚色女性', '深膚色男性', '深膚色女性'],
+                    chart_job_change_labels: ['被取代的職位', '新創造的職位'],
+                    chart_job_change_tooltip: '百萬',
+                    chart_skills_label: '未來技能重要性',
+                    chart_skills_categories: ['批判性思維', '創造力', '領導力與社交', '同理心', '技術素養', 'AI協作能力'],
+                },
+                en: {
+                    header_title: 'AI\'s Double-Edged Sword',
+                    nav_intro: 'Introduction', nav_impact: 'Real-World Impact', nav_workforce: 'Workforce Transformation', nav_solutions: 'The Path Forward',
+                    nav_intro_mobile: 'Introduction', nav_impact_mobile: 'Real-World Impact', nav_workforce_mobile: 'Workforce Transformation', nav_solutions_mobile: 'The Path Forward',
+                    hero_title: 'Navigating the Double-Edged Sword',
+                    hero_subtitle: 'Analyzing AI Discrimination, Workforce Transformation, and the Roadmap to a Fair Future.',
+                    hero_desc: 'This report systematically analyzes three intertwined challenges posed by Artificial Intelligence (AI): the roots of algorithmic bias, the societal impact of AI discrimination, and the profound changes automation brings to the global employment structure. We will explore its generation mechanisms, real-world cases, and propose a multi-level governance framework for a fairer, more resilient intelligent future.',
+                    intro_title: 'Part 1: The Anatomy of Algorithmic Injustice',
+                    intro_desc: 'To understand algorithmic injustice, we must first clarify core concepts. This section uses interactive cards to explain how "bias" transforms into "discrimination" and reveals the three main sources of bias in the AI lifecycle.',
+                    intro_concepts_title: 'Key Concepts Defined',
+                    intro_bias_title: 'Statistical Bias',
+                    intro_bias_desc: 'In machine learning, bias is a systematic error in a model, a necessary part of learning and generalization. It is inherently technical and neutral.',
+                    intro_discrimination_title: 'Societal Discrimination',
+                    intro_discrimination_desc: 'A legal and ethical concept referring to unfair treatment based on protected characteristics (e.g., race, gender). It is social, negative, and context-dependent.',
+                    intro_sources_title: 'Sources of Bias: The AI Lifecycle',
+                    intro_source_data: '💾 Data',
+                    intro_source_data_1_h: 'Historical Bias:', intro_source_data_1_p: 'Training data reflects long-standing societal prejudices.',
+                    intro_source_data_2_h: 'Representation Bias:', intro_source_data_2_p: 'Training data fails to equally represent all groups.',
+                    intro_source_data_3_h: 'Measurement Bias:', intro_source_data_3_p: 'Inappropriate proxies are used (e.g., "arrest records" for "criminal activity").',
+                    intro_source_algo: '⚙️ Algorithm',
+                    intro_source_algo_1_h: 'Algorithmic Bias:', intro_source_algo_1_p: 'The model\'s design itself (e.g., objective function) introduces bias.',
+                    intro_source_algo_2_h: 'Evaluation Bias:', intro_source_algo_2_p: 'Benchmarks used to evaluate the model do not represent the real world.',
+                    intro_source_human: '🧑‍💻 Human Interaction',
+                    intro_source_human_1_h: 'Human Decision Bias:', intro_source_human_1_p: 'Developers or annotators inject their own stereotypes into the system.',
+                    intro_source_human_2_h: 'Usage & Interpretation Bias:', intro_source_human_2_p: 'Users misinterpret or misapply the algorithm\'s output.',
+                    intro_intersectional_title: 'Intersectional Bias: When Disadvantages Compound',
+                    intro_intersectional_desc: 'Bias is not simply additive; it is multiplicative. In facial recognition, for example, the error rate for dark-skinned women is far higher than the sum of error rates for skin color and gender alone.',
+                    intro_intersectional_source: 'Source: "Gender Shades" study. The chart is illustrative, meant to show the significant disparity in error rates.',
+                    impact_title: 'Part 2: The Digital Gatekeepers',
+                    impact_desc: 'Theoretical bias translates into tangible discrimination in the real world. This section uses concrete cases to show how AI acts as a "digital gatekeeper" in critical areas like employment, credit, and justice, deciding individual fates.',
+                    impact_tab_employment: 'Employment & Hiring', impact_tab_credit: 'Credit & Lending', impact_tab_justice: 'Criminal Justice',
+                    impact_case_amazon_title: 'Case: Amazon\'s AI Recruiting Tool',
+                    impact_case_amazon_desc: 'The tool learned from a decade of resumes, which were predominantly from men. The algorithm taught itself to penalize resumes that included women-related terms (e.g., "women\'s college"), systematically filtering out qualified female candidates.',
+                    impact_mechanism: 'Mechanism of Bias:', impact_case_amazon_mech: 'Historical Data Bias',
+                    impact_consequence: 'Societal Consequence:', impact_case_amazon_cons: 'Exacerbated gender inequality in the tech industry.',
+                    impact_other_risks_title: 'Risks in Other Hiring Stages',
+                    impact_risk_1_h: 'Ad Targeting:', impact_risk_1_p: 'Algorithms may show high-paying tech jobs disproportionately to men based on stereotypes.',
+                    impact_risk_2_h: 'Resume Screening:', impact_risk_2_p: 'Automated systems might penalize candidates for "gaps" in their resumes, such as parental leave.',
+                    impact_risk_3_h: 'Salary Setting:', impact_risk_3_p: 'If based on historical data, AI can perpetuate the gender pay gap.',
+                    impact_case_redlining_title: 'Case: Digital-Era "Redlining"',
+                    impact_case_redlining_desc: 'Credit algorithms may not use race directly but can use highly correlated "proxy variables." ZIP codes, spending habits, or even phone type can become a basis for credit risk, leading to financial exclusion for certain ethnic communities.',
+                    impact_mechanism_2: 'Mechanism of Bias:', impact_case_redlining_mech: 'Hidden Discrimination via Proxies',
+                    impact_consequence_2: 'Societal Consequence:', impact_case_redlining_cons: 'Limits access to credit for minorities, widening the wealth gap.',
+                    impact_case_compas_title: 'Case: COMPAS Recidivism Risk System',
+                    impact_case_compas_desc: 'A ProPublica investigation found the system\'s "false positive" rate (wrongly predicting high risk) for Black defendants was nearly twice that of white defendants. This means an innocent Black person is more likely to be labeled "dangerous," affecting bail and sentencing.',
+                    impact_mechanism_3: 'Mechanism of Bias:', impact_case_compas_mech: 'Training data reflects historical bias in the justice system',
+                    impact_consequence_3: 'Societal Consequence:', impact_case_compas_cons: 'May lead to harsher penalties for minorities, exacerbating judicial inequality.',
+                    workforce_title: 'Part 3: The Structural Transformation of the Workforce',
+                    workforce_desc: 'AI and automation are reshaping the global labor market. This is not the end of work, but a profound structural reorganization. This section uses data visualization to reveal the destruction and creation of jobs, and the shift in future skill demands.',
+                    workforce_job_change_title: 'Net Change in Jobs (by 2025)',
+                    workforce_job_change_desc: 'According to the World Economic Forum, while many routine jobs will be displaced, emerging fields will create more jobs. The challenge lies in the workforce\'s skill transition.',
+                    workforce_job_change_source: 'Source: World Economic Forum "Future of Jobs Report".',
+                    workforce_skills_title: 'Core Skills Landscape for Future Jobs',
+                    workforce_skills_desc: 'The future market will highly value skills that are difficult for machines to replicate. Standardized skills of the past are rapidly depreciating, and three new skill categories are becoming crucial.',
+                    workforce_skills_source: 'Source: Analysis from multiple institutional reports.',
+                    solutions_title: 'Part 4: The Path to a Fair Intelligent Future',
+                    solutions_desc: 'Addressing AI challenges requires an integrated governance path. A single technical fix or policy intervention is insufficient. This section presents a multi-level solution framework combining technology, organization, and public policy.',
+                    solutions_tech_title: '🛠️ Technical Level: Building Fairer Algorithms',
+                    solutions_tech_1_h: 'Fairness-Aware ML:', solutions_tech_1_p: 'Embed fairness considerations in pre-, in-, or post-processing stages of the AI lifecycle, such as reweighing data or adding fairness constraints to models.',
+                    solutions_tech_2_h: 'Explainable AI (XAI):', solutions_tech_2_p: 'Use techniques like LIME and SHAP to open the "black box," explain model decisions, and provide a basis for appeal, fulfilling the "right to explanation."',
+                    solutions_tech_3_h: 'Strategies for LLMs:', solutions_tech_3_p: 'Develop specialized debiasing methods like "counterfactual data augmentation" to eliminate gender, racial, and other stereotypes.',
+                    solutions_org_title: '🏢 Organizational/Corporate Level: Beyond Technical Fixes',
+                    solutions_org_1_h: 'Algorithmic Audits & Impact Assessments:', solutions_org_1_p: 'Institutionalize algorithmic audits and conduct regular, independent bias checks, as required by laws like NYC\'s.',
+                    solutions_org_2_h: 'Embrace Diversity & Inclusion:', solutions_org_2_p: 'Build diverse development teams and involve affected communities in the design and evaluation process of AI.',
+                    solutions_org_3_h: 'Ensure Human-in-the-Loop Oversight:', solutions_org_3_p: 'In high-stakes decisions, retain human experts to review, interpret, and override AI recommendations.',
+                    solutions_policy_title: '🏛️ Public Policy/Legal Level: Building a Responsible Ecosystem',
+                    solutions_policy_1_h: 'Risk-Based Regulation:', solutions_policy_1_p: 'Adopt a risk-based approach like the EU AI Act, setting stricter rules for high-risk applications and banning "unacceptable risk" uses.',
+                    solutions_policy_2_h: 'Invest in People & Social Safety Nets:', solutions_policy_2_p: 'Governments should invest heavily in reskilling, lifelong learning, and strengthening social safety nets to support workers in transition.',
+                    solutions_policy_3_h: 'Promote Public-Private & International Cooperation:', solutions_policy_3_p: 'Establish cross-sector and cross-border collaborations to set ethical standards and share best practices.',
+                    footer_credit: 'This interactive report is based on the contents of "Navigating the Double-Edged Sword: AI Discrimination, Workforce Transformation, and the Roadmap to a Fair Future."',
+                    footer_source: 'All data and case analyses are sourced from the original report.',
+                    chart_gender_shades_label: 'Facial Recognition Error Rate (Illustrative)',
+                    chart_gender_shades_x_axis: 'Error Rate (%)',
+                    chart_gender_shades_tooltip: 'Error Rate',
+                    chart_gender_shades_categories: ['Light-Skinned Male', 'Light-Skinned Female', 'Dark-Skinned Male', 'Dark-Skinned Female'],
+                    chart_job_change_labels: ['Displaced Jobs', 'Created Jobs'],
+                    chart_job_change_tooltip: 'Million',
+                    chart_skills_label: 'Importance of Future Skills',
+                    chart_skills_categories: ['Critical Thinking', 'Creativity', 'Leadership & Social', 'Empathy', 'Tech Literacy', 'AI Collaboration'],
+                }
+            };
+
+            let currentLang = 'zh';
+            let genderShadesChart, jobChangeChart, skillsChart;
+
+            function updateText(lang) {
+                document.documentElement.lang = lang;
+                const elements = document.querySelectorAll('[data-lang]');
+                elements.forEach(el => {
+                    const key = el.getAttribute('data-lang');
+                    if (langData[lang][key]) {
+                        el.innerHTML = langData[lang][key];
+                    }
+                });
+                
+                document.getElementById('lang-switcher').textContent = lang === 'zh' ? 'English' : '中文';
+                document.getElementById('lang-switcher-mobile').textContent = lang === 'zh' ? 'English' : '中文';
+                
+                updateCharts(lang);
+            }
+
+            function updateCharts(lang) {
+                const chartLang = langData[lang];
+
+                if (genderShadesChart) genderShadesChart.destroy();
+                genderShadesChart = new Chart(document.getElementById('genderShadesChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: chartLang.chart_gender_shades_categories,
+                        datasets: [{
+                            label: chartLang.chart_gender_shades_label,
+                            data: [0.8, 8.1, 12.3, 34.7],
+                            backgroundColor: ['rgba(189, 215, 238, 0.6)','rgba(244, 204, 204, 0.6)','rgba(163, 126, 98, 0.6)','rgba(163, 126, 98, 1.0)'],
+                            borderColor: ['rgba(189, 215, 238, 1)','rgba(244, 204, 204, 1)','rgba(163, 126, 98, 1)','rgba(109, 76, 65, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (c) => `${chartLang.chart_gender_shades_tooltip}: ${c.raw}%` } } },
+                        scales: { x: { beginAtZero: true, title: { display: true, text: chartLang.chart_gender_shades_x_axis } } }
+                    }
+                });
+
+                if (jobChangeChart) jobChangeChart.destroy();
+                jobChangeChart = new Chart(document.getElementById('jobChangeChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLang.chart_job_change_labels,
+                        datasets: [{ data: [85, 97], backgroundColor: ['#e57373', '#81c784'], borderColor: ['#f8f7f4'], borderWidth: 3 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw} ${chartLang.chart_job_change_tooltip}` } } }
+                    }
+                });
+
+                if (skillsChart) skillsChart.destroy();
+                skillsChart = new Chart(document.getElementById('skillsChart').getContext('2d'), {
+                    type: 'radar',
+                    data: {
+                        labels: chartLang.chart_skills_categories,
+                        datasets: [{
+                            label: chartLang.chart_skills_label, data: [90, 85, 88, 80, 95, 92],
+                            backgroundColor: 'rgba(163, 126, 98, 0.2)', borderColor: 'rgba(163, 126, 98, 1)',
+                            borderWidth: 2, pointBackgroundColor: 'rgba(163, 126, 98, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { r: { beginAtZero: true, max: 100, ticks: { display: false }, pointLabels: { font: { size: 12 } } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            function switchLanguage() {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateText(currentLang);
+            }
+
+            document.getElementById('lang-switcher').addEventListener('click', switchLanguage);
+            document.getElementById('lang-switcher-mobile').addEventListener('click', switchLanguage);
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                       mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const biasSourceItems = document.querySelectorAll('.bias-source-item');
+            biasSourceItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const contentId = item.getAttribute('data-content');
+                    const content = document.getElementById(contentId);
+                    const arrow = item.querySelector('.arrow');
+                    content.classList.toggle('hidden');
+                    arrow.textContent = content.classList.contains('hidden') ? '▼' : '▲';
+                });
+            });
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const target = tab.getAttribute('data-tab');
+                    tabPanes.forEach(pane => {
+                        pane.id === `${target}-content` ? pane.classList.remove('hidden') : pane.classList.add('hidden');
+                    });
+                });
+            });
+            
+            const solutionItems = document.querySelectorAll('.solution-item button');
+            solutionItems.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const arrow = button.querySelector('.arrow');
+                    content.classList.toggle('hidden');
+                    arrow.textContent = content.classList.contains('hidden') ? '▼' : '▲';
+                });
+            });
+
+            Chart.defaults.font.family = "'Noto Sans TC', 'Roboto', sans-serif";
+            Chart.defaults.color = '#3d3d3d';
+
+            updateText(currentLang);
+        });
+    </script>
+</body>
+</html>
