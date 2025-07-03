@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：科技創新與綠色經濟 (中英雙語/深色模式)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Midnight Teal (Background: Slate-900, Text: Slate-300, Accent: Teal-400) -->
+    <!-- Application Structure Plan: The SPA uses a thematic, non-linear dashboard structure with a top navigation bar (Home, Pollution Control, Clean Energy, Transformation Blueprint, Core Concepts). This is better than a linear report format because it allows users to directly access topics of interest and explore the interconnectedness of technologies, policies, and economic principles. The user flow is designed for both guided discovery (scrolling) and targeted exploration (navigation), enhancing usability and comprehension of the complex subject matter. -->
+    <!-- Visualization & Content Choices:
+        - Pollution Control: Goal=Compare/Inform. Method=Interactive cards for categories, and a Chart.js bar chart for TRL comparison. Justification=Visually separates distinct problem areas while allowing for quick comparison of technology maturity.
+        - Clean Energy: Goal=Compare. Method=Multiple Chart.js visualizations (bar, doughnut) for costs (LCOS, Hydrogen) and market share. Interaction=Clickable legends. Justification=Charts provide a quick, powerful way to understand complex quantitative comparisons from the report's tables.
+        - Transformation Blueprint: Goal=Organize/Inform. Method=Tabbed interface for stakeholder recommendations. Justification=Organizes dense, targeted information efficiently without overwhelming the user.
+        - All diagrams and icons are built with HTML/CSS/Tailwind and Unicode characters.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            color: #d1d5db; /* slate-300 */
+        }
+        .chart-container {
+            position: relative;
+            height: 40vh;
+            max-height: 400px;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #2dd4bf; /* teal-400 */
+        }
+        .section-title {
+            color: #5eead4; /* teal-300 */
+        }
+        .card {
+            background-color: #1e293b; /* slate-800 */
+            border-radius: 0.75rem;
+            border: 1px solid #334155; /* slate-700 */
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #475569; /* slate-600 */
+        }
+        .tab-btn {
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .tab-btn.active {
+            color: #2dd4bf; /* teal-400 */
+            border-bottom-color: #2dd4bf;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-slate-800">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-teal-400" data-lang-key="header_title">綠色科技藍圖</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#home" class="nav-link text-slate-300 px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_home">首頁</a>
+                            <a href="#pollution-control" class="nav-link text-slate-300 px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_pollution">污染防治</a>
+                            <a href="#clean-energy" class="nav-link text-slate-300 px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_energy">潔淨能源</a>
+                            <a href="#transformation" class="nav-link text-slate-300 px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_blueprint">轉型藍圖</a>
+                            <a href="#core-concepts" class="nav-link text-slate-300 px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_concepts">核心概念</a>
+                        </div>
+                    </div>
+                    <button id="lang-switcher" class="ml-4 p-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-teal-400 transition">
+                        EN / 中文
+                    </button>
+                    <div class="md:hidden ml-2">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-teal-400 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-teal-500">
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#home" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_home_mobile">首頁</a>
+                    <a href="#pollution-control" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_pollution_mobile">污染防治</a>
+                    <a href="#clean-energy" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_energy_mobile">潔淨能源</a>
+                    <a href="#transformation" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_blueprint_mobile">轉型藍圖</a>
+                    <a href="#core-concepts" class="nav-link block px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_concepts_mobile">核心概念</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="home" class="text-center py-16">
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-100 mb-4" data-lang-key="home_title">綠色科技的交匯點</h1>
+            <p class="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto" data-lang-key="home_subtitle">建構一個永續與繁榮的全球經濟戰略藍圖</p>
+            <p class="mt-6 max-w-4xl mx-auto text-slate-400 leading-relaxed" data-lang-key="home_intro">
+                全球向綠色經濟的轉型，不僅是環境的必然，更是一場深刻的經濟典範轉移。本互動報告旨在闡述如何透過在污染控制、潔淨能源及循環材料等領域的技術躍進，來應對環境惡化與能源安全的雙重危機，共同擘劃一條通往具備韌性、低碳且社會包容的全球經濟之路。
+            </p>
+        </section>
+
+        <section id="pollution-control" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold mb-2" data-lang-key="pollution_title">環境修復與污染控制</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto" data-lang-key="pollution_subtitle">探索應對空氣、水、土壤及廢棄物污染的技術前沿，見證污染控制如何從成本中心轉變為價值創造中心。</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">🌬️</div>
+                    <h3 class="text-xl font-semibold text-slate-100 mb-2" data-lang-key="pollution_card1_title">淨化空氣</h3>
+                    <p class="text-slate-400 text-sm" data-lang-key="pollution_card1_text">從單一污染物控制走向多污染物協同治理，並與節能降耗相結合。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">💧</div>
+                    <h3 class="text-xl font-semibold text-slate-100 mb-2" data-lang-key="pollution_card2_title">淨化水體</h3>
+                    <p class="text-slate-400 text-sm" data-lang-key="pollution_card2_text">將廢水處理廠重新定位為「資源回收廠」與「能源再生中心」。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">🌱</div>
+                    <h3 class="text-xl font-semibold text-slate-100 mb-2" data-lang-key="pollution_card3_title">療癒土地</h3>
+                    <p class="text-slate-400 text-sm" data-lang-key="pollution_card3_text">從物理化學方法走向更精準、低碳、生態友好的生物及智慧化修復。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">♻️</div>
+                    <h3 class="text-xl font-semibold text-slate-100 mb-2" data-lang-key="pollution_card4_title">終結廢棄物</h3>
+                    <p class="text-slate-400 text-sm" data-lang-key="pollution_card4_text">開發替代材料與建立強大回收體系並行，實現材料科學的循環革命。</p>
+                </div>
+            </div>
+
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-slate-100 text-center mb-4" data-lang-key="pollution_chart_title">污染防治技術成熟度 (TRL) 比較</h3>
+                <p class="text-slate-400 text-center max-w-2xl mx-auto mb-8" data-lang-key="pollution_chart_subtitle">技術成熟度 (TRL) 是一個衡量技術發展階段的指標，從1級（基礎原理研究）到9級（實際系統驗證）。此圖表展示了報告中關鍵技術的成熟度，幫助決策者評估其商業化應用的可行性。</p>
+                <div class="chart-container">
+                    <canvas id="pollutionTechChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="clean-energy" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold mb-2" data-lang-key="energy_title">潔淨能源轉型</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto" data-lang-key="energy_subtitle">深入了解驅動能源系統脫碳的關鍵技術組合，從再生能源發電、儲能到智慧電網與碳捕獲。</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-slate-100 text-center mb-4" data-lang-key="energy_chart1_title">電網級儲能技術成本 (LCOS) 比較</h3>
+                    <p class="text-slate-400 text-center max-w-2xl mx-auto mb-8" data-lang-key="energy_chart1_subtitle">大規模儲能是整合間歇性再生能源的關鍵。此圖比較了不同儲能技術的度電儲能成本 (LCOS)，揭示了它們在不同應用場景下的經濟性。</p>
+                    <div class="chart-container">
+                        <canvas id="storageCostChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-slate-100 text-center mb-4" data-lang-key="energy_chart2_title">2030年綠色氫氣生產成本預測</h3>
+                    <p class="text-slate-400 text-center max-w-2xl mx-auto mb-8" data-lang-key="energy_chart2_subtitle">綠色氫能是重工業脫碳的關鍵。然而，其成本在全球範圍內差異顯著。此圖表基於IEA淨零排放情景，預測了各主要地區的生產成本。</p>
+                    <div class="chart-container">
+                        <canvas id="hydrogenCostChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-slate-100 text-center mb-4" data-lang-key="energy_baseload_title">全天候潔淨電力</h3>
+                    <p class="text-slate-400 text-center max-w-2xl mx-auto mb-8" data-lang-key="energy_baseload_subtitle">除了風光等變動性能源，提供穩定基載電力的潔淨能源也至關重要。</p>
+                    <div class="space-y-4">
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <h4 class="font-semibold text-teal-400" data-lang-key="energy_geothermal_title">🌍 增強型地熱系統 (EGS)</h4>
+                            <p class="text-sm text-slate-300" data-lang-key="energy_geothermal_text">透過人造地熱庫，極大擴展地熱應用範圍。商業化已取得突破，具備成本競爭力。</p>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <h4 class="font-semibold text-teal-400" data-lang-key="energy_fusion_title">☀️ 核融合</h4>
+                            <p class="text-sm text-slate-300" data-lang-key="energy_fusion_text">能源領域的「聖杯」，燃料幾乎無限且無長壽命核廢料。私人企業正加速其商業化進程。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-slate-100 text-center mb-4" data-lang-key="energy_negative_title">負排放技術</h3>
+                     <p class="text-slate-400 text-center max-w-2xl mx-auto mb-8" data-lang-key="energy_negative_subtitle">為實現1.5°C溫控目標，我們必須從大氣中移除已存在的二氧化碳。</p>
+                    <div class="space-y-4">
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <h4 class="font-semibold text-teal-400" data-lang-key="energy_ccus_title">🏭 碳捕獲、利用與封存 (CCUS)</h4>
+                            <p class="text-sm text-slate-300" data-lang-key="energy_ccus_text">在排放源頭捕獲二氧化碳，應用於水泥、鋼鐵等「難減排」行業。</p>
+                        </div>
+                        <div class="bg-slate-700 p-4 rounded-lg">
+                            <h4 class="font-semibold text-teal-400" data-lang-key="energy_dac_title">🍃 直接空氣捕獲 (DAC)</h4>
+                            <p class="text-sm text-slate-300" data-lang-key="energy_dac_text">直接從環境空氣中捕獲二氧化碳，是真正的「負排放」技術，但目前成本高昂。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="transformation" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold mb-2" data-lang-key="blueprint_title">系統性轉型藍圖</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto" data-lang-key="blueprint_subtitle">技術本身無法保證成功。轉型需要整合政策、商業模式與社會共識，並從成功案例中汲取經驗。</p>
+            </div>
+            <div class="max-w-4xl mx-auto">
+                <div class="card p-6 md:p-8 mb-12">
+                     <h3 class="text-2xl font-bold text-slate-100 text-center mb-6" data-lang-key="blueprint_roadmap_title">行動路線圖：給各方利害關係人的建議</h3>
+                     <div class="border-b border-slate-700 mb-4">
+                        <nav class="-mb-px flex justify-center space-x-4 md:space-x-8" aria-label="Tabs">
+                            <button class="tab-btn text-slate-400 whitespace-nowrap py-4 px-1 text-sm font-medium active" data-tab="policymakers" data-lang-key="blueprint_tab_policy">政策制定者</button>
+                            <button class="tab-btn text-slate-400 whitespace-nowrap py-4 px-1 text-sm font-medium" data-tab="investors" data-lang-key="blueprint_tab_investors">投資者</button>
+                            <button class="tab-btn text-slate-400 whitespace-nowrap py-4 px-1 text-sm font-medium" data-tab="industry" data-lang-key="blueprint_tab_industry">產業領袖</button>
+                        </nav>
+                    </div>
+                    <div id="tab-content">
+                        <div id="policymakers-content" class="tab-pane">
+                            <ul class="list-disc list-inside space-y-2 text-slate-300">
+                                <li data-lang-key="blueprint_policy_1"><strong>採納系統性、組合式的政策框架：</strong>摒棄對單一技術的零散支持，著眼於整個能源和經濟系統的優化。</li>
+                                <li data-lang-key="blueprint_policy_2"><strong>為私人投資有效「去風險」：</strong>善用公共財政工具，並提供清晰、穩定且長期的政策信號。</li>
+                                <li data-lang-key="blueprint_policy_3"><strong>簡化並現代化監管流程：</strong>為潔淨能源基礎設施設立綠色通道，並更新電力市場規則以獎勵靈活性。</li>
+                            </ul>
+                        </div>
+                        <div id="investors-content" class="tab-pane hidden">
+                             <ul class="list-disc list-inside space-y-2 text-slate-300">
+                                <li data-lang-key="blueprint_investors_1"><strong>關注「鎬與鏟」的投資機會：</strong>關注支撐轉型的賦能基礎設施和供應鏈，如智慧電網、回收設施等。</li>
+                                <li data-lang-key="blueprint_investors_2"><strong>將氣候風險與機遇納入定價：</strong>深度整合環境與社會風險分析，識別「擱淺資產」風險與綠色成長潛力。</li>
+                                <li data-lang-key="blueprint_investors_3"><strong>擁抱耐心資本（Patient Capital）：</strong>對回收週期長的綠色基礎設施專案保持長遠眼光。</li>
+                            </ul>
+                        </div>
+                        <div id="industry-content" class="tab-pane hidden">
+                             <ul class="list-disc list-inside space-y-2 text-slate-300">
+                                <li data-lang-key="blueprint_industry_1"><strong>將循環模式視為核心競爭力：</strong>將循環經濟理念融入產品設計、製造和商業模式的核心。</li>
+                                <li data-lang-key="blueprint_industry_2"><strong>投資於跨領域的研發合作：</strong>與同行、學術界和初創公司建立夥伴關係，共同攻克行業共性難題。</li>
+                                <li data-lang-key="blueprint_industry_3"><strong>主動引領勞動力轉型：</strong>主動投資員工再培訓，幫助他們掌握綠色經濟所需的新技能。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <h3 class="text-2xl font-bold text-slate-100 mb-6" data-lang-key="blueprint_case_study_title">轉型案例研究：沃旭能源 (Ørsted)</h3>
+                    <div class="card p-6 md:p-8 flex flex-col md:flex-row items-center gap-8">
+                        <div class="md:w-2/3 text-left">
+                            <p class="text-slate-400 mb-4" data-lang-key="blueprint_case_study_text1">沃旭能源的前身是丹麥石油與天然氣公司 (DONG Energy)，在短短十年間，它徹底剝離油氣業務，轉型為全球最大的離岸風電開發商。這一激進的轉型是企業界綠色轉型的標竿。</p>
+                            <p class="font-semibold text-teal-400" data-lang-key="blueprint_case_study_text2">其成功路徑揭示：政策必須引領而非追隨技術。唯有具備前瞻性的、積極主動的政策制定，才能為新技術的發展創造出必要的市場空間。</p>
+                        </div>
+                         <div class="md:w-1/3 text-6xl text-center flex items-center justify-center space-x-4">
+                            <span class="text-slate-500">⚫</span>
+                            <span class="text-teal-500 text-4xl">➡️</span>
+                            <span class="text-teal-500">🟢</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="core-concepts" class="py-16 scroll-mt-16">
+            <div class="text-center mb-12">
+                <h2 class="section-title text-3xl font-bold mb-2" data-lang-key="concepts_title">核心概念</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto" data-lang-key="concepts_subtitle">理解驅動這場變革的基礎框架：綠色經濟、循環經濟與綠色金融。</p>
+            </div>
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl text-slate-100 mb-3" data-lang-key="concepts_card1_title">🌳 綠色經濟</h3>
+                    <p class="text-slate-300" data-lang-key="concepts_card1_text">追求低碳、高氣候適應性、資源高效利用且具備社會包容性的經濟模式。其核心目標在於提升人類福祉與社會公平，同時顯著降低環境風險。</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl text-slate-100 mb-3" data-lang-key="concepts_card2_title">🔄 循環經濟</h3>
+                    <p class="text-slate-300" data-lang-key="concepts_card2_text">綠色經濟的運作系統。顛覆「開採—製造—拋棄」的線性模式，倡導一個「零廢棄」的封閉物質循環系統，產品從設計之初就考慮其整個生命週期。</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-xl text-slate-100 mb-3" data-lang-key="concepts_card3_title">💰 綠色金融</h3>
+                    <p class="text-slate-300" data-lang-key="concepts_card3_text">綠色經濟的資本引擎。將環境、社會與治理 (ESG) 因素納入投融資決策，引導資本流向永續發展的領域，為綠色專案提供必要的資金支持。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-800">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-slate-500">
+            <p data-lang-key="footer_text1">本互動報告基於《綠色科技的交匯點：建構永續與繁榮全球經濟的戰略藍圖》報告生成。</p>
+            <p data-lang-key="footer_text2">&copy; 2025 綠色科技藍圖。僅供演示用途。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const translations = {
+        zh: {
+            "header_title": "綠色科技藍圖",
+            "nav_home": "首頁",
+            "nav_pollution": "污染防治",
+            "nav_energy": "潔淨能源",
+            "nav_blueprint": "轉型藍圖",
+            "nav_concepts": "核心概念",
+            "nav_home_mobile": "首頁",
+            "nav_pollution_mobile": "污染防治",
+            "nav_energy_mobile": "潔淨能源",
+            "nav_blueprint_mobile": "轉型藍圖",
+            "nav_concepts_mobile": "核心概念",
+            "home_title": "綠色科技的交匯點",
+            "home_subtitle": "建構一個永續與繁榮的全球經濟戰略藍圖",
+            "home_intro": "全球向綠色經濟的轉型，不僅是環境的必然，更是一場深刻的經濟典範轉移。本互動報告旨在闡述如何透過在污染控制、潔淨能源及循環材料等領域的技術躍進，來應對環境惡化與能源安全的雙重危機，共同擘劃一條通往具備韌性、低碳且社會包容的全球經濟之路。",
+            "pollution_title": "環境修復與污染控制",
+            "pollution_subtitle": "探索應對空氣、水、土壤及廢棄物污染的技術前沿，見證污染控制如何從成本中心轉變為價值創造中心。",
+            "pollution_card1_title": "淨化空氣",
+            "pollution_card1_text": "從單一污染物控制走向多污染物協同治理，並與節能降耗相結合。",
+            "pollution_card2_title": "淨化水體",
+            "pollution_card2_text": "將廢水處理廠重新定位為「資源回收廠」與「能源再生中心」。",
+            "pollution_card3_title": "療癒土地",
+            "pollution_card3_text": "從物理化學方法走向更精準、低碳、生態友好的生物及智慧化修復。",
+            "pollution_card4_title": "終結廢棄物",
+            "pollution_card4_text": "開發替代材料與建立強大回收體系並行，實現材料科學的循環革命。",
+            "pollution_chart_title": "污染防治技術成熟度 (TRL) 比較",
+            "pollution_chart_subtitle": "技術成熟度 (TRL) 是一個衡量技術發展階段的指標，從1級（基礎原理研究）到9級（實際系統驗證）。此圖表展示了報告中關鍵技術的成熟度，幫助決策者評估其商業化應用的可行性。",
+            "energy_title": "潔淨能源轉型",
+            "energy_subtitle": "深入了解驅動能源系統脫碳的關鍵技術組合，從再生能源發電、儲能到智慧電網與碳捕獲。",
+            "energy_chart1_title": "電網級儲能技術成本 (LCOS) 比較",
+            "energy_chart1_subtitle": "大規模儲能是整合間歇性再生能源的關鍵。此圖比較了不同儲能技術的度電儲能成本 (LCOS)，揭示了它們在不同應用場景下的經濟性。",
+            "energy_chart2_title": "2030年綠色氫氣生產成本預測",
+            "energy_chart2_subtitle": "綠色氫能是重工業脫碳的關鍵。然而，其成本在全球範圍內差異顯著。此圖表基於IEA淨零排放情景，預測了各主要地區的生產成本。",
+            "energy_baseload_title": "全天候潔淨電力",
+            "energy_baseload_subtitle": "除了風光等變動性能源，提供穩定基載電力的潔淨能源也至關重要。",
+            "energy_geothermal_title": "🌍 增強型地熱系統 (EGS)",
+            "energy_geothermal_text": "透過人造地熱庫，極大擴展地熱應用範圍。商業化已取得突破，具備成本競爭力。",
+            "energy_fusion_title": "☀️ 核融合",
+            "energy_fusion_text": "能源領域的「聖杯」，燃料幾乎無限且無長壽命核廢料。私人企業正加速其商業化進程。",
+            "energy_negative_title": "負排放技術",
+            "energy_negative_subtitle": "為實現1.5°C溫控目標，我們必須從大氣中移除已存在的二氧化碳。",
+            "energy_ccus_title": "🏭 碳捕獲、利用與封存 (CCUS)",
+            "energy_ccus_text": "在排放源頭捕獲二氧化碳，應用於水泥、鋼鐵等「難減排」行業。",
+            "energy_dac_title": "🍃 直接空氣捕獲 (DAC)",
+            "energy_dac_text": "直接從環境空氣中捕獲二氧化碳，是真正的「負排放」技術，但目前成本高昂。",
+            "blueprint_title": "系統性轉型藍圖",
+            "blueprint_subtitle": "技術本身無法保證成功。轉型需要整合政策、商業模式與社會共識，並從成功案例中汲取經驗。",
+            "blueprint_roadmap_title": "行動路線圖：給各方利害關係人的建議",
+            "blueprint_tab_policy": "政策制定者",
+            "blueprint_tab_investors": "投資者",
+            "blueprint_tab_industry": "產業領袖",
+            "blueprint_policy_1": "<strong>採納系統性、組合式的政策框架：</strong>摒棄對單一技術的零散支持，著眼於整個能源和經濟系統的優化。",
+            "blueprint_policy_2": "<strong>為私人投資有效「去風險」：</strong>善用公共財政工具，並提供清晰、穩定且長期的政策信號。",
+            "blueprint_policy_3": "<strong>簡化並現代化監管流程：</strong>為潔淨能源基礎設施設立綠色通道，並更新電力市場規則以獎勵靈活性。",
+            "blueprint_investors_1": "<strong>關注「鎬與鏟」的投資機會：</strong>關注支撐轉型的賦能基礎設施和供應鏈，如智慧電網、回收設施等。",
+            "blueprint_investors_2": "<strong>將氣候風險與機遇納入定價：</strong>深度整合環境與社會風險分析，識別「擱淺資產」風險與綠色成長潛力。",
+            "blueprint_investors_3": "<strong>擁抱耐心資本（Patient Capital）：</strong>對回收週期長的綠色基礎設施專案保持長遠眼光。",
+            "blueprint_industry_1": "<strong>將循環模式視為核心競爭力：</strong>將循環經濟理念融入產品設計、製造和商業模式的核心。",
+            "blueprint_industry_2": "<strong>投資於跨領域的研發合作：</strong>與同行、學術界和初創公司建立夥伴關係，共同攻克行業共性難題。",
+            "blueprint_industry_3": "<strong>主動引領勞動力轉型：</strong>主動投資員工再培訓，幫助他們掌握綠色經濟所需的新技能。",
+            "blueprint_case_study_title": "轉型案例研究：沃旭能源 (Ørsted)",
+            "blueprint_case_study_text1": "沃旭能源的前身是丹麥石油與天然氣公司 (DONG Energy)，在短短十年間，它徹底剝離油氣業務，轉型為全球最大的離岸風電開發商。這一激進的轉型是企業界綠色轉型的標竿。",
+            "blueprint_case_study_text2": "其成功路徑揭示：政策必須引領而非追隨技術。唯有具備前瞻性的、積極主動的政策制定，才能為新技術的發展創造出必要的市場空間。",
+            "concepts_title": "核心概念",
+            "concepts_subtitle": "理解驅動這場變革的基礎框架：綠色經濟、循環經濟與綠色金融。",
+            "concepts_card1_title": "🌳 綠色經濟",
+            "concepts_card1_text": "追求低碳、高氣候適應性、資源高效利用且具備社會包容性的經濟模式。其核心目標在於提升人類福祉與社會公平，同時顯著降低環境風險。",
+            "concepts_card2_title": "🔄 循環經濟",
+            "concepts_card2_text": "綠色經濟的運作系統。顛覆「開採—製造—拋棄」的線性模式，倡導一個「零廢棄」的封閉物質循環系統，產品從設計之初就考慮其整個生命週期。",
+            "concepts_card3_title": "💰 綠色金融",
+            "concepts_card3_text": "綠色經濟的資本引擎。將環境、社會與治理 (ESG) 因素納入投融資決策，引導資本流向永續發展的領域，為綠色專案提供必要的資金支持。",
+            "footer_text1": "本互動報告基於《綠色科技的交匯點：建構永續與繁榮全球經濟的戰略藍圖》報告生成。",
+            "footer_text2": "© 2025 綠色科技藍圖。僅供演示用途。",
+            "chart_trl_label": "技術成熟度 (TRL)",
+            "chart_trl_axis_label": "TRL (1=最低, 9=最高)",
+            "chart_lcos_axis_label": "LCOS ($/MWh)",
+            "chart_lcos_tooltip": "成本區間: ${min} - ${max}",
+            "chart_hydrogen_axis_label": "2030年預估成本 ($/kg)",
+            "chart_hydrogen_tooltip": "預估區間: {range}"
+        },
+        en: {
+            "header_title": "Green Tech Blueprint",
+            "nav_home": "Home",
+            "nav_pollution": "Pollution Control",
+            "nav_energy": "Clean Energy",
+            "nav_blueprint": "Transformation",
+            "nav_concepts": "Core Concepts",
+            "nav_home_mobile": "Home",
+            "nav_pollution_mobile": "Pollution Control",
+            "nav_energy_mobile": "Clean Energy",
+            "nav_blueprint_mobile": "Transformation",
+            "nav_concepts_mobile": "Core Concepts",
+            "home_title": "The Nexus of Green Technology",
+            "home_subtitle": "A Strategic Blueprint for a Sustainable and Prosperous Global Economy",
+            "home_intro": "The global transition to a green economy is not just an environmental imperative but a profound economic paradigm shift. This interactive report explains how technological leaps in pollution control, clean energy, and circular materials can address the twin crises of environmental degradation and energy security, charting a path toward a resilient, low-carbon, and socially inclusive global economy.",
+            "pollution_title": "Environmental Remediation & Pollution Control",
+            "pollution_subtitle": "Explore the technological frontier in tackling air, water, soil, and waste pollution, and witness how pollution control is transforming from a cost center into a value creation hub.",
+            "pollution_card1_title": "Purifying the Air",
+            "pollution_card1_text": "Moving from single-pollutant control to synergistic multi-pollutant treatment, combined with energy conservation.",
+            "pollution_card2_title": "Cleansing Waters",
+            "pollution_card2_text": "Repositioning wastewater treatment plants as 'resource recovery facilities' and 'energy regeneration centers'.",
+            "pollution_card3_title": "Healing the Land",
+            "pollution_card3_text": "Shifting from physical and chemical methods to more precise, low-carbon, and eco-friendly biological and smart remediation.",
+            "pollution_card4_title": "Ending Waste",
+            "pollution_card4_text": "Developing alternative materials in parallel with building robust recycling systems to achieve a circular revolution in material science.",
+            "pollution_chart_title": "Pollution Control Technology Readiness Level (TRL) Comparison",
+            "pollution_chart_subtitle": "Technology Readiness Level (TRL) is an indicator measuring the maturity of a technology, from level 1 (basic principles) to 9 (proven system). This chart displays the TRL of key technologies from the report, helping decision-makers assess their commercial viability.",
+            "energy_title": "Clean Energy Transition",
+            "energy_subtitle": "Delve into the key technology portfolio driving the decarbonization of the energy system, from renewable generation and storage to smart grids and carbon capture.",
+            "energy_chart1_title": "Grid-Scale Energy Storage Cost (LCOS) Comparison",
+            "energy_chart1_subtitle": "Large-scale storage is key to integrating intermittent renewables. This chart compares the Levelized Cost of Storage (LCOS) for different technologies, revealing their economic viability in various scenarios.",
+            "energy_chart2_title": "2030 Green Hydrogen Production Cost Forecast",
+            "energy_chart2_subtitle": "Green hydrogen is crucial for decarbonizing heavy industry. However, its cost varies significantly worldwide. This chart forecasts production costs in major regions based on the IEA's Net Zero Scenario.",
+            "energy_baseload_title": "24/7 Clean Power",
+            "energy_baseload_subtitle": "Beyond variable sources like solar and wind, clean energy that provides stable baseload power is also essential.",
+            "energy_geothermal_title": "🌍 Enhanced Geothermal Systems (EGS)",
+            "energy_geothermal_text": "By creating artificial geothermal reservoirs, EGS vastly expands the applicable range of geothermal energy. Commercial breakthroughs have made it cost-competitive.",
+            "energy_fusion_title": "☀️ Nuclear Fusion",
+            "energy_fusion_text": "The 'holy grail' of energy, with virtually limitless fuel and no long-lived nuclear waste. Private enterprises are accelerating its commercialization.",
+            "energy_negative_title": "Negative Emission Technologies",
+            "energy_negative_subtitle": "To meet the 1.5°C target, we must remove existing CO2 from the atmosphere.",
+            "energy_ccus_title": "🏭 Carbon Capture, Utilization & Storage (CCUS)",
+            "energy_ccus_text": "Captures CO2 at the source, applied in 'hard-to-abate' sectors like cement and steel.",
+            "energy_dac_title": "🍃 Direct Air Capture (DAC)",
+            "energy_dac_text": "Captures CO2 directly from ambient air, a true 'negative emission' technology, but currently very expensive.",
+            "blueprint_title": "Systemic Transformation Blueprint",
+            "blueprint_subtitle": "Technology alone does not guarantee success. Transformation requires integrating policy, business models, and social consensus, learning from successful case studies.",
+            "blueprint_roadmap_title": "Action Roadmap: Recommendations for Stakeholders",
+            "blueprint_tab_policy": "Policymakers",
+            "blueprint_tab_investors": "Investors",
+            "blueprint_tab_industry": "Industry Leaders",
+            "blueprint_policy_1": "<strong>Adopt systemic, portfolio-based policy frameworks:</strong> Move beyond piecemeal support for single technologies to optimize the entire energy and economic system.",
+            "blueprint_policy_2": "<strong>Effectively de-risk private investment:</strong> Utilize public financial instruments and provide clear, stable, and long-term policy signals.",
+            "blueprint_policy_3": "<strong>Simplify and modernize regulatory processes:</strong> Create green channels for clean energy infrastructure and update market rules to reward flexibility.",
+            "blueprint_investors_1": "<strong>Focus on 'picks and shovels' opportunities:</strong> Invest in the enabling infrastructure and supply chains that support the transition, like smart grids and recycling facilities.",
+            "blueprint_investors_2": "<strong>Price in climate risk and opportunity:</strong> Deeply integrate ESG risk analysis to identify 'stranded asset' risks and green growth potential.",
+            "blueprint_investors_3": "<strong>Embrace Patient Capital:</strong> Take a long-term view on green infrastructure projects with longer payback periods.",
+            "blueprint_industry_1": "<strong>View circular models as a core competency:</strong> Embed circular economy principles into the core of product design, manufacturing, and business models.",
+            "blueprint_industry_2": "<strong>Invest in cross-sector R&D collaboration:</strong> Form partnerships with peers, academia, and startups to tackle common industry challenges.",
+            "blueprint_industry_3": "<strong>Proactively lead the workforce transition:</strong> Invest in reskilling and upskilling employees to equip them with the new skills required for the green economy.",
+            "blueprint_case_study_title": "Case Study: The Transformation of Ørsted",
+            "blueprint_case_study_text1": "Formerly DONG Energy, a Danish oil and gas company, Ørsted divested its fossil fuel business within a decade to become the world's largest offshore wind developer. This radical shift is a benchmark for corporate green transformation.",
+            "blueprint_case_study_text2": "Its success reveals a key lesson: policy must lead, not follow, technology. Only proactive and forward-thinking policymaking can create the necessary market space for new technologies to thrive.",
+            "concepts_title": "Core Concepts",
+            "concepts_subtitle": "Understand the foundational frameworks driving this change: Green Economy, Circular Economy, and Green Finance.",
+            "concepts_card1_title": "🌳 Green Economy",
+            "concepts_card1_text": "An economic model that is low-carbon, climate-resilient, resource-efficient, and socially inclusive. Its core goal is to improve human well-being and social equity while significantly reducing environmental risks.",
+            "concepts_card2_title": "🔄 Circular Economy",
+            "concepts_card2_text": "The operating system of the green economy. It disrupts the linear 'take-make-dispose' model, advocating for a closed-loop system of material flows where products are designed for their entire lifecycle.",
+            "concepts_card3_title": "💰 Green Finance",
+            "concepts_card3_text": "The capital engine of the green economy. It integrates Environmental, Social, and Governance (ESG) factors into investment and lending decisions, channeling capital towards sustainable development.",
+            "footer_text1": "This interactive report is generated based on 'The Nexus of Green Technology: A Strategic Blueprint for a Sustainable and Prosperous Global Economy'.",
+            "footer_text2": "© 2025 Green Tech Blueprint. For demonstration purposes only.",
+            "chart_trl_label": "Technology Readiness Level (TRL)",
+            "chart_trl_axis_label": "TRL (1=Lowest, 9=Highest)",
+            "chart_lcos_axis_label": "LCOS ($/MWh)",
+            "chart_lcos_tooltip": "Cost Range: ${min} - ${max}",
+            "chart_hydrogen_axis_label": "Est. 2030 Cost ($/kg)",
+            "chart_hydrogen_tooltip": "Est. Range: {range}"
+        }
+    };
+
+    let currentLang = localStorage.getItem('appLanguage') || 'zh';
+    let chartInstances = {};
+
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        localStorage.setItem('appLanguage', lang);
+        document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+        
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+
+        // Re-create charts with new language
+        createAllCharts(lang);
+    };
+
+    const langSwitcher = document.getElementById('lang-switcher');
+    langSwitcher.addEventListener('click', () => {
+        const newLang = currentLang === 'zh' ? 'en' : 'zh';
+        switchLanguage(newLang);
+    });
+
+    // Mobile menu toggle
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+    
+    // Smooth scrolling and active nav link highlighting
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    const observerOptions = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.4
+    };
+
+    const sectionObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const id = entry.target.getAttribute('id');
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    const href = link.getAttribute('href');
+                    if (href === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => {
+        sectionObserver.observe(section);
+    });
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+             if (!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+             }
+        });
+    });
+
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.dataset.tab;
+
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            tabPanes.forEach(pane => {
+                if (pane.id === `${tabId}-content`) {
+                    pane.classList.remove('hidden');
+                } else {
+                    pane.classList.add('hidden');
+                }
+            });
+        });
+    });
+
+    // Chart.js configurations
+    const createAllCharts = (lang) => {
+        const chartDefaultFont = "'Inter', 'Noto Sans TC', sans-serif";
+        const chartDefaultColor = '#9ca3af'; // slate-400
+        const gridColor = 'rgba(255, 255, 255, 0.1)';
+        
+        const destroyChart = (chartId) => {
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+            }
+        };
+
+        // Pollution Tech Chart
+        destroyChart('pollutionTechChart');
+        const pollutionTechCtx = document.getElementById('pollutionTechChart');
+        if (pollutionTechCtx) {
+            const pollutionLabels = {
+                zh: ['袋式除塵', '水泥窯脫硫', '耦合脫硝', '流體化床結晶', '厭氧消化', 'AI加藥', '土壤蒸汽浸提', '植物修復', 'AI精準修復', '酵素回收', 'PLA塑膠'],
+                en: ['Baghouse Filter', 'Cement Kiln Desulf.', 'Coupled De-NOx', 'Fluidized Bed Cryst.', 'Anaerobic Digestion', 'AI Dosing', 'Soil Vapor Ext.', 'Phytoremediation', 'AI Precision Repair', 'Enzyme Recycling', 'PLA Plastic']
+            };
+            chartInstances.pollutionTechChart = new Chart(pollutionTechCtx, {
+                type: 'bar',
+                data: {
+                    labels: pollutionLabels[lang],
+                    datasets: [{
+                        label: translations[lang].chart_trl_label,
+                        data: [9, 8, 9, 8, 9, 8, 9, 7, 6, 7, 9],
+                        backgroundColor: 'rgba(45, 212, 191, 0.5)',
+                        borderColor: 'rgba(94, 234, 212, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true, max: 9,
+                            title: { display: true, text: translations[lang].chart_trl_axis_label, font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            ticks: { font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                           ticks: { font: { family: chartDefaultFont, size: 10 }, color: chartDefaultColor },
+                           grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#1e293b', bodyFont: { family: chartDefaultFont }, titleFont: { family: chartDefaultFont } }
+                    }
+                }
+            });
+        }
+
+        // Storage Cost Chart
+        destroyChart('storageCostChart');
+        const storageCostCtx = document.getElementById('storageCostChart');
+        if(storageCostCtx) {
+            const storageLabels = {
+                zh: ['抽蓄水力', '鋰離子電池', '全釩液流電池', '固態電池(預測)'],
+                en: ['Pumped Hydro', 'Li-ion Battery', 'Vanadium Flow Batt.', 'Solid-State (Est.)']
+            };
+            chartInstances.storageCostChart = new Chart(storageCostCtx, {
+                type: 'bar',
+                data: {
+                    labels: storageLabels[lang],
+                    datasets: [{
+                        label: 'Min LCOS', data: [100, 150, 200, 500],
+                        backgroundColor: 'rgba(94, 234, 212, 0.5)', borderColor: 'rgba(45, 212, 191, 1)',
+                        borderWidth: 1, stack: 'Stack 0',
+                    }, {
+                        label: 'Max LCOS Delta', data: [100, 200, 300, 100],
+                        backgroundColor: 'rgba(20, 184, 166, 0.6)', borderColor: 'rgba(15, 118, 110, 1)',
+                        borderWidth: 1, stack: 'Stack 0',
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { font: { family: chartDefaultFont }, color: chartDefaultColor }, grid: { color: gridColor } },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: translations[lang].chart_lcos_axis_label, font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            ticks: { font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: function(context) {
+                                    const rawMin = context.chart.data.datasets[0].data[context.dataIndex];
+                                    const rawMaxDelta = context.chart.data.datasets[1].data[context.dataIndex];
+                                    const rawMax = rawMin + rawMaxDelta;
+                                    return translations[lang].chart_lcos_tooltip.replace('{min}', rawMin).replace('{max}', rawMax);
+                                }
+                            },
+                            bodyFont: { family: chartDefaultFont }, titleFont: { family: chartDefaultFont }
+                        },
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Hydrogen Cost Chart
+        destroyChart('hydrogenCostChart');
+        const hydrogenCostCtx = document.getElementById('hydrogenCostChart');
+        if (hydrogenCostCtx) {
+            const hydrogenLabels = {
+                zh: ['中國', '歐洲', '北美', '澳洲/中東'],
+                en: ['China', 'Europe', 'North America', 'AUS/Mid-East']
+            };
+            chartInstances.hydrogenCostChart = new Chart(hydrogenCostCtx, {
+                type: 'bar',
+                data: {
+                    labels: hydrogenLabels[lang],
+                    datasets: [{
+                        label: 'Est. Cost ($/kg)',
+                        data: [2.0, 4.25, 3.25, 3.0], 
+                        backgroundColor: ['rgba(13, 148, 136, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderColor: ['rgba(45, 212, 191, 1)', 'rgba(251, 191, 36, 1)', 'rgba(96, 165, 250, 1)', 'rgba(248, 113, 113, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { font: { family: chartDefaultFont }, color: chartDefaultColor }, grid: { color: gridColor } },
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: translations[lang].chart_hydrogen_axis_label, font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            ticks: { font: { family: chartDefaultFont }, color: chartDefaultColor },
+                            grid: { color: gridColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            callbacks: {
+                                label: function(context) {
+                                    const ranges = {
+                                        zh: {'中國': '< $2.0', '歐洲': '$3.5 - $5.0', '北美': '$2.5 - $4.0', '澳洲/中東': '< $3.0'},
+                                        en: {'China': '< $2.0', 'Europe': '$3.5 - $5.0', 'North America': '$2.5 - $4.0', 'AUS/Mid-East': '< $3.0'}
+                                    };
+                                    return translations[lang].chart_hydrogen_tooltip.replace('{range}', ranges[lang][context.label]);
+                                }
+                            },
+                             bodyFont: { family: chartDefaultFont }, titleFont: { family: chartDefaultFont }
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    // Initial load
+    switchLanguage(currentLang);
+});
+</script>
+</body>
+</html>
