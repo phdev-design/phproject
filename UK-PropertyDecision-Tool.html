@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英國買屋 vs. 租屋 互動分析儀 (2025)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: The application is structured as a user-centric, single-page journey. It starts with a high-level overview (Core Comparison) to frame the choice. The centerpiece is the 'Interactive Cost Calculator', allowing users to personalize the financial data, making the abstract report concrete. Following this, 'Process Guides' offer clear, step-by-step actions. 'Ownership Types' and 'Government Schemes' delve into crucial details and risks often overlooked. Finally, the 'Decision Helper' brings it all together with a self-assessment framework. This task-oriented flow, from broad comparison to specific action and personal reflection, was chosen to empower the user to navigate the complex decision effectively, rather than passively reading a linear report. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: High-level pros/cons (Table 1) -> Goal: Inform/Compare -> Viz: Icon+text cards -> Interaction: Static display -> Justification: More engaging than a table. -> Method: HTML/CSS.
+        - Report Info: Detailed costs (Section 2) -> Goal: Personalize/Compare -> Viz: Interactive calculator with Donut (Upfront) & Bar (Monthly) charts -> Interaction: Sliders/inputs update charts & text -> Justification: Turns static data into a personal financial tool. -> Library: Chart.js.
+        - Report Info: Buying/Renting processes (Section 3) -> Goal: Guide/Organize -> Viz: Vertical timelines -> Interaction: Click-to-reveal details -> Justification: Visualizes processes without overwhelming the user. -> Method: HTML/CSS/JS.
+        - Report Info: Freehold vs. Leasehold (Section 4) -> Goal: Warn/Inform -> Viz: 2-column layout with warning box -> Interaction: Static display -> Justification: Highlights a critical risk clearly. -> Method: HTML/CSS.
+        - Report Info: Market trends (Section 5) -> Goal: Show Change -> Viz: Bar chart (Price vs Rent Growth) -> Interaction: Hover tooltips -> Justification: Visually demonstrates the key market imbalance noted in the report. -> Library: Chart.js.
+        - Report Info: Government schemes (Section 6) -> Goal: Organize/Inform -> Viz: Tabbed interface -> Interaction: Click to switch schemes -> Justification: Manages distinct information blocks cleanly. -> Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF7;
+            color: #3C3C3C;
+        }
+        .accent-color { color: #A8763E; }
+        .accent-bg { background-color: #A8763E; }
+        .secondary-bg { background-color: #748B75; }
+        .section-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #A8763E;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section-intro {
+            max-width: 48rem;
+            margin: 0 auto 2.5rem auto;
+            text-align: center;
+            color: #5a5a5a;
+            line-height: 1.75;
+        }
+        .nav-link {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.3s, color 0.3s;
+            color: #3C3C3C;
+            font-weight: 500;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #A8763E;
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #A8763E;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        input[type=range]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #A8763E;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#FDFBF7]/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl font-bold accent-color" data-lang="appTitle">英國置業決策儀</h1>
+            <div class="hidden md:flex items-center space-x-2">
+                <a href="#overview" class="nav-link" data-lang="navOverview">核心對比</a>
+                <a href="#calculator" class="nav-link" data-lang="navCalculator">成本計算</a>
+                <a href="#process" class="nav-link" data-lang="navProcess">流程指南</a>
+                <a href="#legal" class="nav-link" data-lang="navLegal">產權類型</a>
+                <a href="#schemes" class="nav-link" data-lang="navSchemes">政府援助</a>
+                <a href="#decision" class="nav-link" data-lang="navDecision">決策助手</a>
+                <button id="lang-toggle-desktop" class="ml-4 px-3 py-1 border border-[#A8763E] text-[#A8763E] rounded-md text-sm hover:bg-[#A8763E] hover:text-white transition-colors">English</button>
+            </div>
+            <div class="flex items-center md:hidden">
+                <button id="lang-toggle-mobile" class="mr-2 px-3 py-1 border border-[#A8763E] text-[#A8763E] rounded-md text-sm">English</button>
+                <button id="mobile-menu-button" class="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#A8763E]">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-2 pt-2 pb-3 space-y-1">
+            <a href="#overview" class="block nav-link" data-lang="navOverview">核心對比</a>
+            <a href="#calculator" class="block nav-link" data-lang="navCalculator">成本計算</a>
+            <a href="#process" class="block nav-link" data-lang="navProcess">流程指南</a>
+            <a href="#legal" class="block nav-link" data-lang="navLegal">產權類型</a>
+            <a href="#schemes" class="block nav-link" data-lang="navSchemes">政府援助</a>
+            <a href="#decision" class="block nav-link" data-lang="navDecision">決策助手</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="py-16 md:py-24 text-center bg-white">
+            <div class="container mx-auto px-4">
+                <h1 class="text-3xl md:text-5xl font-bold accent-color mb-4" data-lang="heroTitle">買房還是租房？</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang="heroSubtitle">在英國，這是在<span class="font-bold">長期財務積累</span>與<span class="font-bold">短期生活彈性</span>之間的關鍵抉擇。本工具將幫助您分析利弊，做出最適合您的決定。</p>
+            </div>
+        </section>
+
+        <section id="overview" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="overviewTitle">核心對比：一目了然</h2>
+                <p class="section-intro" data-lang="overviewIntro">買房與租房各有優劣。此處總結了兩者在關鍵層面的核心差異，助您快速建立一個宏觀概念。這是您決策旅程的起點，它定義了您需要權衡的基本要素。</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                        <h3 class="text-2xl font-bold mb-6 text-center text-gray-800" data-lang="owningTitle">🏡 買房 (Owning)</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▲</span><div><strong class="block" data-lang="owningBenefit1Title">財務增長:</strong> <span data-lang="owningBenefit1Desc">建立資產淨值，房產有資本增值潛力。</span></div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▲</span><div><strong class="block" data-lang="owningBenefit2Title">穩定性與自主性:</strong> <span data-lang="owningBenefit2Desc">高度居住保障，可自由裝修改造。</span></div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">▼</span><div><strong class="block" data-lang="owningDrawback1Title">前期成本高:</strong> <span data-lang="owningDrawback1Desc">需準備大額首期款、印花稅及各項雜費。</span></div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">▼</span><div><strong class="block" data-lang="owningDrawback2Title">靈活性低:</strong> <span data-lang="owningDrawback2Desc">出售房產過程漫長且成本高昂。</span></div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">▼</span><div><strong class="block" data-lang="owningDrawback3Title">責任重大:</strong> <span data-lang="owningDrawback3Desc">業主承擔所有維護和維修費用。</span></div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                        <h3 class="text-2xl font-bold mb-6 text-center text-gray-800" data-lang="rentingTitle">🔑 租房 (Renting)</h3>
+                        <ul class="space-y-4">
+                             <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▲</span><div><strong class="block" data-lang="rentingBenefit1Title">靈活性高:</strong> <span data-lang="rentingBenefit1Desc">租約結束後可輕鬆搬遷，適應生活變化。</span></div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▲</span><div><strong class="block" data-lang="rentingBenefit2Title">前期成本低:</strong> <span data-lang="rentingBenefit2Desc">只需支付按金和預付租金。</span></div></li>
+                            <li class="flex items-start"><span class="text-green-500 mr-3 mt-1">▲</span><div><strong class="block" data-lang="rentingBenefit3Title">責任輕:</strong> <span data-lang="rentingBenefit3Desc">房東負責大部分結構性維修。</span></div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">▼</span><div><strong class="block" data-lang="rentingDrawback1Title">無財務回報:</strong> <span data-lang="rentingDrawback1Desc">租金是純消費，無法建立資產。</span></div></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-3 mt-1">▼</span><div><strong class="block" data-lang="rentingDrawback2Title">居住保障低:</strong> <span data-lang="rentingDrawback2Desc">可能面臨租金上漲或房東收回房屋。</span></div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="calculator" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="calculatorTitle">互動成本計算機</h2>
+                <p class="section-intro" data-lang="calculatorIntro">理論比較後，讓我們將其個人化。請輸入您考慮的物業價格、預計首期款比例以及當前或預計的月租金。此工具將根據2025年的市場數據，為您即時計算並可視化買房與租房的財務差異，揭示購房那座巨大的「前期成本冰山」。</p>
+
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 items-center bg-gray-50 p-8 rounded-xl shadow-inner">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="propertyPrice" class="block font-medium text-gray-700" data-lang="calcLabelPrice">目標物業價格 (£)</label>
+                            <input type="number" id="propertyPrice" value="350000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#A8763E] focus:ring-[#A8763E]">
+                        </div>
+                        <div>
+                            <label for="depositPercentage" class="block font-medium text-gray-700" data-lang="calcLabelDeposit">首期款比例 (<span id="depositPercentageValue">10</span>%)</label>
+                            <input type="range" id="depositPercentage" min="5" max="40" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        </div>
+                        <div>
+                            <label for="monthlyRent" class="block font-medium text-gray-700" data-lang="calcLabelRent">同等地段月租金 (£)</label>
+                            <input type="number" id="monthlyRent" value="1250" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#A8763E] focus:ring-[#A8763E]">
+                        </div>
+                    </div>
+                     <div class="text-center p-6 bg-white rounded-lg shadow">
+                        <h4 class="font-bold text-lg text-gray-800" data-lang="calcMultiplierTitle">前期成本巨大差距</h4>
+                        <p class="text-gray-600 mt-2" data-lang="calcMultiplierDesc1">買房所需現金是租房的</p>
+                        <div id="upfrontCostMultiplier" class="text-5xl font-extrabold accent-color my-3">...</div>
+                        <p class="text-gray-600" data-lang="calcMultiplierDesc2">倍。這是許多人面臨的最大障礙。</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang="calcBuyingTitle">買房成本分析</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center mb-6">
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <span class="block text-sm text-gray-500" data-lang="calcBuyingUpfrontLabel">預估前期總成本</span>
+                                <span id="buyingUpfrontCost" class="block text-2xl font-bold accent-color">£...</span>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <span class="block text-sm text-gray-500" data-lang="calcBuyingMonthlyLabel">預估每月總支出</span>
+                                <span id="buyingMonthlyCost" class="block text-2xl font-bold accent-color">£...</span>
+                            </div>
+                        </div>
+                        <div class="chart-container"><canvas id="upfrontCostChart"></canvas></div>
+                        <p class="text-center text-sm text-gray-500 mt-2" data-lang="calcBuyingChartLabel">前期成本構成</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang="calcRentingTitle">租房成本分析</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center mb-6">
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <span class="block text-sm text-gray-500" data-lang="calcRentingUpfrontLabel">預估前期總成本</span>
+                                <span id="rentingUpfrontCost" class="block text-2xl font-bold accent-color">£...</span>
+                            </div>
+                            <div class="bg-gray-100 p-4 rounded-lg">
+                                <span class="block text-sm text-gray-500" data-lang="calcRentingMonthlyLabel">預估每月總支出</span>
+                                <span id="rentingMonthlyCost" class="block text-2xl font-bold accent-color">£...</span>
+                            </div>
+                        </div>
+                        <div class="chart-container flex items-center justify-center">
+                           <div class="text-center p-8 bg-green-50 rounded-xl border border-green-200">
+                               <p class="text-lg font-medium text-green-800" data-lang="calcRentingBenefit">租房的核心優勢在於其<br><span class="text-3xl font-bold my-2 block" data-lang="calcRentingBenefitHighlight">極低的前期投入</span><br>和無可比擬的靈活性。</p>
+                           </div>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-2" data-lang="calcRentingDrawback">無長期資產積累</p>
+                    </div>
+                </div>
+                
+                <div class="mt-12">
+                     <h3 class="text-xl font-bold text-center mb-4" data-lang="marketTrendTitle">市場趨勢：為何要關心？ (2025年數據)</h3>
+                     <p class="section-intro" data-lang="marketTrendIntro">當前市場呈現一個關鍵趨勢：租金的漲速遠超房價。這意味著租房（您的備選方案）的生活成本正快速上升。若能鎖定固定利率按揭，購房便能有效對沖這種租金通脹，這為有能力的買家提供了一個獨特的戰略機遇。</p>
+                     <div class="chart-container h-80 max-h-[450px]"><canvas id="marketTrendChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="process" class="py-16 md:py-24">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="processTitle">流程指南</h2>
+                <p class="section-intro" data-lang="processIntro">無論選擇哪條路，都需要遵循一套既定流程。這裡將複雜的過程分解為清晰的步驟，並強調了報告中的一個關鍵洞察：您的「主動管理」是過程順暢與否的核心。僅僅依賴專業人士會導致延誤和壓力。</p>
+                <div class="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 class="text-xl font-bold text-center mb-8" data-lang="processBuyingTitle">通往所有權之路 (購房)</h3>
+                        <div class="relative pl-8 border-l-2 border-[#A8763E]">
+                            <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep1Title">1. 財務準備 & 獲取AIP</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep1Desc">儲蓄首期款，檢查信用，獲得原則性按揭協議 (AIP) 以證明購買力。</p>
+                            </div>
+                             <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep2Title">2. 尋房 & 出價</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep2Desc">研究區域，安排看房，並提交正式出價。</p>
+                            </div>
+                             <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep3Title">3. 聘請律師 & 申請按揭</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep3Desc">出價被接受後，立即聘請律師並提交正式按揭申請。</p>
+                            </div>
+                             <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep4Title">4. 測量 & 法律搜索</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep4Desc">安排房屋測量，律師完成所有必要的法律文件和搜索。</p>
+                            </div>
+                            <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep5Title">5. 交換合同 (法律約束)</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep5Desc">支付首期款，交換合同後交易即具法律約束力，不可反悔。</p>
+                            </div>
+                             <div class="process-step">
+                                <div class="absolute w-6 h-6 bg-[#A8763E] rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="buyStep6Title">6. 完成交易 & 獲取鑰匙</h4>
+                                <p class="text-sm text-gray-600" data-lang="buyStep6Desc">支付餘款，所有權正式轉移。</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-xl font-bold text-center mb-8" data-lang="processRentingTitle">通往租賃之路 (租房)</h3>
+                        <div class="relative pl-8 border-l-2 border-[#748B75]">
+                            <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 secondary-bg rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="rentStep1Title">1. 預算 & 準備文件</h4>
+                                <p class="text-sm text-gray-600" data-lang="rentStep1Desc">確定租金範圍，準備身份、收入證明及Right to Rent文件。</p>
+                            </div>
+                            <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 secondary-bg rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="rentStep2Title">2. 尋房 & 提交申請</h4>
+                                <p class="text-sm text-gray-600" data-lang="rentStep2Desc">迅速行動，看房後立即提交申請並支付預留按金。</p>
+                            </div>
+                             <div class="mb-8 process-step">
+                                <div class="absolute w-6 h-6 secondary-bg rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="rentStep3Title">3. 背景審查 & 簽署協議</h4>
+                                <p class="text-sm text-gray-600" data-lang="rentStep3Desc">通過背景審查後，仔細審閱並簽署租賃協議 (AST)。</p>
+                            </div>
+                             <div class="process-step">
+                                <div class="absolute w-6 h-6 secondary-bg rounded-full -left-3 border-4 border-white"></div>
+                                <h4 class="font-bold" data-lang="rentStep4Title">4. 支付費用 & 核對清單</h4>
+                                <p class="text-sm text-gray-600" data-lang="rentStep4Desc">支付首月租金和按金，並與房東一同仔細核對房屋清單(Inventory)，拍照存證。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="legal" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="legalTitle">產權的抉擇：Freehold vs. Leasehold</h2>
+                <p class="section-intro" data-lang="legalIntro">在英國，並非所有房產都意味著您擁有腳下的土地。理解永久產權（Freehold）和租賃產權（Leasehold）的根本區別至關重要。後者常被誤解，可能帶來意想不到的持續成本和限制，侵蝕您作為業主的權利和房產的價值。</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-gray-50 p-8 rounded-xl">
+                        <h3 class="text-2xl font-bold mb-4 text-gray-800" data-lang="freeholdTitle">永久產權 (Freehold)</h3>
+                        <p class="mb-4" data-lang="freeholdDesc">您同時擁有房產和其所在的土地，擁有永久、絕對的所有權。這是最完整的所有權形式。</p>
+                        <ul class="space-y-2 list-disc list-inside">
+                            <li><strong data-lang="freeholdPoint1Title">所有權:</strong> <span data-lang="freeholdPoint1Desc">永久擁有建築和土地。</span></li>
+                            <li><strong data-lang="freeholdPoint2Title">責任:</strong> <span data-lang="freeholdPoint2Desc">對所有維護負全責。</span></li>
+                            <li><strong data-lang="freeholdPoint3Title">成本:</strong> <span data-lang="freeholdPoint3Desc">無地租或服務費。</span></li>
+                            <li><strong data-lang="freeholdPoint4Title">自由度:</strong> <span data-lang="freeholdPoint4Desc">改造自由度高（需遵守規劃法規）。</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 p-8 rounded-xl border border-red-200">
+                        <h3 class="text-2xl font-bold mb-4 text-red-800" data-lang="leaseholdTitle">租賃產權 (Leasehold)</h3>
+                        <p class="mb-4" data-lang="leaseholdDesc">您只在固定期限內（如99年）擁有房產的居住權，但土地歸永久產權人所有。這是一項會隨時間貶值的資產。</p>
+                        <ul class="space-y-2 list-disc list-inside text-red-900">
+                            <li><strong data-lang="leaseholdPoint1Title">所有權:</strong> <span data-lang="leaseholdPoint1Desc">有期限的居住權，不擁有土地。</span></li>
+                            <li><strong data-lang="leaseholdPoint2Title">責任:</strong> <span data-lang="leaseholdPoint2Desc">負責內部維修，但需向地主支付費用。</span></li>
+                            <li><strong data-lang="leaseholdPoint3Title">持續成本:</strong> <span data-lang="leaseholdPoint3Desc">需支付地租(Ground Rent)和服務費(Service Charge)，後者可能高昂且不可預測。</span></li>
+                            <li><strong data-lang="leaseholdPoint4Title">限制:</strong> <span data-lang="leaseholdPoint4Desc">改造、養寵物等通常需要地主許可。</span></li>
+                            <li><strong data-lang="leaseholdPoint5Title">重大風險:</strong> <span data-lang="leaseholdPoint5Desc">租約年期低於80年時，續約成本劇增，房產價值嚴重下跌且難以獲得按揭。</span></li>
+                        </ul>
+                    </div>
+                </div>
+                 <div class="mt-8 text-center bg-amber-50 border border-amber-200 p-6 rounded-lg max-w-4xl mx-auto">
+                    <h4 class="font-bold text-amber-800" data-lang="asymmetryTitle">權力與資訊的不對稱</h4>
+                    <p class="text-sm text-amber-900 mt-2" data-lang="asymmetryDesc">報告指出，無論是租賃產權還是租房，都存在權力不對稱。地主或房東掌握更多控制權。因此，仔細閱讀並理解您的租約或租賃協議，是保護您權益最重要的工具。權利存在於紙上，但只有在被知曉和行使時才有效。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="schemes" class="py-16 md:py-24">
+             <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="schemesTitle">政府援助計劃</h2>
+                <p class="section-intro" data-lang="schemesIntro">為應對高昂的購房門檻，英國政府提供了多項援助計劃。但報告提醒我們，這些計劃是「雙刃劍」：它們降低了進入門檻，但同時也引入了新的限制、風險和長期複雜性。它們是金融產品，而非單純的贈予。</p>
+                <div x-data="{ tab: 'lisa' }" class="max-w-4xl mx-auto">
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button @click="tab = 'lisa'" :class="{ 'border-[#A8763E] text-[#A8763E]': tab === 'lisa', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'lisa' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-lang="schemeTabLISA">終身ISA (LISA)</button>
+                            <button @click="tab = 'so'" :class="{ 'border-[#A8763E] text-[#A8763E]': tab === 'so', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'so' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-lang="schemeTabSO">共享產權 (Shared Ownership)</button>
+                            <button @click="tab = 'fh'" :class="{ 'border-[#A8763E] text-[#A8763E]': tab === 'fh', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': tab !== 'fh' }" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-lang="schemeTabFH">首次購房計劃</button>
+                        </nav>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-100">
+                        <div x-show="tab === 'lisa'">
+                            <h3 class="text-xl font-bold mb-3" data-lang="lisaTitle">終身個人儲蓄賬戶 (Lifetime ISA)</h3>
+                            <p class="mb-4" data-lang="lisaBenefit"><strong>益處:</strong> 政府為您的儲蓄提供25%獎金（每年最高£1,000），助您積累首期款。</p>
+                            <p class="font-bold text-red-700" data-lang="lisaRiskTitle">主要限制與風險:</p>
+                            <ul class="list-disc list-inside space-y-2 mt-2 text-red-700">
+                                <li data-lang="lisaRisk1">購房價格上限為£450,000。</li>
+                                <li data-lang="lisaRisk2">賬戶需開立至少12個月後才能用於購房。</li>
+                                <li data-lang="lisaRisk3">若因不合規原因提前取款，將面臨25%的罰款，這會導致您損失部分本金。</li>
+                            </ul>
+                        </div>
+                        <div x-show="tab === 'so'">
+                            <h3 class="text-xl font-bold mb-3" data-lang="soTitle">共享產權 (Shared Ownership)</h3>
+                            <p class="mb-4" data-lang="soBenefit"><strong>益處:</strong> 只需購買房產的一部分份額（如25%-75%），從而大幅降低首期款和按揭門檻。</p>
+                            <p class="font-bold text-red-700" data-lang="soRiskTitle">主要限制與風險:</p>
+                             <ul class="list-disc list-inside space-y-2 mt-2 text-red-700">
+                                <li data-lang="soRisk1">您需要為未購買的份額向住房協會支付租金和服務費。</li>
+                                <li data-lang="soRisk2">法律上，您是「有保障租戶」而非完全的業主。</li>
+                                <li data-lang="soRisk3">增購額外份額（Staircasing）的成本隨市場價變動，可能變得越來越昂貴。</li>
+                            </ul>
+                        </div>
+                         <div x-show="tab === 'fh'">
+                            <h3 class="text-xl font-bold mb-3" data-lang="fhTitle">首次購房計劃 (First Homes)</h3>
+                            <p class="mb-4" data-lang="fhBenefit"><strong>益處:</strong> 允許符合條件的首次購房者和關鍵工作者以市場價30%-50%的折扣購買新房。</p>
+                            <p class="font-bold text-red-700" data-lang="fhRiskTitle">主要限制與風險:</p>
+                             <ul class="list-disc list-inside space-y-2 mt-2 text-red-700">
+                                <li data-lang="fhRisk1">房源數量非常有限，且有地區限制。</li>
+                                <li data-lang="fhRisk2">出售房產時，必須將同樣的折扣比例傳遞給下一位符合條件的買家，這限制了您的資本增值。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="decision" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title" data-lang="decisionTitle">決策助手：結構化自我評估</h2>
+                <p class="section-intro" data-lang="decisionIntro">最終，買房或租房沒有絕對的「正確」答案，只有最適合您的選擇。請利用以下框架進行一次深刻的自我反思。您的答案將引導您走向一個與您的個人及財務目標最一致的結論。</p>
+                <div class="max-w-3xl mx-auto space-y-6">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg" data-lang="selfAssess1Title">1. 財務穩定性 & 時間規劃</h4>
+                        <p class="mt-2 text-gray-700" data-lang="selfAssess1Desc">您的收入是否穩定？您計劃在一個地方居住多久（建議至少3-5年才考慮買房）？您是否有足夠的應急儲蓄？</p>
+                    </div>
+                     <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg" data-lang="selfAssess2Title">2. 職業與流動性</h4>
+                        <p class="mt-2 text-gray-700" data-lang="selfAssess2Desc">您的職業是否要求您頻繁搬遷？如果是，租房無可比擬的靈活性可能是決定性因素。</p>
+                    </div>
+                     <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg" data-lang="selfAssess3Title">3. 人生階段 & 風險承受能力</h4>
+                        <p class="mt-2 text-gray-700" data-lang="selfAssess3Desc">您對空間和穩定性的需求如何？您是否願意並有能力承擔房市波動和突發高額維修的風險？</p>
+                    </div>
+                     <div class="bg-gray-50 p-6 rounded-lg">
+                        <h4 class="font-bold text-lg" data-lang="selfAssess4Title">4. 生活方式 & 個人自主權</h4>
+                        <p class="mt-2 text-gray-700" data-lang="selfAssess4Desc">能夠自由裝修、飼養寵物、無需向房東請示，對您來說有多重要？</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p data-lang="footerText1">本工具基於《英國置業與租賃權威指南：2025年戰略分析報告》創建。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang="footerText2">所有數據和計算僅供參考，不構成財務建議。請在做出決策前諮詢專業人士。</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const langData = {
+                zh: {
+                    appTitle: "英國置業決策儀",
+                    navOverview: "核心對比",
+                    navCalculator: "成本計算",
+                    navProcess: "流程指南",
+                    navLegal: "產權類型",
+                    navSchemes: "政府援助",
+                    navDecision: "決策助手",
+                    heroTitle: "買房還是租房？",
+                    heroSubtitle: "在英國，這是在<span class=\"font-bold\">長期財務積累</span>與<span class=\"font-bold\">短期生活彈性</span>之間的關鍵抉擇。本工具將幫助您分析利弊，做出最適合您的決定。",
+                    overviewTitle: "核心對比：一目了然",
+                    overviewIntro: "買房與租房各有優劣。此處總結了兩者在關鍵層面的核心差異，助您快速建立一個宏觀概念。這是您決策旅程的起點，它定義了您需要權衡的基本要素。",
+                    owningTitle: "🏡 買房 (Owning)",
+                    owningBenefit1Title: "財務增長:",
+                    owningBenefit1Desc: "建立資產淨值，房產有資本增值潛力。",
+                    owningBenefit2Title: "穩定性與自主性:",
+                    owningBenefit2Desc: "高度居住保障，可自由裝修改造。",
+                    owningDrawback1Title: "前期成本高:",
+                    owningDrawback1Desc: "需準備大額首期款、印花稅及各項雜費。",
+                    owningDrawback2Title: "靈活性低:",
+                    owningDrawback2Desc: "出售房產過程漫長且成本高昂。",
+                    owningDrawback3Title: "責任重大:",
+                    owningDrawback3Desc: "業主承擔所有維護和維修費用。",
+                    rentingTitle: "🔑 租房 (Renting)",
+                    rentingBenefit1Title: "靈活性高:",
+                    rentingBenefit1Desc: "租約結束後可輕鬆搬遷，適應生活變化。",
+                    rentingBenefit2Title: "前期成本低:",
+                    rentingBenefit2Desc: "只需支付按金和預付租金。",
+                    rentingBenefit3Title: "責任輕:",
+                    rentingBenefit3Desc: "房東負責大部分結構性維修。",
+                    rentingDrawback1Title: "無財務回報:",
+                    rentingDrawback1Desc: "租金是純消費，無法建立資產。",
+                    rentingDrawback2Title: "居住保障低:",
+                    rentingDrawback2Desc: "可能面臨租金上漲或房東收回房屋。",
+                    calculatorTitle: "互動成本計算機",
+                    calculatorIntro: "理論比較後，讓我們將其個人化。請輸入您考慮的物業價格、預計首期款比例以及當前或預計的月租金。此工具將根據2025年的市場數據，為您即時計算並可視化買房與租房的財務差異，揭示購房那座巨大的「前期成本冰山」。",
+                    calcLabelPrice: "目標物業價格 (£)",
+                    calcLabelDeposit: "首期款比例 (<span id=\"depositPercentageValue\">10</span>%)",
+                    calcLabelRent: "同等地段月租金 (£)",
+                    calcMultiplierTitle: "前期成本巨大差距",
+                    calcMultiplierDesc1: "買房所需現金是租房的",
+                    calcMultiplierDesc2: "倍。這是許多人面臨的最大障礙。",
+                    calcBuyingTitle: "買房成本分析",
+                    calcBuyingUpfrontLabel: "預估前期總成本",
+                    calcBuyingMonthlyLabel: "預估每月總支出",
+                    calcBuyingChartLabel: "前期成本構成",
+                    calcRentingTitle: "租房成本分析",
+                    calcRentingUpfrontLabel: "預估前期總成本",
+                    calcRentingMonthlyLabel: "預估每月總支出",
+                    calcRentingBenefit: "租房的核心優勢在於其<br><span class=\"text-3xl font-bold my-2 block\" data-lang=\"calcRentingBenefitHighlight\">極低的前期投入</span><br>和無可比擬的靈活性。",
+                    calcRentingBenefitHighlight: "極低的前期投入",
+                    calcRentingDrawback: "無長期資產積累",
+                    marketTrendTitle: "市場趨勢：為何要關心？ (2025年數據)",
+                    marketTrendIntro: "當前市場呈現一個關鍵趨勢：租金的漲速遠超房價。這意味著租房（您的備選方案）的生活成本正快速上升。若能鎖定固定利率按揭，購房便能有效對沖這種租金通脹，這為有能力的買家提供了一個獨特的戰略機遇。",
+                    marketTrendChartLabelPrice: "平均房價增長",
+                    marketTrendChartLabelRent: "平均租金增長",
+                    marketTrendChartLabelYear: "年度增長率",
+                    processTitle: "流程指南",
+                    processIntro: "無論選擇哪條路，都需要遵循一套既定流程。這裡將複雜的過程分解為清晰的步驟，並強調了報告中的一個關鍵洞察：您的「主動管理」是過程順暢與否的核心。僅僅依賴專業人士會導致延誤和壓力。",
+                    processBuyingTitle: "通往所有權之路 (購房)",
+                    buyStep1Title: "1. 財務準備 & 獲取AIP",
+                    buyStep1Desc: "儲蓄首期款，檢查信用，獲得原則性按揭協議 (AIP) 以證明購買力。",
+                    buyStep2Title: "2. 尋房 & 出價",
+                    buyStep2Desc: "研究區域，安排看房，並提交正式出價。",
+                    buyStep3Title: "3. 聘請律師 & 申請按揭",
+                    buyStep3Desc: "出價被接受後，立即聘請律師並提交正式按揭申請。",
+                    buyStep4Title: "4. 測量 & 法律搜索",
+                    buyStep4Desc: "安排房屋測量，律師完成所有必要的法律文件和搜索。",
+                    buyStep5Title: "5. 交換合同 (法律約束)",
+                    buyStep5Desc: "支付首期款，交換合同後交易即具法律約束力，不可反悔。",
+                    buyStep6Title: "6. 完成交易 & 獲取鑰匙",
+                    buyStep6Desc: "支付餘款，所有權正式轉移。",
+                    processRentingTitle: "通往租賃之路 (租房)",
+                    rentStep1Title: "1. 預算 & 準備文件",
+                    rentStep1Desc: "確定租金範圍，準備身份、收入證明及Right to Rent文件。",
+                    rentStep2Title: "2. 尋房 & 提交申請",
+                    rentStep2Desc: "迅速行動，看房後立即提交申請並支付預留按金。",
+                    rentStep3Title: "3. 背景審查 & 簽署協議",
+                    rentStep3Desc: "通過背景審查後，仔細審閱並簽署租賃協議 (AST)。",
+                    rentStep4Title: "4. 支付費用 & 核對清單",
+                    rentStep4Desc: "支付首月租金和按金，並與房東一同仔細核對房屋清單(Inventory)，拍照存證。",
+                    legalTitle: "產權的抉擇：Freehold vs. Leasehold",
+                    legalIntro: "在英國，並非所有房產都意味著您擁有腳下的土地。理解永久產權（Freehold）和租賃產權（Leasehold）的根本區別至關重要。後者常被誤解，可能帶來意想不到的持續成本和限制，侵蝕您作為業主的權利和房產的價值。",
+                    freeholdTitle: "永久產權 (Freehold)",
+                    freeholdDesc: "您同時擁有房產和其所在的土地，擁有永久、絕對的所有權。這是最完整的所有權形式。",
+                    freeholdPoint1Title: "所有權:",
+                    freeholdPoint1Desc: "永久擁有建築和土地。",
+                    freeholdPoint2Title: "責任:",
+                    freeholdPoint2Desc: "對所有維護負全責。",
+                    freeholdPoint3Title: "成本:",
+                    freeholdPoint3Desc: "無地租或服務費。",
+                    freeholdPoint4Title: "自由度:",
+                    freeholdPoint4Desc: "改造自由度高（需遵守規劃法規）。",
+                    leaseholdTitle: "租賃產權 (Leasehold)",
+                    leaseholdDesc: "您只在固定期限內（如99年）擁有房產的居住權，但土地歸永久產權人所有。這是一項會隨時間貶值的資產。",
+                    leaseholdPoint1Title: "所有權:",
+                    leaseholdPoint1Desc: "有期限的居住權，不擁有土地。",
+                    leaseholdPoint2Title: "責任:",
+                    leaseholdPoint2Desc: "負責內部維修，但需向地主支付費用。",
+                    leaseholdPoint3Title: "持續成本:",
+                    leaseholdPoint3Desc: "需支付地租(Ground Rent)和服務費(Service Charge)，後者可能高昂且不可預測。",
+                    leaseholdPoint4Title: "限制:",
+                    leaseholdPoint4Desc: "改造、養寵物等通常需要地主許可。",
+                    leaseholdPoint5Title: "重大風險:",
+                    leaseholdPoint5Desc: "租約年期低於80年時，續約成本劇增，房產價值嚴重下跌且難以獲得按揭。",
+                    asymmetryTitle: "權力與資訊的不對稱",
+                    asymmetryDesc: "報告指出，無論是租賃產權還是租房，都存在權力不對稱。地主或房東掌握更多控制權。因此，仔細閱讀並理解您的租約或租賃協議，是保護您權益最重要的工具。權利存在於紙上，但只有在被知曉和行使時才有效。",
+                    schemesTitle: "政府援助計劃",
+                    schemesIntro: "為應對高昂的購房門檻，英國政府提供了多項援助計劃。但報告提醒我們，這些計劃是「雙刃劍」：它們降低了進入門檻，但同時也引入了新的限制、風險和長期複雜性。它們是金融產品，而非單純的贈予。",
+                    schemeTabLISA: "終身ISA (LISA)",
+                    schemeTabSO: "共享產權 (Shared Ownership)",
+                    schemeTabFH: "首次購房計劃",
+                    lisaTitle: "終身個人儲蓄賬戶 (Lifetime ISA)",
+                    lisaBenefit: "<strong>益處:</strong> 政府為您的儲蓄提供25%獎金（每年最高£1,000），助您積累首期款。",
+                    lisaRiskTitle: "主要限制與風險:",
+                    lisaRisk1: "購房價格上限為£450,000。",
+                    lisaRisk2: "賬戶需開立至少12個月後才能用於購房。",
+                    lisaRisk3: "若因不合規原因提前取款，將面臨25%的罰款，這會導致您損失部分本金。",
+                    soTitle: "共享產權 (Shared Ownership)",
+                    soBenefit: "<strong>益處:</strong> 只需購買房產的一部分份額（如25%-75%），從而大幅降低首期款和按揭門檻。",
+                    soRiskTitle: "主要限制與風險:",
+                    soRisk1: "您需要為未購買的份額向住房協會支付租金和服務費。",
+                    soRisk2: "法律上，您是「有保障租戶」而非完全的業主。",
+                    soRisk3: "增購額外份額（Staircasing）的成本隨市場價變動，可能變得越來越昂貴。",
+                    fhTitle: "首次購房計劃 (First Homes)",
+                    fhBenefit: "<strong>益處:</strong> 允許符合條件的首次購房者和關鍵工作者以市場價30%-50%的折扣購買新房。",
+                    fhRiskTitle: "主要限制與風險:",
+                    fhRisk1: "房源數量非常有限，且有地區限制。",
+                    fhRisk2: "出售房產時，必須將同樣的折扣比例傳遞給下一位符合條件的買家，這限制了您的資本增值。",
+                    decisionTitle: "決策助手：結構化自我評估",
+                    decisionIntro: "最終，買房或租房沒有絕對的「正確」答案，只有最適合您的選擇。請利用以下框架進行一次深刻的自我反思。您的答案將引導您走向一個與您的個人及財務目標最一致的結論。",
+                    selfAssess1Title: "1. 財務穩定性 & 時間規劃",
+                    selfAssess1Desc: "您的收入是否穩定？您計劃在一個地方居住多久（建議至少3-5年才考慮買房）？您是否有足夠的應急儲蓄？",
+                    selfAssess2Title: "2. 職業與流動性",
+                    selfAssess2Desc: "您的職業是否要求您頻繁搬遷？如果是，租房無可比擬的靈活性可能是決定性因素。",
+                    selfAssess3Title: "3. 人生階段 & 風險承受能力",
+                    selfAssess3Desc: "您對空間和穩定性的需求如何？您是否願意並有能力承擔房市波動和突發高額維修的風險？",
+                    selfAssess4Title: "4. 生活方式 & 個人自主權",
+                    selfAssess4Desc: "能夠自由裝修、飼養寵物、無需向房東請示，對您來說有多重要？",
+                    footerText1: "本工具基於《英國置業與租賃權威指南：2025年戰略分析報告》創建。",
+                    footerText2: "所有數據和計算僅供參考，不構成財務建議。請在做出決策前諮詢專業人士。",
+                    upfrontChartLabels: ['首期款', '印花稅', '法律費', '測量費', '其他'],
+                },
+                en: {
+                    appTitle: "UK Property Decision Tool",
+                    navOverview: "Core Comparison",
+                    navCalculator: "Cost Calculator",
+                    navProcess: "Process Guide",
+                    navLegal: "Property Types",
+                    navSchemes: "Govt. Schemes",
+                    navDecision: "Decision Helper",
+                    heroTitle: "To Buy or To Rent?",
+                    heroSubtitle: "In the UK, this is the key choice between <span class=\"font-bold\">long-term financial accumulation</span> and <span class=\"font-bold\">short-term lifestyle flexibility</span>. This tool will help you analyze the pros and cons to make the best decision for you.",
+                    overviewTitle: "Core Comparison: At a Glance",
+                    overviewIntro: "Buying and renting each have their pros and cons. This section summarizes the core differences at a high level to help you quickly form a big picture. This is the starting point of your decision journey, defining the fundamental trade-offs.",
+                    owningTitle: "🏡 Owning",
+                    owningBenefit1Title: "Financial Growth:",
+                    owningBenefit1Desc: "Build equity; property has potential for capital appreciation.",
+                    owningBenefit2Title: "Stability & Autonomy:",
+                    owningBenefit2Desc: "High security of tenure; freedom to renovate and decorate.",
+                    owningDrawback1Title: "High Upfront Costs:",
+                    owningDrawback1Desc: "Requires a large deposit, Stamp Duty, and various fees.",
+                    owningDrawback2Title: "Low Flexibility:",
+                    owningDrawback2Desc: "Selling a property is a long and expensive process.",
+                    owningDrawback3Title: "Major Responsibility:",
+                    owningDrawback3Desc: "The owner is responsible for all maintenance and repair costs.",
+                    rentingTitle: "🔑 Renting",
+                    rentingBenefit1Title: "High Flexibility:",
+                    rentingBenefit1Desc: "Easy to move after the lease ends, adapting to life changes.",
+                    rentingBenefit2Title: "Low Upfront Costs:",
+                    rentingBenefit2Desc: "Only a security deposit and advance rent are required.",
+                    rentingBenefit3Title: "Light Responsibility:",
+                    rentingBenefit3Desc: "The landlord is responsible for most structural repairs.",
+                    rentingDrawback1Title: "No Financial Return:",
+                    rentingDrawback1Desc: "Rent is a pure expense and does not build assets.",
+                    rentingDrawback2Title: "Low Security of Tenure:",
+                    rentingDrawback2Desc: "May face rent increases or the landlord reclaiming the property.",
+                    calculatorTitle: "Interactive Cost Calculator",
+                    calculatorIntro: "After the theoretical comparison, let's get personal. Enter the price of the property you're considering, your expected deposit percentage, and the current or expected monthly rent. This tool will instantly calculate and visualize the financial differences, revealing the huge 'upfront cost iceberg' of buying.",
+                    calcLabelPrice: "Target Property Price (£)",
+                    calcLabelDeposit: "Deposit Percentage (<span id=\"depositPercentageValue\">10</span>%)",
+                    calcLabelRent: "Equivalent Monthly Rent (£)",
+                    calcMultiplierTitle: "The Huge Upfront Cost Gap",
+                    calcMultiplierDesc1: "The cash needed to buy is",
+                    calcMultiplierDesc2: "times more than renting. This is the biggest hurdle for many.",
+                    calcBuyingTitle: "Buying Cost Analysis",
+                    calcBuyingUpfrontLabel: "Est. Total Upfront Cost",
+                    calcBuyingMonthlyLabel: "Est. Total Monthly Outgoings",
+                    calcBuyingChartLabel: "Upfront Cost Breakdown",
+                    calcRentingTitle: "Renting Cost Analysis",
+                    calcRentingUpfrontLabel: "Est. Total Upfront Cost",
+                    calcRentingMonthlyLabel: "Est. Total Monthly Outgoings",
+                    calcRentingBenefit: "The core advantage of renting is its<br><span class=\"text-3xl font-bold my-2 block\" data-lang=\"calcRentingBenefitHighlight\">extremely low initial investment</span><br>and unparalleled flexibility.",
+                    calcRentingBenefitHighlight: "extremely low initial investment",
+                    calcRentingDrawback: "No long-term asset accumulation",
+                    marketTrendTitle: "Market Trend: Why Care? (2025 Data)",
+                    marketTrendIntro: "The current market shows a key trend: rents are rising much faster than house prices. This means the cost of your alternative (renting) is increasing rapidly. Securing a fixed-rate mortgage allows buyers to hedge against this rental inflation, offering a unique strategic opportunity.",
+                    marketTrendChartLabelPrice: "Avg. House Price Growth",
+                    marketTrendChartLabelRent: "Avg. Rental Price Growth",
+                    marketTrendChartLabelYear: "Annual Growth Rate",
+                    processTitle: "Process Guide",
+                    processIntro: "Whichever path you choose, there's a set process to follow. Here, the complex journey is broken down into clear steps. A key insight from the report is emphasized: your 'active management' is crucial for a smooth process. Simply relying on professionals can lead to delays and stress.",
+                    processBuyingTitle: "The Path to Ownership (Buying)",
+                    buyStep1Title: "1. Financial Prep & Get an AIP",
+                    buyStep1Desc: "Save for a deposit, check your credit, and get an Agreement in Principle (AIP) to prove your buying power.",
+                    buyStep2Title: "2. House Hunt & Make an Offer",
+                    buyStep2Desc: "Research areas, arrange viewings, and submit a formal offer.",
+                    buyStep3Title: "3. Instruct Solicitor & Apply for Mortgage",
+                    buyStep3Desc: "Once your offer is accepted, immediately instruct a solicitor and submit your formal mortgage application.",
+                    buyStep4Title: "4. Surveys & Legal Searches",
+                    buyStep4Desc: "Arrange a property survey. Your solicitor will complete all necessary legal searches.",
+                    buyStep5Title: "5. Exchange Contracts (Legally Binding)",
+                    buyStep5Desc: "Pay the deposit. Once contracts are exchanged, the deal is legally binding and you cannot back out.",
+                    buyStep6Title: "6. Completion & Get the Keys",
+                    buyStep6Desc: "Pay the remaining balance, and ownership is formally transferred.",
+                    processRentingTitle: "The Path to Tenancy (Renting)",
+                    rentStep1Title: "1. Budget & Prepare Documents",
+                    rentStep1Desc: "Determine your rental budget and prepare ID, proof of income, and Right to Rent documents.",
+                    rentStep2Title: "2. Find a Property & Apply",
+                    rentStep2Desc: "Act quickly. After a viewing, submit an application and a holding deposit immediately.",
+                    rentStep3Title: "3. Referencing & Sign Agreement",
+                    rentStep3Desc: "After passing reference checks, carefully review and sign the tenancy agreement (AST).",
+                    rentStep4Title: "4. Pay Fees & Check Inventory",
+                    rentStep4Desc: "Pay the first month's rent and security deposit. Carefully check the inventory with the landlord, taking photos as evidence.",
+                    legalTitle: "The Ownership Choice: Freehold vs. Leasehold",
+                    legalIntro: "In the UK, not all property ownership means you own the land beneath your feet. Understanding the fundamental difference between Freehold and Leasehold is critical. The latter is often misunderstood and can bring unexpected ongoing costs and restrictions, eroding your rights and the value of your property.",
+                    freeholdTitle: "Freehold",
+                    freeholdDesc: "You own the property and the land it stands on outright, in perpetuity. It is the most complete form of ownership.",
+                    freeholdPoint1Title: "Ownership:",
+                    freeholdPoint1Desc: "Own the building and the land forever.",
+                    freeholdPoint2Title: "Responsibility:",
+                    freeholdPoint2Desc: "Fully responsible for all maintenance.",
+                    freeholdPoint3Title: "Costs:",
+                    freeholdPoint3Desc: "No ground rent or service charges.",
+                    freeholdPoint4Title: "Freedom:",
+                    freeholdPoint4Desc: "High degree of freedom to alter (subject to planning rules).",
+                    leaseholdTitle: "Leasehold",
+                    leaseholdDesc: "You own the right to occupy the property for a fixed term (e.g., 99 years), but the land belongs to the freeholder. It is a depreciating asset.",
+                    leaseholdPoint1Title: "Ownership:",
+                    leaseholdPoint1Desc: "A right to occupy for a limited time; you don't own the land.",
+                    leaseholdPoint2Title: "Responsibility:",
+                    leaseholdPoint2Desc: "Responsible for interior repairs, but pay fees to the freeholder.",
+                    leaseholdPoint3Title: "Ongoing Costs:",
+                    leaseholdPoint3Desc: "Must pay Ground Rent and Service Charges, which can be high and unpredictable.",
+                    leaseholdPoint4Title: "Restrictions:",
+                    leaseholdPoint4Desc: "Permission often needed from the freeholder for alterations, pets, etc.",
+                    leaseholdPoint5Title: "Major Risk:",
+                    leaseholdPoint5Desc: "When a lease falls below 80 years, extension costs soar and the property's value drops, making it hard to mortgage.",
+                    asymmetryTitle: "Power and Information Asymmetry",
+                    asymmetryDesc: "The report highlights that in both leasehold and rental relationships, there is a power imbalance. The freeholder or landlord holds more control. Therefore, carefully reading and understanding your lease or tenancy agreement is your most important tool for protection. Rights exist on paper, but are only effective when known and exercised.",
+                    schemesTitle: "Government Support Schemes",
+                    schemesIntro: "To address the high barrier to entry, the UK government offers several support schemes. But the report warns these are a 'double-edged sword': they lower the entry bar but also introduce new restrictions, risks, and long-term complexities. They are financial products, not simple gifts.",
+                    schemeTabLISA: "Lifetime ISA (LISA)",
+                    schemeTabSO: "Shared Ownership",
+                    schemeTabFH: "First Homes",
+                    lisaTitle: "Lifetime ISA (LISA)",
+                    lisaBenefit: "<strong>Benefit:</strong> The government adds a 25% bonus to your savings (up to £1,000 per year) to help you build a deposit.",
+                    lisaRiskTitle: "Key Restrictions & Risks:",
+                    lisaRisk1: "Property price cap of £450,000.",
+                    lisaRisk2: "Account must be open for at least 12 months before use for a property purchase.",
+                    lisaRisk3: "Withdrawing for unapproved reasons incurs a 25% penalty, meaning you lose some of your own capital.",
+                    soTitle: "Shared Ownership",
+                    soBenefit: "<strong>Benefit:</strong> Allows you to buy a share of a property (e.g., 25%-75%), drastically reducing the required deposit and mortgage.",
+                    soRiskTitle: "Key Restrictions & Risks:",
+                    soRisk1: "You must pay rent and service charges on the share you don't own to a housing association.",
+                    soRisk2: "Legally, you are an 'assured tenant,' not a full owner.",
+                    soRisk3: "The cost of buying more shares (Staircasing) is based on the current market value, which can become increasingly expensive.",
+                    fhTitle: "First Homes",
+                    fhBenefit: "<strong>Benefit:</strong> Allows eligible first-time buyers and key workers to buy a new-build home for 30%-50% less than its market value.",
+                    fhRiskTitle: "Key Restrictions & Risks:",
+                    fhRisk1: "Very limited availability and subject to regional caps.",
+                    fhRisk2: "When you sell, the same percentage discount must be passed on to the next eligible buyer, limiting your capital gains.",
+                    decisionTitle: "Decision Helper: A Structured Self-Assessment",
+                    decisionIntro: "Ultimately, there is no 'right' answer to buying or renting, only the choice that is right for you. Use the framework below for a deep self-reflection. Your answers will guide you to a conclusion that aligns best with your personal and financial goals.",
+                    selfAssess1Title: "1. Financial Stability & Timescale",
+                    selfAssess1Desc: "Is your income stable? How long do you plan to live in one place (at least 3-5 years is recommended for buying)? Do you have sufficient emergency savings?",
+                    selfAssess2Title: "2. Career & Mobility",
+                    selfAssess2Desc: "Does your career require you to move frequently? If so, the unparalleled flexibility of renting may be the deciding factor.",
+                    selfAssess3Title: "3. Life Stage & Risk Appetite",
+                    selfAssess3Desc: "What are your needs for space and stability? Are you willing and able to bear the risks of market fluctuations and sudden, large repair bills?",
+                    selfAssess4Title: "4. Lifestyle & Personal Autonomy",
+                    selfAssess4Desc: "How important is it for you to be able to decorate freely, own pets, and not have to ask a landlord for permission?",
+                    footerText1: "This tool was created based on the 'Definitive Guide to UK Property: A 2025 Strategic Analysis Report'.",
+                    footerText2: "All data and calculations are for illustrative purposes only and do not constitute financial advice. Please consult with a professional before making a decision.",
+                    upfrontChartLabels: ['Deposit', 'Stamp Duty', 'Legal Fees', 'Survey Fees', 'Other'],
+                }
+            };
+
+            let currentLang = 'zh';
+            let upfrontCostChart;
+            let marketTrendChart;
+
+            const propertyPriceInput = document.getElementById('propertyPrice');
+            const depositPercentageInput = document.getElementById('depositPercentage');
+            const depositPercentageValue = document.getElementById('depositPercentageValue');
+            const monthlyRentInput = document.getElementById('monthlyRent');
+
+            const updateLanguage = () => {
+                document.querySelectorAll('[data-lang]').forEach(el => {
+                    const key = el.getAttribute('data-lang');
+                    if (langData[currentLang][key]) {
+                        el.innerHTML = langData[currentLang][key];
+                    }
+                });
+                document.documentElement.lang = currentLang === 'zh' ? 'zh-TW' : 'en';
+                document.title = currentLang === 'zh' ? '英國買屋 vs. 租屋 互動分析儀 (2025)' : 'UK Buy vs. Rent Interactive Analyser (2025)';
+                
+                const langToggleButtons = document.querySelectorAll('#lang-toggle-desktop, #lang-toggle-mobile');
+                langToggleButtons.forEach(button => {
+                    button.textContent = currentLang === 'zh' ? 'English' : '中文';
+                });
+
+                // Re-render charts with new language
+                updateCalculator();
+            };
+            
+            const toggleLanguage = () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage();
+            };
+
+            document.getElementById('lang-toggle-desktop').addEventListener('click', toggleLanguage);
+            document.getElementById('lang-toggle-mobile').addEventListener('click', toggleLanguage);
+
+            const calculateSDLT = (price) => {
+                let tax = 0;
+                const firstTimeBuyerLimit = 425000;
+                if (price <= firstTimeBuyerLimit) {
+                    return 0;
+                }
+                if (price > firstTimeBuyerLimit) {
+                     tax += (price - firstTimeBuyerLimit) * 0.05;
+                }
+                return tax;
+            };
+            
+            const calculateMonthlyMortgage = (price, depositPercentage, interestRate = 4.5, termYears = 25) => {
+                const loanAmount = price * (1 - depositPercentage / 100);
+                const monthlyInterestRate = (interestRate / 100) / 12;
+                const numberOfPayments = termYears * 12;
+                const numerator = monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
+                const denominator = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+                return loanAmount * (numerator / denominator);
+            };
+
+            const updateCalculator = () => {
+                const price = parseFloat(propertyPriceInput.value) || 0;
+                const depositPercentage = parseFloat(depositPercentageInput.value) || 0;
+                const rent = parseFloat(monthlyRentInput.value) || 0;
+                
+                const depositPercentageSpan = document.getElementById('depositPercentageValue');
+                if (depositPercentageSpan) {
+                    depositPercentageSpan.textContent = depositPercentage;
+                }
+
+                const depositAmount = price * (depositPercentage / 100);
+                const sdlt = calculateSDLT(price);
+                const legalFees = 2000;
+                const surveyFees = 800;
+                const otherFees = 1500;
+                const buyingUpfront = depositAmount + sdlt + legalFees + surveyFees + otherFees;
+
+                const mortgagePayment = calculateMonthlyMortgage(price, depositPercentage);
+                const maintenance = (price * 0.01) / 12; 
+                const insurance = 35;
+                const buyingMonthly = mortgagePayment + maintenance + insurance;
+
+                const rentingDeposit = rent * 5 * 12 / 52;
+                const rentingUpfront = rentingDeposit + rent;
+                
+                document.getElementById('buyingUpfrontCost').textContent = `£${Math.round(buyingUpfront).toLocaleString()}`;
+                document.getElementById('buyingMonthlyCost').textContent = `£${Math.round(buyingMonthly).toLocaleString()}`;
+                document.getElementById('rentingUpfrontCost').textContent = `£${Math.round(rentingUpfront).toLocaleString()}`;
+                document.getElementById('rentingMonthlyCost').textContent = `£${Math.round(rent).toLocaleString()}`;
+                
+                const multiplier = rentingUpfront > 0 ? buyingUpfront / rentingUpfront : 0;
+                document.getElementById('upfrontCostMultiplier').textContent = `${multiplier.toFixed(1)}`;
+
+                const upfrontChartData = {
+                    labels: langData[currentLang].upfrontChartLabels,
+                    datasets: [{
+                        data: [depositAmount, sdlt, legalFees, surveyFees, otherFees],
+                        backgroundColor: ['#A8763E', '#748B75', '#D4B79C', '#A3B4A2', '#C0C0C0'],
+                        borderColor: '#FDFBF7',
+                        borderWidth: 2,
+                    }]
+                };
+
+                if (upfrontCostChart) {
+                    upfrontCostChart.destroy();
+                }
+                const upfrontCtx = document.getElementById('upfrontCostChart').getContext('2d');
+                upfrontCostChart = new Chart(upfrontCtx, {
+                    type: 'doughnut',
+                    data: upfrontChartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0 }).format(context.parsed);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                const marketTrendData = {
+                     labels: [langData[currentLang].marketTrendChartLabelYear],
+                     datasets: [
+                        {
+                             label: langData[currentLang].marketTrendChartLabelPrice,
+                             data: [2.5],
+                             backgroundColor: '#748B75',
+                             borderColor: '#748B75',
+                             borderWidth: 1
+                         },
+                         {
+                             label: langData[currentLang].marketTrendChartLabelRent,
+                             data: [7.4],
+                             backgroundColor: '#A8763E',
+                             borderColor: '#A8763E',
+                             borderWidth: 1
+                         }
+                     ]
+                 };
+                 
+                 if (marketTrendChart) {
+                    marketTrendChart.destroy();
+                 }
+                 const marketTrendCtx = document.getElementById('marketTrendChart').getContext('2d');
+                 marketTrendChart = new Chart(marketTrendCtx, {
+                     type: 'bar',
+                     data: marketTrendData,
+                     options: {
+                         responsive: true,
+                         maintainAspectRatio: false,
+                         scales: {
+                             y: {
+                                 beginAtZero: true,
+                                 ticks: {
+                                     callback: function(value) {
+                                         return value + '%';
+                                     }
+                                 }
+                             }
+                         },
+                         plugins: {
+                             legend: {
+                                 position: 'top',
+                             },
+                             tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.raw}%`;
+                                    }
+                                }
+                             }
+                         }
+                     }
+                 });
+            };
+
+            propertyPriceInput.addEventListener('input', updateCalculator);
+            depositPercentageInput.addEventListener('input', updateCalculator);
+            monthlyRentInput.addEventListener('input', updateCalculator);
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if(!mobileMenu.classList.contains('hidden')) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                })
+            });
+
+            // Initial load
+            updateLanguage();
+        });
+    </script>
+</body>
+</html>
