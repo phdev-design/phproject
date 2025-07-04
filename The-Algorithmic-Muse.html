@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：AI藝術的衝擊與機遇</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: The application is structured into four thematic, full-screen sections to guide the user through a narrative journey: 1. Introduction (核心議題) to present the central conflict. 2. Market Impact (市場衝擊) to visualize the threats and opportunities with an interactive chart. 3. Artist's Response (藝術家的應對) to showcase proactive strategies with an interactive diagram. 4. Future Ecosystem (未來的生態系) to explore macro solutions with comparison cards and actionable takeaways. This narrative structure was chosen over a direct report-to-page mapping to make the complex topic more digestible and engaging for a general audience, moving them logically from problem to solution. -->
+    <!-- Visualization & Content Choices: 1. Market Impact: Report's Table 2 data -> Goal: Compare automation risk -> Viz: Interactive Bar Chart -> Interaction: Hover to see details -> Justification: More engaging than a static table, allows quick comparison. Library: Chart.js. 2. Artist's Response: Report's description of new workflows -> Goal: Illustrate the new creative process -> Viz: HTML/CSS Diagram -> Interaction: Click to reveal stage descriptions -> Justification: Visually breaks down a complex concept into simple, interactive steps. 3. Future Ecosystem: Report's Table 3 data -> Goal: Compare compensation models -> Viz: Interactive Cards -> Interaction: Click buttons to switch content -> Justification: Allows focused comparison without overwhelming the user with a dense table. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FDFBF8;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #D97706;
+            transition: width 0.3s ease;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #D97706;
+        }
+        .nav-link.active::after, .nav-link:hover::after {
+            width: 100%;
+        }
+        .content-section {
+            min-height: 100vh;
+            display: none;
+            padding-top: 80px;
+        }
+        .content-section.active {
+            display: flex;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 id="main-title" class="text-xl font-bold text-gray-800"></h1>
+            <div class="flex items-center space-x-6">
+                <ul class="flex space-x-6 text-base font-medium">
+                    <li><a href="#intro" id="nav-intro" class="nav-link active"></a></li>
+                    <li><a href="#impact" id="nav-impact" class="nav-link"></a></li>
+                    <li><a href="#response" id="nav-response" class="nav-link"></a></li>
+                    <li><a href="#ecosystem" id="nav-ecosystem" class="nav-link"></a></li>
+                </ul>
+                <button id="lang-toggle" class="text-sm font-semibold text-gray-600 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-100 transition-colors">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="intro" class="content-section active flex-col justify-center items-center text-center px-4">
+            <div class="fade-in max-w-4xl">
+                <h2 id="intro-heading" class="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight"></h2>
+                <p id="intro-p" class="mt-6 text-xl text-gray-600 max-w-3xl mx-auto"></p>
+                <div class="mt-12 flex justify-center gap-4">
+                    <a href="#impact" id="intro-btn-impact" class="nav-switch-btn bg-amber-600 text-white font-bold py-3 px-8 rounded-full hover:bg-amber-700 transition-transform transform hover:scale-105"></a>
+                    <a href="#response" id="intro-btn-response" class="nav-switch-btn bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition-transform transform hover:scale-105"></a>
+                </div>
+            </div>
+        </section>
+
+        <section id="impact" class="content-section flex-col justify-center items-center px-4">
+            <div class="fade-in container mx-auto text-center">
+                <h2 id="impact-heading" class="text-4xl font-bold text-gray-900"></h2>
+                <p id="impact-p" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto"></p>
+                <div class="mt-10 chart-container">
+                    <canvas id="impactChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="response" class="content-section flex-col justify-center items-center px-4">
+            <div class="fade-in container mx-auto text-center">
+                <h2 id="response-heading" class="text-4xl font-bold text-gray-900"></h2>
+                <p id="response-p" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto"></p>
+                <div class="mt-12 flex flex-col md:flex-row items-center justify-center gap-4 text-left">
+                    <div id="workflow-diagram" class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-5 gap-4 items-start">
+                        <div class="workflow-step text-center p-4 rounded-lg cursor-pointer transition-all duration-300 bg-white shadow hover:shadow-xl" data-content="traditional">
+                            <h3 id="workflow-step1-h3" class="font-bold text-lg"></h3>
+                            <p id="workflow-step1-p" class="text-sm text-gray-500"></p>
+                        </div>
+                        <div class="flex items-center justify-center text-2xl font-bold text-amber-600">+</div>
+                        <div class="workflow-step text-center p-4 rounded-lg cursor-pointer transition-all duration-300 bg-white shadow hover:shadow-xl" data-content="ai">
+                            <h3 id="workflow-step2-h3" class="font-bold text-lg"></h3>
+                            <p id="workflow-step2-p" class="text-sm text-gray-500"></p>
+                        </div>
+                        <div class="flex items-center justify-center text-2xl font-bold text-amber-600">=</div>
+                        <div class="workflow-step text-center p-4 rounded-lg cursor-pointer transition-all duration-300 bg-white shadow hover:shadow-xl" data-content="hybrid">
+                             <h3 id="workflow-step3-h3" class="font-bold text-lg"></h3>
+                            <p id="workflow-step3-p" class="text-sm text-gray-500"></p>
+                        </div>
+                    </div>
+                </div>
+                <div id="workflow-content" class="mt-8 p-6 bg-white rounded-lg shadow-inner max-w-3xl mx-auto min-h-[150px] transition-all duration-500">
+                    <h4 id="workflow-title" class="text-xl font-bold text-amber-700 mb-2"></h4>
+                    <p id="workflow-text" class="text-gray-700"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ecosystem" class="content-section flex-col justify-center items-center px-4">
+            <div class="fade-in container mx-auto text-center">
+                 <h2 id="ecosystem-heading" class="text-4xl font-bold text-gray-900"></h2>
+                <p id="ecosystem-p" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto"></p>
+                <div class="mt-10 w-full max-w-5xl mx-auto">
+                    <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-6">
+                        <button id="comp-btn-bonus" class="compensation-btn active" data-model="bonus"></button>
+                        <button id="comp-btn-sharing" class="compensation-btn" data-model="sharing"></button>
+                        <button id="comp-btn-tax" class="compensation-btn" data-model="tax"></button>
+                        <button id="comp-btn-license" class="compensation-btn" data-model="license"></button>
+                        <button id="comp-btn-optout" class="compensation-btn" data-model="optout"></button>
+                    </div>
+                    <div id="compensation-display" class="bg-white p-6 rounded-lg shadow-lg text-left transition-all duration-500 min-h-[300px]">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLanguage = 'zh';
+            let impactChartInstance;
+
+            const content = {
+                zh: {
+                    mainTitle: '演算法的繆斯',
+                    nav: { intro: '核心議題', impact: '市場衝擊', response: '藝術家的應對', ecosystem: '未來的生態系' },
+                    intro: {
+                        heading: '替代或機遇？',
+                        p: '生成式AI正以前所未有的力量重塑創意產業。這是一場堪比攝影術誕生的革命，既是賦能創作者的強大工具，也可能成為顛覆其生計的巨大威脅。本報告將引導您深入探索這場變革的核心，剖析其帶來的衝擊，並共同尋找科技進步與藝術家生計之間的平衡點。',
+                        btn_impact: '探索市場衝擊',
+                        btn_response: '了解如何應對'
+                    },
+                    impact: {
+                        heading: '雙層市場的浮現',
+                        p: 'AI的衝擊並非均勻分佈，它正在催生一個分化的「雙層市場」。高概念、強調「人的觸感」的藝術價值可能不降反升；而以技術執行為主的商業設計與內容創作，則面臨嚴峻的價格壓力與替代風險。下方的圖表展示了AI對不同創意角色的預期影響，將滑鼠懸停在長條上以查看詳細趨勢。',
+                        chart: {
+                            labels: ['高概念純藝術', '商業插畫', '平面設計', '圖庫/內容創作', 'AI輔助混合型角色'],
+                            datasetLabel: 'AI 影響程度',
+                            trends: ['↑ (上升)', '↓↓ (顯著下降)', '↓ (下降)', '→ (趨於谷底)', '↑↑ (顯著上升)'],
+                            tooltipTitle: '預期價值趨勢',
+                            axisTitle: '衝擊程度 (負值代表新機會)'
+                        }
+                    },
+                    response: {
+                        heading: '重新定義藝術家的角色',
+                        p: '面對挑戰，藝術家並非只能被動接受。成功的創作者正將AI視為協作者，其角色從純粹的「創作者」轉變為「策展人」與「指導者」。這催生了新的混合型工作流程與職業角色，人類的價值體現在策略、品味和批判性判斷力上。點擊下方流程圖的各個階段，以了解詳情。',
+                        workflow: {
+                            step1_h3: '傳統技藝', step1_p: '人類的核心創作技能',
+                            step2_h3: 'AI 協作', step2_p: '作為創意夥伴',
+                            step3_h3: '混合型輸出', step3_p: '新的藝術形式',
+                            default_title: '點擊一個階段開始探索',
+                            default_text: '新的工作流程整合了人類的創意直覺與AI的生成能力，開創了效率與創意的全新可能。',
+                            traditional: { title: '傳統技藝：人類的核心', text: '這代表了藝術家的基礎能力：概念發想、構圖、色彩理論，以及將想法實現的技術能力。這是人類創意的根基，也是賦予作品情感與深度的來源。' },
+                            ai: { title: 'AI協作：無限的創意跳板', text: '藝術家將AI作為「數位同事」，用於快速概念發想、克服創意瓶頸、模擬場景和自動化繁瑣任務。人類在此階段的角色是「指導者」，引導AI的輸出。' },
+                            hybrid: { title: '混合型輸出：1 + 1 > 2', text: '最終的作品是人類智慧與機器智能的結晶。藝術家對AI生成的元素進行篩選、微調、組合，並融入自己的獨特風格，創造出全新的、超越單一來源的藝術形式。' }
+                        }
+                    },
+                    ecosystem: {
+                        heading: '建立可持續的生態系統',
+                        p: '個體藝術家的適應固然重要，但長期的平衡需要法律、經濟與商業模式的系統性框架。從版權歸屬到數據庫之戰，再到創作者的補償模型，整個社會都在探索共存之道。以下是幾種主要的藝術家補償模型，點擊按鈕進行比較。',
+                        comp_btns: { bonus: '企業獎金/選擇加入', sharing: '收益共享', tax: '系統性徵稅', license: '個人授權', optout: '簡化選擇退出' },
+                        comp_labels: { how: '運作方式：', pro: '優點：', con: '缺點：' },
+                        comp_data: {
+                            bonus: { title: '企業獎金 / 選擇加入', how: '公司設立基金，向自願提供數據用於AI訓練的創作者支付一次性獎金或版稅。', pro: '數據來源合法清晰，對公司風險低；能激勵高品質內容貢獻。', con: '僅惠及自願加入的頭部創作者，無法解決存量數據的侵權問題。' },
+                            sharing: { title: '收益共享', how: 'AI生成內容的收益按一定比例分配給其風格或作品被引用的原創藝術家。', pro: '與市場價值掛鉤，對受歡迎的藝術家更公平；符合消費者對公平的期待。', con: '技術上難以精確追蹤和量化每個藝術家的貢獻；分配機制複雜。' },
+                            tax: { title: '系統性徵稅', how: '對AI公司或服務徵收一筆稅金，成立基金會，分配給廣大版權所有者。', pro: '能覆蓋所有被用作訓練數據的創作者，實現廣泛補償。', con: '徵稅標準和分配機制難以確定；可能抑制AI行業創新；行政成本高。' },
+                            license: { title: '個人授權', how: '藝術家像授權音樂一樣，主動授權其作品或風格用於AI，並協商費用。', pro: '賦予藝術家完全的控制權和定價權。', con: '僅適用於知名度高的藝術家；對個體創作者而言，談判成本極高。' },
+                            optout: { title: '簡化選擇退出', how: '建立法律框架，要求AI公司在收到版權所有者通知後，必須將其作品從訓練集中移除。', pro: '尊重創作者的意願，賦予其拒絕被利用的權利。', con: '將監控和維權的巨大負擔完全轉嫁給創作者；治標不治本，無法提供經濟補償。' }
+                        }
+                    }
+                },
+                en: {
+                    mainTitle: 'The Algorithmic Muse',
+                    nav: { intro: 'Core Issues', impact: 'Market Impact', response: 'Artist\'s Response', ecosystem: 'Future Ecosystem' },
+                    intro: {
+                        heading: 'Replacement or Opportunity?',
+                        p: 'Generative AI is reshaping the creative industries with unprecedented force. This revolution, comparable to the invention of photography, is both a powerful tool empowering creators and a potential threat to their livelihoods. This report will guide you through the core of this transformation, analyze its impacts, and explore a balance between technological advancement and artists\' sustainability.',
+                        btn_impact: 'Explore Market Impact',
+                        btn_response: 'Learn How to Respond'
+                    },
+                    impact: {
+                        heading: 'The Emergence of a Two-Tier Market',
+                        p: 'The impact of AI is not uniform; it\'s creating a "two-tier market". The value of high-concept art emphasizing the "human touch" may rise, while commercial design and content creation focused on technical execution face severe price pressure and replacement risk. The chart below shows the expected impact of AI on different creative roles. Hover over the bars to see detailed trends.',
+                        chart: {
+                            labels: ['High-Concept Fine Art', 'Commercial Illustration', 'Graphic Design', 'Stock/Content Creation', 'AI-Assisted Hybrid Roles'],
+                            datasetLabel: 'AI Impact Level',
+                            trends: ['↑ (Rising)', '↓↓ (Significant Decline)', '↓ (Declining)', '→ (Bottoming Out)', '↑↑ (Significant Rise)'],
+                            tooltipTitle: 'Expected Value Trend',
+                            axisTitle: 'Impact Level (Negative values represent new opportunities)'
+                        }
+                    },
+                    response: {
+                        heading: 'Redefining the Artist\'s Role',
+                        p: 'Facing these challenges, artists are not just passive recipients. Successful creators are embracing AI as a collaborator, shifting their role from pure "creator" to "curator" and "director." This fosters new hybrid workflows and professional roles where human value lies in strategy, taste, and critical judgment. Click on the stages of the workflow below to learn more.',
+                        workflow: {
+                            step1_h3: 'Traditional Craft', step1_p: 'Core human creative skills',
+                            step2_h3: 'AI Collaboration', step2_p: 'As a creative partner',
+                            step3_h3: 'Hybrid Output', step3_p: 'New art forms',
+                            default_title: 'Click a stage to start exploring',
+                            default_text: 'The new workflow integrates human creative intuition with AI\'s generative capabilities, unlocking new possibilities for efficiency and creativity.',
+                            traditional: { title: 'Traditional Craft: The Human Core', text: 'This represents the artist\'s fundamental abilities: ideation, composition, color theory, and the technical skill to realize ideas. It is the foundation of human creativity and the source of emotional depth in art.' },
+                            ai: { title: 'AI Collaboration: The Infinite Springboard', text: 'Artists use AI as a "digital colleague" for rapid brainstorming, overcoming creative blocks, simulating scenes, and automating tedious tasks. The human role here is that of a "director," guiding the AI\'s output.' },
+                            hybrid: { title: 'Hybrid Output: 1 + 1 > 2', text: 'The final work is a synthesis of human intellect and machine intelligence. The artist selects, refines, and combines AI-generated elements, infusing them with their unique style to create new art forms that transcend a single origin.' }
+                        }
+                    },
+                    ecosystem: {
+                        heading: 'Building a Sustainable Ecosystem',
+                        p: 'While individual adaptation is crucial, long-term balance requires a systemic framework of legal, economic, and business models. From copyright attribution to the database wars and creator compensation models, society is exploring ways to coexist. Below are several key artist compensation models. Click the buttons to compare them.',
+                        comp_btns: { bonus: 'Corporate Bonus/Opt-in', sharing: 'Revenue Sharing', tax: 'Systematic Levy', license: 'Personal Licensing', optout: 'Simplified Opt-out' },
+                        comp_labels: { how: 'How it works:', pro: 'Pros:', con: 'Cons:' },
+                        comp_data: {
+                            bonus: { title: 'Corporate Bonus / Opt-in', how: 'Companies create funds to pay one-time bonuses or royalties to creators who voluntarily provide data for AI training.', pro: 'Legally clear data source, low risk for companies; incentivizes high-quality content contribution.', con: 'Only benefits top creators who opt-in, fails to address infringement issues with existing data.' },
+                            sharing: { title: 'Revenue Sharing', how: 'A percentage of revenue from AI-generated content is distributed to the original artists whose styles or works were referenced.', pro: 'Tied to market value, fairer for popular artists; aligns with consumer expectations of fairness.', con: 'Technically difficult to accurately track and quantify each artist\'s contribution; complex distribution mechanism.' },
+                            tax: { title: 'Systematic Levy', how: 'A tax is imposed on AI companies or services to create a foundation that distributes funds to all copyright holders.', pro: 'Can cover all creators whose data was used for training, achieving broad compensation.', con: 'Difficult to determine tax standards and distribution mechanisms; may inhibit AI industry innovation; high administrative costs.' },
+                            license: { title: 'Personal Licensing', how: 'Artists actively license their work or style for AI use, similar to music licensing, and negotiate fees.', pro: 'Gives artists complete control and pricing power.', con: 'Only feasible for well-known artists; negotiation costs are extremely high for individuals.' },
+                            optout: { title: 'Simplified Opt-out', how: 'Establish a legal framework requiring AI companies to remove an artist\'s work from training sets upon request.', pro: 'Respects creators\' wishes and gives them the right to refuse exploitation.', con: 'Shifts the immense burden of monitoring and enforcement entirely to creators; a palliative, not a cure, offering no economic compensation.' }
+                        }
+                    }
+                }
+            };
+
+            function updateContent(lang) {
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                
+                const c = content[lang];
+
+                document.getElementById('main-title').textContent = c.mainTitle;
+                document.getElementById('nav-intro').textContent = c.nav.intro;
+                document.getElementById('nav-impact').textContent = c.nav.impact;
+                document.getElementById('nav-response').textContent = c.nav.response;
+                document.getElementById('nav-ecosystem').textContent = c.nav.ecosystem;
+
+                document.getElementById('intro-heading').textContent = c.intro.heading;
+                document.getElementById('intro-p').textContent = c.intro.p;
+                document.getElementById('intro-btn-impact').textContent = c.intro.btn_impact;
+                document.getElementById('intro-btn-response').textContent = c.intro.btn_response;
+
+                document.getElementById('impact-heading').textContent = c.impact.heading;
+                document.getElementById('impact-p').textContent = c.impact.p;
+                
+                document.getElementById('response-heading').textContent = c.response.heading;
+                document.getElementById('response-p').textContent = c.response.p;
+                document.getElementById('workflow-step1-h3').textContent = c.response.workflow.step1_h3;
+                document.getElementById('workflow-step1-p').textContent = c.response.workflow.step1_p;
+                document.getElementById('workflow-step2-h3').textContent = c.response.workflow.step2_h3;
+                document.getElementById('workflow-step2-p').textContent = c.response.workflow.step2_p;
+                document.getElementById('workflow-step3-h3').textContent = c.response.workflow.step3_h3;
+                document.getElementById('workflow-step3-p').textContent = c.response.workflow.step3_p;
+                document.getElementById('workflow-title').textContent = c.response.workflow.default_title;
+                document.getElementById('workflow-text').textContent = c.response.workflow.default_text;
+
+                document.getElementById('ecosystem-heading').textContent = c.ecosystem.heading;
+                document.getElementById('ecosystem-p').textContent = c.ecosystem.p;
+                document.getElementById('comp-btn-bonus').textContent = c.ecosystem.comp_btns.bonus;
+                document.getElementById('comp-btn-sharing').textContent = c.ecosystem.comp_btns.sharing;
+                document.getElementById('comp-btn-tax').textContent = c.ecosystem.comp_btns.tax;
+                document.getElementById('comp-btn-license').textContent = c.ecosystem.comp_btns.license;
+                document.getElementById('comp-btn-optout').textContent = c.ecosystem.comp_btns.optout;
+
+                updateImpactChart(lang);
+                updateCompensationDisplay(document.querySelector('.compensation-btn.active').dataset.model, lang);
+            }
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.content-section');
+            const navSwitchBtns = document.querySelectorAll('.nav-switch-btn');
+
+            function setActiveSection(targetId) {
+                sections.forEach(section => {
+                    section.classList.toggle('active', section.id === targetId);
+                    section.classList.toggle('fade-in', section.id === targetId);
+                });
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === `#${targetId}`);
+                });
+                window.location.hash = targetId;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    setActiveSection(this.getAttribute('href').substring(1));
+                });
+            });
+
+            navSwitchBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    setActiveSection(targetId);
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            function updateImpactChart(lang) {
+                if (impactChartInstance) {
+                    impactChartInstance.destroy();
+                }
+                const chartData = {
+                    labels: content[lang].impact.chart.labels,
+                    datasets: [{
+                        label: content[lang].impact.chart.datasetLabel,
+                        data: [1, 8, 7, 10, -9],
+                        backgroundColor: ['rgba(52, 211, 153, 0.6)','rgba(251, 146, 60, 0.6)','rgba(239, 68, 68, 0.6)','rgba(185, 28, 28, 0.6)','rgba(22, 163, 74, 0.6)'],
+                        borderColor: ['rgba(52, 211, 153, 1)','rgba(251, 146, 60, 1)','rgba(239, 68, 68, 1)','rgba(185, 28, 28, 1)','rgba(22, 163, 74, 1)'],
+                        borderWidth: 1
+                    }]
+                };
+                const impactCtx = document.getElementById('impactChart').getContext('2d');
+                impactChartInstance = new Chart(impactCtx, {
+                    type: 'bar', data: chartData,
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => `${content[lang].impact.chart.tooltipTitle}: ${content[lang].impact.chart.trends[context.dataIndex]}`,
+                                    title: (context) => context[0].label
+                                },
+                                backgroundColor: '#333', titleFont: { size: 14 }, bodyFont: { size: 12 }, padding: 10, cornerRadius: 4
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: content[lang].impact.chart.axisTitle, font: { size: 14 } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                            y: { grid: { display: false }, ticks: { font: { size: 14 } } }
+                        }
+                    }
+                });
+            }
+
+            const workflowSteps = document.querySelectorAll('.workflow-step');
+            workflowSteps.forEach(step => {
+                step.addEventListener('click', function() {
+                    const contentKey = this.dataset.content;
+                    document.getElementById('workflow-title').textContent = content[currentLanguage].response.workflow[contentKey].title;
+                    document.getElementById('workflow-text').textContent = content[currentLanguage].response.workflow[contentKey].text;
+                    workflowSteps.forEach(s => s.classList.remove('ring-2', 'ring-amber-500'));
+                    this.classList.add('ring-2', 'ring-amber-500');
+                });
+            });
+
+            const compensationBtns = document.querySelectorAll('.compensation-btn');
+            function updateCompensationDisplay(modelKey, lang) {
+                const data = content[lang].ecosystem.comp_data[modelKey];
+                const labels = content[lang].ecosystem.comp_labels;
+                document.getElementById('compensation-display').innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">${data.title}</h3>
+                    <div class="space-y-4">
+                        <div><h4 class="font-semibold text-amber-700">${labels.how}</h4><p class="text-gray-600">${data.how}</p></div>
+                        <div><h4 class="font-semibold text-green-700">${labels.pro}</h4><p class="text-gray-600">${data.pro}</p></div>
+                        <div><h4 class="font-semibold text-red-700">${labels.con}</h4><p class="text-gray-600">${data.con}</p></div>
+                    </div>
+                `;
+            }
+            compensationBtns.forEach(btn => {
+                btn.classList.add('px-4', 'py-2', 'rounded-full', 'text-sm', 'font-semibold', 'transition-colors', 'duration-300');
+                if(btn.classList.contains('active')) { btn.classList.add('bg-amber-600', 'text-white'); } 
+                else { btn.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300'); }
+                btn.addEventListener('click', function() {
+                    compensationBtns.forEach(b => {
+                        b.classList.remove('active', 'bg-amber-600', 'text-white');
+                        b.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    });
+                    this.classList.add('active', 'bg-amber-600', 'text-white');
+                    this.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+                    updateCompensationDisplay(this.dataset.model, currentLanguage);
+                });
+            });
+
+            const langToggle = document.getElementById('lang-toggle');
+            langToggle.addEventListener('click', function() {
+                currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                this.textContent = currentLanguage === 'zh' ? 'EN' : '中';
+                updateContent(currentLanguage);
+            });
+
+            const initialHash = window.location.hash.substring(1);
+            if (initialHash) setActiveSection(initialHash);
+            
+            updateContent(currentLanguage);
+        });
+    </script>
+</body>
+</html>
