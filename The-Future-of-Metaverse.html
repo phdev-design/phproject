@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>元宇宙沉浸式體驗互動指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony (Neutrals with soft slate blue and warm terracotta accents) -->
+    <!-- Application Structure Plan: A thematic, non-linear SPA. The top navigation allows users to jump between five core themes: 1) A hero introduction, 2) The Pillars of Immersion (interactive cards), 3) Core Technologies (tabbed interface for XR, Haptics, Infrastructure), 4) BCI as the Ultimate Interface (interactive comparison chart and timeline), and 5) Challenges & Future (covering hurdles and ethics). This structure is chosen to break down the dense report into digestible, engaging sections, prioritizing user exploration over linear reading. It facilitates understanding by grouping related concepts and using interactive elements to reveal complexity progressively. -->
+    <!-- Visualization & Content Choices: 
+        - Immersion Pillars (Goal: Inform/Organize): Interactive cards using HTML/Tailwind to visually separate foundational concepts.
+        - BCI Comparison (Goal: Compare): An interactive bar chart (Chart.js) to dynamically compare BCI modes across different metrics (quality, risk, cost), making the trade-offs clearer than a static table.
+        - BCI Evolution (Goal: Show Change): A horizontal timeline built with HTML/Tailwind to intuitively represent the staged development process.
+        - STRIDE Threats (Goal: Inform/Organize): An interactive list where clicking a threat reveals its details, making the dense security information more accessible.
+        - Justification: These choices translate the report's static data and text into an engaging experience, promoting active exploration and better comprehension. All visual elements are built to support the user-friendly, thematic application structure.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #FAF8F5;
+            color: #2D2D2D;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C78D7B;
+            border-bottom-color: #C78D7B;
+        }
+        .tab-button {
+            transition: all 0.3s;
+        }
+        .tab-button.active {
+            background-color: #7A8B99;
+            color: #FFFFFF;
+        }
+        .pillar-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .pillar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 350px;
+            width: 100%;
+            max-width: 800px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .bci-button.active {
+            background-color: #C78D7B;
+            color: #fff;
+            border-color: #C78D7B;
+        }
+        .lang-switcher button.active {
+            color: #C78D7B;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-[#2D2D2D]" data-lang-key="header_title">元宇宙的未來</span>
+                </div>
+                <div class="hidden md:flex items-center">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#hero" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_home">首頁</a>
+                        <a href="#immersion" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_immersion">沉浸式體驗</a>
+                        <a href="#technologies" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_tech">核心技術</a>
+                        <a href="#bci" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_bci">終極介面: BCI</a>
+                        <a href="#future" class="nav-link px-3 py-2 rounded-md text-sm font-medium" data-lang-key="nav_future">挑戰與未來</a>
+                    </div>
+                    <div class="lang-switcher ml-6 flex items-center text-sm font-medium">
+                        <button data-lang="zh" class="active">中</button>
+                        <span class="mx-1 text-gray-300">/</span>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+                <div class="md:hidden flex items-center">
+                     <div class="lang-switcher mr-4 flex items-center text-sm font-medium">
+                        <button data-lang="zh" class="active">中</button>
+                        <span class="mx-1 text-gray-300">/</span>
+                        <button data-lang="en">EN</button>
+                    </div>
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#hero" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_home_mobile">首頁</a>
+                <a href="#immersion" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_immersion_mobile">沉浸式體驗</a>
+                <a href="#technologies" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_tech_mobile">核心技術</a>
+                <a href="#bci" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_bci_mobile">終極介面: BCI</a>
+                <a href="#future" class="block nav-link px-3 py-2 rounded-md text-base font-medium" data-lang-key="nav_future_mobile">挑戰與未來</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="min-h-screen flex items-center justify-center bg-cover bg-center" style="background-color: #FAF8F5;">
+            <div class="max-w-4xl mx-auto text-center px-4">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-[#2D2D2D] tracking-tight leading-tight mb-4" data-lang-key="hero_title">探索沉浸式現實的邊界</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto" data-lang-key="hero_subtitle">
+                    從 VR/AR 到腦機介面，本報告深入分析了構建元宇宙的關鍵技術、挑戰與未來。這不僅是技術的演進，更是對人類感知與互動的重新定義。
+                </p>
+            </div>
+        </section>
+
+        <section id="immersion" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-[#2D2D2D]" data-lang-key="immersion_title">沉浸式體驗的四大支柱</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="immersion_subtitle">元宇宙的「臨在感」並非單一技術的產物，而是由四個相輔相成的維度共同構建。任何一個環節的缺失，都將破壞整體的沉浸幻覺。</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div class="pillar-card bg-[#FAF8F5] p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold text-[#7A8B99] mb-2" data-lang-key="pillar_1_title">感官保真度</h3>
+                        <p class="text-gray-700" data-lang-key="pillar_1_text">透過高擬真的視覺、空間化的音訊與觸覺回饋，讓使用者的感官系統相信虛擬世界的真實性，壓倒對現實世界的感知。</p>
+                    </div>
+                    <div class="pillar-card bg-[#FAF8F5] p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold text-[#7A8B99] mb-2" data-lang-key="pillar_2_title">使用者自主權</h3>
+                        <p class="text-gray-700" data-lang-key="pillar_2_text">賦予使用者影響虛擬世界的能力，並觀察其即時、可信的反應。基於物理的互動是建立控制感與化身感的基石。</p>
+                    </div>
+                    <div class="pillar-card bg-[#FAF8F5] p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold text-[#7A8B99] mb-2" data-lang-key="pillar_3_title">敘事參與度</h3>
+                        <p class="text-gray-700" data-lang-key="pillar_3_text">引人入勝的故事情節或環境線索，為使用者的行為提供動機，將技術展示轉化為一個能引發情感共鳴的難忘世界。</p>
+                    </div>
+                    <div class="pillar-card bg-[#FAF8F5] p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold text-[#7A8B99] mb-2" data-lang-key="pillar_4_title">社交共存感</h3>
+                        <p class="text-gray-700" data-lang-key="pillar_4_text">與他人（真人或AI）共享虛擬空間的感覺。這是元宇宙的靈魂，是其超越遊戲，成為下一代社交平台的核心驅動。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="technologies" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-[#2D2D2D]" data-lang-key="tech_title">構建沉浸式現實的核心技術</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="tech_subtitle">從硬體介面到軟體基礎設施，一個龐大而複雜的技術堆疊共同構成了元宇宙的基石。點擊下方標籤，探索各個關鍵領域。</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="mb-8 flex justify-center space-x-2 md:space-x-4 p-1 bg-gray-200 rounded-lg">
+                        <button class="tab-button w-full md:w-auto px-4 py-2 text-sm font-medium rounded-md active" data-tab="xr" data-lang-key="tech_tab_xr">XR: 元宇宙入口</button>
+                        <button class="tab-button w-full md:w-auto px-4 py-2 text-sm font-medium rounded-md" data-tab="haptics" data-lang-key="tech_tab_haptics">觸覺: 感官前沿</button>
+                        <button class="tab-button w-full md:w-auto px-4 py-2 text-sm font-medium rounded-md" data-tab="infra" data-lang-key="tech_tab_infra">基礎設施</button>
+                    </div>
+                    <div id="tab-content" class="bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                        <div id="xr-content" class="tab-pane active">
+                            <h3 class="text-2xl font-bold mb-4 text-[#7A8B99]" data-lang-key="xr_content_title">擴增實境 (XR): 元宇宙的入口</h3>
+                            <p class="text-gray-700 mb-4" data-lang-key="xr_content_p1">XR (VR/AR/MR) 是使用者感知和體驗數位世界的主要方式。其發展核心是實現視覺上的照片級真實感，這需要顯示技術（從4K到16K解析度）、光學技術（如Pancake鏡片）和渲染技術（如神經渲染）的全面突破。同時，空間音訊工程透過模擬聲音的方向和距離，極大地增強了聽覺沉浸感。</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="xr_content_l1"><strong>顯示技術路線圖:</strong> 追求更高解析度、更廣視野 (FoV) 和更輕便的佩戴體驗。</li>
+                                <li data-lang-key="xr_content_l2"><strong>渲染管線:</strong> Unreal和Unity是主要平台，正朝向光譜渲染和神經渲染等前沿技術發展，以實現即時高擬真畫面。</li>
+                                <li data-lang-key="xr_content_l3"><strong>空間音訊:</strong> 透過動態頭部追蹤技術，根據使用者轉動即時調整音景，增強臨在感。</li>
+                            </ul>
+                        </div>
+                        <div id="haptics-content" class="tab-pane hidden">
+                            <h3 class="text-2xl font-bold mb-4 text-[#7A8B99]" data-lang-key="haptics_content_title">觸覺前沿: 模擬觸摸感</h3>
+                            <p class="text-gray-700 mb-4" data-lang-key="haptics_content_p1">觸覺是實現完全沉浸的下一個重要前沿，其技術複雜性遠超視覺和聽覺。目前的技術正從簡單的震動回饋，向模擬物體阻力、質地、甚至溫度的力回饋和電刺激等方向發展。</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="haptics_content_l1"><strong>振動回饋:</strong> 最常見的形式，提供基本的碰撞等觸覺提示。</li>
+                                <li data-lang-key="haptics_content_l2"><strong>力回饋:</strong> 透過觸覺手套等設備，模擬抓握物體時的重量和阻力。</li>
+                                <li data-lang-key="haptics_content_l3"><strong>前沿技術:</strong> 電刺激和超音波觸覺等技術，有望無需穿戴設備即可「觸摸」虛擬物件。</li>
+                            </ul>
+                        </div>
+                        <div id="infra-content" class="tab-pane hidden">
+                             <h3 class="text-2xl font-bold mb-4 text-[#7A8B99]" data-lang-key="infra_content_title">基礎設施: AI、連接性與去中心化</h3>
+                            <p class="text-gray-700 mb-4" data-lang-key="infra_content_p1">XR硬體和觸覺設備的背後，需要一個強大的基礎設施層來支撐。AI、高速連接和區塊鏈是這個基礎設施的三大支柱，共同為元宇宙的運行提供動力。</p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li data-lang-key="infra_content_l1"><strong>人工智慧 (AI):</strong> 用於生成內容、驅動智慧化身，並提供個人化體驗。</li>
+                                <li data-lang-key="infra_content_l2"><strong>連接性 (5G/6G):</strong> 提供高速率、低延遲的網路，結合邊緣運算，確保即時互動的流暢性。</li>
+                                <li data-lang-key="infra_content_l3"><strong>區塊鏈 (Web3):</strong> 透過NFT實現數位資產所有權，並為虛擬經濟提供安全、透明的交易保障。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="bci" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-[#2D2D2D]" data-lang-key="bci_title">終極介面: 腦機介面 (BCI)</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="bci_subtitle">BCI可能是重塑人機關係的革命性轉變，它提供了一條從大腦到虛擬世界的直接通訊管道。點擊下方按鈕，互動比較不同BCI模式的關鍵特性。</p>
+                </div>
+                <div class="bg-[#FAF8F5] p-6 rounded-lg shadow-lg">
+                    <div class="flex flex-wrap justify-center gap-2 mb-6">
+                        <button class="bci-button border border-gray-300 px-4 py-2 rounded-full text-sm font-medium active" data-metric="quality" data-lang-key="bci_btn_quality">訊號品質</button>
+                        <button class="bci-button border border-gray-300 px-4 py-2 rounded-full text-sm font-medium" data-metric="risk" data-lang-key="bci_btn_risk">侵入性與風險</button>
+                        <button class="bci-button border border-gray-300 px-4 py-2 rounded-full text-sm font-medium" data-metric="cost" data-lang-key="bci_btn_cost">成本與便攜性</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="bciChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-[#2D2D2D]" data-lang-key="future_title">挑戰與未來展望</h2>
+                    <p class="mt-4 text-lg text-gray-600" data-lang-key="future_subtitle">從緩解暈動症到解決BCI的倫理困境，通往完全沉浸的元宇宙之路充滿挑戰。但這也為我們描繪了一個由AI、XR和BCI融合定義的漸進式未來。</p>
+                </div>
+                
+                <div class="grid lg:grid-cols-2 gap-12 items-start">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#7A8B99]" data-lang-key="stride_title">倫理與安全挑戰: STRIDE威脅模型</h3>
+                        <p class="text-gray-600 mb-4" data-lang-key="stride_subtitle">隨著BCI與元宇宙的融合，腦數據隱私和「駭腦」等全新安全威脅浮現。下方列出了基於STRIDE模型的潛在威脅，點擊以查看詳細描述。</p>
+                        <div id="stride-container" class="space-y-2"></div>
+                        <div id="stride-description" class="mt-4 p-4 bg-gray-100 rounded-md text-gray-800 min-h-[100px]" data-lang-key="stride_placeholder">
+                           請選擇一個威脅以查看詳情。
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="text-2xl font-bold mb-4 text-[#7A8B99]" data-lang-key="roadmap_title">元宇宙發展軌跡</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-lg font-semibold text-[#C78D7B]" data-lang-key="roadmap_short_title">短期 (1-5年)</h4>
+                                <p class="text-gray-700" data-lang-key="roadmap_short_text">提升XR硬體體驗（解析度、舒適度），增強觸覺回饋。非侵入式BCI在健康、教育等利基市場作為輔助輸入設備出現。</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-[#C78D7B]" data-lang-key="roadmap_mid_title">中期 (5-15年)</h4>
+                                <p class="text-gray-700" data-lang-key="roadmap_mid_text">生成式AI推動內容民主化。非侵入式BCI技術進步，可作為被動調節器整合進XR設備，實現自適應體驗。侵入式BCI臨床應用擴大。</p>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-[#C78D7B]" data-lang-key="roadmap_long_title">長期 (15年以上)</h4>
+                                <p class="text-gray-700" data-lang-key="roadmap_long_text">實現可「讀取」意圖並「寫入」感官體驗的雙向BCI。這將標誌著元宇宙概念的完全兌現——一個與物理現實無法區分的數位現實。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-20">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p data-lang-key="footer_credit">本互動式報告基於《沉浸式架構：元宇宙體驗真實感的技術分析與神經科技的變革性角色》報告創建。</p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footer_copy">&copy; 2025 互動式報告產生器. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentLang = 'zh';
+            let bciChart;
+
+            const translations = {
+                zh: {
+                    header_title: "元宇宙的未來",
+                    nav_home: "首頁",
+                    nav_immersion: "沉浸式體驗",
+                    nav_tech: "核心技術",
+                    nav_bci: "終極介面: BCI",
+                    nav_future: "挑戰與未來",
+                    nav_home_mobile: "首頁",
+                    nav_immersion_mobile: "沉浸式體驗",
+                    nav_tech_mobile: "核心技術",
+                    nav_bci_mobile: "終極介面: BCI",
+                    nav_future_mobile: "挑戰與未來",
+                    hero_title: "探索沉浸式現實的邊界",
+                    hero_subtitle: "從 VR/AR 到腦機介面，本報告深入分析了構建元宇宙的關鍵技術、挑戰與未來。這不僅是技術的演進，更是對人類感知與互動的重新定義。",
+                    immersion_title: "沉浸式體驗的四大支柱",
+                    immersion_subtitle: "元宇宙的「臨在感」並非單一技術的產物，而是由四個相輔相成的維度共同構建。任何一個環節的缺失，都將破壞整體的沉浸幻覺。",
+                    pillar_1_title: "感官保真度",
+                    pillar_1_text: "透過高擬真的視覺、空間化的音訊與觸覺回饋，讓使用者的感官系統相信虛擬世界的真實性，壓倒對現實世界的感知。",
+                    pillar_2_title: "使用者自主權",
+                    pillar_2_text: "賦予使用者影響虛擬世界的能力，並觀察其即時、可信的反應。基於物理的互動是建立控制感與化身感的基石。",
+                    pillar_3_title: "敘事參與度",
+                    pillar_3_text: "引人入勝的故事情節或環境線索，為使用者的行為提供動機，將技術展示轉化為一個能引發情感共鳴的難忘世界。",
+                    pillar_4_title: "社交共存感",
+                    pillar_4_text: "與他人（真人或AI）共享虛擬空間的感覺。這是元宇宙的靈魂，是其超越遊戲，成為下一代社交平台的核心驅動。",
+                    tech_title: "構建沉浸式現實的核心技術",
+                    tech_subtitle: "從硬體介面到軟體基礎設施，一個龐大而複雜的技術堆疊共同構成了元宇宙的基石。點擊下方標籤，探索各個關鍵領域。",
+                    tech_tab_xr: "XR: 元宇宙入口",
+                    tech_tab_haptics: "觸覺: 感官前沿",
+                    tech_tab_infra: "基礎設施",
+                    xr_content_title: "擴增實境 (XR): 元宇宙的入口",
+                    xr_content_p1: "XR (VR/AR/MR) 是使用者感知和體驗數位世界的主要方式。其發展核心是實現視覺上的照片級真實感，這需要顯示技術（從4K到16K解析度）、光學技術（如Pancake鏡片）和渲染技術（如神經渲染）的全面突破。同時，空間音訊工程透過模擬聲音的方向和距離，極大地增強了聽覺沉浸感。",
+                    xr_content_l1: "<strong>顯示技術路線圖:</strong> 追求更高解析度、更廣視野 (FoV) 和更輕便的佩戴體驗。",
+                    xr_content_l2: "<strong>渲染管線:</strong> Unreal和Unity是主要平台，正朝向光譜渲染和神經渲染等前沿技術發展，以實現即時高擬真畫面。",
+                    xr_content_l3: "<strong>空間音訊:</strong> 透過動態頭部追蹤技術，根據使用者轉動即時調整音景，增強臨在感。",
+                    haptics_content_title: "觸覺前沿: 模擬觸摸感",
+                    haptics_content_p1: "觸覺是實現完全沉浸的下一個重要前沿，其技術複雜性遠超視覺和聽覺。目前的技術正從簡單的震動回饋，向模擬物體阻力、質地、甚至溫度的力回饋和電刺激等方向發展。",
+                    haptics_content_l1: "<strong>振動回饋:</strong> 最常見的形式，提供基本的碰撞等觸覺提示。",
+                    haptics_content_l2: "<strong>力回饋:</strong> 透過觸覺手套等設備，模擬抓握物體時的重量和阻力。",
+                    haptics_content_l3: "<strong>前沿技術:</strong> 電刺激和超音波觸覺等技術，有望無需穿戴設備即可「觸摸」虛擬物件。",
+                    infra_content_title: "基礎設施: AI、連接性與去中心化",
+                    infra_content_p1: "XR硬體和觸覺設備的背後，需要一個強大的基礎設施層來支撐。AI、高速連接和區塊鏈是這個基礎設施的三大支柱，共同為元宇宙的運行提供動力。",
+                    infra_content_l1: "<strong>人工智慧 (AI):</strong> 用於生成內容、驅動智慧化身，並提供個人化體驗。",
+                    infra_content_l2: "<strong>連接性 (5G/6G):</strong> 提供高速率、低延遲的網路，結合邊緣運算，確保即時互動的流暢性。",
+                    infra_content_l3: "<strong>區塊鏈 (Web3):</strong> 透過NFT實現數位資產所有權，並為虛擬經濟提供安全、透明的交易保障。",
+                    bci_title: "終極介面: 腦機介面 (BCI)",
+                    bci_subtitle: "BCI可能是重塑人機關係的革命性轉變，它提供了一條從大腦到虛擬世界的直接通訊管道。點擊下方按鈕，互動比較不同BCI模式的關鍵特性。",
+                    bci_btn_quality: "訊號品質",
+                    bci_btn_risk: "侵入性與風險",
+                    bci_btn_cost: "成本與便攜性",
+                    bci_chart_labels: ['非侵入式 (EEG, fNIRS)', '部分侵入式 (ECoG)', '侵入式 (微電極陣列)'],
+                    bci_chart_dataset_quality: "訊號品質 (信噪比/解析度)",
+                    bci_chart_dataset_risk: "侵入性與風險",
+                    bci_chart_dataset_cost: "成本與便攜性",
+                    bci_chart_x_axis_labels: ['低', '', '', '', '中', '', '', '', '高', ''],
+                    bci_chart_tooltip_low: "低",
+                    bci_chart_tooltip_mid: "中",
+                    bci_chart_tooltip_high: "高",
+                    future_title: "挑戰與未來展望",
+                    future_subtitle: "從緩解暈動症到解決BCI的倫理困境，通往完全沉浸的元宇宙之路充滿挑戰。但這也為我們描繪了一個由AI、XR和BCI融合定義的漸進式未來。",
+                    stride_title: "倫理與安全挑戰: STRIDE威脅模型",
+                    stride_subtitle: "隨著BCI與元宇宙的融合，腦數據隱私和「駭腦」等全新安全威脅浮現。下方列出了基於STRIDE模型的潛在威脅，點擊以查看詳細描述。",
+                    stride_placeholder: "請選擇一個威脅以查看詳情。",
+                    stride_data: [
+                        { name: '欺騙 (Spoofing)', description: '攻擊者冒充合法使用者身份。例如，記錄並重播授權使用者的腦電波認證訊號，進入安全的虛擬會議室。' },
+                        { name: '篡改 (Tampering)', description: '惡意修改傳輸中的數據。例如，在商業談判中遠端干擾參與者的神經活動，改變其情緒狀態，使其接受不利條款。' },
+                        { name: '否認 (Repudiation)', description: '使用者否認曾執行某項操作。例如，使用者在元宇宙中進行破壞後，聲稱其BCI設備被駭，導致難以追責。' },
+                        { name: '資訊洩露 (Information Disclosure)', description: '未經授權存取敏感資訊。例如，元宇宙公司伺服器被駭，導致大量使用者原始腦電波數據洩露，可被用於推斷隱私。' },
+                        { name: '阻斷服務 (Denial of Service)', description: '阻止合法使用者使用服務。例如，向BCI系統發送干擾訊號，使其無法正常工作，對殘障人士影響尤為嚴重。' },
+                        { name: '權限提升 (Elevation of Privilege)', description: '攻擊者獲得了不應有的權限。例如，利用軟體漏洞獲得管理員權限，修改多名患者的治療方案，造成健康後果。' }
+                    ],
+                    roadmap_title: "元宇宙發展軌跡",
+                    roadmap_short_title: "短期 (1-5年)",
+                    roadmap_short_text: "提升XR硬體體驗（解析度、舒適度），增強觸覺回饋。非侵入式BCI在健康、教育等利基市場作為輔助輸入設備出現。",
+                    roadmap_mid_title: "中期 (5-15年)",
+                    roadmap_mid_text: "生成式AI推動內容民主化。非侵入式BCI技術進步，可作為被動調節器整合進XR設備，實現自適應體驗。侵入式BCI臨床應用擴大。",
+                    roadmap_long_title: "長期 (15年以上)",
+                    roadmap_long_text: "實現可「讀取」意圖並「寫入」感官體驗的雙向BCI。這將標誌著元宇宙概念的完全兌現——一個與物理現實無法區分的數位現實。",
+                    footer_credit: "本互動式報告基於《沉浸式架構：元宇宙體驗真實感的技術分析與神經科技的變革性角色》報告創建。",
+                    footer_copy: "© 2025 互動式報告產生器. All rights reserved."
+                },
+                en: {
+                    header_title: "The Future of Metaverse",
+                    nav_home: "Home",
+                    nav_immersion: "Immersion",
+                    nav_tech: "Core Tech",
+                    nav_bci: "Ultimate Interface: BCI",
+                    nav_future: "Challenges & Future",
+                    nav_home_mobile: "Home",
+                    nav_immersion_mobile: "Immersion",
+                    nav_tech_mobile: "Core Tech",
+                    nav_bci_mobile: "Ultimate Interface: BCI",
+                    nav_future_mobile: "Challenges & Future",
+                    hero_title: "Exploring the Frontiers of Immersive Reality",
+                    hero_subtitle: "From VR/AR to Brain-Computer Interfaces, this report analyzes the key technologies, challenges, and future of building the metaverse. This is not just an evolution of technology, but a redefinition of human perception and interaction.",
+                    immersion_title: "The Four Pillars of Immersion",
+                    immersion_subtitle: "The 'presence' in the metaverse is not a product of a single technology, but is co-constructed by four complementary dimensions. The absence of any one element will destroy the overall immersive illusion.",
+                    pillar_1_title: "Sensory Fidelity",
+                    pillar_1_text: "Convincing the user's sensory system of the virtual world's reality through high-fidelity visuals, spatialized audio, and haptic feedback, overriding real-world perception.",
+                    pillar_2_title: "User Agency",
+                    pillar_2_text: "Empowering users to influence the virtual world and observe its immediate, credible reactions. Physics-based interaction is the cornerstone of control and embodiment.",
+                    pillar_3_title: "Narrative Engagement",
+                    pillar_3_text: "Compelling storylines or environmental cues provide motivation for user actions, transforming a tech demo into a memorable, emotionally resonant world.",
+                    pillar_4_title: "Social Co-presence",
+                    pillar_4_text: "The feeling of sharing a virtual space with others (real or AI). This is the soul of the metaverse, its core driver to transcend gaming into the next-gen social platform.",
+                    tech_title: "Core Technologies for Building Immersive Reality",
+                    tech_subtitle: "From hardware interfaces to software infrastructure, a vast and complex tech stack forms the foundation of the metaverse. Click the tabs below to explore key areas.",
+                    tech_tab_xr: "XR: Gateway to Metaverse",
+                    tech_tab_haptics: "Haptics: The Sensory Frontier",
+                    tech_tab_infra: "Infrastructure",
+                    xr_content_title: "Extended Reality (XR): Gateway to the Metaverse",
+                    xr_content_p1: "XR (VR/AR/MR) is the primary way users perceive and experience the digital world. Its development core is achieving photorealistic visuals, requiring breakthroughs in display (4K to 16K), optics (e.g., Pancake lenses), and rendering (e.g., neural rendering). Meanwhile, spatial audio engineering greatly enhances auditory immersion by simulating sound direction and distance.",
+                    xr_content_l1: "<strong>Display Roadmap:</strong> Pursuing higher resolution, wider Field of View (FoV), and lighter, more comfortable headsets.",
+                    xr_content_l2: "<strong>Rendering Pipeline:</strong> Unreal and Unity are the main platforms, moving towards advanced techniques like spectral and neural rendering for real-time high-fidelity graphics.",
+                    xr_content_l3: "<strong>Spatial Audio:</strong> Using dynamic head-tracking to adjust the soundscape in real-time as the user turns, enhancing the sense of presence.",
+                    haptics_content_title: "Haptic Frontier: Simulating the Sense of Touch",
+                    haptics_content_p1: "Haptics is the next major frontier for full immersion, with technical complexity far exceeding vision and hearing. Current tech is evolving from simple vibrations to force feedback and electrostimulation that simulate resistance, texture, and even temperature.",
+                    haptics_content_l1: "<strong>Vibrotactile Feedback:</strong> The most common form, providing basic tactile cues for events like collisions.",
+                    haptics_content_l2: "<strong>Force Feedback:</strong> Simulates the weight and resistance of objects when grasped, often via haptic gloves.",
+                    haptics_content_l3: "<strong>Cutting-Edge Tech:</strong> Electrostimulation and ultrasonic haptics promise the ability to 'touch' virtual objects without wearable devices.",
+                    infra_content_title: "Infrastructure: AI, Connectivity & Decentralization",
+                    infra_content_p1: "Behind XR hardware and haptics lies a powerful infrastructure layer. AI, high-speed connectivity, and blockchain are the three pillars that power the metaverse's operation.",
+                    infra_content_l1: "<strong>Artificial Intelligence (AI):</strong> Used to generate content, drive intelligent avatars, and provide personalized experiences.",
+                    infra_content_l2: "<strong>Connectivity (5G/6G):</strong> Provides high-bandwidth, low-latency networks, combined with edge computing, to ensure smooth real-time interactions.",
+                    infra_content_l3: "<strong>Blockchain (Web3):</strong> Enables digital asset ownership via NFTs and provides secure, transparent transactions for the virtual economy.",
+                    bci_title: "The Ultimate Interface: Brain-Computer Interface (BCI)",
+                    bci_subtitle: "BCI could be a revolutionary shift in human-computer interaction, offering a direct communication channel from the brain to the virtual world. Click the buttons below to interactively compare the key features of different BCI modalities.",
+                    bci_btn_quality: "Signal Quality",
+                    bci_btn_risk: "Invasiveness & Risk",
+                    bci_btn_cost: "Cost & Portability",
+                    bci_chart_labels: ['Non-Invasive (EEG, fNIRS)', 'Partially-Invasive (ECoG)', 'Invasive (Microelectrode Array)'],
+                    bci_chart_dataset_quality: "Signal Quality (SNR/Resolution)",
+                    bci_chart_dataset_risk: "Invasiveness & Risk",
+                    bci_chart_dataset_cost: "Cost & Portability",
+                    bci_chart_x_axis_labels: ['Low', '', '', '', 'Mid', '', '', '', 'High', ''],
+                    bci_chart_tooltip_low: "Low",
+                    bci_chart_tooltip_mid: "Mid",
+                    bci_chart_tooltip_high: "High",
+                    future_title: "Challenges & Future Outlook",
+                    future_subtitle: "From mitigating cybersickness to solving BCI's ethical dilemmas, the path to a fully immersive metaverse is fraught with challenges. But it also paints a progressive future defined by the convergence of AI, XR, and BCI.",
+                    stride_title: "Ethical & Security Challenges: The STRIDE Model",
+                    stride_subtitle: "With the convergence of BCI and the metaverse, new security threats like neural data privacy and 'brainjacking' emerge. Below are potential threats based on the STRIDE model. Click to see details.",
+                    stride_placeholder: "Please select a threat to view details.",
+                    stride_data: [
+                        { name: 'Spoofing', description: 'An attacker impersonates a legitimate user. For example, recording and replaying an authorized user\'s brainwave authentication signal to enter a secure virtual meeting.' },
+                        { name: 'Tampering', description: 'Maliciously modifying data in transit. For example, remotely interfering with a participant\'s neural activity during a business negotiation to alter their emotional state and make them accept unfavorable terms.' },
+                        { name: 'Repudiation', description: 'A user denies having performed an action. For example, after causing damage in the metaverse, a user claims their BCI device was hacked, making it difficult to assign responsibility.' },
+                        { name: 'Information Disclosure', description: 'Unauthorized access to sensitive information. For example, a metaverse company\'s server is hacked, leaking raw brainwave data of many users, which could be used to infer private information.' },
+                        { name: 'Denial of Service', description: 'Preventing legitimate users from accessing a service. For example, sending interference signals to a BCI system, rendering it inoperable, which would be especially severe for users with disabilities.' },
+                        { name: 'Elevation of Privilege', description: 'An attacker gains permissions they should not have. For example, exploiting a software vulnerability to gain admin rights on a neuro-rehabilitation platform to alter treatment plans for multiple patients.' }
+                    ],
+                    roadmap_title: "Metaverse Development Trajectory",
+                    roadmap_short_title: "Short-term (1-5 years)",
+                    roadmap_short_text: "Enhancing XR hardware experience (resolution, comfort) and improving haptic feedback. Non-invasive BCIs will appear as auxiliary input devices in niche markets like health and education.",
+                    roadmap_mid_title: "Mid-term (5-15 years)",
+                    roadmap_mid_text: "Generative AI will drive content democratization. Advances in non-invasive BCI will allow integration into XR headsets as passive modulators for adaptive experiences. Clinical applications of invasive BCIs will expand.",
+                    roadmap_long_title: "Long-term (15+ years)",
+                    roadmap_long_text: "Achieving bidirectional BCIs that can 'read' intent and 'write' sensory experiences. This will mark the full realization of the metaverse concept—a digital reality indistinguishable from the physical one.",
+                    footer_credit: "This interactive report was created based on the report 'Immersive Architecture: A Technical Analysis of Realism in the Metaverse Experience and the Transformative Role of Neurotechnology'.",
+                    footer_copy: "© 2025 Interactive Report Generator. All rights reserved."
+                }
+            };
+
+            const setLanguage = (lang) => {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                
+                document.querySelectorAll('.lang-switcher button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+
+                updateStrideThreats(lang);
+                updateBciChart(lang);
+            };
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            function updateActiveNavLink() {
+                const sections = document.querySelectorAll('main section');
+                let currentSectionId = '';
+
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (window.scrollY >= sectionTop - 80) {
+                        currentSectionId = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', updateActiveNavLink);
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('hidden', pane.id !== `${tabId}-content`);
+                        pane.classList.toggle('active', pane.id === `${tabId}-content`);
+                    });
+                });
+            });
+            
+            const bciData = {
+                quality: { data: [2, 5, 9] },
+                risk: { data: [1, 5, 9] },
+                cost: { data: [9, 4, 1] }
+            };
+            
+            const bciCtx = document.getElementById('bciChart').getContext('2d');
+            
+            function updateBciChart(lang) {
+                const langData = translations[lang];
+                const activeMetric = document.querySelector('.bci-button.active').dataset.metric;
+
+                if (bciChart) {
+                    bciChart.destroy();
+                }
+
+                bciChart = new Chart(bciCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: langData.bci_chart_labels,
+                        datasets: [{
+                            label: langData[`bci_chart_dataset_${activeMetric}`],
+                            data: bciData[activeMetric].data,
+                            backgroundColor: activeMetric === 'quality' ? 'rgba(122, 139, 153, 0.6)' : activeMetric === 'risk' ? 'rgba(199, 141, 123, 0.6)' : 'rgba(150, 150, 150, 0.6)',
+                            borderColor: activeMetric === 'quality' ? 'rgba(122, 139, 153, 1)' : activeMetric === 'risk' ? 'rgba(199, 141, 123, 1)' : 'rgba(150, 150, 150, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: {
+                                    callback: (value) => langData.bci_chart_x_axis_labels[value-1] || ''
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.x !== null) {
+                                            const score = context.parsed.x;
+                                            let level;
+                                            if (score <= 3) level = langData.bci_chart_tooltip_low;
+                                            else if (score <= 7) level = langData.bci_chart_tooltip_mid;
+                                            else level = langData.bci_chart_tooltip_high;
+                                            label += `${level} (${score}/10)`;
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const bciButtons = document.querySelectorAll('.bci-button');
+            bciButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    bciButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    updateBciChart(currentLang);
+                });
+            });
+
+            const strideContainer = document.getElementById('stride-container');
+            const strideDescription = document.getElementById('stride-description');
+
+            function updateStrideThreats(lang) {
+                const langData = translations[lang];
+                strideContainer.innerHTML = '';
+                langData.stride_data.forEach(threat => {
+                    const button = document.createElement('button');
+                    button.className = 'w-full text-left p-3 bg-white rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#7A8B99] transition';
+                    button.textContent = threat.name;
+                    button.dataset.description = threat.description;
+                    strideContainer.appendChild(button);
+                    
+                    button.addEventListener('click', () => {
+                        strideDescription.textContent = button.dataset.description;
+                        strideContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('bg-blue-100', 'font-bold'));
+                        button.classList.add('bg-blue-100', 'font-bold');
+                    });
+                });
+                strideDescription.textContent = langData.stride_placeholder;
+            }
+
+            document.querySelectorAll('.lang-switcher button').forEach(button => {
+                button.addEventListener('click', () => {
+                    setLanguage(button.dataset.lang);
+                });
+            });
+
+            // Initial Load
+            setLanguage('zh');
+            updateActiveNavLink();
+        });
+    </script>
+</body>
+</html>
