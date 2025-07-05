@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昭和モダン看板建築 | インフォグラフィック</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Sans+TC:wght@400;700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Noto Sans TC', sans-serif;
+            background-color: #F0F0F0;
+        }
+        h1, h2, h3, .stat-number {
+            font-family: 'Oswald', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 500px;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 9999px;
+            background-color: #FF7A00;
+            border: 4px solid #F0F0F0;
+            z-index: 10;
+        }
+        .lang-btn {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-[#333333]">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <div class="flex justify-end mb-4">
+            <div class="flex space-x-2 bg-[#004AAD] p-1 rounded-lg shadow-md">
+                <button id="btn-ja" class="lang-btn px-3 py-1 text-sm font-bold rounded-md bg-opacity-100 text-white">日</button>
+                <button id="btn-en" class="lang-btn px-3 py-1 text-sm font-bold rounded-md bg-opacity-50 text-gray-200">EN</button>
+                <button id="btn-zh" class="lang-btn px-3 py-1 text-sm font-bold rounded-md bg-opacity-50 text-gray-200">中</button>
+            </div>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 id="main-title" class="text-5xl md:text-7xl font-black uppercase text-[#004AAD]">昭和モダン看板建築</h1>
+            <p id="subtitle" class="text-xl md:text-2xl mt-2 text-[#333333]">震災から生まれ、街を飾り、現代建築に影響を与えた庶民のデザイン革命</p>
+        </header>
+
+        <main class="space-y-8">
+            
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                    <h2 id="revolution-title" class="text-3xl font-bold text-[#004AAD] mb-4">街角の革命：看板建築とは？</h2>
+                    <p id="revolution-desc" class="mb-4">1923年の関東大震災後、東京の商人たちが生み出した独創的な建築様式。伝統的な木造町屋の前面に、耐火性のある装飾的な「ファサード（正面壁）」を取り付けたのが特徴です。それは、復興への希望と商魂の象徴でした。</p>
+                    <div class="border-2 border-dashed border-[#6EB5FF] p-4 rounded-lg">
+                        <h3 id="hybrid-title" class="text-xl font-bold text-center mb-3">構造のハイブリッド</h3>
+                        <div class="flex items-center justify-between space-x-2">
+                            <div class="bg-[#004AAD] text-white p-4 rounded-lg text-center w-2/5">
+                                <span id="hybrid-face-title" class="font-bold text-lg">洋風の「顔」</span>
+                                <p id="hybrid-face-desc" class="text-sm">装飾的なファサード (耐火材)</p>
+                            </div>
+                            <div class="text-5xl font-black text-[#FF7A00]">+</div>
+                            <div class="bg-[#6EB5FF] text-white p-4 rounded-lg text-center w-2/5">
+                                <span id="hybrid-body-title" class="font-bold text-lg">和風の「体」</span>
+                                <p id="hybrid-body-desc" class="text-sm">伝統的な木造町屋</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 h-full flex flex-col justify-center">
+                    <h2 id="palette-title" class="text-3xl font-bold text-[#004AAD] mb-4">職人のパレット</h2>
+                    <p id="palette-desc" class="mb-4">地元の職人たちは、耐火性と表現力を両立させるため、身近な素材を駆使しました。彼らの創意工夫が、街並みに豊かな表情を与えたのです。</p>
+                    <div class="chart-container">
+                        <canvas id="materialsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 id="comparison-title" class="text-3xl font-bold text-center text-[#004AAD] mb-6">三つの近代：日本の建築様式比較</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="border p-4 rounded-lg">
+                        <h3 id="giyofu-title" class="text-2xl font-bold text-[#004AAD]">擬洋風建築</h3>
+                        <p id="giyofu-period" class="text-sm text-gray-500 mb-2">明治時代 (1868-1912)</p>
+                        <p id="giyofu-creator" class="mb-2"><strong>作り手:</strong> 政府主導の建築家</p>
+                        <p id="giyofu-purpose" class="mb-2"><strong>目的:</strong> 国家の威信を示す</p>
+                        <p id="giyofu-feature" class="mb-2"><strong>特徴:</strong> 公共建築、本格的な洋風模倣</p>
+                    </div>
+                    <div class="border-4 border-[#FF7A00] p-4 rounded-lg relative">
+                         <span id="kanban-badge" class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#FF7A00] text-white px-3 py-1 rounded-full text-sm font-bold">主役</span>
+                        <h3 id="kanban-title" class="text-2xl font-bold text-[#004AAD]">看板建築</h3>
+                        <p id="kanban-period" class="text-sm text-gray-500 mb-2">昭和初期 (1920s-30s)</p>
+                        <p id="kanban-creator" class="mb-2"><strong>作り手:</strong> 地元の大工・職人</p>
+                        <p id="kanban-purpose" class="mb-2"><strong>目的:</strong> 商業的なアピール</p>
+                        <p id="kanban-feature" class="mb-2"><strong>特徴:</strong> 小規模店舗、和洋折衷の装飾</p>
+                    </div>
+                    <div class="border p-4 rounded-lg">
+                        <h3 id="modern-title" class="text-2xl font-bold text-[#004AAD]">近代建築</h3>
+                        <p id="modern-period" class="text-sm text-gray-500 mb-2">昭和初期 (1920s-30s)</p>
+                        <p id="modern-creator" class="mb-2"><strong>作り手:</strong> エリート建築家</p>
+                        <p id="modern-purpose" class="mb-2"><strong>目的:</strong> 機能主義・合理主義の追求</p>
+                        <p id="modern-feature" class="mb-2"><strong>特徴:</strong> 鉄筋コンクリート、ミニマルなデザイン</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                    <h2 id="memory-title" class="text-3xl font-bold text-[#004AAD] mb-4">消えゆく街の記憶</h2>
+                    <p id="memory-desc" class="mb-4">都市開発の波と建物の老朽化により、多くの看板建築が姿を消しています。その文化的価値が再認識され、保存と活用が急務となっています。</p>
+                    <div class="text-center bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+                        <p id="heritage-title" class="text-2xl font-bold">危機遺産</p>
+                        <p id="heritage-desc">2015年、世界建築文物保護基金会により<br>築地などの看板建築が危機遺産に指定</p>
+                    </div>
+                    <h3 id="preservation-title" class="text-xl font-bold text-center mb-2">保存の現状</h3>
+                    <div class="chart-container h-48 md:h-64">
+                        <canvas id="preservationChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6 h-full flex flex-col justify-center">
+                     <h2 id="rebirth-title" class="text-3xl font-bold text-[#004AAD] mb-4">未来への再生</h2>
+                    <p id="rebirth-desc" class="mb-4">「昭和レトロ」ブームを追い風に、古い建物をカフェやギャラリーとして再生させる「適応的再利用」が活発化。歴史的価値を経済的な価値へと転換し、街に新たな魅力を生み出しています。</p>
+                    <div class="space-y-3">
+                        <div class="bg-[#E6F0FF] p-4 rounded-lg flex items-center">
+                            <span class="text-4xl mr-4">☕</span>
+                            <div>
+                                <h3 id="reuse-cafe-title" class="font-bold text-[#004AAD]">カフェ＆レストラン</h3>
+                                <p id="reuse-cafe-desc" class="text-sm">建物の持つ物語を味わいの一部に。</p>
+                            </div>
+                        </div>
+                        <div class="bg-[#E6F0FF] p-4 rounded-lg flex items-center">
+                             <span class="text-4xl mr-4">🎨</span>
+                            <div>
+                                <h3 id="reuse-gallery-title" class="font-bold text-[#004AAD]">ギャラリー＆ショップ</h3>
+                                <p id="reuse-gallery-desc" class="text-sm">ユニークな空間が商品の魅力を引き立てる。</p>
+                            </div>
+                        </div>
+                         <div class="bg-[#E6F0FF] p-4 rounded-lg flex items-center">
+                             <span class="text-4xl mr-4">🏘️</span>
+                            <div>
+                                <h3 id="reuse-tourism-title" class="font-bold text-[#004AAD]">観光資源化</h3>
+                                <p id="reuse-tourism-desc" class="text-sm">街並み全体を保存し、地域活性化の核に。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-lg shadow-md p-6 md:p-8">
+                <h2 id="influence-title" class="text-3xl font-bold text-center text-[#004AAD] mb-8">観察から理論へ：現代建築への影響</h2>
+                <p id="influence-desc" class="text-center max-w-3xl mx-auto mb-10">看板建築のような「庶民の建築」を観察する視点は、日本の現代建築に大きな影響を与えました。街角の無名の創造性が、世界的な建築理論の源流となったのです。</p>
+                <div class="relative pl-10">
+                    <div class="absolute left-4 h-full border-l-4 border-[#6EB5FF] top-0"></div>
+                    <div class="space-y-12">
+                        <div class="relative timeline-item">
+                            <p class="text-sm font-bold text-[#FF7A00]">1920s-30s</p>
+                            <h3 id="timeline1-title" class="text-xl font-bold">考現学の誕生</h3>
+                            <p id="timeline1-desc">今和次郎らが提唱。ありふれた日常を観察・記録する学問が、庶民の創造物に光を当てる。</p>
+                        </div>
+                        <div class="relative timeline-item">
+                            <p class="text-sm font-bold text-[#FF7A00]">1970s-80s</p>
+                            <h3 id="timeline2-title" class="text-xl font-bold">建築探偵と「路上観察」</h3>
+                            <p id="timeline2-desc">建築史家・藤森照信が忘れられた建物を調査。「看板建築」と名付け、その価値を「発見」する。</p>
+                        </div>
+                        <div class="relative timeline-item">
+                             <p class="text-sm font-bold text-[#FF7A00]">1990s-現代</p>
+                            <h3 id="timeline3-title" class="text-xl font-bold">アトリエ・ワンと「ペット建築」</h3>
+                            <p id="timeline3-desc">犬吠工房が都市の隙間の小さな建物を研究。「ビヘイビオロジー（ふるまい学）」など独自の理論を展開し、国際的に評価される。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p id="footer-credit">このインフォグラフィックは、日本の昭和モダン「看板建築」に関する研究レポートに基づき作成されました。</p>
+            <p id="footer-tech">ビジュアライゼーションはChart.jsおよびHTML/CSSで構築されています。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        let materialsChart, preservationChart;
+
+        const translations = {
+            ja: {
+                'main-title': '昭和モダン看板建築',
+                'subtitle': '震災から生まれ、街を飾り、現代建築に影響を与えた庶民のデザイン革命',
+                'revolution-title': '街角の革命：看板建築とは？',
+                'revolution-desc': '1923年の関東大震災後、東京の商人たちが生み出した独創的な建築様式。伝統的な木造町屋の前面に、耐火性のある装飾的な「ファサード（正面壁）」を取り付けたのが特徴です。それは、復興への希望と商魂の象徴でした。',
+                'hybrid-title': '構造のハイブリッド',
+                'hybrid-face-title': '洋風の「顔」',
+                'hybrid-face-desc': '装飾的なファサード (耐火材)',
+                'hybrid-body-title': '和風の「体」',
+                'hybrid-body-desc': '伝統的な木造町屋',
+                'palette-title': '職人のパレット',
+                'palette-desc': '地元の職人たちは、耐火性と表現力を両立させるため、身近な素材を駆使しました。彼らの創意工夫が、街並みに豊かな表情を与えたのです。',
+                'comparison-title': '三つの近代：日本の建築様式比較',
+                'giyofu-title': '擬洋風建築',
+                'giyofu-period': '明治時代 (1868-1912)',
+                'giyofu-creator': '<strong>作り手:</strong> 政府主導の建築家',
+                'giyofu-purpose': '<strong>目的:</strong> 国家の威信を示す',
+                'giyofu-feature': '<strong>特徴:</strong> 公共建築、本格的な洋風模倣',
+                'kanban-badge': '主役',
+                'kanban-title': '看板建築',
+                'kanban-period': '昭和初期 (1920s-30s)',
+                'kanban-creator': '<strong>作り手:</strong> 地元の大工・職人',
+                'kanban-purpose': '<strong>目的:</strong> 商業的なアピール',
+                'kanban-feature': '<strong>特徴:</strong> 小規模店舗、和洋折衷の装飾',
+                'modern-title': '近代建築',
+                'modern-period': '昭和初期 (1920s-30s)',
+                'modern-creator': '<strong>作り手:</strong> エリート建築家',
+                'modern-purpose': '<strong>目的:</strong> 機能主義・合理主義の追求',
+                'modern-feature': '<strong>特徴:</strong> 鉄筋コンクリート、ミニマルなデザイン',
+                'memory-title': '消えゆく街の記憶',
+                'memory-desc': '都市開発の波と建物の老朽化により、多くの看板建築が姿を消しています。その文化的価値が再認識され、保存と活用が急務となっています。',
+                'heritage-title': '危機遺産',
+                'heritage-desc': '2015年、世界建築文物保護基金会により<br>築地などの看板建築が危機遺産に指定',
+                'preservation-title': '保存の現状',
+                'rebirth-title': '未来への再生',
+                'rebirth-desc': '「昭和レトロ」ブームを追い風に、古い建物をカフェやギャラリーとして再生させる「適応的再利用」が活発化。歴史的価値を経済的な価値へと転換し、街に新たな魅力を生み出しています。',
+                'reuse-cafe-title': 'カフェ＆レストラン',
+                'reuse-cafe-desc': '建物の持つ物語を味わいの一部に。',
+                'reuse-gallery-title': 'ギャラリー＆ショップ',
+                'reuse-gallery-desc': 'ユニークな空間が商品の魅力を引き立てる。',
+                'reuse-tourism-title': '観光資源化',
+                'reuse-tourism-desc': '街並み全体を保存し、地域活性化の核に。',
+                'influence-title': '観察から理論へ：現代建築への影響',
+                'influence-desc': '看板建築のような「庶民の建築」を観察する視点は、日本の現代建築に大きな影響を与えました。街角の無名の創造性が、世界的な建築理論の源流となったのです。',
+                'timeline1-title': '考現学の誕生',
+                'timeline1-desc': '今和次郎らが提唱。ありふれた日常を観察・記録する学問が、庶民の創造物に光を当てる。',
+                'timeline2-title': '建築探偵と「路上観察」',
+                'timeline2-desc': '建築史家・藤森照信が忘れられた建物を調査。「看板建築」と名付け、その価値を「発見」する。',
+                'timeline3-title': 'アトリエ・ワンと「ペット建築」',
+                'timeline3-desc': '犬吠工房が都市の隙間の小さな建物を研究。「ビヘイビオロジー（ふるまい学）」など独自の理論を展開し、国際的に評価される。',
+                'footer-credit': 'このインフォグラフィックは、日本の昭和モダン「看板建築」に関する研究レポートに基づき作成されました。',
+                'footer-tech': 'ビジュアライゼーションはChart.jsおよびHTML/CSSで構築されています。',
+                'material-copper': '銅板 (緑青の美)',
+                'material-mortar': 'モルタル (自由な造形)',
+                'material-tile': 'タイル (多彩な装飾)',
+                'preservation-museum': '博物館などで保存',
+                'preservation-existing': '現存（推定・減少中）',
+            },
+            en: {
+                'main-title': 'Showa Modern Kanban Kenchiku',
+                'subtitle': 'The People\'s Design Revolution: Born from Disaster, Adorning the City, Influencing Contemporary Architecture',
+                'revolution-title': 'A Revolution on the Corner: What is Kanban Kenchiku?',
+                'revolution-desc': 'An original architectural style created by Tokyo merchants after the 1923 Great Kanto Earthquake. It features a decorative, fire-resistant "facade" attached to the front of a traditional wooden machiya. It was a symbol of hope for recovery and commercial spirit.',
+                'hybrid-title': 'A Structural Hybrid',
+                'hybrid-face-title': 'Western "Face"',
+                'hybrid-face-desc': 'Decorative Facade (Fireproof)',
+                'hybrid-body-title': 'Japanese "Body"',
+                'hybrid-body-desc': 'Traditional Wooden Machiya',
+                'palette-title': 'The Artisan\'s Palette',
+                'palette-desc': 'Local artisans used familiar materials to achieve both fire resistance and expressiveness. Their ingenuity gave the streetscape a rich character.',
+                'comparison-title': 'Three Modernities: A Comparison of Japanese Architectural Styles',
+                'giyofu-title': 'Giyōfū Architecture',
+                'giyofu-period': 'Meiji Period (1868-1912)',
+                'giyofu-creator': '<strong>Creators:</strong> Government-led architects',
+                'giyofu-purpose': '<strong>Purpose:</strong> To show national prestige',
+                'giyofu-feature': '<strong>Features:</strong> Public buildings, authentic Western imitation',
+                'kanban-badge': 'Star',
+                'kanban-title': 'Kanban Kenchiku',
+                'kanban-period': 'Early Showa (1920s-30s)',
+                'kanban-creator': '<strong>Creators:</strong> Local carpenters & artisans',
+                'kanban-purpose': '<strong>Purpose:</strong> Commercial appeal',
+                'kanban-feature': '<strong>Features:</strong> Small shops, Japanese-Western eclectic decoration',
+                'modern-title': 'Modernist Architecture',
+                'modern-period': 'Early Showa (1920s-30s)',
+                'modern-creator': '<strong>Creators:</strong> Elite architects',
+                'modern-purpose': '<strong>Purpose:</strong> Pursuit of functionalism & rationalism',
+                'modern-feature': '<strong>Features:</strong> Reinforced concrete, minimal design',
+                'memory-title': 'Fading Memories of the City',
+                'memory-desc': 'Many Kanban Kenchiku have disappeared due to urban development and aging. Their cultural value is being reassessed, making preservation and utilization urgent.',
+                'heritage-title': 'Heritage on the Brink',
+                'heritage-desc': 'In 2015, the World Monuments Fund designated Kanban Kenchiku in areas like Tsukiji as endangered heritage.',
+                'preservation-title': 'State of Preservation',
+                'rebirth-title': 'Rebirth into the Future',
+                'rebirth-desc': 'Driven by the "Showa Retro" boom, "adaptive reuse" of old buildings as cafes and galleries is gaining traction, converting historical value into economic value and creating new urban charm.',
+                'reuse-cafe-title': 'Cafes & Restaurants',
+                'reuse-cafe-desc': 'Making the building\'s story part of the flavor.',
+                'reuse-gallery-title': 'Galleries & Shops',
+                'reuse-gallery-desc': 'Unique spaces that enhance the appeal of products.',
+                'reuse-tourism-title': 'As a Tourism Resource',
+                'reuse-tourism-desc': 'Preserving entire streetscapes as a core of regional revitalization.',
+                'influence-title': 'From Observation to Theory: Influence on Contemporary Architecture',
+                'influence-desc': 'The perspective of observing "vernacular architecture" like Kanban Kenchiku has greatly influenced modern Japanese architecture. The anonymous creativity of the street corner became a source for global architectural theory.',
+                'timeline1-title': 'The Birth of "Kogengaku" (Modernology)',
+                'timeline1-desc': 'Advocated by Wajiro Kon and others. The study of observing and recording everyday life shed light on the creations of ordinary people.',
+                'timeline2-title': 'Architecture Detectives and "Street Observation"',
+                'timeline2-desc': 'Architectural historian Terunobu Fujimori investigated forgotten buildings, coining the term "Kanban Kenchiku" and "discovering" its value.',
+                'timeline3-title': 'Atelier Bow-Wow and "Pet Architecture"',
+                'timeline3-desc': 'The firm studied tiny buildings in urban gaps, developing unique theories like "Behaviorology" that gained international acclaim.',
+                'footer-credit': 'This infographic was created based on research reports concerning Japan\'s Showa Modern "Kanban Kenchiku".',
+                'footer-tech': 'Visualizations were built with Chart.js and HTML/CSS.',
+                'material-copper': 'Copper Sheathing (Beauty of Patina)',
+                'material-mortar': 'Mortar (Freedom of Form)',
+                'material-tile': 'Tile (Colorful Decoration)',
+                'preservation-museum': 'Preserved in Museums',
+                'preservation-existing': 'Existing (Estimated, Decreasing)',
+            },
+            zh: {
+                'main-title': '昭和摩登看板建築',
+                'subtitle': '源於震災、點綴街區、影響現代建築的庶民設計革命',
+                'revolution-title': '街角的革命：何謂看板建築？',
+                'revolution-desc': '1923年關東大地震後，東京的商人創造出的獨創建築樣式。其特徵是在傳統的木造町屋正面，附加一層具裝飾性的防火「立面」。這是復興的希望與商業精神的象徵。',
+                'hybrid-title': '結構的混合體',
+                'hybrid-face-title': '西式「臉」',
+                'hybrid-face-desc': '裝飾性立面 (防火建材)',
+                'hybrid-body-title': '日式「身」',
+                'hybrid-body-desc': '傳統木造町屋',
+                'palette-title': '工匠的調色盤',
+                'palette-desc': '在地工匠們為了兼顧防火與表現力，靈活運用了身邊的材料。他們的創意巧思為街景增添了豐富的表情。',
+                'comparison-title': '三種近代：日本建築樣式比較',
+                'giyofu-title': '擬洋風建築',
+                'giyofu-period': '明治時代 (1868-1912)',
+                'giyofu-creator': '<strong>創作者:</strong> 政府主導的建築家',
+                'giyofu-purpose': '<strong>目的:</strong> 彰顯國家威信',
+                'giyofu-feature': '<strong>特徵:</strong> 公共建築、本格西風模仿',
+                'kanban-badge': '主角',
+                'kanban-title': '看板建築',
+                'kanban-period': '昭和初期 (1920s-30s)',
+                'kanban-creator': '<strong>創作者:</strong> 在地木匠、工匠',
+                'kanban-purpose': '<strong>目的:</strong> 商業宣傳',
+                'kanban-feature': '<strong>特徵:</strong> 小規模店鋪、和洋折衷裝飾',
+                'modern-title': '近代建築',
+                'modern-period': '昭和初期 (1920s-30s)',
+                'modern-creator': '<strong>創作者:</strong> 菁英建築家',
+                'modern-purpose': '<strong>目的:</strong> 追求功能與理性主義',
+                'modern-feature': '<strong>特徵:</strong> 鋼筋水泥、極簡設計',
+                'memory-title': '消逝中的街區記憶',
+                'memory-desc': '在都市開發的浪潮與建築物的老舊之下，許多看板建築已消失無蹤。其文化價值被重新認識，保存與活用成為當務之急。',
+                'heritage-title': '危機遺產',
+                'heritage-desc': '2015年，世界建築文物保護基金會將築地等地的看板建築<br>指定為瀕危遺產。',
+                'preservation-title': '保存現狀',
+                'rebirth-title': '邁向未來的重生',
+                'rebirth-desc': '搭上「昭和懷舊」風潮，「適應性再利用」——將老建築再生為咖啡館或藝廊——的案例日益活絡，將歷史價值轉化為經濟價值，為街區創造新魅力。',
+                'reuse-cafe-title': '咖啡館＆餐廳',
+                'reuse-cafe-desc': '將建築物的故事轉化為品嚐的一部分。',
+                'reuse-gallery-title': '藝廊＆商店',
+                'reuse-gallery-desc': '獨特的空間更能襯托商品的魅力。',
+                'reuse-tourism-title': '觀光資源化',
+                'reuse-tourism-desc': '將整體街景加以保存，成為地方活化的核心。',
+                'influence-title': '從觀察到理論：對現代建築的影響',
+                'influence-desc': '觀察如看板建築般的「庶民建築」之視角，對日本現代建築帶來了深遠的影響。街角的無名創造力，成為了世界級建築理論的源頭。',
+                'timeline1-title': '考現學的誕生',
+                'timeline1-desc': '由今和次郎等人提倡。觀察並記錄平凡日常的學問，讓庶民的創造物得以展露光芒。',
+                'timeline2-title': '建築偵探與「路上觀察」',
+                'timeline2-desc': '建築史家藤森照信調查被遺忘的建築，將其命名為「看板建築」並「發現」其價值。',
+                'timeline3-title': '犬吠工房與「寵物建築」',
+                'timeline3-desc': '該事務所研究都市夾縫中的微小建築，發展出「行為學」等獨自理論，獲得國際性的評價。',
+                'footer-credit': '此資訊圖表是根據日本昭和摩登「看板建築」之相關研究報告製作而成。',
+                'footer-tech': '圖表由Chart.js及HTML/CSS構建。',
+                'material-copper': '銅板 (綠鏽之美)',
+                'material-mortar': '灰泥 (自由造型)',
+                'material-tile': '磁磚 (多彩裝飾)',
+                'preservation-museum': '於博物館等地保存',
+                'preservation-existing': '現存 (推算，減少中)',
+            }
+        };
+
+        const colorPalette = {
+            primary: '#004AAD',
+            accent: '#FF7A00',
+            light: '#6EB5FF',
+            text: '#333333'
+        };
+
+        const chartDefaultOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: colorPalette.text,
+                        font: {
+                            family: "'Noto Sans JP', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang;
+
+            for (const key in translations[lang]) {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.innerHTML = translations[lang][key];
+                }
+            }
+
+            if (materialsChart) {
+                materialsChart.data.labels = [
+                    translations[lang]['material-copper'],
+                    translations[lang]['material-mortar'],
+                    translations[lang]['material-tile']
+                ];
+                materialsChart.update();
+            }
+
+            if (preservationChart) {
+                preservationChart.data.labels = [
+                    translations[lang]['preservation-museum'],
+                    translations[lang]['preservation-existing']
+                ];
+                preservationChart.update();
+            }
+            
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('bg-opacity-100', 'text-white', 'scale-110');
+                btn.classList.add('bg-opacity-50', 'text-gray-200');
+            });
+            const activeBtn = document.getElementById(`btn-${lang}`);
+            activeBtn.classList.add('bg-opacity-100', 'text-white', 'scale-110');
+            activeBtn.classList.remove('bg-opacity-50', 'text-gray-200');
+        }
+
+        function createCharts() {
+            const ctxMaterials = document.getElementById('materialsChart').getContext('2d');
+            materialsChart = new Chart(ctxMaterials, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '主要なファサード材',
+                        data: [40, 35, 25],
+                        backgroundColor: [colorPalette.primary, colorPalette.accent, colorPalette.light],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...chartDefaultOptions }
+            });
+
+            const ctxPreservation = document.getElementById('preservationChart').getContext('2d');
+            preservationChart = new Chart(ctxPreservation, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '建物数',
+                        data: [50, 450],
+                        backgroundColor: [colorPalette.light, colorPalette.primary],
+                        borderColor: [colorPalette.light, colorPalette.primary],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartDefaultOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, grid: { display: false } },
+                        y: { grid: { display: false } }
+                    },
+                    plugins: { ...chartDefaultOptions.plugins, legend: { display: false } }
+                }
+            });
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            createCharts();
+            
+            document.getElementById('btn-ja').addEventListener('click', () => switchLanguage('ja'));
+            document.getElementById('btn-en').addEventListener('click', () => switchLanguage('en'));
+            document.getElementById('btn-zh').addEventListener('click', () => switchLanguage('zh'));
+            
+            switchLanguage('ja');
+        });
+    </script>
+</body>
+</html>
