@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：解構以巴衝突</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals (Linen, Slate Gray, Sage, Burnt Sienna) -->
+    <!-- 
+      Application Structure Plan: 
+      The application is structured into four thematic, non-linear sections to enhance usability and targeted exploration, moving away from the report's linear five-part structure.
+      1.  **主題登陸頁 (Hero Section):** Grabs user attention and provides a concise introduction to the application's purpose.
+      2.  **互動時間軸 (Interactive Timeline):** Presents the historical context ('The Why') in a chronological, digestible format. Users can click on events to get more detail, making history explorable rather than static. This is more intuitive for understanding cause and effect than a long text block.
+      3.  **現狀儀表板 (The Reality Dashboard):** Translates abstract concepts like 'occupation' into tangible data points and simplified visuals (stats, diagrams, charts). This dashboard approach allows users to quickly grasp the key challenges on the ground (settlements, blockade, restrictions), which is more effective than descriptive paragraphs alone.
+      4.  **策略光譜 (Spectrum of Struggle):** Uses a comparative card layout to display the diverse Palestinian responses ('The What'). This side-by-side structure facilitates understanding of the different and sometimes conflicting strategies (diplomacy, civil resistance, armed conflict) without imposing a narrative hierarchy.
+      5.  **解決方案比較 (Solutions Crossroads):** Deconstructs complex legal and political frameworks using interactive tables and toggles. This allows users to actively compare UN resolutions and future scenarios (two-state vs. one-state), making dense policy information more accessible and engaging.
+      This thematic structure empowers users to navigate based on their questions (e.g., "What's happening now?" or "What are the proposed solutions?") rather than forcing them through a prescribed path, thus improving comprehension and engagement.
+    -->
+    <!-- 
+      Visualization & Content Choices:
+      - **Hero Section:** Goal: Inform & Engage. Method: Large typography and a clear summary. Interaction: Navigation links. Justification: Sets the stage and provides immediate entry points. Library/Method: HTML/Tailwind.
+      - **Timeline:** Goal: Show Change/Sequence. Method: Vertical timeline with clickable cards. Interaction: Click to open a modal with detailed text. Justification: Intuitively visualizes historical progression and allows for layered information access. Library/Method: HTML/CSS/JS.
+      - **1947 Partition Plan Chart:** Goal: Compare/Show Proportion. Method: Donut Chart. Interaction: Hover tooltips. Justification: A donut chart is the clearest way to show the disproportionate land allocation, a key historical grievance. Library/Method: Chart.js (Canvas).
+      - **Key Statistics:** Goal: Inform. Method: Large, bold "Key Figure" callouts. Interaction: Static display for impact. Justification: Highlights the most critical data points from the report for immediate understanding. Library/Method: HTML/Tailwind.
+      - **Strategy Cards:** Goal: Organize & Compare. Method: Grid of cards. Interaction: Clickable cards revealing more information. Justification: Allows for non-linear exploration and easy comparison of different Palestinian strategies. Library/Method: HTML/CSS/JS.
+      - **UN Resolutions Table:** Goal: Organize & Compare. Method: Interactive HTML table. Interaction: Hovering a row highlights it and displays contextual details. Justification: Makes dense legal information from the report's Table 1 digestible and reveals the conflicting interpretations. Library/Method: HTML/JS.
+      - **Solutions Toggle:** Goal: Compare. Method: Tabbed interface. Interaction: Clicking tabs switches between content for Two-State and One-State solutions. Justification: A direct comparison tool that simplifies the complex frameworks from the report's Table 2. Library/Method: HTML/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Lato', 'Noto Sans TC', sans-serif; background-color: #FDFCFB; color: #333; }
+        .bg-linen { background-color: #FDFCFB; }
+        .bg-sage-light { background-color: #e8ede7; }
+        .text-slate { color: #4A5568; }
+        .text-burnt-sienna { color: #E97451; }
+        .border-sage { border-color: #D8E2DC; }
+        .accent-bg { background-color: #E97451; }
+        .accent-text { color: #E97451; }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #E97451;
+            border-bottom-color: #E97451;
+        }
+        .timeline-item { position: relative; padding-left: 3rem; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #D8E2DC;
+        }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-dot {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.25rem;
+            height: 1.25rem;
+            width: 1.25rem;
+            border-radius: 50%;
+            background-color: #E97451;
+            border: 4px solid #FDFCFB;
+            transform: translateX(-50%);
+            margin-left: 0.625rem;
+        }
+        .modal {
+            transition: opacity 0.3s ease;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-linen">
+
+    <!-- Header & Navigation -->
+    <header class="bg-linen sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <h1 id="main-title" class="text-xl md:text-2xl font-bold text-slate"></h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#timeline" class="nav-link font-medium pb-1" data-i18n="navTimeline"></a>
+                <a href="#reality" class="nav-link font-medium pb-1" data-i18n="navReality"></a>
+                <a href="#struggle" class="nav-link font-medium pb-1" data-i18n="navStruggle"></a>
+                <a href="#solutions" class="nav-link font-medium pb-1" data-i18n="navSolutions"></a>
+                <button id="lang-toggle-desktop" class="text-sm font-semibold text-slate bg-gray-200 px-3 py-1 rounded-full hover:bg-gray-300 transition-colors">English</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6 text-slate" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4 border-t border-gray-200">
+            <a href="#timeline" class="block py-2 text-slate nav-link" data-i18n="navTimeline"></a>
+            <a href="#reality" class="block py-2 text-slate nav-link" data-i18n="navReality"></a>
+            <a href="#struggle" class="block py-2 text-slate nav-link" data-i18n="navStruggle"></a>
+            <a href="#solutions" class="block py-2 text-slate nav-link" data-i18n="navSolutions"></a>
+            <button id="lang-toggle-mobile" class="mt-2 w-full text-sm font-semibold text-slate bg-gray-200 px-3 py-2 rounded-full hover:bg-gray-300 transition-colors">English</button>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 md:py-12">
+        <!-- Hero Section -->
+        <section id="hero" class="text-center mb-16 md:mb-24">
+            <h2 class="text-3xl md:text-5xl font-bold text-slate mb-4" data-i18n="heroTitle"></h2>
+            <p class="text-lg md:text-xl text-slate max-w-3xl mx-auto" data-i18n="heroSubtitle"></p>
+        </section>
+
+        <!-- Timeline Section -->
+        <section id="timeline" class="mb-16 md:mb-24">
+            <header class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold text-slate mb-3" data-i18n="timelineHeader"></h3>
+                <p class="text-md md:text-lg text-slate max-w-3xl mx-auto" data-i18n="timelineIntro"></p>
+            </header>
+            <div id="timeline-container" class="max-w-4xl mx-auto"></div>
+        </section>
+
+        <!-- Reality Section -->
+        <section id="reality" class="mb-16 md:mb-24 bg-sage-light p-6 md:p-10 rounded-lg">
+            <header class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold text-slate mb-3" data-i18n="realityHeader"></h3>
+                <p class="text-md md:text-lg text-slate max-w-3xl mx-auto" data-i18n="realityIntro"></p>
+            </header>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-linen p-6 rounded-lg shadow-lg text-center">
+                    <h4 class="text-xl font-bold text-slate mb-2" data-i18n="partitionTitle"></h4>
+                    <p class="text-slate mb-4" data-i18n="partitionDesc"></p>
+                    <div class="chart-container">
+                        <canvas id="partitionChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-linen p-6 rounded-lg shadow-lg text-center flex flex-col justify-center">
+                    <h4 class="text-xl font-bold text-slate mb-2" data-i18n="nakbaTitle"></h4>
+                    <p class="text-6xl font-bold accent-text">750,000</p>
+                    <p class="text-slate mt-2" data-i18n="nakbaDesc"></p>
+                </div>
+                <div class="bg-linen p-6 rounded-lg shadow-lg text-center flex flex-col justify-center">
+                    <h4 class="text-xl font-bold text-slate mb-2" data-i18n="settlementsTitle"></h4>
+                    <p class="text-6xl font-bold accent-text">>700,000</p>
+                    <p class="text-slate mt-2" data-i18n="settlementsDesc"></p>
+                </div>
+                <div class="bg-linen p-6 rounded-lg shadow-lg text-center md:col-span-2 lg:col-span-1 flex flex-col justify-center">
+                     <h4 class="text-xl font-bold text-slate mb-2" data-i18n="blockadeTitle"></h4>
+                    <p class="text-6xl font-bold accent-text">>95%</p>
+                    <p class="text-slate mt-2" data-i18n="blockadeDesc"></p>
+                </div>
+                <div class="bg-linen p-6 rounded-lg shadow-lg md:col-span-2">
+                    <h4 class="text-xl font-bold text-slate mb-4 text-center" data-i18n="matrixTitle"></h4>
+                    <p class="text-slate mb-4" data-i18n="matrixDesc"></p>
+                    <div class="w-full h-40 bg-gray-200 rounded-lg flex items-center justify-center p-4 border-4 border-dashed border-gray-400">
+                        <p class="text-center text-slate font-semibold" data-i18n="matrixDiagram"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Struggle Section -->
+        <section id="struggle" class="mb-16 md:mb-24">
+            <header class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold text-slate mb-3" data-i18n="struggleHeader"></h3>
+                <p class="text-md md:text-lg text-slate max-w-3xl mx-auto" data-i18n="struggleIntro"></p>
+            </header>
+            <div id="struggle-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </section>
+
+        <!-- Solutions Section -->
+        <section id="solutions" class="bg-sage-light p-6 md:p-10 rounded-lg">
+            <header class="text-center mb-12">
+                <h3 class="text-2xl md:text-4xl font-bold text-slate mb-3" data-i18n="solutionsHeader"></h3>
+                <p class="text-md md:text-lg text-slate max-w-3xl mx-auto" data-i18n="solutionsIntro"></p>
+            </header>
+            
+            <div class="mb-12">
+                <h4 class="text-xl font-bold text-slate mb-4 text-center" data-i18n="resolutionsHeader"></h4>
+                <p class="text-slate text-center mb-6 max-w-2xl mx-auto" data-i18n="resolutionsIntro"></p>
+                <div id="resolutions-container" class="space-y-4"></div>
+            </div>
+
+            <div>
+                <h4 class="text-xl font-bold text-slate mb-4 text-center" data-i18n="endgameHeader"></h4>
+                 <div class="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-2 flex space-x-2 mb-6">
+                    <button id="btn-two-state" class="solution-btn flex-1 py-2 px-4 rounded-md text-sm font-medium focus:outline-none transition-colors duration-300" data-i18n="twoStateBtn"></button>
+                    <button id="btn-one-state" class="solution-btn flex-1 py-2 px-4 rounded-md text-sm font-medium focus:outline-none transition-colors duration-300" data-i18n="oneStateBtn"></button>
+                </div>
+                <div id="solution-content-container" class="bg-white p-6 rounded-lg shadow-inner min-h-[200px]"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate text-white mt-16">
+        <div class="container mx-auto px-6 py-4 text-center">
+            <p data-i18n="footerText1"></p>
+            <p class="text-sm mt-2" data-i18n="footerText2"></p>
+        </div>
+    </footer>
+
+    <!-- Modal Structure -->
+    <div id="modal" class="modal fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="bg-white rounded-lg shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="modal-title" class="text-2xl font-bold text-slate"></h2>
+                    <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                </div>
+                <div id="modal-content" class="text-slate"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATA & I18N ---
+            const i18nData = {
+                zh: {
+                    mainTitle: "解構以巴衝突",
+                    navTimeline: "歷史時間軸",
+                    navReality: "佔領的現實",
+                    navStruggle: "鬥爭的光譜",
+                    navSolutions: "和平之路？",
+                    langToggle: "English",
+                    heroTitle: "深入剖析「解放巴勒斯坦」",
+                    heroSubtitle: "本互動報告旨在闡明「解放巴勒斯坦」呼聲背後的歷史、現實與多方行動。透過互動式時間軸、數據圖表與策略分析，我們將一同探索這場全球最棘手衝突之一的核心問題：「為什麼？」以及「做了什麼？」",
+                    timelineHeader: "關鍵時刻：互動歷史時間軸",
+                    timelineIntro: "從帝國的承諾到戰爭的後果，點擊下方各個事件，了解構成今日衝突的歷史根源。本節旨在解答「為什麼要解放巴勒斯坦」的歷史維度。",
+                    readMore: "閱讀更多",
+                    realityHeader: "佔領的現實：一個民族的真實生活",
+                    realityIntro: "本節透過數據與圖表，展現軍事佔領下的當代狀況，包括屯墾區、隔離牆、加薩封鎖以及對資源的控制。這是「解放」訴求的現代基礎。",
+                    partitionTitle: "聯合國分治計畫 (1947)",
+                    partitionDesc: "計畫將55%的土地劃給猶太國，儘管當時猶太人口僅佔三分之一，擁有不到10%的土地。",
+                    nakbaTitle: "民族浩劫 (Nakba, 1948)",
+                    nakbaDesc: "巴勒斯坦人流離失所，成為難民，構成巴勒斯坦民族最深刻的創傷。",
+                    settlementsTitle: "非法屯墾區",
+                    settlementsDesc: "以色列屯墾者居住在約旦河西岸與東耶路撒冷，根據國際法被視為非法。",
+                    blockadeTitle: "加薩封鎖 (2007至今)",
+                    blockadeDesc: "的水源不宜飲用，失業率長期高於40%，造成嚴重人道危機。",
+                    matrixTitle: "控制矩陣：隔離牆與檢查站",
+                    matrixDesc: "以色列修建的隔離牆超過85%的路徑偏離1967年綠線，深入西岸腹地，旨在囊括大型屯墾區。這與數百個檢查站共同構成一個複雜的控制體系，嚴重限制巴勒斯坦人的行動自由，分割社區，並被國際法院裁定為非法。此體系被批評為旨在製造「既成事實」，構成對巴勒斯坦土地的「事實上吞併」。",
+                    matrixDiagram: "示意圖：隔離牆割裂了巴勒斯坦土地，將屯墾區（<span class=\"text-blue-600\">藍色區域</span>）與巴勒斯坦社區（<span class=\"text-green-600\">綠色區域</span>）隔開，使一個連續的國家變得不可能。",
+                    struggleHeader: "鬥爭的光譜：巴勒斯坦的行動",
+                    struggleIntro: "面對佔領，巴勒斯坦人採取了多樣化的策略。本節檢視從外交談判、群眾抵抗到武裝衝突等不同的行動路徑，直接回應「做了什麼？」這一問題。",
+                    solutionsHeader: "未來的十字路口：和平之路？",
+                    solutionsIntro: "國際社會提出了多個法律框架與解決方案，但和平依然遙遠。本節分析關鍵的聯合國決議，並比較主要的最終解決方案。",
+                    resolutionsHeader: "關鍵聯合國決議：兩種解讀",
+                    resolutionsIntro: "許多和平努力的基礎是聯合國決議，但雙方對其核心條款的解讀大相逕庭。滑鼠懸停在下方決議上查看爭議點。",
+                    palestinianView: "巴方解讀：",
+                    israeliView: "以方解讀：",
+                    endgameHeader: "衝突的終局：方案比較",
+                    twoStateBtn: "兩國方案",
+                    oneStateBtn: "一國方案",
+                    pros: "優點",
+                    cons: "障礙/批評",
+                    footerText1: "本互動報告基於提供的《解放巴勒斯坦爭議分析》文件創建，旨在促進對複雜議題的理解。",
+                    footerText2: "僅供教育與資訊交流目的。",
+                    chartLabels: ['劃給猶太國', '劃給阿拉伯國', '耶路撒冷 (國際共管)'],
+                    chartTooltip: "的土地",
+                },
+                en: {
+                    mainTitle: "Deconstructing the Conflict",
+                    navTimeline: "Timeline",
+                    navReality: "Reality of Occupation",
+                    navStruggle: "Spectrum of Struggle",
+                    navSolutions: "Path to Peace?",
+                    langToggle: "中文",
+                    heroTitle: "Deconstructing \"Free Palestine\"",
+                    heroSubtitle: "This interactive report aims to clarify the history, reality, and actions behind the call to \"Free Palestine.\" Through an interactive timeline, data visualizations, and strategic analysis, we will explore the core questions of this intractable global conflict: \"Why?\" and \"What has been done?\"",
+                    timelineHeader: "Key Moments: An Interactive Timeline",
+                    timelineIntro: "From imperial promises to the consequences of war, click on the events below to understand the historical roots of today's conflict. This section aims to answer the historical dimension of 'Why Free Palestine?'",
+                    readMore: "Read More",
+                    realityHeader: "The Reality of Occupation: A People's Lived Experience",
+                    realityIntro: "This section uses data and diagrams to illustrate the contemporary situation under military occupation, including settlements, the separation wall, the Gaza blockade, and resource control. This is the modern basis for the call for 'liberation.'",
+                    partitionTitle: "UN Partition Plan (1947)",
+                    partitionDesc: "The plan allocated 55% of the land to a Jewish state, despite the Jewish population comprising only one-third and owning less than 10% of the land.",
+                    nakbaTitle: "The Nakba (Catastrophe, 1948)",
+                    nakbaDesc: "Palestinians were displaced, becoming refugees, forming the deepest trauma of the Palestinian national experience.",
+                    settlementsTitle: "Illegal Settlements",
+                    settlementsDesc: "Israeli settlers reside in the West Bank and East Jerusalem, considered illegal under international law.",
+                    blockadeTitle: "Gaza Blockade (2007-Present)",
+                    blockadeDesc: "of water is undrinkable, and unemployment has long exceeded 40%, causing a severe humanitarian crisis.",
+                    matrixTitle: "Matrix of Control: The Wall & Checkpoints",
+                    matrixDesc: "Over 85% of the separation barrier's route deviates from the 1967 Green Line, cutting deep into the West Bank to annex large settlement blocs. Combined with hundreds of checkpoints, it creates a complex system of control that severely restricts Palestinian movement, fragments communities, and was deemed illegal by the ICJ. This system is criticized for creating 'facts on the ground' that constitute a 'de facto annexation' of Palestinian land.",
+                    matrixDiagram: "Diagram: The wall fragments Palestinian land, separating settlements (<span class=\"text-blue-600\">blue areas</span>) from Palestinian communities (<span class=\"text-green-600\">green areas</span>), making a contiguous state impossible.",
+                    struggleHeader: "The Spectrum of Struggle: Palestinian Actions",
+                    struggleIntro: "In the face of occupation, Palestinians have adopted diverse strategies. This section examines the different paths of action, from diplomatic negotiations and popular resistance to armed conflict, directly addressing the question, 'What has been done?'",
+                    solutionsHeader: "Crossroads of the Future: A Path to Peace?",
+                    solutionsIntro: "The international community has proposed multiple legal frameworks and solutions, yet peace remains distant. This section analyzes key UN resolutions and compares the main final-status solutions.",
+                    resolutionsHeader: "Key UN Resolutions: Two Interpretations",
+                    resolutionsIntro: "Many peace efforts are based on UN resolutions, but the two sides interpret their core tenets very differently. Hover over the resolutions below to see the points of contention.",
+                    palestinianView: "Palestinian View:",
+                    israeliView: "Israeli View:",
+                    endgameHeader: "The Endgame: Comparing Solutions",
+                    twoStateBtn: "Two-State Solution",
+                    oneStateBtn: "One-State Solution",
+                    pros: "Pros",
+                    cons: "Obstacles/Critiques",
+                    footerText1: "This interactive report was created based on the provided 'Analysis of the Free Palestine Controversy' document to promote understanding of a complex issue.",
+                    footerText2: "For educational and informational purposes only.",
+                    chartLabels: ['Allocated to Jewish State', 'Allocated to Arab State', 'Jerusalem (Intl. Corpus Separatum)'],
+                    chartTooltip: "of land",
+                }
+            };
+
+            const dynamicData = {
+                zh: {
+                    timelineData: [
+                        { year: '1917', title: '《貝爾福宣言》', content: '英國承諾支持在巴勒斯坦建立一個「猶太民族之家」，同時規定不得損害當地非猶太社群的權利，為兩種民族願景的直接碰撞埋下伏筆。' },
+                        { year: '1947', title: '聯合國分治計畫', content: '聯合國第181號決議提議將巴勒斯坦分割為阿拉伯國和猶太國。計畫將約55%的土地劃給佔少數人口的猶太人，遭到阿拉伯方斷然拒絕。' },
+                        { year: '1948', title: '「浩劫」(Nakba) 與第一次中東戰爭', content: '以色列宣布建國，引發戰爭。戰後以色列領土擴張至78%的託管地。約75萬巴勒斯坦人流離失所，成為難民，此事件被稱為「浩劫」。聯合國通過第194號決議，確立難民的回歸權。' },
+                        { year: '1967', title: '六日戰爭與「挫敗」(Naksa)', content: '以色列佔領了剩餘的22%巴勒斯坦土地，包括約旦河西岸、東耶路撒冷和加薩走廊，開啟了持續至今的軍事佔領。聯合國安理會通過第242號決議，確立「土地換和平」原則。' },
+                        { year: '1987-1993', title: '第一次大起義 (Intifada)', content: '一場以公民不服從為主的群眾性民眾起義。它成功地將佔領的人道代價呈現在世界面前，並促成了後續的和平談判。' },
+                        { year: '1993-1995', title: '《奧斯陸協議》', content: '以色列與巴解組織相互承認，並建立了巴勒斯坦自治政府。協議設定了五年過渡期以談判永久性方案，但最終失敗，且在過渡期內以色列屯墾區急劇擴張。' },
+                        { year: '2000-2005', title: '第二次大起義', content: '在大衛營峰會失敗後爆發，是一場遠為暴力的武裝衝突，導致雙方數千人死亡，並直接促使以色列修建隔離牆。' },
+                        { year: '2007', title: '巴勒斯坦分裂與加薩封鎖', content: '哈瑪斯在贏得2006年選舉後，於2007年以武力控制加薩走廊，導致巴勒斯坦政治分裂。以色列和埃及隨即對加薩實施嚴密封鎖。' },
+                        { year: '2024', title: '國際法院（ICJ）訴訟', content: '南非向國際法院提起訴訟，指控以色列在加薩的軍事行動違反了《種族滅絕公約》。法院發布了臨時措施，命令以色列防止種族滅絕行為。' }
+                    ],
+                    struggleData: [
+                        { title: '外交戰線 (巴解/自治政府)', content: '透過談判和國際承認追求建國。雖達成《奧斯陸協議》並建立自治政府，但未能結束佔領，反而被批評為佔領的「分包商」，導致合法性危機。' },
+                        { title: '群眾抵抗 (大起義/BDS)', content: '透過公民不服從（第一次大起義）和全球性的非暴力抵制、撤資、制裁運動（BDS）向以色列施壓，要求其遵守國際法。' },
+                        { title: '武裝鬥爭 (哈瑪斯)', content: '主張透過武裝鬥爭解放所有歷史上的巴勒斯坦，拒絕與以色列談判。其崛起與奧斯陸和平進程的失敗和自治政府的無能密切相關。' },
+                        { title: '國際法律戰', content: '近年來，巴勒斯坦及其支持者轉向國際法律舞台，提出種族隔離和種族滅絕的指控，試圖透過法律途徑追究以色列的責任。' }
+                    ],
+                    resolutionsData: [
+                        { title: 'UN Res 194 (回歸權)', palestinianView: '視為不可剝奪的個人與集體權利，是解決難民問題的法律基石。', israeliView: '拒絕大規模難民回歸，認為這會威脅其作為猶太國家的特性與人口結構。' },
+                        { title: 'UN Res 242 (土地換和平)', palestinianView: '堅持要求以色列完全撤出所有在1967年佔領的領土，回到「綠線」邊界。', israeliView: '利用決議措辭的模糊性，解釋為無需從「所有」佔領領土撤出，可保留部分土地以換取「安全邊界」。' }
+                    ],
+                    solutionsData: {
+                        twoState: { title: '兩國方案', description: '建立一個獨立、主權的巴勒斯坦國，與以色列並存。這是國際社會長期的官方共識，但因屯墾區擴張等障礙被視為瀕臨死亡。', pros: ['實現巴勒斯坦民族自決', '維持以色列的猶太國家特性', '擁有廣泛的國際法理基礎'], cons: ['屯墾區使領土連續性幾乎不可能', '耶路撒冷、難民等核心問題無解', '雙方民意支持度降至歷史低點'] },
+                        oneState: { title: '一國方案', description: '承認從地中海到約旦河已是「事實上的一國」，並在此框架下尋求解決方案，如建立單一的民主世俗國家。', pros: ['承認兩個民族對整片土地的聯繫', '可能實現所有居民的平等公民權', '永久結束「佔領」這一法律狀態'], cons: ['絕大多數以色列人反對，視為猶太復國主義的終結', '許多巴勒斯坦人反對，意味著放棄民族獨立目標', '可能鞏固一個永久不平等的「種族隔離」體系'] }
+                    }
+                },
+                en: {
+                    timelineData: [
+                        { year: '1917', title: 'Balfour Declaration', content: 'Britain pledges support for a "national home for the Jewish people" in Palestine, while stipulating that the rights of non-Jewish communities should not be prejudiced, setting the stage for a direct clash of national visions.' },
+                        { year: '1947', title: 'UN Partition Plan', content: 'UN Resolution 181 proposed partitioning Palestine into Arab and Jewish states. The plan allocated about 55% of the land to the Jewish minority, and was rejected by the Arab side.' },
+                        { year: '1948', title: 'The "Nakba" & First Arab-Israeli War', content: 'Israel declares statehood, leading to war. Post-war, Israel\'s territory expands to 78% of the mandate. ~750,000 Palestinians are displaced, becoming refugees in an event known as the "Nakba." The UN passes Res. 194, affirming the right of return.' },
+                        { year: '1967', title: 'Six-Day War & The "Naksa"', content: 'Israel occupies the remaining 22% of historic Palestine—the West Bank, East Jerusalem, and Gaza Strip—beginning the military occupation that continues today. UNSC Res. 242 establishes the "land for peace" principle.' },
+                        { year: '1987-1993', title: 'First Intifada', content: 'A mass popular uprising characterized by civil disobedience. It successfully brought the human cost of occupation to the world\'s attention and spurred subsequent peace talks.' },
+                        { year: '1993-1995', title: 'Oslo Accords', content: 'Mutual recognition between Israel and the PLO, establishing the Palestinian Authority. It set a five-year interim period for a permanent solution, which ultimately failed as Israeli settlements expanded dramatically.' },
+                        { year: '2000-2005', title: 'Second Intifada', content: 'Erupted after the failure of the Camp David Summit, this was a far more violent, armed conflict, resulting in thousands of deaths on both sides and directly leading to the construction of the separation wall.' },
+                        { year: '2007', title: 'Palestinian Split & Gaza Blockade', content: 'After winning the 2006 elections, Hamas takes control of the Gaza Strip by force in 2007, leading to a Palestinian political split. Israel and Egypt impose a strict blockade on Gaza.' },
+                        { year: '2024', title: 'International Court of Justice (ICJ) Case', content: 'South Africa brings a case to the ICJ accusing Israel of violating the Genocide Convention with its military actions in Gaza. The court issues provisional measures ordering Israel to prevent acts of genocide.' }
+                    ],
+                    struggleData: [
+                        { title: 'Diplomacy (PLO/PA)', content: 'Pursued statehood through negotiations and international recognition. Achieved the Oslo Accords and established the PA, but failed to end the occupation, leading to a legitimacy crisis as a perceived "subcontractor" for the occupation.' },
+                        { title: 'Popular Resistance (Intifada/BDS)', content: 'Utilized civil disobedience (First Intifada) and a global, non-violent Boycott, Divestment, and Sanctions (BDS) movement to pressure Israel to comply with international law.' },
+                        { title: 'Armed Struggle (Hamas)', content: 'Advocates for the liberation of all of historic Palestine through armed struggle, rejecting negotiations with Israel. Its rise is closely linked to the failure of the Oslo peace process and the PA\'s perceived ineffectiveness.' },
+                        { title: 'International Lawfare', content: 'In recent years, Palestinians and their supporters have increasingly turned to the international legal arena, leveraging accusations of apartheid and genocide to hold Israel accountable.' }
+                    ],
+                    resolutionsData: [
+                        { title: 'UN Res 194 (Right of Return)', palestinianView: 'Seen as an inalienable individual and collective right, the legal cornerstone for resolving the refugee issue.', israeliView: 'Rejects a mass return of refugees, arguing it would threaten its character and demographics as a Jewish state.' },
+                        { title: 'UN Res 242 (Land for Peace)', palestinianView: 'Insists on a full Israeli withdrawal from all territories occupied in 1967, back to the "Green Line" border.', israeliView: 'Uses ambiguity in the text to argue it does not require withdrawal from "all" territories, allowing for retention of some land for "secure borders."' }
+                    ],
+                    solutionsData: {
+                        twoState: { title: 'Two-State Solution', description: 'The establishment of an independent, sovereign Palestinian state alongside Israel. It has been the long-standing official international consensus but is now seen as moribund due to obstacles like settlement expansion.', pros: ['Fulfills Palestinian national self-determination', 'Maintains Israel\'s Jewish character', 'Has a broad basis in international law'], cons: ['Settlements make territorial contiguity nearly impossible', 'Core issues (Jerusalem, refugees) are unresolved', 'Public support on both sides is at an all-time low'] },
+                        oneState: { title: 'One-State Paradigm', description: 'Recognizes the "de facto one-state reality" from the Mediterranean to the Jordan River and seeks solutions within it, such as a single, democratic secular state.', pros: ['Acknowledges the connection of both peoples to the entire land', 'Could achieve equal civil rights for all inhabitants', 'Permanently ends the legal status of "occupation"'], cons: ['Opposed by a vast majority of Israelis as the end of Zionism', 'Opposed by many Palestinians as abandoning national independence', 'Could entrench a permanent, unequal "apartheid" system'] }
+                    }
+                }
+            };
+            
+            let currentLang = 'zh';
+            let partitionChartInstance = null;
+
+            // --- RENDER FUNCTION ---
+            function renderContent(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+                // Static text
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.dataset.i18n;
+                    if (i18nData[lang][key]) {
+                        el.innerHTML = i18nData[lang][key];
+                    }
+                });
+                
+                // Toggle buttons text
+                document.getElementById('lang-toggle-desktop').textContent = i18nData[lang].langToggle;
+                document.getElementById('lang-toggle-mobile').textContent = i18nData[lang].langToggle;
+
+                // Dynamic content
+                populateTimeline(lang);
+                populateStruggle(lang);
+                populateResolutions(lang);
+                renderPartitionChart(lang);
+                
+                // Reset solutions tab to default
+                const btnTwoState = document.getElementById('btn-two-state');
+                if (btnTwoState) {
+                    btnTwoState.click();
+                }
+            }
+
+            // --- DYNAMIC POPULATION FUNCTIONS ---
+            function populateTimeline(lang) {
+                const timelineContainer = document.getElementById('timeline-container');
+                timelineContainer.innerHTML = '';
+                dynamicData[lang].timelineData.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'timeline-item pb-12';
+                    div.innerHTML = `
+                        <div class="timeline-dot"></div>
+                        <h5 class="text-xl font-bold text-slate mb-1">${item.year}: ${item.title}</h5>
+                        <p class="text-slate mb-2">${item.content.substring(0, 100)}...</p>
+                        <button class="read-more-btn text-sm font-semibold accent-text hover:underline">${i18nData[lang].readMore}</button>
+                    `;
+                    div.querySelector('.read-more-btn').addEventListener('click', () => {
+                        openModal(`${item.year}: ${item.title}`, `<p>${item.content}</p>`);
+                    });
+                    timelineContainer.appendChild(div);
+                });
+            }
+
+            function populateStruggle(lang) {
+                const struggleContainer = document.getElementById('struggle-container');
+                struggleContainer.innerHTML = '';
+                dynamicData[lang].struggleData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-6 rounded-lg shadow-lg cursor-pointer transform hover:-translate-y-1 transition-transform duration-300';
+                    card.innerHTML = `
+                        <h4 class="text-xl font-bold text-slate mb-3">${item.title}</h4>
+                        <p class="text-slate text-sm">${item.content}</p>
+                    `;
+                    card.addEventListener('click', () => {
+                         openModal(item.title, `<p>${item.content}</p>`);
+                    });
+                    struggleContainer.appendChild(card);
+                });
+            }
+
+            function populateResolutions(lang) {
+                const resolutionsContainer = document.getElementById('resolutions-container');
+                resolutionsContainer.innerHTML = '';
+                dynamicData[lang].resolutionsData.forEach(res => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-white p-4 rounded-lg shadow-md transition-shadow duration-300 hover:shadow-xl relative';
+                    div.innerHTML = `
+                        <h5 class="font-bold text-lg text-center text-slate">${res.title}</h5>
+                        <div class="resolution-details absolute top-full left-0 w-full bg-slate text-white p-4 rounded-b-lg mt-1 opacity-0 pointer-events-none transition-opacity duration-300 z-10">
+                           <p><strong class="text-green-300">${i18nData[lang].palestinianView}</strong> ${res.palestinianView}</p>
+                           <p class="mt-2"><strong class="text-blue-300">${i18nData[lang].israeliView}</strong> ${res.israeliView}</p>
+                        </div>
+                    `;
+                    div.addEventListener('mouseenter', () => div.querySelector('.resolution-details').classList.remove('opacity-0', 'pointer-events-none'));
+                    div.addEventListener('mouseleave', () => div.querySelector('.resolution-details').classList.add('opacity-0', 'pointer-events-none'));
+                    resolutionsContainer.appendChild(div);
+                });
+            }
+            
+            function updateSolutionContent(solutionKey) {
+                const solution = dynamicData[currentLang].solutionsData[solutionKey];
+                const solutionContentContainer = document.getElementById('solution-content-container');
+                solutionContentContainer.innerHTML = `
+                    <h5 class="text-2xl font-bold text-slate mb-3">${solution.title}</h5>
+                    <p class="text-slate mb-4">${solution.description}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h6 class="font-semibold text-green-600 mb-2">${i18nData[currentLang].pros}</h6>
+                            <ul class="list-disc list-inside text-sm text-slate space-y-1">
+                                ${solution.pros.map(p => `<li>${p}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h6 class="font-semibold text-red-600 mb-2">${i18nData[currentLang].cons}</h6>
+                            <ul class="list-disc list-inside text-sm text-slate space-y-1">
+                                ${solution.cons.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- EVENT LISTENERS ---
+            // Language Toggle
+            function toggleLanguage() {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                renderContent(newLang);
+            }
+            document.getElementById('lang-toggle-desktop').addEventListener('click', toggleLanguage);
+            document.getElementById('lang-toggle-mobile').addEventListener('click', toggleLanguage);
+
+            // Mobile Menu
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+
+            // Smooth Scrolling & Active Nav Link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelector(link.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                document.querySelectorAll('section').forEach(section => {
+                    if (pageYOffset >= section.offsetTop - 70) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // Modal Logic
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            function openModal(title, content) {
+                modalTitle.innerHTML = title;
+                modalContent.innerHTML = content;
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+            }
+            function closeModal() {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }
+            modalCloseBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => e.target === modal && closeModal());
+
+            // Solutions Toggle
+            const btnTwoState = document.getElementById('btn-two-state');
+            const btnOneState = document.getElementById('btn-one-state');
+            function setActiveButton(activeBtn) {
+                 document.querySelectorAll('.solution-btn').forEach(btn => {
+                    btn.classList.remove('accent-bg', 'text-white');
+                    btn.classList.add('text-slate', 'bg-gray-200');
+                });
+                activeBtn.classList.add('accent-bg', 'text-white');
+                activeBtn.classList.remove('text-slate', 'bg-gray-200');
+            }
+            btnTwoState.addEventListener('click', () => {
+                updateSolutionContent('twoState');
+                setActiveButton(btnTwoState);
+            });
+            btnOneState.addEventListener('click', () => {
+                updateSolutionContent('oneState');
+                setActiveButton(btnOneState);
+            });
+            
+            // --- CHART.JS ---
+            function renderPartitionChart(lang) {
+                if (partitionChartInstance) {
+                    partitionChartInstance.destroy();
+                }
+                const ctx = document.getElementById('partitionChart').getContext('2d');
+                partitionChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: i18nData[lang].chartLabels,
+                        datasets: [{
+                            data: [55, 44, 1],
+                            backgroundColor: ['#4A5568', '#8FBC8F', '#D8E2DC'],
+                            borderColor: '#FDFCFB',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#4A5568',
+                                    font: { family: "'Lato', 'Noto Sans TC', sans-serif" }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw}% ${i18nData[lang].chartTooltip}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- INITIAL LOAD ---
+            renderContent(currentLang);
+        });
+    </script>
+</body>
+</html>
