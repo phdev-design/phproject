@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>組合語言與遊戲開發：互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #003f5c;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #f95d6a, #ffa600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .lang-switch-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            border: 1px solid #ffa600;
+        }
+        .lang-switch-button:hover {
+            background-color: rgba(255, 166, 0, 0.5);
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <button id="lang-switch" class="lang-switch-button">English</button>
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-4" data-lang-key="main_title">組合語言與遊戲開發</h1>
+            <p class="text-xl md:text-2xl gradient-text font-bold" data-lang-key="subtitle">從硬體枷鎖到現代優化的演化史詩</p>
+        </header>
+
+        <main class="space-y-8">
+
+            <section id="section1" class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-white" data-lang-key="s1_title">第一章：與硬體的直接對話</h2>
+                <p class="mb-6 text-gray-300" data-lang-key="s1_p1">組合語言是人類思維與機器邏輯之間最直接的橋樑。它並非一種單一語言，而是特定 CPU 架構的「人類可讀」介面。在高階語言的抽象與機器碼的原始之間，組合語言給予了開發者對硬體近乎完全的控制權，是理解電腦運作原理的根基。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s1_c1_title">程式語言光譜</h3>
+                        <p class="text-sm text-gray-400 mb-6 text-center" data-lang-key="s1_c1_p1">從開發者編寫的原始碼到 CPU 執行的指令，需要經過層層轉譯。組合語言處於這個流程的核心位置。</p>
+                        <div class="space-y-4 text-center">
+                            <div class="bg-purple-600 p-3 rounded-lg shadow-lg">
+                                <p class="font-bold text-white" data-lang-key="s1_c1_l1_1">高階語言 (C++, C#, Python)</p>
+                                <p class="text-xs text-purple-200" data-lang-key="s1_c1_l1_2">開發者編寫，高度抽象</p>
+                            </div>
+                            <div class="text-2xl font-bold text-cyan-400">↓</div>
+                            <div class="border-2 border-dashed border-cyan-400 p-3 rounded-lg bg-gray-800">
+                                <p class="font-bold text-white" data-lang-key="s1_c1_l2_1">編譯器 (Compiler)</p>
+                                <p class="text-xs text-gray-300" data-lang-key="s1_c1_l2_2">將邏輯轉換為指令</p>
+                            </div>
+                            <div class="text-2xl font-bold text-cyan-400">↓</div>
+                            <div class="bg-cyan-500 p-3 rounded-lg shadow-lg">
+                                <p class="font-bold text-white" data-lang-key="s1_c1_l3_1">組合語言 (Assembly)</p>
+                                <p class="text-xs text-cyan-100" data-lang-key="s1_c1_l3_2">機器指令的助憶碼表示</p>
+                            </div>
+                            <div class="text-2xl font-bold text-orange-400">↓</div>
+                             <div class="border-2 border-dashed border-orange-400 p-3 rounded-lg bg-gray-800">
+                                <p class="font-bold text-white" data-lang-key="s1_c1_l4_1">組譯器 (Assembler)</p>
+                                <p class="text-xs text-gray-300" data-lang-key="s1_c1_l4_2">將助憶碼轉換為二進位</p>
+                            </div>
+                            <div class="text-2xl font-bold text-orange-400">↓</div>
+                            <div class="bg-orange-600 p-3 rounded-lg shadow-lg">
+                                <p class="font-bold text-white" data-lang-key="s1_c1_l5_1">機器語言 (Machine Code)</p>
+                                <p class="text-xs text-orange-200" data-lang-key="s1_c1_l5_2">CPU 直接執行的 0 與 1</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s1_c2_title">關鍵指令集架構 (ISA)</h3>
+                        <p class="text-sm text-gray-400 mb-6 text-center" data-lang-key="s1_c2_p1">不同時代的遊戲開發，圍繞著不同的 CPU 架構。每種架構都有其獨特的組合語言。</p>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="isaChart"></canvas>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4 text-center" data-lang-key="s1_c2_p2">此圖表概念性地展示了不同 ISA 在其主導領域的影響力。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="section2" class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl lg:col-span-2">
+                <h2 class="text-3xl font-bold mb-4 text-white" data-lang-key="s2_title">第二章：黃金時代的必然選擇</h2>
+                <p class="mb-6 text-gray-300" data-lang-key="s2_p1">在遊戲開發的黎明時期 (1970s - 1990s)，硬體資源極度匱乏。高階語言編譯器效率低下且佔用寶貴資源，使得組合語言成為開發者榨乾硬體效能、創造奇蹟的唯一選擇。這是一個「限制催生創意」的時代。</p>
+                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+                    <div class="lg:col-span-3 bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s2_c1_title">早期主機 RAM 容量對比</h3>
+                        <p class="text-sm text-gray-400 mb-6 text-center" data-lang-key="s2_c1_p1">早期遊戲主機的記憶體以位元組 (Bytes) 或千位元組 (KB) 計算，與今日動輒 GB 起跳的 PC 形成天壤之別。</p>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="ramChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 text-center space-y-6">
+                        <div class="bg-rose-600/80 p-6 rounded-xl shadow-xl">
+                             <h3 class="text-xl font-bold mb-2 text-white" data-lang-key="s2_c2_title">任天堂紅白機 (NES)</h3>
+                             <p class="text-6xl font-black text-white animate-pulse">2KB</p>
+                             <p class="font-bold text-rose-200" data-lang-key="s2_c2_p1">工作 RAM</p>
+                             <p class="mt-2 text-sm text-rose-100" data-lang-key="s2_c2_p2">開發者必須在如此狹小的空間內，手動管理每一位元組，創造出《超級瑪利歐》等不朽經典。</p>
+                        </div>
+                         <div class="bg-cyan-600/80 p-6 rounded-xl shadow-xl">
+                             <h3 class="text-xl font-bold mb-2 text-white" data-lang-key="s2_c3_title">開發者的神乎其技</h3>
+                             <p class="font-bold text-sm text-cyan-200" data-lang-key="s2_c3_l1">● 自修改程式碼</p>
+                             <p class="font-bold text-sm text-cyan-200" data-lang-key="s2_c3_l2">● 位元運算取代乘除法</p>
+                             <p class="font-bold text-sm text-cyan-200" data-lang-key="s2_c3_l3">● 壓榨 PPU 硬體特性</p>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="section3" class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-white" data-lang-key="s3_title">第三章：典範轉移與混合模型</h2>
+                <p class="mb-6 text-gray-300" data-lang-key="s3_p1">1990 年代，硬體效能飛躍，開發者時間成本超越機器時間成本。追求開發效率的 C/C++ 語言崛起，成為業界標準。然而，組合語言並未完全消失，而是以「混合編程」的形式，在效能最關鍵處發揮作用。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s3_c1_title">id Software 的混合動力心臟</h3>
+                        <p class="text-sm text-gray-400 mb-6" data-lang-key="s3_c1_p1">《毀滅戰士》和《雷神之鎚》的引擎主體用 C 語言編寫以提高開發效率，但在決定遊戲幀率的渲染核心，則毫不猶豫地使用手寫組合語言進行「外科手術式」優化。</p>
+                        <div class="flex items-center justify-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-4xl font-bold text-green-400">C</p>
+                                <p class="text-xs text-gray-300" data-lang-key="s3_c1_l1">遊戲邏輯<br>檔案系統<br>網路功能</p>
+                            </div>
+                            <div class="text-4xl font-bold text-white">+</div>
+                            <div class="text-center">
+                                <p class="text-4xl font-bold text-orange-400">Asm</p>
+                                <p class="text-xs text-gray-300" data-lang-key="s3_c1_l2">渲染迴圈<br>光影計算<br>核心演算法</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s3_c2_title">時代的絕響：《模擬樂園》</h3>
+                         <p class="text-sm text-gray-400 mb-6 text-center" data-lang-key="s3_c2_p1">1999年，Chris Sawyer 一人幾乎完全使用 x86 組合語言完成了這款複雜的模擬遊戲，只為達到他所要求的極致效能。</p>
+                        <div class="chart-container h-56">
+                            <canvas id="rctChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section4" class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-white" data-lang-key="s4_title">第四章：現代遊戲開發的組合語言遺產</h2>
+                <p class="mb-6 text-gray-300" data-lang-key="s4_p1">直接編寫組合語言的時代雖已過去，但其「榨取極致效能」的核心精神，在現代以 SIMD（單指令多資料流）技術的形式得以傳承。開發者透過更高層次的工具，駕馭現代 CPU 的平行處理能力。</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s4_c1_title">SIMD：一次處理，多倍快樂</h3>
+                        <p class="text-sm text-gray-400 mb-6" data-lang-key="s4_c1_p1">SIMD 允許 CPU 用一條指令同時對多個資料執行相同操作，是 3D 圖形、物理模擬等運算的加速關鍵。</p>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="simdChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-gray-900/70 p-6 rounded-lg">
+                        <h3 class="text-xl font-bold mb-4 text-center text-amber-400" data-lang-key="s4_c2_title">資料佈局決定效能：SOA vs AOS</h3>
+                        <p class="text-sm text-gray-400 mb-6" data-lang-key="s4_c2_p1">要發揮 SIMD 的威力，資料必須在記憶體中連續排列。資料導向設計中的「陣列結構」(SOA) 遠比傳統的「結構陣列」(AOS) 對 CPU 快取和 SIMD 更友好。</p>
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="font-bold text-red-400 mb-2" data-lang-key="s4_c2_d1_title">結構陣列 (AOS) - 不利於 SIMD</h4>
+                                <div class="flex flex-wrap gap-1 bg-red-900/50 p-2 rounded">
+                                    <div class="flex border border-red-400 rounded"><div class="p-2 bg-red-500">X</div><div class="p-2 bg-green-500">Y</div><div class="p-2 bg-blue-500">Z</div></div>
+                                    <div class="flex border border-red-400 rounded"><div class="p-2 bg-red-500">X</div><div class="p-2 bg-green-500">Y</div><div class="p-2 bg-blue-500">Z</div></div>
+                                    <div class="flex border border-red-400 rounded"><div class="p-2 bg-red-500">X</div><div class="p-2 bg-green-500">Y</div><div class="p-2 bg-blue-500">Z</div></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1" data-lang-key="s4_c2_d1_p1">資料交錯儲存，CPU 載入困難。</p>
+                            </div>
+                             <div>
+                                <h4 class="font-bold text-green-400 mb-2" data-lang-key="s4_c2_d2_title">陣列結構 (SOA) - SIMD 最愛</h4>
+                                <div class="space-y-1 bg-green-900/50 p-2 rounded">
+                                    <div class="flex gap-1"><div class="p-2 flex-1 text-center bg-red-500 rounded">X</div><div class="p-2 flex-1 text-center bg-red-500 rounded">X</div><div class="p-2 flex-1 text-center bg-red-500 rounded">X</div></div>
+                                    <div class="flex gap-1"><div class="p-2 flex-1 text-center bg-green-500 rounded">Y</div><div class="p-2 flex-1 text-center bg-green-500 rounded">Y</div><div class="p-2 flex-1 text-center bg-green-500 rounded">Y</div></div>
+                                    <div class="flex gap-1"><div class="p-2 flex-1 text-center bg-blue-500 rounded">Z</div><div class="p-2 flex-1 text-center bg-blue-500 rounded">Z</div><div class="p-2 flex-1 text-center bg-blue-500 rounded">Z</div></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1" data-lang-key="s4_c2_d2_p1">同類資料連續儲存，便於 CPU 一次性載入處理。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="section5" class="bg-slate-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl">
+                 <h2 class="text-3xl font-bold mb-4 text-white" data-lang-key="s5_title">第五章：結論與啟示</h2>
+                 <p class="mb-6 text-gray-300" data-lang-key="s5_p1">組合語言在遊戲開發中的直接應用已然式微，但作為一種教導我們如何與機器對話、追求人機效率合一的程式設計哲學，它的影響力將永存不朽。理解硬體，方能駕馭軟體。</p>
+                 <div class="bg-gray-900/70 p-6 rounded-lg">
+                    <h3 class="text-xl font-bold mb-4 text-amber-400" data-lang-key="s5_c1_title">對現代遊戲開發者的啟示</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-300">
+                        <li data-lang-key="s5_c1_l1"><strong class="text-white">培養「機械同理心」：</strong>即使使用高階語言，也要思考程式碼最終如何被硬體執行。</li>
+                        <li data-lang-key="s5_c1_l2"><strong class="text-white">資料佈局優先：</strong>優化時，優先考慮資料結構是否對快取和 SIMD 友好。好的佈局勝過無數指令優化。</li>
+                        <li data-lang-key="s5_c1_l3"><strong class="text-white">善用分析工具 (Profiler)：</strong>不要猜測效能瓶頸。用資料指導你的優化方向，避免「過早優化」。</li>
+                        <li data-lang-key="s5_c1_l4"><strong class="text-white">學習現代工具：</strong>掌握 Unreal 的 C++ Intrinsics 或 Unity 的 DOTS/Burst Compiler，它們是現代的「組合語言」。</li>
+                    </ul>
+                 </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p data-lang-key="footer_p1">資訊圖表根據《組合語言與遊戲開發：從硬體枷鎖到現代優化的演化史詩》報告生成。</p>
+            <p data-lang-key="footer_p2">UI/UX 設計與資料視覺化 by Canvas Infographics。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const translations = {
+            "zh-TW": {
+                lang_button: "English",
+                main_title: "組合語言與遊戲開發",
+                subtitle: "從硬體枷鎖到現代優化的演化史詩",
+                s1_title: "第一章：與硬體的直接對話",
+                s1_p1: "組合語言是人類思維與機器邏輯之間最直接的橋樑。它並非一種單一語言，而是特定 CPU 架構的「人類可讀」介面。在高階語言的抽象與機器碼的原始之間，組合語言給予了開發者對硬體近乎完全的控制權，是理解電腦運作原理的根基。",
+                s1_c1_title: "程式語言光譜",
+                s1_c1_p1: "從開發者編寫的原始碼到 CPU 執行的指令，需要經過層層轉譯。組合語言處於這個流程的核心位置。",
+                s1_c1_l1_1: "高階語言 (C++, C#, Python)",
+                s1_c1_l1_2: "開發者編寫，高度抽象",
+                s1_c1_l2_1: "編譯器 (Compiler)",
+                s1_c1_l2_2: "將邏輯轉換為指令",
+                s1_c1_l3_1: "組合語言 (Assembly)",
+                s1_c1_l3_2: "機器指令的助憶碼表示",
+                s1_c1_l4_1: "組譯器 (Assembler)",
+                s1_c1_l4_2: "將助憶碼轉換為二進位",
+                s1_c1_l5_1: "機器語言 (Machine Code)",
+                s1_c1_l5_2: "CPU 直接執行的 0 與 1",
+                s1_c2_title: "關鍵指令集架構 (ISA)",
+                s1_c2_p1: "不同時代的遊戲開發，圍繞著不同的 CPU 架構。每種架構都有其獨特的組合語言。",
+                s1_c2_p2: "此圖表概念性地展示了不同 ISA 在其主導領域的影響力。",
+                isa_chart_labels: ['MOS 6502 (早期主機)', 'x86/amd64 (PC 遊戲)', 'ARM (行動裝置)'],
+                isa_chart_title: '指令集架構',
+                s2_title: "第二章：黃金時代的必然選擇",
+                s2_p1: "在遊戲開發的黎明時期 (1970s - 1990s)，硬體資源極度匱乏。高階語言編譯器效率低下且佔用寶貴資源，使得組合語言成為開發者榨乾硬體效能、創造奇蹟的唯一選擇。這是一個「限制催生創意」的時代。",
+                s2_c1_title: "早期主機 RAM 容量對比",
+                s2_c1_p1: "早期遊戲主機的記憶體以位元組 (Bytes) 或千位元組 (KB) 計算，與今日動輒 GB 起跳的 PC 形成天壤之別。",
+                ram_chart_labels: ['Atari 2600 (1977)', 'NES (1983)', '現代遊戲 PC (2024)'],
+                ram_chart_title: 'RAM 容量 (KB)',
+                s2_c2_title: "任天堂紅白機 (NES)",
+                s2_c2_p1: "工作 RAM",
+                s2_c2_p2: "開發者必須在如此狹小的空間內，手動管理每一位元組，創造出《超級瑪利歐》等不朽經典。",
+                s2_c3_title: "開發者的神乎其技",
+                s2_c3_l1: "● 自修改程式碼",
+                s2_c3_l2: "● 位元運算取代乘除法",
+                s2_c3_l3: "● 壓榨 PPU 硬體特性",
+                s3_title: "第三章：典範轉移與混合模型",
+                s3_p1: "1990 年代，硬體效能飛躍，開發者時間成本超越機器時間成本。追求開發效率的 C/C++ 語言崛起，成為業界標準。然而，組合語言並未完全消失，而是以「混合編程」的形式，在效能最關鍵處發揮作用。",
+                s3_c1_title: "id Software 的混合動力心臟",
+                s3_c1_p1: "《毀滅戰士》和《雷神之鎚》的引擎主體用 C 語言編寫以提高開發效率，但在決定遊戲幀率的渲染核心，則毫不猶豫地使用手寫組合語言進行「外科手術式」優化。",
+                s3_c1_l1: "遊戲邏輯<br>檔案系統<br>網路功能",
+                s3_c1_l2: "渲染迴圈<br>光影計算<br>核心演算法",
+                s3_c2_title: "時代的絕響：《模擬樂園》",
+                s3_c2_p1: "1999年，Chris Sawyer 一人幾乎完全使用 x86 組合語言完成了這款複雜的模擬遊戲，只為達到他所要求的極致效能。",
+                rct_chart_labels: ['x86 組合語言', 'C 語言 (介面交互)'],
+                s4_title: "第四章：現代遊戲開發的組合語言遺產",
+                s4_p1: "直接編寫組合語言的時代雖已過去，但其「榨取極致效能」的核心精神，在現代以 SIMD（單指令多資料流）技術的形式得以傳承。開發者透過更高層次的工具，駕馭現代 CPU 的平行處理能力。",
+                s4_c1_title: "SIMD：一次處理，多倍快樂",
+                s4_c1_p1: "SIMD 允許 CPU 用一條指令同時對多個資料執行相同操作，是 3D 圖形、物理模擬等運算的加速關鍵。",
+                simd_chart_labels: ['向量加法', '矩陣乘法', '粒子更新'],
+                simd_dataset1_label: '純量運算 (無優化)',
+                simd_dataset2_label: 'SSE (4x 加速)',
+                simd_dataset3_label: 'AVX (8x 加速)',
+                simd_axis_title: '相對效能提升倍數',
+                s4_c2_title: "資料佈局決定效能：SOA vs AOS",
+                s4_c2_p1: "要發揮 SIMD 的威力，資料必須在記憶體中連續排列。資料導向設計中的「陣列結構」(SOA) 遠比傳統的「結構陣列」(AOS) 對 CPU 快取和 SIMD 更友好。",
+                s4_c2_d1_title: "結構陣列 (AOS) - 不利於 SIMD",
+                s4_c2_d1_p1: "資料交錯儲存，CPU 載入困難。",
+                s4_c2_d2_title: "陣列結構 (SOA) - SIMD 最愛",
+                s4_c2_d2_p1: "同類資料連續儲存，便於 CPU 一次性載入處理。",
+                s5_title: "第五章：結論與啟示",
+                s5_p1: "組合語言在遊戲開發中的直接應用已然式微，但作為一種教導我們如何與機器對話、追求人機效率合一的程式設計哲學，它的影響力將永存不朽。理解硬體，方能駕馭軟體。",
+                s5_c1_title: "對現代遊戲開發者的啟示",
+                s5_c1_l1: '<strong class="text-white">培養「機械同理心」：</strong>即使使用高階語言，也要思考程式碼最終如何被硬體執行。',
+                s5_c1_l2: '<strong class="text-white">資料佈局優先：</strong>優化時，優先考慮資料結構是否對快取和 SIMD 友好。好的佈局勝過無數指令優化。',
+                s5_c1_l3: '<strong class="text-white">善用分析工具 (Profiler)：</strong>不要猜測效能瓶頸。用資料指導你的優化方向，避免「過早優化」。',
+                s5_c1_l4: '<strong class="text-white">學習現代工具：</strong>掌握 Unreal 的 C++ Intrinsics 或 Unity 的 DOTS/Burst Compiler，它們是現代的「組合語言」。',
+                footer_p1: "資訊圖表根據《組合語言與遊戲開發：從硬體枷鎖到現代優化的演化史詩》報告生成。",
+                footer_p2: "UI/UX 設計與資料視覺化 by Canvas Infographics。",
+            },
+            "en-US": {
+                lang_button: "中文",
+                main_title: "Assembly Language & Game Development",
+                subtitle: "An Epic of Evolution from Hardware Shackles to Modern Optimization",
+                s1_title: "Chapter 1: A Direct Conversation with Hardware",
+                s1_p1: "Assembly language is the most direct bridge between human thought and machine logic. It's not a single language, but a human-readable interface for a specific CPU architecture. Between the abstraction of high-level languages and the rawness of machine code, assembly gives developers near-total control over hardware, forming the foundation for understanding how computers work.",
+                s1_c1_title: "The Programming Language Spectrum",
+                s1_c1_p1: "From the source code written by developers to the instructions executed by the CPU, multiple translation layers are involved. Assembly language sits at the core of this process.",
+                s1_c1_l1_1: "High-Level Languages (C++, C#, Python)",
+                s1_c1_l1_2: "Written by developers, highly abstract",
+                s1_c1_l2_1: "Compiler",
+                s1_c1_l2_2: "Translates logic into instructions",
+                s1_c1_l3_1: "Assembly Language",
+                s1_c1_l3_2: "Mnemonic representation of machine instructions",
+                s1_c1_l4_1: "Assembler",
+                s1_c1_l4_2: "Converts mnemonics to binary",
+                s1_c1_l5_1: "Machine Code",
+                s1_c1_l5_2: "0s and 1s directly executed by the CPU",
+                s1_c2_title: "Key Instruction Set Architectures (ISA)",
+                s1_c2_p1: "Game development across different eras revolved around different CPU architectures. Each architecture has its unique assembly language.",
+                s1_c2_p2: "This chart conceptually illustrates the influence of different ISAs in their dominant domains.",
+                isa_chart_labels: ['MOS 6502 (Early Consoles)', 'x86/amd64 (PC Gaming)', 'ARM (Mobile Devices)'],
+                isa_chart_title: 'Instruction Set Architecture',
+                s2_title: "Chapter 2: The Inevitable Choice of the Golden Age",
+                s2_p1: "In the dawn of game development (1970s - 1990s), hardware resources were extremely scarce. High-level language compilers were inefficient and consumed precious resources, making assembly the only choice for developers to squeeze every drop of performance from the hardware and create miracles. It was an era where 'limitations fostered creativity.'",
+                s2_c1_title: "Early Console RAM Capacity Comparison",
+                s2_c1_p1: "Early game consoles had memory measured in Bytes or Kilobytes, a stark contrast to today's PCs which start at multiple Gigabytes.",
+                ram_chart_labels: ['Atari 2600 (1977)', 'NES (1983)', 'Modern Gaming PC (2024)'],
+                ram_chart_title: 'RAM Capacity (KB)',
+                s2_c2_title: "Nintendo Entertainment System (NES)",
+                s2_c2_p1: "Work RAM",
+                s2_c2_p2: "Developers had to manually manage every byte in this tiny space to create timeless classics like Super Mario Bros.",
+                s2_c3_title: "The Developers' God-like Skills",
+                s2_c3_l1: "● Self-modifying code",
+                s2_c3_l2: "● Bitwise operations for multiplication/division",
+                s2_c3_l3: "● Exploiting PPU hardware quirks",
+                s3_title: "Chapter 3: Paradigm Shift & The Hybrid Model",
+                s3_p1: "In the 1990s, hardware performance leaped forward, and developer time became more expensive than machine time. The pursuit of development efficiency led to the rise of C/C++, which became the industry standard. However, assembly didn't disappear entirely but was used in a 'hybrid programming' model for performance-critical sections.",
+                s3_c1_title: "id Software's Hybrid Heart",
+                s3_c1_p1: "The main body of engines for games like Doom and Quake was written in C for development speed, but the rendering core, which determined the frame rate, was surgically optimized with handwritten assembly.",
+                s3_c1_l1: "Game Logic<br>File System<br>Networking",
+                s3_c1_l2: "Rendering Loop<br>Lighting Calculation<br>Core Algorithms",
+                s3_c2_title: "A Swan Song for an Era: RollerCoaster Tycoon",
+                s3_c2_p1: "In 1999, Chris Sawyer single-handedly wrote this complex simulation game almost entirely in x86 assembly to achieve the extreme performance he demanded.",
+                rct_chart_labels: ['x86 Assembly', 'C Language (for Interface)'],
+                s4_title: "Chapter 4: The Legacy of Assembly in Modern Game Development",
+                s4_p1: "While the era of writing games directly in assembly is over, its core spirit of 'squeezing out maximum performance' lives on in the form of SIMD (Single Instruction, Multiple Data) technology. Developers now wield the power of modern CPU parallelism through higher-level tools.",
+                s4_c1_title: "SIMD: One Instruction, Multiple Joys",
+                s4_c1_p1: "SIMD allows the CPU to perform the same operation on multiple pieces of data with a single instruction, which is key for accelerating 3D graphics, physics simulations, and more.",
+                simd_chart_labels: ['Vector Addition', 'Matrix Multiplication', 'Particle Update'],
+                simd_dataset1_label: 'Scalar Operations (No Optimization)',
+                simd_dataset2_label: 'SSE (4x Speedup)',
+                simd_dataset3_label: 'AVX (8x Speedup)',
+                simd_axis_title: 'Relative Performance Improvement',
+                s4_c2_title: "Data Layout Determines Performance: SOA vs. AOS",
+                s4_c2_p1: "To leverage SIMD, data must be contiguous in memory. The 'Structure of Arrays' (SOA) layout in data-oriented design is far more friendly to CPU caches and SIMD than the traditional 'Array of Structures' (AOS).",
+                s4_c2_d1_title: "Array of Structures (AOS) - Bad for SIMD",
+                s4_c2_d1_p1: "Data is interleaved, making it difficult for the CPU to load.",
+                s4_c2_d2_title: "Structure of Arrays (SOA) - SIMD's Best Friend",
+                s4_c2_d2_p1: "Similar data is stored contiguously, allowing for efficient bulk loading by the CPU.",
+                s5_title: "Chapter 5: Conclusion & Insights",
+                s5_p1: "The direct application of assembly language in game development has waned, but its influence as a programming philosophy—teaching us how to talk to the machine and pursue human-machine efficiency—is immortal. To master software, one must understand hardware.",
+                s5_c1_title: "Insights for Modern Game Developers",
+                s5_c1_l1: '<strong class="text-white">Cultivate "Mechanical Sympathy":</strong> Even with high-level languages, think about how your code is ultimately executed by the hardware.',
+                s5_c1_l2: '<strong class="text-white">Prioritize Data Layout:</strong> When optimizing, first consider if your data structures are cache and SIMD-friendly. A good layout trumps countless instruction optimizations.',
+                s5_c1_l3: '<strong class="text-white">Use Profilers:</strong> Don\'t guess performance bottlenecks. Let data guide your optimization efforts and avoid "premature optimization."',
+                s5_c1_l4: '<strong class="text-white">Learn Modern Tools:</strong> Master Unreal\'s C++ Intrinsics or Unity\'s DOTS/Burst Compiler. They are the "assembly language" of today.',
+                footer_p1: "Infographic generated based on the report 'Assembly Language & Game Development: An Epic of Evolution from Hardware Shackles to Modern Optimization'.",
+                footer_p2: "UI/UX Design & Data Visualization by Canvas Infographics.",
+            }
+        };
+
+        let currentLang = 'zh-TW';
+        let charts = {};
+
+        const vibrantPalette = {
+            blue: '#2f4b7c',
+            purple: '#665191',
+            magenta: '#a05195',
+            pink: '#d45087',
+            red: '#f95d6a',
+            orange: '#ff7c43',
+            yellow: '#ffa600',
+            darkBlue: '#003f5c',
+            textPrimary: 'rgba(255, 255, 255, 0.8)',
+            grid: 'rgba(255, 255, 255, 0.1)'
+        };
+
+        const universalTooltipCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            return Array.isArray(label) ? label.join(' ') : label;
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        color: vibrantPalette.textPrimary
+                    }
+                }
+            }
+        };
+
+        function createIsaChart(lang) {
+            if (charts.isaChart) charts.isaChart.destroy();
+            const ctx = document.getElementById('isaChart').getContext('2d');
+            charts.isaChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: translations[lang].isa_chart_labels,
+                    datasets: [{
+                        label: translations[lang].isa_chart_title,
+                        data: [25, 45, 30],
+                        backgroundColor: [vibrantPalette.purple, vibrantPalette.blue, vibrantPalette.orange],
+                        borderColor: vibrantPalette.darkBlue,
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...universalTooltipCallback, responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function createRamChart(lang) {
+            if (charts.ramChart) charts.ramChart.destroy();
+            const ctx = document.getElementById('ramChart').getContext('2d');
+            charts.ramChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: translations[lang].ram_chart_labels,
+                    datasets: [{
+                        label: translations[lang].ram_chart_title,
+                        data: [0.128, 2, 16 * 1024 * 1024],
+                        backgroundColor: [vibrantPalette.pink, vibrantPalette.magenta, vibrantPalette.yellow],
+                        borderColor: [vibrantPalette.red, vibrantPalette.purple, vibrantPalette.orange],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...universalTooltipCallback,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'logarithmic',
+                            ticks: {
+                               color: vibrantPalette.textPrimary,
+                               callback: function(value) {
+                                    if (value >= 10000000) return '16 GB';
+                                    if (value >= 1000) return '1 MB';
+                                    if (value >= 1) return '1 KB';
+                                    if (value >= 0.1) return '100 B';
+                                    return null;
+                               }
+                            },
+                            grid: { color: vibrantPalette.grid }
+                        },
+                        x: { ticks: { color: vibrantPalette.textPrimary }, grid: { color: vibrantPalette.grid } }
+                    }
+                }
+            });
+        }
+
+        function createRctChart(lang) {
+            if (charts.rctChart) charts.rctChart.destroy();
+            const ctx = document.getElementById('rctChart').getContext('2d');
+            charts.rctChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: translations[lang].rct_chart_labels,
+                    datasets: [{
+                        data: [99, 1],
+                        backgroundColor: [vibrantPalette.blue, vibrantPalette.red],
+                        borderColor: vibrantPalette.darkBlue,
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...universalTooltipCallback, responsive: true, maintainAspectRatio: false }
+            });
+        }
+        
+        function createSimdChart(lang) {
+            if (charts.simdChart) charts.simdChart.destroy();
+            const ctx = document.getElementById('simdChart').getContext('2d');
+            charts.simdChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: translations[lang].simd_chart_labels,
+                    datasets: [
+                        { label: translations[lang].simd_dataset1_label, data: [1, 1, 1], backgroundColor: vibrantPalette.blue },
+                        { label: translations[lang].simd_dataset2_label, data: [4, 3.5, 4.2], backgroundColor: vibrantPalette.purple },
+                        { label: translations[lang].simd_dataset3_label, data: [8, 7.8, 8.5], backgroundColor: vibrantPalette.orange }
+                    ]
+                },
+                options: {
+                    ...universalTooltipCallback,
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { ticks: { color: vibrantPalette.textPrimary }, grid: { color: vibrantPalette.grid } },
+                        x: {
+                            ticks: { color: vibrantPalette.textPrimary, callback: function(value) { return value + 'x'; } },
+                            grid: { color: vibrantPalette.grid },
+                            title: { display: true, text: translations[lang].simd_axis_title, color: vibrantPalette.textPrimary }
+                        }
+                    }
+                }
+            });
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            document.getElementById('lang-switch').textContent = translations[lang].lang_button;
+
+            createAllCharts(lang);
+        }
+
+        function createAllCharts(lang) {
+            createIsaChart(lang);
+            createRamChart(lang);
+            createRctChart(lang);
+            createSimdChart(lang);
+        }
+
+        document.getElementById('lang-switch').addEventListener('click', () => {
+            const newLang = currentLang === 'zh-TW' ? 'en-US' : 'zh-TW';
+            setLanguage(newLang);
+        });
+
+        window.onload = () => {
+            setLanguage('zh-TW');
+        };
+    </script>
+</body>
+</html>
