@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サーモンパラドックス：日本はいかにしてサーモンを食べるようになったか</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+            background-color: #F8F9FA;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #FF6F61, #C56183);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 1.25rem;
+            left: -0.5rem;
+            width: 1rem;
+            height: 1rem;
+            background-color: #6B5B95;
+            border-radius: 9999px;
+            border: 2px solid #F8F9FA;
+        }
+        .lang-btn.active {
+            background-color: #6B5B95;
+            color: white;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl relative">
+
+        <div id="lang-switcher" class="absolute top-4 right-4 bg-white rounded-lg shadow-md p-1 flex space-x-1 z-10">
+            <button onclick="switchLanguage('ja')" class="lang-btn px-3 py-1 text-sm font-bold text-gray-700 rounded-md focus:outline-none transition-colors duration-200">日</button>
+            <button onclick="switchLanguage('zh')" class="lang-btn px-3 py-1 text-sm font-bold text-gray-700 rounded-md focus:outline-none transition-colors duration-200">中</button>
+            <button onclick="switchLanguage('en')" class="lang-btn px-3 py-1 text-sm font-bold text-gray-700 rounded-md focus:outline-none transition-colors duration-200">EN</button>
+        </div>
+
+        <header class="text-center py-8 md:py-12">
+            <h1 class="text-4xl md:text-6xl font-black gradient-text mb-4" data-lang-key="mainTitle">サーモンパラドックス</h1>
+            <p class="text-lg md:text-2xl font-bold text-gray-700" data-lang-key="subtitle">「日本人はサーモンが嫌い」は本当か？</p>
+            <p class="mt-4 max-w-3xl mx-auto text-gray-600" data-lang-key="headerPara">
+                この広まった説は、実は大きな誤解です。このインフォグラフィックでは、寄生虫への懸念から生まれた食文化の壁を、ノルウェーの画期的なマーケティング戦略がいかにして打ち破り、サーモンを日本の食卓の王者に押し上げたか、その驚くべき物語をデータと共に解き明かします。
+            </p>
+        </header>
+
+        <main>
+            <section id="two-salmons" class="my-12 md:my-16">
+                <h2 class="text-3xl font-bold text-center mb-8" data-lang-key="twoSalmonsTitle">物語の核心：二種類の「サケ」</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+                        <h3 class="text-2xl font-extrabold flex items-center mb-3" data-lang-key="sakeTitle">鮭 (Sake) 🔥</h3>
+                        <p class="text-gray-600 mb-4" data-lang-key="sakeDesc">伝統的に日本近海で獲れる天然の太平洋サケ。</p>
+                        <ul class="space-y-2 list-inside">
+                            <li class="flex items-start"><span class="text-red-500 mr-2">●</span><strong data-lang-key="sakePoint1Title">寄生虫リスク：</strong><span data-lang-key="sakePoint1Desc">アニサキス感染の危険性があるため、生食はタブー。</span></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-2">●</span><strong data-lang-key="sakePoint2Title">調理法：</strong><span data-lang-key="sakePoint2Desc">加熱が必須。主に塩焼きや煮付けで食される。</span></li>
+                            <li class="flex items-start"><span class="text-red-500 mr-2">●</span><strong data-lang-key="sakePoint3Title">位置付け：</strong><span data-lang-key="sakePoint3Desc">伝統的な「加熱用の魚」。</span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-teal-500">
+                        <h3 class="text-2xl font-extrabold flex items-center mb-3" data-lang-key="samonTitle">サーモン (Sāmon) ✅</h3>
+                        <p class="text-gray-600 mb-4" data-lang-key="samonDesc">主にノルウェーから輸入される養殖のアトランティックサーモン。</p>
+                        <ul class="space-y-2 list-inside">
+                            <li class="flex items-start"><span class="text-teal-500 mr-2">●</span><strong data-lang-key="samonPoint1Title">安全性：</strong><span data-lang-key="samonPoint1Desc">管理された飼料で育つため、寄生虫の心配がない。</span></li>
+                            <li class="flex items-start"><span class="text-teal-500 mr-2">●</span><strong data-lang-key="samonPoint2Title">調理法：</strong><span data-lang-key="samonPoint2Desc">生食に最適。寿司や刺身の主役。</span></li>
+                            <li class="flex items-start"><span class="text-teal-500 mr-2">●</span><strong data-lang-key="samonPoint3Title">位置付け：</strong><span data-lang-key="samonPoint3Desc">モダンで安全な「生食用の魚」。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="project-japan" class="my-12 md:my-16 bg-gray-100 py-12 rounded-xl">
+                <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="projectJapanTitle">ノルウェーの奇襲</h2>
+                <p class="text-center text-xl font-semibold text-gray-700 mb-10" data-lang-key="projectJapanSubtitle">「プロジェクト・ジャパン」はいかにして歴史を変えたか</p>
+                <div class="max-w-3xl mx-auto pl-6 relative border-l-4 border-gray-300">
+                    <div class="timeline-item mb-12">
+                        <h4 class="text-xl font-bold text-[#6B5B95]" data-lang-key="timeline1Title">1985年：計画始動 🇳🇴🇯🇵</h4>
+                        <p class="text-gray-600" data-lang-key="timeline1Desc">ノルウェーの水産物輸出委員会が、過剰生産されたサーモンの新市場として日本に照準を合わせ、国家プロジェクトを開始。</p>
+                    </div>
+                    <div class="timeline-item mb-12">
+                        <h4 class="text-xl font-bold text-[#6B5B95]" data-lang-key="timeline2Title">1980年代後半：厚い文化の壁 ❌</h4>
+                        <p class="text-gray-600" data-lang-key="timeline2Desc">「サケは生で食べない」という日本の根強い食文化に阻まれ、輸入業者やシェフからことごとく拒絶される。色、味、さらには頭の形までが拒否の理由とされた。</p>
+                    </div>
+                    <div class="timeline-item mb-12">
+                        <h4 class="text-xl font-bold text-[#6B5B95]" data-lang-key="timeline3Title">1990年頃：戦略転換 🎯</h4>
+                        <p class="text-gray-600" data-lang-key="timeline3Desc">伝統的な市場を避け、新たなターゲットに狙いを定める。<br>1. <strong>ネーミング戦略：</strong> カタカナで「サーモン」と表記し、「鮭」との差別化を図る。<br>2. <strong>新チャネル開拓：</strong> 当時急成長していたファミリー層向けの「回転寿司」に活路を見出す。</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h4 class="text-xl font-bold text-[#6B5B95]" data-lang-key="timeline4Title">1992年：歴史的契約 🤝</h4>
+                        <p class="text-gray-600" data-lang-key="timeline4Desc">大手食品会社ニチレイと画期的な契約を締結。5000トンのサーモンを「寿司ネタ用」として販売することを条件に、破格の値段で提供。これが市場をこじ開ける決定打となり、日本の食文化に革命が起きた。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="data" class="my-12 md:my-16">
+                <h2 class="text-3xl font-bold text-center mb-10" data-lang-key="dataTitle">データが語るサーモンの覇権</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-center">
+                        <p class="text-lg text-gray-600" data-lang-key="importAmountLabel">年間総輸入量</p>
+                        <p class="text-6xl md:text-7xl font-black gradient-text my-2">32<span data-lang-key="tenThousand">万</span><span data-lang-key="tons">トン</span></p>
+                        <p class="text-lg text-gray-600" data-lang-key="importAmountSuffix">以上</p>
+                        <p class="mt-4 text-sm text-gray-500" data-lang-key="importAmountNote">この数字自体が、「日本人がサーモンを嫌い」という説を明確に否定しています。</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang-key="householdChartTitle">家庭の食卓革命：生鮮魚介購入量の変化</h3>
+                        <p class="text-center text-sm text-gray-500 mb-4" data-lang-key="householdChartDesc">約30年で、日本の家庭で最も買われる魚はイカからサーモンへと劇的に変化しました。</p>
+                        <div class="chart-container">
+                            <canvas id="householdConsumptionChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:col-span-2">
+                         <h3 class="text-xl font-bold text-center mb-4" data-lang-key="sushiChartTitle">回転寿司の絶対王者：人気ネタランキング</h3>
+                         <p class="text-center text-sm text-gray-500 mb-4" data-lang-key="sushiChartDesc">マルハニチロの長期調査によると、サーモンは10年以上連続で「最もよく食べる寿司ネタ」の1位を独走しています。</p>
+                         <div class="chart-container max-w-md">
+                            <canvas id="sushiKingChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-lg p-6 md:col-span-2">
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang-key="ageChartTitle">世代間の味覚戦争：サーモン vs マグロ</h3>
+                        <p class="text-center text-sm text-gray-500 mb-4" data-lang-key="ageChartDesc">若年層ほどサーモンを好み、50歳未満の世帯では購入量・金額ともにサーモンがマグロを圧倒。市場の未来はサーモンが握っています。</p>
+                        <div class="chart-container max-w-4xl h-96 md:h-[450px]">
+                            <canvas id="ageDemographicsChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="future" class="my-12 md:my-16">
+                <h2 class="text-3xl font-bold text-center mb-8" data-lang-key="futureTitle">寿司の向こうへ：サーモンの次なる一手</h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                        <h3 class="text-2xl font-extrabold flex items-center mb-3" data-lang-key="future1Title">「サモ肉」戦略 🥩</h3>
+                        <p class="text-gray-600" data-lang-key="future1Desc">ノルウェーは現在、サーモンを牛肉、豚肉、鶏肉に次ぐ「第4の肉」として位置づけるキャンペーンを展開中。寿司や刺身だけでなく、ハンバーグやソテーなど日常の加熱料理での消費拡大を狙っています。</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                        <h3 class="text-2xl font-extrabold flex items-center mb-3" data-lang-key="future2Title">国産養殖の台頭 🗾</h3>
+                        <p class="text-gray-600" data-lang-key="future2Desc">日本の陸上養殖技術も進歩し、「国産サーモン」が増加傾向に。これにより、より新鮮な供給が可能になる一方、国内市場での競争激化という新たな課題も生まれています。</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center py-8 mt-8 border-t">
+            <p class="text-gray-600" data-lang-key="footerNote">このインフォグラフィックは、日本の食文化におけるサーモンの変遷に関する調査レポートに基づいています。</p>
+            <p class="text-xs text-gray-400 mt-2">Data Visualization by Canvas Infographics</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const translations = {
+            ja: {
+                docTitle: 'サーモンパラドックス：日本はいかにしてサーモンを食べるようになったか',
+                mainTitle: 'サーモンパラドックス',
+                subtitle: '「日本人はサーモンが嫌い」は本当か？',
+                headerPara: 'この広まった説は、実は大きな誤解です。このインフォグラフィックでは、寄生虫への懸念から生まれた食文化の壁を、ノルウェーの画期的なマーケティング戦略がいかにして打ち破り、サーモンを日本の食卓の王者に押し上げたか、その驚くべき物語をデータと共に解き明かします。',
+                twoSalmonsTitle: '物語の核心：二種類の「サケ」',
+                sakeTitle: '鮭 (Sake) 🔥',
+                sakeDesc: '伝統的に日本近海で獲れる天然の太平洋サケ。',
+                sakePoint1Title: '寄生虫リスク：',
+                sakePoint1Desc: 'アニサキス感染の危険性があるため、生食はタブー。',
+                sakePoint2Title: '調理法：',
+                sakePoint2Desc: '加熱が必須。主に塩焼きや煮付けで食される。',
+                sakePoint3Title: '位置付け：',
+                sakePoint3Desc: '伝統的な「加熱用の魚」。',
+                samonTitle: 'サーモン (Sāmon) ✅',
+                samonDesc: '主にノルウェーから輸入される養殖のアトランティックサーモン。',
+                samonPoint1Title: '安全性：',
+                samonPoint1Desc: '管理された飼料で育つため、寄生虫の心配がない。',
+                samonPoint2Title: '調理法：',
+                samonPoint2Desc: '生食に最適。寿司や刺身の主役。',
+                samonPoint3Title: '位置付け：',
+                samonPoint3Desc: 'モダンで安全な「生食用の魚」。',
+                projectJapanTitle: 'ノルウェーの奇襲',
+                projectJapanSubtitle: '「プロジェクト・ジャパン」はいかにして歴史を変えたか',
+                timeline1Title: '1985年：計画始動 🇳🇴🇯�',
+                timeline1Desc: 'ノルウェーの水産物輸出委員会が、過剰生産されたサーモンの新市場として日本に照準を合わせ、国家プロジェクトを開始。',
+                timeline2Title: '1980年代後半：厚い文化の壁 ❌',
+                timeline2Desc: '「サケは生で食べない」という日本の根強い食文化に阻まれ、輸入業者やシェフからことごとく拒絶される。色、味、さらには頭の形までが拒否の理由とされた。',
+                timeline3Title: '1990年頃：戦略転換 🎯',
+                timeline3Desc: '伝統的な市場を避け、新たなターゲットに狙いを定める。<br>1. <strong>ネーミング戦略：</strong> カタカナで「サーモン」と表記し、「鮭」との差別化を図る。<br>2. <strong>新チャネル開拓：</strong> 当時急成長していたファミリー層向けの「回転寿司」に活路を見出す。',
+                timeline4Title: '1992年：歴史的契約 🤝',
+                timeline4Desc: '大手食品会社ニチレイと画期的な契約を締結。5000トンのサーモンを「寿司ネタ用」として販売することを条件に、破格の値段で提供。これが市場をこじ開ける決定打となり、日本の食文化に革命が起きた。',
+                dataTitle: 'データが語るサーモンの覇権',
+                importAmountLabel: '年間総輸入量',
+                tenThousand: '万',
+                tons: 'トン',
+                importAmountSuffix: '以上',
+                importAmountNote: 'この数字自体が、「日本人がサーモンを嫌い」という説を明確に否定しています。',
+                householdChartTitle: '家庭の食卓革命：生鮮魚介購入量の変化',
+                householdChartDesc: '約30年で、日本の家庭で最も買われる魚はイカからサーモンへと劇的に変化しました。',
+                householdChartXLabel: '購入量ランキング',
+                squid: 'イカ',
+                shrimp: 'エビ',
+                tuna: 'マグロ',
+                salmon: 'サーモン',
+                sushiChartTitle: '回転寿司の絶対王者：人気ネタランキング',
+                sushiChartDesc: 'マルハニチロの長期調査によると、サーモンは10年以上連続で「最もよく食べる寿司ネタ」の1位を独走しています。',
+                sushiChartLabel: '好きな寿司ネタ',
+                tunaChutoro: 'マグロ (中トロ)',
+                hamachiBuri: 'ハマチ/ブリ',
+                other: 'その他',
+                ageChartTitle: '世代間の味覚戦争：サーモン vs マグロ',
+                ageChartDesc: '若年層ほどサーモンを好み、50歳未満の世帯では購入量・金額ともにサーモンがマグロを圧倒。市場の未来はサーモンが握っています。',
+                ageChartYLabel: '世帯主の年齢層',
+                ageChartXLabel: '← マグロ支持層 | サーモン支持層 →',
+                ageLabels: ['40歳未満', '40-49歳', '50-59歳', '60-69歳', '70歳以上'],
+                legendAmount: '購入量首選',
+                legendSpending: '購入金額首選',
+                futureTitle: '寿司の向こうへ：サーモンの次なる一手',
+                future1Title: '「サモ肉」戦略 🥩',
+                future1Desc: 'ノルウェーは現在、サーモンを牛肉、豚肉、鶏肉に次ぐ「第4の肉」として位置づけるキャンペーンを展開中。寿司や刺身だけでなく、ハンバーグやソテーなど日常の加熱料理での消費拡大を狙っています。',
+                future2Title: '国産養殖の台頭 🗾',
+                future2Desc: '日本の陸上養殖技術も進歩し、「国産サーモン」が増加傾向に。これにより、より新鮮な供給が可能になる一方、国内市場での競争激化という新たな課題も生まれています。',
+                footerNote: 'このインフォグラフィックは、日本の食文化におけるサーモンの変遷に関する調査レポートに基づいています。'
+            },
+            zh: {
+                docTitle: '鮭魚悖論：日本如何開始食用三文魚',
+                mainTitle: '鮭魚悖論',
+                subtitle: '日本人真的不喜歡吃三文魚嗎？',
+                headerPara: '這個廣為流傳的說法其實是一個巨大的誤解。本資訊圖表將透過數據揭示，挪威革命性的市場策略如何打破因寄生蟲疑慮而生的文化壁壘，並將三文魚推上日本餐桌的王者寶座。',
+                twoSalmonsTitle: '故事的核心：兩種「鮭魚」',
+                sakeTitle: '鮭 (Sake) 🔥',
+                sakeDesc: '傳統上在日本近海捕獲的野生太平洋鮭魚。',
+                sakePoint1Title: '寄生蟲風險：',
+                sakePoint1Desc: '因有感染海獸胃線蟲的風險，生食為禁忌。',
+                sakePoint2Title: '烹飪方式：',
+                sakePoint2Desc: '必須加熱，主要以鹽烤或燉煮方式食用。',
+                sakePoint3Title: '定位：',
+                sakePoint3Desc: '傳統的「加熱用魚」。',
+                samonTitle: 'サーモン (Sāmon) ✅',
+                samonDesc: '主要從挪威進口的人工養殖大西洋三文魚。',
+                samonPoint1Title: '安全性：',
+                samonPoint1Desc: '以受管理的飼料餵養，無寄生蟲之虞。',
+                samonPoint2Title: '烹飪方式：',
+                samonPoint2Desc: '最適合生食，為壽司和刺身的主角。',
+                samonPoint3Title: '定位：',
+                samonPoint3Desc: '現代、安全的「生食用魚」。',
+                projectJapanTitle: '挪威的奇襲',
+                projectJapanSubtitle: '「日本計畫」如何改寫歷史',
+                timeline1Title: '1985年：計畫啟動 🇳🇴🇯🇵',
+                timeline1Desc: '挪威漁業出口委員會針對過剩的三文魚產量，瞄準日本為新市場，啟動國家級專案。',
+                timeline2Title: '1980年代末：厚重的文化壁壘 ❌',
+                timeline2Desc: '「鮭魚不能生吃」的日本傳統飲食文化根深蒂固，遭到進口商和廚師的普遍拒絕。顏色、味道甚至頭部形狀都成為拒絕的理由。',
+                timeline3Title: '1990年左右：策略轉向 🎯',
+                timeline3Desc: '避開傳統市場，鎖定新目標。<br>1. <strong>命名策略：</strong> 以片假名「サーモン」標示，與「鮭」做出區隔。<br>2. <strong>開拓新通路：</strong> 在當時迅速發展的家庭式「迴轉壽司」中找到突破口。',
+                timeline4Title: '1992年：歷史性的合約 🤝',
+                timeline4Desc: '與大型食品公司「Nichirei」簽訂里程碑協議。以極優惠價格提供5000噸三文魚，條件是必須作為「壽司料」銷售。此舉成為打開市場的關鍵，為日本飲食文化帶來革命。',
+                dataTitle: '數據揭示三文魚的霸權',
+                importAmountLabel: '年度總進口量',
+                tenThousand: '萬',
+                tons: '噸',
+                importAmountSuffix: '以上',
+                importAmountNote: '這個數字本身就明確反駁了「日本人不喜歡三文魚」的說法。',
+                householdChartTitle: '家庭餐桌革命：生鮮海產購買量變化',
+                householdChartDesc: '近30年間，日本家庭最常購買的魚類從魷魚變成了三文魚。',
+                householdChartXLabel: '購買量排名',
+                squid: '魷魚',
+                shrimp: '蝦',
+                tuna: '鮪魚',
+                salmon: '三文魚',
+                sushiChartTitle: '迴轉壽司的絕對王者：人氣壽司料排行',
+                sushiChartDesc: '根據丸羽日朗的長期調查，三文魚已連續十多年蟬聯「最常吃的壽司料」冠軍。',
+                sushiChartLabel: '喜愛的壽司料',
+                tunaChutoro: '鮪魚 (中腹)',
+                hamachiBuri: '青甘魚/鰤魚',
+                other: '其他',
+                ageChartTitle: '世代間的味覺戰爭：三文魚 vs 鮪魚',
+                ageChartDesc: '越年輕的世代越偏愛三文魚，在50歲以下的家庭中，三文魚的購買量和金額均已超越鮪魚。市場的未來由三文魚掌握。',
+                ageChartYLabel: '戶主年齡層',
+                ageChartXLabel: '← 鮪魚支持者 | 三文魚支持者 →',
+                ageLabels: ['40歲以下', '40-49歲', '50-59歲', '60-69歲', '70歲以上'],
+                legendAmount: '購買量首選',
+                legendSpending: '購買金額首選',
+                futureTitle: '超越壽司：三文魚的下一步',
+                future1Title: '「サモ肉」策略 🥩',
+                future1Desc: '挪威目前正推動將三文魚定位為繼牛肉、豬肉、雞肉之後的「第四種肉」。目標是將消費從壽司和刺身擴展到漢堡、煎炒等日常熱菜。',
+                future2Title: '國產養殖的興起 🗾',
+                future2Desc: '日本的陸上養殖技術進步，使得「國產三文魚」產量增加。這能提供更新鮮的產品，但也引發了國內市場競爭加劇的新挑戰。',
+                footerNote: '此資訊圖表根據有關日本飲食文化中三文魚變遷的調查報告製作。'
+            },
+            en: {
+                docTitle: 'The Salmon Paradox: How Japan Came to Eat Salmon',
+                mainTitle: 'The Salmon Paradox',
+                subtitle: 'Is it true that the Japanese dislike salmon?',
+                headerPara: 'This widespread myth is a major misunderstanding. This infographic uses data to unravel the surprising story of how a revolutionary Norwegian marketing strategy broke down cultural barriers born from parasite concerns, elevating salmon to the king of the Japanese dining table.',
+                twoSalmonsTitle: 'The Heart of the Story: Two Kinds of "Salmon"',
+                sakeTitle: '鮭 (Sake) 🔥',
+                sakeDesc: 'Wild Pacific salmon traditionally caught near Japan.',
+                sakePoint1Title: 'Parasite Risk:',
+                sakePoint1Desc: 'Risk of Anisakis infection makes it taboo to eat raw.',
+                sakePoint2Title: 'Cooking Method:',
+                sakePoint2Desc: 'Must be cooked. Mainly grilled with salt or simmered.',
+                sakePoint3Title: 'Positioning:',
+                sakePoint3Desc: 'A traditional "fish for cooking".',
+                samonTitle: 'サーモン (Sāmon) ✅',
+                samonDesc: 'Farmed Atlantic salmon, mainly imported from Norway.',
+                samonPoint1Title: 'Safety:',
+                samonPoint1Desc: 'Raised on controlled feed, so there are no parasite concerns.',
+                samonPoint2Title: 'Cooking Method:',
+                samonPoint2Desc: 'Perfect for raw consumption. The star of sushi and sashimi.',
+                samonPoint3Title: 'Positioning:',
+                samonPoint3Desc: 'A modern, safe "fish for eating raw".',
+                projectJapanTitle: 'The Norwegian Gambit',
+                projectJapanSubtitle: 'How "Project Japan" Changed History',
+                timeline1Title: '1985: The Plan Begins 🇳🇴🇯🇵',
+                timeline1Desc: 'Facing a surplus, the Norwegian fisheries export committee targets Japan as a new market for its salmon, launching a national project.',
+                timeline2Title: 'Late 1980s: A Thick Cultural Wall ❌',
+                timeline2Desc: 'The deep-rooted Japanese food culture of "not eating salmon raw" leads to rejections from importers and chefs. Its color, taste, and even head shape were cited as reasons.',
+                timeline3Title: 'c. 1990: A Strategic Pivot 🎯',
+                timeline3Desc: 'Avoiding traditional markets to target new segments.<br>1. <strong>Naming Strategy:</strong> Using the katakana "サーモン" to differentiate it from "鮭".<br>2. <strong>New Channels:</strong> Finding an opportunity in the booming family-oriented "conveyor belt sushi" restaurants.',
+                timeline4Title: '1992: The Historic Deal 🤝',
+                timeline4Desc: 'A landmark deal is struck with food giant Nichirei. 5,000 tons of salmon are offered at a steep discount, on the condition it is sold specifically for sushi. This becomes the turning point, revolutionizing Japanese food culture.',
+                dataTitle: 'Data Tells the Story of Salmon\'s Dominance',
+                importAmountLabel: 'Total Annual Imports',
+                tenThousand: '0k',
+                tons: ' tons',
+                importAmountSuffix: '+',
+                importAmountNote: 'This figure alone clearly refutes the myth that Japanese people dislike salmon.',
+                householdChartTitle: 'A Revolution on the Dinner Table: Changes in Seafood Purchases',
+                householdChartDesc: 'In about 30 years, the most purchased fish in Japanese households has dramatically shifted from squid to salmon.',
+                householdChartXLabel: 'Purchase Volume Ranking',
+                squid: 'Squid',
+                shrimp: 'Shrimp',
+                tuna: 'Tuna',
+                salmon: 'Salmon',
+                sushiChartTitle: 'The Undisputed King of Conveyor Belt Sushi',
+                sushiChartDesc: 'According to long-term surveys by Maruha Nichiro, salmon has been the #1 "most eaten sushi topping" for over a decade straight.',
+                sushiChartLabel: 'Favorite Sushi Toppings',
+                tunaChutoro: 'Tuna (Medium Fatty)',
+                hamachiBuri: 'Yellowtail/Amberjack',
+                other: 'Other',
+                ageChartTitle: 'Generational Taste War: Salmon vs. Tuna',
+                ageChartDesc: 'Younger generations prefer salmon, with households under 50 overwhelmingly choosing salmon in both volume and spending. The future of the market belongs to salmon.',
+                ageChartYLabel: 'Age of Head of Household',
+                ageChartXLabel: '← Tuna Supporters | Salmon Supporters →',
+                ageLabels: ['Under 40', '40-49', '50-59', '60-69', '70+'],
+                legendAmount: 'Top by Volume',
+                legendSpending: 'Top by Spending',
+                futureTitle: 'Beyond the Sushi Counter: Salmon\'s Next Move',
+                future1Title: 'The "Samo-niku" Strategy 🥩',
+                future1Desc: 'Norway is now promoting salmon as the "fourth meat" after beef, pork, and chicken, aiming to expand consumption from sushi to everyday cooked dishes like burgers and sautés.',
+                future2Title: 'The Rise of Domestic Farming 🗾',
+                future2Desc: 'Japan\'s own land-based aquaculture technology is advancing, increasing the supply of "domestic salmon." This allows for fresher products but also creates new challenges of intensified market competition.',
+                footerNote: 'This infographic is based on research reports on the evolution of salmon in Japanese food culture.'
+            }
+        };
+
+        let currentCharts = [];
+        let currentLang = 'ja';
+
+        const chartTooltip = {
+            enabled: true,
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    }
+                    return label;
+                }
+            }
+        };
+
+        const energeticPlayfulPalette = {
+            salmon: 'rgba(255, 111, 97, 0.8)',
+            purple: 'rgba(107, 91, 181, 0.8)',
+            green: 'rgba(136, 176, 75, 0.8)',
+            pink: 'rgba(247, 202, 201, 0.8)',
+            blue: 'rgba(146, 168, 209, 0.8)',
+            salmonBorder: 'rgba(255, 111, 97, 1)',
+            purpleBorder: 'rgba(107, 91, 181, 1)',
+        };
+
+        function createCharts(lang) {
+            const T = translations[lang];
+
+            const householdConsumptionChart = new Chart(document.getElementById('householdConsumptionChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['1989', '2018'],
+                    datasets: [{ label: T.squid, data: [1, 4], backgroundColor: energeticPlayfulPalette.blue }, { label: T.shrimp, data: [2, 5], backgroundColor: energeticPlayfulPalette.pink }, { label: T.tuna, data: [3, 2], backgroundColor: energeticPlayfulPalette.purple }, { label: T.salmon, data: [4, 1], backgroundColor: energeticPlayfulPalette.salmon }]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: { x: { reverse: true, title: { display: true, text: T.householdChartXLabel }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } },
+                    plugins: { legend: { position: 'bottom' }, tooltip: chartTooltip }
+                }
+            });
+            currentCharts.push(householdConsumptionChart);
+
+            const sushiKingChart = new Chart(document.getElementById('sushiKingChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: [T.salmon, T.tunaChutoro, T.hamachiBuri, T.other],
+                    datasets: [{ label: T.sushiChartLabel, data: [55, 25, 12, 8], backgroundColor: [energeticPlayfulPalette.salmon, energeticPlayfulPalette.purple, energeticPlayfulPalette.green, energeticPlayfulPalette.blue], borderColor: '#fff', borderWidth: 3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' }, tooltip: chartTooltip }, cutout: '60%' }
+            });
+            currentCharts.push(sushiKingChart);
+            
+            const ageDemographicsChart = new Chart(document.getElementById('ageDemographicsChart'), {
+                type: 'bar',
+                data: {
+                    labels: T.ageLabels,
+                    datasets: [ { label: 'Salmon', data: [100, 100, 100, 100, 100], backgroundColor: energeticPlayfulPalette.salmon, stack: 'Stack 0' }, { label: 'Tuna', data: [-100, -100, -100, -100, -100], backgroundColor: energeticPlayfulPalette.purple, stack: 'Stack 1' } ]
+                },
+                options: {
+                    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: false, ticks: { callback: () => '' }, grid: { display: false }, title: { display: true, text: T.ageChartXLabel } },
+                        y: { stacked: true, grid: { display: false }, title: { display: true, text: T.ageChartYLabel } }
+                    },
+                    plugins: {
+                        tooltip: { enabled: false },
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                generateLabels: () => [
+                                    { text: T.legendAmount, fillStyle: 'transparent' }, { text: T.salmon, fillStyle: energeticPlayfulPalette.salmon }, { text: T.tuna, fillStyle: energeticPlayfulPalette.purple },
+                                    { text: '   ', fillStyle: 'transparent' },
+                                    { text: T.legendSpending, fillStyle: 'transparent' }, { text: T.salmon, fillStyle: '#FFBFB9' }, { text: T.tuna, fillStyle: '#B5A8E0' }
+                                ]
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    id: 'pyramidLabels',
+                    afterDraw(chart) {
+                        const { ctx, scales: {x, y} } = chart;
+                        ctx.save();
+                        const amountData = [ { salmon: true, tuna: true }, { salmon: true, tuna: true }, { salmon: true, tuna: false }, { salmon: true, tuna: false }, { salmon: true, tuna: false } ];
+                        const spendingData = [ { salmon: true, tuna: false }, { salmon: true, tuna: false }, { salmon: false, tuna: true }, { salmon: false, tuna: true }, { salmon: false, tuna: true } ];
+                        ctx.font = 'bold 12px Noto Sans JP';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        y.getMatchingVisibleMetas().forEach(meta => {
+                           meta.data.forEach((bar, index) => {
+                               const yPos = bar.y;
+                               if (amountData[index].salmon) { ctx.fillStyle = energeticPlayfulPalette.salmon; ctx.beginPath(); ctx.arc(x.getPixelForValue(25), yPos - 8, 6, 0, 2 * Math.PI); ctx.fill(); }
+                               if (amountData[index].tuna) { ctx.fillStyle = energeticPlayfulPalette.purple; ctx.beginPath(); ctx.arc(x.getPixelForValue(-25), yPos - 8, 6, 0, 2 * Math.PI); ctx.fill(); }
+                               if (spendingData[index].salmon) { ctx.fillStyle = '#FFBFB9'; ctx.beginPath(); ctx.arc(x.getPixelForValue(75), yPos + 8, 6, 0, 2 * Math.PI); ctx.fill(); }
+                               if (spendingData[index].tuna) { ctx.fillStyle = '#B5A8E0'; ctx.beginPath(); ctx.arc(x.getPixelForValue(-75), yPos + 8, 6, 0, 2 * Math.PI); ctx.fill(); }
+                           });
+                        });
+                        ctx.restore();
+                    }
+                }]
+            });
+            currentCharts.push(ageDemographicsChart);
+        }
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            const T = translations[lang];
+
+            // 1. Update all elements with a data-lang-key attribute
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (T[key]) {
+                    el.innerHTML = T[key];
+                }
+            });
+
+            // 2. Specifically handle the composite import amount text for English
+            const tenThousandEl = document.querySelector('[data-lang-key="tenThousand"]');
+            if (lang === 'en' && tenThousandEl) {
+                const parentP = tenThousandEl.parentNode;
+                if (parentP) {
+                    // Combine '32' with '0k tons' for the English version
+                    parentP.innerHTML = `32${T.tenThousand}${T.tons}`;
+                }
+            }
+            
+            // 3. Update document title and active button
+            document.title = T.docTitle;
+            document.documentElement.lang = lang;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if ((lang === 'ja' && btn.textContent === '日') || (lang === 'zh' && btn.textContent === '中') || (lang === 'en' && btn.textContent === 'EN')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // 4. Recreate charts with translated labels
+            currentCharts.forEach(chart => chart.destroy());
+            currentCharts = [];
+            createCharts(lang);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            switchLanguage('ja');
+        });
+    </script>
+</body>
+</html>
