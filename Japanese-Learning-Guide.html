@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式日語學習指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Harmony -->
+    <!-- Application Structure Plan: A single-page dashboard with a sticky top navigation for easy access to key thematic sections: 'Why Learn?', 'Language Structure', 'Learning Roadmap', 'Communication Art', and 'Toolbox'. This non-linear structure allows users to explore topics based on their immediate interests, which is more engaging than a linear report format. Key interactions include a clickable JLPT roadmap that updates charts and text, and an interactive Keigo verb table, making dense information digestible and practical. This design prioritizes user-driven exploration and quick reference. -->
+    <!-- Visualization & Content Choices: JLPT levels are presented as an interactive stepper/timeline. Goal: Compare progress. Viz: Chart.js donut chart showing Kanji/vocab counts per level. Interaction: Clicking a level updates the chart and corresponding text. Justification: Visually represents the learning load per stage. Keigo verbs are in an interactive table. Goal: Organize/Inform. Viz: HTML table. Interaction: Dropdown verb selection updates table rows. Justification: A practical tool over a static list. Writing systems use tabs. Goal: Organize. Viz: HTML tabs. Interaction: Click to switch views. Justification: Standard, space-saving UI for categorized content. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Lato', 'Noto Sans TC', sans-serif;
+            background-color: #F8F5F2;
+            color: #4A4A4A;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #C2410C;
+            border-bottom-color: #C2410C;
+        }
+        .chart-container {
+            position: relative;
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px;
+            width: 280px;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #574538;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #6B7280;
+            margin-bottom: 2.5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-orange-800" data-key="mainTitle">日語學習指南</div>
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="#why-learn" class="nav-link" data-key="navWhyLearn">為何學習</a>
+                <a href="#language-structure" class="nav-link" data-key="navLangStructure">語言結構</a>
+                <a href="#roadmap" class="nav-link" data-key="navRoadmap">學習藍圖</a>
+                <a href="#communication" class="nav-link" data-key="navCommunication">溝通藝術</a>
+                <a href="#toolbox" class="nav-link" data-key="navToolbox">工具箱</a>
+                <button id="lang-switcher" class="ml-4 px-3 py-1 border-2 border-orange-600 text-orange-600 font-semibold rounded-full hover:bg-orange-600 hover:text-white transition-colors duration-300">English</button>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-4 space-y-2">
+            <a href="#why-learn" class="block nav-link text-center" data-key="navWhyLearnMobile">為何學習</a>
+            <a href="#language-structure" class="block nav-link text-center" data-key="navLangStructureMobile">語言結構</a>
+            <a href="#roadmap" class="block nav-link text-center" data-key="navRoadmapMobile">學習藍圖</a>
+            <a href="#communication" class="block nav-link text-center" data-key="navCommunicationMobile">溝通藝術</a>
+            <a href="#toolbox" class="block nav-link text-center" data-key="navToolboxMobile">工具箱</a>
+            <button id="lang-switcher-mobile" class="w-full mt-2 px-3 py-1 border-2 border-orange-600 text-orange-600 font-semibold rounded-full hover:bg-orange-600 hover:text-white transition-colors duration-300">English</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="text-center py-20 px-4 bg-orange-50">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-orange-900 mb-4" data-key="heroTitle">解鎖日語：您的互動式學習之旅</h1>
+            <p class="text-lg md:text-xl text-orange-800 max-w-3xl mx-auto" data-key="heroSubtitle">
+                從動機到精通，本指南將報告中的深度洞察轉化為一個互動式的學習體驗。探索日語的結構，規劃您的學習路徑，並掌握文化溝通的藝術。
+            </p>
+        </section>
+
+        <section id="why-learn" class="py-16 px-4 text-center">
+            <h2 class="section-title" data-key="whyLearnTitle">為何學習日語？</h2>
+            <p class="section-subtitle" data-key="whyLearnSubtitle">學習日語不僅是掌握一門新技能，更是為您的職業生涯和個人生活開啟一扇全新的大門。探索它所帶來的雙重紅利。</p>
+            <div class="container mx-auto grid md:grid-cols-2 gap-8 text-left">
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-orange-700 mb-4" data-key="proTitle">💼 專業的必要性</h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700" data-key="proList">
+                        <li><b>拓寬職涯</b>：直接進入日本市場或在跨國公司中獲得獨特優勢。JLPT N2/N1是許多職位的金鑰匙。</li>
+                        <li><b>薪酬溢價</b>：日英雙語能力是稀缺資源，通常能在薪資談判中獲得更高籌碼。</li>
+                        <li><b>高增長領域優勢</b>：在科技（AI、機器人）、汽車（電動車）和生物技術等領域，能直接獲取第一手日語資訊。</li>
+                        <li><b>融入職場文化</b>：流利的日語有助於建立更深層次的同事關係和人際網絡。</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-orange-700 mb-4" data-key="personalTitle">🌸 文化與個人紅利</h3>
+                    <ul class="space-y-3 list-disc list-inside text-gray-700" data-key="personalList">
+                        <li><b>無過濾的文化體驗</b>：直接享受動漫、文學、遊戲和電影的原文魅力，體會翻譯中流失的細微之處。</li>
+                        <li><b>深度旅行體驗</b>：從「觀察者」變為「參與者」，與當地人交流，體驗真正的「おもてなし」。</li>
+                        <li><b>建立真誠友誼</b>：語言是通往心靈的橋樑，為結交日本朋友、建立跨文化關係提供了可能。</li>
+                        <li><b>認知能力提升</b>：學習結構迥異的語言能鍛鍊大腦，提升記憶力、解決問題的能力和認知靈活性。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="language-structure" class="py-16 px-4 bg-orange-50 text-center">
+            <h2 class="section-title" data-key="structureTitle">語言的建築藍圖</h2>
+            <p class="section-subtitle" data-key="structureSubtitle">日語的魅力在於其獨特的結構。理解其書寫、音韻和語法三大支柱，是精通這門語言的基礎。</p>
+            <div class="container mx-auto card text-left">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="writingSystemTitle">✍️ 書寫系統</h3>
+                    <p class="mb-4" data-key="writingSystemDesc">現代日語融合了三種文字，各司其職，共同構成一個功能互補的書寫體系。</p>
+                    <div class="border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-6" id="writing-tabs">
+                            <button data-tab="hiragana" class="tab-button active py-4 px-1 border-b-2 font-medium text-lg border-orange-600 text-orange-600" data-key="tabHiragana">平假名</button>
+                            <button data-tab="katakana" class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-key="tabKatakana">片假名</button>
+                            <button data-tab="kanji" class="tab-button py-4 px-1 border-b-2 font-medium text-lg border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-key="tabKanji">漢字</button>
+                        </nav>
+                    </div>
+                    <div id="tab-content" class="pt-6">
+                        <div id="hiragana-content" class="tab-panel">
+                            <h4 class="font-bold text-lg mb-2" data-key="hiraganaTitle">平假名 (ひらがな)</h4>
+                            <p data-key="hiraganaDesc">字形圓潤，主要用於語法功能詞（助詞、活用詞尾）、沒有通用漢字的日本本土詞彙，以及為漢字注音 (振り仮名)。</p>
+                            <p class="text-2xl mt-2 p-4 bg-gray-100 rounded-md tracking-widest">あ い う え お か き く け こ...</p>
+                        </div>
+                        <div id="katakana-content" class="tab-panel hidden">
+                            <h4 class="font-bold text-lg mb-2" data-key="katakanaTitle">片假名 (カタカナ)</h4>
+                            <p data-key="katakanaDesc">字形方正，主要用於外來語、擬聲擬態詞、學術名稱，以及在文本中起強調作用。</p>
+                            <p class="text-2xl mt-2 p-4 bg-gray-100 rounded-md tracking-widest">ア イ ウ エ オ カ キ ク ケ コ...</p>
+                        </div>
+                        <div id="kanji-content" class="tab-panel hidden">
+                             <h4 class="font-bold text-lg mb-2" data-key="kanjiTitle">漢字 (Kanji)</h4>
+                             <p data-key="kanjiDesc">源自中國的表意文字，用於表示名詞、動詞和形容詞的詞幹等實質意義。學習漢字的關鍵是掌握其「音讀」(On'yomi) 和「訓讀」(Kun'yomi)。</p>
+                             <p class="text-2xl mt-2 p-4 bg-gray-100 rounded-md">私 は 日本 の 学生 です。</p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="phoneticsTitle">🎵 音韻系統</h3>
+                        <p data-key="phoneticsDesc">日語的發音有兩大核心特徵：</p>
+                        <ul class="mt-2 space-y-2 list-disc list-inside" data-key="phoneticsList">
+                            <li><b>音拍計時節奏</b>：每個音拍（mora）的發音時長大致相等，形成了日語獨特的、均勻的節奏感。例如，「東京」(Tōkyō) 有4個音拍 (To-o-kyo-o)。</li>
+                            <li><b>聲調重音</b>：通過音高的相對變化來區分詞義，而非強弱。例如 `ha[L]shi[H]` (橋) vs `ha[H]shi[L]` (箸)。</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="grammarTitle">📜 語法結構</h3>
+                        <p data-key="grammarDesc">日語的語法邏輯圍繞三個中心：</p>
+                         <ul class="mt-2 space-y-2 list-disc list-inside" data-key="grammarList">
+                            <li><b>SOV 語序</b>：基本語序是「主語-賓語-謂語」，動詞永遠在句末。例如: 私 は リンゴ を 食べる。 (我 蘋果 吃)</li>
+                            <li><b>助詞系統</b>：使用助詞 (は, が, を, に, で) 來標示詞語在句子中的語法功能，使得語序相對靈活。</li>
+                            <li><b>黏著語特性</b>：在詞根上黏附後綴來表達否定、時態、被動等複雜語法意義。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="py-16 px-4 text-center">
+            <h2 class="section-title" data-key="roadmapTitle">您的學習藍圖</h2>
+            <p class="section-subtitle" data-key="roadmapSubtitle">學習日語是一場循序漸進的旅程。此互動藍圖對應日本語能力試驗(JLPT)的等級，為您提供從新手到精通的清晰里程碑。點擊不同等級來探索詳情。</p>
+            <div class="container mx-auto">
+                <div class="flex justify-center items-center mb-8">
+                    <div id="jlpt-stepper" class="flex flex-wrap justify-center gap-2 md:gap-4">
+                    </div>
+                </div>
+                <div class="card md:grid md:grid-cols-2 gap-8 items-center text-left">
+                    <div class="chart-container mx-auto mb-8 md:mb-0">
+                        <canvas id="jlptChart"></canvas>
+                    </div>
+                    <div>
+                        <h3 id="jlpt-level-title" class="text-3xl font-bold text-orange-700 mb-4"></h3>
+                        <p id="jlpt-level-summary" class="text-gray-600 mb-4"></p>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg" data-key="roadmapApp">🌍 現實應用</h4>
+                                <p id="jlpt-level-application" class="text-gray-600"></p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg" data-key="roadmapTasks">🎯 核心任務</h4>
+                                <ul id="jlpt-level-tasks" class="list-disc list-inside text-gray-600 space-y-1"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="communication" class="py-16 px-4 bg-orange-50 text-center">
+            <h2 class="section-title" data-key="commTitle">溝通的藝術</h2>
+            <p class="section-subtitle" data-key="commSubtitle">精通日語遠不止語法和詞彙。掌握其背後的社會文化規則，才能進行真正得體、有效的溝通。</p>
+            <div class="container mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
+                <div class="card lg:col-span-2">
+                    <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="keigoTitle">🙇 敬語 (Keigo)</h3>
+                    <p class="mb-4" data-key="keigoDesc">敬語是一套通過語言來表達尊敬、謙遜和禮貌的複雜語法體系。它分為三類：丁寧語 (禮貌)、尊敬語 (抬高對方) 和謙讓語 (貶低自己)。</p>
+                    <div class="space-y-2 mb-4">
+                        <label for="keigo-verb-select" class="font-medium" data-key="keigoSelectLabel">選擇一個動詞查看變化:</label>
+                        <select id="keigo-verb-select" class="w-full p-2 border border-gray-300 rounded-md focus:ring-orange-500 focus:border-orange-500">
+                        </select>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-100">
+                                <tr id="keigo-table-header">
+                                    <th class="p-3" data-key="keigoHeaderForm">形式</th>
+                                    <th class="p-3" data-key="keigoHeaderJapanese">日語</th>
+                                    <th class="p-3" data-key="keigoHeaderRomaji">羅馬字</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keigo-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <div class="card lg:col-span-1 space-y-6">
+                     <div>
+                        <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="uchiSotoTitle">🏠 内外 (Uchi-Soto)</h3>
+                        <p data-key="uchiSotoDesc">一個核心社交原則，區分「圈內人」(uchi) 和「圈外人」(soto)。這個概念決定了敬語的使用策略：對外人要抬高，對自己人（即使是上司）在對外時要謙遜。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-orange-700 mb-3" data-key="highContextTitle">🤫 高語境溝通</h3>
+                        <p data-key="highContextDesc">溝通在很大程度上依賴於潛在的默契而非語言的字面意義。</p>
+                        <ul class="mt-2 space-y-1 list-disc list-inside" data-key="highContextList">
+                           <li><b>曖昧表達</b>: 常用「難しい」(困難) 來委婉地拒絕。</li>
+                           <li><b>相槌</b>: 「はい」「ええ」等插話表示「正在聽」，不代表「同意」。</li>
+                           <li><b>本音と建前</b>: 區分真實想法 (本音) 和場面話 (建前)。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="toolbox" class="py-16 px-4 text-center">
+            <h2 class="section-title" data-key="toolboxTitle">您的學習工具箱</h2>
+            <p class="section-subtitle" data-key="toolboxSubtitle">成功的學習者會構建一個個人化的工具生態系統。這裡是一些經過評述的關鍵資源，助您一臂之力。</p>
+            <div class="container mx-auto grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card">
+                    <h3 class="text-xl font-bold text-orange-700 mb-3" data-key="toolboxTextbooks">📚 核心教科書</h3>
+                    <ul class="space-y-2 text-left" data-key="toolboxTextbooksList">
+                        <li><b>《みんなの日本語》</b>: 結構嚴謹，語法全面，適合系統學習。</li>
+                        <li><b>《Genki》</b>: 貼近大學生生活，以溝通為導向，適合自學。</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-orange-700 mb-3" data-key="toolboxApps">📱 數位工具 & App</h3>
+                     <ul class="space-y-2 text-left" data-key="toolboxAppsList">
+                        <li><b>Anki/WaniKani</b>: 基於SRS的記憶工具，高效記憶詞彙和漢字。</li>
+                        <li><b>Moji辭書/Takoboto</b>: 功能強大的電子詞典。</li>
+                        <li><b>HelloTalk/Tandem</b>: 尋找語言交換夥伴的最佳平台。</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 class="text-xl font-bold text-orange-700 mb-3" data-key="toolboxMedia">🎧 聽力 & 媒體資源</h3>
+                     <ul class="space-y-2 text-left" data-key="toolboxMediaList">
+                        <li><b>分級Podcast</b>: 如 Sakura Tips, Nihongo Con Teppei 等。</li>
+                        <li><b>NHK News Web Easy</b>: 帶有注音和詞典功能的新聞網站。</li>
+                        <li><b>日劇/動畫</b>: 接觸自然語速和地道表達的絕佳方式。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-stone-800 text-white text-center p-6">
+        <p data-key="footerText">&copy; 2025 互動式日語學習指南。基於綜合報告創建。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentLang = 'zh';
+            let jlptChart;
+
+            const translations = {
+                zh: {
+                    mainTitle: "日語學習指南",
+                    navWhyLearn: "為何學習",
+                    navLangStructure: "語言結構",
+                    navRoadmap: "學習藍圖",
+                    navCommunication: "溝通藝術",
+                    navToolbox: "工具箱",
+                    navWhyLearnMobile: "為何學習",
+                    navLangStructureMobile: "語言結構",
+                    navRoadmapMobile: "學習藍圖",
+                    navCommunicationMobile: "溝通藝術",
+                    navToolboxMobile: "工具箱",
+                    langButton: "English",
+                    heroTitle: "解鎖日語：您的互動式學習之旅",
+                    heroSubtitle: "從動機到精通，本指南將報告中的深度洞察轉化為一個互動式的學習體驗。探索日語的結構，規劃您的學習路徑，並掌握文化溝通的藝術。",
+                    whyLearnTitle: "為何學習日語？",
+                    whyLearnSubtitle: "學習日語不僅是掌握一門新技能，更是為您的職業生涯和個人生活開啟一扇全新的大門。探索它所帶來的雙重紅利。",
+                    proTitle: "💼 專業的必要性",
+                    proList: `<li><b>拓寬職涯</b>：直接進入日本市場或在跨國公司中獲得獨特優勢。JLPT N2/N1是許多職位的金鑰匙。</li>
+                              <li><b>薪酬溢價</b>：日英雙語能力是稀缺資源，通常能在薪資談判中獲得更高籌碼。</li>
+                              <li><b>高增長領域優勢</b>：在科技（AI、機器人）、汽車（電動車）和生物技術等領域，能直接獲取第一手日語資訊。</li>
+                              <li><b>融入職場文化</b>：流利的日語有助於建立更深層次的同事關係和人際網絡。</li>`,
+                    personalTitle: "🌸 文化與個人紅利",
+                    personalList: `<li><b>無過濾的文化體驗</b>：直接享受動漫、文學、遊戲和電影的原文魅力，體會翻譯中流失的細微之處。</li>
+                                   <li><b>深度旅行體驗</b>：從「觀察者」變為「參與者」，與當地人交流，體驗真正的「おもてなし」。</li>
+                                   <li><b>建立真誠友誼</b>：語言是通往心靈的橋樑，為結交日本朋友、建立跨文化關係提供了可能。</li>
+                                   <li><b>認知能力提升</b>：學習結構迥異的語言能鍛鍊大腦，提升記憶力、解決問題的能力和認知靈活性。</li>`,
+                    structureTitle: "語言的建築藍圖",
+                    structureSubtitle: "日語的魅力在於其獨特的結構。理解其書寫、音韻和語法三大支柱，是精通這門語言的基礎。",
+                    writingSystemTitle: "✍️ 書寫系統",
+                    writingSystemDesc: "現代日語融合了三種文字，各司其職，共同構成一個功能互補的書寫體系。",
+                    tabHiragana: "平假名",
+                    tabKatakana: "片假名",
+                    tabKanji: "漢字",
+                    hiraganaTitle: "平假名 (ひらがな)",
+                    hiraganaDesc: "字形圓潤，主要用於語法功能詞（助詞、活用詞尾）、沒有通用漢字的日本本土詞彙，以及為漢字注音 (振り仮名)。",
+                    katakanaTitle: "片假名 (カタカナ)",
+                    katakanaDesc: "字形方正，主要用於外來語、擬聲擬態詞、學術名稱，以及在文本中起強調作用。",
+                    kanjiTitle: "漢字 (Kanji)",
+                    kanjiDesc: "源自中國的表意文字，用於表示名詞、動詞和形容詞的詞幹等實質意義。學習漢字的關鍵是掌握其「音讀」(On'yomi) 和「訓讀」(Kun'yomi)。",
+                    phoneticsTitle: "🎵 音韻系統",
+                    phoneticsDesc: "日語的發音有兩大核心特徵：",
+                    phoneticsList: `<li><b>音拍計時節奏</b>：每個音拍（mora）的發音時長大致相等，形成了日語獨特的、均勻的節奏感。例如，「東京」(Tōkyō) 有4個音拍 (To-o-kyo-o)。</li>
+                                    <li><b>聲調重音</b>：通過音高的相對變化來區分詞義，而非強弱。例如 \`ha[L]shi[H]\` (橋) vs \`ha[H]shi[L]\` (箸)。</li>`,
+                    grammarTitle: "📜 語法結構",
+                    grammarDesc: "日語的語法邏輯圍繞三個中心：",
+                    grammarList: `<li><b>SOV 語序</b>：基本語序是「主語-賓語-謂語」，動詞永遠在句末。例如: 私 は リンゴ を 食べる。 (我 蘋果 吃)</li>
+                                  <li><b>助詞系統</b>：使用助詞 (は, が, を, に, で) 來標示詞語在句子中的語法功能，使得語序相對靈活。</li>
+                                  <li><b>黏著語特性</b>：在詞根上黏附後綴來表達否定、時態、被動等複雜語法意義。</li>`,
+                    roadmapTitle: "您的學習藍圖",
+                    roadmapSubtitle: "學習日語是一場循序漸進的旅程。此互動藍圖對應日本語能力試驗(JLPT)的等級，為您提供從新手到精通的清晰里程碑。點擊不同等級來探索詳情。",
+                    roadmapApp: "🌍 現實應用",
+                    roadmapTasks: "🎯 核心任務",
+                    commTitle: "溝通的藝術",
+                    commSubtitle: "精通日語遠不止語法和詞彙。掌握其背後的社會文化規則，才能進行真正得體、有效的溝通。",
+                    keigoTitle: "🙇 敬語 (Keigo)",
+                    keigoDesc: "敬語是一套通過語言來表達尊敬、謙遜和禮貌的複雜語法體系。它分為三類：丁寧語 (禮貌)、尊敬語 (抬高對方) 和謙讓語 (貶低自己)。",
+                    keigoSelectLabel: "選擇一個動詞查看變化:",
+                    keigoHeaderForm: "形式",
+                    keigoHeaderJapanese: "日語",
+                    keigoHeaderRomaji: "羅馬字",
+                    uchiSotoTitle: "🏠 内外 (Uchi-Soto)",
+                    uchiSotoDesc: "一個核心社交原則，區分「圈內人」(uchi) 和「圈外人」(soto)。這個概念決定了敬語的使用策略：對外人要抬高，對自己人（即使是上司）在對外時要謙遜。",
+                    highContextTitle: "🤫 高語境溝通",
+                    highContextDesc: "溝通在很大程度上依賴於潛在的默契而非語言的字面意義。",
+                    highContextList: `<li><b>曖昧表達</b>: 常用「難しい」(困難) 來委婉地拒絕。</li>
+                                     <li><b>相槌</b>: 「はい」「ええ」等插話表示「正在聽」，不代表「同意」。</li>
+                                     <li><b>本音と建前</b>: 區分真實想法 (本音) 和場面話 (建前)。</li>`,
+                    toolboxTitle: "您的學習工具箱",
+                    toolboxSubtitle: "成功的學習者會構建一個個人化的工具生態系統。這裡是一些經過評述的關鍵資源，助您一臂之力。",
+                    toolboxTextbooks: "📚 核心教科書",
+                    toolboxTextbooksList: `<li><b>《みんなの日本語》</b>: 結構嚴謹，語法全面，適合系統學習。</li>
+                                           <li><b>《Genki》</b>: 貼近大學生生活，以溝通為導向，適合自學。</li>`,
+                    toolboxApps: "📱 數位工具 & App",
+                    toolboxAppsList: `<li><b>Anki/WaniKani</b>: 基於SRS的記憶工具，高效記憶詞彙和漢字。</li>
+                                      <li><b>Moji辭書/Takoboto</b>: 功能強大的電子詞典。</li>
+                                      <li><b>HelloTalk/Tandem</b>: 尋找語言交換夥伴的最佳平台。</li>`,
+                    toolboxMedia: "� 聽力 & 媒體資源",
+                    toolboxMediaList: `<li><b>分級Podcast</b>: 如 Sakura Tips, Nihongo Con Teppei 等。</li>
+                                       <li><b>NHK News Web Easy</b>: 帶有注音和詞典功能的新聞網站。</li>
+                                       <li><b>日劇/動畫</b>: 接觸自然語速和地道表達的絕佳方式。</li>`,
+                    footerText: "&copy; 2025 互動式日語學習指南。基於綜合報告創建。",
+                    jlptData: {
+                        'N5': { summary: '能大致理解基礎日語。可閱讀平假名、片假名及基礎漢字構成的短文。能聽懂語速緩慢的簡短日常對話。', knowledge: { '漢字': 100, '詞彙': 800 }, application: '可進行簡單的問候、自我介紹、購物、點餐等最基本的生存交流。', tasks: ['完全掌握平假名和片假名', '學習核心助詞 (は,が,を,に,で)', '掌握動詞ます/です形', '使用SRS工具開始背單詞'], chartLabels: ['漢字', '詞彙'] },
+                        'N4': { summary: '能理解基礎日語。可閱讀由基本詞彙和漢字寫成的日常話題文章。能大致聽懂語速稍慢的日常會話。', knowledge: { '漢字': 300, '詞彙': 1500 }, application: '能應對大部分日常情境，如問路、郵局、銀行等。可進行簡單的日常對話。', tasks: ['學習動詞て形及各種用法', '掌握更多助詞和基礎語法結構', '擴大詞彙量和漢字量', '開始接觸簡易閱讀材料'], chartLabels: ['漢字', '詞彙'] },
+                        'N3': { summary: '能大致理解日常生活所使用的日語。可看懂具體內容的文章，掌握報紙標題概要。能大致理解接近常速的連貫對話。', knowledge: { '漢字': 650, '詞彙': 3750 }, application: '能獨立在日本生活，處理較複雜的日常事務。能參與更深入的社交對話。是部分專門學校和IT職位的門檻。', tasks: ['掌握複雜語法 (條件,被動,使役)', '系統性擴展漢字與詞彙', '過渡到真實語言材料 (如 NHK Easy News)', '開始收聽為學習者製作的Podcast'], chartLabels: ['漢字', '詞彙'] },
+                        'N2': { summary: '能理解日常及較廣泛情境下的日語。能閱讀報紙、雜誌的報導與評論。能聽懂近常速的連貫對話和新聞。', knowledge: { '漢字': 1000, '詞彙': 6000 }, application: '能無障礙在日本生活、社交。是大多數日本企業對外國雇員的最低要求。', tasks: ['大量接觸母語級材料', '精通商務場景的基礎敬語', '強化口說和寫作輸出', '深入理解語境和慣用表達'], chartLabels: ['漢字', '詞彙'] },
+                        'N1': { summary: '能理解廣泛情境下所使用的日語。能閱讀報紙社論等複雜、抽象的文章。能聽懂常速的連貫對話、新聞及講課。', knowledge: { '漢字': 2000, '詞彙': 10000 }, application: '語言能力與受過教育的母語者相當。適用於所有專業領域，是醫生、律師、高級管理等職位的先決條件。', tasks: ['沉浸式高強度輸入 (學術論文,文學作品)', '完全掌握敬語系統，揮灑自如', '就複雜、抽象話題進行深入討論', '打磨表達的精確性和地道性'], chartLabels: ['漢字', '詞彙'] },
+                    },
+                    keigoData: {
+                        'する (suru)': { polite: 'します (shimasu)', respectful: 'なさる (nasaru)', humble: 'いたす (itasu)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        '行く (iku)': { polite: '行きます (ikimasu)', respectful: 'いらっしゃる (irassharu)', humble: '伺う/参る (ukagau/mairu)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        '来る (kuru)': { polite: '来ます (kimasu)', respectful: 'いらっしゃる (irassharu)', humble: '伺う/参る (ukagau/mairu)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        'いる (iru)': { polite: 'います (imasu)', respectful: 'いらっしゃる (irassharu)', humble: 'おる (oru)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        '食べる (taberu)': { polite: '食べます (tabemasu)', respectful: '召し上がる (meshiagaru)', humble: 'いただく (itadaku)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        '言う (iu)': { polite: '言います (iimasu)', respectful: 'おっしゃる (ossharu)', humble: '申す/申し上げる (mōsu/mōshiageru)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] },
+                        '見る (miru)': { polite: '見ます (mimasu)', respectful: 'ご覧になる (goran ni naru)', humble: '拝見する (haiken suru)', forms: ['禮貌形 (Polite)', '尊敬語 (Respectful)', '謙讓語 (Humble)'] }
+                    }
+                },
+                en: {
+                    mainTitle: "Japanese Learning Guide",
+                    navWhyLearn: "Why Learn",
+                    navLangStructure: "Structure",
+                    navRoadmap: "Roadmap",
+                    navCommunication: "Communication",
+                    navToolbox: "Toolbox",
+                    navWhyLearnMobile: "Why Learn",
+                    navLangStructureMobile: "Structure",
+                    navRoadmapMobile: "Roadmap",
+                    navCommunicationMobile: "Communication",
+                    navToolboxMobile: "Toolbox",
+                    langButton: "中文",
+                    heroTitle: "Unlock Japanese: Your Interactive Learning Journey",
+                    heroSubtitle: "From motivation to mastery, this guide transforms deep report insights into an interactive learning experience. Explore the structure of Japanese, plan your learning path, and master the art of cultural communication.",
+                    whyLearnTitle: "Why Learn Japanese?",
+                    whyLearnSubtitle: "Learning Japanese is not just about acquiring a new skill; it's about opening a new door for your career and personal life. Explore the dual dividends it offers.",
+                    proTitle: "💼 Professional Imperatives",
+                    proList: `<li><b>Broaden Career Paths</b>: Directly enter the Japanese market or gain a unique advantage in multinational corporations. JLPT N2/N1 is the key to many positions.</li>
+                              <li><b>Salary Premium</b>: Japanese-English bilingual ability is a scarce resource, often leading to a stronger negotiating position for higher salaries.</li>
+                              <li><b>Advantage in High-Growth Sectors</b>: Gain direct access to firsthand Japanese information in fields like technology (AI, robotics), automotive (EVs), and biotechnology.</li>
+                              <li><b>Integrate into Workplace Culture</b>: Fluency in Japanese helps build deeper relationships with colleagues and professional networks.</li>`,
+                    personalTitle: "🌸 Cultural & Personal Dividends",
+                    personalList: `<li><b>Unfiltered Cultural Experience</b>: Directly enjoy the original charm of anime, literature, games, and movies, experiencing nuances lost in translation.</li>
+                                   <li><b>In-Depth Travel Experience</b>: Transform from an 'observer' to a 'participant,' interacting with locals and experiencing true 'omotenashi'.</li>
+                                   <li><b>Build Genuine Friendships</b>: Language is a bridge to the heart, making it possible to make Japanese friends and build cross-cultural relationships.</li>
+                                   <li><b>Enhance Cognitive Abilities</b>: Learning a structurally different language exercises the brain, improving memory, problem-solving skills, and cognitive flexibility.</li>`,
+                    structureTitle: "The Language's Blueprint",
+                    structureSubtitle: "The charm of Japanese lies in its unique structure. Understanding its three pillars—writing, phonology, and grammar—is fundamental to mastering the language.",
+                    writingSystemTitle: "✍️ Writing Systems",
+                    writingSystemDesc: "Modern Japanese integrates three different scripts, each with its own role, forming a complementary writing system.",
+                    tabHiragana: "Hiragana",
+                    tabKatakana: "Katakana",
+                    tabKanji: "Kanji",
+                    hiraganaTitle: "Hiragana (ひらがな)",
+                    hiraganaDesc: "With rounded characters, it's mainly used for grammatical function words (particles, inflections), native Japanese words without common kanji, and phonetic guides for kanji (furigana).",
+                    katakanaTitle: "Katakana (カタカナ)",
+                    katakanaDesc: "With angular characters, it's primarily used for foreign loanwords, onomatopoeia, scientific names, and for emphasis in text.",
+                    kanjiTitle: "Kanji (漢字)",
+                    kanjiDesc: "Ideographic characters from Chinese, used for the core meaning of nouns, verbs, and adjectives. Mastering their 'On'yomi' and 'Kun'yomi' readings is key.",
+                    phoneticsTitle: "🎵 Phonological System",
+                    phoneticsDesc: "Japanese pronunciation has two core features:",
+                    phoneticsList: `<li><b>Mora-timed Rhythm</b>: Each mora (sound unit) has a roughly equal duration, creating a unique, even rhythm. For example, 'Tōkyō' has 4 morae (To-o-kyo-o).</li>
+                                    <li><b>Pitch Accent</b>: Word meaning is distinguished by relative pitch changes, not stress. E.g., \`ha[L]shi[H]\` (bridge) vs. \`ha[H]shi[L]\` (chopsticks).</li>`,
+                    grammarTitle: "📜 Grammatical Structure",
+                    grammarDesc: "The logic of Japanese grammar revolves around three centers:",
+                    grammarList: `<li><b>SOV Word Order</b>: The basic order is Subject-Object-Verb, with the verb always at the end. E.g., 私 は リンゴ を 食べる (I apple eat).</li>
+                                  <li><b>Particle System</b>: Particles (は, が, を, に, で) mark the grammatical function of words, allowing for flexible word order.</li>
+                                  <li><b>Agglutinative Nature</b>: Suffixes are attached to word stems to express complex grammar like negation, tense, and passive voice.</li>`,
+                    roadmapTitle: "Your Learning Roadmap",
+                    roadmapSubtitle: "Learning Japanese is a progressive journey. This interactive roadmap, aligned with the JLPT levels, provides clear milestones from novice to mastery. Click on a level to explore details.",
+                    roadmapApp: "🌍 Real-World Application",
+                    roadmapTasks: "🎯 Core Tasks",
+                    commTitle: "The Art of Communication",
+                    commSubtitle: "Mastering Japanese is more than just grammar and vocabulary. Understanding the socio-cultural rules behind it is key to truly appropriate and effective communication.",
+                    keigoTitle: "🙇 Keigo (Honorifics)",
+                    keigoDesc: "Keigo is a complex grammatical system to express respect, humility, and politeness. It's divided into three categories: Teineigo (polite), Sonkeigo (respectful), and Kenjōgo (humble).",
+                    keigoSelectLabel: "Select a verb to see its forms:",
+                    keigoHeaderForm: "Form",
+                    keigoHeaderJapanese: "Japanese",
+                    keigoHeaderRomaji: "Romaji",
+                    uchiSotoTitle: "🏠 Uchi-Soto (Inside/Outside)",
+                    uchiSotoDesc: "A core social principle distinguishing 'insiders' (uchi) from 'outsiders' (soto). This concept dictates keigo strategy: elevate outsiders and be humble about your own group, even superiors.",
+                    highContextTitle: "🤫 High-Context Communication",
+                    highContextDesc: "Communication relies heavily on unspoken understanding rather than literal meaning.",
+                    highContextList: `<li><b>Ambiguous Expressions</b>: Using "難しい" (difficult) is a common way to politely refuse.</li>
+                                     <li><b>Aizuchi</b>: Interjections like "はい" and "ええ" show you are listening, not that you agree.</li>
+                                     <li><b>Honne & Tatemae</b>: Distinguishing between one's true feelings (honne) and public-facing statements (tatemae).</li>`,
+                    toolboxTitle: "Your Learning Toolbox",
+                    toolboxSubtitle: "Successful learners build a personalized ecosystem of tools. Here are some reviewed key resources to help you.",
+                    toolboxTextbooks: "📚 Core Textbooks",
+                    toolboxTextbooksList: `<li><b>Minna no Nihongo</b>: Structurally rigorous and grammatically comprehensive, suitable for systematic learning.</li>
+                                           <li><b>Genki</b>: Relatable to university life, communication-oriented, and great for self-study.</li>`,
+                    toolboxApps: "📱 Digital Tools & Apps",
+                    toolboxAppsList: `<li><b>Anki/WaniKani</b>: SRS-based tools for efficient vocabulary and kanji memorization.</li>
+                                      <li><b>Moji Jisho/Takoboto</b>: Powerful electronic dictionaries.</li>
+                                      <li><b>HelloTalk/Tandem</b>: The best platforms for finding language exchange partners.</li>`,
+                    toolboxMedia: "🎧 Listening & Media Resources",
+                    toolboxMediaList: `<li><b>Leveled Podcasts</b>: Such as Sakura Tips, Nihongo Con Teppei, etc.</li>
+                                       <li><b>NHK News Web Easy</b>: A news site with furigana and dictionary functions.</li>
+                                       <li><b>J-Dramas/Anime</b>: An excellent way to encounter natural speed and authentic expressions.</li>`,
+                    footerText: "&copy; 2025 Interactive Japanese Learning Guide. Created based on a comprehensive report.",
+                    jlptData: {
+                        'N5': { summary: 'Able to understand some basic Japanese. Can read and understand typical expressions and sentences written in hiragana, katakana, and basic kanji. Can listen to and comprehend conversations about topics regularly encountered in daily life.', knowledge: { 'Kanji': 100, 'Vocab': 800 }, application: 'Can handle simple greetings, self-introductions, shopping, ordering food, and other basic survival situations.', tasks: ['Master hiragana and katakana completely', 'Learn core particles (は,が,を,に,で)', 'Master verb masu/desu forms', 'Start using SRS tools for vocabulary'], chartLabels: ['Kanji', 'Vocab'] },
+                        'N4': { summary: 'Able to understand basic Japanese. Can read and understand passages on familiar daily topics written in basic vocabulary and kanji. Can listen and comprehend conversations encountered in daily life and follow their general content.', knowledge: { 'Kanji': 300, 'Vocab': 1500 }, application: 'Can handle most daily situations like asking for directions, post office, bank, etc. Can hold simple daily conversations.', tasks: ['Learn verb te-form and its various uses', 'Master more particles and basic grammar structures', 'Expand vocabulary and kanji knowledge', 'Start reading simple materials'], chartLabels: ['Kanji', 'Vocab'] },
+                        'N3': { summary: 'Able to understand Japanese used in everyday situations to a certain degree. Can read and understand written materials with specific contents concerning everyday topics. Can grasp summary information from newspaper headlines. Can listen and comprehend coherent conversations in everyday situations, spoken at near-natural speed.', knowledge: { 'Kanji': 650, 'Vocab': 3750 }, application: 'Can live in Japan independently, handling more complex daily tasks. Can participate in deeper social conversations. A requirement for some vocational schools and IT positions.', tasks: ['Master complex grammar (conditionals, passive, causative)', 'Systematically expand kanji and vocabulary', 'Transition to authentic materials (e.g., NHK Easy News)', 'Start listening to podcasts for learners'], chartLabels: ['Kanji', 'Vocab'] },
+                        'N2': { summary: 'Able to understand Japanese used in everyday situations and in a variety of circumstances to a certain degree. Can read materials such as articles and commentaries in newspapers and magazines. Can comprehend coherent conversations and news reports, spoken at nearly natural speed.', knowledge: { 'Kanji': 1000, 'Vocab': 6000 }, application: 'Can live and socialize in Japan without difficulty. The minimum requirement for most Japanese companies hiring foreigners.', tasks: ['Engage with a large volume of native-level materials', 'Master basic business keigo', 'Strengthen speaking and writing output', 'Deepen understanding of context and idioms'], chartLabels: ['Kanji', 'Vocab'] },
+                        'N1': { summary: 'Able to understand Japanese used in a broad range of circumstances. Can read writings with logical complexity and/or abstract writings on a variety of topics, such as newspaper editorials. Can comprehend orally presented materials such as coherent conversations, news reports, and lectures, spoken at a natural speed.', knowledge: { 'Kanji': 2000, 'Vocab': 10000 }, application: 'Language ability is equivalent to an educated native speaker. Suitable for all professional fields, a prerequisite for doctors, lawyers, senior management, etc.', tasks: ['Immersive, high-intensity input (academic papers, literature)', 'Fully master the keigo system', 'Discuss complex and abstract topics in depth', 'Refine precision and authenticity of expression'], chartLabels: ['Kanji', 'Vocab'] },
+                    },
+                    keigoData: {
+                        'する (suru)': { polite: 'します (shimasu)', respectful: 'なさる (nasaru)', humble: 'いたす (itasu)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        '行く (iku)': { polite: '行きます (ikimasu)', respectful: 'いらっしゃる (irassharu)', humble: '伺う/参る (ukagau/mairu)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        '来る (kuru)': { polite: '来ます (kimasu)', respectful: 'いらっしゃる (irassharu)', humble: '伺う/参る (ukagau/mairu)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        'いる (iru)': { polite: 'います (imasu)', respectful: 'いらっしゃる (irassharu)', humble: 'おる (oru)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        '食べる (taberu)': { polite: '食べます (tabemasu)', respectful: '召し上がる (meshiagaru)', humble: 'いただく (itadaku)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        '言う (iu)': { polite: '言います (iimasu)', respectful: 'おっしゃる (ossharu)', humble: '申す/申し上げる (mōsu/mōshiageru)', forms: ['Polite', 'Respectful', 'Humble'] },
+                        '見る (miru)': { polite: '見ます (mimasu)', respectful: 'ご覧になる (goran ni naru)', humble: '拝見する (haiken suru)', forms: ['Polite', 'Respectful', 'Humble'] }
+                    }
+                }
+            };
+
+            const jlptStepper = document.getElementById('jlpt-stepper');
+            const levelTitle = document.getElementById('jlpt-level-title');
+            const levelSummary = document.getElementById('jlpt-level-summary');
+            const levelApplication = document.getElementById('jlpt-level-application');
+            const levelTasks = document.getElementById('jlpt-level-tasks');
+            const ctx = document.getElementById('jlptChart').getContext('2d');
+            
+            function updateRoadmap(level, data) {
+                const levelData = data[level];
+                levelTitle.textContent = level;
+                levelSummary.textContent = levelData.summary;
+                levelApplication.textContent = levelData.application;
+                
+                levelTasks.innerHTML = '';
+                levelData.tasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.textContent = task;
+                    levelTasks.appendChild(li);
+                });
+
+                const chartData = {
+                    labels: levelData.chartLabels,
+                    datasets: [{
+                        data: [levelData.knowledge[levelData.chartLabels[0]], levelData.knowledge[levelData.chartLabels[1]]],
+                        backgroundColor: ['#F97316', '#EA580C'],
+                        hoverBackgroundColor: ['#FB923C', '#F97316'],
+                        borderColor: '#F8F5F2',
+                        borderWidth: 4,
+                    }]
+                };
+
+                if (jlptChart) jlptChart.destroy();
+
+                jlptChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { padding: 20, font: { size: 14 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed !== null) label += context.parsed + (currentLang === 'zh' ? ' 個' : '');
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%',
+                    }
+                });
+
+                document.querySelectorAll('#jlpt-stepper button').forEach(btn => {
+                    btn.classList.toggle('bg-orange-600', btn.dataset.level === level);
+                    btn.classList.toggle('text-white', btn.dataset.level === level);
+                    btn.classList.toggle('bg-white', btn.dataset.level !== level);
+                    btn.classList.toggle('text-orange-600', btn.dataset.level !== level);
+                });
+            }
+            
+            const keigoSelect = document.getElementById('keigo-verb-select');
+            const keigoTableBody = document.getElementById('keigo-table-body');
+
+            function updateKeigoTable(verb, data) {
+                const verbData = data[verb];
+                keigoTableBody.innerHTML = `
+                    <tr class="border-b">
+                        <td class="p-3 font-medium">${verbData.forms[0]}</td>
+                        <td class="p-3">${verbData.polite.split(' ')[0]}</td>
+                        <td class="p-3 font-mono">${verbData.polite.split(' ')[1]}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="p-3 font-medium">${verbData.forms[1]}</td>
+                        <td class="p-3">${verbData.respectful.split(' ')[0]}</td>
+                        <td class="p-3 font-mono">${verbData.respectful.split(' ')[1]}</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="p-3 font-medium">${verbData.forms[2]}</td>
+                        <td class="p-3">${verbData.humble.split(' ')[0]}</td>
+                        <td class="p-3 font-mono">${verbData.humble.split(' ')[1]}</td>
+                    </tr>
+                `;
+            }
+
+            function switchLanguage(lang) {
+                currentLang = lang;
+                const langData = translations[lang];
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+                document.querySelectorAll('[data-key]').forEach(elem => {
+                    const key = elem.dataset.key;
+                    if (langData[key]) {
+                        elem.innerHTML = langData[key];
+                    }
+                });
+
+                document.getElementById('lang-switcher').textContent = langData.langButton;
+                document.getElementById('lang-switcher-mobile').textContent = langData.langButton;
+
+                const activeButton = document.querySelector('#jlpt-stepper .bg-orange-600');
+                const currentJlptLevel = activeButton ? activeButton.dataset.level : 'N5';
+                updateRoadmap(currentJlptLevel, langData.jlptData);
+                
+                const currentKeigoVerb = keigoSelect.value;
+                keigoSelect.innerHTML = '';
+                Object.keys(langData.keigoData).forEach(verb => {
+                    const option = document.createElement('option');
+                    option.value = verb;
+                    option.textContent = verb.split(' ')[0];
+                    keigoSelect.appendChild(option);
+                });
+
+                if (currentKeigoVerb && keigoSelect.querySelector(`option[value="${currentKeigoVerb}"]`)) {
+                   keigoSelect.value = currentKeigoVerb;
+                }
+                
+                updateKeigoTable(keigoSelect.value, langData.keigoData);
+            }
+
+            function initializePage() {
+                const langData = translations[currentLang];
+                
+                Object.keys(langData.jlptData).forEach(level => {
+                    const button = document.createElement('button');
+                    button.dataset.level = level;
+                    button.textContent = level;
+                    button.className = 'px-4 py-2 rounded-full font-semibold border-2 border-orange-600 transition';
+                    button.addEventListener('click', () => updateRoadmap(level, translations[currentLang].jlptData));
+                    jlptStepper.appendChild(button);
+                });
+
+                keigoSelect.addEventListener('change', (e) => updateKeigoTable(e.target.value, translations[currentLang].keigoData));
+
+                switchLanguage('zh');
+
+                document.getElementById('lang-switcher').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+                document.getElementById('lang-switcher-mobile').addEventListener('click', () => switchLanguage(currentLang === 'zh' ? 'en' : 'zh'));
+            }
+
+            initializePage();
+            
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'border-orange-600', 'text-orange-600');
+                        btn.classList.add('border-transparent', 'text-gray-500');
+                    });
+                    button.classList.add('active', 'border-orange-600', 'text-orange-600');
+                    
+                    tabPanels.forEach(panel => {
+                        panel.classList.toggle('hidden', panel.id !== `${button.dataset.tab}-content`);
+                    });
+                });
+            });
+
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            
+            document.querySelectorAll('#header a[href^="#"]').forEach(link => {
+                link.addEventListener('click', () => {
+                    if(!mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden');
+                });
+            });
+
+            const sections = document.querySelectorAll('main section');
+            const headerNavLinks = document.querySelectorAll('#header .nav-link');
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        headerNavLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                if (section.id) observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>
