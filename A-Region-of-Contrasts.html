@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北薩默塞特：區域分析資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #F8F8F8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .kpi-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .kpi-value {
+            font-size: 3rem;
+            font-weight: 900;
+            line-height: 1.1;
+            color: #DB1F48;
+        }
+        .kpi-label {
+            font-size: 1rem;
+            color: #004369;
+            margin-top: 0.5rem;
+        }
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #01949A;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 3px;
+        }
+        .timeline-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-container.left {
+            left: 0;
+        }
+        .timeline-container.right {
+            left: 50%;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            right: -14px;
+            background-color: #F8F8F8;
+            border: 4px solid #DB1F48;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-container.right::after {
+            left: -14px;
+        }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: white;
+            position: relative;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+         h1, h2, h3 {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body class="text-[#004369]">
+
+    <header class="bg-[#004369] text-white p-8 text-center rounded-b-3xl shadow-lg relative">
+        <h1 class="text-4xl md:text-5xl font-black" data-lang-key="headerTitle">北薩默塞特：對比鮮明的區域</h1>
+        <p class="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-[#E5DDCB]" data-lang-key="headerSubtitle">在發展壓力與環境保護之間尋求平衡的綜合分析</p>
+        <button id="lang-switcher" class="absolute top-4 right-4 bg-[#DB1F48] text-white py-2 px-4 rounded-lg shadow-md hover:bg-[#b91c3d] transition-colors">
+            English
+        </button>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="dilemma" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="dilemmaTitle">核心困境：無解的方程式？</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="dilemmaText">
+                北薩默塞特面臨著一個根本性的挑戰。政府要求在未來15年內大幅增加住房供應，然而該地區絕大部分土地因環境因素而受到嚴格的開發限制。這一困境是所有戰略決策的核心。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="kpi-card bg-[#E5DDCB]">
+                    <div class="kpi-value text-[#004369]">23,805</div>
+                    <div class="kpi-label font-bold" data-lang-key="kpiNewHomesLabel">套新住宅</div>
+                    <p class="mt-2 text-sm" data-lang-key="kpiNewHomesText">政府為未來15年設定的強制性住房目標。</p>
+                </div>
+                <div class="kpi-card bg-[#E5DDCB]">
+                    <div class="kpi-value text-[#DB1F48]">85%</div>
+                    <div class="kpi-label font-bold" data-lang-key="kpiLandRestrictedLabel">土地受限</div>
+                    <p class="mt-2 text-sm" data-lang-key="kpiLandRestrictedText">因洪水風險、綠帶或傑出自然風景區而受保護。</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+
+        <section id="snapshot" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="snapshotTitle">區域快照：通勤者悖論</h2>
+             <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="snapshotText">
+                該地區人口不斷增長，生活品質極具吸引力，從而推高了房價。然而，本地薪資水平與高昂的生活成本並不匹配，揭示了其經濟對鄰近布里斯托的嚴重依賴。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="popGrowthTitle">人口增長 (2011-2021)</h3>
+                    <div class="chart-container">
+                        <canvas id="populationGrowthChart"></canvas>
+                    </div>
+                     <p class="mt-4 text-sm text-center text-gray-600" data-lang-key="popGrowthText">北薩默塞特的人口增長率（7.0%）略高於英格蘭平均水平，顯示出其作為理想居住地的吸引力。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="housingSalaryTitle">收入 vs 房價</h3>
+                     <div class="chart-container">
+                        <canvas id="housingSalaryChart"></canvas>
+                    </div>
+                    <p class="mt-4 text-sm text-center text-gray-600" data-lang-key="housingSalaryText">平均房價遠高於全國平均水平，而平均年薪卻較低，凸顯了住房負擔能力的危機。</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+        
+        <section id="towns" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="townsTitle">北薩默塞特的四副面孔</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="townsText">
+                該地區的四個主要城鎮各自代表了不同的發展模式和挑戰，從大規模再生到歷史遺產保護，需要量身定制的政策方針。
+            </p>
+             <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="townPopTitle">主要城鎮人口 (2021)</h3>
+                <div class="chart-container h-96 md:h-[450px]">
+                    <canvas id="townPopulationChart"></canvas>
+                </div>
+                <p class="mt-4 text-sm text-center text-gray-600" data-lang-key="townPopText">韋斯頓-超級-馬雷是最大的行政和人口中心，而波蒂斯黑德等較小城鎮則因其通勤便利性而經歷了快速增長。</p>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+
+        <section id="economy" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="economyTitle">「雙軌」經濟引擎</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="economyText">
+                北薩默塞特的經濟體系呈現出雙重性：一邊是依賴環境保護的傳統行業，如旅遊和食品；另一邊是需要發展空間的現代高價值行業，如先進工程和物流。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
+                <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="employmentSectorsTitle">最大就業行業</h3>
+                    <div class="chart-container">
+                        <canvas id="employmentSectorsChart"></canvas>
+                    </div>
+                     <p class="mt-4 text-sm text-center text-gray-600" data-lang-key="employmentSectorsText">批發和零售貿易是最大的就業部門，但高價值的先進製造業和專業服務業對經濟的貢獻也至關重要。</p>
+                </div>
+                <div class="md:col-span-3 space-y-4">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg text-[#01949A]" data-lang-key="track1Title">軌道一：保護驅動</h4>
+                        <p class="text-sm" data-lang-key="track1Text">利用自然景觀和肥沃農田發展 <strong class="text-[#DB1F48]" data-lang-key="track1Keyword1">旅遊業</strong> 和 <strong class="text-[#DB1F48]" data-lang-key="track1Keyword2">食品飲料業</strong>。Yeo Valley 和 Thatchers Cider 等品牌是其代表。</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="font-bold text-lg text-[#01949A]" data-lang-key="track2Title">軌道二：發展驅動</h4>
+                        <p class="text-sm" data-lang-key="track2Text">依靠近M5、港口和機場的優越位置發展 <strong class="text-[#DB1F48]" data-lang-key="track2Keyword1">先進工程</strong> 和 <strong class="text-[#DB1F48]" data-lang-key="track2Keyword2">物流業</strong>。這裡是歐洲最大航空航天集群的一部分。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+
+        <section id="infrastructure" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="infraTitle">基礎設施生命線</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="infraText">
+                重大基礎設施項目是該地區未來發展的關鍵推動者。住房目標的實現和經濟的持續增長，嚴重依賴於這些項目的按時交付。
+            </p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="kpi-card">
+                    <div class="kpi-value">50,000+</div>
+                    <div class="kpi-label" data-lang-key="kpiRailLabel">人將重新連接鐵路</div>
+                    <p class="mt-2" data-lang-key="kpiRailText"><strong>波蒂斯黑德鐵路線</strong>重啟項目預計於2028年完工，將極大緩解交通擁堵並支持住房增長。</p>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">15M</div>
+                    <div class="kpi-label" data-lang-key="kpiAirportLabel">年客運量目標</div>
+                     <p class="mt-2" data-lang-key="kpiAirportText"><strong>布里斯托機場</strong>的擴建計劃將創造數千個就業機會，但缺乏公共交通連接是其主要挑戰。</p>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+        
+        <section id="heritage" class="my-12">
+             <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="heritageTitle">遺產作為經濟引擎：克利夫登碼頭的故事</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="heritageText">
+                歷史遺產並非靜態的遺跡，而是活躍的經濟資產。克利夫登碼頭從瀕臨拆除到由社區主導成功修復的故事，證明了保護歷史可以成為推動未來發展的強大戰略。
+            </p>
+             <div class="timeline">
+                <div class="timeline-container left">
+                    <div class="timeline-content">
+                        <h3 class="font-bold text-lg text-[#004369]" data-lang-key="timeline1Title">1869: 建造</h3>
+                        <p class="text-sm" data-lang-key="timeline1Text">為吸引維多利亞時代遊客和提供渡輪服務而建，以其優雅的設計聞名。</p>
+                    </div>
+                </div>
+                <div class="timeline-container right">
+                    <div class="timeline-content">
+                        <h3 class="font-bold text-lg text-[#004369]" data-lang-key="timeline2Title">1970: 災難性倒塌</h3>
+                        <p class="text-sm" data-lang-key="timeline2Text">在一次壓力測試中，兩個橋跨倒塌入海，碼頭面臨被永久拆除的威脅。</p>
+                    </div>
+                </div>
+                <div class="timeline-container left">
+                    <div class="timeline-content">
+                        <h3 class="font-bold text-lg text-[#004369]" data-lang-key="timeline3Title">1989: 社區救援</h3>
+                        <p class="text-sm" data-lang-key="timeline3Text">在地方發起的聲勢浩大的運動後，經過多年籌款和努力，碼頭部分重新開放。</p>
+                    </div>
+                </div>
+                <div class="timeline-container right">
+                    <div class="timeline-content">
+                        <h3 class="font-bold text-lg text-[#004369]" data-lang-key="timeline4Title">1998至今: 重獲新生</h3>
+                        <p class="text-sm" data-lang-key="timeline4Text">全面修復後，碼頭成為一級保護建築、主要旅遊景點和社區中心，為當地經濟做出積極貢獻。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#01949A]/30">
+
+        <section id="swot" class="my-12">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="swotTitle">未來展望：戰略總結 (SWOT)</h2>
+            <p class="text-center max-w-3xl mx-auto text-lg mb-8" data-lang-key="swotText">
+               北薩默塞特正處於一個關鍵的轉折點。其未來的繁榮取決於能否有效管理其內在的矛盾，平衡發展需求與環境資產的保護。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="swotS">優勢 (Strengths)</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="swotSList">
+                        <li>優越的戰略位置 (M5, 港口, 機場)</li>
+                        <li>高品質的生活環境</li>
+                        <li>多元化的經濟基礎</li>
+                        <li>高技能的勞動力</li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-red-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="swotW">劣勢 (Weaknesses)</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="swotWList">
+                        <li>住房負擔能力危機</li>
+                        <li>依賴通勤的經濟模式</li>
+                        <li>關鍵基礎設施不足</li>
+                        <li>未加入WECA的政治碎片化</li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="swotO">機遇 (Opportunities)</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="swotOList">
+                        <li>波蒂斯黑德鐵路線項目</li>
+                        <li>韋斯頓-超級-馬雷的再生</li>
+                        <li>高價值行業增長潛力</li>
+                        <li>利用遺產促進旅遊業</li>
+                    </ul>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-yellow-500">
+                    <h3 class="font-bold text-xl mb-2" data-lang-key="swotT">威脅 (Threats)</h3>
+                    <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="swotTList">
+                        <li>無法實現的住房目標</li>
+                        <li>基礎設施項目延誤或失敗</li>
+                        <li>受保護景觀受到侵蝕</li>
+                        <li>氣候變化帶來的洪水風險</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="text-center p-4 bg-[#E5DDCB] text-[#004369] mt-12">
+        <p class="text-xs" data-lang-key="footerText">資料來源：北薩默塞特：治理、經濟與未來發展綜合區域分析報告。本資訊圖表僅供說明之用。</p>
+    </footer>
+
+    <script>
+        const vibrantPalette = {
+            darkBlue: '#004369',
+            teal: '#01949A',
+            redPink: '#DB1F48',
+            beige: '#E5DDCB',
+            offWhite: '#F8F8F8'
+        };
+
+        const languageData = {
+            zh: {
+                htmlLang: 'zh-CN',
+                switchButton: 'English',
+                headerTitle: '北薩默塞特：對比鮮明的區域',
+                headerSubtitle: '在發展壓力與環境保護之間尋求平衡的綜合分析',
+                dilemmaTitle: '核心困境：無解的方程式？',
+                dilemmaText: '北薩默塞特面臨著一個根本性的挑戰。政府要求在未來15年內大幅增加住房供應，然而該地區絕大部分土地因環境因素而受到嚴格的開發限制。這一困境是所有戰略決策的核心。',
+                kpiNewHomesLabel: '套新住宅',
+                kpiNewHomesText: '政府為未來15年設定的強制性住房目標。',
+                kpiLandRestrictedLabel: '土地受限',
+                kpiLandRestrictedText: '因洪水風險、綠帶或傑出自然風景區而受保護。',
+                snapshotTitle: '區域快照：通勤者悖論',
+                snapshotText: '該地區人口不斷增長，生活品質極具吸引力，從而推高了房價。然而，本地薪資水平與高昂的生活成本並不匹配，揭示了其經濟對鄰近布里斯托的嚴重依賴。',
+                popGrowthTitle: '人口增長 (2011-2021)',
+                popGrowthText: '北薩默塞特的人口增長率（7.0%）略高於英格蘭平均水平，顯示出其作為理想居住地的吸引力。',
+                housingSalaryTitle: '收入 vs 房價',
+                housingSalaryText: '平均房價遠高於全國平均水平，而平均年薪卻較低，凸顯了住房負擔能力的危機。',
+                townsTitle: '北薩默塞特的四副面孔',
+                townsText: '該地區的四個主要城鎮各自代表了不同的發展模式和挑戰，從大規模再生到歷史遺產保護，需要量身定制的政策方針。',
+                townPopTitle: '主要城鎮人口 (2021)',
+                townPopText: '韋斯頓-超級-馬雷是最大的行政和人口中心，而波蒂斯黑德等較小城鎮則因其通勤便利性而經歷了快速增長。',
+                economyTitle: '「雙軌」經濟引擎',
+                economyText: '北薩默塞特的經濟體系呈現出雙重性：一邊是依賴環境保護的傳統行業，如旅遊和食品；另一邊是需要發展空間的現代高價值行業，如先進工程和物流。',
+                employmentSectorsTitle: '最大就業行業',
+                employmentSectorsText: '批發和零售貿易是最大的就業部門，但高價值的先進製造業和專業服務業對經濟的貢獻也至關重要。',
+                track1Title: '軌道一：保護驅動',
+                track1Text: '利用自然景觀和肥沃農田發展 <strong class="text-[#DB1F48]">旅遊業</strong> 和 <strong class="text-[#DB1F48]">食品飲料業</strong>。Yeo Valley 和 Thatchers Cider 等品牌是其代表。',
+                track2Title: '軌道二：發展驅動',
+                track2Text: '依靠近M5、港口和機場的優越位置發展 <strong class="text-[#DB1F48]">先進工程</strong> 和 <strong class="text-[#DB1F48]">物流業</strong>。這裡是歐洲最大航空航天集群的一部分。',
+                infraTitle: '基礎設施生命線',
+                infraText: '重大基礎設施項目是該地區未來發展的關鍵推動者。住房目標的實現和經濟的持續增長，嚴重依賴於這些項目的按時交付。',
+                kpiRailLabel: '人將重新連接鐵路',
+                kpiRailText: '<strong>波蒂斯黑德鐵路線</strong>重啟項目預計於2028年完工，將極大緩解交通擁堵並支持住房增長。',
+                kpiAirportLabel: '年客運量目標',
+                kpiAirportText: '<strong>布里斯托機場</strong>的擴建計劃將創造數千個就業機會，但缺乏公共交通連接是其主要挑戰。',
+                heritageTitle: '遺產作為經濟引擎：克利夫登碼頭的故事',
+                heritageText: '歷史遺產並非靜態的遺跡，而是活躍的經濟資產。克利夫登碼頭從瀕臨拆除到由社區主導成功修復的故事，證明了保護歷史可以成為推動未來發展的強大戰略。',
+                timeline1Title: '1869: 建造',
+                timeline1Text: '為吸引維多利亞時代遊客和提供渡輪服務而建，以其優雅的設計聞名。',
+                timeline2Title: '1970: 災難性倒塌',
+                timeline2Text: '在一次壓力測試中，兩個橋跨倒塌入海，碼頭面臨被永久拆除的威脅。',
+                timeline3Title: '1989: 社區救援',
+                timeline3Text: '在地方發起的聲勢浩大的運動後，經過多年籌款和努力，碼頭部分重新開放。',
+                timeline4Title: '1998至今: 重獲新生',
+                timeline4Text: '全面修復後，碼頭成為一級保護建築、主要旅遊景點和社區中心，為當地經濟做出積極貢獻。',
+                swotTitle: '未來展望：戰略總結 (SWOT)',
+                swotText: '北薩默塞特正處於一個關鍵的轉折點。其未來的繁榮取決於能否有效管理其內在的矛盾，平衡發展需求與環境資產的保護。',
+                swotS: '優勢 (Strengths)',
+                swotSList: '<li>優越的戰略位置 (M5, 港口, 機場)</li><li>高品質的生活環境</li><li>多元化的經濟基礎</li><li>高技能的勞動力</li>',
+                swotW: '劣勢 (Weaknesses)',
+                swotWList: '<li>住房負擔能力危機</li><li>依賴通勤的經濟模式</li><li>關鍵基礎設施不足</li><li>未加入WECA的政治碎片化</li>',
+                swotO: '機遇 (Opportunities)',
+                swotOList: '<li>波蒂斯黑德鐵路線項目</li><li>韋斯頓-超級-馬雷的再生</li><li>高價值行業增長潛力</li><li>利用遺產促進旅遊業</li>',
+                swotT: '威脅 (Threats)',
+                swotTList: '<li>無法實現的住房目標</li><li>基礎設施項目延誤或失敗</li><li>受保護景觀受到侵蝕</li><li>氣候變化帶來的洪水風險</li>',
+                footerText: '資料來源：北薩默塞特：治理、經濟與未來發展綜合區域分析報告。本資訊圖表僅供說明之用。',
+                charts: {
+                    popGrowth: {
+                        dataset1: '北薩默塞特',
+                        dataset2: '英格蘭 (增長率6.6%)'
+                    },
+                    housingSalary: {
+                        labels: ['北薩默塞特', '英國平均'],
+                        dataset1: '平均房價 (£)',
+                        dataset2: '平均年薪 (£)'
+                    },
+                    townPop: {
+                        labels: ['韋斯頓-超級-馬雷', '波蒂斯黑德', '克利夫登', '內爾西'],
+                        dataset1: '2021年人口'
+                    },
+                    employmentSectors: {
+                        labels: ['批發與零售貿易；汽車維修', '人類健康與社會工作', '專業、科學與技術活動', '製造業', '教育'],
+                        dataset1: '就業人數比例'
+                    }
+                }
+            },
+            en: {
+                htmlLang: 'en',
+                switchButton: '中文',
+                headerTitle: 'North Somerset: A Region of Contrasts',
+                headerSubtitle: 'A comprehensive analysis of balancing development pressure with environmental protection.',
+                dilemmaTitle: 'The Core Dilemma: An Unsolvable Equation?',
+                dilemmaText: 'North Somerset faces a fundamental challenge. Government demands for a significant increase in housing supply over the next 15 years clash with a landscape where the vast majority of land is heavily constrained by environmental factors. This dilemma is at the heart of all strategic decisions.',
+                kpiNewHomesLabel: 'New Homes',
+                kpiNewHomesText: 'The mandatory housing target set by the government for the next 15 years.',
+                kpiLandRestrictedLabel: 'Land Restricted',
+                kpiLandRestrictedText: 'Protected due to flood risk, Green Belt, or Area of Outstanding Natural Beauty status.',
+                snapshotTitle: 'Regional Snapshot: The Commuter Paradox',
+                snapshotText: 'The region\'s growing population and attractive quality of life drive up house prices. However, local salary levels do not match the high cost of living, revealing a significant economic dependency on neighbouring Bristol.',
+                popGrowthTitle: 'Population Growth (2011-2021)',
+                popGrowthText: 'North Somerset\'s population growth (7.0%) is slightly above the England average, indicating its attractiveness as a place to live.',
+                housingSalaryTitle: 'Income vs. House Prices',
+                housingSalaryText: 'The average house price is significantly higher than the national average, while the average salary is lower, highlighting a critical housing affordability crisis.',
+                townsTitle: 'The Four Faces of North Somerset',
+                townsText: 'The four main towns each represent different development patterns and challenges, from large-scale regeneration to heritage preservation, requiring tailored policy approaches.',
+                townPopTitle: 'Main Town Populations (2021)',
+                townPopText: 'Weston-super-Mare is the largest administrative and population center, while smaller towns like Portishead have seen rapid growth due to their commuter appeal.',
+                economyTitle: 'The "Dual-Track" Economic Engine',
+                economyText: 'North Somerset\'s economy exhibits a duality: traditional sectors like tourism and food, which rely on environmental protection, and modern, high-value sectors like advanced engineering and logistics, which require space to grow.',
+                employmentSectorsTitle: 'Largest Employment Sectors',
+                employmentSectorsText: 'Wholesale and retail trade is the largest employment sector, but high-value advanced manufacturing and professional services are also crucial economic contributors.',
+                track1Title: 'Track 1: Conservation-Driven',
+                track1Text: 'Leveraging the natural landscape and fertile farmland to grow <strong class="text-[#DB1F48]">Tourism</strong> and <strong class="text-[#DB1F48]">Food & Drink</strong>. Brands like Yeo Valley and Thatchers Cider are representative.',
+                track2Title: 'Track 2: Development-Driven',
+                track2Text: 'Capitalising on proximity to the M5, port, and airport to develop <strong class="text-[#DB1F48]">Advanced Engineering</strong> and <strong class="text-[#DB1F48]">Logistics</strong>. It is part of Europe\'s largest aerospace cluster.',
+                infraTitle: 'Infrastructure Lifelines',
+                infraText: 'Major infrastructure projects are critical enablers for the region\'s future. The delivery of housing targets and continued economic growth are heavily dependent on their timely completion.',
+                kpiRailLabel: 'People Reconnected to Rail',
+                kpiRailText: 'The <strong>Portishead Railway Line</strong> reopening, due 2028, will significantly ease congestion and support housing growth.',
+                kpiAirportLabel: 'Annual Passenger Target',
+                kpiAirportText: 'The <strong>Bristol Airport</strong> expansion plan will create thousands of jobs but is challenged by a lack of public transport links.',
+                heritageTitle: 'Heritage as an Economic Engine: The Story of Clevedon Pier',
+                heritageText: 'Heritage is not a static relic but an active economic asset. The story of Clevedon Pier’s journey from near-demolition to a successful community-led restoration proves that preserving history can be a powerful strategy for future growth.',
+                timeline1Title: '1869: Construction',
+                timeline1Text: 'Built to attract Victorian tourists and serve as a ferry port, famed for its elegant design.',
+                timeline2Title: '1970: Catastrophic Collapse',
+                timeline2Text: 'Two spans collapsed into the sea during a stress test, and the pier faced permanent demolition.',
+                timeline3Title: '1989: Community Rescue',
+                timeline3Text: 'After a huge local campaign, years of fundraising, and effort, the pier partially reopened.',
+                timeline4Title: '1998-Present: Rebirth',
+                timeline4Text: 'Fully restored, it is now a Grade I listed building, a major tourist attraction, and a community hub, actively contributing to the local economy.',
+                swotTitle: 'Future Outlook: Strategic Summary (SWOT)',
+                swotText: 'North Somerset is at a critical juncture. Its future prosperity depends on successfully managing its inherent contradictions, balancing the need for development against the protection of its environmental assets.',
+                swotS: 'Strengths',
+                swotSList: '<li>Prime strategic location (M5, Port, Airport)</li><li>High-quality living environment</li><li>Diverse economic base</li><li>Highly skilled workforce</li>',
+                swotW: 'Weaknesses',
+                swotWList: '<li>Housing affordability crisis</li><li>Commuter-dependent economic model</li><li>Key infrastructure deficits</li><li>Political fragmentation (non-WECA member)</li>',
+                swotO: 'Opportunities',
+                swotOList: '<li>Portishead rail line project</li><li>Regeneration of Weston-super-Mare</li><li>Growth potential in high-value sectors</li><li>Leveraging heritage for tourism</li>',
+                swotT: 'Threats',
+                swotTList: '<li>Unachievable housing targets</li><li>Failure/delay of key infrastructure projects</li><li>Erosion of protected landscapes</li><li>Flood risk from climate change</li>',
+                footerText: 'Source: North Somerset: A Comprehensive Regional Analysis of Governance, Economy, and Future Development. This infographic is for illustrative purposes only.',
+                charts: {
+                    popGrowth: {
+                        dataset1: 'North Somerset',
+                        dataset2: 'England (6.6% growth)'
+                    },
+                    housingSalary: {
+                        labels: ['North Somerset', 'UK Average'],
+                        dataset1: 'Avg. House Price (£)',
+                        dataset2: 'Avg. Annual Salary (£)'
+                    },
+                    townPop: {
+                        labels: ['Weston-super-Mare', 'Portishead', 'Clevedon', 'Nailsea'],
+                        dataset1: 'Population 2021'
+                    },
+                    employmentSectors: {
+                        labels: ['Wholesale & Retail Trade; Repair of Vehicles', 'Human Health & Social Work', 'Professional, Scientific & Technical', 'Manufacturing', 'Education'],
+                        dataset1: '% of Employment'
+                    }
+                }
+            }
+        };
+
+        function wrapLabel(str, maxWidth) {
+            if (typeof str !== 'string' || str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+
+        const commonTooltipCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            } else {
+                              return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        
+        let populationGrowthChart, housingSalaryChart, townPopulationChart, employmentSectorsChart;
+        let currentLang = 'zh';
+
+        function updateLanguage(lang) {
+            document.documentElement.lang = languageData[lang].htmlLang;
+            document.getElementById('lang-switcher').innerText = languageData[lang].switchButton;
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (languageData[lang][key]) {
+                    el.innerHTML = languageData[lang][key];
+                }
+            });
+
+            // Update charts
+            const chartLangData = languageData[lang].charts;
+
+            populationGrowthChart.data.datasets[0].label = chartLangData.popGrowth.dataset1;
+            populationGrowthChart.data.datasets[1].label = chartLangData.popGrowth.dataset2;
+            populationGrowthChart.update();
+            
+            housingSalaryChart.data.labels = chartLangData.housingSalary.labels;
+            housingSalaryChart.data.datasets[0].label = chartLangData.housingSalary.dataset1;
+            housingSalaryChart.data.datasets[1].label = chartLangData.housingSalary.dataset2;
+            housingSalaryChart.update();
+
+            townPopulationChart.data.labels = chartLangData.townPop.labels;
+            townPopulationChart.data.datasets[0].label = chartLangData.townPop.dataset1;
+            townPopulationChart.update();
+
+            employmentSectorsChart.data.labels = chartLangData.employmentSectors.labels.map(l => wrapLabel(l, 16));
+            employmentSectorsChart.data.datasets[0].label = chartLangData.employmentSectors.dataset1;
+            employmentSectorsChart.update();
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const populationGrowthCtx = document.getElementById('populationGrowthChart').getContext('2d');
+            populationGrowthChart = new Chart(populationGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2011', '2021'],
+                    datasets: [{
+                        label: '北薩默塞特',
+                        data: [202600, 216728],
+                        borderColor: vibrantPalette.redPink,
+                        backgroundColor: vibrantPalette.redPink + '33',
+                        tension: 0.1,
+                        fill: true,
+                    },
+                    {
+                        label: '英格蘭 (增長率6.6%)',
+                        data: [53012456, 56489800],
+                         borderColor: vibrantPalette.teal,
+                        backgroundColor: vibrantPalette.teal + '33',
+                        tension: 0.1,
+                        fill: false,
+                        borderDash: [5, 5]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...commonTooltipCallback,
+                    scales: {
+                         y: {
+                            beginAtZero: false,
+                             ticks: {
+                                callback: function(value, index, values) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const housingSalaryCtx = document.getElementById('housingSalaryChart').getContext('2d');
+            housingSalaryChart = new Chart(housingSalaryCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['北薩默塞特', '英國平均'],
+                    datasets: [{
+                        label: '平均房價 (£)',
+                        data: [351807, 294910],
+                        backgroundColor: vibrantPalette.darkBlue,
+                    }, {
+                        label: '平均年薪 (£)',
+                        data: [29895, 34000], 
+                        backgroundColor: vibrantPalette.teal,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...commonTooltipCallback,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, values) {
+                                    return '£' + (value / 1000) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const townPopulationCtx = document.getElementById('townPopulationChart').getContext('2d');
+            townPopulationChart = new Chart(townPopulationCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['韋斯頓-超級-馬雷', '波蒂斯黑德', '克利夫登', '內爾西'],
+                    datasets: [{
+                        label: '2021年人口',
+                        data: [84628, 26366, 21078, 15917],
+                        backgroundColor: [
+                            vibrantPalette.darkBlue,
+                            vibrantPalette.teal,
+                            vibrantPalette.redPink,
+                            vibrantPalette.beige,
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...commonTooltipCallback,
+                     plugins: {
+                        ...commonTooltipCallback.plugins,
+                        legend: {
+                            display: false
+                        }
+                    },
+                     scales: {
+                        x: {
+                            beginAtZero: true,
+                             ticks: {
+                                callback: function(value, index, values) {
+                                    return (value / 1000) + 'k';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const employmentSectorsCtx = document.getElementById('employmentSectorsChart').getContext('2d');
+            const employmentLabels = [
+                '批發與零售貿易；汽車維修',
+                '人類健康與社會工作',
+                '專業、科學與技術活動',
+                '製造業',
+                '教育'
+            ].map(label => wrapLabel(label, 16));
+
+            employmentSectorsChart = new Chart(employmentSectorsCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: employmentLabels,
+                    datasets: [{
+                        label: '就業人數比例',
+                        data: [15.2, 13.5, 12.1, 9.8, 9.5],
+                        backgroundColor: [
+                            vibrantPalette.darkBlue,
+                            vibrantPalette.teal,
+                            vibrantPalette.redPink,
+                            '#F9A826',
+                            '#A9A9A9'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...commonTooltipCallback,
+                    plugins: {
+                         ...commonTooltipCallback.plugins,
+                        legend: {
+                            position: 'bottom',
+                             labels: {
+                                boxWidth: 15
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(currentLang);
+            });
+            
+            updateLanguage('zh');
+        });
+    </script>
+</body>
+</html>
