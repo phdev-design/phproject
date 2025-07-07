@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>共生心智：BCI-XR 技術融合資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F8FF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid white;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .lang-btn.active {
+            background-color: white;
+            color: #004AAD;
+        }
+    </style>
+</head>
+<body class="text-[#333333]">
+
+    <header class="bg-[#004AAD] text-white text-center py-8 px-4 relative">
+        <div class="absolute top-4 right-4">
+            <div class="flex space-x-2 bg-black bg-opacity-20 p-1 rounded-full">
+                <button id="lang-zh" class="lang-btn">中文</button>
+                <button id="lang-en" class="lang-btn">EN</button>
+            </div>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-bold mb-4" data-lang-key="headerTitle"></h1>
+        <p class="text-xl md:text-2xl max-w-3xl mx-auto" data-lang-key="headerSubtitle"></p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="intro" class="my-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-4" data-lang-key="introTitle"></h2>
+                    <p class="text-lg" data-lang-key="introText"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-2" data-lang-key="interactionTitle"></h3>
+                    <div class="space-y-4 mt-4">
+                        <div class="p-4 bg-blue-100 rounded-lg">
+                            <h4 class="font-bold text-lg">🚀 <span data-lang-key="activeBCI"></span></h4>
+                            <p data-lang-key="activeBCIText"></p>
+                        </div>
+                        <div class="p-4 bg-blue-100 rounded-lg">
+                            <h4 class="font-bold text-lg">❤️ <span data-lang-key="passiveBCI"></span></h4>
+                            <p data-lang-key="passiveBCIText"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#58B3E3]/50">
+
+        <section id="core-tech" class="my-12">
+            <h2 class="text-3xl font-bold text-center text-[#004AAD] mb-8" data-lang-key="coreTechTitle"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="bciBridgeTitle"></h3>
+                    <p class="mb-4" data-lang-key="bciBridgeText"></p>
+                    <div class="chart-container">
+                        <canvas id="bciMethodChart"></canvas>
+                    </div>
+                    <p class="text-center mt-2 text-sm text-gray-600" data-lang-key="bciMethodChartDesc"></p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="bciWorkflowTitle"></h3>
+                    <p class="mb-4" data-lang-key="bciWorkflowText"></p>
+                    <div class="flex-grow space-y-2 flex flex-col justify-center">
+                        <div class="flex items-center space-x-4 p-3 bg-blue-50 rounded-lg">
+                            <div class="bg-[#0079C1] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
+                            <p><strong data-lang-key="workflow1Title"></strong>: <span data-lang-key="workflow1Text"></span></p>
+                        </div>
+                        <div class="text-center text-2xl text-[#0079C1]">↓</div>
+                        <div class="flex items-center space-x-4 p-3 bg-blue-50 rounded-lg">
+                            <div class="bg-[#0079C1] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
+                            <p><strong data-lang-key="workflow2Title"></strong>: <span data-lang-key="workflow2Text"></span></p>
+                        </div>
+                        <div class="text-center text-2xl text-[#0079C1]">↓</div>
+                        <div class="flex items-center space-x-4 p-3 bg-blue-50 rounded-lg">
+                             <div class="bg-[#0079C1] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
+                            <p><strong data-lang-key="workflow3Title"></strong>: <span data-lang-key="workflow3Text"></span></p>
+                        </div>
+                         <div class="text-center text-2xl text-[#0079C1]">↓</div>
+                        <div class="flex items-center space-x-4 p-3 bg-blue-50 rounded-lg">
+                            <div class="bg-[#0079C1] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">4</div>
+                            <p><strong data-lang-key="workflow4Title"></strong>: <span data-lang-key="workflow4Text"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#58B3E3]/50">
+
+        <section id="applications" class="my-12">
+            <h2 class="text-3xl font-bold text-center text-[#004AAD] mb-8" data-lang-key="applicationsTitle"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4">🏥 <span data-lang-key="appHealthTitle"></span></h3>
+                    <p class="mb-4" data-lang-key="appHealthText"></p>
+                    <div class="chart-container h-64 max-h-64">
+                        <canvas id="rehabChart"></canvas>
+                    </div>
+                    <p class="text-center mt-2 text-sm text-gray-600" data-lang-key="rehabChartDesc"></p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4">🎮 <span data-lang-key="appGamingTitle"></span></h3>
+                    <p class="mb-4" data-lang-key="appGamingText"></p>
+                     <div class="chart-container h-64 max-h-64">
+                        <canvas id="flowStateChart"></canvas>
+                    </div>
+                    <p class="text-center mt-2 text-sm text-gray-600" data-lang-key="flowStateChartDesc"></p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg md:col-span-2 lg:col-span-1">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4">✈️ <span data-lang-key="appTrainingTitle"></span></h3>
+                    <p class="mb-4" data-lang-key="appTrainingText"></p>
+                    <div class="text-center p-8 bg-blue-50 rounded-lg mt-12">
+                        <div class="text-6xl mb-4">🧠</div>
+                        <p class="text-xl font-bold text-[#004AAD]" data-lang-key="cognitiveTitle"></p>
+                        <p class="text-gray-600" data-lang-key="cognitiveText"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#58B3E3]/50">
+
+        <section id="challenges" class="my-12">
+            <h2 class="text-3xl font-bold text-center text-[#004AAD] mb-8" data-lang-key="challengesTitle"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="techBottleneckTitle"></h3>
+                    <p class="mb-4" data-lang-key="techBottleneckText"></p>
+                    <div class="chart-container h-64 max-h-64">
+                        <canvas id="bciLiteracyChart"></canvas>
+                    </div>
+                    <p class="text-center mt-2 text-sm text-gray-600" data-lang-key="bciLiteracyChartDesc"></p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="marketDilemmaTitle"></h3>
+                     <p class="mb-4" data-lang-key="marketDilemmaText"></p>
+                    <div class="flex flex-col items-center justify-center h-full p-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center p-4 border-2 border-dashed border-[#0079C1] rounded-lg">
+                                <p class="text-4xl">📱</p>
+                                <p class="font-bold" data-lang-key="hardwareAdoption"></p>
+                            </div>
+                            <div class="text-2xl font-bold text-[#004AAD] mx-4">🔁</div>
+                            <div class="text-center p-4 border-2 border-dashed border-[#58B3E3] rounded-lg">
+                                <p class="text-4xl">💡</p>
+                                <p class="font-bold" data-lang-key="killerApps"></p>
+                            </div>
+                        </div>
+                        <p class="mt-8 text-center text-gray-600" data-lang-key="marketDilemmaDesc"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-t-2 border-[#58B3E3]/50">
+
+        <section id="future" class="my-12">
+             <h2 class="text-3xl font-bold text-center text-[#004AAD] mb-8" data-lang-key="futureTitle"></h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg md:col-span-2">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="metaverseTitle"></h3>
+                    <p data-lang-key="metaverseText"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-red-600 mb-4" data-lang-key="pandoraTitle"></h3>
+                    <p class="mb-4" data-lang-key="pandoraText"></p>
+                    <div class="chart-container">
+                        <canvas id="neurosecurityChart"></canvas>
+                    </div>
+                    <p class="text-center mt-2 text-sm text-gray-600" data-lang-key="neurosecurityChartDesc"></p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col justify-center">
+                    <h3 class="text-2xl font-bold text-[#0079C1] mb-4" data-lang-key="neurorightsTitle"></h3>
+                    <p class="mb-4" data-lang-key="neurorightsText"></p>
+                    <ul class="list-disc list-inside space-y-2 text-lg">
+                        <li class="font-bold">🧠 <span data-lang-key="right1"></span></li>
+                        <li class="font-bold">👤 <span data-lang-key="right2"></span></li>
+                        <li class="font-bold">⚖️ <span data-lang-key="right3"></span></li>
+                        <li class="font-bold">🛡️ <span data-lang-key="right4"></span></li>
+                    </ul>
+                    <p class="mt-4 text-gray-600" data-lang-key="neurorightsDesc"></p>
+                </div>
+             </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#004AAD] text-white text-center p-6 mt-12">
+        <p data-lang-key="footerText"></p>
+    </footer>
+
+    <script>
+        const translations = {
+            en: {
+                headerTitle: "Symbiotic Mind",
+                headerSubtitle: "The revolutionary fusion of Brain-Computer Interfaces (BCI) and Extended Reality (XR) is pioneering a new era of human-computer interaction.",
+                introTitle: "Not Just an Addition, But a Symbiosis",
+                introText: "The fusion of BCI-XR is not a simple technological addition but a symbiotic relationship. BCI provides XR with unprecedented 'mind-control' and 'emotional sensing' interaction dimensions; conversely, XR offers a rich, controllable, and safe application environment for BCI. Its value lies not in replacing the mouse, but in creating entirely new interaction possibilities.",
+                interactionTitle: "Key Interaction Modes",
+                activeBCI: "Active BCI",
+                activeBCIText: "Directly control virtual objects through intention.",
+                passiveBCI: "Passive BCI",
+                passiveBCIText: "Monitor cognition and emotion to dynamically adapt the experience.",
+                coreTechTitle: "Core Technology Analysis",
+                bciBridgeTitle: "BCI: A Neural Bridge",
+                bciBridgeText: "BCI establishes direct communication between the brain and external devices, but signal quality is key. Non-invasive EEG has become mainstream due to its safety, yet it faces the immense challenge of low signal-to-noise ratio.",
+                bciMethodChartDesc: "This chart compares the performance of different BCI methods on key metrics, highlighting the fundamental trade-off between invasive and non-invasive technologies.",
+                bciWorkflowTitle: "BCI Workflow",
+                bciWorkflowText: "From raw brainwaves to concrete commands, a BCI system follows a standardized process to transform abstract intentions into virtual actions.",
+                workflow1Title: "Signal Acquisition",
+                workflow1Text: "Capture brain signals via EEG sensors.",
+                workflow2Title: "Preprocessing & Feature Extraction",
+                workflow2Text: "Filter noise and identify meaningful patterns.",
+                workflow3Title: "Signal Decoding",
+                workflow3Text: "Translate features into commands using machine learning.",
+                workflow4Title: "Command Output & Feedback",
+                workflow4Text: "Execute action in XR and present the result.",
+                applicationsTitle: "World-Changing Application Landscape",
+                appHealthTitle: "Healthcare",
+                appHealthText: "BCI-XR revolutionizes neurorehabilitation. Through 'gamified therapy,' it leverages neuroplasticity to significantly enhance the engagement and recovery outcomes for stroke and spinal cord injury patients.",
+                rehabChartDesc: "Gamified rehabilitation significantly boosts patient motivation and adherence, key pain points of traditional therapy.",
+                appGamingTitle: "Affective Gaming",
+                appGamingText: "Games are no longer static challenges but can 'read' the player's mind. Passive BCI monitors player emotions to dynamically adjust game difficulty, music, and even plot, creating the ultimate personalized immersive experience.",
+                flowStateChartDesc: "The adaptive system aims to keep the player in a 'flow state,' the optimal balance between challenge and skill.",
+                appTrainingTitle: "High-Stakes Training",
+                appTrainingText: "In military and aviation, cognitive overload is a primary cause of fatal errors. BCI acts as a 'cognitive sentinel,' monitoring the operator's mental state in real-time and intelligently adjusting information display in AR to prevent overload.",
+                cognitiveTitle: "Cognitive Load Monitoring",
+                cognitiveText: "When load is too high, the system automatically simplifies the interface and highlights key threats.",
+                challengesTitle: "Bridging the Reality Gap: Key Challenges",
+                techBottleneckTitle: "Technical Bottlenecks: Accuracy & Usability",
+                techBottleneckText: "Non-invasive BCI is still plagued by low signal-to-noise ratio, latency, and accuracy issues. Furthermore, 15-30% of users struggle to produce reliable control signals, a phenomenon known as 'BCI illiteracy.'",
+                bciLiteracyChartDesc: "The 'BCI illiteracy' phenomenon is a major obstacle to achieving universal BCI control.",
+                marketDilemmaTitle: "Market Dilemma: Chicken and Egg",
+                marketDilemmaText: "The market is caught in a vicious cycle: the lack of killer apps hinders hardware adoption, and low hardware adoption discourages developers, limiting ecosystem growth.",
+                hardwareAdoption: "Low Hardware Adoption",
+                killerApps: "Few Killer Apps",
+                marketDilemmaDesc: "Breaking this cycle requires investment from platform-level players or a breakthrough in a niche market like healthcare.",
+                futureTitle: "Future Horizons: Enhancement, Metaverse & Ethics",
+                metaverseTitle: "The Ultimate Interface for the Metaverse & Cognitive Enhancement",
+                metaverseText: "In the long term, BCI is poised to become the most natural and seamless interaction layer for the metaverse. It will also move beyond 'restoration' to 'enhancing' the cognitive abilities (like memory and learning) of healthy individuals. However, this bright future is accompanied by profound ethical and security challenges.",
+                pandoraTitle: "Pandora's Box: Neurosecurity Threats",
+                pandoraText: "BCI introduces entirely new threats. 'Brainjacking' could steal thoughts, and 'adversarial attacks' could manipulate the system. Protecting the privacy and autonomy of neural data has become as urgent as the technological development itself.",
+                neurosecurityChartDesc: "This assessment of different neurosecurity threats highlights the significant risks of malicious manipulation and privacy breaches.",
+                neurorightsTitle: "The Call for Neuro-rights",
+                neurorightsText: "To address potential risks, an emerging legal and ethical framework—Neuro-rights—has been proposed. It aims to protect fundamental individual rights, ensuring the sanctity of the mental realm.",
+                right1: "Mental Privacy",
+                right2: "Personal Identity & Free Will",
+                right3: "Fair Access to Augmentation",
+                right4: "Protection from Algorithmic Bias",
+                neurorightsDesc: "Establishing a robust governance framework is a prerequisite for ensuring this powerful technology benefits society safely and ethically.",
+                footerText: "© 2025 Symbiotic Mind Industry Analysis. This infographic is generated based on a comprehensive industry report."
+            },
+            zh: {
+                headerTitle: "共生心智",
+                headerSubtitle: "腦機介面 (BCI) 與延展實境 (XR) 的革命性融合，正在開創人機互動的全新紀元。",
+                introTitle: "不只是疊加，而是共生",
+                introText: "BCI-XR 的融合並非簡單的技術相加，而是一種共生關係。BCI 為 XR 提供了前所未有的「心控」與「情感感知」互動維度；反之，XR 為 BCI 提供了豐富、可控且安全的應用環境。其價值不在於取代滑鼠，而在於開創全新的互動可能性。",
+                interactionTitle: "關鍵互動模式",
+                activeBCI: "主動式BCI",
+                activeBCIText: "透過意念直接控制虛擬物件。",
+                passiveBCI: "被動式BCI",
+                passiveBCIText: "監測認知與情感，動態適應體驗。",
+                coreTechTitle: "核心技術解析",
+                bciBridgeTitle: "腦機介面 (BCI)：一座神經橋樑",
+                bciBridgeText: "BCI 在大腦與外部設備間建立直接通訊，但信號品質是關鍵。非侵入式 EEG 因其安全性而成為主流，卻也面臨信噪比低的巨大挑戰。",
+                bciMethodChartDesc: "此圖表比較了不同 BCI 方法在關鍵指標上的表現，凸顯了侵入式與非侵入式技術間的根本性權衡。",
+                bciWorkflowTitle: "BCI 工作流程",
+                bciWorkflowText: "從原始腦波到具體指令，BCI 系統遵循一個標準化的處理流程，將抽象意圖轉化為虛擬行動。",
+                workflow1Title: "信號採集",
+                workflow1Text: "透過 EEG 感測器捕捉腦電信號。",
+                workflow2Title: "預處理 & 特徵提取",
+                workflow2Text: "濾除噪聲，辨識有意義的模式。",
+                workflow3Title: "信號解碼",
+                workflow3Text: "利用機器學習演算法轉譯為指令。",
+                workflow4Title: "指令輸出 & 回饋",
+                workflow4Text: "在 XR 中執行操作並呈現結果。",
+                applicationsTitle: "改變世界的應用版圖",
+                appHealthTitle: "醫療保健",
+                appHealthText: "BCI-XR 為神經復健帶來革命。透過「遊戲化治療」，它利用神經可塑性，極大提升了中風、脊髓損傷患者的參與度和康復效果。",
+                rehabChartDesc: "遊戲化復健顯著提升了患者的動機與依從性，這是傳統療法的關鍵痛點。",
+                appGamingTitle: "情感遊戲",
+                appGamingText: "遊戲不再只是靜態挑戰，而是能「讀懂」玩家內心。被動式 BCI 監測玩家情緒，動態調整遊戲難度、音樂甚至劇情，創造極致的個人化沉浸體驗。",
+                flowStateChartDesc: "適應性系統旨在讓玩家保持在「心流」狀態，即挑戰與技能的最佳平衡點。",
+                appTrainingTitle: "高風險訓練",
+                appTrainingText: "在軍事、航空領域，認知負荷過載是致命失誤的主因。BCI 扮演「認知哨兵」，即時監測操作員的精神狀態，在 AR 介面中智慧調整資訊呈現，防止資訊過載。",
+                cognitiveTitle: "認知負荷監測",
+                cognitiveText: "負荷過高時，系統自動簡化介面，高亮關鍵威脅。",
+                challengesTitle: "彌合現實鴻溝：關鍵挑戰",
+                techBottleneckTitle: "技術瓶頸：準確性與可用性",
+                techBottleneckText: "非侵入式 BCI 仍受低信噪比、延遲和準確性問題的困擾。此外，有 15-30% 的使用者難以產生可靠控制信號，即「BCI 文盲」現象。",
+                bciLiteracyChartDesc: "「BCI文盲」現象是實現普適性 BCI 控制的一大障礙。",
+                marketDilemmaTitle: "商業困境：雞生蛋，蛋生雞",
+                marketDilemmaText: "市場陷入了一個惡性循環：缺乏殺手級應用阻礙了硬體普及，而低硬體普及率又讓開發者望而卻步，限制了生態的發展。",
+                hardwareAdoption: "硬體普及率低",
+                killerApps: "殺手級應用少",
+                marketDilemmaDesc: "打破此循環需要平台級玩家的投入或在利基市場（如醫療）取得突破。",
+                futureTitle: "未來地平線：增強、元宇宙與倫理",
+                metaverseTitle: "元宇宙的終極介面與認知增強",
+                metaverseText: "長遠來看，BCI 有望成為元宇宙中最自然、最無縫的互動層，並超越「恢復」功能，進入「增強」健康個體認知能力（如記憶、學習）的全新領域。然而，這一光明前景伴隨著深刻的倫理與安全挑戰。",
+                pandoraTitle: "潘朵拉的盒子：神經安全威脅",
+                pandoraText: "BCI 引入了全新的威脅。「腦部劫持」可能竊取思想，「對抗性攻擊」能操縱系統。保護神經數據的隱私和自主權，已成為與技術發展同等重要的迫切任務。",
+                neurosecurityChartDesc: "不同神經安全威脅的嚴重性評估，凸顯了惡意操縱和隱私洩露的巨大風險。",
+                neurorightsTitle: "神經權利 (Neuro-rights) 的呼籲",
+                neurorightsText: "為應對潛在風險，一個新興的法律與倫理框架——神經權利——應運而生，旨在保護個人的基本權利，確保心靈領域的神聖不可侵犯。",
+                right1: "精神隱私權",
+                right2: "個人自主權",
+                right3: "公平近用權",
+                right4: "免受演算法偏見影響的權利",
+                neurorightsDesc: "建立健全的治理框架是確保這項強大技術能安全、合乎倫理地造福社會的前提。",
+                footerText: "© 2025 共生心智產業分析。此資訊圖表基於綜合產業報告生成。"
+            }
+        };
+
+        const chartTranslations = {
+            en: {
+                bciMethod: {
+                    title: 'BCI Signal Acquisition Method Comparison',
+                    yLabel: 'Relative Score (0-100)',
+                    labels: ['Invasive BCI (e.g., ECoG)', 'Non-Invasive BCI (e.g., EEG)'],
+                    datasets: ['Signal Quality (SNR)', 'Spatial Resolution', 'Risk/Invasiveness']
+                },
+                rehab: {
+                    title: 'Patient Engagement in BCI-XR Rehabilitation',
+                    labels: ['High Engagement', 'Moderate Engagement', 'Low Engagement']
+                },
+                flowState: {
+                    title: 'Flow State Adaptation in Affective Gaming',
+                    yLabel: 'Load/Difficulty Level',
+                    datasets: ["Player's Cognitive Load", 'Game Difficulty (System Adapted)', 'Flow Channel (Optimal Experience)']
+                },
+                bciLiteracy: {
+                    title: 'BCI User Performance Distribution',
+                    labels: ['Can Produce Reliable Signals (approx. 70-85%)', 'BCI Illiteracy (approx. 15-30%)']
+                },
+                neurosecurity: {
+                    title: 'Neurosecurity Threat Assessment',
+                    label: 'Threat Severity',
+                    labels: [['Brainjacking', '(Malicious Control)'], 'Adversarial Attacks', ['Privacy Leakage', '(Thought Theft)'], 'Data Misuse', ['Denial of Service', '(System Paralysis)']]
+                }
+            },
+            zh: {
+                bciMethod: {
+                    title: 'BCI 信號採集方法比較',
+                    yLabel: '相對評分 (0-100)',
+                    labels: ['侵入式 BCI (如 ECoG)', '非侵入式 BCI (如 EEG)'],
+                    datasets: ['信號品質 (SNR)', '空間解析度', '風險/侵入性']
+                },
+                rehab: {
+                    title: 'BCI-XR 復健中的患者參與度',
+                    labels: ['高度參與', '中度參與', '低度參與']
+                },
+                flowState: {
+                    title: '情感遊戲中的心流狀態適應',
+                    yLabel: '負荷/難度等級',
+                    datasets: ['玩家認知負荷', '遊戲難度 (系統適應)', '心流通道 (最佳體驗)']
+                },
+                bciLiteracy: {
+                    title: 'BCI 使用者性能分佈',
+                    labels: ['可產生可靠信號 (約70-85%)', 'BCI 文盲 (約15-30%)']
+                },
+                neurosecurity: {
+                    title: '神經安全威脅評估',
+                    label: '威脅嚴重性',
+                    labels: [['腦部劫持', '(惡意操縱)'], '對抗性攻擊', ['隱私洩露', '(思想竊取)'], '數據濫用', ['阻斷服務', '(系統癱瘓)']]
+                }
+            }
+        };
+
+        let currentLanguage = 'zh';
+        let chartInstances = {};
+
+        const brilliantBlues = {
+            deepBlue: '#004AAD',
+            brightBlue: '#0079C1',
+            lightBlue: '#58B3E3',
+            white: '#FFFFFF',
+            aliceBlue: '#F0F8FF',
+            darkGray: '#333333',
+            red: '#E53E3E'
+        };
+
+        function wrapLabels(label, maxWidth) {
+            if (Array.isArray(label)) return label; 
+            const words = label.split(' ');
+            if (words.length === 1) return label;
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 < maxWidth) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: brilliantBlues.darkGray,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            }
+        };
+        
+        function destroyCharts() {
+            Object.values(chartInstances).forEach(chart => chart.destroy());
+            chartInstances = {};
+        }
+
+        function renderCharts(lang) {
+            destroyCharts();
+            const ct = chartTranslations[lang];
+
+            chartInstances.bciMethodChart = new Chart(document.getElementById('bciMethodChart'), {
+                type: 'bar',
+                data: {
+                    labels: ct.bciMethod.labels,
+                    datasets: [{
+                        label: ct.bciMethod.datasets[0], data: [90, 25], backgroundColor: brilliantBlues.brightBlue,
+                    }, {
+                        label: ct.bciMethod.datasets[1], data: [85, 30], backgroundColor: brilliantBlues.lightBlue,
+                    }, {
+                        label: ct.bciMethod.datasets[2], data: [95, 5], backgroundColor: brilliantBlues.red,
+                    }]
+                },
+                options: { ...defaultChartOptions, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: ct.bciMethod.yLabel } } }, plugins: { ...defaultChartOptions.plugins, title: { display: true, text: ct.bciMethod.title, color: brilliantBlues.darkGray, font: { size: 16 } } } }
+            });
+            
+            chartInstances.rehabChart = new Chart(document.getElementById('rehabChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ct.rehab.labels,
+                    datasets: [{ data: [75, 20, 5], backgroundColor: [brilliantBlues.brightBlue, brilliantBlues.lightBlue, '#D1E9F8'], borderColor: brilliantBlues.white, borderWidth: 4 }]
+                },
+                options: { ...defaultChartOptions, cutout: '60%', plugins: { ...defaultChartOptions.plugins, title: { display: true, text: ct.rehab.title, color: brilliantBlues.darkGray, font: { size: 16 } } } }
+            });
+
+            chartInstances.flowStateChart = new Chart(document.getElementById('flowStateChart'), {
+                type: 'line',
+                data: {
+                    labels: lang === 'zh' ? ['開始', '5分鐘', '10分鐘', '15分鐘', '20分鐘', '25分鐘'] : ['Start', '5 min', '10 min', '15 min', '20 min', '25 min'],
+                    datasets: [
+                        { label: ct.flowState.datasets[0], data: [30, 45, 80, 60, 55, 75], borderColor: brilliantBlues.brightBlue, tension: 0.4, fill: false }, 
+                        { label: ct.flowState.datasets[1], data: [40, 40, 70, 50, 50, 65], borderColor: brilliantBlues.lightBlue, borderDash: [5, 5], tension: 0.4, fill: false },
+                        { label: ct.flowState.datasets[2], data: [20, 20, 20, 20, 20, 20], backgroundColor: 'rgba(92, 196, 92, 0.1)', pointRadius: 0, fill: '+1' },
+                        { label: '', data: [80, 80, 80, 80, 80, 80], backgroundColor: 'rgba(92, 196, 92, 0.1)', pointRadius: 0, fill: '-1' }
+                    ]
+                },
+                options: { ...defaultChartOptions, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: ct.flowState.yLabel } } }, plugins: { ...defaultChartOptions.plugins, title: { display: true, text: ct.flowState.title, color: brilliantBlues.darkGray, font: { size: 16 } }, filler: { propagate: true } } }
+            });
+
+            chartInstances.bciLiteracyChart = new Chart(document.getElementById('bciLiteracyChart'), {
+                type: 'pie',
+                data: {
+                    labels: ct.bciLiteracy.labels.map(l => wrapLabels(l, 16)),
+                    datasets: [{ data: [78, 22], backgroundColor: [brilliantBlues.brightBlue, brilliantBlues.red], borderColor: brilliantBlues.white, borderWidth: 4 }]
+                },
+                options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, title: { display: true, text: ct.bciLiteracy.title, color: brilliantBlues.darkGray, font: { size: 16 } } } }
+            });
+
+            chartInstances.neurosecurityChart = new Chart(document.getElementById('neurosecurityChart'), {
+                type: 'radar',
+                data: {
+                    labels: ct.neurosecurity.labels,
+                    datasets: [{ label: ct.neurosecurity.label, data: [9, 8, 9.5, 7, 6], backgroundColor: 'rgba(229, 62, 62, 0.2)', borderColor: brilliantBlues.red, pointBackgroundColor: brilliantBlues.red, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: brilliantBlues.red }]
+                },
+                options: { ...defaultChartOptions, scales: { r: { beginAtZero: true, max: 10, angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, pointLabels: { color: brilliantBlues.darkGray, font: { size: 12 } }, ticks: { backdropColor: 'transparent', color: brilliantBlues.darkGray } } }, plugins: { ...defaultChartOptions.plugins, title: { display: true, text: ct.neurosecurity.title, color: brilliantBlues.darkGray, font: { size: 16 } } } }
+            });
+        }
+
+        function updateTextContent(lang) {
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        }
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('bci-xr-lang', lang);
+            
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            updateTextContent(lang);
+            renderCharts(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('bci-xr-lang') || 'zh';
+            
+            document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+            document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+
+            switchLanguage(savedLang);
+        });
+
+    </script>
+</body>
+</html>
