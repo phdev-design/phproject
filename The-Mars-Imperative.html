@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火星任務：殖民與生命探尋</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #0B132B;
+            color: #EFEFEF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .text-accent {
+            color: #5BC0BE;
+        }
+        .bg-card {
+            background-color: #1C2541;
+        }
+        .bg-card-deep {
+            background-color: #0c1a32;
+        }
+        .border-accent {
+            border-color: #3A506B;
+        }
+        .stat-card h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #5BC0BE;
+            margin-bottom: 0.5rem;
+        }
+        .stat-card p.stat {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+        .stat-card p.context {
+            font-size: 0.875rem;
+            color: #bdc5d1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="py-12 md:py-20 text-center bg-card-deep relative">
+        <div class="absolute top-4 right-4">
+            <button id="lang-switcher" class="bg-accent text-white font-bold py-2 px-4 rounded-lg bg-blue-500 hover:bg-blue-700 transition-colors" data-lang-key="lang_button">切換至英文</button>
+        </div>
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-4xl md:text-6xl font-black mb-4 text-white" data-lang-key="main_title">火星任務與宇宙叩問</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-300" data-lang-key="main_subtitle">分析人類擴展至火星的可能性與挑戰，以及尋找外星生命的深遠意義。</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="why-mars" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="chapter1_title">第一章：火星邊疆</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300" data-lang-key="chapter1_intro">驅動我們望向紅色星球的力量是複雜的，交織著生存的渴望、經濟的潛力、科學的好奇心以及地緣政治的競爭。</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <div class="bg-card rounded-lg shadow-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-accent" data-lang-key="nasa_title">NASA：月球到火星的穩健藍圖</h3>
+                        <p class="mb-4 text-gray-300" data-lang-key="nasa_desc">NASA 採用一種深思熟慮的階段性方法，將月球作為關鍵試驗場。阿提米絲計畫旨在測試長期生命支持、地表棲息地和遠程操作，為 2030 年代末或 2040 年代的首次載人火星任務奠定基礎。</p>
+                    </div>
+                    <div class="text-sm space-y-3 mt-4">
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="nasa_phase1_label">第一階段:</span><span data-lang-key="nasa_phase1_text">阿提米絲 I (已完成) - 無人繞月</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="nasa_phase2_label">第二階段:</span><span data-lang-key="nasa_phase2_text">阿提米絲 II (~2026) - 載人繞月</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="nasa_phase3_label">第三階段:</span><span data-lang-key="nasa_phase3_text">阿提米絲 III (~2027) - 載人登月</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="nasa_phase4_label">第四階段:</span><span data-lang-key="nasa_phase4_text">月球門戶與基地 (~2028+)</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="nasa_goal_label">最終目標:</span><span class="text-white font-bold" data-lang-key="nasa_goal_text">載人火星任務 (2030s/40s)</span></div>
+                    </div>
+                </div>
+
+                <div class="bg-card rounded-lg shadow-2xl p-6 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-accent" data-lang-key="spacex_title">SpaceX：直達火星的宏大願景</h3>
+                        <p class="mb-4 text-gray-300" data-lang-key="spacex_desc">SpaceX 的策略核心是完全可重複使用的星艦系統，旨在快速迭代並實現大規模運輸。其目標是繞過月球，直接在火星建立一個百萬人口的自給自足城市，最早於 2020 年代末進行首次載人登陸。</p>
+                    </div>
+                     <div class="text-sm space-y-3 mt-4">
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="spacex_step1_label">第一步:</span><span data-lang-key="spacex_step1_text">星艦軌道飛行測試 (進行中)</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="spacex_step2_label">第二步:</span><span data-lang-key="spacex_step2_text">無人貨運星艦登陸 (~2026)</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="spacex_step3_label">第三步:</span><span data-lang-key="spacex_step3_text">建立先驅基地</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="spacex_step4_label">第四步:</span><span data-lang-key="spacex_step4_text">首次載人登陸 (2020s 末)</span></div>
+                        <div class="flex items-center"><span class="font-bold text-accent mr-2 w-24" data-lang-key="spacex_goal_label">最終目標:</span><span class="text-white font-bold" data-lang-key="spacex_goal_text">自給自足的百萬人口城市</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="challenges" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="chapter2_title">第二章：生存的挑戰</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300" data-lang-key="chapter2_intro">在火星上建立永久基地需要克服巨大的生理、技術和環境障礙。每一個挑戰都考驗著人類的智慧與韌性。</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                <div class="bg-card rounded-lg p-6 stat-card text-center shadow-2xl">
+                    <h3 data-lang-key="stat_bone">骨質流失</h3>
+                    <p class="stat">1-2% / <span data-lang-key="stat_month">每月</span></p>
+                    <p class="context" data-lang-key="stat_bone_desc">在微重力下，骨密度流失率與地球上的老年人相當，對抗措施至關重要。</p>
+                </div>
+                <div class="bg-card rounded-lg p-6 stat-card text-center shadow-2xl">
+                    <h3 data-lang-key="stat_radiation">輻射劑量</h3>
+                    <p class="stat">x 100 <span data-lang-key="stat_times">倍</span></p>
+                    <p class="context" data-lang-key="stat_radiation_desc">火星表面的輻射劑量約為地球的100倍，顯著增加癌症等健康風險。</p>
+                </div>
+                <div class="bg-card rounded-lg p-6 stat-card text-center shadow-2xl">
+                    <h3 data-lang-key="stat_delay">通訊延遲</h3>
+                    <p class="stat">~24 <span data-lang-key="stat_minutes">分鐘</span></p>
+                    <p class="context" data-lang-key="stat_delay_desc">單程通訊延遲使得與地球的即時對話不可能，對心理和操作構成巨大挑戰。</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-card rounded-lg p-6 shadow-2xl">
+                    <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="isru_title">就地取材：氧氣與燃料的生產</h3>
+                    <p class="text-sm text-gray-300 mb-4 text-center" data-lang-key="isru_desc">利用火星大氣製造生命所需資源是實現自給自足的關鍵。MOXIE實驗已成功驗證了從$CO_2$中生產氧氣的可行性。</p>
+                    <div class="flow-container space-y-4">
+                        <div class="p-4 bg-card-deep rounded-lg text-center">
+                            <p class="font-bold" data-lang-key="isru_flow1_title">1. 大氣捕獲</p>
+                            <p class="text-xs text-gray-400" data-lang-key="isru_flow1_desc">收集火星大氣 (96% $CO_2$)</p>
+                        </div>
+                        <div class="text-center text-accent text-2xl font-bold">↓</div>
+                        <div class="flex gap-4">
+                            <div class="flex-1 p-4 bg-card-deep rounded-lg text-center">
+                                <p class="font-bold">MOXIE (<span data-lang-key="isru_moxie_process">固態電解</span>)</p>
+                                <p class="text-xs text-gray-400">$CO_2 \rightarrow C + O_2$</p>
+                                <p class="mt-2 font-bold text-white" data-lang-key="isru_moxie_result">→ 呼吸用氧氣</p>
+                            </div>
+                            <div class="flex-1 p-4 bg-card-deep rounded-lg text-center">
+                                <p class="font-bold" data-lang-key="isru_sabatier_process">薩巴蒂爾反應</p>
+                                <p class="text-xs text-gray-400">$CO_2 + 4H_2 \rightarrow CH_4 + 2H_2O$</p>
+                                <p class="mt-2 font-bold text-white" data-lang-key="isru_sabatier_result">→ 甲烷燃料 & 水</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-card rounded-lg p-6 shadow-2xl">
+                     <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="life_support_title">閉環維生系統效率</h3>
+                    <p class="text-sm text-gray-300 mb-4 text-center" data-lang-key="life_support_desc">對於長期任務，高效回收空氣和水是生存的根本。系統效率的提升是從依賴性前哨站邁向自給自足殖民地的關鍵。</p>
+                    <div class="chart-container"><canvas id="lifeSupportChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="search-for-life" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="chapter3_title">第三章：尋找宇宙同伴</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300" data-lang-key="chapter3_intro">超越火星，我們將目光投向更廣闊的宇宙，使用多種方法搜尋地外生命的跡象，無論是微生物還是智慧文明。</p>
+            <div class="bg-card rounded-lg p-6 shadow-2xl">
+                <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="detection_methods_title">生命探測方法比較</h3>
+                <p class="text-sm text-gray-300 mb-6 text-center" data-lang-key="detection_methods_desc">每種探測方法都有其獨特的目標和局限性，從竊聽宇宙對話到分析遙遠行星的大氣成分。</p>
+                <div class="chart-container h-96"><canvas id="detectionMethodsChart"></canvas></div>
+            </div>
+            
+            <div class="mt-8 bg-card rounded-lg p-6 shadow-2xl">
+                <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="drake_title">德雷克方程式：一個機率框架</h3>
+                <p class="text-sm text-gray-300 mb-6 text-center" data-lang-key="drake_desc">此方程式並非用於計算精確數字，而是將「銀河系中存在多少個可探測文明」這個大問題，分解為一系列更易於思考的機率因素。</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-center text-xs">
+                    <div class="p-2 bg-card-deep rounded">N =</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_r" title="銀河系恆星形成速率">R*</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_fp" title="擁有行星的恆星比例">fp</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_ne" title="宜居帶行星數量">ne</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_fl" title="生命演化出的行星比例">fl</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_fi" title="演化出智慧的生命比例">fi</div>
+                    <div class="p-2 bg-card-deep rounded" data-lang-key="drake_fc" title="發展出技術的文明比例">fc</div>
+                    <div class="p-2 bg-card-deep rounded col-span-2 md:col-span-1" data-lang-key="drake_l" title="技術文明持續時間">L</div>
+                </div>
+                <p class="text-center text-gray-400 text-sm mt-4" data-lang-key="drake_fermi">至今，N的數值仍是未知數，這引出了著名的「費米悖論」：如果宇宙充滿生命，那它們在哪裡？</p>
+            </div>
+        </section>
+        
+        <section id="implications" class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-2" data-lang-key="chapter4_title">第四章：哥白尼的回響</h2>
+            <p class="text-center max-w-3xl mx-auto mb-12 text-gray-300" data-lang-key="chapter4_intro">發現任何形式的地外生命，都將從根本上改變我們對自身在宇宙中位置的看法，其影響將遍及科學、哲學、宗教和社會的每一個角落。</p>
+            
+            <h3 class="text-xl font-bold text-center mb-6" data-lang-key="impact_spectrum_title">發現的影響光譜</h3>
+            <div class="space-y-6">
+                <div class="bg-card rounded-lg shadow-2xl p-6 border-l-4 border-accent">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impact_level1_title">第一級：已滅絕的微生物生命 (例如，火星化石)</h4>
+                    <p class="text-gray-300" data-lang-key="impact_level1_desc">影響主要是科學和哲學層面。它證明生命並非地球獨有，將是一次深刻但可控的範式轉移，挑戰人類中心主義，但不會構成直接威脅。</p>
+                </div>
+                 <div class="bg-card rounded-lg shadow-2xl p-6 border-l-4 border-yellow-400">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impact_level2_title">第二級：現存的微生物生命 (例如，歐羅巴海洋)</h4>
+                    <p class="text-gray-300" data-lang-key="impact_level2_desc">影響更為顯著，意味著宇宙*現在*是充滿生機的。這將引發關於行星保護和潛在污染的迫切倫理問題，使宇宙不再那麼空曠。</p>
+                </div>
+                 <div class="bg-card rounded-lg shadow-2xl p-6 border-l-4 border-red-500">
+                    <h4 class="font-bold text-lg mb-2" data-lang-key="impact_level3_title">第三級：智慧生命 (例如，SETI信號)</h4>
+                    <p class="text-gray-300" data-lang-key="impact_level3_desc">影響是物種級別的、變革性的，且可能混亂。它將挑戰一切：我們的文化、宗教、安全以及我們作為主導技術物種的地位。其影響將不可逆轉地改變人類社會。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="bg-card-deep rounded-lg shadow-2xl p-8">
+            <h2 class="text-3xl font-bold text-center mb-4" data-lang-key="chapter5_title">最終章：雙重使命的抉擇</h2>
+            <p class="text-center max-w-3xl mx-auto mb-6 text-gray-300" data-lang-key="chapter5_intro">我們正處於一個歷史的十字路口，面臨著一對偉大但相互競爭的目標。</p>
+            <div class="flex flex-col md:flex-row gap-8 text-center">
+                <div class="flex-1">
+                    <div class="text-6xl mb-4">🧑‍🚀</div>
+                    <h3 class="text-2xl font-bold mb-2 text-accent" data-lang-key="mission_expand_title">擴展與殖民</h3>
+                    <p class="text-gray-300" data-lang-key="mission_expand_desc">將人類發展為多行星物種，以確保意識的長遠存續。這是一個以工程、建設和人類定居為核心的宏大目標。</p>
+                </div>
+                <div class="flex items-center justify-center text-4xl font-bold text-gray-500">VS</div>
+                <div class="flex-1">
+                    <div class="text-6xl mb-4">🔬</div>
+                    <h3 class="text-2xl font-bold mb-2 text-accent" data-lang-key="mission_protect_title">保護與探尋</h3>
+                    <p class="text-gray-300" data-lang-key="mission_protect_desc">保護火星等潛在宜居世界的原始狀態，以便進行明確的土著生命科學搜尋。這是一個以保護、發現和倫理為核心的科學使命。</p>
+                </div>
+            </div>
+            <p class="text-center max-w-3xl mx-auto mt-8 text-gray-400" data-lang-key="mission_conclusion">殖民化是最終極的污染行為，而科學探尋要求絕對的純淨。在未來十年，我們在任務架構和行星保護政策上所做的選擇，將決定哪個使命佔據優先地位，並塑造人類的宇宙未來。</p>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 mt-12 border-t border-accent">
+        <p class="text-sm text-gray-400" data-lang-key="footer_source">資料來源：火星任務與宇宙叩問：人類擴展至火星及尋找外星生命之分析報告。</p>
+    </footer>
+
+    <script>
+        const langData = {
+            zh: {
+                title: '火星任務：殖民與生命探尋',
+                lang_button: 'Switch to English',
+                main_title: '火星任務與宇宙叩問',
+                main_subtitle: '分析人類擴展至火星的可能性與挑戰，以及尋找外星生命的深遠意義。',
+                chapter1_title: '第一章：火星邊疆',
+                chapter1_intro: '驅動我們望向紅色星球的力量是複雜的，交織著生存的渴望、經濟的潛力、科學的好奇心以及地緣政治的競爭。',
+                nasa_title: 'NASA：月球到火星的穩健藍圖',
+                nasa_desc: 'NASA 採用一種深思熟慮的階段性方法，將月球作為關鍵試驗場。阿提米絲計畫旨在測試長期生命支持、地表棲息地和遠程操作，為 2030 年代末或 2040 年代的首次載人火星任務奠定基礎。',
+                nasa_phase1_label: '第一階段:', nasa_phase1_text: '阿提米絲 I (已完成) - 無人繞月',
+                nasa_phase2_label: '第二階段:', nasa_phase2_text: '阿提米絲 II (~2026) - 載人繞月',
+                nasa_phase3_label: '第三階段:', nasa_phase3_text: '阿提米絲 III (~2027) - 載人登月',
+                nasa_phase4_label: '第四階段:', nasa_phase4_text: '月球門戶與基地 (~2028+)',
+                nasa_goal_label: '最終目標:', nasa_goal_text: '載人火星任務 (2030s/40s)',
+                spacex_title: 'SpaceX：直達火星的宏大願景',
+                spacex_desc: 'SpaceX 的策略核心是完全可重複使用的星艦系統，旨在快速迭代並實現大規模運輸。其目標是繞過月球，直接在火星建立一個百萬人口的自給自足城市，最早於 2020 年代末進行首次載人登陸。',
+                spacex_step1_label: '第一步:', spacex_step1_text: '星艦軌道飛行測試 (進行中)',
+                spacex_step2_label: '第二步:', spacex_step2_text: '無人貨運星艦登陸 (~2026)',
+                spacex_step3_label: '第三步:', spacex_step3_text: '建立先驅基地',
+                spacex_step4_label: '第四步:', spacex_step4_text: '首次載人登陸 (2020s 末)',
+                spacex_goal_label: '最終目標:', spacex_goal_text: '自給自足的百萬人口城市',
+                chapter2_title: '第二章：生存的挑戰',
+                chapter2_intro: '在火星上建立永久基地需要克服巨大的生理、技術和環境障礙。每一個挑戰都考驗著人類的智慧與韌性。',
+                stat_bone: '骨質流失', stat_month: '每月', stat_bone_desc: '在微重力下，骨密度流失率與地球上的老年人相當，對抗措施至關重要。',
+                stat_radiation: '輻射劑量', stat_times: '倍', stat_radiation_desc: '火星表面的輻射劑量約為地球的100倍，顯著增加癌症等健康風險。',
+                stat_delay: '通訊延遲', stat_minutes: '分鐘', stat_delay_desc: '單程通訊延遲使得與地球的即時對話不可能，對心理和操作構成巨大挑戰。',
+                isru_title: '就地取材：氧氣與燃料的生產',
+                isru_desc: '利用火星大氣製造生命所需資源是實現自給自足的關鍵。MOXIE實驗已成功驗證了從$CO_2$中生產氧氣的可行性。',
+                isru_flow1_title: '1. 大氣捕獲', isru_flow1_desc: '收集火星大氣 (96% $CO_2$)',
+                isru_moxie_process: '固態電解', isru_moxie_result: '→ 呼吸用氧氣',
+                isru_sabatier_process: '薩巴蒂爾反應', isru_sabatier_result: '→ 甲烷燃料 & 水',
+                life_support_title: '閉環維生系統效率',
+                life_support_desc: '對於長期任務，高效回收空氣和水是生存的根本。系統效率的提升是從依賴性前哨站邁向自給自足殖民地的關鍵。',
+                life_support_chart_label: '閉環回收效率 (%)',
+                life_support_chart_labels: ['ESA ACLS (現有)', 'UK CHRSy (下一代)'],
+                chapter3_title: '第三章：尋找宇宙同伴',
+                chapter3_intro: '超越火星，我們將目光投向更廣闊的宇宙，使用多種方法搜尋地外生命的跡象，無論是微生物還是智慧文明。',
+                detection_methods_title: '生命探測方法比較',
+                detection_methods_desc: '每種探測方法都有其獨特的目標和局限性，從竊聽宇宙對話到分析遙遠行星的大氣成分。',
+                detection_methods_chart_label1: '技術成熟度 (估計)',
+                detection_methods_chart_label2: '證據確定性 (潛力)',
+                detection_methods_chart_labels: ['無線電/光學SETI', '凌日光譜學 (生物信號)', '原位探測車分析 (火星)', '樣本取回 (火星)', '直接成像 (未來)'],
+                drake_title: '德雷克方程式：一個機率框架',
+                drake_desc: '此方程式並非用於計算精確數字，而是將「銀河系中存在多少個可探測文明」這個大問題，分解為一系列更易於思考的機率因素。',
+                drake_r: '銀河系恆星形成速率', drake_fp: '擁有行星的恆星比例', drake_ne: '宜居帶行星數量', drake_fl: '生命演化出的行星比例', drake_fi: '演化出智慧的生命比例', drake_fc: '發展出技術的文明比例', drake_l: '技術文明持續時間',
+                drake_fermi: '至今，N的數值仍是未知數，這引出了著名的「費米悖論」：如果宇宙充滿生命，那它們在哪裡？',
+                chapter4_title: '第四章：哥白尼的回響',
+                chapter4_intro: '發現任何形式的地外生命，都將從根本上改變我們對自身在宇宙中位置的看法，其影響將遍及科學、哲學、宗教和社會的每一個角落。',
+                impact_spectrum_title: '發現的影響光譜',
+                impact_level1_title: '第一級：已滅絕的微生物生命 (例如，火星化石)',
+                impact_level1_desc: '影響主要是科學和哲學層面。它證明生命並非地球獨有，將是一次深刻但可控的範式轉移，挑戰人類中心主義，但不會構成直接威脅。',
+                impact_level2_title: '第二級：現存的微生物生命 (例如，歐羅巴海洋)',
+                impact_level2_desc: '影響更為顯著，意味著宇宙*現在*是充滿生機的。這將引發關於行星保護和潛在污染的迫切倫理問題，使宇宙不再那麼空曠。',
+                impact_level3_title: '第三級：智慧生命 (例如，SETI信號)',
+                impact_level3_desc: '影響是物種級別的、變革性的，且可能混亂。它將挑戰一切：我們的文化、宗教、安全以及我們作為主導技術物種的地位。其影響將不可逆轉地改變人類社會。',
+                chapter5_title: '最終章：雙重使命的抉擇',
+                chapter5_intro: '我們正處於一個歷史的十字路口，面臨著一對偉大但相互競爭的目標。',
+                mission_expand_title: '擴展與殖民',
+                mission_expand_desc: '將人類發展為多行星物種，以確保意識的長遠存續。這是一個以工程、建設和人類定居為核心的宏大目標。',
+                mission_protect_title: '保護與探尋',
+                mission_protect_desc: '保護火星等潛在宜居世界的原始狀態，以便進行明確的土著生命科學搜尋。這是一個以保護、發現和倫理為核心的科學使命。',
+                mission_conclusion: '殖民化是最終極的污染行為，而科學探尋要求絕對的純淨。在未來十年，我們在任務架構和行星保護政策上所做的選擇，將決定哪個使命佔據優先地位，並塑造人類的宇宙未來。',
+                footer_source: '資料來源：火星任務與宇宙叩問：人類擴展至火星及尋找外星生命之分析報告。'
+            },
+            en: {
+                title: 'Mars Mission: Colonization & The Search for Life',
+                lang_button: '切换到中文',
+                main_title: 'The Mars Imperative & The Cosmic Question',
+                main_subtitle: 'An analysis of the potential and challenges of human expansion to Mars, and the profound implications of the search for extraterrestrial life.',
+                chapter1_title: 'Chapter 1: The Martian Frontier',
+                chapter1_intro: 'The forces driving us towards the Red Planet are complex, weaving together a desire for survival, economic potential, scientific curiosity, and geopolitical competition.',
+                nasa_title: 'NASA: The Deliberate Path from Moon to Mars',
+                nasa_desc: 'NASA employs a considered, phased approach, using the Moon as a critical proving ground. The Artemis program is designed to test long-duration life support, surface habitats, and remote operations, paving the way for the first crewed Mars missions in the late 2030s or 2040s.',
+                nasa_phase1_label: 'Phase 1:', nasa_phase1_text: 'Artemis I (Completed) - Uncrewed Lunar Flyby',
+                nasa_phase2_label: 'Phase 2:', nasa_phase2_text: 'Artemis II (~2026) - Crewed Lunar Flyby',
+                nasa_phase3_label: 'Phase 3:', nasa_phase3_text: 'Artemis III (~2027) - Crewed Lunar Landing',
+                nasa_phase4_label: 'Phase 4:', nasa_phase4_text: 'Lunar Gateway & Base (~2028+)',
+                nasa_goal_label: 'End Goal:', nasa_goal_text: 'Crewed Mars Mission (2030s/40s)',
+                spacex_title: 'SpaceX: The Direct Vision for Mars',
+                spacex_desc: 'At the core of SpaceX\'s strategy is the fully reusable Starship system, designed for rapid iteration and massive-scale transport. The goal is to bypass the Moon and establish a self-sustaining city of one million people on Mars, with the first crewed landing as early as the late 2020s.',
+                spacex_step1_label: 'Step 1:', spacex_step1_text: 'Starship Orbital Test Flights (Ongoing)',
+                spacex_step2_label: 'Step 2:', spacex_step2_text: 'Uncrewed Cargo Landings (~2026)',
+                spacex_step3_label: 'Step 3:', spacex_step3_text: 'Establish Pioneer Base',
+                spacex_step4_label: 'Step 4:', spacex_step4_text: 'First Crewed Landing (Late 2020s)',
+                spacex_goal_label: 'End Goal:', spacex_goal_text: 'Self-Sustaining City of 1 Million',
+                chapter2_title: 'Chapter 2: The Challenge of Survival',
+                chapter2_intro: 'Establishing a permanent base on Mars requires overcoming immense physiological, technological, and environmental hurdles. Each challenge tests the limits of human ingenuity and resilience.',
+                stat_bone: 'Bone Loss', stat_month: 'Per Month', stat_bone_desc: 'In microgravity, bone density loss is comparable to that of an elderly person on Earth, making countermeasures critical.',
+                stat_radiation: 'Radiation Dose', stat_times: 'Times', stat_radiation_desc: 'The radiation dose on the Martian surface is about 100 times that on Earth, significantly increasing health risks like cancer.',
+                stat_delay: 'Communication Delay', stat_minutes: 'Minutes', stat_delay_desc: 'The one-way communication delay makes real-time conversation with Earth impossible, posing a huge psychological and operational challenge.',
+                isru_title: 'Living Off the Land: Oxygen & Fuel Production',
+                isru_desc: 'Manufacturing vital resources from the Martian atmosphere is key to self-sufficiency. The MOXIE experiment has successfully proven the viability of producing oxygen from CO2.',
+                isru_flow1_title: '1. Atmospheric Collection', isru_flow1_desc: 'Collect Martian Atmosphere (96% CO2)',
+                isru_moxie_process: 'Solid Oxide Electrolysis', isru_moxie_result: '→ Breathable Oxygen',
+                isru_sabatier_process: 'Sabatier Reaction', isru_sabatier_result: '→ Methane Fuel & Water',
+                life_support_title: 'Closed-Loop Life Support Efficiency',
+                life_support_desc: 'For long-duration missions, efficiently recycling air and water is fundamental to survival. Improving system efficiency is the key to moving from a dependent outpost to a self-sufficient colony.',
+                life_support_chart_label: 'Closed-Loop Recycling Efficiency (%)',
+                life_support_chart_labels: ['ESA ACLS (Current)', 'UK CHRSy (Next-Gen)'],
+                chapter3_title: 'Chapter 3: Searching for Cosmic Company',
+                chapter3_intro: 'Beyond Mars, we cast our gaze to the wider cosmos, using a diverse array of methods to search for signs of extraterrestrial life, from microbes to intelligent civilizations.',
+                detection_methods_title: 'Life Detection Method Comparison',
+                detection_methods_desc: 'Each detection method has unique goals and limitations, from eavesdropping on cosmic conversations to analyzing the atmospheric makeup of distant worlds.',
+                detection_methods_chart_label1: 'Technological Readiness (Est.)',
+                detection_methods_chart_label2: 'Evidence Certainty (Potential)',
+                detection_methods_chart_labels: ['Radio/Optical SETI', 'Transit Spectroscopy (Biosignatures)', 'In-Situ Rover Analysis (Mars)', 'Sample Return (Mars)', 'Direct Imaging (Future)'],
+                drake_title: 'The Drake Equation: A Probabilistic Framework',
+                drake_desc: 'This equation is not for calculating a precise number, but for breaking down the grand question of "How many detectable civilizations are in our galaxy?" into a series of more manageable probabilistic factors.',
+                drake_r: 'Rate of star formation', drake_fp: 'Fraction of stars with planets', drake_ne: 'Habitable planets per star', drake_fl: 'Fraction on which life appears', drake_fi: 'Fraction that develops intelligence', drake_fc: 'Fraction that develops technology', drake_l: 'Lifetime of a civilization',
+                drake_fermi: 'To date, the value of N remains unknown, leading to the famous "Fermi Paradox": If the universe is teeming with life, where is everybody?',
+                chapter4_title: 'Chapter 4: A Copernican Echo',
+                chapter4_intro: 'The discovery of any form of extraterrestrial life would fundamentally alter our perception of our place in the universe, with repercussions in every corner of science, philosophy, religion, and society.',
+                impact_spectrum_title: 'The Spectrum of Discovery Impact',
+                impact_level1_title: 'Level 1: Extinct Microbial Life (e.g., Martian Fossils)',
+                impact_level1_desc: 'The impact is primarily scientific and philosophical. It proves life is not unique to Earth, a profound but manageable paradigm shift that challenges anthropocentrism but poses no direct threat.',
+                impact_level2_title: 'Level 2: Extant Microbial Life (e.g., Europan Oceans)',
+                impact_level2_desc: 'The impact is more significant, meaning the universe is *currently* alive. It raises immediate and critical ethical questions about planetary protection and potential contamination, making the cosmos feel less empty.',
+                impact_level3_title: 'Level 3: Intelligent Life (e.g., A SETI Signal)',
+                impact_level3_desc: 'The impact is species-level, transformative, and potentially chaotic. It challenges everything: our culture, religions, security, and our status as the dominant technological species. The effects would irrevocably change human society.',
+                chapter5_title: 'Final Chapter: The Dual Mandate',
+                chapter5_intro: 'We stand at a historic crossroads, faced with a pair of grand but competing objectives.',
+                mission_expand_title: 'Expansion & Colonization',
+                mission_expand_desc: 'To develop humanity into a multi-planetary species to ensure the long-term survival of consciousness. This is a grand objective centered on engineering, construction, and human settlement.',
+                mission_protect_title: 'Protection & Discovery',
+                mission_protect_desc: 'To preserve the pristine state of potentially habitable worlds like Mars for the unambiguous scientific search for indigenous life. This is a scientific mission centered on conservation, discovery, and ethics.',
+                mission_conclusion: 'Colonization is the ultimate act of contamination, while scientific discovery demands absolute purity. The choices we make in mission architecture and planetary protection policy in the next decade will determine which mandate takes precedence, shaping humanity\'s cosmic future.',
+                footer_source: 'Source: The Mars Imperative & The Cosmic Question: An Analysis of Human Expansion to Mars and the Search for Extraterrestrial Life.'
+            }
+        };
+
+        let currentLang = 'zh';
+        let lifeSupportChartInstance, detectionMethodsChartInstance;
+
+        const chartColors = {
+            blue: '#5BC0BE',
+            darkBlue: '#3A506B',
+            white: '#FFFFFF',
+            orange: '#F26419'
+        };
+
+        const tooltipPlugin = {
+            tooltip: {
+                backgroundColor: 'rgba(28, 37, 65, 0.9)',
+                titleFont: { size: 16, weight: 'bold', family: 'Noto Sans TC, Roboto' },
+                bodyFont: { size: 12, family: 'Noto Sans TC, Roboto' },
+                padding: 12,
+                cornerRadius: 8,
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                            return label.join(' ');
+                        } else {
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+        
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) return str;
+            let words = str.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + ' ' + words[i]).length > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine += ' ' + words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        function createCharts(lang) {
+            if (lifeSupportChartInstance) lifeSupportChartInstance.destroy();
+            if (detectionMethodsChartInstance) detectionMethodsChartInstance.destroy();
+
+            const lifeSupportCtx = document.getElementById('lifeSupportChart');
+            if (lifeSupportCtx) {
+                lifeSupportChartInstance = new Chart(lifeSupportCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: langData[lang].life_support_chart_labels,
+                        datasets: [{
+                            label: langData[lang].life_support_chart_label,
+                            data: [50, 98],
+                            backgroundColor: [chartColors.darkBlue, chartColors.blue],
+                            borderColor: [chartColors.darkBlue, chartColors.blue],
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            barPercentage: 0.5
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(58, 80, 107, 0.3)' },
+                                ticks: { color: chartColors.white, font: { family: 'Noto Sans TC, Roboto' } }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.white, font: { family: 'Noto Sans TC, Roboto' } }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            ...tooltipPlugin
+                        }
+                    }
+                });
+            }
+            
+            const detectionMethodsCtx = document.getElementById('detectionMethodsChart');
+            if (detectionMethodsCtx) {
+                const originalLabels = langData[lang].detection_methods_chart_labels;
+                const wrappedLabels = originalLabels.map(label => wrapLabel(label, 16));
+                
+                detectionMethodsChartInstance = new Chart(detectionMethodsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: wrappedLabels,
+                        datasets: [{
+                            label: langData[lang].detection_methods_chart_label1,
+                            data: [90, 80, 95, 40, 20],
+                            backgroundColor: chartColors.blue,
+                        }, {
+                            label: langData[lang].detection_methods_chart_label2,
+                            data: [100, 60, 70, 100, 90],
+                            backgroundColor: chartColors.darkBlue,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                             x: {
+                                grid: { display: false },
+                                ticks: { color: chartColors.white, font: { family: 'Noto Sans TC, Roboto' } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { color: 'rgba(58, 80, 107, 0.3)' },
+                                ticks: { color: chartColors.white, font: { family: 'Noto Sans TC, Roboto' } }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: { color: chartColors.white, font: { family: 'Noto Sans TC, Roboto' } }
+                            },
+                            ...tooltipPlugin
+                        }
+                    }
+                });
+            }
+        }
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            document.title = langData[lang].title;
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (langData[lang][key]) {
+                    el.innerHTML = langData[lang][key];
+                }
+            });
+
+            const drakeTooltips = {
+                'drake_r': 'Rate of star formation in our galaxy',
+                'drake_fp': 'Fraction of those stars that have planets',
+                'drake_ne': 'Average number of planets that can potentially support life per star that has planets',
+                'drake_fl': 'Fraction of planets that could support life that actually develop life at some point',
+                'drake_fi': 'Fraction of planets with life that go on to develop intelligent life',
+                'drake_fc': 'Fraction of civilizations that develop a technology that releases detectable signs of their existence into space',
+                'drake_l': 'Length of time for which such civilizations release detectable signals into space'
+            };
+            const drakeTooltipsZh = {
+                'drake_r': '銀河系恆星形成速率',
+                'drake_fp': '擁有行星的恆星比例',
+                'drake_ne': '宜居帶行星數量',
+                'drake_fl': '生命演化出的行星比例',
+                'drake_fi': '演化出智慧的生命比例',
+                'drake_fc': '發展出技術的文明比例',
+                'drake_l': '技術文明持續時間'
+            };
+
+            if (lang === 'en') {
+                Object.keys(drakeTooltips).forEach(key => {
+                    const el = document.querySelector(`[data-lang-key="${key}"]`);
+                    if (el) el.title = drakeTooltips[key];
+                });
+            } else {
+                 Object.keys(drakeTooltipsZh).forEach(key => {
+                    const el = document.querySelector(`[data-lang-key="${key}"]`);
+                    if (el) el.title = drakeTooltipsZh[key];
+                });
+            }
+
+            createCharts(lang);
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            switchLanguage(newLang);
+        });
+
+        window.addEventListener('load', () => {
+            switchLanguage('zh');
+        });
+
+    </script>
+</body>
+</html>
