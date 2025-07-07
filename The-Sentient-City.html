@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感知城市：智慧技術與數據驅動治理資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F2F2F2;
+            color: #231F20;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .text-shadow {
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            padding: 1.5rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .flow-arrow::after {
+            content: '▼';
+            font-size: 2rem;
+            color: #0077C0;
+            display: block;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .flow-arrow-right::after {
+            content: '►';
+            font-size: 2rem;
+            color: #0077C0;
+            display: inline-block;
+            margin: 0 1rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#005082] text-white text-center py-12 px-4 relative">
+        <h1 class="text-4xl md:text-6xl font-bold text-shadow" data-key="headerTitle"></h1>
+        <p class="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-shadow" data-key="headerSubtitle"></p>
+        <button id="lang-switcher" class="absolute top-4 right-4 bg-[#00A1E4] hover:bg-[#0077C0] text-white font-bold py-2 px-4 rounded-full transition-colors duration-300"></button>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="definition" class="mb-12">
+            <div class="text-center max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-[#0077C0] mb-4" data-key="section1Title"></h2>
+                <p class="text-lg mb-8" data-key="section1Subtitle"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="card">
+                    <div class="text-4xl mb-3">📈</div>
+                    <h3 class="text-xl font-bold text-[#005082] mb-2" data-key="pillar1Title"></h3>
+                    <p data-key="pillar1Desc"></p>
+                </div>
+                <div class="card">
+                    <div class="text-4xl mb-3">🌳</div>
+                    <h3 class="text-xl font-bold text-[#005082] mb-2" data-key="pillar2Title"></h3>
+                    <p data-key="pillar2Desc"></p>
+                </div>
+                <div class="card">
+                    <div class="text-4xl mb-3">❤️</div>
+                    <h3 class="text-xl font-bold text-[#005082] mb-2" data-key="pillar3Title"></h3>
+                    <p data-key="pillar3Desc"></p>
+                </div>
+                <div class="card">
+                    <div class="text-4xl mb-3">🏛️</div>
+                    <h3 class="text-xl font-bold text-[#005082] mb-2" data-key="pillar4Title"></h3>
+                    <p data-key="pillar4Desc"></p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#00A1E4]/30">
+
+        <section id="technologies" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0077C0] mb-8" data-key="section2Title"></h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-[#005082] mb-4" data-key="tech1Title"></h3>
+                    <p class="mb-4 flex-grow" data-key="tech1Desc"></p>
+                    <div class="chart-container h-64 md:h-72"><canvas id="itsChart"></canvas></div>
+                    <p class="mt-4 text-sm text-gray-600 text-center" data-key="tech1Note"></p>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-[#005082] mb-4" data-key="tech2Title"></h3>
+                    <p class="mb-4 flex-grow" data-key="tech2Desc"></p>
+                    <div class="chart-container h-64 md:h-72 flex items-center justify-center">
+                        <div class="text-center">
+                            <span class="text-6xl font-bold text-[#00A1E4]">⚡</span>
+                            <p class="text-xl font-semibold mt-4" data-key="tech2Highlight"></p>
+                            <p class="text-gray-600" data-key="tech2HighlightDesc"></p>
+                        </div>
+                    </div>
+                     <p class="mt-4 text-sm text-gray-600 text-center" data-key="tech2Note"></p>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-2xl font-bold text-[#005082] mb-4" data-key="tech3Title"></h3>
+                    <p class="mb-4 flex-grow" data-key="tech3Desc"></p>
+                    <div class="chart-container h-64 md:h-72 flex items-center justify-center">
+                         <div class="text-center">
+                            <span class="text-6xl font-bold text-[#00A1E4]">🌡️</span>
+                            <p class="text-xl font-semibold mt-4" data-key="tech3Highlight"></p>
+                            <p class="text-gray-600" data-key="tech3HighlightDesc"></p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-600 text-center" data-key="tech3Note"></p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#00A1E4]/30">
+
+        <section id="data" class="mb-12">
+             <h2 class="text-3xl font-bold text-center text-[#0077C0] mb-2" data-key="section3Title"></h2>
+             <p class="text-lg text-center max-w-4xl mx-auto mb-8" data-key="section3Subtitle"></p>
+            
+            <div class="card md:col-span-2 p-6">
+                <h3 class="text-xl font-bold text-center text-[#005082] mb-6" data-key="flowTitle"></h3>
+                <div class="flex flex-col md:flex-row items-center justify-around text-center">
+                    <div class="flex-1 p-4">
+                        <div class="text-4xl mb-2">📡</div>
+                        <h4 class="font-bold" data-key="flow1Title"></h4>
+                        <p class="text-sm" data-key="flow1Desc"></p>
+                    </div>
+                    <div class="hidden md:block flow-arrow-right"></div>
+                    <div class="md:hidden flow-arrow"></div>
+                    <div class="flex-1 p-4">
+                        <div class="text-4xl mb-2">🔄</div>
+                        <h4 class="font-bold" data-key="flow2Title"></h4>
+                        <p class="text-sm" data-key="flow2Desc"></p>
+                    </div>
+                     <div class="hidden md:block flow-arrow-right"></div>
+                     <div class="md:hidden flow-arrow"></div>
+                    <div class="flex-1 p-4">
+                        <div class="text-4xl mb-2">🎯</div>
+                        <h4 class="font-bold" data-key="flow3Title"></h4>
+                        <p class="text-sm" data-key="flow3Desc"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-t-2 border-[#00A1E4]/30">
+
+        <section id="casestudies" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0077C0] mb-8" data-key="section4Title"></h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card order-2 md:order-1">
+                     <p class="mb-4" data-key="caseStudyText1"></p>
+                    <p class="mb-4" data-key="caseStudyText2"></p>
+                    <div class="grid grid-cols-2 gap-4 text-center mt-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-[#00A1E4]">25%</div>
+                            <div class="text-gray-600" data-key="caseStudyStat1"></div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <div class="text-3xl font-bold text-[#00A1E4]">$50M</div>
+                            <div class="text-gray-600" data-key="caseStudyStat2"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card order-1 md:order-2">
+                    <div class="chart-container h-80 md:h-96"><canvas id="caseStudiesChart"></canvas></div>
+                    <p class="mt-4 text-sm text-gray-600 text-center" data-key="caseStudyChartNote"></p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-t-2 border-[#00A1E4]/30">
+
+        <section id="future" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0077C0] mb-8" data-key="section5Title"></h2>
+            <p class="text-lg text-center max-w-4xl mx-auto mb-8" data-key="section5Subtitle"></p>
+            <div class="card">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="p-4">
+                        <h3 class="text-2xl font-bold text-[#005082]" data-key="futureTech1Title"></h3>
+                        <p class="mt-2" data-key="futureTech1Desc"></p>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-2xl font-bold text-[#005082]" data-key="futureTech2Title"></h3>
+                        <p class="mt-2" data-key="futureTech2Desc"></p>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="text-2xl font-bold text-[#005082]" data-key="futureTech3Title"></h3>
+                        <p class="mt-2" data-key="futureTech3Desc"></p>
+                    </div>
+                </div>
+                <div class="text-center text-5xl font-bold text-[#00A1E4] my-6">+</div>
+                <div class="text-center p-4 bg-blue-50 rounded-lg">
+                    <h3 class="text-2xl font-bold text-[#0077C0]" data-key="futureResultTitle"></h3>
+                    <p class="mt-2" data-key="futureResultDesc"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#231F20] text-white text-center py-6 px-4">
+        <p data-key="footerText"></p>
+    </footer>
+
+    <script>
+        const translations = {
+            'zh-TW': {
+                headerTitle: '感知城市',
+                headerSubtitle: '剖析智慧技術、數據驅動治理與未來城市的發展軌跡',
+                langSwitch: 'English',
+                section1Title: '什麼是智慧城市？',
+                section1Subtitle: '智慧城市不僅是技術的堆疊，更是一種以人為本、旨在提升生活品質、效率與永續性的城市發展新理念。它整合了資訊與通訊技術(ICT)，將城市從被動管理轉變為主動優化的智慧有機體。',
+                pillar1Title: '永續經濟',
+                pillar1Desc: '建構綠色、低碳的創新生態系，實現資源的永續利用。',
+                pillar2Title: '永續環境',
+                pillar2Desc: '有效管理自然資源，減少污染，建構能應對氣候變遷的城市韌性。',
+                pillar3Title: '宜居社會',
+                pillar3Desc: '提供安全、便捷的公共服務，創造和諧、舒適的生活空間。',
+                pillar4Title: '智慧治理',
+                pillar4Desc: '利用數據實現更透明、高效且具參與性的政府運作。',
+                section2Title: '三大核心技術骨幹',
+                tech1Title: '🚗 智慧交通系統 (ITS)',
+                tech1Desc: '利用感測器、AI與大數據分析，將傳統交通設施轉變為動態管理的智慧網路，以緩解壅塞、提升安全與效率。',
+                tech1Note: 'ITS系統在緩解交通壅塞、節省成本與提升安全方面效益顯著。',
+                tech2Title: '💡 智慧電網',
+                tech2Desc: '一個自動化、雙向互動的電力與資訊網路，能整合再生能源、自我修復故障，並透過智慧電錶賦予用戶管理用電的能力。',
+                tech2Highlight: '實現需求響應',
+                tech2HighlightDesc: '以分時電價平滑負載曲線',
+                tech2Note: '智慧電網是驅動城市能源韌性與效率的核心。',
+                tech3Title: '🏢 智慧建築',
+                tech3Desc: '應用物聯網(IoT)與自動化技術，創造更節能、營運更高效、對使用者更舒適健康的空間，並實現預測性維護。',
+                tech3Highlight: '提升能源效率',
+                tech3HighlightDesc: '自動調節HVAC與照明',
+                tech3Note: '智慧建築是構成智慧城市的基本單元。',
+                section3Title: '數據：城市治理的新引擎',
+                section3Subtitle: '大數據分析將城市從被動應對問題轉變為主動預測和優化，實現「以證據為本」的城市主義，打破資訊壁壘，催生「數位孿生」等前沿應用。',
+                flowTitle: '從數據到智慧的轉化過程',
+                flow1Title: '1. 收集',
+                flow1Desc: '來自ITS、電網、建築等來源的海量、異構數據。',
+                flow2Title: '2. 整合與分析',
+                flow2Desc: '在開放數據平台上匯總、清洗並分析數據。',
+                flow3Title: '3. 洞察與行動',
+                flow3Desc: '提煉可指導行動的洞察，優化市政服務與決策。',
+                section4Title: '全球智慧城市實踐藍圖',
+                caseStudyText1: '不同城市根據其獨特的政治、經濟與社會背景，採取了截然不同的智慧城市發展路徑。例如，巴塞隆納的「超級街廓」計畫，透過重新規劃交通，將街道空間還給市民，旨在將私家車使用量減少21%。',
+                caseStudyText2: '同時，其物聯網應用也帶來顯著效益，如智慧灌溉系統成功節省了25%的水資源，智慧停車等方案則大幅增加了城市收入。',
+                caseStudyStat1: '水資源節省',
+                caseStudyStat2: '年增停車收入',
+                caseStudyChartNote: '比較新加坡、巴塞隆納與索爾福德在治理模式、主要目標和技術策略上的差異。',
+                section5Title: '未來軌跡：技術融合的下一片前沿',
+                section5Subtitle: 'AI、5G與邊緣運算的融合，正將城市從被動的數據收集者，轉變為具備自主反應能力的智慧有機體，實現從「延遲循環」到「即時響應」的根本性飛躍。',
+                futureTech1Title: '🤖 人工智慧 (AI)',
+                futureTech1Desc: '提供即時分析與自主決策的「智慧」。',
+                futureTech2Title: '📶 5G',
+                futureTech2Desc: '提供超高速、超低延遲的「神經網路」。',
+                futureTech3Title: '☁️ 邊緣運算',
+                futureTech3Desc: '將處理能力推向數據源頭，實現「現場反應」。',
+                futureResultTitle: '新一代智慧城市',
+                futureResultDesc: '一個如同生物體、具備分散式智慧與即時響應能力的「城市神經系統」。',
+                footerText: '這份資訊圖表綜合了《感知城市：智慧城市核心技術、數據驅動治理與未來軌跡之深度剖析》報告中的關鍵洞察。',
+                itsChartTitle: '智慧交通系統 (ITS) 效益',
+                itsChartLabel: '效益提升百分比 (%)',
+                itsLabels: ['旅行時間縮短', '交叉口等待時間減少', '交通事故率降低'],
+                caseStudiesChartTitle: '全球案例戰略比較',
+                caseStudiesLabels: ['治理模式 (中央 -> 合作)', '主要目標 (經濟 -> 民生)', '技術策略 (主導 -> 開放)'],
+                caseStudiesCities: ['新加坡', '巴塞隆納', '索爾福德']
+            },
+            'en': {
+                headerTitle: 'The Sentient City',
+                headerSubtitle: 'Analyzing Smart Technologies, Data-Driven Governance, and the Future Urban Trajectory',
+                langSwitch: '中文',
+                section1Title: 'What is a Smart City?',
+                section1Subtitle: 'A smart city is not just a collection of technologies, but a new, human-centric urban development philosophy aimed at enhancing quality of life, efficiency, and sustainability. It integrates ICT to transform the city from a passively managed entity into a proactively optimized, intelligent organism.',
+                pillar1Title: 'Smart Economy',
+                pillar1Desc: 'Building a green, low-carbon innovation ecosystem to achieve sustainable resource use.',
+                pillar2Title: 'Smart Environment',
+                pillar2Desc: 'Effectively managing natural resources, reducing pollution, and building urban resilience to climate change.',
+                pillar3Title: 'Smart Living',
+                pillar3Desc: 'Providing safe and convenient public services to create a harmonious and comfortable living space.',
+                pillar4Title: 'Smart Governance',
+                pillar4Desc: 'Using data to achieve more transparent, efficient, and participatory government operations.',
+                section2Title: 'Three Core Technology Pillars',
+                tech1Title: '🚗 Intelligent Transport Systems (ITS)',
+                tech1Desc: 'Using sensors, AI, and big data analytics to transform traditional transport infrastructure into a dynamically managed smart network to alleviate congestion and improve safety and efficiency.',
+                tech1Note: 'ITS demonstrates significant benefits in alleviating traffic congestion, saving costs, and enhancing safety.',
+                tech2Title: '💡 Smart Grid',
+                tech2Desc: 'An automated, two-way interactive network for electricity and information that can integrate renewable energy, self-heal from faults, and empower users to manage their electricity consumption via smart meters.',
+                tech2Highlight: 'Enabling Demand Response',
+                tech2HighlightDesc: 'Smoothing load curves with time-of-use pricing',
+                tech2Note: 'The smart grid is the core driver of urban energy resilience and efficiency.',
+                tech3Title: '🏢 Smart Buildings',
+                tech3Desc: 'Applying the Internet of Things (IoT) and automation to create spaces that are more energy-efficient, operationally effective, and comfortable for users, while enabling predictive maintenance.',
+                tech3Highlight: 'Boosting Energy Efficiency',
+                tech3HighlightDesc: 'Automating HVAC and lighting',
+                tech3Note: 'Smart buildings are the fundamental units that constitute a smart city.',
+                section3Title: 'Data: The New Engine of Urban Governance',
+                section3Subtitle: 'Big data analytics transforms cities from passively reacting to problems to proactively predicting and optimizing, enabling "evidence-based urbanism," breaking down information silos, and fostering frontier applications like "Digital Twins."',
+                flowTitle: 'The Transformation Process from Data to Wisdom',
+                flow1Title: '1. Collect',
+                flow1Desc: 'Massive, heterogeneous data from sources like ITS, grids, and buildings.',
+                flow2Title: '2. Integrate & Analyze',
+                flow2Desc: 'Aggregate, clean, and analyze data on open data platforms.',
+                flow3Title: '3. Insight & Action',
+                flow3Desc: 'Extract actionable insights to optimize municipal services and decision-making.',
+                section4Title: 'Global Smart City Blueprints in Practice',
+                caseStudyText1: 'Different cities adopt distinct smart city development paths based on their unique political, economic, and social contexts. For example, Barcelona\'s "Superblocks" program reclaims street space for citizens by redesigning traffic flow, aiming to reduce private car use by 21%.',
+                caseStudyText2: 'Meanwhile, its IoT applications have yielded significant benefits, such as a 25% water saving from smart irrigation systems and a substantial increase in city revenue from smart parking solutions.',
+                caseStudyStat1: 'Water Savings',
+                caseStudyStat2: 'Annual Parking Revenue Increase',
+                caseStudyChartNote: 'Comparing the governance models, primary goals, and technology strategies of Singapore, Barcelona, and Salford.',
+                section5Title: 'Future Trajectory: The Next Frontier of Technology Convergence',
+                section5Subtitle: 'The convergence of AI, 5G, and edge computing is transforming cities from passive data collectors into intelligent organisms with autonomous response capabilities, achieving a fundamental leap from "latency loops" to "real-time response."',
+                futureTech1Title: '🤖 Artificial Intelligence (AI)',
+                futureTech1Desc: 'Provides the "intelligence" for real-time analysis and autonomous decision-making.',
+                futureTech2Title: '📶 5G',
+                futureTech2Desc: 'Provides the "neural network" with ultra-high speed and ultra-low latency.',
+                futureTech3Title: '☁️ Edge Computing',
+                futureTech3Desc: 'Pushes processing power to the data source, enabling "on-site response."',
+                futureResultTitle: 'The Next-Generation Smart City',
+                futureResultDesc: 'An "urban nervous system" that, like a biological organism, possesses distributed intelligence and real-time response capabilities.',
+                footerText: 'This infographic synthesizes key insights from the report "The Sentient City: A Deep Dive into Core Technologies, Data-Driven Governance, and Future Trajectories of Smart Cities."',
+                itsChartTitle: 'Intelligent Transport System (ITS) Benefits',
+                itsChartLabel: 'Benefit Improvement (%)',
+                itsLabels: ['Travel Time Reduction', 'Intersection Wait Time Reduction', 'Accident Rate Reduction'],
+                caseStudiesChartTitle: 'Global Case Strategy Comparison',
+                caseStudiesLabels: ['Governance (Centralized -> Collaborative)', 'Main Goal (Economic -> Citizen-centric)', 'Tech Strategy (Top-down -> Open)'],
+                caseStudiesCities: ['Singapore', 'Barcelona', 'Salford']
+            }
+        };
+
+        let currentLanguage = 'zh-TW';
+        let itsChartInstance, caseStudiesChartInstance;
+
+        const brilliantBlues = {
+            primary: '#00A1E4',
+            secondary: '#0077C0',
+            dark: '#005082',
+            light: '#F2F2F2',
+            text: '#231F20'
+        };
+
+        const chartTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) return str;
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            });
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+
+        function renderCharts() {
+            if (itsChartInstance) itsChartInstance.destroy();
+            if (caseStudiesChartInstance) caseStudiesChartInstance.destroy();
+            
+            const langData = translations[currentLanguage];
+
+            const itsData = {
+                labels: langData.itsLabels.map(l => wrapLabel(l, 16)),
+                datasets: [{
+                    label: langData.itsChartLabel,
+                    data: [25, 40, 5],
+                    backgroundColor: [brilliantBlues.primary, brilliantBlues.secondary, brilliantBlues.dark],
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }]
+            };
+
+            itsChartInstance = new Chart(document.getElementById('itsChart'), {
+                type: 'bar',
+                data: itsData,
+                options: {
+                    ...chartTooltipOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { beginAtZero: true, ticks: { callback: value => value + '%' } }
+                    },
+                    plugins: {
+                        ...chartTooltipOptions.plugins,
+                        legend: { display: false },
+                        title: { display: true, text: langData.itsChartTitle }
+                    }
+                }
+            });
+
+            const caseStudiesData = {
+                labels: langData.caseStudiesLabels,
+                datasets: [
+                    {
+                        label: langData.caseStudiesCities[0],
+                        data: [1, 1, 1],
+                        fill: true,
+                        backgroundColor: 'rgba(0, 161, 228, 0.2)',
+                        borderColor: 'rgb(0, 161, 228)',
+                        pointBackgroundColor: 'rgb(0, 161, 228)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(0, 161, 228)'
+                    },
+                    {
+                        label: langData.caseStudiesCities[1],
+                        data: [2, 3, 3],
+                        fill: true,
+                        backgroundColor: 'rgba(0, 119, 192, 0.2)',
+                        borderColor: 'rgb(0, 119, 192)',
+                        pointBackgroundColor: 'rgb(0, 119, 192)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(0, 119, 192)'
+                    },
+                    {
+                        label: langData.caseStudiesCities[2],
+                        data: [3, 2, 2],
+                        fill: true,
+                        backgroundColor: 'rgba(0, 80, 130, 0.2)',
+                        borderColor: 'rgb(0, 80, 130)',
+                        pointBackgroundColor: 'rgb(0, 80, 130)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(0, 80, 130)'
+                    }
+                ]
+            };
+
+            caseStudiesChartInstance = new Chart(document.getElementById('caseStudiesChart'), {
+                type: 'radar',
+                data: caseStudiesData,
+                options: {
+                    ...chartTooltipOptions,
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    elements: { line: { borderWidth: 3 } },
+                    scales: {
+                        r: {
+                            angleLines: { display: false },
+                            suggestedMin: 0,
+                            suggestedMax: 3,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                       ...chartTooltipOptions.plugins,
+                       title: { display: true, text: langData.caseStudiesChartTitle }
+                    }
+                }
+            });
+        }
+
+        function updateContent() {
+            const lang = translations[currentLanguage];
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.dataset.key;
+                if (lang[key]) {
+                    el.innerHTML = lang[key];
+                }
+            });
+            document.documentElement.lang = currentLanguage;
+            document.querySelector('title').innerText = lang.headerTitle;
+            document.getElementById('lang-switcher').innerText = lang.langSwitch;
+            renderCharts();
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'zh-TW' ? 'en' : 'zh-TW';
+            updateContent();
+        });
+
+        document.addEventListener('DOMContentLoaded', updateContent);
+    </script>
+</body>
+</html>
