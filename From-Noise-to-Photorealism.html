@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Noise to Photorealism: The Principles of AI Image Generation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flow-box {
+            border-color: #F9D423;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .flow-arrow {
+            color: #F9D423;
+        }
+        .kpi-card {
+            background-color: #2c2f33;
+            border-left: 4px solid #FC913A;
+        }
+        .prompt-card {
+             background-color: rgba(255, 255, 255, 0.05);
+        }
+        .lang-switcher button.active {
+            background-color: #FF4E50;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-[#23272A] text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <div class="lang-switcher fixed top-4 right-4 z-50 bg-[#2C2F33] rounded-full p-1 shadow-lg">
+            <button id="lang-en" class="px-3 py-1 text-sm font-bold rounded-full transition-colors duration-300 active">EN</button>
+            <button id="lang-zh" class="px-3 py-1 text-sm font-bold rounded-full transition-colors duration-300">繁體</button>
+        </div>
+
+        <header class="text-center my-12">
+            <h1 data-lang-key="mainTitle" class="text-4xl md:text-6xl font-black tracking-tight text-white leading-tight">From Noise to <span class="text-[#FF4E50]">Photorealism</span></h1>
+            <p data-lang-key="mainSubtitle" class="mt-4 text-lg md:text-xl text-gray-400 max-w-3xl mx-auto">An interactive guide to the principles, architectures, and societal impact of modern AI image generation.</p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="architectures">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="section1Title" class="text-3xl font-bold text-white">The Core Engines: Two Competing Philosophies</h2>
+                    <p data-lang-key="section1Para" class="mt-2 text-gray-400 max-w-2xl mx-auto">At the heart of AI image generation lie two dominant architectures: Generative Adversarial Networks (GANs) and Diffusion Models. While both can produce stunning results, they operate on fundamentally different principles, leading to a critical trade-off between speed, stability, and control.</p>
+                </div>
+                <div class="bg-[#2C2F33] rounded-2xl shadow-2xl p-6 md:p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="text-gray-300">
+                            <h3 data-lang-key="section1ChartTitle" class="text-2xl font-bold text-white mb-4">GANs vs. Diffusion Models</h3>
+                             <p data-lang-key="section1ChartPara1" class="mb-4">This comparison highlights the key trade-offs. GANs, known for their lightning-fast inference, excel in real-time applications and direct feature editing. However, their adversarial training process is notoriously unstable.</p>
+                             <p data-lang-key="section1ChartPara2">In contrast, Diffusion Models offer superior image diversity and training stability, making them the backbone of modern large-scale models like Stable Diffusion. This reliability comes at the cost of a much slower, iterative generation process.</p>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="archComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="stylegan-flow">
+                 <div class="text-center mb-12">
+                    <h2 data-lang-key="section2Title" class="text-3xl font-bold text-white">The Art of Control: Disentangling Features with StyleGAN</h2>
+                    <p data-lang-key="section2Para" class="mt-2 text-gray-400 max-w-2xl mx-auto">To generate not just realistic, but controllable faces, NVIDIA's StyleGAN introduced a revolutionary architecture. Its key insight was to separate the abstract "style" of a face from the random noise, allowing for unprecedented, fine-grained editing of semantic features like age, expression, and lighting.</p>
+                </div>
+                <div class="bg-[#2C2F33] rounded-2xl shadow-2xl p-6 md:p-8">
+                    <h3 data-lang-key="section2FlowTitle" class="text-2xl font-bold text-white text-center mb-8">StyleGAN's Control Mechanism</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                        <div class="flow-box border-2 rounded-lg p-4 w-48">
+                            <h4 data-lang-key="flowBox1Title" class="font-bold text-lg">Latent Code (z)</h4>
+                            <p data-lang-key="flowBox1Para" class="text-sm text-gray-400">A random noise vector</p>
+                        </div>
+                        <div class="text-4xl flow-arrow font-thin transform md:-translate-y-2 rotate-90 md:rotate-0">&rarr;</div>
+                        <div class="flow-box border-2 rounded-lg p-4 w-48">
+                            <h4 data-lang-key="flowBox2Title" class="font-bold text-lg">Mapping Network (f)</h4>
+                            <p data-lang-key="flowBox2Para" class="text-sm text-gray-400">Transforms z into a disentangled space W</p>
+                        </div>
+                        <div class="text-4xl flow-arrow font-thin transform md:-translate-y-2 rotate-90 md:rotate-0">&rarr;</div>
+                         <div class="flow-box border-2 rounded-lg p-4 w-48">
+                            <h4 data-lang-key="flowBox3Title" class="font-bold text-lg">Style Vector (w)</h4>
+                            <p data-lang-key="flowBox3Para" class="text-sm text-gray-400">Controls a specific visual style</p>
+                        </div>
+                        <div class="text-4xl flow-arrow font-thin transform md:-translate-y-2 rotate-90 md:rotate-0">&darr;</div>
+                         <div class="flow-box border-2 rounded-lg p-4 w-48">
+                            <h4 data-lang-key="flowBox4Title" class="font-bold text-lg">Synthesis Network</h4>
+                            <p data-lang-key="flowBox4Para" class="text-sm text-gray-400">Builds the image, injecting style at each layer</p>
+                        </div>
+                    </div>
+                    <p data-lang-key="section2FlowPara" class="text-center mt-8 text-gray-400 max-w-3xl mx-auto">This flow diagram, built with HTML and Tailwind CSS, illustrates the process. The Mapping Network is the key: it creates an intermediate latent space 'W' where different visual attributes are separated. This "disentanglement" is what makes intuitive control possible, allowing a user to change one feature (like a smile) without accidentally altering others (like gender).</p>
+                </div>
+            </section>
+
+            <section id="prompting">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="section3Title" class="text-3xl font-bold text-white">Speaking the AI's Language: The Art of the Prompt</h2>
+                    <p data-lang-key="section3Para" class="mt-2 text-gray-400 max-w-2xl mx-auto">Modern models like Stable Diffusion are guided by natural language. The quality of the output is directly tied to the quality of the input "prompt." Effective prompting is a new form of programming, blending artistic direction with technical specification to create a detailed blueprint for the AI.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="prompt-card rounded-lg p-6">
+                        <div class="flex items-center">
+                            <span class="text-3xl mr-4">👤</span>
+                            <h3 data-lang-key="promptCard1Title" class="text-xl font-bold text-white">Subject & Style</h3>
+                        </div>
+                        <p data-lang-key="promptCard1Para" class="mt-2 text-gray-400">Be specific. "A 30-year-old woman with auburn hair" is better than "a woman." Define the medium, e.g., "photorealistic," "oil painting."</p>
+                    </div>
+                    <div class="prompt-card rounded-lg p-6">
+                         <div class="flex items-center">
+                            <span class="text-3xl mr-4">🖼️</span>
+                            <h3 data-lang-key="promptCard2Title" class="text-xl font-bold text-white">Composition & Lighting</h3>
+                        </div>
+                        <p data-lang-key="promptCard2Para" class="mt-2 text-gray-400">Use photographic terms. "Close-up portrait," "low-angle shot," "cinematic lighting," "soft rim light" guide the AI to professional results.</p>
+                    </div>
+                    <div class="prompt-card rounded-lg p-6">
+                         <div class="flex items-center">
+                            <span class="text-3xl mr-4">⚙️</span>
+                            <h3 data-lang-key="promptCard3Title" class="text-xl font-bold text-white">Technical Details</h3>
+                        </div>
+                        <p data-lang-key="promptCard3Para" class="mt-2 text-gray-400">Mimic real-world gear. Adding "shot on Canon 5D, 85mm f/1.4 lens, 8K UHD" pushes the model towards higher fidelity and realism.</p>
+                    </div>
+                </div>
+            </section>
+
+
+            <section id="data">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="section4Title" class="text-3xl font-bold text-white">The Fuel of Creation: The Data Dilemma</h2>
+                    <p data-lang-key="section4Para" class="mt-2 text-gray-400 max-w-2xl mx-auto">An AI model is only as good as the data it's trained on. The choice of dataset represents a fundamental trade-off between specialization and generalization, and raises significant ethical questions about copyright, privacy, and bias.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-[#2C2F33] rounded-2xl shadow-2xl p-6 md:p-8">
+                         <h3 data-lang-key="section4ChartTitle" class="text-2xl font-bold text-white mb-4">Dataset Scale: Curated vs. Web-Scale</h3>
+                         <p data-lang-key="section4ChartPara" class="text-gray-300 mb-4">This chart visualizes the staggering difference in scale between a curated, specialized dataset like FFHQ (70,000 images), used to train StyleGAN, and a web-scraped, general-purpose dataset like LAION-5B (5.85 billion image-text pairs), which powers Stable Diffusion. The y-axis uses a logarithmic scale to make this vast difference comprehensible.</p>
+                        <div class="chart-container">
+                            <canvas id="datasetComparisonChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-[#2C2F33] rounded-2xl shadow-2xl p-6 md:p-8 flex flex-col justify-center">
+                        <h3 data-lang-key="section4CostTitle" class="text-2xl font-bold text-white mb-6">The Unseen Cost of Scale</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 data-lang-key="section4CostFFHQTitle" class="font-semibold text-[#FF4E50]">FFHQ (Specialist)</h4>
+                                <p data-lang-key="section4CostFFHQPara" class="text-gray-400">✓ High Quality & Resolution<br/>✓ Cleaned & Curated<br/>✓ Unparalleled Control</p>
+                            </div>
+                            <div>
+                                <h4 data-lang-key="section4CostLAIONTitle" class="font-semibold text-[#FC913A]">LAION-5B (Generalist)</h4>
+                                <p data-lang-key="section4CostLAIONPara" class="text-gray-400">✓ Massive Diversity<br/>✗ Copyright & Privacy Issues<br/>✗ Contains Biased & Harmful Content</p>
+                            </div>
+                        </div>
+                         <p data-lang-key="section4CostPara" class="text-gray-300 mt-6">While LAION-5B enables incredible versatility, its uncurated nature means models inherit the internet's "original sin"—a chaotic mix of creativity, toxicity, and exploitation, creating major legal and ethical challenges.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ethics">
+                <div class="text-center mb-12">
+                    <h2 data-lang-key="section5Title" class="text-3xl font-bold text-white">The Societal Mirror: Bias, Truth, and Law</h2>
+                    <p data-lang-key="section5Para" class="mt-2 text-gray-400 max-w-2xl mx-auto">AI models are not objective; they are a mirror reflecting the biases in their training data. This has profound implications for fairness, trust in digital media, and the ongoing legal battles over copyright and authenticity.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-[#2C2F33] rounded-2xl shadow-2xl p-6 md:p-8">
+                         <h3 data-lang-key="section5ChartTitle" class="text-2xl font-bold text-white mb-4">Encoded Bias: A Case Study</h3>
+                         <p data-lang-key="section5ChartPara" class="text-gray-300 mb-4">AI models amplify societal stereotypes. When one model was prompted to generate images for professions, the results showed stark gender bias. This donut chart illustrates how a prompt for "a doctor" overwhelmingly produced male images, reflecting and reinforcing outdated stereotypes encoded in the training data.</p>
+                        <div class="chart-container max-w-sm">
+                            <canvas id="biasChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="space-y-8">
+                        <div class="kpi-card p-6 rounded-lg shadow-lg">
+                            <h4 data-lang-key="kpi1Title" class="text-lg font-bold text-white">The End of "Photographic Truth"</h4>
+                            <p data-lang-key="kpi1Para" class="mt-2 text-gray-300">AI faces are now indistinguishable from real ones, and studies show they are often perceived as <span class="font-bold text-[#FC913A]">more trustworthy</span>. The age-old concept of "seeing is believing" is fundamentally broken.</p>
+                        </div>
+                        <div class="kpi-card p-6 rounded-lg shadow-lg">
+                            <h4 data-lang-key="kpi2Title" class="text-lg font-bold text-white">The Deepfake Dilemma</h4>
+                            <p data-lang-key="kpi2Para" class="mt-2 text-gray-300">The ease of creating hyper-realistic fakes for disinformation, fraud, and harassment creates a dangerous asymmetry where creation is far easier and cheaper than detection and defense.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 py-8 border-t border-gray-700">
+            <p data-lang-key="footerText" class="text-gray-500">Infographic generated based on "From Noise to Photorealism" report. All visualizations are rendered using HTML Canvas and Chart.js, with no SVG or Mermaid JS assets used.</p>
+        </footer>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                mainTitle: 'From Noise to <span class="text-[#FF4E50]">Photorealism</span>',
+                mainSubtitle: "An interactive guide to the principles, architectures, and societal impact of modern AI image generation.",
+                section1Title: "The Core Engines: Two Competing Philosophies",
+                section1Para: "At the heart of AI image generation lie two dominant architectures: Generative Adversarial Networks (GANs) and Diffusion Models. While both can produce stunning results, they operate on fundamentally different principles, leading to a critical trade-off between speed, stability, and control.",
+                section1ChartTitle: "GANs vs. Diffusion Models",
+                section1ChartPara1: "This comparison highlights the key trade-offs. GANs, known for their lightning-fast inference, excel in real-time applications and direct feature editing. However, their adversarial training process is notoriously unstable.",
+                section1ChartPara2: "In contrast, Diffusion Models offer superior image diversity and training stability, making them the backbone of modern large-scale models like Stable Diffusion. This reliability comes at the cost of a much slower, iterative generation process.",
+                section2Title: "The Art of Control: Disentangling Features with StyleGAN",
+                section2Para: "To generate not just realistic, but controllable faces, NVIDIA's StyleGAN introduced a revolutionary architecture. Its key insight was to separate the abstract 'style' of a face from the random noise, allowing for unprecedented, fine-grained editing of semantic features like age, expression, and lighting.",
+                section2FlowTitle: "StyleGAN's Control Mechanism",
+                flowBox1Title: "Latent Code (z)",
+                flowBox1Para: "A random noise vector",
+                flowBox2Title: "Mapping Network (f)",
+                flowBox2Para: "Transforms z into a disentangled space W",
+                flowBox3Title: "Style Vector (w)",
+                flowBox3Para: "Controls a specific visual style",
+                flowBox4Title: "Synthesis Network",
+                flowBox4Para: "Builds the image, injecting style at each layer",
+                section2FlowPara: "This flow diagram, built with HTML and Tailwind CSS, illustrates the process. The Mapping Network is the key: it creates an intermediate latent space 'W' where different visual attributes are separated. This 'disentanglement' is what makes intuitive control possible, allowing a user to change one feature (like a smile) without accidentally altering others (like gender).",
+                section3Title: "Speaking the AI's Language: The Art of the Prompt",
+                section3Para: "Modern models like Stable Diffusion are guided by natural language. The quality of the output is directly tied to the quality of the input 'prompt.' Effective prompting is a new form of programming, blending artistic direction with technical specification to create a detailed blueprint for the AI.",
+                promptCard1Title: "Subject & Style",
+                promptCard1Para: 'Be specific. "A 30-year-old woman with auburn hair" is better than "a woman." Define the medium, e.g., "photorealistic," "oil painting."',
+                promptCard2Title: "Composition & Lighting",
+                promptCard2Para: 'Use photographic terms. "Close-up portrait," "low-angle shot," "cinematic lighting," "soft rim light" guide the AI to professional results.',
+                promptCard3Title: "Technical Details",
+                promptCard3Para: 'Mimic real-world gear. Adding "shot on Canon 5D, 85mm f/1.4 lens, 8K UHD" pushes the model towards higher fidelity and realism.',
+                section4Title: "The Fuel of Creation: The Data Dilemma",
+                section4Para: "An AI model is only as good as the data it's trained on. The choice of dataset represents a fundamental trade-off between specialization and generalization, and raises significant ethical questions about copyright, privacy, and bias.",
+                section4ChartTitle: "Dataset Scale: Curated vs. Web-Scale",
+                section4ChartPara: "This chart visualizes the staggering difference in scale between a curated, specialized dataset like FFHQ (70,000 images), used to train StyleGAN, and a web-scraped, general-purpose dataset like LAION-5B (5.85 billion image-text pairs), which powers Stable Diffusion. The y-axis uses a logarithmic scale to make this vast difference comprehensible.",
+                section4CostTitle: "The Unseen Cost of Scale",
+                section4CostFFHQTitle: "FFHQ (Specialist)",
+                section4CostFFHQPara: "✓ High Quality & Resolution<br/>✓ Cleaned & Curated<br/>✓ Unparalleled Control",
+                section4CostLAIONTitle: "LAION-5B (Generalist)",
+                section4CostLAIONPara: "✓ Massive Diversity<br/>✗ Copyright & Privacy Issues<br/>✗ Contains Biased & Harmful Content",
+                section4CostPara: "While LAION-5B enables incredible versatility, its uncurated nature means models inherit the internet's 'original sin'—a chaotic mix of creativity, toxicity, and exploitation, creating major legal and ethical challenges.",
+                section5Title: "The Societal Mirror: Bias, Truth, and Law",
+                section5Para: "AI models are not objective; they are a mirror reflecting the biases in their training data. This has profound implications for fairness, trust in digital media, and the ongoing legal battles over copyright and authenticity.",
+                section5ChartTitle: "Encoded Bias: A Case Study",
+                section5ChartPara: "AI models amplify societal stereotypes. When one model was prompted to generate images for professions, the results showed stark gender bias. This donut chart illustrates how a prompt for 'a doctor' overwhelmingly produced male images, reflecting and reinforcing outdated stereotypes encoded in the training data.",
+                kpi1Title: 'The End of "Photographic Truth"',
+                kpi1Para: 'AI faces are now indistinguishable from real ones, and studies show they are often perceived as <span class="font-bold text-[#FC913A]">more trustworthy</span>. The age-old concept of "seeing is believing" is fundamentally broken.',
+                kpi2Title: "The Deepfake Dilemma",
+                kpi2Para: "The ease of creating hyper-realistic fakes for disinformation, fraud, and harassment creates a dangerous asymmetry where creation is far easier and cheaper than detection and defense.",
+                footerText: 'Infographic generated based on "From Noise to Photorealism" report. All visualizations are rendered using HTML Canvas and Chart.js, with no SVG or Mermaid JS assets used.',
+            },
+            zh: {
+                mainTitle: '從噪聲到<span class="text-[#FF4E50]">照片級真實感</span>',
+                mainSubtitle: "一個關於現代AI圖像生成的原理、架構和社會影響的互動指南。",
+                section1Title: "核心引擎：兩種競爭哲學",
+                section1Para: "在AI圖像生成的核心，存在兩種主導架構：生成對抗網絡（GANs）和擴散模型。雖然兩者都能產生驚人的結果，但它們的運作原理根本不同，導致在速度、穩定性和控制之間存在關鍵的權衡。",
+                section1ChartTitle: "GANs vs. 擴散模型",
+                section1ChartPara1: "此比較突顯了關鍵的權衡。以其閃電般的推理速度而聞名的GAN，在實時應用和直接特徵編輯方面表現出色。然而，其對抗性訓練過程是出了名的不穩定。",
+                section1ChartPara2: "相比之下，擴散模型提供了卓越的圖像多樣性和訓練穩定性，使其成為像Stable Diffusion這樣現代大規模模型的支柱。這種可靠性是以一個更慢、迭代的生成過程為代價的。",
+                section2Title: "控制的藝術：用StyleGAN解耦特徵",
+                section2Para: "為了生成不僅真實，而且可控的人臉，NVIDIA的StyleGAN引入了一種革命性的架構。其關鍵洞見是將人臉的抽象「風格」與隨機噪聲分開，從而實現對年齡、表情和光照等語義特徵前所未有的精細編輯。",
+                section2FlowTitle: "StyleGAN的控制機制",
+                flowBox1Title: "潛在代碼 (z)",
+                flowBox1Para: "一個隨機噪聲向量",
+                flowBox2Title: "映射網絡 (f)",
+                flowBox2Para: "將z轉換為一個解耦的空間W",
+                flowBox3Title: "風格向量 (w)",
+                flowBox3Para: "控制特定的視覺風格",
+                flowBox4Title: "合成網絡",
+                flowBox4Para: "注入風格，逐層構建圖像",
+                section2FlowPara: "這個用HTML和Tailwind CSS構建的流程圖說明了這個過程。映射網絡是關鍵：它創建了一個中間潛在空間'W'，其中不同的視覺屬性被分離開來。這種「解耦」使得直觀的控制成為可能，允許用戶更改一個特徵（如微笑）而不會意外地改變其他特徵（如性別）。",
+                section3Title: "說AI的語言：提示詞的藝術",
+                section3Para: "像Stable Diffusion這樣的現代模型是由自然語言引導的。輸出的質量與輸入「提示詞」的質量直接相關。有效的提示詞是一種新的編程形式，將藝術指導與技術規範相結合，為AI創建詳細的藍圖。",
+                promptCard1Title: "主體與風格",
+                promptCard1Para: '要具體。「一位三十多歲、留著赤褐色頭髮的女性」勝過「一位女性」。定義媒介，例如「照片級真實感」、「油畫」。',
+                promptCard2Title: "構圖與光照",
+                promptCard2Para: '使用攝影術語。「特寫肖像」、「低角度拍攝」、「電影級光效」、「柔和的輪廓光」能引導AI達到專業效果。',
+                promptCard3Title: "技術細節",
+                promptCard3Para: '模仿真實世界的設備。添加「使用Canon 5D，85mm f/1.4鏡頭拍攝，8K UHD」能促使模型達到更高的保真度和真實感。',
+                section4Title: "創造的燃料：數據困境",
+                section4Para: "一個AI模型的好壞取決於其訓練數據。數據集的選擇代表了專業化與泛化之間的基本權衡，並引發了關於版權、隱私和偏見的重大倫理問題。",
+                section4ChartTitle: "數據集規模：精選 vs. 網絡規模",
+                section4ChartPara: "此圖表可視化了精選的專業數據集（如用於訓練StyleGAN的FFHQ，7萬張圖像）與網絡抓取的通用數據集（如驅動Stable Diffusion的LAION-5B，58.5億個圖文對）之間驚人的規模差異。Y軸使用對數刻度，以使這種巨大的差異易於理解。",
+                section4CostTitle: "規模的無形成本",
+                section4CostFFHQTitle: "FFHQ (專家)",
+                section4CostFFHQPara: "✓ 高質量與高分辨率<br/>✓ 經過清理與策劃<br/>✓ 無與倫比的控制力",
+                section4CostLAIONTitle: "LAION-5B (通才)",
+                section4CostLAIONPara: "✓ 巨大的多樣性<br/>✗ 版權與隱私問題<br/>✗ 包含偏見與有害內容",
+                section4CostPara: "雖然LAION-5B實現了令人難以置信的多功能性，但其未經整理的性質意味著模型繼承了互聯網的「原罪」——一種創造力、毒性和剝削的混亂結合體，從而產生了重大的法律和倫理挑戰。",
+                section5Title: "社會的鏡子：偏見、真相與法律",
+                section5Para: "AI模型並非客觀；它們是反映其訓練數據中偏見的一面鏡子。這對公平性、對數字媒體的信任以及正在進行的關於版權和真實性的法律鬥爭產生了深遠的影響。",
+                section5ChartTitle: "編碼的偏見：案例研究",
+                section5ChartPara: "AI模型放大了社會刻板印象。當一個模型被提示生成職業圖像時，結果顯示出明顯的性別偏見。這個甜甜圈圖說明了「醫生」的提示詞如何絕大多數地產生了男性圖像，反映並加強了編碼在訓練數據中的過時刻板印象。",
+                kpi1Title: '“攝影真實性”的終結',
+                kpi1Para: 'AI人臉現在與真人無法區分，研究表明它們通常被認為<span class="font-bold text-[#FC913A]">更值得信賴</span>。「眼見為實」這個古老的觀念已從根本上被打破。',
+                kpi2Title: "深度偽造的困境",
+                kpi2Para: "輕易創建用於虛假信息、欺詐和騷擾的超現實偽造品，造成了一種危險的不對稱性，即創造遠比檢測和防禦更容易、更便宜。",
+                footerText: '資訊圖表基於《從噪聲到照片級真實感》報告生成。所有視覺化均使用HTML Canvas和Chart.js渲染，未使用SVG或Mermaid JS資產。',
+            }
+        };
+
+        const chartData = {
+            en: {
+                arch: {
+                    labels: ['Image Quality', 'Training Stability', 'Inference Speed', 'Controllability', 'Diversity'],
+                    datasets: [{ label: 'Diffusion Models' }, { label: 'GANs' }]
+                },
+                dataset: {
+                    labels: ['FFHQ (Curated)', 'LAION-5B (Web-Scale)'],
+                    datasetLabel: 'Number of Image-Text Pairs'
+                },
+                bias: {
+                    labels: ['Male Representation', 'Female Representation', 'Other/Unspecified'],
+                    datasetLabel: 'Gender Representation for "Doctor" Prompt'
+                }
+            },
+            zh: {
+                arch: {
+                    labels: ['圖像質量', '訓練穩定性', '推理速度', '可控性', '多樣性'],
+                    datasets: [{ label: '擴散模型' }, { label: '生成對抗網絡' }]
+                },
+                dataset: {
+                    labels: ['FFHQ (精選)', 'LAION-5B (網絡規模)'],
+                    datasetLabel: '圖文對數量'
+                },
+                bias: {
+                    labels: ['男性代表性', '女性代表性', '其他/未指定'],
+                    datasetLabel: '“醫生”提示詞的性別代表性'
+                }
+            }
+        };
+
+        let currentLang = 'en';
+        let archChart, datasetChart, biasChart;
+
+        const switchLanguage = (lang) => {
+            currentLang = lang;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            
+            recreateCharts(lang);
+        };
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+              return label.join(' ');
+            } else {
+              return label;
+            }
+        };
+
+        const chartOptionsTemplate = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#E1F5C4',
+                        font: {
+                            family: "'Inter', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            }
+        };
+
+        const palette = {
+            color1: '#FF4E50',
+            color2: '#FC913A',
+            color3: '#F9D423',
+            textColor: '#E1F5C4'
+        };
+
+        const createArchChart = (lang) => {
+            const ctx = document.getElementById('archComparisonChart').getContext('2d');
+            const data = chartData[lang].arch;
+            if (archChart) archChart.destroy();
+            archChart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: data.datasets[0].label,
+                        data: [9, 9, 2, 6, 9],
+                        backgroundColor: 'rgba(255, 78, 80, 0.2)',
+                        borderColor: palette.color1,
+                        pointBackgroundColor: palette.color1,
+                    }, {
+                        label: data.datasets[1].label,
+                        data: [8, 3, 9, 8, 6],
+                        backgroundColor: 'rgba(252, 145, 58, 0.2)',
+                        borderColor: palette.color2,
+                        pointBackgroundColor: palette.color2,
+                    }]
+                },
+                options: { ...chartOptionsTemplate, scales: { r: { angleLines: { color: 'rgba(255, 255, 255, 0.2)' }, grid: { color: 'rgba(255, 255, 255, 0.2)' }, pointLabels: { color: palette.textColor, font: { size: 12, family: "'Inter', 'Noto Sans TC', sans-serif" } }, ticks: { color: palette.textColor, backdropColor: 'transparent', stepSize: 2 } } } }
+            });
+        };
+
+        const createDatasetChart = (lang) => {
+            const ctx = document.getElementById('datasetComparisonChart').getContext('2d');
+            const data = chartData[lang].dataset;
+            if (datasetChart) datasetChart.destroy();
+            datasetChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{ label: data.datasetLabel, data: [70000, 5850000000], backgroundColor: [palette.color1, palette.color2] }]
+                },
+                options: { ...chartOptionsTemplate, indexAxis: 'y', scales: { x: { type: 'logarithmic', ticks: { color: palette.textColor }, grid: { color: 'rgba(255, 255, 255, 0.1)' } }, y: { ticks: { color: palette.textColor }, grid: { color: 'rgba(255, 255, 255, 0.1)' } } }, plugins: { legend: { display: false }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (context) => `${context.dataset.label}: ${context.raw.toLocaleString()}` } } } }
+            });
+        };
+
+        const createBiasChart = (lang) => {
+            const ctx = document.getElementById('biasChart').getContext('2d');
+            const data = chartData[lang].bias;
+            if (biasChart) biasChart.destroy();
+            biasChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{ label: data.datasetLabel, data: [76, 8, 16], backgroundColor: [palette.color1, palette.color2, palette.color3], borderColor: '#2C2F33', borderWidth: 4 }]
+                },
+                options: { ...chartOptionsTemplate, cutout: '60%', plugins: { legend: { position: 'bottom', labels: { color: palette.textColor, font: { family: "'Inter', 'Noto Sans TC', sans-serif" } } }, tooltip: { callbacks: { title: tooltipTitleCallback, label: (context) => `${context.label}: ${context.raw}%` } } } }
+            });
+        };
+
+        const recreateCharts = (lang) => {
+            createArchChart(lang);
+            createDatasetChart(lang);
+            createBiasChart(lang);
+        };
+
+        document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+
+        window.onload = () => {
+            switchLanguage('en');
+        };
+    </script>
+</body>
+</html>
