@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025年人工智能革命：跨領域影響與社會認知資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 384px;
+            }
+        }
+        .kpi-box {
+            background-color: #4ECDC4;
+            color: #292F36;
+        }
+        .kpi-value {
+            font-size: 3.5rem;
+            line-height: 1;
+        }
+        .flow-arrow {
+            color: #FF6B6B;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl relative">
+
+        <div class="absolute top-4 right-4 md:top-8 md:right-8 z-10">
+            <button id="lang-toggle" class="bg-[#00A9E0] text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-[#0077a0] transition-colors">
+                English
+            </button>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#292F36] mb-2" data-translate-key="headerTitle">2025年人工智能革命</h1>
+            <p class="text-lg text-gray-600" data-translate-key="headerSubtitle">跨領域影響、市場動態與公眾認知的深度解析</p>
+        </header>
+
+        <section id="overview" class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-xl font-bold text-[#00A9E0] mb-2" data-translate-key="kpi1Title">整體AI市場規模 (2030年預測)</h3>
+                    <div class="kpi-value font-bold text-[#292F36]" data-translate-key="kpi1Value">$1.8 兆美元</div>
+                    <p class="text-gray-600 mt-2" data-translate-key="kpi1Desc">企業對垂直領域AI解決方案的強勁需求推動了超過30%的年均複合增長率。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="publicPerceptionTitle">公眾對AI的態度分佈</h3>
+                    <div class="chart-container h-64 md:h-auto">
+                        <canvas id="publicPerceptionChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4" data-translate-key="publicPerceptionDesc">社會對AI的看法呈現分化，樂觀與迴避的群體規模相當，凸顯了溝通與建立信任的必要性。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-center items-center text-center">
+                     <h3 class="text-xl font-bold text-[#00A9E0] mb-2" data-translate-key="privacyConcernTitle">隱私擔憂</h3>
+                    <div class="kpi-value font-bold text-[#FF6B6B]">53%</div>
+                    <p class="text-gray-600 mt-2" data-translate-key="privacyConcernDesc">超過半數的美國人認為，在保護個人隱私方面，AI帶來的弊大於利，這是推動監管的核心動力。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#292F36]" data-translate-key="educationTitle">📚 AI對教育的轉型</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="educationAdoptionTitle">教育工作者的信念與實踐差距</h3>
+                    <div class="chart-container">
+                        <canvas id="educationAdoptionChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4" data-translate-key="educationAdoptionDesc">儘管絕大多數教育者認同AI的益處，但實際使用者和制定了正式策略的機構仍是少數，顯示出巨大的潛力與實踐鴻溝。</p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-6" data-translate-key="educationRoleTitle">AI的角色：增強而非取代</h3>
+                    <p class="text-gray-600 mb-6 text-center" data-translate-key="educationRoleDesc">AI的核心價值在於將教師從重複性工作中解放出來，使其能專注於更高價值的教學互動。這是一個相輔相成的過程。</p>
+                    <div class="space-y-4">
+                        <div class="bg-gray-100 p-4 rounded-lg text-center">
+                            <h4 class="font-bold" data-translate-key="flow1_1">自動化常規任務</h4>
+                            <p class="text-sm" data-translate-key="flow1_2">例如：評分、排程、進度追蹤</p>
+                        </div>
+                        <div class="text-center text-5xl font-extrabold flow-arrow">↓</div>
+                        <div class="bg-gray-100 p-4 rounded-lg text-center">
+                            <h4 class="font-bold" data-translate-key="flow2_1">釋放教師時間與精力</h4>
+                            <p class="text-sm" data-translate-key="flow2_2">將資源從行政管理轉移到教學核心</p>
+                        </div>
+                        <div class="text-center text-5xl font-extrabold flow-arrow">↓</div>
+                         <div class="kpi-box p-4 rounded-lg text-center">
+                            <h4 class="font-bold" data-translate-key="flow3_1">實現教學增強</h4>
+                            <p class="text-sm" data-translate-key="flow3_2">專注於個人化指導、情感支持與批判性思維培養</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="healthcare" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#292F36]" data-translate-key="healthcareTitle">🩺 AI作為現代醫療的基石</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-lg p-6 order-2 md:order-1">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="healthcareMarketTitle">AI在醫療領域的市場增長預測</h3>
+                    <div class="chart-container">
+                        <canvas id="healthcareMarketChart"></canvas>
+                    </div>
+                     <p class="text-center text-gray-600 mt-4" data-translate-key="healthcareMarketDesc">受精準醫療和提升診斷效率需求的驅動，AI在醫療領域的市場預計將以近40%的驚人年均複合增長率擴張。</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 order-1 md:order-2 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-xl font-bold text-[#00A9E0] mb-4" data-translate-key="healthcareParadigmTitle">從「偵測」到「預測」的範式轉移</h3>
+                    <p class="text-gray-600 mb-4" data-translate-key="healthcareParadigmDesc">AI不僅能更快、更準確地發現疾病，更能預測未來風險，為預防性干預開創了新紀元。</p>
+                    <div class="kpi-box p-8 rounded-full w-48 h-48 flex flex-col justify-center items-center shadow-xl">
+                        <span class="text-5xl font-bold" data-translate-key="riskPredictionValue">5年</span>
+                        <span class="font-semibold mt-2" data-translate-key="riskPredictionDesc">乳癌風險預測</span>
+                    </div>
+                    <p class="text-gray-600 mt-4" data-translate-key="riskPredictionExample">AI平台能夠在乳房X光片看似正常的情況下，預測未來五年的患癌風險，這是AI預測能力的典型例證。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="entertainment" class="mb-16">
+             <h2 class="text-3xl font-bold text-center mb-8 text-[#292F36]" data-translate-key="entertainmentTitle">🎬 生成式AI與新娛樂經濟</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <div class="lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="entertainmentMarketTitle">生成式AI在娛樂市場的爆炸性增長</h3>
+                    <div class="chart-container w-full max-w-full">
+                        <canvas id="entertainmentMarketChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4" data-translate-key="entertainmentMarketDesc">由個人化內容需求和生產成本效益驅動，生成式AI正重塑媒體娛樂產業，市場規模預計在十年內增長超過10倍。</p>
+                </div>
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="adoptionStrategyTitle">採用策略分化：巨頭 vs 創作者</h3>
+                     <p class="text-gray-600 mb-6 text-center" data-translate-key="adoptionStrategyDesc">大型製片廠因法律和倫理風險而態度謹慎，而獨立創作者則迅速擁抱AI以降低成本、提升速度。</p>
+                    <div class="flex-grow flex flex-col justify-center">
+                        <div class="w-full">
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-base font-medium text-[#292F36]" data-translate-key="studioBudget">大型製片廠AI預算佔比</span>
+                                    <span class="text-sm font-medium text-[#292F36]">&lt; 3%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div class="bg-[#FF6B6B] h-4 rounded-full" style="width: 3%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-base font-medium text-[#292F36]" data-translate-key="creatorAdoption">獨立創作者採用意願</span>
+                                    <span class="text-sm font-medium text-[#292F36]" data-translate-key="creatorAdoptionValue">高</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div class="bg-[#4ECDC4] h-4 rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                     <p class="text-center text-gray-600 mt-6" data-translate-key="divergenceImpact">這種分歧可能催生全新的媒體形式，並將觀眾的注意力從傳統平台轉移開。</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="public-trust" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#292F36]" data-translate-key="publicTrustTitle">⚖️ 公眾廣場：彌合信任差距</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                     <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="publicConcernsTitle">公眾對AI的核心擔憂</h3>
+                    <div class="chart-container">
+                        <canvas id="publicConcernsChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4" data-translate-key="publicConcernsDesc">隱私、工作取代和演算法偏見是公眾最關切的議題，這些擔憂直接推動了歐盟《AI法案》等監管框架的形成。</p>
+                </div>
+                 <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center text-[#00A9E0] mb-4" data-translate-key="jobImpactTitle">對就業影響的看法：專家 vs 公眾</h3>
+                    <div class="chart-container">
+                        <canvas id="jobImpactChart"></canvas>
+                    </div>
+                    <p class="text-center text-gray-600 mt-4" data-translate-key="jobImpactDesc">專家與公眾在AI對就業影響的看法上存在巨大分歧。專家預見到重大變革，而多數公眾目前感受不深，這種認知差異是潛在的社會摩擦點。</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center pt-8 border-t border-gray-300">
+            <p class="text-gray-600" data-translate-key="footerSource">本資訊圖表數據來源於《2025年人工智能革命：跨領域應用、市場動態與公眾認知的深度解析》報告。</p>
+            <p class="text-sm text-gray-500 mt-2" data-translate-key="footerCredit">設計與開發：Canvas Infographics, 2025</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const FONT_COLOR = '#292F36';
+        const GRID_COLOR = '#e5e7eb';
+        const PALETTE = {
+            blue: '#00A9E0',
+            yellow: '#FBC400',
+            red: '#FF6B6B',
+            teal: '#4ECDC4',
+        };
+
+        const translations = {
+            zh: {
+                htmlLang: 'zh-TW',
+                toggleButton: 'English',
+                headerTitle: '2025年人工智能革命',
+                headerSubtitle: '跨領域影響、市場動態與公眾認知的深度解析',
+                kpi1Title: '整體AI市場規模 (2030年預測)',
+                kpi1Value: '$1.8 兆美元',
+                kpi1Desc: '企業對垂直領域AI解決方案的強勁需求推動了超過30%的年均複合增長率。',
+                publicPerceptionTitle: '公眾對AI的態度分佈',
+                publicPerceptionDesc: '社會對AI的看法呈現分化，樂觀與迴避的群體規模相當，凸顯了溝通與建立信任的必要性。',
+                privacyConcernTitle: '隱私擔憂',
+                privacyConcernDesc: '超過半數的美國人認為，在保護個人隱私方面，AI帶來的弊大於利，這是推動監管的核心動力。',
+                educationTitle: '📚 AI對教育的轉型',
+                educationAdoptionTitle: '教育工作者的信念與實踐差距',
+                educationAdoptionDesc: '儘管絕大多數教育者認同AI的益處，但實際使用者和制定了正式策略的機構仍是少數，顯示出巨大的潛力與實踐鴻溝。',
+                educationRoleTitle: 'AI的角色：增強而非取代',
+                educationRoleDesc: 'AI的核心價值在於將教師從重複性工作中解放出來，使其能專注於更高價值的教學互動。這是一個相輔相成的過程。',
+                flow1_1: '自動化常規任務',
+                flow1_2: '例如：評分、排程、進度追蹤',
+                flow2_1: '釋放教師時間與精力',
+                flow2_2: '將資源從行政管理轉移到教學核心',
+                flow3_1: '實現教學增強',
+                flow3_2: '專注於個人化指導、情感支持與批判性思維培養',
+                healthcareTitle: '🩺 AI作為現代醫療的基石',
+                healthcareMarketTitle: 'AI在醫療領域的市場增長預測',
+                healthcareMarketDesc: '受精準醫療和提升診斷效率需求的驅動，AI在醫療領域的市場預計將以近40%的驚人年均複合增長率擴張。',
+                healthcareParadigmTitle: '從「偵測」到「預測」的範式轉移',
+                healthcareParadigmDesc: 'AI不僅能更快、更準確地發現疾病，更能預測未來風險，為預防性干預開創了新紀元。',
+                riskPredictionValue: '5年',
+                riskPredictionDesc: '乳癌風險預測',
+                riskPredictionExample: 'AI平台能夠在乳房X光片看似正常的情況下，預測未來五年的患癌風險，這是AI預測能力的典型例證。',
+                entertainmentTitle: '🎬 生成式AI與新娛樂經濟',
+                entertainmentMarketTitle: '生成式AI在娛樂市場的爆炸性增長',
+                entertainmentMarketDesc: '由個人化內容需求和生產成本效益驅動，生成式AI正重塑媒體娛樂產業，市場規模預計在十年內增長超過10倍。',
+                adoptionStrategyTitle: '採用策略分化：巨頭 vs 創作者',
+                adoptionStrategyDesc: '大型製片廠因法律和倫理風險而態度謹慎，而獨立創作者則迅速擁抱AI以降低成本、提升速度。',
+                studioBudget: '大型製片廠AI預算佔比',
+                creatorAdoption: '獨立創作者採用意願',
+                creatorAdoptionValue: '高',
+                divergenceImpact: '這種分歧可能催生全新的媒體形式，並將觀眾的注意力從傳統平台轉移開。',
+                publicTrustTitle: '⚖️ 公眾廣場：彌合信任差距',
+                publicConcernsTitle: '公眾對AI的核心擔憂',
+                publicConcernsDesc: '隱私、工作取代和演算法偏見是公眾最關切的議題，這些擔憂直接推動了歐盟《AI法案》等監管框架的形成。',
+                jobImpactTitle: '對就業影響的看法：專家 vs 公眾',
+                jobImpactDesc: '專家與公眾在AI對就業影響的看法上存在巨大分歧。專家預見到重大變革，而多數公眾目前感受不深，這種認知差異是潛在的社會摩擦點。',
+                footerSource: '本資訊圖表數據來源於《2025年人工智能革命：跨領域應用、市場動態與公眾認知的深度解析》報告。',
+                footerCredit: '設計與開發：Canvas Infographics, 2025',
+                charts: {
+                    publicPerception: { labels: ['AI樂觀主義者', 'AI迴避者', 'AI無知者'], title: '公眾態度' },
+                    educationAdoption: { labels: ['認同AI益處', '實際使用AI', '有正式推行計劃'], title: '教育工作者 (%)' },
+                    healthcareMarket: { title: '市場規模 (十億美元)' },
+                    entertainmentMarket: { title: '市場規模 (十億美元)' },
+                    publicConcerns: { labels: ['隱私與數據安全', '工作被取代', '演算法偏見與歧視', '操縱與虛假資訊'], title: '擔憂程度 (相對重要性)' },
+                    jobImpact: { labels: ['預計AI將帶來重大工作變革', '目前工作受AI影響很小'], yAxisTitle: '百分比 (%)', expertLabel: '專家', publicLabel: '公眾' }
+                }
+            },
+            en: {
+                htmlLang: 'en',
+                toggleButton: '中文',
+                headerTitle: 'The 2025 AI Revolution',
+                headerSubtitle: 'An In-depth Analysis of Cross-Sector Impact, Market Dynamics, and Public Perception',
+                kpi1Title: 'Overall AI Market Size (2030 Forecast)',
+                kpi1Value: '$1.8 Trillion',
+                kpi1Desc: 'Strong enterprise demand for vertical-specific AI solutions is driving a CAGR of over 30%.',
+                publicPerceptionTitle: 'Public Attitude Towards AI',
+                publicPerceptionDesc: 'Societal views on AI are polarized, with optimists and avoiders being of similar size, highlighting the need for communication and trust-building.',
+                privacyConcernTitle: 'Privacy Concerns',
+                privacyConcernDesc: 'Over half of Americans believe AI does more harm than good in protecting personal privacy, a key driver for regulation.',
+                educationTitle: '📚 AI\'s Transformation of Education',
+                educationAdoptionTitle: 'Educator Belief vs. Practice Gap',
+                educationAdoptionDesc: 'While most educators see AI\'s benefits, few institutions have formal policies, and only a slight majority use it, showing a vast potential-practice gap.',
+                educationRoleTitle: 'AI\'s Role: Augment, Not Replace',
+                educationRoleDesc: 'AI\'s core value is freeing teachers from repetitive tasks to focus on high-value interactions, creating a complementary process.',
+                flow1_1: 'Automate Routine Tasks',
+                flow1_2: 'e.g., Grading, Scheduling, Progress Tracking',
+                flow2_1: 'Free Up Teacher Time & Energy',
+                flow2_2: 'Shift resources from admin to core teaching',
+                flow3_1: 'Enable Teaching Augmentation',
+                flow3_2: 'Focus on personalized guidance, support, and critical thinking',
+                healthcareTitle: '🩺 AI as a Cornerstone of Modern Medicine',
+                healthcareMarketTitle: 'AI in Healthcare Market Growth Forecast',
+                healthcareMarketDesc: 'Driven by precision medicine and diagnostic efficiency, the AI in healthcare market is projected to expand at a stunning CAGR of nearly 40%.',
+                healthcareParadigmTitle: 'Paradigm Shift: From Detection to Prediction',
+                healthcareParadigmDesc: 'AI not only detects diseases faster and more accurately but also predicts future risks, opening a new era of preventative intervention.',
+                riskPredictionValue: '5-Year',
+                riskPredictionDesc: 'Breast Cancer Risk Prediction',
+                riskPredictionExample: 'AI platforms can predict five-year cancer risk from mammograms that appear normal to the human eye, exemplifying AI\'s predictive power.',
+                entertainmentTitle: '🎬 Generative AI & the New Entertainment Economy',
+                entertainmentMarketTitle: 'Explosive Growth of Generative AI in Entertainment',
+                entertainmentMarketDesc: 'Driven by personalized content demand and production efficiencies, Generative AI is reshaping media, with the market set to grow over 10x in a decade.',
+                adoptionStrategyTitle: 'Divergent Adoption: Studios vs. Creators',
+                adoptionStrategyDesc: 'Major studios are cautious due to legal and ethical risks, while independent creators rapidly embrace AI for cost and speed.',
+                studioBudget: 'Major Studio AI Budget Allocation',
+                creatorAdoption: 'Independent Creator Adoption Willingness',
+                creatorAdoptionValue: 'High',
+                divergenceImpact: 'This divergence could spawn new media forms and shift audience attention away from traditional platforms.',
+                publicTrustTitle: '⚖️ The Public Square: Bridging the Trust Gap',
+                publicConcernsTitle: 'Core Public Concerns About AI',
+                publicConcernsDesc: 'Privacy, job displacement, and algorithmic bias are top public concerns, directly fueling regulatory frameworks like the EU AI Act.',
+                jobImpactTitle: 'Perceptions of Job Impact: Experts vs. Public',
+                jobImpactDesc: 'A significant gap exists between experts and the public on AI\'s job impact. This cognitive dissonance is a potential point of social friction.',
+                footerSource: 'Data for this infographic is sourced from the report "The 2025 AI Revolution: An In-depth Analysis of Cross-Sector Impact, Market Dynamics, and Public Perception".',
+                footerCredit: 'Design & Development: Canvas Infographics, 2025',
+                charts: {
+                    publicPerception: { labels: ['AI Optimists', 'AI Avoiders', 'AI Unaware'], title: 'Public Attitude' },
+                    educationAdoption: { labels: ['Believe in AI Benefits', 'Actively Use AI', 'Have Formal Policies'], title: 'Educators (%)' },
+                    healthcareMarket: { title: 'Market Size (in Billions USD)' },
+                    entertainmentMarket: { title: 'Market Size (in Billions USD)' },
+                    publicConcerns: { labels: ['Privacy & Data Security', 'Job Displacement', 'Algorithmic Bias & Discrimination', 'Manipulation & Disinformation'], title: 'Concern Level (Relative Importance)' },
+                    jobImpact: { labels: ['Expect Major Job Change from AI', 'Expect Little Job Impact from AI'], yAxisTitle: 'Percentage (%)', expertLabel: 'Experts', publicLabel: 'Public' }
+                }
+            }
+        };
+
+        let currentLang = 'zh';
+        const charts = {};
+
+        const wrapLabel = (label, maxLength = 16) => {
+            if (currentLang === 'zh' || label.length <= maxLength) return label;
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        };
+
+        const GLOBAL_TOOLTIP_CONFIG = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    }
+                    return label;
+                }
+            }
+        };
+
+        function destroyCharts() {
+            Object.keys(charts).forEach(key => {
+                if (charts[key]) {
+                    charts[key].destroy();
+                }
+            });
+        }
+
+        function renderContent(lang) {
+            currentLang = lang;
+            const content = translations[lang];
+            
+            document.documentElement.lang = content.htmlLang;
+            document.querySelector('title').innerText = content.headerTitle;
+            document.getElementById('lang-toggle').innerText = content.toggleButton;
+
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.getAttribute('data-translate-key');
+                if (content[key]) {
+                    el.innerHTML = content[key];
+                }
+            });
+
+            destroyCharts();
+            
+            Chart.defaults.color = FONT_COLOR;
+            Chart.defaults.font.family = lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif";
+            Chart.defaults.font.weight = '500';
+
+            charts.publicPerception = new Chart(document.getElementById('publicPerceptionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: content.charts.publicPerception.labels,
+                    datasets: [{
+                        label: content.charts.publicPerception.title,
+                        data: [37, 34, 29],
+                        backgroundColor: [PALETTE.teal, PALETTE.yellow, PALETTE.red],
+                        borderColor: '#ffffff',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: GLOBAL_TOOLTIP_CONFIG }, cutout: '60%' }
+            });
+
+            charts.educationAdoption = new Chart(document.getElementById('educationAdoptionChart'), {
+                type: 'bar',
+                data: {
+                    labels: content.charts.educationAdoption.labels,
+                    datasets: [{
+                        label: content.charts.educationAdoption.title,
+                        data: [97, 56, 35],
+                        backgroundColor: [PALETTE.blue, PALETTE.yellow, PALETTE.red],
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true, max: 100, grid: { color: GRID_COLOR }}, y: { grid: { display: false }}}, plugins: { legend: { display: false }, tooltip: GLOBAL_TOOLTIP_CONFIG }}
+            });
+
+            charts.healthcareMarket = new Chart(document.getElementById('healthcareMarketChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2024', '2026', '2028', '2030', '2032'],
+                    datasets: [{
+                        label: content.charts.healthcareMarket.title,
+                        data: [27.6, 52.1, 98.7, 187.0, 252.9],
+                        fill: false, borderColor: PALETTE.teal, backgroundColor: PALETTE.teal, tension: 0.4, pointRadius: 5, pointHoverRadius: 8
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: GRID_COLOR }}, x: { grid: { display: false }}}, plugins: { legend: { display: true, position: 'bottom' }, tooltip: GLOBAL_TOOLTIP_CONFIG }}
+            });
+
+            charts.entertainmentMarket = new Chart(document.getElementById('entertainmentMarketChart'), {
+                type: 'line',
+                data: {
+                    labels: ['2024', '2026', '2028', '2030', '2032'],
+                    datasets: [{
+                        label: content.charts.entertainmentMarket.title,
+                        data: [2.0, 3.5, 6.0, 10.2, 17.4],
+                        borderColor: PALETTE.red, backgroundColor: 'rgba(255, 107, 107, 0.2)', fill: true, tension: 0.4
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: GRID_COLOR }}, x: { grid: { display: false }}}, plugins: { legend: { display: true, position: 'bottom' }, tooltip: GLOBAL_TOOLTIP_CONFIG }}
+            });
+
+            charts.publicConcerns = new Chart(document.getElementById('publicConcernsChart'), {
+                type: 'bar',
+                data: {
+                    labels: content.charts.publicConcerns.labels.map(l => wrapLabel(l)),
+                    datasets: [{
+                        label: content.charts.publicConcerns.title,
+                        data: [90, 85, 80, 75],
+                        backgroundColor: [PALETTE.red, PALETTE.yellow, PALETTE.blue, PALETTE.teal],
+                        borderRadius: 4
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { ticks: { font: { size: 14 }}, grid: { display: false }}}, plugins: { legend: { display: false }, tooltip: GLOBAL_TOOLTIP_CONFIG }}
+            });
+
+            charts.jobImpact = new Chart(document.getElementById('jobImpactChart'), {
+                type: 'bar',
+                data: {
+                    labels: content.charts.jobImpact.labels.map(l => wrapLabel(l, 25)),
+                    datasets: [
+                        { label: content.charts.jobImpact.expertLabel, data: [90, 10], backgroundColor: PALETTE.blue, borderRadius: 4 },
+                        { label: content.charts.jobImpact.publicLabel, data: [38, 62], backgroundColor: PALETTE.yellow, borderRadius: 4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: content.charts.jobImpact.yAxisTitle }, grid: { color: GRID_COLOR }}, x: { grid: { display: false }}}, plugins: { legend: { position: 'bottom' }, tooltip: { ...GLOBAL_TOOLTIP_CONFIG, mode: 'index', intersect: false }}}
+            });
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            renderContent(newLang);
+        });
+
+        window.onload = function() {
+            renderContent('zh');
+        };
+    </script>
+</body>
+</html>
