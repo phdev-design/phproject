@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>火星殖民可行性分析資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', 'Roboto', sans-serif;
+            background-color: #003459;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: rgba(0, 126, 167, 0.1);
+            border: 1px solid #007EA7;
+        }
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #00A8E8;
+            line-height: 1.2;
+        }
+        .flowchart-arrow {
+            content: '➔';
+            color: #00A8E8;
+            font-size: 2rem;
+            text-align: center;
+        }
+        .lang-switch-button {
+            background-color: #007EA7;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        .lang-switch-button:hover {
+            background-color: #00A8E8;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <div class="relative text-center mb-12">
+            <div class="absolute top-0 right-0">
+                <button id="lang-switcher" class="lang-switch-button">English</button>
+            </div>
+            <header>
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-2" data-lang-key="header.title">邁向紅色星球</h1>
+                <p class="text-lg md:text-xl text-gray-300" data-lang-key="header.subtitle">火星殖民可行性與關鍵技術挑戰</p>
+            </header>
+        </div>
+
+        <main class="space-y-8">
+
+            <section class="card rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-4 text-[#00A8E8]" data-lang-key="section1.title">1. 為何是火星？三大戰略驅動力</h2>
+                <p class="text-center text-gray-300 max-w-3xl mx-auto mb-6" data-lang-key="section1.p1">
+                    將人類文明擴展至火星並非單一動機，而是由科學探索、物種存續和經濟催化三大支柱共同構成的宏偉藍圖。三者相互依存，形成一個自我強化的邏輯閉環。
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                        <div class="text-4xl mb-2">🔬</div>
+                        <h3 class="text-xl font-semibold mb-1" data-lang-key="section1.card1.title">科學探索</h3>
+                        <p class="text-gray-400" data-lang-key="section1.card1.p">作為獨一無二的行星實驗室，研究火星演化並尋找地外生命跡象。</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                        <div class="text-4xl mb-2">🌍</div>
+                        <h3 class="text-xl font-semibold mb-1" data-lang-key="section1.card2.title">物種存續</h3>
+                        <p class="text-gray-400" data-lang-key="section1.card2.p">為人類文明建立一個「備份」，應對地球潛在的生存威脅。</p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                        <div class="text-4xl mb-2">🚀</div>
+                        <h3 class="text-xl font-semibold mb-1" data-lang-key="section1.card3.title">經濟催化</h3>
+                        <p class="text-gray-400" data-lang-key="section1.card3.p">驅動尖端技術突破，催生太空資源開發等全新經濟前沿。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="card rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6 text-[#00A8E8]" data-lang-key="section2.title">2. 奔赴火星的競賽：兩種戰略對比</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div>
+                         <p class="text-gray-300 mb-4" data-lang-key="section2.p1">
+                            目前全球形成了兩種主流的火星探索路徑：NASA以月球為跳板的增量式、國際合作模式，以及SpaceX旨在快速實現大規模殖民的顛覆性商業模式。
+                        </p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="border-b border-[#007EA7]">
+                                        <th class="p-3" data-lang-key="table.feature">特性</th>
+                                        <th class="p-3">NASA (M2M計畫)</th>
+                                        <th class="p-3">SpaceX</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-700">
+                                        <td class="p-3 font-semibold" data-lang-key="table.philosophy">核心哲學</td>
+                                        <td class="p-3" data-lang-key="table.nasa.philosophy">增量式科學探索</td>
+                                        <td class="p-3" data-lang-key="table.spacex.philosophy">快速大規模殖民</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-700">
+                                        <td class="p-3 font-semibold" data-lang-key="table.path">探索路徑</td>
+                                        <td class="p-3" data-lang-key="table.nasa.path">月球 -> 火星</td>
+                                        <td class="p-3" data-lang-key="table.spacex.path">直達火星</td>
+                                    </tr>
+                                    <tr class="border-b border-gray-700">
+                                        <td class="p-3 font-semibold" data-lang-key="table.vehicle">關鍵載具</td>
+                                        <td class="p-3" data-lang-key="table.nasa.vehicle">SLS + 獵戶座</td>
+                                        <td class="p-3" data-lang-key="table.spacex.vehicle">星艦 (Starship)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-3 font-semibold" data-lang-key="table.landing">首次載人登陸目標</td>
+                                        <td class="p-3">~2038</td>
+                                        <td class="p-3">~2029</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="missionTimelineChart"></canvas>
+                    </div>
+                </div>
+                 <p class="text-center text-sm text-gray-400 mt-4" data-lang-key="section2.p2">
+                    上圖比較了NASA和SpaceX的首次載人火星登陸目標時間線，凸顯了兩者在戰略規劃上的顯著差異。
+                </p>
+            </section>
+            
+            <section class="card rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6 text-[#00A8E8]" data-lang-key="section3.title">3. 人的因素：深空棲居的生理障礙</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                         <p class="text-gray-300 mb-4" data-lang-key="section3.p1">
+                            在所有技術挑戰中，最脆弱的系統是人類自身。長期太空旅行對人體構成嚴峻的生理威脅，其中輻射和微重力是兩大主要殺手，是限制長期任務的關鍵瓶頸。
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">☢️</span>
+                                <p data-lang-key="section3.risk1"><strong>宇宙輻射 (GCRs):</strong> 增加癌症風險，損傷中樞神經系統。</p>
+                            </div>
+                             <div class="flex items-center">
+                                <span class="text-2xl mr-4">🦴</span>
+                                <p data-lang-key="section3.risk2"><strong>骨質流失:</strong> 每月流失1-2%骨密度，增加骨折風險。</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">💪</span>
+                                <p data-lang-key="section3.risk3"><strong>肌肉萎縮:</strong> 廢用性萎縮導致力量和耐力下降。</p>
+                            </div>
+                            <div class="flex items-center">
+                                <span class="text-2xl mr-4">❤️</span>
+                                <p data-lang-key="section3.risk4"><strong>心血管去適應:</strong> 心臟功能減退，返回重力環境後易出現問題。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="healthRiskChart"></canvas>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-gray-400 mt-4" data-lang-key="section3.p2">
+                    圖表展示了主要生理風險的相對影響程度。輻射是目前最難以有效防護的長期威脅。
+                </p>
+            </section>
+
+            <section class="card rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6 text-[#00A8E8]" data-lang-key="section4.title">4. 就地資源利用 (ISRU)：自給自足的基石</h2>
+                <p class="text-center text-gray-300 max-w-3xl mx-auto mb-8" data-lang-key="section4.p1">
+                    要實現可持續的火星存在，必須「就地取材」。ISRU技術是將火星貧瘠的資源轉化為生命必需品的煉金術，是擺脫地球補給依賴的唯一途徑。
+                </p>
+                <div class="space-y-8">
+                    <div class="text-center">
+                         <h3 class="text-xl font-semibold mb-4" data-lang-key="section4.subtitle1">火星大氣構成</h3>
+                         <div class="chart-container h-64 md:h-80 mx-auto">
+                            <canvas id="atmosphereChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-400 mt-4" data-lang-key="section4.p2">
+                           火星大氣中超過95%是二氧化碳，這是生產氧氣和燃料的寶貴原料。
+                        </p>
+                    </div>
+
+                    <div class="text-center">
+                        <h3 class="text-xl font-semibold mb-6" data-lang-key="section4.subtitle2">ISRU 核心流程</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-5 items-center gap-4 text-center">
+                            <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                                <h4 class="font-bold text-lg" data-lang-key="flowchart.step1.title">資源</h4>
+                                <p class="text-sm text-[#00A8E8]" data-lang-key="flowchart.step1.content">火星水冰 (H₂O)<br/>火星大氣 (CO₂)<br/>火星風化層</p>
+                            </div>
+                            <div class="flowchart-arrow hidden md:block">➔</div>
+                             <div class="md:hidden text-3xl text-center my-2">↓</div>
+                            <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                                <h4 class="font-bold text-lg" data-lang-key="flowchart.step2.title">處理</h4>
+                                <p class="text-sm text-[#00A8E8]" data-lang-key="flowchart.step2.content">電解 (水/CO₂)<br/>薩巴蒂爾反應<br/>3D列印</p>
+                            </div>
+                           <div class="flowchart-arrow hidden md:block">➔</div>
+                             <div class="md:hidden text-3xl text-center my-2">↓</div>
+                             <div class="p-4 rounded-lg bg-black bg-opacity-20">
+                                <h4 class="font-bold text-lg" data-lang-key="flowchart.step3.title">產品</h4>
+                                <p class="text-sm text-[#00A8E8]" data-lang-key="flowchart.step3.content">氧氣 (O₂)<br/>水 (H₂O)<br/>甲烷燃料 (CH₄)<br/>建築材料</p>
+                            </div>
+                           <div class="flowchart-arrow hidden md:block">➔</div>
+                             <div class="md:hidden text-3xl text-center my-2">↓</div>
+                             <div class="p-4 rounded-lg bg-black bg-opacity-20 col-span-1 md:col-span-2">
+                                <h4 class="font-bold text-lg" data-lang-key="flowchart.step4.title">應用</h4>
+                                <p class="text-sm text-[#00A8E8]" data-lang-key="flowchart.step4.content">生命支持系統 (呼吸)<br/>火箭返航燃料<br/>棲息地與基礎設施建設</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-center mb-6 text-[#00A8E8]" data-lang-key="section5.title">5. 核心技術系統：能源與建設</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-semibold text-center mb-4" data-lang-key="section5.subtitle1">能源方案對比：太陽能 vs. 核能</h3>
+                        <p class="text-gray-300 mb-4" data-lang-key="section5.p1">
+                            能源是殖民地的血液。雖然太陽能技術成熟，但在沙塵暴頻發的火星，其可靠性遠不及不受環境影響的緊湊型核分裂反應爐。
+                        </p>
+                        <div class="chart-container">
+                             <canvas id="energySourceChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-gray-400 mt-4" data-lang-key="section5.p2">
+                           核能（裂變電源）在功率密度和連續運行能力上擁有壓倒性優勢，是支撐工業級ISRU的必然選擇。
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-xl font-semibold text-center mb-4" data-lang-key="section5.subtitle2">技術三位一體</h3>
+                         <p class="text-gray-300 mb-4" data-lang-key="section5.p3">
+                            火星基礎設施的建立依賴於一個緊密耦合的「技術三位一體」，三者互為前提，缺一不可，共同構成殖民計畫的技術基石。
+                        </p>
+                        <div class="relative w-full h-80 flex items-center justify-center">
+                             <div class="absolute top-0 text-center">
+                                <div class="text-4xl mb-2">☢️</div>
+                                <h4 class="text-lg font-bold" data-lang-key="trinity.item1.title">核能發電</h4>
+                                <p class="text-sm text-gray-400" data-lang-key="trinity.item1.p">提供持續、高功率電力</p>
+                            </div>
+                             <div class="absolute bottom-0 left-0 text-center">
+                                <div class="text-4xl mb-2">🤖</div>
+                                <h4 class="text-lg font-bold" data-lang-key="trinity.item2.title">自主機器人</h4>
+                                <p class="text-sm text-gray-400" data-lang-key="trinity.item2.p">執行建設與資源開採</p>
+                            </div>
+                            <div class="absolute bottom-0 right-0 text-center">
+                                <div class="text-4xl mb-2">🏗️</div>
+                                <h4 class="text-lg font-bold" data-lang-key="trinity.item3.title">3D列印</h4>
+                                <p class="text-sm text-gray-400" data-lang-key="trinity.item3.p">利用本地材料建造</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="text-center pt-8">
+                <p class="text-gray-400" data-lang-key="footer.p1">這是一項跨世代的宏偉事業，其挑戰巨大，但潛在回報——確保人類文明的永續——同樣無可估量。</p>
+                <p class="text-xs text-gray-500 mt-2" data-lang-key="footer.p2">基於火星殖民可行性研究報告生成。所有數據均為說明性。無SVG或Mermaid JS使用。</p>
+            </footer>
+        </main>
+    </div>
+
+<script>
+    const translations = {
+        zh: {
+            "langBtn": "English",
+            "header.title": "邁向紅色星球",
+            "header.subtitle": "火星殖民可行性與關鍵技術挑戰",
+            "section1.title": "1. 為何是火星？三大戰略驅動力",
+            "section1.p1": "將人類文明擴展至火星並非單一動機，而是由科學探索、物種存續和經濟催化三大支柱共同構成的宏偉藍圖。三者相互依存，形成一個自我強化的邏輯閉環。",
+            "section1.card1.title": "科學探索",
+            "section1.card1.p": "作為獨一無二的行星實驗室，研究火星演化並尋找地外生命跡象。",
+            "section1.card2.title": "物種存續",
+            "section1.card2.p": "為人類文明建立一個「備份」，應對地球潛在的生存威脅。",
+            "section1.card3.title": "經濟催化",
+            "section1.card3.p": "驅動尖端技術突破，催生太空資源開發等全新經濟前沿。",
+            "section2.title": "2. 奔赴火星的競賽：兩種戰略對比",
+            "section2.p1": "目前全球形成了兩種主流的火星探索路徑：NASA以月球為跳板的增量式、國際合作模式，以及SpaceX旨在快速實現大規模殖民的顛覆性商業模式。",
+            "section2.p2": "上圖比較了NASA和SpaceX的首次載人火星登陸目標時間線，凸顯了兩者在戰略規劃上的顯著差異。",
+            "table.feature": "特性",
+            "table.philosophy": "核心哲學",
+            "table.nasa.philosophy": "增量式科學探索",
+            "table.spacex.philosophy": "快速大規模殖民",
+            "table.path": "探索路徑",
+            "table.nasa.path": "月球 -> 火星",
+            "table.spacex.path": "直達火星",
+            "table.vehicle": "關鍵載具",
+            "table.nasa.vehicle": "SLS + 獵戶座",
+            "table.spacex.vehicle": "星艦 (Starship)",
+            "table.landing": "首次載人登陸目標",
+            "section3.title": "3. 人的因素：深空棲居的生理障礙",
+            "section3.p1": "在所有技術挑戰中，最脆弱的系統是人類自身。長期太空旅行對人體構成嚴峻的生理威脅，其中輻射和微重力是兩大主要殺手，是限制長期任務的關鍵瓶頸。",
+            "section3.risk1": "<strong>宇宙輻射 (GCRs):</strong> 增加癌症風險，損傷中樞神經系統。",
+            "section3.risk2": "<strong>骨質流失:</strong> 每月流失1-2%骨密度，增加骨折風險。",
+            "section3.risk3": "<strong>肌肉萎縮:</strong> 廢用性萎縮導致力量和耐力下降。",
+            "section3.risk4": "<strong>心血管去適應:</strong> 心臟功能減退，返回重力環境後易出現問題。",
+            "section3.p2": "圖表展示了主要生理風險的相對影響程度。輻射是目前最難以有效防護的長期威脅。",
+            "section4.title": "4. 就地資源利用 (ISRU)：自給自足的基石",
+            "section4.p1": "要實現可持續的火星存在，必須「就地取材」。ISRU技術是將火星貧瘠的資源轉化為生命必需品的煉金術，是擺脫地球補給依賴的唯一途徑。",
+            "section4.subtitle1": "火星大氣構成",
+            "section4.p2": "火星大氣中超過95%是二氧化碳，這是生產氧氣和燃料的寶貴原料。",
+            "section4.subtitle2": "ISRU 核心流程",
+            "flowchart.step1.title": "資源",
+            "flowchart.step1.content": "火星水冰 (H₂O)<br/>火星大氣 (CO₂)<br/>火星風化層",
+            "flowchart.step2.title": "處理",
+            "flowchart.step2.content": "電解 (水/CO₂)<br/>薩巴蒂爾反應<br/>3D列印",
+            "flowchart.step3.title": "產品",
+            "flowchart.step3.content": "氧氣 (O₂)<br/>水 (H₂O)<br/>甲烷燃料 (CH₄)<br/>建築材料",
+            "flowchart.step4.title": "應用",
+            "flowchart.step4.content": "生命支持系統 (呼吸)<br/>火箭返航燃料<br/>棲息地與基礎設施建設",
+            "section5.title": "5. 核心技術系統：能源與建設",
+            "section5.subtitle1": "能源方案對比：太陽能 vs. 核能",
+            "section5.p1": "能源是殖民地的血液。雖然太陽能技術成熟，但在沙塵暴頻發的火星，其可靠性遠不及不受環境影響的緊湊型核分裂反應爐。",
+            "section5.p2": "核能（裂變電源）在功率密度和連續運行能力上擁有壓倒性優勢，是支撐工業級ISRU的必然選擇。",
+            "section5.subtitle2": "技術三位一體",
+            "section5.p3": "火星基礎設施的建立依賴於一個緊密耦合的「技術三位一體」，三者互為前提，缺一不可，共同構成殖民計畫的技術基石。",
+            "trinity.item1.title": "核能發電",
+            "trinity.item1.p": "提供持續、高功率電力",
+            "trinity.item2.title": "自主機器人",
+            "trinity.item2.p": "執行建設與資源開採",
+            "trinity.item3.title": "3D列印",
+            "trinity.item3.p": "利用本地材料建造",
+            "footer.p1": "這是一項跨世代的宏偉事業，其挑戰巨大，但潛在回報——確保人類文明的永續——同樣無可估量。",
+            "footer.p2": "基於火星殖民可行性研究報告生成。所有數據均為說明性。無SVG或Mermaid JS使用。",
+            "charts.timeline.label": "首次載人登陸目標年份",
+            "charts.health.label": "風險與挑戰評分 (滿分10)",
+            "charts.health.risks": ["宇宙輻射 (GCRs)", "骨質流失", "肌肉萎縮", "心血管去適應", "心理壓力"],
+            "charts.atmosphere.labels": ["二氧化碳 (CO2)", "氮氣 (N2)", "氬氣 (Ar)", "其他"],
+            "charts.energy.labels": ["功率密度 (W/kg)", "連續運行能力", "沙塵暴脆弱性"],
+            "charts.energy.solar": "太陽能",
+            "charts.energy.nuclear": "核能"
+        },
+        en: {
+            "langBtn": "中文",
+            "header.title": "Journey to the Red Planet",
+            "header.subtitle": "Feasibility of Mars Colonization & Key Technical Challenges",
+            "section1.title": "1. Why Mars? The Three Strategic Drivers",
+            "section1.p1": "Expanding human civilization to Mars is not driven by a single motive, but by a grand vision built on three pillars: scientific exploration, species survival, and economic catalysis. These three are interdependent, forming a self-reinforcing logical loop.",
+            "section1.card1.title": "Scientific Exploration",
+            "section1.card1.p": "As a unique planetary laboratory, to study Martian evolution and search for signs of extraterrestrial life.",
+            "section1.card2.title": "Species Survival",
+            "section1.card2.p": "To establish a 'backup' for human civilization against potential existential threats on Earth.",
+            "section1.card3.title": "Economic Catalyst",
+            "section1.card3.p": "Driving cutting-edge technological breakthroughs and creating new economic frontiers like space resource development.",
+            "section2.title": "2. The Race to Mars: A Tale of Two Strategies",
+            "section2.p1": "Currently, two main approaches to Mars exploration have emerged globally: NASA's incremental, internationally cooperative model using the Moon as a stepping stone, and SpaceX's disruptive commercial model aiming for rapid, large-scale colonization.",
+            "section2.p2": "The chart above compares the target timelines for the first crewed Mars landing by NASA and SpaceX, highlighting the significant difference in their strategic planning.",
+            "table.feature": "Feature",
+            "table.philosophy": "Core Philosophy",
+            "table.nasa.philosophy": "Incremental Scientific Exploration",
+            "table.spacex.philosophy": "Rapid Large-Scale Colonization",
+            "table.path": "Exploration Path",
+            "table.nasa.path": "Moon -> Mars",
+            "table.spacex.path": "Direct to Mars",
+            "table.vehicle": "Key Vehicle",
+            "table.nasa.vehicle": "SLS + Orion",
+            "table.spacex.vehicle": "Starship",
+            "table.landing": "First Crewed Landing Target",
+            "section3.title": "3. The Human Factor: Physiological Hurdles of Deep Space Habitation",
+            "section3.p1": "Of all the technical challenges, the most fragile system is the human body itself. Long-duration space travel poses severe physiological threats, with radiation and microgravity being the two main killers, acting as key bottlenecks for long-term missions.",
+            "section3.risk1": "<strong>Galactic Cosmic Rays (GCRs):</strong> Increased cancer risk, damage to the central nervous system.",
+            "section3.risk2": "<strong>Bone Density Loss:</strong> Loss of 1-2% bone density per month, increasing fracture risk.",
+            "section3.risk3": "<strong>Muscle Atrophy:</strong> Disuse atrophy leads to decreased strength and endurance.",
+            "section3.risk4": "<strong>Cardiovascular Deconditioning:</strong> Reduced heart function, leading to issues upon return to a gravity environment.",
+            "section3.p2": "The chart illustrates the relative impact of major physiological risks. Radiation is currently the most difficult long-term threat to effectively shield against.",
+            "section4.title": "4. In-Situ Resource Utilization (ISRU): The Cornerstone of Self-Sufficiency",
+            "section4.p1": "To achieve a sustainable presence on Mars, we must 'live off the land.' ISRU is the alchemy that turns Mars' barren resources into life's necessities, and it is the only way to break free from dependency on Earthly supplies.",
+            "section4.subtitle1": "Martian Atmosphere Composition",
+            "section4.p2": "Over 95% of the Martian atmosphere is carbon dioxide, a valuable resource for producing oxygen and fuel.",
+            "section4.subtitle2": "Core ISRU Process Flow",
+            "flowchart.step1.title": "Resources",
+            "flowchart.step1.content": "Martian Water Ice (H₂O)<br/>Martian Atmosphere (CO₂)<br/>Martian Regolith",
+            "flowchart.step2.title": "Processing",
+            "flowchart.step2.content": "Electrolysis (Water/CO₂)<br/>Sabatier Reaction<br/>3D Printing",
+            "flowchart.step3.title": "Products",
+            "flowchart.step3.content": "Oxygen (O₂)<br/>Water (H₂O)<br/>Methane Fuel (CH₄)<br/>Building Materials",
+            "flowchart.step4.title": "Applications",
+            "flowchart.step4.content": "Life Support Systems (Breathing)<br/>Rocket Propellant for Return<br/>Habitat & Infrastructure Construction",
+            "section5.title": "5. Core Technical Systems: Power and Construction",
+            "section5.subtitle1": "Energy Solutions: Solar vs. Nuclear",
+            "section5.p1": "Energy is the lifeblood of a colony. While solar technology is mature, its reliability on dust-storm-prone Mars pales in comparison to compact nuclear fission reactors, which are unaffected by the environment.",
+            "section5.p2": "Nuclear power (fission surface power) has an overwhelming advantage in power density and continuous operation, making it the inevitable choice to support industrial-scale ISRU.",
+            "section5.subtitle2": "The Technological Trinity",
+            "section5.p3": "The establishment of Martian infrastructure relies on a tightly coupled 'technological trinity.' These three elements are prerequisites for each other, forming the technical foundation of the colonization plan.",
+            "trinity.item1.title": "Nuclear Power",
+            "trinity.item1.p": "Provides continuous, high-power electricity",
+            "trinity.item2.title": "Autonomous Robotics",
+            "trinity.item2.p": "Performs construction and resource extraction",
+            "trinity.item3.title": "3D Printing",
+            "trinity.item3.p": "Builds structures using local materials",
+            "footer.p1": "This is a multi-generational endeavor of immense challenge, but its potential reward—ensuring the long-term survival of human civilization—is equally immeasurable.",
+            "footer.p2": "Generated based on Mars colonization feasibility studies. All data is illustrative. No SVG or Mermaid JS was used.",
+            "charts.timeline.label": "First Crewed Landing Target Year",
+            "charts.health.label": "Risk & Challenge Score (out of 10)",
+            "charts.health.risks": ["Cosmic Radiation (GCRs)", "Bone Loss", "Muscle Atrophy", "Cardiovascular Deconditioning", "Psychological Stress"],
+            "charts.atmosphere.labels": ["Carbon Dioxide (CO2)", "Nitrogen (N2)", "Argon (Ar)", "Other"],
+            "charts.energy.labels": ["Power Density (W/kg)", "Continuous Operation", "Dust Storm Vulnerability"],
+            "charts.energy.solar": "Solar",
+            "charts.energy.nuclear": "Nuclear"
+        }
+    };
+
+    let currentLang = 'zh';
+    const charts = {};
+
+    function wrapText(str, maxWidth) {
+        if (!str || str.length <= maxWidth) {
+            return str;
+        }
+        const words = str.split(' ');
+        let lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+            if (currentLine.length + words[i].length + 1 <= maxWidth) {
+                currentLine += ' ' + words[i];
+            } else {
+                lines.push(currentLine);
+                currentLine = words[i];
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+    
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+        document.getElementById('lang-switcher').textContent = translations[lang]['langBtn'];
+        updateAllCharts(lang);
+    };
+    
+    const updateAllCharts = (lang) => {
+        const langData = translations[lang];
+
+        // Mission Timeline Chart
+        charts.missionTimeline.data.datasets[0].label = langData['charts.timeline.label'];
+        charts.missionTimeline.update();
+
+        // Health Risk Chart
+        charts.healthRisk.data.datasets[0].label = langData['charts.health.label'];
+        charts.healthRisk.data.labels = langData['charts.health.risks'].map(l => wrapText(l, 16));
+        charts.healthRisk.update();
+
+        // Atmosphere Chart
+        charts.atmosphere.data.labels = langData['charts.atmosphere.labels'];
+        charts.atmosphere.update();
+
+        // Energy Source Chart
+        charts.energySource.data.labels = langData['charts.energy.labels'].map(l => wrapText(l, 16));
+        charts.energySource.data.datasets[0].label = langData['charts.energy.solar'];
+        charts.energySource.data.datasets[1].label = langData['charts.energy.nuclear'];
+        charts.energySource.update();
+    };
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#FFFFFF' } },
+                tooltip: { callbacks: { title: tooltipTitleCallback } }
+            },
+            scales: {
+                x: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(156, 163, 175, 0.2)' } },
+                y: { ticks: { color: '#9CA3AF' }, grid: { color: 'rgba(156, 163, 175, 0.2)' } }
+            }
+        };
+
+        const missionTimelineData = {
+            labels: ['NASA (M2M Program)', 'SpaceX'],
+            datasets: [{
+                label: '',
+                data: [2038, 2029],
+                backgroundColor: ['#007EA7', '#00A8E8'],
+                borderColor: ['#00A8E8', '#003459'],
+                borderWidth: 1
+            }]
+        };
+        charts.missionTimeline = new Chart(document.getElementById('missionTimelineChart'), {
+            type: 'bar',
+            data: missionTimelineData,
+            options: { ...commonChartOptions, indexAxis: 'y', scales: { x: { ...commonChartOptions.scales.x, min: 2025 }, y: { ...commonChartOptions.scales.y } } }
+        });
+        
+        const healthRiskData = {
+            labels: [],
+            datasets: [{
+                label: '',
+                data: [9.5, 8.5, 8, 7.5, 9],
+                backgroundColor: ['#FF6978', '#00A8E8', '#00A8E8', '#00A8E8', '#FF6978'],
+                borderColor: '#007EA7',
+                borderWidth: 1
+            }]
+        };
+        charts.healthRisk = new Chart(document.getElementById('healthRiskChart'), {
+            type: 'bar',
+            data: healthRiskData,
+            options: { ...commonChartOptions, indexAxis: 'y', plugins: { ...commonChartOptions.plugins, legend: { display: false } } }
+        });
+        
+        const atmosphereData = {
+            labels: [],
+            datasets: [{
+                data: [95.3, 2.7, 1.6, 0.4],
+                backgroundColor: ['#00A8E8', '#007EA7', '#003459', '#9CA3AF'],
+                hoverOffset: 4
+            }]
+        };
+        charts.atmosphere = new Chart(document.getElementById('atmosphereChart'), {
+            type: 'pie',
+            data: atmosphereData,
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', labels: { color: '#FFFFFF' } }, tooltip: { callbacks: { title: tooltipTitleCallback } } } }
+        });
+        
+        const energySourceData = {
+            labels: [],
+            datasets: [
+                { label: '', data: [3, 2, 1], backgroundColor: '#007EA7' },
+                { label: '', data: [9, 10, 10], backgroundColor: '#00A8E8' }
+            ]
+        };
+        charts.energySource = new Chart(document.getElementById('energySourceChart'), {
+            type: 'bar',
+            data: energySourceData,
+            options: { ...commonChartOptions, scales: { y: { ...commonChartOptions.scales.y, min: 0, max: 10, ticks: {stepSize: 2} } } }
+        });
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            switchLanguage(newLang);
+        });
+
+        switchLanguage('zh');
+    });
+</script>
+</body>
+</html>
