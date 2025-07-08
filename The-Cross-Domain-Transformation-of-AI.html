@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動報告：人工智能的應用與社會接受度</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals & Slate Blue -->
+    <!-- Application Structure Plan: The structure will be a single-page application with a fixed top navigation bar allowing users to jump to five distinct sections: 1. Overview: Introduces the topic and features an interactive card layout comparing the three main sectors (Education, Healthcare, Entertainment) across goals, applications, and risks. This provides an immediate, high-level synthesis. 2. Education: A dedicated section detailing AI's role in education, using cards for key applications (e.g., Personalization, Automation) and a "Challenges" toggle to reveal ethical concerns. 3. Healthcare: Similar structure to Education, focusing on diagnostics, drug discovery, and robotics, with a prominent callout for the "Equitable Accuracy" challenge. 4. Entertainment: Focuses on personalization and creation, highlighting the economic conflict with a visual representation of job impact vs. new roles. 5. Public Perception & Governance: A dashboard-style section with interactive charts (using Chart.js) to display public opinion data. Users can filter by application (e.g., healthcare vs. hiring). This section will also present the core ethical principles and stakeholder recommendations in a clear, digestible format (e.g., accordion or tabbed lists). This non-linear, thematic structure is chosen to break down the dense report into manageable, user-driven explorations, allowing comparison and deep dives without overwhelming the user with a long, linear scroll. Interactivity is focused on revealing complexity on demand (toggles, accordions) and exploring data (interactive charts). -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: High-level comparison of Education, Healthcare, Entertainment (Table 1). -> Goal: Compare. -> Viz/Method: Interactive cards in a 3-column grid (HTML/Tailwind). On hover, it highlights key stats. -> Interaction: Hover effects. -> Justification: More visually engaging and interactive than a static table. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: Public opinion statistics (e.g., % worried vs. excited, trust in different domains from Table 2). -> Goal: Inform/Compare. -> Viz/Method: Interactive Bar and Doughnut charts (Chart.js/Canvas). -> Interaction: A dropdown filter will allow users to switch the chart's data. Tooltips on hover show exact percentages. -> Justification: Charts are the best way to visualize survey data. Interactivity allows exploration of nuanced public opinion. -> Library/Method: Chart.js/Canvas.
+        - Report Info: Geographic differences in AI perception. -> Goal: Compare. -> Viz/Method: A horizontal bar chart. -> Interaction: Static chart for clear comparison. -> Justification: Directly visualizes the stark contrast. -> Library/Method: Chart.js/Canvas.
+        - Report Info: Core ethical principles. -> Goal: Organize/Inform. -> Viz/Method: An accordion interface (HTML/Tailwind/JS). -> Interaction: User clicks to expand panels containing definitions and examples. -> Justification: Breaks down dense text, encouraging active engagement. -> Library/Method: HTML/Tailwind/JS.
+        - Report Info: Applications within each sector. -> Goal: Inform/Organize. -> Viz/Method: Styled content cards with Unicode icons. -> Interaction: Simple layout. -> Justification: Provides a clean, visual summary. -> Library/Method: HTML/Tailwind/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :lang(zh-Hant) body { font-family: 'Noto Sans TC', sans-serif; }
+        :lang(en) body { font-family: 'Roboto', sans-serif; }
+        body {
+            background-color: #f8fafc; 
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .nav-link.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        .section-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="font-bold text-xl text-slate-800" data-lang-key="headerTitle">AI 洞察報告</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" class="nav-link text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent" data-lang-key="navOverview">總覽</a>
+                            <a href="#sectors" class="nav-link text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent" data-lang-key="navSectors">三大領域</a>
+                            <a href="#perception" class="nav-link text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent" data-lang-key="navPerception">公眾觀感</a>
+                            <a href="#governance" class="nav-link text-slate-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent" data-lang-key="navGovernance">倫理與治理</a>
+                        </div>
+                    </div>
+                    <button id="lang-switcher" class="ml-4 px-3 py-1.5 border border-slate-300 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none">EN / 中文</button>
+                </div>
+                 <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-200 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="#overview" data-lang-key="navOverview">總覽</option>
+                        <option value="#sectors" data-lang-key="navSectors">三大領域</option>
+                        <option value="#perception" data-lang-key="navPerception">公眾觀感</option>
+                        <option value="#governance" data-lang-key="navGovernance">倫理與治理</option>
+                    </select>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+
+        <section id="overview" class="mb-16 scroll-mt-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-center text-slate-800 mb-4" data-lang-key="mainTitle">人工智能的跨領域變革</h1>
+            <p class="text-lg text-center text-slate-600 max-w-3xl mx-auto mb-12" data-lang-key="mainSubtitle">
+                人工智能（AI）作為一種通用技術，正深刻地重塑教育、醫療和娛樂等關鍵領域。本報告將深入探討其應用、社會接受度及倫理挑戰，揭示一個在創新與風險中尋求平衡的未來。
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="section-card bg-white p-6 rounded-xl shadow-lg border border-transparent hover:border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🎓</span>
+                        <h3 class="text-2xl font-bold text-slate-900" data-lang-key="eduTitle">教育</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="goal">目標：</strong><span data-lang-key="eduGoal">實現個人化學習與效率提升，增強而非取代教師。</span></p>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="apps">關鍵應用：</strong><span data-lang-key="eduApps">適應性學習平台、智能家教、行政自動化。</span></p>
+                    <p class="text-slate-600"><strong data-lang-key="tension">核心張力：</strong><span data-lang-key="eduTension">數位鴻溝、學生批判性思維能力下降、數據隱私。</span></p>
+                </div>
+                <div class="section-card bg-white p-6 rounded-xl shadow-lg border border-transparent hover:border-green-500">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">❤️‍🩹</span>
+                        <h3 class="text-2xl font-bold text-slate-900" data-lang-key="healthTitle">醫療</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="goal">目標：</strong><span data-lang-key="healthGoal">追求診斷的準確性與速度，實現個人化精準護理。</span></p>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="apps">關鍵應用：</strong><span data-lang-key="healthApps">醫學影像分析、藥物發現、機器人手術。</span></p>
+                    <p class="text-slate-600"><strong data-lang-key="tension">核心張力：</strong><span data-lang-key="healthTension">患者隱私、演算法偏見、醫療事故的問責。</span></p>
+                </div>
+                <div class="section-card bg-white p-6 rounded-xl shadow-lg border border-transparent hover:border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <span class="text-3xl mr-4">🎬</span>
+                        <h3 class="text-2xl font-bold text-slate-900" data-lang-key="entTitle">娛樂</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="goal">目標：</strong><span data-lang-key="entGoal">驅動用戶參與度，革新內容創作與商業變現模式。</span></p>
+                    <p class="text-slate-600 mb-4"><strong data-lang-key="apps">關鍵應用：</strong><span data-lang-key="entApps">推薦引擎、生成式內容創作、目標廣告。</span></p>
+                    <p class="text-slate-600"><strong data-lang-key="tension">核心張力：</strong><span data-lang-key="entTension">版權歸屬、深度偽造、創意工作者的就業衝擊。</span></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="sectors" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-800 mb-2" data-lang-key="sectorsTitle">三大關鍵領域深度剖析</h2>
+            <p class="text-lg text-center text-slate-600 max-w-3xl mx-auto mb-12" data-lang-key="sectorsSubtitle">
+                從個人化課堂到精準醫療，再到互動式娛樂，AI正在各領域掀起一場深刻的革命。點擊下方的標籤，探索AI在不同場景下的具體應用與獨特挑戰。
+            </p>
+            <div id="sector-tabs" class="mb-8 flex justify-center border-b border-slate-200">
+                 <button data-sector="education" class="sector-tab-button relative py-4 px-6 text-lg font-medium text-slate-500 hover:text-blue-600 focus:outline-none border-b-2 border-transparent" data-lang-key="eduTab">🎓 教育</button>
+                 <button data-sector="healthcare" class="sector-tab-button relative py-4 px-6 text-lg font-medium text-slate-500 hover:text-green-600 focus:outline-none border-b-2 border-transparent" data-lang-key="healthTab">❤️‍🩹 醫療</button>
+                 <button data-sector="entertainment" class="sector-tab-button relative py-4 px-6 text-lg font-medium text-slate-500 hover:text-purple-600 focus:outline-none border-b-2 border-transparent" data-lang-key="entTab">🎬 娛樂</button>
+            </div>
+            <div id="sector-content" class="min-h-[400px]"></div>
+        </section>
+
+        <section id="perception" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-800 mb-2" data-lang-key="perceptionTitle">公眾觀感：擔憂與好奇並存</h2>
+             <p class="text-lg text-center text-slate-600 max-w-3xl mx-auto mb-12" data-lang-key="perceptionSubtitle">
+                大眾對AI的態度是複雜且矛盾的。數據顯示，在不同應用場景和不同群體之間，人們的信任度與擔憂程度存在顯著差異。下方的互動圖表揭示了這幅複雜的輿論圖景。
+            </p>
+            <div class="grid lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="sentimentChartTitle">公眾情緒光譜：興奮 vs. 擔憂</h3>
+                    <div class="chart-container h-64 md:h-80"><canvas id="sentimentChart"></canvas></div>
+                    <p class="text-sm text-center text-slate-500 mt-4" data-lang-key="sentimentChartDesc">數據顯示，對AI感到擔憂的民眾比例遠高於感到興奮者，凸顯了社會層面的普遍焦慮。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="riskChartTitle">高風險 vs. 低風險：AI應用接受度</h3>
+                    <div class="chart-container"><canvas id="riskAcceptanceChart"></canvas></div>
+                     <p class="text-sm text-center text-slate-500 mt-4" data-lang-key="riskChartDesc">公眾對AI的接受度高度依賴於應用場景的風險。在醫療、招聘等高風險領域，擔憂情緒顯著升高。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg lg:col-span-2">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="geoChartTitle">全球視野：各國對AI的樂觀程度</h3>
+                    <div class="chart-container"><canvas id="geographyChart"></canvas></div>
+                     <p class="text-sm text-center text-slate-500 mt-4" data-lang-key="geoChartDesc">發展中國家對AI的態度普遍比已開發國家更為樂觀，反映了文化和發展階段的差異。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="governance" class="scroll-mt-20">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-800 mb-2" data-lang-key="governanceTitle">倫理與治理：駕馭未來</h2>
+            <p class="text-lg text-center text-slate-600 max-w-3xl mx-auto mb-12" data-lang-key="governanceSubtitle">
+                為了確保AI能夠造福人類，建立強健的倫理框架和治理機制至關重要。這需要解決公平性、問責制、透明度和隱私等核心挑戰。
+            </p>
+            <div class="max-w-4xl mx-auto">
+                <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-slate-800 focus:outline-none">
+                        <span data-lang-key="accFairnessTitle">⚖️ 公平性與偏見緩解</span>
+                        <span class="accordion-icon text-2xl transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 pt-0 text-slate-600">
+                            <p><strong data-lang-key="challenge">挑戰：</strong> <span data-lang-key="accFairnessChallenge">AI模型可能複製並放大訓練數據中潛藏的歷史性社會偏見，導致對特定群體的不公平對待，例如在招聘或醫療風險評估中。</span></p>
+                            <p class="mt-2"><strong data-lang-key="strategy">緩解策略：</strong> <span data-lang-key="accFairnessStrategy">對訓練數據進行嚴格審計、部署後持續監控模型的公平性表現、採用多樣化的開發團隊以減少視角盲點。</span></p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-slate-800 focus:outline-none">
+                        <span data-lang-key="accAccountabilityTitle">🤝 問責制與責任歸屬</span>
+                        <span class="accordion-icon text-2xl transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 pt-0 text-slate-600">
+                            <p><strong data-lang-key="challenge">挑戰：</strong> <span data-lang-key="accAccountabilityChallenge">當AI系統（如自動駕駛汽車或醫療診斷AI）出錯並造成損害時，傳統的責任鏈條被打破，難以確定責任歸屬。</span></p>
+                            <p class="mt-2"><strong data-lang-key="strategy">緩解策略：</strong> <span data-lang-key="accAccountabilityStrategy">建立清晰的法律框架，明確開發者、部署者和使用者的責任；強制要求高風險系統記錄決策日誌，以便事後追溯。</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-slate-800 focus:outline-none">
+                        <span data-lang-key="accTransparencyTitle">🔍 透明度與可解釋性</span>
+                        <span class="accordion-icon text-2xl transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 pt-0 text-slate-600">
+                           <p><strong data-lang-key="challenge">挑戰：</strong> <span data-lang-key="accTransparencyChallenge">許多先進AI模型的決策過程如同「黑箱」，人類難以理解其做出特定判斷的原因，這阻礙了信任的建立與有效監督。</span></p>
+                            <p class="mt-2"><strong data-lang-key="strategy">緩解策略：</strong> <span data-lang-key="accTransparencyStrategy">發展和採用可解釋AI（XAI）技術；要求高風險決策必須提供人類可理解的解釋；對用戶清晰說明AI的角色和局限性。</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item bg-white rounded-lg shadow-md mb-4">
+                    <button class="accordion-header w-full flex justify-between items-center p-5 text-left font-semibold text-slate-800 focus:outline-none">
+                        <span data-lang-key="accPrivacyTitle">🛡️ 隱私與數據保護</span>
+                        <span class="accordion-icon text-2xl transition-transform duration-300 transform">+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-5 pt-0 text-slate-600">
+                            <p><strong data-lang-key="challenge">挑戰：</strong> <span data-lang-key="accPrivacyChallenge">AI的運行依賴大量數據，這帶來了對個人敏感資訊（如病歷、行為數據）過度收集、濫用或洩露的巨大風險。</span></p>
+                            <p class="mt-2"><strong data-lang-key="strategy">緩解策略：</strong> <span data-lang-key="accPrivacyStrategy">遵循「隱私始於設計」原則；採用數據匿名化和去標識化技術；確保用戶的知情同意權，並提供易於操作的數據管理選項。</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-slate-800 text-white mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm">
+            <p data-lang-key="footerText">&copy; 2024 AI 洞察報告。基於研究報告生成。</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            let currentLang = 'zh-Hant';
+            let activeCharts = {};
+
+            const translations = {
+                'zh-Hant': {
+                    headerTitle: 'AI 洞察報告',
+                    navOverview: '總覽',
+                    navSectors: '三大領域',
+                    navPerception: '公眾觀感',
+                    navGovernance: '倫理與治理',
+                    mainTitle: '人工智能的跨領域變革',
+                    mainSubtitle: '人工智能（AI）作為一種通用技術，正深刻地重塑教育、醫療和娛樂等關鍵領域。本報告將深入探討其應用、社會接受度及倫理挑戰，揭示一個在創新與風險中尋求平衡的未來。',
+                    goal: '目標：',
+                    apps: '關鍵應用：',
+                    tension: '核心張力：',
+                    challenge: '挑戰：',
+                    strategy: '緩解策略：',
+                    eduTitle: '教育',
+                    eduGoal: '實現個人化學習與效率提升，增強而非取代教師。',
+                    eduApps: '適應性學習平台、智能家教、行政自動化。',
+                    eduTension: '數位鴻溝、學生批判性思維能力下降、數據隱私。',
+                    healthTitle: '醫療',
+                    healthGoal: '追求診斷的準確性與速度，實現個人化精準護理。',
+                    healthApps: '醫學影像分析、藥物發現、機器人手術。',
+                    healthTension: '患者隱私、演算法偏見、醫療事故的問責。',
+                    entTitle: '娛樂',
+                    entGoal: '驅動用戶參與度，革新內容創作與商業變現模式。',
+                    entApps: '推薦引擎、生成式內容創作、目標廣告。',
+                    entTension: '版權歸屬、深度偽造、創意工作者的就業衝擊。',
+                    sectorsTitle: '三大關鍵領域深度剖析',
+                    sectorsSubtitle: '從個人化課堂到精準醫療，再到互動式娛樂，AI正在各領域掀起一場深刻的革命。點擊下方的標籤，探索AI在不同場景下的具體應用與獨特挑戰。',
+                    eduTab: '🎓 教育',
+                    healthTab: '❤️‍🩹 醫療',
+                    entTab: '🎬 娛樂',
+                    perceptionTitle: '公眾觀感：擔憂與好奇並存',
+                    perceptionSubtitle: '大眾對AI的態度是複雜且矛盾的。數據顯示，在不同應用場景和不同群體之間，人們的信任度與擔憂程度存在顯著差異。下方的互動圖表揭示了這幅複雜的輿論圖景。',
+                    sentimentChartTitle: '公眾情緒光譜：興奮 vs. 擔憂',
+                    sentimentChartDesc: '數據顯示，對AI感到擔憂的民眾比例遠高於感到興奮者，凸顯了社會層面的普遍焦慮。',
+                    riskChartTitle: '高風險 vs. 低風險：AI應用接受度',
+                    riskChartDesc: '公眾對AI的接受度高度依賴於應用場景的風險。在醫療、招聘等高風險領域，擔憂情緒顯著升高。',
+                    geoChartTitle: '全球視野：各國對AI的樂觀程度',
+                    geoChartDesc: '發展中國家對AI的態度普遍比已開發國家更為樂觀，反映了文化和發展階段的差異。',
+                    governanceTitle: '倫理與治理：駕馭未來',
+                    governanceSubtitle: '為了確保AI能夠造福人類，建立強健的倫理框架和治理機制至關重要。這需要解決公平性、問責制、透明度和隱私等核心挑戰。',
+                    accFairnessTitle: '⚖️ 公平性與偏見緩解',
+                    accFairnessChallenge: 'AI模型可能複製並放大訓練數據中潛藏的歷史性社會偏見，導致對特定群體的不公平對待，例如在招聘或醫療風險評估中。',
+                    accFairnessStrategy: '對訓練數據進行嚴格審計、部署後持續監控模型的公平性表現、採用多樣化的開發團隊以減少視角盲點。',
+                    accAccountabilityTitle: '🤝 問責制與責任歸屬',
+                    accAccountabilityChallenge: '當AI系統（如自動駕駛汽車或醫療診斷AI）出錯並造成損害時，傳統的責任鏈條被打破，難以確定責任歸屬。',
+                    accAccountabilityStrategy: '建立清晰的法律框架，明確開發者、部署者和使用者的責任；強制要求高風險系統記錄決策日誌，以便事後追溯。',
+                    accTransparencyTitle: '🔍 透明度與可解釋性',
+                    accTransparencyChallenge: '許多先進AI模型的決策過程如同「黑箱」，人類難以理解其做出特定判斷的原因，這阻礙了信任的建立與有效監督。',
+                    accTransparencyStrategy: '發展和採用可解釋AI（XAI）技術；要求高風險決策必須提供人類可理解的解釋；對用戶清晰說明AI的角色和局限性。',
+                    accPrivacyTitle: '🛡️ 隱私與數據保護',
+                    accPrivacyChallenge: 'AI的運行依賴大量數據，這帶來了對個人敏感資訊（如病歷、行為數據）過度收集、濫用或洩露的巨大風險。',
+                    accPrivacyStrategy: '遵循「隱私始於設計」原則；採用數據匿名化和去標識化技術；確保用戶的知情同意權，並提供易於操作的數據管理選項。',
+                    footerText: '&copy; 2024 AI 洞察報告。基於研究報告生成。',
+                    sectorContent: {
+                        education: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">新課堂：人工智能融入教育</h3><p class="text-slate-600 mb-6">AI正透過個人化學習、行政自動化和沉浸式體驗，重塑教育生態。其目標是成為「增強型教師」的得力助手，而非取代人類教學的核心價值。</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-blue-500 pl-4"><h4 class="font-bold text-lg">關鍵應用</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>適應性學習平台：</strong>為學生量身打造學習路徑。</li><li><strong>行政任務自動化：</strong>自動評分、排課，解放教師時間。</li><li><strong>沉浸式學習：</strong>透過VR/AR提供虛擬實驗和實地考察。</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">核心挑戰</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>過度依賴：</strong>可能削弱學生的批判性思維能力。</li><li><strong>演算法偏見：</strong>加劇教育不公和數位鴻溝。</li><li><strong>數據隱私：</strong>海量學生數據的安全與倫理使用。</li></ul></div></div></div>`,
+                        healthcare: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">數位治療師：AI在醫療轉型中的角色</h3><p class="text-slate-600 mb-6">在醫療這個高風險領域，AI的價值體現在其超越人類的分析能力，從革命性診斷到加速藥物研發，推動醫療向預防性、個人化的新範式轉變。</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-green-500 pl-4"><h4 class="font-bold text-lg">關鍵應用</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>醫學影像分析：</strong>大幅提高癌症等疾病的早期檢出率。</li><li><strong>藥物發現：</strong>縮短研發週期，提高臨床試驗成功率。</li><li><strong>機器人輔助手術：</strong>提升手術的精確度和微創性。</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">核心挑戰</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>演算法偏見：</strong>對不同族群產生歧視性診斷，威脅生命。</li><li><strong>問責制：</strong>醫療事故發生時，責任歸屬難以界定。</li><li><strong>公眾信任：</strong>民眾對AI醫療的可靠性與安全性普遍缺乏信心。</li></ul></div></div></div>`,
+                        entertainment: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">演算法繆斯：AI對娛樂產業的影響</h3><p class="text-slate-600 mb-6">AI正在從內容分發的後端走向創作的前台，透過超個人化推薦和生成式內容，引發了一場關於創意、所有權和勞動價值的深刻變革。</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-purple-500 pl-4"><h4 class="font-bold text-lg">關鍵應用</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>推薦引擎：</strong>策劃個人化的數位生活，提升用戶黏性。</li><li><strong>生成式內容：</strong>輔助劇本、音樂、視覺效果的創作。</li><li><strong>互動式敘事：</strong>在遊戲和影視中創造可變的故事情節。</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">核心挑戰</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>版權歸屬：</strong>AI生成內容的所有權歸屬引發法律爭議。</li><li><strong>就業衝擊：</strong>演員、編劇等創意崗位面臨被替代的風險。</li><li><strong>深度偽造：</strong>數位替身和虛假內容的濫用帶來倫理危機。</li></ul></div></div></div>`
+                    },
+                    chartData: {
+                        sentiment: { labels: ['更擔憂', '情緒複雜', '更興奮'], datasetLabel: '公眾情緒' },
+                        risk: { labels: ['用於招聘決策', '自動駕駛汽車', '提供醫療建議', '處理家務'], datasetLabel: '感到擔憂的比例 (%)' },
+                        geo: { labels: ['中國', '印尼', '加拿大', '美國', '法國'], datasetLabel: '認為AI利大於弊的比例 (%)' }
+                    }
+                },
+                'en': {
+                    headerTitle: 'AI Insight Report',
+                    navOverview: 'Overview',
+                    navSectors: 'Sectors',
+                    navPerception: 'Perception',
+                    navGovernance: 'Governance',
+                    mainTitle: 'The Cross-Domain Transformation of AI',
+                    mainSubtitle: 'As a general-purpose technology, Artificial Intelligence (AI) is profoundly reshaping key sectors like education, healthcare, and entertainment. This report explores its applications, public acceptance, and ethical challenges, revealing a future that balances innovation and risk.',
+                    goal: 'Goal:',
+                    apps: 'Key Apps:',
+                    tension: 'Core Tension:',
+                    challenge: 'Challenge:',
+                    strategy: 'Mitigation Strategy:',
+                    eduTitle: 'Education',
+                    eduGoal: 'To achieve personalized learning and efficiency, augmenting rather than replacing teachers.',
+                    eduApps: 'Adaptive learning platforms, intelligent tutoring, administrative automation.',
+                    eduTension: 'Digital divide, decline in students\' critical thinking, data privacy.',
+                    healthTitle: 'Healthcare',
+                    healthGoal: 'To pursue diagnostic accuracy and speed, enabling personalized precision care.',
+                    healthApps: 'Medical imaging analysis, drug discovery, robotic surgery.',
+                    healthTension: 'Patient privacy, algorithmic bias, accountability for medical errors.',
+                    entTitle: 'Entertainment',
+                    entGoal: 'To drive user engagement and revolutionize content creation and monetization.',
+                    entApps: 'Recommendation engines, generative content creation, targeted advertising.',
+                    entTension: 'Copyright ownership, deepfakes, job impact on creative professionals.',
+                    sectorsTitle: 'Deep Dive into Three Key Sectors',
+                    sectorsSubtitle: 'From personalized classrooms to precision medicine and interactive entertainment, AI is sparking a profound revolution. Click the tabs below to explore its specific applications and unique challenges in different contexts.',
+                    eduTab: '🎓 Education',
+                    healthTab: '❤️‍🩹 Healthcare',
+                    entTab: '🎬 Entertainment',
+                    perceptionTitle: 'Public Perception: A Mix of Concern and Curiosity',
+                    perceptionSubtitle: 'The public\'s attitude toward AI is complex and contradictory. Data reveals significant differences in trust and concern across various applications and demographics. The interactive charts below illustrate this complex landscape.',
+                    sentimentChartTitle: 'Public Sentiment Spectrum: Excitement vs. Concern',
+                    sentimentChartDesc: 'Data shows that the proportion of people concerned about AI is much higher than those who are excited, highlighting widespread societal anxiety.',
+                    riskChartTitle: 'High vs. Low Risk: AI Application Acceptance',
+                    riskChartDesc: 'Public acceptance of AI is highly dependent on the risk of the application scenario. Concern increases significantly in high-stakes domains like healthcare and hiring.',
+                    geoChartTitle: 'Global Perspective: Optimism about AI by Country',
+                    geoChartDesc: 'Developing countries are generally more optimistic about AI than developed countries, reflecting cultural and developmental differences.',
+                    governanceTitle: 'Ethics and Governance: Navigating the Future',
+                    governanceSubtitle: 'To ensure AI benefits humanity, establishing robust ethical frameworks and governance mechanisms is crucial. This requires addressing core challenges like fairness, accountability, transparency, and privacy.',
+                    accFairnessTitle: '⚖️ Fairness & Bias Mitigation',
+                    accFairnessChallenge: 'AI models can replicate and amplify historical societal biases present in training data, leading to unfair treatment of certain groups, such as in hiring or medical risk assessment.',
+                    accFairnessStrategy: 'Conducting rigorous audits of training data, continuously monitoring model fairness post-deployment, and employing diverse development teams to reduce blind spots.',
+                    accAccountabilityTitle: '🤝 Accountability & Liability',
+                    accAccountabilityChallenge: 'When an AI system (like a self-driving car or a diagnostic AI) errs and causes harm, the traditional chain of responsibility is broken, making it difficult to assign liability.',
+                    accAccountabilityStrategy: 'Establishing clear legal frameworks that define the responsibilities of developers, deployers, and users; mandating that high-risk systems log decisions for traceability.',
+                    accTransparencyTitle: '🔍 Transparency & Explainability',
+                    accTransparencyChallenge: 'The decision-making process of many advanced AI models is like a "black box," making it difficult for humans to understand the reasons for a specific judgment, which hinders trust and effective oversight.',
+                    accTransparencyStrategy: 'Developing and adopting eXplainable AI (XAI) techniques; requiring high-stakes decisions to be accompanied by human-understandable explanations; clearly communicating the AI\'s role and limitations to users.',
+                    accPrivacyTitle: '🛡️ Privacy & Data Protection',
+                    accPrivacyChallenge: 'AI relies on vast amounts of data, which creates significant risks of over-collection, misuse, or leakage of sensitive personal information (like medical records or behavioral data).',
+                    accPrivacyStrategy: 'Adhering to "Privacy by Design" principles; using data anonymization and de-identification techniques; ensuring users\' informed consent and providing easy-to-use data management options.',
+                    footerText: '&copy; 2024 AI Insight Report. Generated based on research.',
+                    sectorContent: {
+                        education: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">The New Classroom: AI Integration in Education</h3><p class="text-slate-600 mb-6">AI is reshaping the educational ecosystem through personalized learning, administrative automation, and immersive experiences. Its goal is to be a powerful assistant for the "augmented teacher," not to replace the core value of human instruction.</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-blue-500 pl-4"><h4 class="font-bold text-lg">Key Applications</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Adaptive Learning Platforms:</strong> Tailoring learning paths for each student.</li><li><strong>Administrative Task Automation:</strong> Freeing up teacher time with auto-grading and scheduling.</li><li><strong>Immersive Learning:</strong> Providing virtual labs and field trips via VR/AR.</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">Core Challenges</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Over-reliance:</strong> May weaken students' critical thinking skills.</li><li><strong>Algorithmic Bias:</strong> Exacerbating educational inequality and the digital divide.</li><li><strong>Data Privacy:</strong> The security and ethical use of vast student data.</li></ul></div></div></div>`,
+                        healthcare: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">The Digital Healer: AI's Role in Healthcare Transformation</h3><p class="text-slate-600 mb-6">In the high-stakes field of healthcare, AI's value lies in its superhuman analytical abilities, from revolutionary diagnostics to accelerating drug discovery, driving a shift toward a new paradigm of preventive, personalized care.</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-green-500 pl-4"><h4 class="font-bold text-lg">Key Applications</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Medical Imaging Analysis:</strong> Significantly improving early detection of diseases like cancer.</li><li><strong>Drug Discovery:</strong> Shortening R&D cycles and increasing clinical trial success rates.</li><li><strong>Robotic-Assisted Surgery:</strong> Enhancing surgical precision and minimizing invasiveness.</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">Core Challenges</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Algorithmic Bias:</strong> Posing life-threatening risks with discriminatory diagnoses for different populations.</li><li><strong>Accountability:</strong> Difficulty in assigning liability when medical errors occur.</li><li><strong>Public Trust:</strong> Widespread lack of confidence in the reliability and safety of AI in healthcare.</li></ul></div></div></div>`,
+                        entertainment: `<div class="bg-white p-8 rounded-xl shadow-lg animate-fade-in"><h3 class="text-2xl font-bold text-slate-900 mb-4">The Algorithmic Muse: AI's Impact on the Entertainment Industry</h3><p class="text-slate-600 mb-6">AI is moving from the backend of content distribution to the forefront of creation, sparking a profound transformation in creativity, ownership, and labor value through hyper-personalization and generative content.</p><div class="grid md:grid-cols-2 gap-6"><div class="border-l-4 border-purple-500 pl-4"><h4 class="font-bold text-lg">Key Applications</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Recommendation Engines:</strong> Curating personalized digital lives to increase user engagement.</li><li><strong>Generative Content:</strong> Assisting in the creation of scripts, music, and visual effects.</li><li><strong>Interactive Narratives:</strong> Creating variable storylines in games and films.</li></ul></div><div class="border-l-4 border-red-500 pl-4"><h4 class="font-bold text-lg">Core Challenges</h4><ul class="list-disc list-inside text-slate-600 mt-2 space-y-1"><li><strong>Copyright Ownership:</strong> Legal disputes arising from the ownership of AI-generated content.</li><li><strong>Job Impact:</strong> Risk of replacement for creative roles like actors and writers.</li><li><strong>Deepfakes:</strong> Ethical crises from the misuse of digital clones and fake content.</li></ul></div></div></div>`
+                    },
+                    chartData: {
+                        sentiment: { labels: ['More Concerned', 'Mixed Feelings', 'More Excited'], datasetLabel: 'Public Sentiment' },
+                        risk: { labels: ['Hiring Decisions', 'Self-Driving Cars', 'Medical Advice', 'Household Chores'], datasetLabel: 'Percentage Concerned (%)' },
+                        geo: { labels: ['China', 'Indonesia', 'Canada', 'USA', 'France'], datasetLabel: 'Believe AI Benefits Outweigh Risks (%)' }
+                    }
+                }
+            };
+
+            function updateLanguage(lang) {
+                document.documentElement.lang = lang;
+                const translation = translations[lang];
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (translation[key]) {
+                        el.innerHTML = translation[key];
+                    }
+                });
+                
+                // Update dynamic content
+                const activeSector = document.querySelector('.sector-tab-button.font-bold')?.dataset.sector || 'education';
+                updateSectorContent(activeSector, lang);
+                
+                // Re-render charts
+                renderCharts(lang);
+            }
+
+            const langSwitcher = document.getElementById('lang-switcher');
+            langSwitcher.addEventListener('click', () => {
+                currentLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+                updateLanguage(currentLang);
+            });
+            
+            const sectorTabs = document.getElementById('sector-tabs');
+            const sectorContent = document.getElementById('sector-content');
+            const sectorButtons = document.querySelectorAll('.sector-tab-button');
+
+            function updateSectorContent(sector, lang) {
+                sectorButtons.forEach(btn => {
+                    btn.classList.remove('text-blue-600', 'text-green-600', 'text-purple-600', 'border-blue-500', 'border-green-500', 'border-purple-500', 'font-bold');
+                    btn.classList.add('text-slate-500', 'border-transparent');
+                });
+                const activeBtn = document.querySelector(`.sector-tab-button[data-sector="${sector}"]`);
+                 if (sector === 'education') {
+                    activeBtn.classList.add('text-blue-600', 'border-blue-500', 'font-bold');
+                } else if (sector === 'healthcare') {
+                    activeBtn.classList.add('text-green-600', 'border-green-500', 'font-bold');
+                } else if (sector === 'entertainment') {
+                    activeBtn.classList.add('text-purple-600', 'border-purple-500', 'font-bold');
+                }
+
+                sectorContent.innerHTML = translations[lang].sectorContent[sector];
+                
+                const contentDiv = sectorContent.querySelector('.animate-fade-in');
+                if (contentDiv) {
+                    contentDiv.style.animation = 'none';
+                    contentDiv.offsetHeight; 
+                    contentDiv.style.animation = null; 
+                }
+            }
+
+            sectorTabs.addEventListener('click', (e) => {
+                if (e.target.matches('.sector-tab-button')) {
+                    const sector = e.target.dataset.sector;
+                    updateSectorContent(sector, currentLang);
+                }
+            });
+
+            function renderCharts(lang) {
+                const chartTranslations = translations[lang].chartData;
+
+                if (activeCharts.sentiment) activeCharts.sentiment.destroy();
+                const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+                activeCharts.sentiment = new Chart(sentimentCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartTranslations.sentiment.labels,
+                        datasets: [{
+                            label: chartTranslations.sentiment.datasetLabel,
+                            data: [52, 36, 10],
+                            backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'],
+                            borderColor: '#f8fafc',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (c) => `${c.label}: ${c.raw}%` } } }
+                    }
+                });
+
+                if (activeCharts.risk) activeCharts.risk.destroy();
+                const riskAcceptanceCtx = document.getElementById('riskAcceptanceChart').getContext('2d');
+                activeCharts.risk = new Chart(riskAcceptanceCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartTranslations.risk.labels,
+                        datasets: [{
+                            label: chartTranslations.risk.datasetLabel,
+                            data: [85, 83, 80, 19],
+                            backgroundColor: ['#dc2626', '#ea580c', '#f97316', '#16a34a'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                        scales: { x: { beginAtZero: true, max: 100 } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            
+                if (activeCharts.geo) activeCharts.geo.destroy();
+                const geographyCtx = document.getElementById('geographyChart').getContext('2d');
+                activeCharts.geo = new Chart(geographyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: chartTranslations.geo.labels,
+                        datasets: [{
+                            label: chartTranslations.geo.datasetLabel,
+                            data: [83, 80, 40, 39, 31],
+                            backgroundColor: ['#d946ef', '#a855f7', '#6366f1', '#3b82f6', '#0ea5e9'],
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, max: 100 } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+            
+            const accordionItems = document.querySelectorAll('.accordion-item');
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.accordion-icon');
+                    const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
+                    
+                    accordionItems.forEach(i => {
+                        i.querySelector('.accordion-content').style.maxHeight = '0px';
+                        i.querySelector('.accordion-icon').classList.remove('rotate-45');
+                    });
+                    
+                    if (!isOpen) {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.classList.add('rotate-45');
+                    }
+                });
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            sections.forEach(section => observer.observe(section));
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', function(e) {
+                const targetId = e.target.value;
+                 document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+            });
+
+            const styleSheet = document.createElement("style");
+            styleSheet.type = "text/css";
+            styleSheet.innerText = `@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } } .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }`;
+            document.head.appendChild(styleSheet);
+            
+            // Initial Load
+            updateLanguage(currentLang);
+        });
+    </script>
+
+</body>
+</html>
