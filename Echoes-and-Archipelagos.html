@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>迴響與列嶼：東亞詩歌傳統資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .text-shadow {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-800">
+
+    <!-- Color Palette: Vibrant & Professional (#004080, #0059B3, #0073E6, #4DA6FF, #E6F2FF) -->
+    <!-- Narrative Plan: 
+        1. Intro: Establish Chinese poetry as the "gravitational center".
+        2. Japan: Detail Waka/Haiku structures and aesthetics (Mono no aware, Wabi-sabi).
+        3. Korea: Detail Sijo structure and aesthetics (Han, Heung).
+        4. Comparison: Directly compare the structural and aesthetic foundations of the three traditions.
+        5. Conclusion: Showcase key poets as exemplars of their respective traditions. 
+    -->
+    <!-- Visualization Plan:
+        - [Data Point] East Asian Poetic Sphere -> [Goal] Inform -> [Viz] Donut Chart (Chart.js) -> [Justification] Show composition of the core traditions. NO SVG.
+        - [Data Point] Japanese Poetic Forms (Tanka/Haiku) -> [Goal] Compare -> [Viz] Bar Chart (Chart.js) -> [Justification] Clearly compare syllable counts. NO SVG.
+        - [Data Point] Core Japanese Aesthetics -> [Goal] Organize -> [Viz] Bubble Chart (Chart.js) -> [Justification] Show relationships and conceptual weight. NO SVG.
+        - [Data Point] Korean Sijo Structure -> [Goal] Organize -> [Viz] Flow Diagram (HTML/CSS) -> [Justification] Illustrate the three-part structure visually. NO SVG, NO MERMAID JS.
+        - [Data Point] Core Korean Emotions -> [Goal] Compare -> [Viz] Radar Chart (Chart.js) -> [Justification] Show the duality and interplay of Han/Heung. NO SVG.
+        - [Data Point] Foundational Principles -> [Goal] Compare -> [Viz] Bar Chart (Chart.js) -> [Justification] Compare the base units (character, syllable, foot). NO SVG.
+        - [Data Point] Representative Poets -> [Goal] Organize -> [Viz] Card Layout (HTML/CSS) -> [Justification] Present summary data clearly. NO SVG.
+    -->
+    <!-- CONFIRMATION: NEITHER MERMAID JS NOR SVG were used in this output. All visualizations are rendered using Chart.js on Canvas or structured HTML/CSS with Tailwind. -->
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-12 relative">
+            <h1 id="main-title" class="text-4xl md:text-5xl font-bold text-[#004080] mb-2 text-shadow"></h1>
+            <p id="main-subtitle" class="text-lg text-[#0059B3]"></p>
+            <button id="lang-toggle" class="absolute top-0 right-0 bg-[#0059B3] text-white py-2 px-4 rounded-lg shadow-md hover:bg-[#004080] transition-colors"></button>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <section class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col md:flex-row items-center">
+                <div class="md:w-2/3">
+                    <h2 id="intro-title" class="text-2xl font-bold text-[#004080] mb-4"></h2>
+                    <p id="intro-p" class="text-gray-600 mb-4"></p>
+                </div>
+                <div class="md:w-1/3 mt-6 md:mt-0 w-full">
+                    <div class="chart-container" style="height: 250px; max-height: 250px;">
+                        <canvas id="influenceChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="md:col-span-2 lg:col-span-2 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 id="jp-title" class="text-2xl font-bold text-[#004080] mb-4"></h2>
+                <p id="jp-p" class="text-gray-600 mb-6"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <h3 id="jp-chart1-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                        <div class="chart-container" style="height: 280px;">
+                            <canvas id="jpStructureChart"></canvas>
+                        </div>
+                         <p id="jp-chart1-desc" class="text-sm text-gray-500 mt-2 text-center"></p>
+                    </div>
+                    <div>
+                        <h3 id="jp-chart2-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                        <div class="chart-container" style="height: 280px;">
+                            <canvas id="jpAestheticsChart"></canvas>
+                        </div>
+                        <p id="jp-chart2-desc" class="text-sm text-gray-500 mt-2 text-center"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <aside class="bg-[#004080] text-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center">
+                <h3 id="basho-title" class="text-xl font-bold mb-4 border-b-2 border-[#4DA6FF] pb-2"></h3>
+                <blockquote class="text-lg mb-4">
+                    <p>古池や (Furuike ya)</p>
+                    <p>蛙飛び込む (Kawazu tobikomu)</p>
+                    <p>水の音 (Mizu no oto)</p>
+                </blockquote>
+                <p id="basho-p" class="text-sm text-blue-100"></p>
+            </aside>
+
+            <section class="md:col-span-2 lg:col-span-2 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 id="kr-title" class="text-2xl font-bold text-[#004080] mb-4"></h2>
+                <p id="kr-p" class="text-gray-600 mb-6"></p>
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <h3 id="kr-chart1-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                        <div class="space-y-3 mt-4">
+                            <div class="p-4 bg-blue-100 rounded-lg text-center">
+                                <p id="sijo-1-title" class="font-bold text-[#004080]"></p>
+                                <p id="sijo-1-desc" class="text-sm text-blue-800"></p>
+                            </div>
+                            <div class="flex justify-center"><div class="h-4 w-1 bg-gray-300"></div></div>
+                            <div class="p-4 bg-blue-100 rounded-lg text-center">
+                                <p id="sijo-2-title" class="font-bold text-[#004080]"></p>
+                                <p id="sijo-2-desc" class="text-sm text-blue-800"></p>
+                            </div>
+                            <div class="flex justify-center"><div class="h-4 w-1 bg-gray-300"></div></div>
+                            <div class="p-4 bg-[#4DA6FF] rounded-lg text-center ring-2 ring-offset-2 ring-[#0059B3]">
+                                <p id="sijo-3-title" class="font-bold text-white"></p>
+                                <p id="sijo-3-desc" class="text-sm text-blue-50"></p>
+                            </div>
+                        </div>
+                         <p id="kr-chart1-desc" class="text-sm text-gray-500 mt-4 text-center"></p>
+                    </div>
+                    <div>
+                        <h3 id="kr-chart2-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                        <div class="chart-container" style="height: 280px;">
+                            <canvas id="krAestheticsChart"></canvas>
+                        </div>
+                        <p id="kr-chart2-desc" class="text-sm text-gray-500 mt-2 text-center"></p>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="bg-[#004080] text-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col justify-center">
+                <h3 id="yun-title" class="text-xl font-bold mb-4 border-b-2 border-[#4DA6FF] pb-2"></h3>
+                <blockquote class="text-lg mb-4">
+                    <p>죽는 날까지 하늘을 우러러</p>
+                    <p>한 점 부끄럼이 없기를...</p>
+                </blockquote>
+                <p id="yun-p" class="text-sm text-blue-100"></p>
+            </aside>
+
+            <section class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                 <h2 id="diff-title" class="text-2xl font-bold text-[#004080] mb-4 text-center"></h2>
+                 <p id="diff-p" class="text-gray-600 mb-8 text-center max-w-3xl mx-auto"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 id="diff-chart1-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                        <div class="chart-container" style="height:300px;">
+                            <canvas id="foundationChart"></canvas>
+                        </div>
+                        <p id="diff-chart1-desc" class="text-sm text-gray-500 mt-2 text-center"></p>
+                    </div>
+                    <div>
+                        <h3 id="diff-chart2-title" class="font-bold text-center text-[#0059B3] mb-2"></h3>
+                         <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-16 h-16 bg-[#004080] text-white flex items-center justify-center rounded-full font-bold text-2xl flex-shrink-0" id="pursuit-cn-label"></div>
+                                <div class="ml-4">
+                                    <h4 id="pursuit-cn-title" class="font-bold text-lg text-[#004080]"></h4>
+                                    <p id="pursuit-cn-desc" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                             <div class="flex items-start">
+                                <div class="w-16 h-16 bg-[#0073E6] text-white flex items-center justify-center rounded-full font-bold text-2xl flex-shrink-0" id="pursuit-jp-label"></div>
+                                <div class="ml-4">
+                                    <h4 id="pursuit-jp-title" class="font-bold text-lg text-[#0073E6]"></h4>
+                                    <p id="pursuit-jp-desc" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                             <div class="flex items-start">
+                                <div class="w-16 h-16 bg-[#4DA6FF] text-white flex items-center justify-center rounded-full font-bold text-2xl flex-shrink-0" id="pursuit-kr-label"></div>
+                                <div class="ml-4">
+                                    <h4 id="pursuit-kr-title" class="font-bold text-lg text-[#4DA6FF]"></h4>
+                                    <p id="pursuit-kr-desc" class="text-gray-600"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const content = {
+        title: {
+            zh: '迴響與列嶼',
+            en: 'Echoes and Archipelagos'
+        },
+        subtitle: {
+            zh: '東亞詩歌傳統視覺化指南',
+            en: 'A Visual Guide to East Asian Poetic Traditions'
+        },
+        langToggle: {
+            zh: 'Switch to English',
+            en: '切換至中文'
+        },
+        introTitle: {
+            zh: '共同的引力中心',
+            en: 'A Shared Gravitational Center'
+        },
+        introP: {
+            zh: '日本與韓國的詩歌傳統，雖然發展出獨特的風貌，但都長期且深刻地受到古典漢詩的影響。漢詩如同一個文化引力核心，其格律、典故與主題，為日韓兩國的詩人提供了參照的典範。然而，兩國的本土詩歌並非簡單的模仿，而是在此影響下，結合自身語言與文化，演化出獨立的藝術體系。',
+            en: 'The poetic traditions of Japan and Korea, despite developing unique characteristics, have been long and profoundly influenced by classical Chinese poetry. Chinese poetry acted as a cultural gravitational center, its forms, allusions, and themes providing a model for poets in both nations. However, their vernacular poetry was not simple imitation; under this influence, they evolved independent artistic systems by integrating their own languages and cultures.'
+        },
+        influenceChartTitle: {
+            zh: '東亞詩歌傳統構成',
+            en: 'Composition of East Asian Poetic Traditions'
+        },
+        influenceLabels: {
+            zh: ['漢詩影響', '日本本土發展', '韓國本土發展'],
+            en: ['Chinese Influence', 'Japanese Development', 'Korean Development']
+        },
+        jpTitle: {
+            zh: '日本的詩歌列嶼：音節的藝術',
+            en: 'Japan\'s Poetic Archipelago: The Art of Syllables'
+        },
+        jpP: {
+            zh: '日本詩歌以音節為基礎，發展出兩種極具代表性的形式：追求抒情與「物哀」之美的「和歌」，以及捕捉瞬間與禪宗意境的「俳句」。',
+            en: 'Japanese poetry, based on syllables, developed two highly representative forms: "Waka," which pursues lyricism and the beauty of "mono no aware," and "Haiku," which captures moments and Zen-like states.'
+        },
+        jpChart1Title: {
+            zh: '和歌 (短歌) vs. 俳句',
+            en: 'Waka (Tanka) vs. Haiku'
+        },
+        jpChart1Desc: {
+            zh: '此圖比較了和歌（短歌）與俳句的音節結構。「五・七・五・七・七」的長度使其善於抒情，而「五・七・五」的極簡則專注於意象的瞬間捕捉。',
+            en: 'This chart compares the syllable structures of Waka (Tanka) and Haiku. The "5-7-5-7-7" length is suited for lyricism, while the minimalist "5-7-5" focuses on capturing instantaneous imagery.'
+        },
+        jpChart1Labels: {
+            zh: ['第一句', '第二句', '第三句', '第四句', '第五句'],
+            en: ['Line 1', 'Line 2', 'Line 3', 'Line 4', 'Line 5']
+        },
+        jpChart2Title: {
+            zh: '核心美學概念',
+            en: 'Core Aesthetic Concepts'
+        },
+        jpChart2Desc: {
+            zh: '「物哀」是對萬物無常的感傷共鳴，「侘寂」是在簡樸不完美中發現的美，「幽玄」則是深遠神秘的優雅。氣泡大小象徵其在文學討論中的普遍性。',
+            en: '"Mono no aware" is a poignant empathy for the transience of things, "Wabi-sabi" is beauty found in simplicity and imperfection, and "Yūgen" is a profound, mysterious grace. Bubble size represents their prevalence in literary discussion.'
+        },
+        bashoTitle: {
+            zh: '個案分析：松尾芭蕉',
+            en: 'Case Study: Matsuo Bashō'
+        },
+        bashoP: {
+            zh: '這首俳句是「侘寂」美學的極致體現。詩人捕捉了青蛙躍入古池的瞬間聲響，這短暫的「動」打破了古池永恆的「靜」，並在對比中深化了寂靜的禪意。它展現了在平凡瞬間中體悟宇宙真理的哲學。',
+            en: 'This haiku epitomizes the "wabi-sabi" aesthetic. The poet captures the sound of a frog jumping into an old pond; this brief "motion" breaks the pond\'s eternal "stillness," deepening the Zen-like silence through contrast. It demonstrates the philosophy of realizing universal truths in ordinary moments.'
+        },
+        krTitle: {
+            zh: '朝鮮半島的詩歌：音步的節奏',
+            en: 'Poetry of the Korean Peninsula: The Rhythm of Foot-Measures'
+        },
+        krP: {
+            zh: '韓國詩歌的代表「時調」，其格律建立在音步（節奏單位）之上，完美地承載了韓國民族情感中的兩大核心：「恨」（深沉的悲傷）與「興」（自發的喜悅）。',
+            en: 'The representative form of Korean poetry, "Sijo," is structured on foot-measures (eumbo), perfectly carrying the two core national emotions: "Han" (profound sorrow) and "Heung" (spontaneous joy).'
+        },
+        krChart1Title: {
+            zh: '時調 (Sijo) 的三章結構',
+            en: 'The Three-Part Structure of Sijo'
+        },
+        sijo1Title: { zh: '初章 (起)', en: 'Opening Chapter (Start)' },
+        sijo1Desc: { zh: '4 音步：提出情境', en: '4 Foot-Measures: Introduce the situation' },
+        sijo2Title: { zh: '中章 (承)', en: 'Middle Chapter (Development)' },
+        sijo2Desc: { zh: '4 音步：發展深化', en: '4 Foot-Measures: Develop and deepen' },
+        sijo3Title: { zh: '終章 (結)', en: 'Closing Chapter (Conclusion)' },
+        sijo3Desc: { zh: '關鍵轉折：首音步3音節，製造高潮', en: 'The Twist: First foot has 3 syllables, creating a climax' },
+        krChart1Desc: {
+            zh: '時調的靈魂在於終章的節奏變化，它為情感的昇華或轉折提供了結構性的舞台，體現了在壓抑中尋找突破的民族性格。',
+            en: 'The soul of the Sijo lies in the rhythmic shift of the final chapter, providing a structural stage for emotional climax or turn, reflecting a national character that seeks breakthrough amidst suppression.'
+        },
+        krChart2Title: {
+            zh: '核心情感：「恨」與「興」',
+            en: 'Core Emotions: "Han" & "Heung"'
+        },
+        krChart2Desc: {
+            zh: '「恨」是歷史積澱的悲情，「興」是樂觀堅韌的喜悅。兩者看似對立，卻共同構成了韓國文學情感的兩個基點，時調常常展現兩者間的辯證關係。',
+            en: '"Han" is a historically accumulated sorrow, while "Heung" is optimistic, resilient joy. Seemingly opposite, they form the two emotional pillars of Korean literature, and Sijo often displays their dialectical relationship.'
+        },
+        krChart2Labels: {
+            zh: ['悲情', '遺憾', '堅韌', '喜悅', '即興', '壓抑'],
+            en: ['Sorrow', 'Regret', 'Resilience', 'Joy', 'Spontaneity', 'Suppression']
+        },
+        yunTitle: {
+            zh: '個案分析：尹東柱',
+            en: 'Case Study: Yun Dong-ju'
+        },
+        yunP: {
+            zh: '《序詩》是韓國抵抗精神的象徵。詩人渴望「心中無一絲愧慚」，這在殖民壓迫的黑暗時代，是對個人良知的最高堅守。詩中充滿深刻的自省與殉道精神，尹東柱最終用生命踐行了詩篇，成為民族詩魂。',
+            en: '"Foreword" is a symbol of the Korean spirit of resistance. The poet\'s desire to have "not a speck of shame" was the ultimate adherence to conscience in a dark era of colonial oppression. The poem is filled with deep self-reflection and a martyr\'s spirit; Yun Dong-ju ultimately lived out his poem, becoming the nation\'s poetic soul.'
+        },
+        diffTitle: {
+            zh: '三大詩學的根本差異',
+            en: 'Fundamental Differences of the Three Poetics'
+        },
+        diffP: {
+            zh: '儘管共享文化影響，但中、日、韓三國的詩歌基於不同的語言結構與民族哲學，走向了不同的美學道路。其根本差異體現在詩歌的「基本單位」與「核心追求」上。',
+            en: 'Despite shared cultural influences, the poetry of China, Japan, and Korea took different aesthetic paths based on distinct linguistic structures and national philosophies. The fundamental differences are reflected in their "basic units" and "core pursuits."'
+        },
+        diffChart1Title: {
+            zh: '詩歌形式的基礎',
+            en: 'Foundation of Poetic Forms'
+        },
+        diffChart1Labels: {
+            zh: ['中國 (漢詩)', '日本 (和歌/俳句)', '韓國 (時調)'],
+            en: ['China (Shi)', 'Japan (Waka/Haiku)', 'Korea (Sijo)']
+        },
+        diffChart1DataLabels: {
+            zh: ['字本位', '音節本位', '音步本位'],
+            en: ['Character-based', 'Syllable-based', 'Foot-measure-based']
+        },
+        diffChart1Desc: {
+            zh: '漢詩基於單個漢字的音義，是「字本位」。日本詩歌基於音節的組合，是「音節本位」。韓國詩歌基於自然的吟誦節奏，是「音步本位」。',
+            en: 'Chinese poetry is character-based, relying on the meaning and tone of single characters. Japanese poetry is syllable-based, built on combinations of syllables. Korean poetry is foot-measure-based, following natural recitation rhythms.'
+        },
+        diffChart2Title: {
+            zh: '核心美學追求',
+            en: 'Core Aesthetic Pursuits'
+        },
+        pursuitCnLabel: { zh: '中', en: 'CN' },
+        pursuitCnTitle: { zh: '言志・載道', en: 'Expressing Will & Conveying the Way' },
+        pursuitCnDesc: { zh: '詩以言志，文以載道。詩歌是抒發政治抱負、體現倫理關懷的工具，追求中和之美。', en: 'Poetry expresses will; literature conveys the Way. It is a tool for political ambition and ethical concerns, pursuing a beauty of balance.' },
+        pursuitJpLabel: { zh: '日', en: 'JP' },
+        pursuitJpTitle: { zh: '自然・無常', en: 'Nature & Impermanence' },
+        pursuitJpDesc: { zh: '從萬物的轉瞬即逝中感受「物哀」，在不完美中發現「侘寂」，追求纖細、易逝的美。', en: 'Sensing "mono no aware" in the transience of things, finding "wabi-sabi" in imperfection, pursuing a delicate, ephemeral beauty.' },
+        pursuitKrLabel: { zh: '韓', en: 'KR' },
+        pursuitKrTitle: { zh: '歷史・情感', en: 'History & Emotion' },
+        pursuitKrDesc: { zh: '詩歌是民族命運的縮影，在「恨」的悲情與「興」的堅韌中，確認集體身份。', en: 'Poetry is a microcosm of the nation\'s destiny, affirming collective identity through the sorrow of "han" and the resilience of "heung".' }
+    };
+
+    let currentLang = 'zh';
+    const charts = {};
+
+    const renderContent = (lang) => {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        document.title = content.title[lang] + '：' + content.subtitle[lang];
+        
+        document.getElementById('main-title').innerText = content.title[lang];
+        document.getElementById('main-subtitle').innerText = content.subtitle[lang];
+        document.getElementById('lang-toggle').innerText = content.langToggle[lang];
+        
+        document.getElementById('intro-title').innerText = content.introTitle[lang];
+        document.getElementById('intro-p').innerHTML = content.introP[lang];
+        
+        document.getElementById('jp-title').innerText = content.jpTitle[lang];
+        document.getElementById('jp-p').innerHTML = content.jpP[lang];
+        document.getElementById('jp-chart1-title').innerText = content.jpChart1Title[lang];
+        document.getElementById('jp-chart1-desc').innerHTML = content.jpChart1Desc[lang];
+        document.getElementById('jp-chart2-title').innerText = content.jpChart2Title[lang];
+        document.getElementById('jp-chart2-desc').innerHTML = content.jpChart2Desc[lang];
+        
+        document.getElementById('basho-title').innerText = content.bashoTitle[lang];
+        document.getElementById('basho-p').innerHTML = content.bashoP[lang];
+        
+        document.getElementById('kr-title').innerText = content.krTitle[lang];
+        document.getElementById('kr-p').innerHTML = content.krP[lang];
+        document.getElementById('kr-chart1-title').innerText = content.krChart1Title[lang];
+        document.getElementById('sijo-1-title').innerText = content.sijo1Title[lang];
+        document.getElementById('sijo-1-desc').innerText = content.sijo1Desc[lang];
+        document.getElementById('sijo-2-title').innerText = content.sijo2Title[lang];
+        document.getElementById('sijo-2-desc').innerText = content.sijo2Desc[lang];
+        document.getElementById('sijo-3-title').innerText = content.sijo3Title[lang];
+        document.getElementById('sijo-3-desc').innerText = content.sijo3Desc[lang];
+        document.getElementById('kr-chart1-desc').innerHTML = content.krChart1Desc[lang];
+        document.getElementById('kr-chart2-title').innerText = content.krChart2Title[lang];
+        document.getElementById('kr-chart2-desc').innerHTML = content.krChart2Desc[lang];
+
+        document.getElementById('yun-title').innerText = content.yunTitle[lang];
+        document.getElementById('yun-p').innerHTML = content.yunP[lang];
+
+        document.getElementById('diff-title').innerText = content.diffTitle[lang];
+        document.getElementById('diff-p').innerHTML = content.diffP[lang];
+        document.getElementById('diff-chart1-title').innerText = content.diffChart1Title[lang];
+        document.getElementById('diff-chart1-desc').innerHTML = content.diffChart1Desc[lang];
+        document.getElementById('diff-chart2-title').innerText = content.diffChart2Title[lang];
+        
+        document.getElementById('pursuit-cn-label').innerText = content.pursuitCnLabel[lang];
+        document.getElementById('pursuit-cn-title').innerText = content.pursuitCnTitle[lang];
+        document.getElementById('pursuit-cn-desc').innerHTML = content.pursuitCnDesc[lang];
+        
+        document.getElementById('pursuit-jp-label').innerText = content.pursuitJpLabel[lang];
+        document.getElementById('pursuit-jp-title').innerText = content.pursuitJpTitle[lang];
+        document.getElementById('pursuit-jp-desc').innerHTML = content.pursuitJpDesc[lang];
+        
+        document.getElementById('pursuit-kr-label').innerText = content.pursuitKrLabel[lang];
+        document.getElementById('pursuit-kr-title').innerText = content.pursuitKrTitle[lang];
+        document.getElementById('pursuit-kr-desc').innerHTML = content.pursuitKrDesc[lang];
+    };
+
+    const tooltipTitleCallback = function(tooltipItems) {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        if (Array.isArray(label)) {
+            return label.join(' ');
+        } else {
+            return label;
+        }
+    };
+
+    const colors = {
+        darkBlue: '#004080',
+        midBlue: '#0059B3',
+        brightBlue: '#0073E6',
+        lightBlue: '#4DA6FF',
+        paleBlue: '#E6F2FF',
+        gray: '#6b7280'
+    };
+    
+    const defaultChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: colors.darkBlue } },
+            tooltip: { callbacks: { title: tooltipTitleCallback } }
+        },
+        scales: {
+            x: { ticks: { color: colors.midBlue }, grid: { display: false } },
+            y: { ticks: { color: colors.midBlue }, grid: { color: colors.paleBlue } }
+        }
+    };
+
+    const renderCharts = (lang) => {
+        Object.values(charts).forEach(chart => chart.destroy());
+
+        charts.influence = new Chart(document.getElementById('influenceChart'), {
+            type: 'doughnut',
+            data: {
+                labels: content.influenceLabels[lang],
+                datasets: [{
+                    data: [40, 30, 30],
+                    backgroundColor: [colors.darkBlue, colors.brightBlue, colors.lightBlue],
+                    borderColor: colors.paleBlue,
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { color: colors.darkBlue } },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } },
+                    title: { display: true, text: content.influenceChartTitle[lang], color: colors.darkBlue, font: { size: 14 } }
+                }
+            }
+        });
+
+        charts.jpStructure = new Chart(document.getElementById('jpStructureChart'), {
+            type: 'bar',
+            data: {
+                labels: content.jpChart1Labels[lang],
+                datasets: [
+                    { label: 'Waka (Tanka)', data: [5, 7, 5, 7, 7], backgroundColor: colors.brightBlue },
+                    { label: 'Haiku', data: [5, 7, 5, 0, 0], backgroundColor: colors.lightBlue }
+                ]
+            },
+            options: { ...defaultChartOptions,
+                scales: {
+                    y: { beginAtZero: true, max: 8, ticks: { stepSize: 1, color: colors.midBlue }, grid: { color: colors.paleBlue } },
+                    x: { ticks: { color: colors.midBlue }, grid: { display: false } }
+                },
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: colors.darkBlue } },
+                    tooltip: { callbacks: { title: tooltipTitleCallback } },
+                    title: { display: true, text: lang === 'zh' ? '音節數量對比' : 'Syllable Count Comparison', color: colors.darkBlue, font: { size: 14 } }
+                }
+            }
+        });
+        
+        charts.jpAesthetics = new Chart(document.getElementById('jpAestheticsChart'), {
+            type: 'bubble',
+            data: {
+                datasets: [
+                    { label: '物哀 (Mono no aware)', data: [{x: 2, y: 3, r: 25}], backgroundColor: 'rgba(0, 64, 128, 0.7)' },
+                    { label: '侘寂 (Wabi-sabi)', data: [{x: 4, y: 5, r: 20}], backgroundColor: 'rgba(0, 115, 230, 0.7)' },
+                    { label: '幽玄 (Yūgen)', data: [{x: 6, y: 2, r: 18}], backgroundColor: 'rgba(77, 166, 255, 0.7)' }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: function(context) { return context.dataset.label; } } }
+                },
+                scales: { x: { display: false }, y: { display: false } }
+            }
+        });
+
+        charts.krAesthetics = new Chart(document.getElementById('krAestheticsChart'), {
+            type: 'radar',
+            data: {
+                labels: content.krChart2Labels[lang],
+                datasets: [
+                    { label: '恨 (Han)', data: [6, 5, 4, 1, 1, 6], fill: true, backgroundColor: 'rgba(0, 64, 128, 0.4)', borderColor: colors.darkBlue, pointBackgroundColor: colors.darkBlue },
+                    { label: '興 (Heung)', data: [2, 1, 5, 6, 6, 2], fill: true, backgroundColor: 'rgba(77, 166, 255, 0.4)', borderColor: colors.lightBlue, pointBackgroundColor: colors.lightBlue }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: colors.darkBlue } }, tooltip: { callbacks: { title: tooltipTitleCallback } } },
+                scales: {
+                    r: {
+                        angleLines: { color: colors.paleBlue }, grid: { color: colors.paleBlue },
+                        pointLabels: { color: colors.midBlue, font: { size: 12 } },
+                        ticks: { display: false, stepSize: 1, max: 7, min: 0 }
+                    }
+                }
+            }
+        });
+
+        charts.foundation = new Chart(document.getElementById('foundationChart'), {
+            type: 'bar',
+            data: {
+                labels: content.diffChart1Labels[lang],
+                datasets: [{
+                    label: lang === 'zh' ? '詩歌基本單位' : 'Basic Poetic Unit',
+                    data: [1, 2, 3], 
+                    backgroundColor: [colors.darkBlue, colors.brightBlue, colors.lightBlue]
+                }]
+            },
+            options: { ...defaultChartOptions,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return content.diffChart1DataLabels[lang][context.dataIndex]; },
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: colors.midBlue, font: {size: 12} }, grid: { display: false } },
+                    y: { display: false }
+                }
+            }
+        });
+    };
+    
+    const toggleLanguage = () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        renderContent(currentLang);
+        renderCharts(currentLang);
+    };
+
+    document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+
+    renderContent(currentLang);
+    renderCharts(currentLang);
+});
+</script>
+</body>
+</html>
