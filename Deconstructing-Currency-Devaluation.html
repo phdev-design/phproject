@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">資訊圖表：拆解港元匯率壓力</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            font-size: 2.5rem;
+            line-height: 1;
+            color: #ee9b00;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-[#005f73] text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto max-w-5xl flex justify-between items-center">
+            <div class="text-left">
+                <h1 class="text-2xl md:text-4xl font-bold" data-lang-key="headerTitle">解構貨幣貶值</h1>
+                <p class="text-sm md:text-xl" data-lang-key="headerSubtitle">為何貨幣會下跌，以及為何港元與眾不同</p>
+            </div>
+            <div class="flex items-center">
+                <button id="lang-switcher" class="bg-[#e9d8a6] text-[#005f73] font-bold py-2 px-4 rounded-lg hover:bg-[#ca6702] hover:text-white transition-colors">
+                    English
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto max-w-5xl p-4 md:p-8 mt-4">
+        
+        <section id="global-factors" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s1Title">第一節：全球貨幣的拉鋸戰</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s1Intro">在浮動匯率制度下（如日圓、歐元），多種力量決定著貨幣的升跌。這些因素是理解全球貨幣動態的關鍵。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-4xl mb-2">📉</div>
+                    <h3 class="font-bold text-lg text-[#0a9396]" data-lang-key="s1Factor1Title">較低利率</h3>
+                    <p class="text-sm" data-lang-key="s1Factor1Desc">回報率較低，削弱了對外國資本的吸引力，引發資本外流。</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-4xl mb-2">🔥</div>
+                    <h3 class="font-bold text-lg text-[#0a9396]" data-lang-key="s1Factor2Title">較高通脹</h3>
+                    <p class="text-sm" data-lang-key="s1Factor2Desc">侵蝕購買力，降低出口競爭力，減少對該貨幣的需求。</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-4xl mb-2">🏛️</div>
+                    <h3 class="font-bold text-lg text-[#0a9396]" data-lang-key="s1Factor3Title">經濟疲弱</h3>
+                    <p class="text-sm" data-lang-key="s1Factor3Desc">經濟增長放緩或衰退會削弱投資者信心，阻礙投資。</p>
+                </div>
+                <div class="bg-blue-50 rounded-lg p-4">
+                    <div class="text-4xl mb-2">🌪️</div>
+                    <h3 class="font-bold text-lg text-[#0a9396]" data-lang-key="s1Factor4Title">政治風險</h3>
+                    <p class="text-sm" data-lang-key="s1Factor4Desc">不確定性會引發資本外逃，尋求更安全的資產。</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="hkd-system" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s2Title">第二節：香港的獨特之處：聯繫匯率制度</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s2Intro">與浮動匯率不同，港元採用聯繫匯率制度（LERS），這是一種嚴格的貨幣發行局制度。它的目標是穩定，而非浮動。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="border-2 border-[#0a9396] rounded-lg p-4">
+                    <h3 class="text-xl font-bold text-center text-[#0a9396] mb-4" data-lang-key="s2FloatTitle">浮動匯率（如：日圓）</h3>
+                    <div class="text-center">
+                        <p class="mb-2" data-lang-key="s2FloatStep1">市場力量（供求）</p>
+                        <p class="flow-arrow">⬇</p>
+                        <p class="mb-2" data-lang-key="s2FloatStep2">決定匯率自由浮動</p>
+                        <p class="flow-arrow">⬇</p>
+                        <p class="font-bold text-[#ae2012]" data-lang-key="s2FloatResult">結果：匯率波動</p>
+                    </div>
+                </div>
+                <div class="border-2 border-[#ee9b00] rounded-lg p-4">
+                    <h3 class="text-xl font-bold text-center text-[#ee9b00] mb-4" data-lang-key="s2PegTitle">聯繫匯率（港元）</h3>
+                     <div class="text-center">
+                        <p class="mb-2" data-lang-key="s2PegStep1">港元與美元掛鈎</p>
+                        <p class="flow-arrow">⬇</p>
+                        <p class="mb-2" data-lang-key="s2PegStep2">匯率鎖定在 7.75 - 7.85 區間</p>
+                         <p class="flow-arrow">⬇</p>
+                        <p class="font-bold text-[#005f73]" data-lang-key="s2PegResult">結果：匯率穩定</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="carry-trade" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s3Title">第三節：壓力來源：港元套息交易</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s3Intro">近期港元「貶值」的壓力，主要並非源於經濟基本面，而是由港元與美元之間的息差驅動的「套息交易」活動。</p>
+            <div class="md:grid md:grid-cols-2 md:gap-8 items-center">
+                <div class="chart-container mb-8 md:mb-0">
+                    <canvas id="interestRateChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="font-bold text-xl text-center mb-4" data-lang-key="s3CarryTradeTitle">套息交易四部曲</h3>
+                    <ol class="space-y-4">
+                        <li class="flex items-start">
+                            <div class="bg-[#ee9b00] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">1</div>
+                            <div data-lang-key="s3CarryTradeStep1"><span class="font-bold">借入港元：</span>交易者以較低的香港銀行同業拆息（HIBOR）借入港元資金。</div>
+                        </li>
+                        <li class="flex items-start">
+                             <div class="bg-[#ee9b00] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">2</div>
+                            <div data-lang-key="s3CarryTradeStep2"><span class="font-bold">兌換美元：</span>在市場上拋售港元，買入美元。這個操作直接增加了港元的供應，對其匯率構成下行壓力。</div>
+                        </li>
+                        <li class="flex items-start">
+                             <div class="bg-[#ee9b00] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">3</div>
+                            <div data-lang-key="s3CarryTradeStep3"><span class="font-bold">投資美元：</span>將換來的美元投資於收益率更高的美國資產（如美國國債）。</div>
+                        </li>
+                         <li class="flex items-start">
+                             <div class="bg-[#ee9b00] text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">4</div>
+                            <div data-lang-key="s3CarryTradeStep4"><span class="font-bold">賺取息差：</span>從港元與美元之間顯著的利率差距中獲利。</div>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+        
+        <section id="mechanism" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s4Title">第四節：系統反擊：自動調節機制</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s4Intro">當套息交易將港元推至7.85的弱方兌換保證水平時，聯繫匯率制度的內置防禦機制便會啟動。這並非系統失靈，而是系統正在正常運作。</p>
+            <div class="flex flex-col md:flex-row justify-around items-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow w-60 h-40 flex items-center justify-center"><p data-lang-key="s4MechanismStep1">港元匯率觸及 7.85 弱方水平</p></div>
+                    <div class="flow-arrow">⬇</div>
+                </div>
+                <div class="flex flex-col items-center">
+                     <div class="bg-gray-100 p-4 rounded-lg shadow w-60 h-40 flex items-center justify-center"><p data-lang-key="s4MechanismStep2">金管局入市干預，<br>買入港元，賣出美元</p></div>
+                    <div class="flow-arrow">⬇</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow w-60 h-40 flex items-center justify-center"><p data-lang-key="s4MechanismStep3">銀行體系總結餘<br>（流動性）減少</p></div>
+                    <div class="flow-arrow">⬇</div>
+                </div>
+                 <div class="flex flex-col items-center">
+                    <div class="bg-gray-100 p-4 rounded-lg shadow w-60 h-40 flex items-center justify-center"><p data-lang-key="s4MechanismStep4">港元利率 (HIBOR)<br>被推高</p></div>
+                     <div class="flow-arrow">⬇</div>
+                </div>
+                 <div class="flex flex-col items-center">
+                    <div class="bg-green-100 p-4 rounded-lg shadow border-2 border-green-500 w-60 h-40 flex items-center justify-center"><p class="text-green-800 font-bold" data-lang-key="s4MechanismResult">套息交易利潤空間收窄，<br>壓力緩解</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fundamentals" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s5Title">第五節：經濟體檢：香港的基本面穩固嗎？</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s5Intro">數據顯示，香港經濟基本面依然強勁。這強化了港元壓力主要來自技術性套利，而非根本性問題的結論。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="text-center bg-blue-50 p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-2 text-[#0a9396]" data-lang-key="s5GdpTitle">實質GDP增長 (年增率)</h3>
+                    <div class="chart-container h-64 md:h-72">
+                        <canvas id="gdpChart"></canvas>
+                    </div>
+                </div>
+                 <div class="text-center bg-blue-50 p-6 rounded-lg">
+                    <h3 class="font-bold text-xl mb-2 text-[#0a9396]" data-lang-key="s5CurrentAccountTitle">經常帳戶盈餘 (2025年第一季)</h3>
+                    <p class="text-6xl font-bold text-[#005f73] my-10">+1,252</p>
+                    <p class="text-2xl text-gray-600" data-lang-key="s5CurrentAccountUnit">億港元</p>
+                     <p class="text-sm mt-4" data-lang-key="s5CurrentAccountDesc">反映香港從對外貿易及投資中賺取的收入遠超支出，為港元提供強大支持。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="reserves" class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-3xl font-bold text-[#005f73] mb-4 text-center" data-lang-key="s6Title">第六節：終極後盾：香港的外匯儲備</h2>
+            <p class="text-center mb-6 text-lg" data-lang-key="s6Intro">聯繫匯率制度的信譽，最終建基於香港龐大的外匯儲備。這筆儲備為金管局提供了無可置疑的能力來抵禦任何衝擊。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="text-center">
+                    <p class="text-lg text-gray-600" data-lang-key="s6ReservesDate">官方外匯儲備資產 (2025年6月)</p>
+                    <p class="text-7xl font-bold text-[#ca6702] my-4">4,319億</p>
+                    <p class="text-3xl text-gray-800" data-lang-key="s6ReservesUnit">美元</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="reservesChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-[#005f73] text-white mt-8 p-6">
+        <div class="container mx-auto max-w-5xl text-center">
+            <h2 class="text-2xl font-bold" data-lang-key="footerTitle">結論：穩定是有代價的</h2>
+            <p class="mt-2 max-w-3xl mx-auto" data-lang-key="footerConclusion">港元面臨的貶值壓力是聯繫匯率制度正常運作的一部分，它將外部的匯率衝擊轉化為內部利率的調整。香港為了換取對其國際金融中心地位至關重要的<span class="font-bold text-[#e9d8a6]">匯率穩定</span>，放棄了獨立的貨幣政策。只要這個戰略目標不變，在龐大外匯儲備的支持下，聯繫匯率制度將依然是香港金融體系的基石。</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const langData = {
+        'zh-Hant': {
+            pageTitle: '資訊圖表：拆解港元匯率壓力',
+            headerTitle: '解構貨幣貶值',
+            headerSubtitle: '為何貨幣會下跌，以及為何港元與眾不同',
+            s1Title: '第一節：全球貨幣的拉鋸戰',
+            s1Intro: '在浮動匯率制度下（如日圓、歐元），多種力量決定著貨幣的升跌。這些因素是理解全球貨幣動態的關鍵。',
+            s1Factor1Title: '較低利率',
+            s1Factor1Desc: '回報率較低，削弱了對外國資本的吸引力，引發資本外流。',
+            s1Factor2Title: '較高通脹',
+            s1Factor2Desc: '侵蝕購買力，降低出口競爭力，減少對該貨幣的需求。',
+            s1Factor3Title: '經濟疲弱',
+            s1Factor3Desc: '經濟增長放緩或衰退會削弱投資者信心，阻礙投資。',
+            s1Factor4Title: '政治風險',
+            s1Factor4Desc: '不確定性會引發資本外逃，尋求更安全的資產。',
+            s2Title: '第二節：香港的獨特之處：聯繫匯率制度',
+            s2Intro: '與浮動匯率不同，港元採用聯繫匯率制度（LERS），這是一種嚴格的貨幣發行局制度。它的目標是穩定，而非浮動。',
+            s2FloatTitle: '浮動匯率（如：日圓）',
+            s2FloatStep1: '市場力量（供求）',
+            s2FloatStep2: '決定匯率自由浮動',
+            s2FloatResult: '結果：匯率波動',
+            s2PegTitle: '聯繫匯率（港元）',
+            s2PegStep1: '港元與美元掛鈎',
+            s2PegStep2: '匯率鎖定在 7.75 - 7.85 區間',
+            s2PegResult: '結果：匯率穩定',
+            s3Title: '第三節：壓力來源：港元套息交易',
+            s3Intro: '近期港元「貶值」的壓力，主要並非源於經濟基本面，而是由港元與美元之間的息差驅動的「套息交易」活動。',
+            s3CarryTradeTitle: '套息交易四部曲',
+            s3CarryTradeStep1: '<span class="font-bold">借入港元：</span>交易者以較低的香港銀行同業拆息（HIBOR）借入港元資金。',
+            s3CarryTradeStep2: '<span class="font-bold">兌換美元：</span>在市場上拋售港元，買入美元。這個操作直接增加了港元的供應，對其匯率構成下行壓力。',
+            s3CarryTradeStep3: '<span class="font-bold">投資美元：</span>將換來的美元投資於收益率更高的美國資產（如美國國債）。',
+            s3CarryTradeStep4: '<span class="font-bold">賺取息差：</span>從港元與美元之間顯著的利率差距中獲利。',
+            s4Title: '第四節：系統反擊：自動調節機制',
+            s4Intro: '當套息交易將港元推至7.85的弱方兌換保證水平時，聯繫匯率制度的內置防禦機制便會啟動。這並非系統失靈，而是系統正在正常運作。',
+            s4MechanismStep1: '港元匯率觸及 7.85 弱方水平',
+            s4MechanismStep2: '金管局入市干預，<br>買入港元，賣出美元',
+            s4MechanismStep3: '銀行體系總結餘<br>（流動性）減少',
+            s4MechanismStep4: '港元利率 (HIBOR)<br>被推高',
+            s4MechanismResult: '套息交易利潤空間收窄，<br>壓力緩解',
+            s5Title: '第五節：經濟體檢：香港的基本面穩固嗎？',
+            s5Intro: '數據顯示，香港經濟基本面依然強勁。這強化了港元壓力主要來自技術性套利，而非根本性問題的結論。',
+            s5GdpTitle: '實質GDP增長 (年增率)',
+            s5CurrentAccountTitle: '經常帳戶盈餘 (2025年第一季)',
+            s5CurrentAccountUnit: '億港元',
+            s5CurrentAccountDesc: '反映香港從對外貿易及投資中賺取的收入遠超支出，為港元提供強大支持。',
+            s6Title: '第六節：終極後盾：香港的外匯儲備',
+            s6Intro: '聯繫匯率制度的信譽，最終建基於香港龐大的外匯儲備。這筆儲備為金管局提供了無可置疑的能力來抵禦任何衝擊。',
+            s6ReservesDate: '官方外匯儲備資產 (2025年6月)',
+            s6ReservesUnit: '美元',
+            footerTitle: '結論：穩定是有代價的',
+            footerConclusion: '港元面臨的貶值壓力是聯繫匯率制度正常運作的一部分，它將外部的匯率衝擊轉化為內部利率的調整。香港為了換取對其國際金融中心地位至關重要的<span class="font-bold text-[#e9d8a6]">匯率穩定</span>，放棄了獨立的貨幣政策。只要這個戰略目標不變，在龐大外匯儲備的支持下，聯繫匯率制度將依然是香港金融體系的基石。',
+            chartInterestRateTitle: '港美息差是套息交易的驅動力',
+            chartInterestRateYLabel: '利率 (%)',
+            chartInterestRateLabelHKD: '港元利率 (HIBOR)',
+            chartInterestRateLabelUSD: '美元利率 (SOFR)',
+            chartGdpLabel: '實質GDP年增率 (%)',
+            chartReservesTitle: '外匯儲備 vs 貨幣基礎',
+            chartReservesLabelFX: '外匯儲備',
+            chartReservesLabelMB: '貨幣基礎',
+            chartReservesTooltipFX: '外匯儲備是貨幣基礎的 1.7 倍',
+            chartReservesTooltipMB: '貨幣基礎 (基準)',
+            langButton: 'English',
+        },
+        'en': {
+            pageTitle: 'Infographic: Unpacking the HKD Exchange Rate Pressure',
+            headerTitle: 'Deconstructing Currency Devaluation',
+            headerSubtitle: 'Why currencies fall, and why the Hong Kong Dollar is different',
+            s1Title: 'Section 1: The Global Currency Tug-of-War',
+            s1Intro: 'Under a floating exchange rate system (like the Yen or Euro), various forces determine a currency\'s rise or fall. These factors are key to understanding global currency dynamics.',
+            s1Factor1Title: 'Lower Interest Rates',
+            s1Factor1Desc: 'Lower rates of return make a currency less attractive to foreign capital, leading to capital outflow.',
+            s1Factor2Title: 'Higher Inflation',
+            s1Factor2Desc: 'Erodes purchasing power and reduces export competitiveness, decreasing demand for the currency.',
+            s1Factor3Title: 'Weak Economy',
+            s1Factor3Desc: 'Slow growth or recession dampens investor confidence and discourages investment.',
+            s1Factor4Title: 'Political Risk',
+            s1Factor4Desc: 'Uncertainty can trigger capital flight as investors seek safer assets.',
+            s2Title: 'Section 2: Hong Kong\'s Unique Case: The Linked Exchange Rate System',
+            s2Intro: 'Unlike floating currencies, the HKD operates under the Linked Exchange Rate System (LERS), a strict currency board system. Its goal is stability, not fluctuation.',
+            s2FloatTitle: 'Floating Rate (e.g., JPY)',
+            s2FloatStep1: 'Market Forces (Supply & Demand)',
+            s2FloatStep2: 'Determine a freely floating rate',
+            s2FloatResult: 'Result: Volatile Exchange Rate',
+            s2PegTitle: 'Linked Rate (HKD)',
+            s2PegStep1: 'HKD is pegged to the USD',
+            s2PegStep2: 'Rate is locked in a 7.75 - 7.85 band',
+            s2PegResult: 'Result: Stable Exchange Rate',
+            s3Title: 'Section 3: The Source of Pressure: The HKD Carry Trade',
+            s3Intro: 'The recent pressure causing the HKD to "weaken" is not primarily driven by economic fundamentals, but by "carry trade" activity fueled by the interest rate gap between the HKD and USD.',
+            s3CarryTradeTitle: 'The 4 Steps of a Carry Trade',
+            s3CarryTradeStep1: '<span class="font-bold">Borrow HKD:</span> Traders borrow HKD funds at the lower Hong Kong Interbank Offered Rate (HIBOR).',
+            s3CarryTradeStep2: '<span class="font-bold">Convert to USD:</span> They sell the HKD in the market to buy USD. This action directly increases the supply of HKD, putting downward pressure on its exchange rate.',
+            s3CarryTradeStep3: '<span class="font-bold">Invest in USD:</span> The converted USD is invested in higher-yielding US assets (like US Treasury bonds).',
+            s3CarryTradeStep4: '<span class="font-bold">Earn the Spread:</span> Profit is made from the significant interest rate differential between the HKD and USD.',
+            s4Title: 'Section 4: The System Fights Back: The Automatic Adjustment Mechanism',
+            s4Intro: 'When carry trades push the HKD to the weak-side convertibility undertaking of 7.85, the LERS\'s built-in defense mechanism activates. This is not a system failure; it is the system working as designed.',
+            s4MechanismStep1: 'HKD exchange rate hits the 7.85 weak side',
+            s4MechanismStep2: 'HKMA intervenes, buying HKD and selling USD',
+            s4MechanismStep3: 'Aggregate Balance (liquidity) in the banking system decreases',
+            s4MechanismStep4: 'HKD interest rates (HIBOR) are pushed higher',
+            s4MechanismResult: 'Carry trade profit margin narrows, pressure eases',
+            s5Title: 'Section 5: Economic Health Check: Are Hong Kong\'s Fundamentals Solid?',
+            s5Intro: 'Data shows that Hong Kong\'s economic fundamentals remain strong. This reinforces the conclusion that the pressure on the HKD is mainly from technical arbitrage, not fundamental issues.',
+            s5GdpTitle: 'Real GDP Growth (YoY %)',
+            s5CurrentAccountTitle: 'Current Account Surplus (Q1 2025)',
+            s5CurrentAccountUnit: 'Billion HKD',
+            s5CurrentAccountDesc: 'Reflects that HK earns far more from external trade and investment than it spends, providing strong support for the currency.',
+            s6Title: 'Section 6: The Ultimate Backstop: Hong Kong\'s Foreign Exchange Reserves',
+            s6Intro: 'The credibility of the LERS ultimately rests on Hong Kong\'s massive foreign exchange reserves. This arsenal gives the HKMA unquestionable power to defend against any shocks.',
+            s6ReservesDate: 'Official Foreign Exchange Reserves (June 2025)',
+            s6ReservesUnit: 'Billion USD',
+            footerTitle: 'Conclusion: Stability Comes at a Price',
+            footerConclusion: 'The devaluation pressure on the HKD is a normal part of the LERS, translating external exchange rate shocks into internal interest rate adjustments. To gain the crucial <span class="font-bold text-[#e9d8a6]">exchange rate stability</span> vital for its status as an international financial center, Hong Kong forgoes an independent monetary policy. As long as this strategic goal remains, backed by vast reserves, the LERS will remain the cornerstone of its financial system.',
+            chartInterestRateTitle: 'HKD-USD Interest Rate Spread Drives Carry Trade',
+            chartInterestRateYLabel: 'Interest Rate (%)',
+            chartInterestRateLabelHKD: 'HKD Rate (HIBOR)',
+            chartInterestRateLabelUSD: 'USD Rate (SOFR)',
+            chartGdpLabel: 'Real GDP Growth Rate (%)',
+            chartReservesTitle: 'Foreign Reserves vs. Monetary Base',
+            chartReservesLabelFX: 'Foreign Reserves',
+            chartReservesLabelMB: 'Monetary Base',
+            chartReservesTooltipFX: 'Reserves are 1.7x the Monetary Base',
+            chartReservesTooltipMB: 'Monetary Base (Baseline)',
+            langButton: '中文',
+        }
+    };
+
+    let currentLang = 'zh-Hant';
+    let charts = {};
+
+    const langSwitcher = document.getElementById('lang-switcher');
+
+    const switchLanguage = (lang) => {
+        currentLang = lang;
+        document.documentElement.lang = lang;
+        langSwitcher.textContent = langData[lang].langButton;
+
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (langData[lang][key]) {
+                if (el.tagName === 'TITLE') {
+                    el.textContent = langData[lang][key];
+                } else {
+                    el.innerHTML = langData[lang][key];
+                }
+            }
+        });
+        
+        createCharts(lang);
+    };
+
+    langSwitcher.addEventListener('click', () => {
+        const newLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+        switchLanguage(newLang);
+    });
+
+    const createCharts = (lang) => {
+        const currentLangData = langData[lang];
+
+        Object.values(charts).forEach(chart => chart.destroy());
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        };
+
+        const sharedChartOptions = {
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#374151',
+                        font: { size: 14, family: "'Roboto', 'Noto Sans TC', sans-serif" }
+                    }
+                },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    titleFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                    bodyFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#4b5563', font: { family: "'Roboto', 'Noto Sans TC', sans-serif" }},
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: '#4b5563', font: { family: "'Roboto', 'Noto Sans TC', sans-serif" }},
+                    grid: { color: '#e5e7eb' }
+                }
+            }
+        };
+
+        const interestRateCtx = document.getElementById('interestRateChart').getContext('2d');
+        charts.interestRate = new Chart(interestRateCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Early May 2025', 'Late June 2025'],
+                datasets: [{
+                    label: currentLangData.chartInterestRateLabelHKD,
+                    data: [1.00, 1.78],
+                    backgroundColor: '#94d2bd',
+                    borderColor: '#0a9396',
+                    borderWidth: 1
+                }, {
+                    label: currentLangData.chartInterestRateLabelUSD,
+                    data: [4.74, 4.50],
+                    backgroundColor: '#ee9b00',
+                    borderColor: '#ca6702',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...sharedChartOptions,
+                scales: {
+                    ...sharedChartOptions.scales,
+                    y: {
+                        ...sharedChartOptions.scales.y,
+                        title: { display: true, text: currentLangData.chartInterestRateYLabel, color: '#374151' }
+                    }
+                },
+                plugins: {
+                    ...sharedChartOptions.plugins,
+                    title: { display: true, text: currentLangData.chartInterestRateTitle, font: { size: 16, weight: 'bold' }, color: '#005f73', padding: { bottom: 10 } }
+                }
+            }
+        });
+
+        const gdpCtx = document.getElementById('gdpChart').getContext('2d');
+        charts.gdp = new Chart(gdpCtx, {
+            type: 'bar',
+            data: {
+                labels: ['2023', '2024', '2025 Q1'],
+                datasets: [{
+                    label: currentLangData.chartGdpLabel,
+                    data: [3.2, 2.5, 3.1],
+                    backgroundColor: ['#94d2bd', '#0a9396', '#005f73'],
+                    borderColor: '#005f73',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                ...sharedChartOptions,
+                plugins: { ...sharedChartOptions.plugins, legend: { display: false } }
+            }
+        });
+        
+        const reservesCtx = document.getElementById('reservesChart').getContext('2d');
+        charts.reserves = new Chart(reservesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [currentLangData.chartReservesLabelFX, currentLangData.chartReservesLabelMB],
+                datasets: [{
+                    data: [1.7, 1],
+                    backgroundColor: ['#005f73', '#e9d8a6'],
+                    borderColor: ['#ffffff', '#ffffff'],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: currentLangData.chartReservesTitle, font: { size: 16, weight: 'bold'}, color: '#005f73', padding: { bottom: 10 } },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback,
+                            label: (context) => {
+                                 if (context.label === currentLangData.chartReservesLabelFX) {
+                                    return currentLangData.chartReservesTooltipFX;
+                                 }
+                                 return currentLangData.chartReservesTooltipMB;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#374151', font: { family: "'Roboto', 'Noto Sans TC', sans-serif" }}
+                    }
+                }
+            }
+        });
+    };
+    
+    createCharts(currentLang);
+});
+</script>
+
+</body>
+</html>
