@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>蘋果電腦儲存策略深度解析 | Apple's Storage Strategy Deep Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F8FF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #0077B6;
+        }
+        .kpi-card {
+            background-color: #CAF0F8;
+            border-left: 5px solid #0077B6;
+        }
+        .pro-con-card {
+            min-height: 200px;
+        }
+        .pro-con-card h4 {
+            border-bottom: 2px solid;
+        }
+        .pro-card h4 { border-color: #0077B6; }
+        .con-card h4 { border-color: #d03f3f; }
+        .comparison-table > div {
+            border-bottom: 1px solid #90E0EF;
+        }
+        .comparison-table > div:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-[#03045E]">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-12 relative">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#004AAD] mb-4" data-translate-key="mainTitle">蘋果的儲存空間博弈</h1>
+            <p class="text-lg md:text-xl text-[#0077B6] max-w-3xl mx-auto" data-translate-key="mainSubtitle">看似不足的基礎容量並非疏忽，而是一場精心策劃的商業戰略。本分析將揭示其背後的四大核心支柱。</p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-[#0077B6] text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-[#004AAD] transition-colors">
+                English
+            </button>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="profit-maximization">
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2 text-center" data-translate-key="section1Title">第一節：稀缺性的經濟學</h2>
+                    <p class="text-center text-lg text-[#0077B6] mb-8" data-translate-key="section1Subtitle">將標準組件轉化為高利潤的奢侈品升級選項。</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="chart-container">
+                            <canvas id="appleTaxChart"></canvas>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-4" data-translate-key="s1ChartTitle">儲存空間的「蘋果稅」</h3>
+                            <p class="mb-4" data-translate-key="s1ChartDesc">蘋果的儲存升級定價遠超市場零售價，形成了巨大的利潤空間。此圖表比較了蘋果官方升級每GB的成本與零售市場上高性能SSD的每GB成本，清晰地量化了高達數倍的溢價。</p>
+                            <div class="kpi-card p-4 rounded-lg shadow">
+                                <span class="text-sm font-semibold text-[#004AAD]" data-translate-key="s1KpiTitle">關鍵洞察</span>
+                                <p class="text-2xl font-bold" data-translate-key="s1KpiValue">溢價率高達 290%+</p>
+                                <p class="text-sm" data-translate-key="s1KpiDesc">將256GB的M4 MacBook Air升級至512GB，其每GB成本約為$0.78，而市場零售價僅約$0.20。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12">
+                        <h3 class="text-xl font-bold mb-6 text-center" data-translate-key="s1FlowTitle">從心理錨點到向上銷售 (Upsell)</h3>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="text-center p-4 bg-gray-100 rounded-lg shadow-md">
+                                <div class="text-2xl mb-2">①</div>
+                                <h4 class="font-bold" data-translate-key="s1Flow1Title">誘人起售價</h4>
+                                <p class="text-sm" data-translate-key="s1Flow1Desc">MacBook Air $999起<br>(256GB)</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="text-center p-4 bg-gray-100 rounded-lg shadow-md">
+                                <div class="text-2xl mb-2">②</div>
+                                <h4 class="font-bold" data-translate-key="s1Flow2Title">容量焦慮</h4>
+                                <p class="text-sm" data-translate-key="s1Flow2Desc">256GB難以<br>滿足長期需求</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                             <div class="text-center p-4 bg-blue-100 rounded-lg shadow-lg border-2 border-[#0077B6]">
+                                <div class="text-2xl mb-2">③</div>
+                                <h4 class="font-bold" data-translate-key="s1Flow3Title">昂貴的升級</h4>
+                                <p class="text-sm" data-translate-key="s1Flow3Desc">升級到512GB<br>需 +$200</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                             <div class="text-center p-4 bg-green-100 rounded-lg shadow-lg border-2 border-green-500">
+                                <div class="text-2xl mb-2">④</div>
+                                <h4 class="font-bold" data-translate-key="s1Flow4Title">向上銷售</h4>
+                                <p class="text-sm" data-translate-key="s1Flow4Desc">"不如再加一點錢<br>直上MacBook Pro"</p>
+                            </div>
+                        </div>
+                         <p class="text-center text-gray-600 mt-4" data-translate-key="s1FlowConclusion">蘋果利用高昂的單項升級費用，巧妙地縮小了與高階型號的價格差距，誘導消費者購買更高利潤的產品。</p>
+                    </div>
+
+                </div>
+            </section>
+            
+            <section id="service-ecosystem">
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2 text-center" data-translate-key="section2Title">第二節：數位重力井</h2>
+                    <p class="text-center text-lg text-[#0077B6] mb-8" data-translate-key="section2Subtitle">利用硬件限制，驅動高利潤的iCloud服務生態。</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4" data-translate-key="s2ChartTitle">服務：真正的利潤引擎</h3>
+                            <p class="mb-4" data-translate-key="s2ChartDesc">蘋果的服務部門毛利率驚人，幾乎是硬件產品部門的兩倍。有限的本地儲存是將用戶從一次性硬件購買者轉變為持續性服務訂閱者的關鍵催化劑。</p>
+                            <div class="kpi-card p-4 rounded-lg shadow">
+                                <span class="text-sm font-semibold text-[#004AAD]" data-translate-key="s2KpiTitle">關鍵數據 (2024財年)</span>
+                                <p class="text-2xl font-bold">$961.7億</p>
+                                <p class="text-sm" data-translate-key="s2KpiDesc">服務部門收入，佔總收入近25%。</p>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="marginChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12">
+                        <h3 class="text-xl font-bold mb-6 text-center" data-translate-key="s2FlowTitle">用戶旅程：從本地稀缺到雲端依賴</h3>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="text-center p-3 bg-gray-100 rounded-lg shadow-md flex-1">
+                                <p class="text-2xl mb-2">①</p>
+                                <h4 class="font-bold" data-translate-key="s2Flow1Title">空間不足</h4>
+                                <p class="text-sm" data-translate-key="s2Flow1Desc">"儲存空間已滿"的系統警告頻繁出現。</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="text-center p-3 bg-blue-100 rounded-lg shadow-md flex-1">
+                                <p class="text-2xl mb-2">②</p>
+                                <h4 class="font-bold" data-translate-key="s2Flow2Title">系統引導</h4>
+                                <p class="text-sm" data-translate-key="s2Flow2Desc">macOS自動提示使用「最佳化儲存空間」，將文件移至iCloud。</p>
+                            </div>
+                             <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="text-center p-3 bg-blue-100 rounded-lg shadow-md flex-1">
+                                <p class="text-2xl mb-2">③</p>
+                                <h4 class="font-bold" data-translate-key="s2Flow3Title">訂閱iCloud+</h4>
+                                <p class="text-sm" data-translate-key="s2Flow3Desc">免費的5GB迅速用盡，用戶付費訂閱，成為持續收入來源。</p>
+                            </div>
+                             <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="text-center p-3 bg-green-100 rounded-lg shadow-lg border-2 border-green-500 flex-1">
+                                <p class="text-2xl mb-2">④</p>
+                                <h4 class="font-bold" data-translate-key="s2Flow4Title">生態鎖定</h4>
+                                <p class="text-sm" data-translate-key="s2Flow4Desc">所有數位生活（照片、文件、備份）被綁定，提高了更換品牌的門檻。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="engineering">
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2 text-center" data-translate-key="section3Title">第三節：工程的教條</h2>
+                    <p class="text-center text-lg text-[#0077B6] mb-8" data-translate-key="section3Subtitle">整合、性能與絕對控制背後的代價。</p>
+                    
+                     <div class="text-center mb-10">
+                        <h3 class="text-xl font-bold" data-translate-key="s3PerfTitle">極致性能的論據</h3>
+                        <p class="text-gray-600 mb-4" data-translate-key="s3PerfDesc">蘋果透過自研SoC與整合式架構，實現了頂級的SSD讀寫速度。</p>
+                        <div class="inline-block bg-[#004AAD] text-white p-6 rounded-xl shadow-2xl">
+                            <span class="text-5xl font-bold">~7,500 MB/s</span>
+                            <p class="mt-2" data-translate-key="s3PerfKpi">M4 Pro MacBook Pro SSD 寫入速度</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="pro-card bg-blue-50 rounded-lg p-6 shadow-md pro-con-card">
+                            <h4 class="text-2xl font-bold text-[#004AAD] pb-2 mb-4" data-translate-key="s3ProsTitle">優點 (官方說法)</h4>
+                            <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-green-500 font-bold text-2xl mr-3">✔</span>
+                                    <div><strong class="text-[#0077B6]" data-translate-key="s3Pro1Title">更高可靠性：</strong><span data-translate-key="s3Pro1Desc">焊接點減少了因震動導致的機械故障點。</span></div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-green-500 font-bold text-2xl mr-3">✔</span>
+                                    <div><strong class="text-[#0077B6]" data-translate-key="s3Pro2Title">極致輕薄設計：</strong><span data-translate-key="s3Pro2Desc">取消插槽節省內部空間，實現更緊湊的工業設計。</span></div>
+                                </li>
+                                 <li class="flex items-start">
+                                    <span class="text-green-500 font-bold text-2xl mr-3">✔</span>
+                                    <div><strong class="text-[#0077B6]" data-translate-key="s3Pro3Title">性能與效率：</strong><span data-translate-key="s3Pro3Desc">減少延遲，配合統一記憶體架構提升整體性能。</span></div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="con-card bg-red-50 rounded-lg p-6 shadow-md pro-con-card">
+                             <h4 class="text-2xl font-bold text-red-600 pb-2 mb-4" data-translate-key="s3ConsTitle">代價 (消費者視角)</h4>
+                             <ul class="space-y-4">
+                                <li class="flex items-start">
+                                    <span class="text-red-500 font-bold text-2xl mr-3">✘</span>
+                                    <div><strong class="text-red-500" data-translate-key="s3Con1Title">無法升級：</strong><span data-translate-key="s3Con1Desc">購買時必須預測未來需求並支付高額費用。</span></div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-red-500 font-bold text-2xl mr-3">✘</span>
+                                    <div><strong class="text-red-500" data-translate-key="s3Con2Title">維修災難：</strong><span data-translate-key="s3Con2Desc">SSD故障意味著需要更換昂貴的整個主機板。</span></div>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-red-500 font-bold text-2xl mr-3">✘</span>
+                                     <div><strong class="text-red-500" data-translate-key="s3Con3Title">數據永久遺失風險：</strong><span data-translate-key="s3Con3Desc">主機板損壞可能導致儲存的數據無法恢復。</span></div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="competition">
+                <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2 text-center" data-translate-key="section4Title">第四節：競爭的棋局</h2>
+                    <p class="text-center text-lg text-[#0077B6] mb-8" data-translate-key="section4Subtitle">兩種哲學的對決：封閉生態 vs 開放架構。</p>
+                    
+                    <div class="max-w-4xl mx-auto comparison-table">
+                        <div class="grid grid-cols-4 gap-4 font-bold p-3 bg-blue-100 rounded-t-lg">
+                            <div data-translate-key="s4TableHeader1">型號</div>
+                            <div data-translate-key="s4TableHeader2">基礎儲存</div>
+                            <div data-translate-key="s4TableHeader3">可升級性</div>
+                            <div class="text-right" data-translate-key="s4TableHeader4">關鍵差異</div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-4 items-center p-3">
+                            <div class="font-bold">Apple MacBook Air (M4)</div>
+                            <div>256 GB</div>
+                            <div class="text-red-600 font-semibold" data-translate-key="s4TableVal1">不可升級 (焊接)</div>
+                            <div class="text-right text-sm" data-translate-key="s4TableDiff1">推動iCloud訂閱與生態鎖定</div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-4 items-center p-3 bg-gray-50">
+                            <div class="font-bold">Dell XPS 13</div>
+                            <div>512 GB</div>
+                            <div class="text-green-600 font-semibold" data-translate-key="s4TableVal2">通常可升級 (M.2)</div>
+                            <div class="text-right text-sm" data-translate-key="s4TableDiff2">提供更高規格性價比</div>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-4 items-center p-3">
+                            <div class="font-bold">Microsoft Surface Laptop 6</div>
+                            <div>256 GB</div>
+                            <div class="text-green-600 font-semibold" data-translate-key="s4TableVal3">可維修/更換</div>
+                            <div class="text-right text-sm" data-translate-key="s4TableDiff3">強調可維修性，挑戰蘋果的封閉模式</div>
+                        </div>
+                    </div>
+                     <p class="text-center text-gray-600 mt-6" data-translate-key="s4Conclusion">競爭對手，特別是微軟，正透過強調可維修性來挑戰蘋果的封閉設計哲學，試圖吸引對長期價值和數據安全敏感的企業與專業用戶。</p>
+                </div>
+            </section>
+            
+            <section id="conclusion">
+                 <div class="bg-[#004AAD] text-white rounded-lg shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-center mb-6" data-translate-key="conclusionTitle">結論：給明智消費者的建議</h2>
+                    <p class="text-center text-lg text-[#CAF0F8] mb-8" data-translate-key="conclusionSubtitle">理解蘋果的策略是做出明智選擇的關鍵。蘋果的策略是四大支柱高度協同的結果，迫使消費者在體驗與控制權之間做出權衡。</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-[#0077B6] p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-2" data-translate-key="tip1Title">① 預先購買</h3>
+                            <p class="text-sm" data-translate-key="tip1Desc">由於無法升級，請在購買時盡可能選擇超出當前需求的儲存和記憶體配置，以避免設備過早淘汰。</p>
+                        </div>
+                        <div class="bg-[#0077B6] p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-2" data-translate-key="tip2Title">② 混合儲存</h3>
+                            <p class="text-sm" data-translate-key="tip2Desc">結合使用高速外部SSD與iCloud+服務。前者用於存放大型文件，後者用於同步核心數據和備份。</p>
+                        </div>
+                        <div class="bg-[#0077B6] p-6 rounded-lg">
+                            <h3 class="font-bold text-xl mb-2" data-translate-key="tip3Title">③ 計算真實成本</h3>
+                            <p class="text-sm" data-translate-key="tip3Desc">超越廣告中的起售價，計算滿足您長期需求的「真實擁有成本」，並與競爭對手比較。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+        
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p data-translate-key="footerSource">本資訊圖表根據「解構蘋果的儲存空間策略」報告生成。</p>
+            <p data-translate-key="footerDisclaimer">所有數據和分析僅供參考。NEITHER Mermaid JS NOR SVG were used in this output.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const translations = {
+                'zh-Hant': {
+                    mainTitle: '蘋果的儲存空間博弈',
+                    mainSubtitle: '看似不足的基礎容量並非疏忽，而是一場精心策劃的商業戰略。本分析將揭示其背後的四大核心支柱。',
+                    section1Title: '第一節：稀缺性的經濟學',
+                    section1Subtitle: '將標準組件轉化為高利潤的奢侈品升級選項。',
+                    s1ChartTitle: '儲存空間的「蘋果稅」',
+                    s1ChartDesc: '蘋果的儲存升級定價遠超市場零售價，形成了巨大的利潤空間。此圖表比較了蘋果官方升級每GB的成本與零售市場上高性能SSD的每GB成本，清晰地量化了高達數倍的溢價。',
+                    s1KpiTitle: '關鍵洞察',
+                    s1KpiValue: '溢價率高達 290%+',
+                    s1KpiDesc: '將256GB的M4 MacBook Air升級至512GB，其每GB成本約為$0.78，而市場零售價僅約$0.20。',
+                    s1FlowTitle: '從心理錨點到向上銷售 (Upsell)',
+                    s1Flow1Title: '誘人起售價',
+                    s1Flow1Desc: 'MacBook Air $999起<br>(256GB)',
+                    s1Flow2Title: '容量焦慮',
+                    s1Flow2Desc: '256GB難以<br>滿足長期需求',
+                    s1Flow3Title: '昂貴的升級',
+                    s1Flow3Desc: '升級到512GB<br>需 +$200',
+                    s1Flow4Title: '向上銷售',
+                    s1Flow4Desc: '"不如再加一點錢<br>直上MacBook Pro"',
+                    s1FlowConclusion: '蘋果利用高昂的單項升級費用，巧妙地縮小了與高階型號的價格差距，誘導消費者購買更高利潤的產品。',
+                    section2Title: '第二節：數位重力井',
+                    section2Subtitle: '利用硬件限制，驅動高利潤的iCloud服務生態。',
+                    s2ChartTitle: '服務：真正的利潤引擎',
+                    s2ChartDesc: '蘋果的服務部門毛利率驚人，幾乎是硬件產品部門的兩倍。有限的本地儲存是將用戶從一次性硬件購買者轉變為持續性服務訂閱者的關鍵催化劑。',
+                    s2KpiTitle: '關鍵數據 (2024財年)',
+                    s2KpiDesc: '服務部門收入，佔總收入近25%。',
+                    s2FlowTitle: '用戶旅程：從本地稀缺到雲端依賴',
+                    s2Flow1Title: '空間不足',
+                    s2Flow1Desc: '"儲存空間已滿"的系統警告頻繁出現。',
+                    s2Flow2Title: '系統引導',
+                    s2Flow2Desc: 'macOS自動提示使用「最佳化儲存空間」，將文件移至iCloud。',
+                    s2Flow3Title: '訂閱iCloud+',
+                    s2Flow3Desc: '免費的5GB迅速用盡，用戶付費訂閱，成為持續收入來源。',
+                    s2Flow4Title: '生態鎖定',
+                    s2Flow4Desc: '所有數位生活（照片、文件、備份）被綁定，提高了更換品牌的門檻。',
+                    section3Title: '第三節：工程的教條',
+                    section3Subtitle: '整合、性能與絕對控制背後的代價。',
+                    s3PerfTitle: '極致性能的論據',
+                    s3PerfDesc: '蘋果透過自研SoC與整合式架構，實現了頂級的SSD讀寫速度。',
+                    s3PerfKpi: 'M4 Pro MacBook Pro SSD 寫入速度',
+                    s3ProsTitle: '優點 (官方說法)',
+                    s3Pro1Title: '更高可靠性：',
+                    s3Pro1Desc: '焊接點減少了因震動導致的機械故障點。',
+                    s3Pro2Title: '極致輕薄設計：',
+                    s3Pro2Desc: '取消插槽節省內部空間，實現更緊湊的工業設計。',
+                    s3Pro3Title: '性能與效率：',
+                    s3Pro3Desc: '減少延遲，配合統一記憶體架構提升整體性能。',
+                    s3ConsTitle: '代價 (消費者視角)',
+                    s3Con1Title: '無法升級：',
+                    s3Con1Desc: '購買時必須預測未來需求並支付高額費用。',
+                    s3Con2Title: '維修災難：',
+                    s3Con2Desc: 'SSD故障意味著需要更換昂貴的整個主機板。',
+                    s3Con3Title: '數據永久遺失風險：',
+                    s3Con3Desc: '主機板損壞可能導致儲存的數據無法恢復。',
+                    section4Title: '第四節：競爭的棋局',
+                    section4Subtitle: '兩種哲學的對決：封閉生態 vs 開放架構。',
+                    s4TableHeader1: '型號',
+                    s4TableHeader2: '基礎儲存',
+                    s4TableHeader3: '可升級性',
+                    s4TableHeader4: '關鍵差異',
+                    s4TableVal1: '不可升級 (焊接)',
+                    s4TableDiff1: '推動iCloud訂閱與生態鎖定',
+                    s4TableVal2: '通常可升級 (M.2)',
+                    s4TableDiff2: '提供更高規格性價比',
+                    s4TableVal3: '可維修/更換',
+                    s4TableDiff3: '強調可維修性，挑戰蘋果的封閉模式',
+                    s4Conclusion: '競爭對手，特別是微軟，正透過強調可維修性來挑戰蘋果的封閉設計哲學，試圖吸引對長期價值和數據安全敏感的企業與專業用戶。',
+                    conclusionTitle: '結論：給明智消費者的建議',
+                    conclusionSubtitle: '理解蘋果的策略是做出明智選擇的關鍵。蘋果的策略是四大支柱高度協同的結果，迫使消費者在體驗與控制權之間做出權衡。',
+                    tip1Title: '① 預先購買',
+                    tip1Desc: '由於無法升級，請在購買時盡可能選擇超出當前需求的儲存和記憶體配置，以避免設備過早淘汰。',
+                    tip2Title: '② 混合儲存',
+                    tip2Desc: '結合使用高速外部SSD與iCloud+服務。前者用於存放大型文件，後者用於同步核心數據和備份。',
+                    tip3Title: '③ 計算真實成本',
+                    tip3Desc: '超越廣告中的起售價，計算滿足您長期需求的「真實擁有成本」，並與競爭對手比較。',
+                    footerSource: '本資訊圖表根據「解構蘋果的儲存空間策略」報告生成。',
+                    footerDisclaimer: '所有數據和分析僅供參考。NEITHER Mermaid JS NOR SVG were used in this output.',
+                    chartLabelApple: '蘋果官方升級 (每GB)',
+                    chartLabelRetail: '零售市場高性能SSD (每GB)',
+                    chartLabelCost: '每GB成本 (美元)',
+                    chartLabelServiceMargin: '服務部門毛利率',
+                    chartLabelProductMargin: '產品部門毛利率',
+                    chartLabelMargin: '毛利率',
+                },
+                'en': {
+                    mainTitle: "Apple's Storage Gambit",
+                    mainSubtitle: "The seemingly small base storage isn't an oversight, but a meticulously planned business strategy. This analysis reveals the four core pillars behind it.",
+                    section1Title: 'Section 1: The Economics of Scarcity',
+                    section1Subtitle: 'Turning a standard component into a high-margin luxury upgrade.',
+                    s1ChartTitle: 'The "Apple Tax" on Storage',
+                    s1ChartDesc: "Apple's storage upgrade pricing far exceeds market retail prices, creating a huge profit margin. This chart compares the per-GB cost of Apple's official upgrade with the per-GB cost of high-performance SSDs on the retail market, clearly quantifying the premium of several hundred percent.",
+                    s1KpiTitle: 'Key Insight',
+                    s1KpiValue: 'Premium up to 290%+',
+                    s1KpiDesc: 'Upgrading a 256GB M4 MacBook Air to 512GB costs about $0.78/GB, while the market retail price is only about $0.20/GB.',
+                    s1FlowTitle: 'From Psychological Anchor to Upsell',
+                    s1Flow1Title: 'Tempting Starting Price',
+                    s1Flow1Desc: 'MacBook Air from $999<br>(256GB)',
+                    s1Flow2Title: 'Capacity Anxiety',
+                    s1Flow2Desc: '256GB is insufficient<br>for long-term needs',
+                    s1Flow3Title: 'Expensive Upgrade',
+                    s1Flow3Desc: 'Upgrade to 512GB<br>costs +$200',
+                    s1Flow4Title: 'The Upsell',
+                    s1Flow4Desc: '"For a little more, I<br>could get a MacBook Pro"',
+                    s1FlowConclusion: 'Apple uses high individual upgrade costs to cleverly narrow the price gap with higher-end models, inducing consumers to buy more profitable products.',
+                    section2Title: 'Section 2: The Digital Gravity Well',
+                    section2Subtitle: 'Using hardware limitations to drive the high-profit iCloud service ecosystem.',
+                    s2ChartTitle: 'Services: The Real Profit Engine',
+                    s2ChartDesc: "Apple's services division has a staggering gross margin, almost double that of its hardware products. Limited local storage is the key catalyst for converting users from one-time hardware buyers to recurring service subscribers.",
+                    s2KpiTitle: 'Key Figure (FY 2024)',
+                    s2KpiDesc: 'Services revenue, accounting for nearly 25% of total revenue.',
+                    s2FlowTitle: 'The User Journey: From Local Scarcity to Cloud Dependency',
+                    s2Flow1Title: 'Storage Full',
+                    s2Flow1Desc: 'Frequent "Storage Full" system warnings appear.',
+                    s2Flow2Title: 'System Nudge',
+                    s2Flow2Desc: 'macOS automatically suggests using "Optimize Storage" to move files to iCloud.',
+                    s2Flow3Title: 'Subscribe to iCloud+',
+                    s2Flow3Desc: 'The free 5GB is quickly exhausted, leading users to subscribe for a recurring revenue stream.',
+                    s2Flow4Title: 'Ecosystem Lock-in',
+                    s2Flow4Desc: 'The entire digital life (photos, files, backups) becomes tied to the ecosystem, increasing the barrier to switching brands.',
+                    section3Title: 'Section 3: The Engineering Dogma',
+                    section3Subtitle: 'The price of integration, performance, and absolute control.',
+                    s3PerfTitle: 'The Argument for Ultimate Performance',
+                    s3PerfDesc: 'Through its custom SoC and integrated architecture, Apple achieves top-tier SSD read/write speeds.',
+                    s3PerfKpi: 'M4 Pro MacBook Pro SSD Write Speed',
+                    s3ProsTitle: 'Pros (The Official Narrative)',
+                    s3Pro1Title: 'Higher Reliability:',
+                    s3Pro1Desc: 'Soldered points reduce mechanical failure points from vibration.',
+                    s3Pro2Title: 'Ultra-thin Design:',
+                    s3Pro2Desc: 'Removing sockets saves internal space, enabling a more compact industrial design.',
+                    s3Pro3Title: 'Performance & Efficiency:',
+                    s3Pro3Desc: 'Reduces latency and improves overall performance with the unified memory architecture.',
+                    s3ConsTitle: 'Cons (The Consumer Perspective)',
+                    s3Con1Title: 'No Upgrades:',
+                    s3Con1Desc: 'Must predict future needs at purchase and pay a high premium.',
+                    s3Con2Title: 'Repair Nightmare:',
+                    s3Con2Desc: 'An SSD failure means replacing the entire expensive logic board.',
+                    s3Con3Title: 'Risk of Permanent Data Loss:',
+                    s3Con3Desc: 'Logic board damage can lead to unrecoverable data on the SSD.',
+                    section4Title: 'Section 4: The Competitive Chessboard',
+                    section4Subtitle: 'A clash of two philosophies: closed ecosystem vs. open architecture.',
+                    s4TableHeader1: 'Model',
+                    s4TableHeader2: 'Base Storage',
+                    s4TableHeader3: 'Upgradability',
+                    s4TableHeader4: 'Key Difference',
+                    s4TableVal1: 'Not Upgradable (Soldered)',
+                    s4TableDiff1: 'Drives iCloud subscription & ecosystem lock-in',
+                    s4TableVal2: 'Usually Upgradable (M.2)',
+                    s4TableDiff2: 'Offers better specs for the price',
+                    s4TableVal3: 'Repairable/Replaceable',
+                    s4TableDiff3: 'Emphasizes repairability to challenge Apple\'s model',
+                    s4Conclusion: 'Competitors, especially Microsoft, are challenging Apple\'s closed design philosophy by emphasizing repairability, trying to attract enterprise and pro users sensitive to long-term value and data security.',
+                    conclusionTitle: 'Conclusion: Advice for the Wise Consumer',
+                    conclusionSubtitle: "Understanding Apple's strategy is key to making a wise choice. It's a result of four highly synergistic pillars, forcing a trade-off between experience and control.",
+                    tip1Title: '① Buy Ahead',
+                    tip1Desc: 'Since upgrades are impossible, choose more storage and memory than you currently need at the time of purchase to avoid premature obsolescence.',
+                    tip2Title: '② Hybrid Storage',
+                    tip2Desc: 'Combine a high-speed external SSD for large files with an iCloud+ subscription for syncing core data and backups.',
+                    tip3Title: '③ Calculate True Cost',
+                    tip3Desc: 'Look beyond the advertised starting price. Calculate the "true cost of ownership" for a configuration that meets your long-term needs and compare it with competitors.',
+                    footerSource: 'This infographic is generated based on the "Deconstructing Apple\'s Storage Strategy" report.',
+                    footerDisclaimer: 'All data and analysis are for reference only. NEITHER Mermaid JS NOR SVG were used in this output.',
+                    chartLabelApple: "Apple's Official Upgrade (per GB)",
+                    chartLabelRetail: 'Retail High-Performance SSD (per GB)',
+                    chartLabelCost: 'Cost per GB (USD)',
+                    chartLabelServiceMargin: 'Services Gross Margin',
+                    chartLabelProductMargin: 'Products Gross Margin',
+                    chartLabelMargin: 'Gross Margin',
+                }
+            };
+
+            let currentLang = 'zh-Hant';
+            let appleTaxChart, marginChart;
+
+            const brandColors = {
+                darkBlue: '#004AAD',
+                mediumBlue: '#0077B6',
+                lightBlue: '#90E0EF',
+                veryLightBlue: '#CAF0F8',
+                textDark: '#03045E',
+                accentRed: '#d03f3f'
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: brandColors.textDark,
+                            font: {
+                                size: 14,
+                                family: "'Roboto', 'Noto Sans TC', sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        },
+                        titleFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                        bodyFont: { family: "'Roboto', 'Noto Sans TC', sans-serif" }
+                    }
+                }
+            };
+
+            function createAppleTaxChart(lang) {
+                const ctx = document.getElementById('appleTaxChart').getContext('2d');
+                if (appleTaxChart) appleTaxChart.destroy();
+                appleTaxChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: [translations[lang].chartLabelApple, translations[lang].chartLabelRetail],
+                        datasets: [{
+                            label: translations[lang].chartLabelCost,
+                            data: [0.78, 0.20],
+                            backgroundColor: [brandColors.accentRed, brandColors.mediumBlue],
+                            borderColor: [brandColors.accentRed, brandColors.mediumBlue],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: brandColors.textDark, callback: (v) => '$' + v } },
+                            x: { ticks: { color: brandColors.textDark } }
+                        },
+                        plugins: { ...defaultChartOptions.plugins, legend: { display: false } }
+                    }
+                });
+            }
+
+            function createMarginChart(lang) {
+                const ctx = document.getElementById('marginChart').getContext('2d');
+                if (marginChart) marginChart.destroy();
+                marginChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [translations[lang].chartLabelServiceMargin, translations[lang].chartLabelProductMargin],
+                        datasets: [{
+                            label: translations[lang].chartLabelMargin,
+                            data: [73.9, 37.2],
+                            backgroundColor: [brandColors.mediumBlue, brandColors.lightBlue],
+                            borderColor: [brandColors.darkBlue, brandColors.mediumBlue],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        plugins: {
+                            ...defaultChartOptions.plugins,
+                            tooltip: {
+                                ...defaultChartOptions.plugins.tooltip,
+                                callbacks: {
+                                    ...defaultChartOptions.plugins.tooltip.callbacks,
+                                    label: (c) => `${c.label}: ${c.parsed}%`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateText(lang) {
+                document.querySelectorAll('[data-translate-key]').forEach(el => {
+                    const key = el.dataset.translateKey;
+                    if (translations[lang][key]) {
+                        el.innerHTML = translations[lang][key];
+                    }
+                });
+                document.documentElement.lang = lang;
+                document.getElementById('lang-switcher').textContent = lang === 'en' ? '繁體中文' : 'English';
+            }
+            
+            function renderContent(lang) {
+                updateText(lang);
+                createAppleTaxChart(lang);
+                createMarginChart(lang);
+            }
+
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLang = currentLang === 'en' ? 'zh-Hant' : 'en';
+                renderContent(currentLang);
+            });
+
+            renderContent(currentLang);
+        });
+    </script>
+</body>
+</html>
