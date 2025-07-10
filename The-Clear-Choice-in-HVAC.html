@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：R32 vs. R410A 雪種 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .super-title {
+            font-weight: 900;
+            font-size: 4rem;
+            line-height: 1;
+            letter-spacing: -0.05em;
+        }
+        @media (min-width: 768px) {
+            .super-title {
+                font-size: 6rem;
+            }
+        }
+        .flow-arrow {
+            position: relative;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        .flow-arrow::after {
+            content: '↓';
+            font-size: 2rem;
+            font-weight: bold;
+            color: #92A8D1;
+        }
+        .flow-box {
+            border: 2px solid;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lang-btn.active {
+            background-color: #6B5B95;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- NEITHER Mermaid JS NOR SVG were used anywhere in the output. All diagrams implemented with Chart.js Canvas or structured HTML/CSS with Tailwind. -->
+    <!-- Color Palette: Energetic & Playful -->
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- Language Switcher -->
+        <div class="text-center mb-8">
+            <div class="inline-flex rounded-md shadow-sm">
+                <button id="lang-en" class="lang-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700">English</button>
+                <button id="lang-zh" class="lang-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-r border-gray-200 rounded-r-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700">繁體中文</button>
+            </div>
+        </div>
+
+        <!-- Header Section -->
+        <header class="text-center my-12">
+            <h1 data-lang-key="mainTitle" class="text-3xl md:text-5xl font-bold text-gray-900 mb-4">The Clear Choice in HVAC: R32 vs. R410A</h1>
+            <p data-lang-key="mainSubtitle" class="text-lg md:text-xl max-w-3xl mx-auto text-gray-600">The era of R410A refrigerant is ending. Driven by global regulations and superior performance, R32 is the definitive successor. This analysis breaks down why your next HVAC system should run on R32.</p>
+        </header>
+
+        <!-- Main Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Environmental Impact: GWP -->
+            <div class="md:col-span-2 lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 data-lang-key="envTitle" class="text-2xl font-bold mb-1 text-center">🌍 The Environmental Imperative</h2>
+                <p data-lang-key="envSubtitle" class="text-center text-gray-600 mb-6">The primary reason for the industry-wide shift is Global Warming Potential (GWP), which measures a gas's climate impact relative to $CO_2$. The difference is staggering.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-[#FF6F61]">R410A</h3>
+                        <p class="super-title text-[#FF6F61]">2088</p>
+                        <p data-lang-key="gwpLabel" class="font-semibold text-xl">Global Warming Potential</p>
+                        <p data-lang-key="r410aGwpDesc" class="text-gray-500 mt-2">1kg of R410A has the same warming effect as 2,088kg of Carbon Dioxide.</p>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-[#6B5B95]">R32</h3>
+                        <p class="super-title text-[#6B5B95]">675</p>
+                        <p data-lang-key="gwpLabel" class="font-semibold text-xl">Global Warming Potential</p>
+                        <p data-lang-key="r32GwpDesc" class="text-gray-500 mt-2">A direct <strong>~68% reduction</strong> in climate impact per kg.</p>
+                    </div>
+                </div>
+                 <div class="chart-container mt-8">
+                    <canvas id="gwpChart"></canvas>
+                </div>
+                 <p data-lang-key="gwpChartDesc" class="text-center text-gray-600 mt-4">This bar chart visually represents the dramatic GWP reduction offered by R32, making it the clear choice for environmental compliance and responsibility.</p>
+            </div>
+
+            <!-- Compounded Benefits -->
+            <div class="lg:col-span-3 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 data-lang-key="compoundTitle" class="text-2xl font-bold mb-1 text-center">✨ Compounded Climate Benefits</h2>
+                <p data-lang-key="compoundSubtitle" class="text-center text-gray-600 mb-8">R32's environmental advantage is more than just its lower GWP. Its superior properties create a multiplier effect, reducing the total climate impact by approximately 75%.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 data-lang-key="chargeTitle" class="text-xl font-bold mb-4">Less is More: Reduced System Charge</h3>
+                        <p data-lang-key="chargeDesc" class="text-gray-600 mb-4">R32 is more efficient at transferring heat, so systems require less of it to achieve the same cooling effect. This reduces the potential impact from leaks and lowers material usage.</p>
+                        <div class="chart-container">
+                            <canvas id="chargeReductionChart"></canvas>
+                        </div>
+                        <p data-lang-key="chargeChartDesc" class="text-center text-gray-600 mt-4">R32 systems typically require <strong>20-30% less refrigerant charge</strong> by weight than an equivalent R410A system.</p>
+                    </div>
+                    <div>
+                        <h3 data-lang-key="efficiencyTitle" class="text-xl font-bold mb-4">Smarter Power: Higher Energy Efficiency</h3>
+                        <p data-lang-key="efficiencyDesc" class="text-gray-600 mb-4">Since 95-98% of an AC's lifetime emissions come from the electricity it uses, efficiency is paramount. R32 systems consume less power, reducing indirect emissions and saving you money.</p>
+                        <div class="chart-container">
+                             <canvas id="efficiencyGainChart"></canvas>
+                        </div>
+                        <p data-lang-key="efficiencyChartDesc" class="text-center text-gray-600 mt-4">On average, R32 systems are <strong>5-10% more energy-efficient</strong>, leading to direct savings on your electricity bill.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance -->
+            <div class="md:col-span-1 lg:col-span-1 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 data-lang-key="perfTitle" class="text-2xl font-bold mb-1 text-center">⚡ Performance Under Pressure</h2>
+                 <p data-lang-key="perfSubtitle" class="text-center text-gray-600 mb-6">R32 isn't just greener; it's a better-performing refrigerant, leading to enhanced comfort and system longevity.</p>
+                <div class="chart-container h-96">
+                    <canvas id="performanceRadarChart"></canvas>
+                </div>
+                <p data-lang-key="perfChartDesc" class="text-center text-gray-600 mt-4">This chart compares key metrics. R32's superior thermodynamic properties result in higher energy efficiency and greater cooling/heating capacity, meaning faster comfort and lower running costs.</p>
+            </div>
+
+            <!-- Servicing -->
+            <div class="md:col-span-1 lg:col-span-2 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 data-lang-key="serviceTitle" class="text-2xl font-bold mb-1 text-center">🔧 Simpler, Cheaper Servicing</h2>
+                <p data-lang-key="serviceSubtitle" class="text-center text-gray-600 mb-6">The chemical composition directly impacts long-term maintenance costs. R32's purity is a major advantage.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- R410A Flow -->
+                    <div>
+                        <h3 data-lang-key="r410aBlend" class="text-xl font-bold text-center mb-4 text-[#FF6F61]">R410A (A Blend)</h3>
+                        <div class="flow-box border-[#FF6F61]"><p data-lang-key="flowLeak">System develops a leak</p></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#FF6F61]"><p data-lang-key="flowFractionation">Components leak at different rates (fractionation)</p></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#FF6F61] bg-[#FF6F61]/10"><p data-lang-key="flowRecover">Entire remaining charge must be recovered</p></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#FF6F61] font-bold"><p data-lang-key="flowCostly">Costly Full System Recharge Required</p></div>
+                    </div>
+                    <!-- R32 Flow -->
+                    <div>
+                         <h3 data-lang-key="r32Pure" class="text-xl font-bold text-center mb-4 text-[#6B5B95]">R32 (Pure)</h3>
+                         <div class="flow-box border-[#6B5B95]"><p data-lang-key="flowLeak">System develops a leak</p></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#6B5B95]"><p data-lang-key="flowNoFractionation">No fractionation occurs</p></div>
+                         <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#6B5B95] bg-[#6B5B95]/10"><p data-lang-key="flowRepair">Technician repairs the leak</p></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-box border-[#6B5B95] font-bold"><p data-lang-key="flowSimple">Simple, Inexpensive "Top-Up"</p></div>
+                    </div>
+                </div>
+                 <p data-lang-key="serviceChartDesc" class="text-center text-gray-600 mt-8">This flow chart illustrates the critical difference in servicing. As R410A becomes scarcer and more expensive, the cost of a full recharge will be a major liability for system owners.</p>
+            </div>
+
+            <!-- Safety -->
+            <div class="md:col-span-2 lg:col-span-2 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 data-lang-key="safetyTitle" class="text-2xl font-bold mb-1 text-center">🛡️ Safety: Fact vs. Fiction</h2>
+                <p data-lang-key="safetySubtitle" class="text-center text-gray-600 mb-6">R32 is classified as A2L (mildly flammable), which requires professional handling but represents a very low, manageable risk.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b">
+                                <th data-lang-key="safetyProp" class="p-4">Property</th>
+                                <th class="p-4 text-center">R410A</th>
+                                <th class="p-4 text-center">R32</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b">
+                                <td data-lang-key="safetyClass" class="p-4 font-semibold">ASHRAE Class</td>
+                                <td class="p-4 text-center"><span class="font-bold py-1 px-3 bg-green-200 text-green-800 rounded-full">A1</span></td>
+                                <td class="p-4 text-center"><span class="font-bold py-1 px-3 bg-yellow-200 text-yellow-800 rounded-full">A2L</span></td>
+                            </tr>
+                            <tr class="border-b">
+                                <td data-lang-key="safetyFlame" class="p-4 font-semibold">Flame Propagation</td>
+                                <td data-lang-key="safetyNo" class="p-4 text-center">No</td>
+                                <td data-lang-key="safetySlow" class="p-4 text-center">Yes, but very slow (&lt;10cm/s)</td>
+                            </tr>
+                            <tr class="border-b">
+                                <td data-lang-key="safetyIgnition" class="p-4 font-semibold">Ignition Risk</td>
+                                <td data-lang-key="safetyNone" class="p-4 text-center">None</td>
+                                <td data-lang-key="safetyDifficult" class="p-4 text-center">Very difficult to ignite (needs high energy)</td>
+                            </tr>
+                            <tr>
+                                <td data-lang-key="safetyHandling" class="p-4 font-semibold">Professional Handling</td>
+                                <td data-lang-key="safetyStandard" class="p-4 text-center">Standard Practice</td>
+                                <td data-lang-key="safetyA2L" class="p-4 text-center">Standard Practice + A2L Tools & Ventilation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                 <p data-lang-key="safetyDesc" class="text-center text-gray-600 mt-6">The global HVAC industry has adopted R32 because its safety profile is well-understood and easily managed by certified technicians following established protocols. The "mildly flammable" classification should not be a cause for consumer concern.</p>
+            </div>
+            
+            <!-- Economics -->
+            <div class="md:col-span-2 lg:col-span-1 bg-white rounded-xl shadow-lg p-6 md:p-8">
+                 <h2 data-lang-key="econTitle" class="text-2xl font-bold mb-1 text-center">💰 The Economic Winner</h2>
+                 <p data-lang-key="econSubtitle" class="text-center text-gray-600 mb-6">A Total Cost of Ownership approach reveals R32 is the only financially prudent choice for a new system.</p>
+                 <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-1">
+                            <span data-lang-key="econCostTrend" class="text-base font-medium">Refrigerant Cost Trend</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-6">
+                            <div class="bg-[#FF6F61] h-6 rounded-full flex items-center justify-end pr-2" style="width: 90%"><span class="text-white font-bold text-sm">R410A 📈</span></div>
+                        </div>
+                         <div class="w-full bg-gray-200 rounded-full h-6 mt-2">
+                            <div class="bg-[#6B5B95] h-6 rounded-full flex items-center justify-end pr-2" style="width: 30%"><span class="text-white font-bold text-sm">R32 📉</span></div>
+                        </div>
+                        <p data-lang-key="econCostDesc" class="text-sm text-gray-500 mt-2">Regulatory phase-downs are causing R410A prices to skyrocket, while R32 remains stable and affordable.</p>
+                    </div>
+                    <div class="pt-4">
+                        <h4 data-lang-key="econSavings" class="font-semibold">Lifetime Savings</h4>
+                        <p data-lang-key="econSavingsDesc" class="text-sm text-gray-500 mt-1">Combining energy savings (~5-10% annually) and lower, more predictable maintenance costs makes R32 significantly cheaper over the system's 15-20 year lifespan.</p>
+                    </div>
+                 </div>
+            </div>
+            
+            <!-- Verdict -->
+            <div class="md:col-span-2 lg:col-span-3 bg-gradient-to-br from-[#6B5B95] to-[#88B04B] text-white rounded-xl shadow-lg p-6 md:p-8 text-center">
+                 <h2 data-lang-key="verdictTitle" class="text-3xl font-bold mb-4">The Final Verdict Is Clear</h2>
+                 <p data-lang-key="verdictSubtitle" class="text-xl max-w-4xl mx-auto mb-6">For any new HVAC installation, R32 is decisively superior to R410A. It is more environmentally friendly, more efficient, cheaper to operate and maintain, and compliant with future regulations.</p>
+                 <div class="flex flex-col md:flex-row justify-center items-center gap-4">
+                    <div class="bg-white/20 p-4 rounded-lg">
+                        <h4 data-lang-key="verdictNew" class="font-bold">For Buyers of New Systems:</h4>
+                        <p data-lang-key="verdictNewDesc">Exclusively purchase an R32 system.</p>
+                    </div>
+                     <div class="bg-white/20 p-4 rounded-lg">
+                        <h4 data-lang-key="verdictOld" class="font-bold">For Owners of R410A Systems:</h4>
+                        <p data-lang-key="verdictOldDesc">No need to replace yet, but budget for high repair costs or replacement at first major failure.</p>
+                    </div>
+                 </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const FONT_COLOR = '#374151'; 
+        const GRID_COLOR = '#E5E7EB'; 
+
+        const PALETTE = {
+            r410a: '#FF6F61', // Coral
+            r32: '#6B5B95', // Purple
+            accent1: '#88B04B', // Green
+            accent2: '#F7CAC9', // Pink
+            accent3: '#92A8D1'  // Blue
+        };
+
+        const translations = {
+            en: {
+                mainTitle: "The Clear Choice in HVAC: R32 vs. R410A",
+                mainSubtitle: "The era of R410A refrigerant is ending. Driven by global regulations and superior performance, R32 is the definitive successor. This analysis breaks down why your next HVAC system should run on R32.",
+                envTitle: "🌍 The Environmental Imperative",
+                envSubtitle: "The primary reason for the industry-wide shift is Global Warming Potential (GWP), which measures a gas's climate impact relative to $CO_2$. The difference is staggering.",
+                gwpLabel: "Global Warming Potential",
+                r410aGwpDesc: "1kg of R410A has the same warming effect as 2,088kg of Carbon Dioxide.",
+                r32GwpDesc: "A direct <strong>~68% reduction</strong> in climate impact per kg.",
+                gwpChartTitle: "GWP Comparison",
+                gwpXAxisLabel: "GWP ($CO_2$ Equivalent)",
+                gwpChartDesc: "This bar chart visually represents the dramatic GWP reduction offered by R32, making it the clear choice for environmental compliance and responsibility.",
+                compoundTitle: "✨ Compounded Climate Benefits",
+                compoundSubtitle: "R32's environmental advantage is more than just its lower GWP. Its superior properties create a multiplier effect, reducing the total climate impact by approximately 75%.",
+                chargeTitle: "Less is More: Reduced System Charge",
+                chargeDesc: "R32 is more efficient at transferring heat, so systems require less of it to achieve the same cooling effect. This reduces the potential impact from leaks and lowers material usage.",
+                chargeChartTitle: "Typical Charge Reduction",
+                chargeChartLabel1: "Refrigerant Reduction",
+                chargeChartLabel2: "Remaining Charge",
+                chargeChartDesc: "R32 systems typically require <strong>20-30% less refrigerant charge</strong> by weight than an equivalent R410A system.",
+                efficiencyTitle: "Smarter Power: Higher Energy Efficiency",
+                efficiencyDesc: "Since 95-98% of an AC's lifetime emissions come from the electricity it uses, efficiency is paramount. R32 systems consume less power, reducing indirect emissions and saving you money.",
+                efficiencyChartTitle: "Typical Energy Efficiency Gain",
+                efficiencyChartLabel1: "Energy Savings",
+                efficiencyChartLabel2: "Baseline",
+                efficiencyChartDesc: "On average, R32 systems are <strong>5-10% more energy-efficient</strong>, leading to direct savings on your electricity bill.",
+                perfTitle: "⚡ Performance Under Pressure",
+                perfSubtitle: "R32 isn't just greener; it's a better-performing refrigerant, leading to enhanced comfort and system longevity.",
+                perfChartTitle: "Relative Performance Metrics (R32 as 100%)",
+                perfChartLabel1: "Energy Efficiency",
+                perfChartLabel2: "Cooling Capacity",
+                perfChartLabel3: "Heating Capacity",
+                perfChartLabel4: "Lower Environmental Impact",
+                perfChartDesc: "This chart compares key metrics. R32's superior thermodynamic properties result in higher energy efficiency and greater cooling/heating capacity, meaning faster comfort and lower running costs.",
+                serviceTitle: "🔧 Simpler, Cheaper Servicing",
+                serviceSubtitle: "The chemical composition directly impacts long-term maintenance costs. R32's purity is a major advantage.",
+                r410aBlend: "R410A (A Blend)",
+                r32Pure: "R32 (Pure)",
+                flowLeak: "System develops a leak",
+                flowFractionation: "Components leak at different rates (fractionation)",
+                flowRecover: "Entire remaining charge must be recovered",
+                flowCostly: "Costly Full System Recharge Required",
+                flowNoFractionation: "No fractionation occurs",
+                flowRepair: "Technician repairs the leak",
+                flowSimple: "Simple, Inexpensive \"Top-Up\"",
+                serviceChartDesc: "This flow chart illustrates the critical difference in servicing. As R410A becomes scarcer and more expensive, the cost of a full recharge will be a major liability for system owners.",
+                safetyTitle: "🛡️ Safety: Fact vs. Fiction",
+                safetySubtitle: "R32 is classified as A2L (mildly flammable), which requires professional handling but represents a very low, manageable risk.",
+                safetyProp: "Property",
+                safetyClass: "ASHRAE Class",
+                safetyFlame: "Flame Propagation",
+                safetyIgnition: "Ignition Risk",
+                safetyHandling: "Professional Handling",
+                safetyNo: "No",
+                safetySlow: "Yes, but very slow (<10cm/s)",
+                safetyNone: "None",
+                safetyDifficult: "Very difficult to ignite (needs high energy)",
+                safetyStandard: "Standard Practice",
+                safetyA2L: "Standard Practice + A2L Tools & Ventilation",
+                safetyDesc: "The global HVAC industry has adopted R32 because its safety profile is well-understood and easily managed by certified technicians following established protocols. The \"mildly flammable\" classification should not be a cause for consumer concern.",
+                econTitle: "💰 The Economic Winner",
+                econSubtitle: "A Total Cost of Ownership approach reveals R32 is the only financially prudent choice for a new system.",
+                econCostTrend: "Refrigerant Cost Trend",
+                econCostDesc: "Regulatory phase-downs are causing R410A prices to skyrocket, while R32 remains stable and affordable.",
+                econSavings: "Lifetime Savings",
+                econSavingsDesc: "Combining energy savings (~5-10% annually) and lower, more predictable maintenance costs makes R32 significantly cheaper over the system's 15-20 year lifespan.",
+                verdictTitle: "The Final Verdict Is Clear",
+                verdictSubtitle: "For any new HVAC installation, R32 is decisively superior to R410A. It is more environmentally friendly, more efficient, cheaper to operate and maintain, and compliant with future regulations.",
+                verdictNew: "For Buyers of New Systems:",
+                verdictNewDesc: "Exclusively purchase an R32 system.",
+                verdictOld: "For Owners of R410A Systems:",
+                verdictOldDesc: "No need to replace yet, but budget for high repair costs or replacement at first major failure."
+            },
+            zh: {
+                mainTitle: "空調系統的明確選擇：R32 vs. R410A",
+                mainSubtitle: "R410A雪種的時代即將結束。在全球法規和卓越性能的推動下，R32已成為最終的繼任者。本分析將詳細說明為何您的下一套空調系統應該使用R32。",
+                envTitle: "🌍 環境保護的當務之急",
+                envSubtitle: "整個行業轉型的首要原因是「全球暖化潛勢」（GWP），它衡量氣體相對於二氧化碳對氣候的影響。兩者之間的差異是驚人的。",
+                gwpLabel: "全球暖化潛勢",
+                r410aGwpDesc: "1公斤R410A造成的暖化效應，相當於2,088公斤的二氧化碳。",
+                r32GwpDesc: "每公斤的氣候影響直接<strong>減少約68%</strong>。",
+                gwpChartTitle: "GWP 比較",
+                gwpXAxisLabel: "GWP (二氧化碳當量)",
+                gwpChartDesc: "此長條圖直觀地展示了R32在GWP方面的顯著優勢，使其成為符合環保法規和企業責任的明確選擇。",
+                compoundTitle: "✨ 複合的氣候效益",
+                compoundSubtitle: "R32的環保優勢不僅在於其較低的GWP。其卓越的特性產生了乘數效應，使總體氣候影響減少約75%。",
+                chargeTitle: "事半功倍：減少系統填充量",
+                chargeDesc: "R32的熱傳遞效率更高，因此系統只需較少的雪種即可達到相同的冷卻效果。這減少了洩漏可能造成的影響，並降低了物料使用。",
+                chargeChartTitle: "典型填充量減少幅度",
+                chargeChartLabel1: "雪種減少量",
+                chargeChartLabel2: "剩餘填充量",
+                chargeChartDesc: "與同等的R410A系統相比，R32系統所需的雪種重量通常<strong>減少20-30%</strong>。",
+                efficiencyTitle: "智慧節能：更高的能源效率",
+                efficiencyDesc: "一部空調在其生命週期中95-98%的排放來自其消耗的電力，因此能源效率至關重要。R32系統耗電更少，從而減少間接排放並為您省錢。",
+                efficiencyChartTitle: "典型能源效率提升幅度",
+                efficiencyChartLabel1: "節省能源",
+                efficiencyChartLabel2: "基準線",
+                efficiencyChartDesc: "平均而言，R32系統的<strong>能源效率高出5-10%</strong>，能直接為您節省電費。",
+                perfTitle: "⚡ 壓力下的卓越性能",
+                perfSubtitle: "R32不僅更環保，它還是一種性能更佳的雪種，能帶來更佳的舒適度和更長的系統壽命。",
+                perfChartTitle: "相對性能指標 (以R32為100%)",
+                perfChartLabel1: "能源效率",
+                perfChartLabel2: "製冷能力",
+                perfChartLabel3: "制暖能力",
+                perfChartLabel4: "較低環境影響",
+                perfChartDesc: "此圖表比較了關鍵指標。R32卓越的熱力學特性使其具有更高的能源效率和更強的製冷/制暖能力，意味著更快的舒適體驗和更低的運行成本。",
+                serviceTitle: "🔧 更簡單、更便宜的維修",
+                serviceSubtitle: "化學成分直接影響長期維護成本。R32的單一成分是一大優勢。",
+                r410aBlend: "R410A (混合物)",
+                r32Pure: "R32 (純物質)",
+                flowLeak: "系統出現洩漏",
+                flowFractionation: "不同成分以不同速率洩漏（分餾）",
+                flowRecover: "必須回收所有剩餘的雪種",
+                flowCostly: "需要昂貴的系統完全重新充填",
+                flowNoFractionation: "不會發生分餾",
+                flowRepair: "技術人員修補洩漏處",
+                flowSimple: "簡單、便宜的「補充」即可",
+                serviceChartDesc: "此流程圖說明了維修方面的關鍵差異。隨著R410A變得越來越稀缺和昂貴，完全重新充填的成本將成為系統所有者的主要負擔。",
+                safetyTitle: "🛡️ 安全性：事實與迷思",
+                safetySubtitle: "R32被歸類為A2L級（輕度易燃），需要專業處理，但風險極低且可控。",
+                safetyProp: "屬性",
+                safetyClass: "ASHRAE 安全等級",
+                safetyFlame: "火焰傳播",
+                safetyIgnition: "點燃風險",
+                safetyHandling: "專業處理",
+                safetyNo: "否",
+                safetySlow: "是，但非常緩慢 (<10cm/s)",
+                safetyNone: "無",
+                safetyDifficult: "極難點燃（需要高能量）",
+                safetyStandard: "標準做法",
+                safetyA2L: "標準做法 + A2L級工具和通風",
+                safetyDesc: "全球空調行業已採用R32，因為其安全性已得到充分了解，並可由經過認證的技術人員遵循既定協議輕鬆管理。「輕度易燃」的分類不應引起消費者的擔憂。",
+                econTitle: "💰 經濟上的贏家",
+                econSubtitle: "從總擁有成本的角度來看，R32是新系統唯一明智的財務選擇。",
+                econCostTrend: "雪種成本趨勢",
+                econCostDesc: "法規性的逐步淘汰導致R410A價格飛漲，而R32的價格則保持穩定且可負擔。",
+                econSavings: "生命週期節省",
+                econSavingsDesc: "結合每年約5-10%的能源節省以及更低、更可預測的維護成本，使得R32在系統15-20年的生命週期內顯著更便宜。",
+                verdictTitle: "最終結論顯而易見",
+                verdictSubtitle: "對於任何新的空調安裝，R32在各方面都決定性地優於R410A。它更環保、更高效、運行和維護成本更低，並且符合未來的法規。",
+                verdictNew: "對於新系統的購買者：",
+                verdictNewDesc: "應只購買R32系統。",
+                verdictOld: "對於R410A系統的擁有者：",
+                verdictOldDesc: "無需立即更換，但應為首次重大故障時的高昂維修費用或更換做好預算準備。"
+            }
+        };
+
+        let currentLang = 'en';
+        let charts = {};
+
+        const universalTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function updateTextContent(lang) {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+        }
+        
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        function createCharts(lang) {
+            destroyCharts();
+            const t = translations[lang];
+
+            // GWP Chart
+            const gwpCtx = document.getElementById('gwpChart').getContext('2d');
+            charts.gwp = new Chart(gwpCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['R410A', 'R32'],
+                    datasets: [{
+                        label: t.gwpLabel,
+                        data: [2088, 675],
+                        backgroundColor: [PALETTE.r410a, PALETTE.r32],
+                        borderWidth: 1
+                    }]
+                },
+                options: { ...universalTooltipOptions, responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { ...universalTooltipOptions.plugins, legend: { display: false }, title: { display: true, text: t.gwpChartTitle, font: { size: 16 }, color: FONT_COLOR }}, scales: { x: { beginAtZero: true, title: { display: true, text: t.gwpXAxisLabel, color: FONT_COLOR }, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }}, y: { ticks: { color: FONT_COLOR, font: {size: 14, weight: 'bold'} }, grid: { display: false }}}}
+            });
+
+            // Charge Reduction Donut Chart
+            const chargeCtx = document.getElementById('chargeReductionChart').getContext('2d');
+            charts.charge = new Chart(chargeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [t.chargeChartLabel1, t.chargeChartLabel2],
+                    datasets: [{ data: [25, 75], backgroundColor: [PALETTE.r32, '#E5E7EB'], borderColor: ['#FFFFFF'], borderWidth: 4, hoverOffset: 4 }]
+                },
+                options: { ...universalTooltipOptions, responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '70%', plugins: { ...universalTooltipOptions.plugins, legend: { display: false }, title: { display: true, text: t.chargeChartTitle, font: { size: 16 }, color: FONT_COLOR }}}
+            });
+
+            // Efficiency Gain Donut Chart
+            const efficiencyCtx = document.getElementById('efficiencyGainChart').getContext('2d');
+            charts.efficiency = new Chart(efficiencyCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [t.efficiencyChartLabel1, t.efficiencyChartLabel2],
+                    datasets: [{ data: [8, 92], backgroundColor: [PALETTE.accent1, '#E5E7EB'], borderColor: ['#FFFFFF'], borderWidth: 4, hoverOffset: 4 }]
+                },
+                options: { ...universalTooltipOptions, responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '70%', plugins: { ...universalTooltipOptions.plugins, legend: { display: false }, title: { display: true, text: t.efficiencyChartTitle, font: { size: 16 }, color: FONT_COLOR }}}
+            });
+
+            // Performance Radar Chart
+            const radarCtx = document.getElementById('performanceRadarChart').getContext('2d');
+            charts.radar = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: [t.perfChartLabel1, t.perfChartLabel2, t.perfChartLabel3, t.perfChartLabel4],
+                    datasets: [{
+                        label: 'R410A',
+                        data: [90, 92, 92, 32],
+                        fill: true, backgroundColor: 'rgba(255, 111, 97, 0.2)', borderColor: PALETTE.r410a, pointBackgroundColor: PALETTE.r410a, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: PALETTE.r410a
+                    }, {
+                        label: 'R32',
+                        data: [100, 100, 100, 100],
+                        fill: true, backgroundColor: 'rgba(107, 91, 149, 0.2)', borderColor: PALETTE.r32, pointBackgroundColor: PALETTE.r32, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: PALETTE.r32
+                    }]
+                },
+                options: { ...universalTooltipOptions, responsive: true, maintainAspectRatio: false, plugins: { ...universalTooltipOptions.plugins, legend: { position: 'top', labels: { color: FONT_COLOR } }, title: { display: true, text: t.perfChartTitle, font: { size: 16 }, color: FONT_COLOR }}, scales: { r: { angleLines: { color: GRID_COLOR }, grid: { color: GRID_COLOR }, pointLabels: { font: { size: 12 }, color: FONT_COLOR }, ticks: { display: false, stepSize: 25 }, suggestedMin: 0, suggestedMax: 100 }}}
+            });
+        }
+        
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+
+            updateTextContent(lang);
+            createCharts(lang);
+
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+        }
+
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
+
+        // Initial load
+        setLanguage('en');
+
+    </script>
+</body>
+</html>
