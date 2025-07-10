@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インフォグラフィック：日本はなぜ漢字を使い続けるのか</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+TC:wght@400;700&family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', 'Noto Sans JP', 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA;
+            color: #212121;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .material-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .material-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #004AAD;
+            border-bottom: 3px solid #0079FF;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .icon-unicode {
+            font-size: 3rem;
+            line-height: 1;
+            color: #0079FF;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: background-color 0.3s, color 0.3s;
+            border: 2px solid transparent;
+        }
+        .lang-btn.active {
+            background-color: #004AAD;
+            color: white;
+            border-color: #004AAD;
+        }
+        .lang-btn:not(.active) {
+            background-color: white;
+            color: #004AAD;
+            border-color: #004AAD;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center py-12 relative">
+            <div id="lang-switcher" class="absolute top-4 right-4 flex space-x-2">
+                <button class="lang-btn" data-lang="ja">日本語</button>
+                <button class="lang-btn" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="en">English</button>
+            </div>
+            <h1 data-lang-key="headerTitle" class="text-4xl md:text-6xl font-bold text-[#004AAD] mb-4"></h1>
+            <p data-lang-key="headerSubtitle" class="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto"></p>
+        </header>
+
+        <main class="space-y-16">
+            <section id="history" class="material-card p-6 md:p-8">
+                <h2 data-lang-key="section1Title" class="section-title"></h2>
+                <p data-lang-key="section1P" class="mb-8 text-gray-600"></p>
+                <div class="relative w-full">
+                    <div class="border-l-4 border-[#52A7FF] ml-4 md:ml-0 md:border-l-0 md:border-t-4 md:w-full absolute md:top-1/2 h-full md:h-0"></div>
+                    <div class="flex flex-col md:flex-row justify-between relative text-sm md:text-base">
+                        <div class="flex items-start md:flex-col md:items-center w-full md:w-1/4 mb-8 md:mb-0">
+                            <div class="bg-[#004AAD] w-8 h-8 rounded-full border-4 border-white flex-shrink-0 -ml-6 md:ml-0 md:-mt-4 z-10"></div>
+                            <div class="ml-4 md:ml-0 md:mt-4 text-center">
+                                <h3 data-lang-key="timeline1H" class="font-bold text-lg text-[#004AAD]"></h3>
+                                <p data-lang-key="timeline1P"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start md:flex-col md:items-center w-full md:w-1/4 mb-8 md:mb-0">
+                            <div class="bg-[#0079FF] w-8 h-8 rounded-full border-4 border-white flex-shrink-0 -ml-6 md:ml-0 md:-mt-4 z-10"></div>
+                            <div class="ml-4 md:ml-0 md:mt-4 text-center">
+                                <h3 data-lang-key="timeline2H" class="font-bold text-lg text-[#0079FF]"></h3>
+                                <p data-lang-key="timeline2P"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start md:flex-col md:items-center w-full md:w-1/4 mb-8 md:mb-0">
+                            <div class="bg-[#52A7FF] w-8 h-8 rounded-full border-4 border-white flex-shrink-0 -ml-6 md:ml-0 md:-mt-4 z-10"></div>
+                            <div class="ml-4 md:ml-0 md:mt-4 text-center">
+                                <h3 data-lang-key="timeline3H" class="font-bold text-lg text-[#52A7FF]"></h3>
+                                <p data-lang-key="timeline3P"></p>
+                            </div>
+                        </div>
+                        <div class="flex items-start md:flex-col md:items-center w-full md:w-1/4">
+                            <div class="bg-[#C8E2FF] w-8 h-8 rounded-full border-4 border-white flex-shrink-0 -ml-6 md:ml-0 md:-mt-4 z-10"></div>
+                            <div class="ml-4 md:ml-0 md:mt-4 text-center">
+                                <h3 data-lang-key="timeline4H" class="font-bold text-lg text-[#C8E2FF]"></h3>
+                                <p data-lang-key="timeline4P"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="functionality">
+                <h2 data-lang-key="section2Title" class="section-title text-center"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="material-card p-6 md:p-8">
+                        <h3 data-lang-key="func1H" class="text-xl font-bold mb-4 text-[#004AAD]"></h3>
+                        <p data-lang-key="func1P" class="mb-4 text-gray-600"></p>
+                        <div class="chart-container">
+                            <canvas id="readingSpeedChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="material-card p-6 md:p-8">
+                        <h3 data-lang-key="func2H" class="text-xl font-bold mb-4 text-[#004AAD]"></h3>
+                        <p data-lang-key="func2P" class="mb-4 text-gray-600"></p>
+                        <div class="bg-[#C8E2FF] rounded-lg p-6 text-center h-full flex flex-col justify-center">
+                            <p class="text-2xl font-bold text-[#004AAD] mb-2">きしゃのきしゃがきしゃできしゃす。</p>
+                            <p class="text-gray-600 mb-4">(kisha no kisha ga kisha de kisha su)</p>
+                            <p class="text-2xl font-bold text-[#004AAD]">貴社の記者が汽車で帰社す。</p>
+                            <p data-lang-key="func2Example" class="text-sm text-gray-500 mt-2"></p>
+                        </div>
+                    </div>
+                    <div class="material-card p-6 md:p-8">
+                        <h3 data-lang-key="func3H" class="text-xl font-bold mb-4 text-[#004AAD]"></h3>
+                        <p data-lang-key="func3P" class="mb-4 text-gray-600"></p>
+                        <div class="chart-container">
+                            <canvas id="wordCreationChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="material-card p-6 md:p-8">
+                        <h3 data-lang-key="func4H" class="text-xl font-bold mb-4 text-[#004AAD]"></h3>
+                        <p data-lang-key="func4P" class="mb-4 text-gray-600"></p>
+                        <div class="flex justify-around items-center h-full text-center">
+                            <div>
+                                <p class="icon-unicode">☀️</p>
+                                <p class="text-2xl font-bold mt-2">暑い</p>
+                                <p class="text-gray-600">(atsui)</p>
+                                <p data-lang-key="func4Ex1" class="text-sm"></p>
+                            </div>
+                            <div>
+                                <p class="icon-unicode">🔥</p>
+                                <p class="text-2xl font-bold mt-2">熱い</p>
+                                <p class="text-gray-600">(atsui)</p>
+                                <p data-lang-key="func4Ex2" class="text-sm"></p>
+                            </div>
+                            <div>
+                                <p class="icon-unicode">📚</p>
+                                <p class="text-2xl font-bold mt-2">厚い</p>
+                                <p class="text-gray-600">(atsui)</p>
+                                <p data-lang-key="func4Ex3" class="text-sm"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="debate" class="material-card p-6 md:p-8">
+                <h2 data-lang-key="section3Title" class="section-title"></h2>
+                <p data-lang-key="section3P" class="mb-8 text-gray-600"></p>
+                <div class="chart-container h-[400px]">
+                    <canvas id="kanjiPolicyChart"></canvas>
+                </div>
+                 <p data-lang-key="section3Note" class="text-center text-gray-600 mt-4"></p>
+            </section>
+
+            <section id="comparison" class="material-card p-6 md:p-8 overflow-x-auto">
+                <h2 data-lang-key="section4Title" class="section-title"></h2>
+                <p data-lang-key="section4P" class="mb-8 text-gray-600"></p>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-[#004AAD] text-white">
+                            <th data-lang-key="tableH1" class="p-3 font-bold"></th>
+                            <th data-lang-key="tableH2" class="p-3 font-bold"></th>
+                            <th data-lang-key="tableH3" class="p-3 font-bold"></th>
+                            <th data-lang-key="tableH4" class="p-3 font-bold"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-200">
+                            <td data-lang-key="tableR1C1" class="p-3 font-bold"></td>
+                            <td data-lang-key="tableR1C2" class="p-3"></td>
+                            <td data-lang-key="tableR1C3" class="p-3"></td>
+                            <td data-lang-key="tableR1C4" class="p-3"></td>
+                        </tr>
+                        <tr class="bg-gray-50 border-b border-gray-200">
+                            <td data-lang-key="tableR2C1" class="p-3 font-bold"></td>
+                            <td data-lang-key="tableR2C2" class="p-3"></td>
+                            <td data-lang-key="tableR2C3" class="p-3"></td>
+                            <td data-lang-key="tableR2C4" class="p-3"></td>
+                        </tr>
+                        <tr class="border-b border-gray-200">
+                            <td data-lang-key="tableR3C1" class="p-3 font-bold"></td>
+                            <td data-lang-key="tableR3C2" class="p-3"></td>
+                            <td data-lang-key="tableR3C3" class="p-3"></td>
+                            <td data-lang-key="tableR3C4" class="p-3"></td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td data-lang-key="tableR4C1" class="p-3 font-bold"></td>
+                            <td data-lang-key="tableR4C2" class="p-3"></td>
+                            <td data-lang-key="tableR4C3" class="p-3"></td>
+                            <td data-lang-key="tableR4C4" class="p-3"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 py-8 border-t border-gray-300">
+            <p data-lang-key="footer" class="text-gray-600"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const translations = {
+                headerTitle: {
+                    ja: '日本はなぜ漢字を使い続けるのか？',
+                    zh: '日本為何使用漢字？',
+                    en: 'Why Does Japan Continue to Use Kanji?'
+                },
+                headerSubtitle: {
+                    ja: 'デジタル時代における複雑な文字体系の存続。それは歴史的遺産であるだけでなく、言語的・機能的な必然性に基づいた合理的な選択です。',
+                    zh: '在數位時代，一個複雜書寫系統的存續。這不僅是歷史遺產，更是基於語言功能與文化需求的理性選擇。',
+                    en: 'The survival of a complex writing system in the digital age. This is not just a historical legacy, but a rational choice based on linguistic and functional necessity.'
+                },
+                section1Title: {
+                    ja: '第一章：文字の夜明けと融合の道',
+                    zh: '第一章：文字的黎明與融合之道',
+                    en: 'Chapter 1: The Dawn of Writing & Path of Fusion'
+                },
+                section1P: {
+                    ja: '日本の文字の歴史は、漢字の導入から始まりました。それは単なる文字の借用ではなく、言語と文化を根本から変えた、1600年以上にわたる創造的な適応の物語です。',
+                    zh: '日本的文字史始於漢字的引進。這不僅僅是單純的文字借用，而是一個長達1600多年，從根本上改變了語言和文化的創造性適應的故事。',
+                    en: 'The history of writing in Japan began with the introduction of Kanji. This was not a mere borrowing of characters, but a 1600-year story of creative adaptation that fundamentally changed the language and culture.'
+                },
+                timeline1H: { ja: '4-5世紀', zh: '4-5世紀', en: '4th-5th Cent.' },
+                timeline1P: {
+                    ja: '漢字の本格的伝来。朝鮮半島経由で、仏教・儒教思想と共にエリート層へ。',
+                    zh: '漢字正式傳入。經由朝鮮半島，與佛教、儒教思想一同傳入精英階層。',
+                    en: 'Full-scale introduction of Kanji. Arrived via the Korean peninsula with Buddhism and Confucianism for the elite.'
+                },
+                timeline2H: { ja: '8世紀', zh: '8世紀', en: '8th Century' },
+                timeline2P: {
+                    ja: '万葉仮名の成立。漢字の音を借りて日本語を表記。『万葉集』が編纂される。',
+                    zh: '萬葉假名成立。借用漢字的讀音來表記日語。《萬葉集》編纂完成。',
+                    en: 'Man\'yōgana is established, using Kanji for their phonetic value to write Japanese, as seen in the "Man\'yōshū" anthology.'
+                },
+                timeline3H: { ja: '9-10世紀', zh: '9-10世紀', en: '9th-10th Cent.' },
+                timeline3P: {
+                    ja: '仮名の誕生。万葉仮名の草書体から平仮名が、楷書の部首から片仮名が生まれる。',
+                    zh: '假名誕生。從萬葉假名的草書體誕生了平假名，從楷書的部首誕生了片假名。',
+                    en: 'The birth of Kana. Hiragana evolved from cursive Man\'yōgana, and Katakana from components of regular script Kanji.'
+                },
+                timeline4H: { ja: '現在', zh: '現在', en: 'Present Day' },
+                timeline4P: {
+                    ja: '漢字仮名交じり文。漢字で実質的意味を、仮名で文法的機能を表す、世界でも類を見ない書記体系。',
+                    zh: '漢字假名混合文。漢字表達實質意義，假名處理語法功能，是世界罕見的書寫系統。',
+                    en: 'Kanji-Kana mixed script. A unique system where Kanji convey core meaning and Kana handle grammatical functions.'
+                },
+                section2Title: {
+                    ja: '第二章：現代日本語における漢字の機能性',
+                    zh: '第二章：漢字在現代日語中的功能性',
+                    en: 'Chapter 2: The Functionality of Kanji in Modern Japanese'
+                },
+                func1H: {
+                    ja: '1. 圧倒的な情報伝達効率',
+                    zh: '1. 卓越的資訊傳達效率',
+                    en: '1. Superior Information Efficiency'
+                },
+                func1P: {
+                    ja: '漢字と仮名を組み合わせることで、単語の区切りが視覚的に明確になり、純粋な表音文字のみの文よりも速く、正確に内容を把握できます。',
+                    zh: '漢字與假名的組合使單詞分界在視覺上更清晰，比純表音文字的句子更能快速、準確地理解內容。',
+                    en: 'The mix of Kanji and Kana visually clarifies word boundaries, allowing for faster and more accurate comprehension than purely phonetic scripts.'
+                },
+                func2H: {
+                    ja: '2. 同音異義語の完全な解決',
+                    zh: '2. 完美解決同音異義詞',
+                    en: '2. The Ultimate Solution for Homophones'
+                },
+                func2P: {
+                    ja: '日本語には同音異義語が非常に多いです。漢字は、これらを書面上で明確に区別するための不可欠なツールです。',
+                    zh: '日語中存在大量同音異義詞。漢字是在書面上明確區分它們的必要工具。',
+                    en: 'Japanese has a vast number of homophones. Kanji are an indispensable tool for distinguishing them in writing.'
+                },
+                func2Example: {
+                    ja: '(貴社: your company, 記者: reporter, 汽車: train, 帰社: return to office)',
+                    zh: '(貴社: 貴公司, 記者: 記者, 汽車: 火車, 帰社: 返回公司)',
+                    en: '(貴社: your company, 記者: reporter, 汽車: train, 帰社: return to office)'
+                },
+                func3H: {
+                    ja: '3. 無限の造語能力',
+                    zh: '3. 無限的造詞能力',
+                    en: '3. Infinite Word-Creation Power'
+                },
+                func3P: {
+                    ja: '既存の漢字を組み合わせることで、新しい概念を論理的かつ直感的に表現する言葉を創造できます。これは近代化の原動力となりました。',
+                    zh: '通過組合現有漢字，可以創造出邏輯清晰、直觀表達新概念的詞彙。這成為了近代化的驅動力。',
+                    en: 'By combining existing Kanji, new words for new concepts can be created logically and intuitively. This was a driving force of modernization.'
+                },
+                func4H: {
+                    ja: '4. 繊細な意味の表現',
+                    zh: '4. 細膩的語義表達',
+                    en: '4. Nuanced Semantic Expression'
+                },
+                func4P: {
+                    ja: '同じ読み方でも、異なる漢字を使うことで微妙なニュアンスの違いを正確に伝え分けることができます。',
+                    zh: '即使讀音相同，使用不同的漢字也能準確傳達細微的語義差異。',
+                    en: 'Even with the same pronunciation, different Kanji can be used to convey subtle differences in meaning accurately.'
+                },
+                func4Ex1: { ja: '気候の暑さ', zh: '氣候的炎熱', en: 'Hot (weather)' },
+                func4Ex2: { ja: '物体の熱さ', zh: '物體的燙熱', en: 'Hot (object)' },
+                func4Ex3: { ja: '物体の厚み', zh: '物體的厚度', en: 'Thick (object)' },
+                section3Title: {
+                    ja: '第三章：存廃論争から「制限」へ',
+                    zh: '第三章：從存廢之爭到「限制」',
+                    en: 'Chapter 3: From Debate to "Limitation"'
+                },
+                section3P: {
+                    ja: '明治維新後、「漢字は学習が困難で近代化の妨げ」とする漢字廃止論が台頭しました。しかし、その実用性と文化的重要性から完全な廃止には至らず、「制限と標準化」という現実的な妥協策が取られました。その結果が常用漢字の制定です。',
+                    zh: '明治維新後，認為「漢字學習困難，阻礙近代化」的廢止論抬頭。但因其實用性與文化重要性，最終未能完全廢除，而是採取了「限制與標準化」的務實妥協，其結果便是常用漢字的制定。',
+                    en: 'After the Meiji Restoration, arguments to abolish Kanji arose, claiming it hindered modernization. However, due to its practicality and cultural importance, a compromise of "limitation and standardization" was reached, resulting in the Jōyō Kanji list.'
+                },
+                section3Note: {
+                    ja: '常用漢字の数は、社会の変化に応じて見直され、2010年には2,136字に増加しました。',
+                    zh: '常用漢字的數量隨社會變遷而調整，於2010年增加至2,136字。',
+                    en: 'The number of Jōyō Kanji is revised according to societal changes, increasing to 2,136 characters in 2010.'
+                },
+                section4Title: {
+                    ja: '第四章：東アジアの分岐路',
+                    zh: '第四章：東亞的岔路',
+                    en: 'Chapter 4: The East Asian Divergence'
+                },
+                section4P: {
+                    ja: '同じく漢字文化圏にあった韓国とベトナムは、近代化の過程で漢字を廃止する道を選びました。日本の独自性は、言語の融合深度と、植民地化を免れたことで自国の言語政策を主体的に決定できた歴史的背景にあります。',
+                    zh: '同屬漢字文化圈的韓國與越南，在近代化過程中選擇了廢除漢字。日本的獨特性在於其語言融合的深度，以及免於被殖民，從而能自主決定語言政策的歷史背景。',
+                    en: 'Korea and Vietnam, also part of the Sinosphere, chose to abolish Chinese characters during modernization. Japan\'s unique path stems from its deep linguistic fusion and a history free from colonization, allowing autonomous language policy.'
+                },
+                tableH1: { ja: '比較項目', zh: '比較項目', en: 'Comparison' },
+                tableH2: { ja: '日本', zh: '日本', en: 'Japan' },
+                tableH3: { ja: '韓国', zh: '韓國', en: 'Korea' },
+                tableH4: { ja: 'ベトナム', zh: '越南', en: 'Vietnam' },
+                tableR1C1: { ja: '主要な本土文字', zh: '主要本土文字', en: 'Primary Native Script' },
+                tableR1C2: { ja: '仮名 (漢字の簡略化)', zh: '假名 (漢字的簡化)', en: 'Kana (simplified Kanji)' },
+                tableR1C3: { ja: 'ハングル (独自発明の表音文字)', zh: '諺文 (獨自發明的表音文字)', en: 'Hangul (unique phonetic invention)' },
+                tableR1C4: { ja: 'クオック・グー (ラテン文字ベース)', zh: '國語字 (基於拉丁字母)', en: 'Quốc Ngữ (Latin-based)' },
+                tableR2C1: { ja: '漢字との融合', zh: '與漢字的融合', en: 'Integration with Kanji' },
+                tableR2C2: { ja: '非常に深い (音読み・訓読み)', zh: '非常深 (音讀、訓讀)', en: 'Very Deep (On\'yomi & Kun\'yomi)' },
+                tableR2C3: { ja: '中程度 (漢語の借用が主)', zh: '中等 (主要借用漢語詞)', en: 'Moderate (mainly loanwords)' },
+                tableR2C4: { ja: '中程度 (漢越語の借用が主)', zh: '中等 (主要借用漢越詞)', en: 'Moderate (mainly loanwords)' },
+                tableR3C1: { ja: '文字改革の原動力', zh: '文字改革的驅動力', en: 'Driver of Reform' },
+                tableR3C2: { ja: '内部の近代化論争と妥協', zh: '內部近代化論爭與妥協', en: 'Internal debate & compromise' },
+                tableR3C3: { ja: '民族主義と脱植民地化', zh: '民族主義與去殖民化', en: 'Nationalism & decolonization' },
+                tableR3C4: { ja: 'フランス植民地政策と独立後の効率化', zh: '法國殖民政策與獨立後的效率需求', en: 'French colonialism & post-independence efficiency' },
+                tableR4C1: { ja: '現在の漢字の地位', zh: '現今漢字地位', en: 'Current Status of Kanji' },
+                tableR4C2: { ja: '不可欠な構成要素', zh: '不可或缺的組成部分', en: 'Indispensable component' },
+                tableR4C3: { ja: 'ほぼ廃止 (限定的使用)', zh: '基本廢除 (有限使用)', en: 'Mostly abolished (limited use)' },
+                tableR4C4: { ja: '完全廃止', zh: '完全廢除', en: 'Completely abolished' },
+                footer: {
+                    ja: '結論として、日本の漢字使用は歴史的慣性ではなく、言語の機能性と文化の連続性を保つための、ダイナミックで合理的な選択であり続けています。',
+                    zh: '總之，日本使用漢字並非歷史慣性，而是為了保持語言功能性與文化連續性，至今仍是一項動態且理性的選擇。',
+                    en: 'In conclusion, Japan\'s use of Kanji is not historical inertia, but a dynamic and rational choice to maintain linguistic functionality and cultural continuity.'
+                }
+            };
+            
+            const chartData = {
+                readingSpeed: {
+                    ja: { labels: ['漢字仮名交じり文', '仮名のみの文'], title: '相対的な読解速度 (%)' },
+                    zh: { labels: ['漢字假名混合文', '純假名文'], title: '相對閱讀速度 (%)' },
+                    en: { labels: ['Kanji-Kana Mix', 'Kana Only'], title: 'Relative Reading Speed (%)' }
+                },
+                wordCreation: {
+                    ja: { label: '「電」から派生した和製漢語', data: [{ x: 3, y: 5, r: 35, label: '電話'}, { x: 6, y: 7, r: 30, label: '電気'}, { x: 8, y: 3, r: 25, label: '電車'}, { x: 4.5, y: 2, r: 20, label: '電子'}, { x: 1, y: 8, r: 18, label: '電池'}], center: { x: 5, y: 5, r: 40, label: '電'} },
+                    zh: { label: '由「電」衍生的和製漢語', data: [{ x: 3, y: 5, r: 35, label: '電話'}, { x: 6, y: 7, r: 30, label: '電氣'}, { x: 8, y: 3, r: 25, label: '電車'}, { x: 4.5, y: 2, r: 20, label: '電子'}, { x: 1, y: 8, r: 18, label: '電池'}], center: { x: 5, y: 5, r: 40, label: '電'} },
+                    en: { label: 'Japanese words from "電" (Electricity)', data: [{ x: 3, y: 5, r: 35, label: 'Telephone'}, { x: 6, y: 7, r: 30, label: 'Electricity'}, { x: 8, y: 3, r: 25, label: 'Train'}, { x: 4.5, y: 2, r: 20, label: 'Electron'}, { x: 1, y: 8, r: 18, label: 'Battery'}], center: { x: 5, y: 5, r: 40, label: '電'} }
+                },
+                kanjiPolicy: {
+                    ja: { labels: ['1946年\n当用漢字', '1981年\n常用漢字', '2010年\n改定常用漢字'], title: '漢字の数' },
+                    zh: { labels: ['1946年\n當用漢字', '1981年\n常用漢字', '2010年\n修訂常用漢字'], title: '漢字數量' },
+                    en: { labels: ['1946\nTōyō Kanji', '1981\nJōyō Kanji', '2010\nRevised Jōyō Kanji'], title: 'Number of Kanji' }
+                }
+            };
+
+            let charts = {};
+
+            function changeLanguage(lang) {
+                document.documentElement.lang = lang;
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (translations[key] && translations[key][lang]) {
+                        el.innerHTML = translations[key][lang];
+                    }
+                });
+
+                document.querySelectorAll('#lang-switcher .lang-btn').forEach(btn => {
+                    if (btn.getAttribute('data-lang') === lang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                updateCharts(lang);
+            }
+            
+            function updateCharts(lang) {
+                const speedData = chartData.readingSpeed[lang];
+                charts.readingSpeed.data.labels = speedData.labels;
+                charts.readingSpeed.options.scales.x.title.text = speedData.title;
+                charts.readingSpeed.update();
+
+                const creationData = chartData.wordCreation[lang];
+                charts.wordCreation.data.datasets[0].label = creationData.label;
+                charts.wordCreation.data.datasets[0].data = creationData.data;
+                charts.wordCreation.data.datasets[1].data = [creationData.center];
+                charts.wordCreation.update();
+
+                const policyData = chartData.kanjiPolicy[lang];
+                charts.kanjiPolicy.data.labels = policyData.labels;
+                charts.kanjiPolicy.options.scales.y.title.text = policyData.title;
+                charts.kanjiPolicy.update();
+            }
+
+            function initializeCharts() {
+                const brilliantBlues = {
+                    dark: '#004AAD', main: '#0079FF', light: '#52A7FF', lighter: '#C8E2FF', text: '#212121'
+                };
+                const tooltipTitleCallback = (tooltipItems) => {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    return Array.isArray(label) ? label.join(' ') : label;
+                };
+                const sharedChartOptions = {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)', titleFont: { size: 16, weight: 'bold' },
+                            bodyFont: { size: 14 }, padding: 12, callbacks: { title: tooltipTitleCallback }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: brilliantBlues.text, font: { size: 12 } }, grid: { display: false } },
+                        y: { ticks: { color: brilliantBlues.text, font: { size: 12 } }, grid: { color: '#E0E0E0' } }
+                    }
+                };
+
+                charts.readingSpeed = new Chart(document.getElementById('readingSpeedChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Reading Speed Comparison', data: [100, 65],
+                            backgroundColor: [brilliantBlues.main, brilliantBlues.lighter],
+                            borderColor: [brilliantBlues.dark, brilliantBlues.light],
+                            borderWidth: 2, borderRadius: 5
+                        }]
+                    },
+                    options: { ...sharedChartOptions, indexAxis: 'y',
+                        scales: {
+                            x: { ...sharedChartOptions.scales.x, title: { display: true, text: '', color: brilliantBlues.text } },
+                            y: { ...sharedChartOptions.scales.y, grid: { display: false } }
+                        }
+                    }
+                });
+
+                charts.wordCreation = new Chart(document.getElementById('wordCreationChart'), {
+                    type: 'bubble',
+                    data: {
+                        datasets: [
+                            { label: '', data: [], backgroundColor: 'rgba(0, 121, 255, 0.6)', borderColor: brilliantBlues.dark },
+                            { label: 'Center Concept', data: [], backgroundColor: 'rgba(0, 74, 173, 0.8)', borderColor: '#000' }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { label: (context) => context.raw.label || '' } }
+                        },
+                        scales: { x: { display: false }, y: { display: false } }
+                    }
+                });
+
+                charts.kanjiPolicy = new Chart(document.getElementById('kanjiPolicyChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Number of official Kanji', data: [1850, 1945, 2136],
+                            backgroundColor: [brilliantBlues.light, brilliantBlues.main, brilliantBlues.dark],
+                            borderWidth: 1, borderRadius: 4
+                        }]
+                    },
+                    options: { ...sharedChartOptions,
+                        scales: {
+                            x: { ...sharedChartOptions.scales.x,
+                                ticks: { ...sharedChartOptions.scales.x.ticks,
+                                    callback: function(value, index, values) {
+                                        const label = this.getLabelForValue(value);
+                                        return label.split('\n');
+                                    }
+                                }
+                            },
+                            y: { ...sharedChartOptions.scales.y, title: { display: true, text: '', color: brilliantBlues.text } }
+                        }
+                    }
+                });
+            }
+
+            initializeCharts();
+
+            document.getElementById('lang-switcher').addEventListener('click', (e) => {
+                if (e.target.matches('.lang-btn')) {
+                    const lang = e.target.getAttribute('data-lang');
+                    changeLanguage(lang);
+                }
+            });
+
+            changeLanguage('ja');
+        });
+    </script>
+</body>
+</html>
