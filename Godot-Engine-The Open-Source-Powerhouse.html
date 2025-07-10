@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot 引擎深度解析：一個開源遊戲引擎的崛起</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .dark body {
+            background-color: #111827;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 500px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #CCE5FF;
+        }
+        .dark .timeline::before {
+            background-color: #004AAD;
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 20px 40px;
+            box-sizing: border-box;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+            padding-right: 50px;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+            padding-left: 50px;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: #0079FF;
+            border: 4px solid #CCE5FF;
+            top: 20px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .dark .timeline-item::after {
+            background-color: #99C9FF;
+            border-color: #004AAD;
+        }
+        .timeline-item:nth-child(even)::after {
+            left: -10px;
+        }
+        .swot-grid > div {
+            border: 2px solid #CCE5FF;
+        }
+        .dark .swot-grid > div {
+            border-color: #004AAD;
+        }
+    </style>
+</head>
+<body class="text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <!-- Color Palette: Brilliant Blues (#004AAD, #0079FF, #55A6FF, #99C9FF, #CCE5FF) -->
+    <!-- Plan: Visualize Godot's history, free model, market position, and future prospects. -->
+    <!-- Visualizations: HTML/CSS Timeline, HTML/CSS Flowcharts, Chart.js Bar Chart, HTML/CSS SWOT Grid. -->
+    <!-- Confirmation: NO SVG or Mermaid JS used. All visuals are HTML/CSS or Chart.js/Canvas. -->
+
+    <header class="bg-[#004AAD] text-white p-8 text-center relative">
+        <h1 id="header-title" class="text-4xl md:text-6xl font-black tracking-tight"></h1>
+        <p id="header-subtitle" class="mt-4 text-lg md:text-xl text-[#99C9FF]"></p>
+        <div class="absolute top-4 right-4 flex items-center space-x-4">
+            <button id="lang-switcher" class="bg-[#0079FF] hover:bg-[#55A6FF] text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                English
+            </button>
+            <button id="theme-toggle" class="p-2 rounded-full bg-[#0079FF] hover:bg-[#55A6FF] text-white transition-colors">
+                <svg id="theme-toggle-dark-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                <svg id="theme-toggle-light-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="history" class="mb-16">
+            <h2 id="history-title" class="text-3xl font-bold text-center mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h2>
+            <p id="history-subtitle" class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto"></p>
+            <div class="relative timeline">
+                <div class="timeline-item">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-[#0079FF] dark:border-[#55A6FF]">
+                        <h3 id="history-1-title" class="font-bold text-xl text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                        <p id="history-1-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mb-2"></p>
+                        <p id="history-1-desc"></p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-[#0079FF] dark:border-[#55A6FF]">
+                        <h3 id="history-2-title" class="font-bold text-xl text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                         <p id="history-2-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mb-2"></p>
+                        <p id="history-2-desc"></p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-[#0079FF] dark:border-[#55A6FF]">
+                        <h3 id="history-3-title" class="font-bold text-xl text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                        <p id="history-3-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mb-2"></p>
+                        <p id="history-3-desc"></p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-[#0079FF] dark:border-[#55A6FF]">
+                        <h3 id="history-4-title" class="font-bold text-xl text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                         <p id="history-4-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mb-2"></p>
+                        <p id="history-4-desc"></p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border-l-4 border-[#55A6FF] dark:border-[#99C9FF]">
+                        <h3 id="history-5-title" class="font-bold text-xl text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                         <p id="history-5-subtitle" class="text-sm text-gray-500 dark:text-gray-400 mb-2"></p>
+                        <p id="history-5-desc"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="free-model" class="mb-16">
+            <h2 id="free-model-title" class="text-3xl font-bold text-center mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h2>
+            <p id="free-model-subtitle" class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto"></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-6xl text-[#0079FF]">📜</div>
+                    <h3 id="freedom-1-title" class="text-2xl font-bold mt-4 mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                    <p id="freedom-1-subtitle" class="text-sm font-bold text-[#55A6FF] mb-4"></p>
+                    <p id="freedom-1-desc" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-6xl text-[#0079FF]">🧠</div>
+                    <h3 id="freedom-2-title" class="text-2xl font-bold mt-4 mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                    <p id="freedom-2-subtitle" class="text-sm font-bold text-[#55A6FF] mb-4"></p>
+                    <p id="freedom-2-desc" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+                    <div class="text-6xl text-[#0079FF]">🏛️</div>
+                    <h3 id="freedom-3-title" class="text-2xl font-bold mt-4 mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h3>
+                    <p id="freedom-3-subtitle" class="text-sm font-bold text-[#55A6FF] mb-4"></p>
+                    <p id="freedom-3-desc" class="text-gray-700 dark:text-gray-300"></p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="comparison" class="mb-16">
+            <h2 id="comparison-title" class="text-3xl font-bold text-center mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h2>
+            <p id="comparison-subtitle" class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto"></p>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div class="chart-container">
+                    <canvas id="engineComparisonChart"></canvas>
+                </div>
+                <p id="comparison-note" class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4"></p>
+            </div>
+        </section>
+
+        <section id="ecosystem" class="mb-16">
+            <h2 id="ecosystem-title" class="text-3xl font-bold text-center mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h2>
+            <p id="ecosystem-subtitle" class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto"></p>
+            <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-lg flex flex-col md:flex-row items-center justify-center gap-8">
+                <div class="text-center p-6 bg-[#CCE5FF] dark:bg-gray-700 rounded-lg">
+                    <h3 class="text-2xl font-black text-[#004AAD] dark:text-[#99C9FF]">Godot Engine</h3>
+                    <p id="ecosystem-core" class="font-bold text-[#0079FF] dark:text-[#55A6FF]"></p>
+                </div>
+                <div class="text-5xl font-thin text-[#99C9FF] dark:text-gray-500 transform md:-rotate-90">➔</div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <h4 id="ecosystem-services-title" class="font-bold text-[#004AAD] dark:text-[#99C9FF]"></h4>
+                        <p id="ecosystem-services-subtitle" class="text-sm text-gray-600 dark:text-gray-400"></p>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <p id="ecosystem-service-1">🎮 </p>
+                    </div>
+                    <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <p id="ecosystem-service-2">🏢 </p>
+                    </div>
+                     <div class="p-4 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
+                        <p id="ecosystem-service-3">🧩 </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="swot" class="mb-16">
+            <h2 id="swot-title" class="text-3xl font-bold text-center mb-2 text-[#004AAD] dark:text-[#99C9FF]"></h2>
+            <p id="swot-subtitle" class="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto"></p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 swot-grid">
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 id="swot-s-title" class="text-2xl font-bold text-green-600 dark:text-green-400 mb-3"></h3>
+                    <ul id="swot-s-list" class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"></ul>
+                </div>
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 id="swot-w-title" class="text-2xl font-bold text-red-600 dark:text-red-400 mb-3"></h3>
+                     <ul id="swot-w-list" class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"></ul>
+                </div>
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 id="swot-o-title" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-3"></h3>
+                     <ul id="swot-o-list" class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"></ul>
+                </div>
+                <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                    <h3 id="swot-t-title" class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-3"></h3>
+                    <ul id="swot-t-list" class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300"></ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    
+    <footer class="bg-[#004AAD] text-white text-center p-6 mt-12">
+        <p id="footer-main"></p>
+        <p id="footer-sub" class="text-xs text-[#99C9FF] mt-2"></p>
+    </footer>
+
+    <script>
+        const langData = {
+            'zh-hant': {
+                title: 'Godot 引擎深度解析：一個開源遊戲引擎的崛起',
+                headerTitle: 'Godot 引擎：人民的引擎',
+                headerSubtitle: '一個由社群驅動、真正免費且開源的遊戲開發典範',
+                historyTitle: 'Godot 的演進之路',
+                historySubtitle: '從一個在拉丁美洲誕生的內部工具，到震撼全球遊戲開發界的開源力量，這是一段關於堅持、開放與社群信任的史詩。',
+                history1Title: '2001-2014: 閉源時代',
+                history1Subtitle: '一個因應需求而生的引擎',
+                history1Desc: '由 Juan Linietsky 與 Ariel Manzur 為解決當時缺乏通用引擎的問題而開發的內部工具，並已成功應用於史克威爾艾尼克斯等公司的商業專案。',
+                history2Title: '2014: 開源的黎明 (v1.x)',
+                history2Subtitle: '走向公眾',
+                history2Desc: '創辦人決定以寬鬆的 MIT 授權條款向全世界公開 Godot，將其從私有資產轉變為由全球社群共同塑造的公共產品。',
+                history3Title: '2018: 技術現代化 (v3.x)',
+                history3Subtitle: '引入 PBR 與 C#',
+                history3Desc: '引入基於物理的彩現 (PBR) 和 C# 支援，使 Godot 在 3D 領域更具競爭力，並開始吸引更廣泛的開發者群體。',
+                history4Title: '2023: 引擎重塑 (v4.x)',
+                history4Subtitle: '擁抱 Vulkan',
+                history4Desc: '發布了根本性重塑的 4.0 版本，引入 Vulkan 後端和全域光照技術 (SDFGI)，實現了性能與圖形能力的巨大飛躍。',
+                history5Title: '2023: Unity 收費風波',
+                history5Subtitle: '行業的催化劑',
+                history5Desc: '競爭對手 Unity 的爭議性收費政策引發開發者出走潮，Godot 因其開放、可預測的模式成為最大受益者，用戶數激增。',
+                freeModelTitle: 'Godot 為何是「免費」的？三大自由支柱',
+                freeModelSubtitle: 'Godot 的「免費」不僅是零成本，它是一個由法律、哲學與治理共同構成的、賦予開發者真正自由的完整體系。',
+                freedom1Title: '法律自由',
+                freedom1Subtitle: 'MIT 授權條款',
+                freedom1Desc: '您用 Godot 創造的一切完全屬於您。無權利金、無訂閱費，可以閉源發布您的商業遊戲，唯一的義務是附上版權聲明。',
+                freedom2Title: '設計自由',
+                freedom2Subtitle: '實用主義與使用者驅動',
+                freedom2Desc: '引擎的發展由開發者的真實需求驅動，而非企業的路線圖。核心理念是提供一個精簡、強大、易用的核心，並鼓勵社群擴展。',
+                freedom3Title: '治理自由',
+                freedom3Subtitle: '獨立非營利基金會',
+                freedom3Desc: 'Godot 由一個獨立的非營利基金會管理，資金來自社群捐款和企業贊助。這確保了專案的發展獨立於任何單一商業實體的盈利目標。',
+                comparisonTitle: '三大引擎商業模式對比',
+                comparisonSubtitle: '與競爭對手相比，Godot 的模式提供了無與倫比的財務可預測性和信任。這裡比較了不同引擎在收入超過關鍵門檻後的費用結構。',
+                comparisonNote: '*註：費用為示意性估算，基於公開的權利金/訂閱政策。Unity 費用基於其 Pro 方案，Unreal 的 5% 權利金於總收入超過 100 萬美元後計算。',
+                chartLabels: ['Godot Engine: MIT 授權', 'Unreal Engine: 首個100萬美元後5%權利金', 'Unity Engine: Pro 訂閱費'],
+                chartDatasetLabel: '開發者在遊戲總收入達 150 萬美元時的預估引擎成本 (美元)',
+                chartTitle: '遊戲總收入達 $1.5M 時的預估引擎成本',
+                ecosystemTitle: '共生生態系統：開源與商業的結合',
+                ecosystemSubtitle: 'Godot 採用類似「紅帽模式」的策略：核心引擎永久免費，而獨立的商業公司（由核心開發者創立）則圍繞它提供專門的商業服務，形成良性循環。',
+                ecosystemCore: '100% 免費 & 開源核心',
+                ecosystemServicesTitle: 'W4 Games 等公司',
+                ecosystemServicesSubtitle: '提供增值服務',
+                ecosystemService1: '🎮 主機平台移植 (NDA)',
+                ecosystemService2: '🏢 企業級支援',
+                ecosystemService3: '🧩 客製化整合',
+                swotTitle: '未來展望：Godot 的 SWOT 分析',
+                swotSubtitle: '綜合來看，Godot 擁有明確的優勢和巨大的機遇，但也面臨著成長帶來的挑戰與威脅。',
+                swotSTitle: '優勢 (Strengths)',
+                swotSList: ['<strong>真正的所有權</strong>：無可動搖的 MIT 授權。', '<strong>高度社群信任</strong>：開放透明的治理。', '<strong>頂級的 2D 工作流程</strong>：業界公認的強項。', '<strong>無財務風險</strong>：對所有開發者完全免費。'],
+                swotWTitle: '劣勢 (Weaknesses)',
+                swotWList: ['<strong>生態系統規模</strong>：素材與外掛程式相對較少。', '<strong>AAA 級 3D 案例</strong>：頂級 3D 商業成功案例尚不多。', '<strong>社群管理風險</strong>：快速成長帶來治理挑戰。'],
+                swotOTitle: '機會 (Opportunities)',
+                swotOList: ['<strong>把握行業變局</strong>：吸引尋求穩定的開發者。', '<strong>拓展至教育領域</strong>：憑藉易用性成為教學標準。', '<strong>壯大商業服務</strong>：完善主機移植和企業支援。'],
+                swotTTitle: '威脅 (Threats)',
+                swotTList: ['<strong>社群分裂</strong>：分支 (Fork) 專案可能分散開發力量。', '<strong>資金依賴性</strong>：核心開發依賴社群捐款。', '<strong>治理複雜性</strong>：大型開源專案治理的固有難題。'],
+                footerMain: '此資訊圖表基於公開資料綜合分析而成，旨在提供 Godot 引擎的概覽。',
+                footerSub: 'Godot Engine is a free and open source community-driven 2D and 3D game engine. Godot is not affiliated with this presentation.',
+                langButton: 'English'
+            },
+            'en': {
+                title: 'Godot Engine In-Depth: The Rise of an Open-Source Powerhouse',
+                headerTitle: "Godot Engine: The People's Engine",
+                headerSubtitle: 'A community-driven, truly free, and open-source paradigm for game development',
+                historyTitle: 'The Evolution of Godot',
+                historySubtitle: 'From an in-house tool born in Latin America to an open-source force shaking the global game development scene, this is an epic of persistence, openness, and community trust.',
+                history1Title: '2001-2014: The Closed-Source Era',
+                history1Subtitle: 'An Engine Born of Necessity',
+                history1Desc: 'Developed by Juan Linietsky and Ariel Manzur as an in-house tool to solve the lack of general-purpose engines, it was successfully used in commercial projects for companies like Square Enix.',
+                history2Title: '2014: The Dawn of Open Source (v1.x)',
+                history2Subtitle: 'Going Public',
+                history2Desc: 'The founders decided to release Godot to the world under the permissive MIT license, transforming it from a private asset into a public good shaped by a global community.',
+                history3Title: '2018: Technical Modernization (v3.x)',
+                history3Subtitle: 'Introducing PBR & C#',
+                history3Desc: 'Introduced Physically-Based Rendering (PBR) and C# support, making Godot more competitive in the 3D space and attracting a wider range of developers.',
+                history4Title: '2023: A Fundamental Rework (v4.x)',
+                history4Subtitle: 'Embracing Vulkan',
+                history4Desc: 'Released the fundamentally reworked version 4.0, introducing a Vulkan backend and SDFGI global illumination, achieving a massive leap in performance and graphical capabilities.',
+                history5Title: '2023: The Unity Pricing Controversy',
+                history5Subtitle: 'An Industry Catalyst',
+                history5Desc: "Rival Unity's controversial fee policy sparked a developer exodus. Godot, with its open and predictable model, became the biggest beneficiary, seeing its user base surge.",
+                freeModelTitle: "Why is Godot 'Free'? The Three Pillars of Freedom",
+                freeModelSubtitle: "Godot's 'free' is not just about zero cost; it's a complete system of law, philosophy, and governance that grants developers true freedom.",
+                freedom1Title: 'Legal Freedom',
+                freedom1Subtitle: 'The MIT License',
+                freedom1Desc: 'Everything you create with Godot is 100% yours. No royalties, no subscription fees. You can release your commercial game as closed-source, with the only obligation being to include the copyright notice.',
+                freedom2Title: 'Philosophical Freedom',
+                freedom2Subtitle: 'Pragmatism & User-Driven Design',
+                freedom2Desc: "The engine's development is driven by the real needs of developers, not a corporate roadmap. The core idea is to provide a lean, powerful, and easy-to-use core, and empower the community to extend it.",
+                freedom3Title: 'Governance Freedom',
+                freedom3Subtitle: 'Independent Non-Profit Foundation',
+                freedom3Desc: 'Godot is managed by an independent non-profit foundation funded by community donations and corporate sponsorships. This ensures its development is independent of any single commercial entity’s profit goals.',
+                comparisonTitle: 'Business Model Comparison: The Big Three Engines',
+                comparisonSubtitle: "Compared to its rivals, Godot's model offers unparalleled financial predictability and trust. This chart compares the fee structures after crossing key revenue thresholds.",
+                comparisonNote: '*Note: Costs are illustrative estimates based on public royalty/subscription policies. Unity cost is based on its Pro plan, and Unreal\'s 5% royalty applies after the first $1M in gross revenue.',
+                chartLabels: ['Godot Engine: MIT License', 'Unreal Engine: 5% Royalty after first $1M', 'Unity Engine: Pro Subscription Fee'],
+                chartDatasetLabel: 'Estimated Engine Cost (USD) when a game reaches $1.5M in gross revenue',
+                chartTitle: 'Estimated Engine Cost at $1.5M Gross Revenue',
+                ecosystemTitle: 'A Symbiotic Ecosystem: Open Source Meets Commerce',
+                ecosystemSubtitle: "Godot adopts a 'Red Hat model' strategy: the core engine is forever free, while separate commercial companies (founded by core developers) provide specialized commercial services around it, creating a virtuous cycle.",
+                ecosystemCore: '100% Free & Open-Source Core',
+                ecosystemServicesTitle: 'W4 Games & others',
+                ecosystemServicesSubtitle: 'Provide value-added services',
+                ecosystemService1: '🎮 Console Porting (NDA)',
+                ecosystemService2: '🏢 Enterprise Support',
+                ecosystemService3: '🧩 Custom Integrations',
+                swotTitle: 'Future Outlook: A SWOT Analysis of Godot',
+                swotSubtitle: 'Overall, Godot has clear strengths and immense opportunities, but also faces challenges and threats that come with growth.',
+                swotSTitle: 'Strengths',
+                swotSList: ['<strong>True Ownership</strong>: The unshakable MIT license.', '<strong>High Community Trust</strong>: Open and transparent governance.', '<strong>Best-in-class 2D workflow</strong>: An industry-recognized strength.', '<strong>No financial risk</strong>: Completely free for all developers.'],
+                swotWTitle: 'Weaknesses',
+                swotWList: ['<strong>Ecosystem Size</strong>: Asset and plugin library is smaller than rivals.', '<strong>AAA 3D Showcase</strong>: Lacks numerous top-tier 3D commercial successes.', '<strong>Community Management Risk</strong>: Rapid growth brings governance challenges.'],
+                swotOTitle: 'Opportunities',
+                swotOList: ['<strong>Capitalize on industry shifts</strong>: Attract developers seeking stability.', '<strong>Expand into education</strong>: Become a teaching standard due to its ease of use.', '<strong>Grow commercial services</strong>: Improve console porting and enterprise support.'],
+                swotTTitle: 'Threats',
+                swotTList: ['<strong>Community Fragmentation</strong>: Forks like Redot could split development efforts.', '<strong>Funding Dependency</strong>: Core development relies on community donations.', '<strong>Governance Complexity</strong>: The inherent difficulty of governing a large open-source project.'],
+                footerMain: 'This infographic is based on a synthesis of public data and aims to provide an overview of the Godot Engine.',
+                footerSub: 'Godot Engine is a free and open source community-driven 2D and 3D game engine. Godot is not affiliated with this presentation.',
+                langButton: '中文'
+            }
+        };
+
+        let currentLang = 'zh-hant';
+        let currentTheme = 'light';
+        let engineComparisonChart;
+
+        const themeToggle = document.getElementById('theme-toggle');
+        const darkIcon = document.getElementById('theme-toggle-dark-icon');
+        const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function wrapLabel(str, maxLen) {
+            if (str.length <= maxLen) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLen && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine.length > 0 ? ' ' : '') + word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+        
+        function createChart(lang, theme) {
+            const data = langData[lang];
+            const ctx = document.getElementById('engineComparisonChart').getContext('2d');
+            
+            if (engineComparisonChart) {
+                engineComparisonChart.destroy();
+            }
+
+            const isDark = theme === 'dark';
+            const tickColor = isDark ? '#cbd5e1' : '#333';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : '#e0e0e0';
+            const titleColor = isDark ? '#99C9FF' : '#004AAD';
+
+            engineComparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.chartLabels.map(label => wrapLabel(label, 35)),
+                    datasets: [{
+                        label: data.chartDatasetLabel,
+                        data: [0, 25000, 2049],
+                        backgroundColor: ['#0079FF', '#55A6FF', '#99C9FF'],
+                        borderColor: ['#004AAD', '#004AAD', '#004AAD'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: { callback: value => '$' + value.toLocaleString(), color: tickColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                           ticks: { color: tickColor, font: { weight: 'bold' } },
+                           grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: data.chartTitle,
+                            font: { size: 18, weight: 'bold' },
+                            color: titleColor,
+                            padding: { top: 10, bottom: 30 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.x !== null) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(context.parsed.x);
+                                    }
+                                    return label;
+                                },
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateContent(lang) {
+            const data = langData[lang];
+            document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+            document.title = data.title;
+
+            const elements = {
+                'header-title': data.headerTitle, 'header-subtitle': data.headerSubtitle,
+                'history-title': data.historyTitle, 'history-subtitle': data.historySubtitle,
+                'history-1-title': data.history1Title, 'history-1-subtitle': data.history1Subtitle, 'history-1-desc': data.history1Desc,
+                'history-2-title': data.history2Title, 'history-2-subtitle': data.history2Subtitle, 'history-2-desc': data.history2Desc,
+                'history-3-title': data.history3Title, 'history-3-subtitle': data.history3Subtitle, 'history-3-desc': data.history3Desc,
+                'history-4-title': data.history4Title, 'history-4-subtitle': data.history4Subtitle, 'history-4-desc': data.history4Desc,
+                'history-5-title': data.history5Title, 'history-5-subtitle': data.history5Subtitle, 'history-5-desc': data.history5Desc,
+                'free-model-title': data.freeModelTitle, 'free-model-subtitle': data.freeModelSubtitle,
+                'freedom-1-title': data.freedom1Title, 'freedom-1-subtitle': data.freedom1Subtitle, 'freedom-1-desc': data.freedom1Desc,
+                'freedom-2-title': data.freedom2Title, 'freedom-2-subtitle': data.freedom2Subtitle, 'freedom-2-desc': data.freedom2Desc,
+                'freedom-3-title': data.freedom3Title, 'freedom-3-subtitle': data.freedom3Subtitle, 'freedom-3-desc': data.freedom3Desc,
+                'comparison-title': data.comparisonTitle, 'comparison-subtitle': data.comparisonSubtitle, 'comparison-note': data.comparisonNote,
+                'ecosystem-title': data.ecosystemTitle, 'ecosystem-subtitle': data.ecosystemSubtitle, 'ecosystem-core': data.ecosystemCore,
+                'ecosystem-services-title': data.ecosystemServicesTitle, 'ecosystem-services-subtitle': data.ecosystemServicesSubtitle,
+                'ecosystem-service-1': '🎮 ' + data.ecosystemService1.substring(2), 'ecosystem-service-2': '🏢 ' + data.ecosystemService2.substring(2), 'ecosystem-service-3': '🧩 ' + data.ecosystemService3.substring(2),
+                'swot-title': data.swotTitle, 'swot-subtitle': data.swotSubtitle,
+                'swot-s-title': data.swotSTitle, 'swot-w-title': data.swotWTitle, 'swot-o-title': data.swotOTitle, 'swot-t-title': data.swotTTitle,
+                'footer-main': data.footerMain, 'footer-sub': data.footerSub, 'lang-switcher': data.langButton
+            };
+
+            for (const id in elements) {
+                document.getElementById(id).innerHTML = elements[id];
+            }
+
+            document.getElementById('swot-s-list').innerHTML = data.swotSList.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('swot-w-list').innerHTML = data.swotWList.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('swot-o-list').innerHTML = data.swotOList.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('swot-t-list').innerHTML = data.swotTList.map(item => `<li>${item}</li>`).join('');
+            
+            createChart(lang, currentTheme);
+        }
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                darkIcon.classList.remove('hidden');
+                lightIcon.classList.add('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                darkIcon.classList.add('hidden');
+                lightIcon.classList.remove('hidden');
+            }
+            updateContent(currentLang);
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        });
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            currentLang = currentLang === 'zh-hant' ? 'en' : 'zh-hant';
+            updateContent(currentLang);
+        });
+
+        window.onload = () => {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            setTheme(savedTheme);
+        };
+    </script>
+</body>
+</html>
