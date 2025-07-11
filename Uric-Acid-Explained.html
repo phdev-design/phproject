@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>尿酸全解析：互動式資訊圖表 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .lang-btn.active {
+            background-color: #003f5c;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#003f5c] to-[#665191]" data-lang-key="mainTitle">尿酸全解析</h1>
+            <div class="flex items-center">
+                <nav class="hidden md:block">
+                    <a href="#section-1" class="text-slate-600 hover:text-[#ff7c43] mx-2 font-medium" data-lang-key="nav.origin">起源</a>
+                    <a href="#section-2" class="text-slate-600 hover:text-[#ff7c43] mx-2 font-medium" data-lang-key="nav.doubleEdge">雙面刃</a>
+                    <a href="#section-3" class="text-slate-600 hover:text-[#ff7c43] mx-2 font-medium" data-lang-key="nav.causes">成因</a>
+                    <a href="#section-4" class="text-slate-600 hover:text-[#ff7c43] mx-2 font-medium" data-lang-key="nav.harm">危害</a>
+                    <a href="#section-5" class="text-slate-600 hover:text-[#ff7c43] mx-2 font-medium" data-lang-key="nav.management">管理</a>
+                </nav>
+                <div class="ml-4">
+                    <button id="lang-zh" class="lang-btn px-3 py-1 text-sm font-semibold rounded-l-md border border-slate-300">中</button>
+                    <button id="lang-en" class="lang-btn px-3 py-1 text-sm font-semibold rounded-r-md border-y border-r border-slate-300">EN</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 md:py-12">
+
+        <section id="section-1" class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-[#003f5c] mb-4" data-lang-key="s1.title">尿酸從何而來？</h2>
+            <p class="max-w-3xl mx-auto text-slate-600 text-lg" data-lang-key="s1.subtitle">尿酸是「普林」的代謝最終產物。普林是構成我們DNA和細胞能量的基礎物質，存在於所有動植物細胞中。人體透過精密的系統來平衡尿酸的生產與排泄。</p>
+            <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#2f4b7c]" data-lang-key="s1.chart1.title">尿酸來源：80/20 法則</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s1.chart1.desc">體內八成尿酸源於自身新陳代謝，飲食僅佔兩成，但卻是我們可以控制的關鍵變數。</p>
+                    <div class="chart-container">
+                        <canvas id="sourceChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#2f4b7c]" data-lang-key="s1.chart2.title">尿酸排泄途徑</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s1.chart2.desc">腎臟是排泄尿酸的主力軍，負責清除體內約三分之二的尿酸，腸道則輔助排出剩餘部分。</p>
+                     <div class="chart-container">
+                        <canvas id="excretionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <section id="section-2" class="mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-[#003f5c] mb-12" data-lang-key="s2.title">尿酸的雙面刃：英雄與反派</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+                <div class="stat-card border-t-4 border-green-500">
+                    <h3 class="text-2xl font-bold text-green-600 mb-4 flex items-center" data-lang-key="s2.hero.title">🛡️ 守護者 (英雄)</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s2.hero.desc">在正常範圍內，尿酸是人體內最強大的抗氧化劑之一，保護我們免受自由基傷害。</p>
+                    <div class="text-center my-6">
+                        <p class="text-slate-500" data-lang-key="s2.hero.stat.title">貢獻血漿總抗氧化能力</p>
+                        <p class="text-6xl font-bold text-green-600 my-2">~60%</p>
+                    </div>
+                    <ul class="space-y-2 text-slate-700">
+                        <li class="flex items-start"><span class="text-green-500 mr-2">✓</span><span data-lang-key="s2.hero.point1"><strong>神經保護：</strong>可能降低神經退化性疾病風險。</span></li>
+                        <li class="flex items-start"><span class="text-green-500 mr-2">✓</span><span data-lang-key="s2.hero.point2"><strong>維持血壓：</strong>在遠古環境中是生存優勢。</span></li>
+                    </ul>
+                </div>
+                <div class="stat-card border-t-4 border-red-500">
+                    <h3 class="text-2xl font-bold text-red-600 mb-4 flex items-center" data-lang-key="s2.villain.title">⚠️ 破壞者 (反派)</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s2.villain.desc">當尿酸過高（高尿酸血症），它便會變成威脅健康的元兇。</p>
+                    <div class="text-center my-6 bg-red-50 p-4 rounded-lg">
+                        <p class="text-slate-500" data-lang-key="s2.villain.stat.title">高尿酸血症診斷標準</p>
+                        <div class="flex justify-around mt-2">
+                            <div>
+                                <p class="text-3xl font-bold text-red-600">>7.0</p>
+                                <p class="text-slate-600" data-lang-key="s2.villain.stat.male">男性 (mg/dL)</p>
+                            </div>
+                            <div>
+                                <p class="text-3xl font-bold text-red-600">>6.0</p>
+                                <p class="text-slate-600" data-lang-key="s2.villain.stat.female">女性 (mg/dL)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-slate-700">
+                        <li class="flex items-start"><span class="text-red-500 mr-2">✗</span><span data-lang-key="s2.villain.point1"><strong>引發痛風：</strong>尿酸結晶沉積關節導致劇痛。</span></li>
+                        <li class="flex items-start"><span class="text-red-500 mr-2">✗</span><span data-lang-key="s2.villain.point2"><strong>損傷器官：</strong>長期可致腎病及心血管問題。</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <section id="section-3" class="mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-[#003f5c] mb-4" data-lang-key="s3.title">為何尿酸會失衡？</h2>
+            <p class="max-w-3xl mx-auto text-center text-slate-600 text-lg mb-12" data-lang-key="s3.subtitle">高尿酸血症的成因複雜，但絕大多數情況（約90%）源於排泄系統失靈，而非生產過量。</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#665191]" data-lang-key="s3.chart1.title">失衡主因：排泄不足</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s3.chart1.desc">腎臟無法有效將尿酸排出體外，是導致尿酸累積的最主要原因。</p>
+                    <div class="chart-container">
+                        <canvas id="causeChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#665191]" data-lang-key="s3.chart2.title">飲食中的「三大元兇」</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s3.chart2.desc">某些飲食不僅提供普林，更會嚴重抑制尿酸排泄，造成雙重打擊。</p>
+                    <div class="chart-container">
+                        <canvas id="triggersChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+        
+        <section id="section-4" class="mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-[#003f5c] mb-4" data-lang-key="s4.title">失控的連鎖反應：系統性危害</h2>
+            <p class="max-w-3xl mx-auto text-center text-slate-600 text-lg mb-12" data-lang-key="s4.subtitle">高尿酸不僅引發痛風，更是一系列慢性病的幕後推手，形成相互加劇的惡性循環，被稱為「第四高」。</p>
+            
+            <div class="stat-card w-full mb-12">
+                <h3 class="text-xl font-bold text-center mb-6 text-[#a05195]" data-lang-key="s4.flow.title">高尿酸與慢性病的惡性循環</h3>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                    <div class="p-4 bg-red-100 rounded-lg shadow">
+                        <p class="font-bold text-red-800" data-lang-key="s4.flow.step1.title">高尿酸血症</p>
+                    </div>
+                    <div class="text-3xl text-red-400 transform md:rotate-0">→</div>
+                    <div class="p-4 bg-orange-100 rounded-lg shadow">
+                        <p class="font-bold text-orange-800" data-lang-key="s4.flow.step2.title">腎臟損傷</p>
+                        <p class="text-sm text-orange-600" data-lang-key="s4.flow.step2.desc">(排泄能力下降)</p>
+                    </div>
+                     <div class="text-3xl text-orange-400 transform md:rotate-0">→</div>
+                    <div class="p-4 bg-yellow-100 rounded-lg shadow">
+                        <p class="font-bold text-yellow-800" data-lang-key="s4.flow.step3.title">心血管疾病</p>
+                        <p class="text-sm text-yellow-600" data-lang-key="s4.flow.step3.desc">(高血壓/動脈硬化)</p>
+                    </div>
+                    <div class="text-3xl text-yellow-400 transform md:rotate-0">→</div>
+                     <div class="p-4 bg-purple-100 rounded-lg shadow">
+                        <p class="font-bold text-purple-800" data-lang-key="s4.flow.step4.title">代謝綜合症</p>
+                        <p class="text-sm text-purple-600" data-lang-key="s4.flow.step4.desc">(糖尿病風險增加)</p>
+                    </div>
+                </div>
+                 <p class="text-center text-sm text-slate-500 mt-4" data-lang-key="s4.flow.footer">這些疾病會反過來加劇高尿酸，形成難以打破的循環。</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#a05195]" data-lang-key="s4.chart1.title">健康的隱形殺手：「第四高」</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s4.chart1.desc">高尿酸與高血壓、高血脂、高血糖密切相關，共同構成重大健康威脅。</p>
+                    <div class="chart-container">
+                        <canvas id="fourthHighChart"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#a05195]" data-lang-key="s4.tophus.title">痛風石：永久的印記</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s4.tophus.desc">長期失控下，尿酸結晶會形成痛風石，侵蝕骨骼與關節，造成不可逆的損傷和畸形。</p>
+                    <div class="p-4 bg-gray-100 rounded-lg text-center">
+                        <p class="text-5xl">🦴</p>
+                        <p class="mt-2 font-semibold text-gray-700" data-lang-key="s4.tophus.subtitle">關節侵蝕</p>
+                        <p class="text-sm text-gray-500" data-lang-key="s4.tophus.subdesc">導致慢性疼痛與功能喪失</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <section id="section-5" class="mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-[#003f5c] mb-12" data-lang-key="s5.title">奪回主導權：全面管理藍圖</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <div class="stat-card text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 text-3xl mb-4">💧</div>
+                    <h3 class="text-xl font-bold text-[#003f5c] mb-2" data-lang-key="s5.card1.title">充足飲水</h3>
+                    <p class="text-slate-600" data-lang-key="s5.card1.desc">每日飲用 2-3 公升水，是稀釋尿酸、幫助排泄最簡單有效的方法。</p>
+                </div>
+                <div class="stat-card text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 text-green-600 text-3xl mb-4">⚖️</div>
+                    <h3 class="text-xl font-bold text-[#003f5c] mb-2" data-lang-key="s5.card2.title">體重管理</h3>
+                    <p class="text-slate-600" data-lang-key="s5.card2.desc">循序漸進地減重。快速節食反而會導致尿酸急劇升高。</p>
+                </div>
+                <div class="stat-card text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 text-orange-600 text-3xl mb-4">🏃‍♂️</div>
+                    <h3 class="text-xl font-bold text-[#003f5c] mb-2" data-lang-key="s5.card3.title">適度運動</h3>
+                    <p class="text-slate-600" data-lang-key="s5.card3.desc">規律的中等強度有氧運動有助於整體代謝健康。</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 items-stretch">
+                 <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#ff7c43]" data-lang-key="s5.diet.title">飲食智慧：趨吉避凶</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-bold text-lg text-red-600 mb-2" data-lang-key="s5.diet.avoid.title">❌ 嚴格避免</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li data-lang-key="s5.diet.avoid.item1">酒精（特別是啤酒）、含糖飲料</li>
+                                <li data-lang-key="s5.diet.avoid.item2">動物內臟、濃肉湯、部分海產</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h4 class="font-bold text-lg text-green-600 mb-2" data-lang-key="s5.diet.encourage.title">✅ 鼓勵攝取</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li data-lang-key="s5.diet.encourage.item1">低脂乳製品、咖啡、車厘子</li>
+                                <li data-lang-key="s5.diet.encourage.item2">所有蔬菜、豆類及豆製品</li>
+                                <li data-lang-key="s5.diet.encourage.item3"><strong class="text-green-700" data-lang-key="s5.diet.encourage.myth">迷思破解：</strong>植物性普林（如豆類、蘑菇）並不會增加痛風風險。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="stat-card">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#ff7c43]" data-lang-key="s5.chart.title">藥物治療目標</h3>
+                    <p class="text-center text-slate-500 mb-4" data-lang-key="s5.chart.desc">對於無法單靠生活方式達標的患者，藥物治療是關鍵。目標是將尿酸長期控制在安全範圍。</p>
+                     <div class="chart-container">
+                        <canvas id="treatmentGoalChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#003f5c] text-white text-center p-6 mt-12">
+        <p data-lang-key="footer.disclaimer">本資訊圖表內容僅供參考，不能取代專業醫療建議。如有健康問題，請諮詢醫生。</p>
+        <p class="text-sm opacity-70 mt-2" data-lang-key="footer.source">資料來源：尿酸：人體雙刃劍的全面報告</p>
+    </footer>
+
+    <script>
+        let currentLang = 'zh';
+        let activeCharts = [];
+
+        const content = {
+            zh: {
+                mainTitle: "尿酸全解析",
+                "nav.origin": "起源",
+                "nav.doubleEdge": "雙面刃",
+                "nav.causes": "成因",
+                "nav.harm": "危害",
+                "nav.management": "管理",
+                "s1.title": "尿酸從何而來？",
+                "s1.subtitle": "尿酸是「普林」的代謝最終產物。普林是構成我們DNA和細胞能量的基礎物質，存在於所有動植物細胞中。人體透過精密的系統來平衡尿酸的生產與排泄。",
+                "s1.chart1.title": "尿酸來源：80/20 法則",
+                "s1.chart1.desc": "體內八成尿酸源於自身新陳代謝，飲食僅佔兩成，但卻是我們可以控制的關鍵變數。",
+                "s1.chart1.labels": ['內源性 (自身代謝)', '外源性 (飲食攝取)'],
+                "s1.chart2.title": "尿酸排泄途徑",
+                "s1.chart2.desc": "腎臟是排泄尿酸的主力軍，負責清除體內約三分之二的尿酸，腸道則輔助排出剩餘部分。",
+                "s1.chart2.labels": ['經腎臟排泄', '經腸道排泄'],
+                "s2.title": "尿酸的雙面刃：英雄與反派",
+                "s2.hero.title": "🛡️ 守護者 (英雄)",
+                "s2.hero.desc": "在正常範圍內，尿酸是人體內最強大的抗氧化劑之一，保護我們免受自由基傷害。",
+                "s2.hero.stat.title": "貢獻血漿總抗氧化能力",
+                "s2.hero.point1": "<strong>神經保護：</strong>可能降低神經退化性疾病風險。",
+                "s2.hero.point2": "<strong>維持血壓：</strong>在遠古環境中是生存優勢。",
+                "s2.villain.title": "⚠️ 破壞者 (反派)",
+                "s2.villain.desc": "當尿酸過高（高尿酸血症），它便會變成威脅健康的元兇。",
+                "s2.villain.stat.title": "高尿酸血症診斷標準",
+                "s2.villain.stat.male": "男性 (mg/dL)",
+                "s2.villain.stat.female": "女性 (mg/dL)",
+                "s2.villain.point1": "<strong>引發痛風：</strong>尿酸結晶沉積關節導致劇痛。",
+                "s2.villain.point2": "<strong>損傷器官：</strong>長期可致腎病及心血管問題。",
+                "s3.title": "為何尿酸會失衡？",
+                "s3.subtitle": "高尿酸血症的成因複雜，但絕大多數情況（約90%）源於排泄系統失靈，而非生產過量。",
+                "s3.chart1.title": "失衡主因：排泄不足",
+                "s3.chart1.desc": "腎臟無法有效將尿酸排出體外，是導致尿酸累積的最主要原因。",
+                "s3.chart1.labels": ['排泄不足', '生成過多'],
+                "s3.chart2.title": "飲食中的「三大元兇」",
+                "s3.chart2.desc": "某些飲食不僅提供普林，更會嚴重抑制尿酸排泄，造成雙重打擊。",
+                "s3.chart2.labels": ['酒精 (尤其啤酒)', '高果糖漿飲品', '高普林食物 (內臟/肉湯)'],
+                "s3.chart2.datasetLabel": "對尿酸的負面影響指數",
+                "s4.title": "失控的連鎖反應：系統性危害",
+                "s4.subtitle": "高尿酸不僅引發痛風，更是一系列慢性病的幕後推手，形成相互加劇的惡性循環，被稱為「第四高」。",
+                "s4.flow.title": "高尿酸與慢性病的惡性循環",
+                "s4.flow.step1.title": "高尿酸血症",
+                "s4.flow.step2.title": "腎臟損傷",
+                "s4.flow.step2.desc": "(排泄能力下降)",
+                "s4.flow.step3.title": "心血管疾病",
+                "s4.flow.step3.desc": "(高血壓/動脈硬化)",
+                "s4.flow.step4.title": "代謝綜合症",
+                "s4.flow.step4.desc": "(糖尿病風險增加)",
+                "s4.flow.footer": "這些疾病會反過來加劇高尿酸，形成難以打破的循環。",
+                "s4.chart1.title": "健康的隱形殺手：「第四高」",
+                "s4.chart1.desc": "高尿酸與高血壓、高血脂、高血糖密切相關，共同構成重大健康威脅。",
+                "s4.chart1.labels": ['高血壓', '心血管疾病', '糖尿病風險', '腎臟損傷', '代謝綜合症'],
+                "s4.chart1.datasetLabel": "與高尿酸的關聯強度",
+                "s4.tophus.title": "痛風石：永久的印記",
+                "s4.tophus.desc": "長期失控下，尿酸結晶會形成痛風石，侵蝕骨骼與關節，造成不可逆的損傷和畸形。",
+                "s4.tophus.subtitle": "關節侵蝕",
+                "s4.tophus.subdesc": "導致慢性疼痛與功能喪失",
+                "s5.title": "奪回主導權：全面管理藍圖",
+                "s5.card1.title": "充足飲水",
+                "s5.card1.desc": "每日飲用 2-3 公升水，是稀釋尿酸、幫助排泄最簡單有效的方法。",
+                "s5.card2.title": "體重管理",
+                "s5.card2.desc": "循序漸進地減重。快速節食反而會導致尿酸急劇升高。",
+                "s5.card3.title": "適度運動",
+                "s5.card3.desc": "規律的中等強度有氧運動有助於整體代謝健康。",
+                "s5.diet.title": "飲食智慧：趨吉避凶",
+                "s5.diet.avoid.title": "❌ 嚴格避免",
+                "s5.diet.avoid.item1": "酒精（特別是啤酒）、含糖飲料",
+                "s5.diet.avoid.item2": "動物內臟、濃肉湯、部分海產",
+                "s5.diet.encourage.title": "✅ 鼓勵攝取",
+                "s5.diet.encourage.item1": "低脂乳製品、咖啡、車厘子",
+                "s5.diet.encourage.item2": "所有蔬菜、豆類及豆製品",
+                "s5.diet.encourage.myth": "迷思破解：",
+                "s5.diet.encourage.item3": "<strong class=\"text-green-700\">迷思破解：</strong>植物性普林（如豆類、蘑菇）並不會增加痛風風險。",
+                "s5.chart.title": "藥物治療目標",
+                "s5.chart.desc": "對於無法單靠生活方式達標的患者，藥物治療是關鍵。目標是將尿酸長期控制在安全範圍。",
+                "s5.chart.labels": ['治療前', '第1個月', '第3個月', '第6個月', '第12個月'],
+                "s5.chart.datasetLabel": "血尿酸水平 (mg/dL)",
+                "s5.chart.annotation": "治療目標 ( < 6.0 )",
+                "footer.disclaimer": "本資訊圖表內容僅供參考，不能取代專業醫療建議。如有健康問題，請諮詢醫生。",
+                "footer.source": "資料來源：尿酸：人體雙刃劍的全面報告"
+            },
+            en: {
+                mainTitle: "Uric Acid Explained",
+                "nav.origin": "Origin",
+                "nav.doubleEdge": "Double-Edged",
+                "nav.causes": "Causes",
+                "nav.harm": "Harm",
+                "nav.management": "Management",
+                "s1.title": "Where Does Uric Acid Come From?",
+                "s1.subtitle": "Uric acid is the final product of 'purine' metabolism. Purines are fundamental substances that make up our DNA and cellular energy, present in all plant and animal cells. The body balances uric acid production and excretion through a precise system.",
+                "s1.chart1.title": "Uric Acid Sources: The 80/20 Rule",
+                "s1.chart1.desc": "80% of uric acid comes from the body's own metabolism, while only 20% comes from diet. However, diet is the key variable we can control.",
+                "s1.chart1.labels": ['Endogenous (Metabolism)', 'Exogenous (Diet)'],
+                "s1.chart2.title": "Uric Acid Excretion Pathways",
+                "s1.chart2.desc": "The kidneys are the main player in excreting uric acid, clearing about two-thirds of it. The intestines assist in removing the rest.",
+                "s1.chart2.labels": ['Excreted by Kidneys', 'Excreted by Intestines'],
+                "s2.title": "Uric Acid: A Double-Edged Sword",
+                "s2.hero.title": "🛡️ The Protector (Hero)",
+                "s2.hero.desc": "Within a normal range, uric acid is one of the body's most powerful antioxidants, protecting us from free radical damage.",
+                "s2.hero.stat.title": "Contribution to Total Plasma Antioxidant Capacity",
+                "s2.hero.point1": "<strong>Neuroprotection:</strong> May reduce the risk of neurodegenerative diseases.",
+                "s2.hero.point2": "<strong>Blood Pressure Maintenance:</strong> A survival advantage in ancient environments.",
+                "s2.villain.title": "⚠️ The Destroyer (Villain)",
+                "s2.villain.desc": "When uric acid is too high (hyperuricemia), it becomes a major health threat.",
+                "s2.villain.stat.title": "Diagnostic Criteria for Hyperuricemia",
+                "s2.villain.stat.male": "Male (mg/dL)",
+                "s2.villain.stat.female": "Female (mg/dL)",
+                "s2.villain.point1": "<strong>Causes Gout:</strong> Uric acid crystals deposit in joints, causing severe pain.",
+                "s2.villain.point2": "<strong>Damages Organs:</strong> Long-term can lead to kidney disease and cardiovascular problems.",
+                "s3.title": "Why Does Uric Acid Become Imbalanced?",
+                "s3.subtitle": "The causes of hyperuricemia are complex, but the vast majority of cases (about 90%) are due to excretion system failure, not overproduction.",
+                "s3.chart1.title": "Main Cause of Imbalance: Underexcretion",
+                "s3.chart1.desc": "The inability of the kidneys to effectively excrete uric acid is the primary reason for its accumulation.",
+                "s3.chart1.labels": ['Underexcretion', 'Overproduction'],
+                "s3.chart2.title": "The 'Big Three' Dietary Culprits",
+                "s3.chart2.desc": "Certain foods not only provide purines but also severely inhibit uric acid excretion, delivering a double blow.",
+                "s3.chart2.labels": ['Alcohol (especially Beer)', 'High-Fructose Drinks', 'High-Purine Foods (Organ Meats/Broth)'],
+                "s3.chart2.datasetLabel": "Negative Impact Index on Uric Acid",
+                "s4.title": "The Uncontrolled Chain Reaction: Systemic Harm",
+                "s4.subtitle": "High uric acid not only triggers gout but is also the culprit behind a series of chronic diseases, forming a vicious cycle and known as the 'Fourth High'.",
+                "s4.flow.title": "The Vicious Cycle of High Uric Acid and Chronic Diseases",
+                "s4.flow.step1.title": "Hyperuricemia",
+                "s4.flow.step2.title": "Kidney Damage",
+                "s4.flow.step2.desc": "(Decreased excretion)",
+                "s4.flow.step3.title": "Cardiovascular Disease",
+                "s4.flow.step3.desc": "(Hypertension/Atherosclerosis)",
+                "s4.flow.step4.title": "Metabolic Syndrome",
+                "s4.flow.step4.desc": "(Increased diabetes risk)",
+                "s4.flow.footer": "These diseases, in turn, worsen high uric acid, creating a hard-to-break cycle.",
+                "s4.chart1.title": "The Invisible Killer: The 'Fourth High'",
+                "s4.chart1.desc": "High uric acid is closely related to hypertension, hyperlipidemia, and hyperglycemia, posing a major health threat together.",
+                "s4.chart1.labels": ['Hypertension', 'Cardiovascular Disease', 'Diabetes Risk', 'Kidney Damage', 'Metabolic Syndrome'],
+                "s4.chart1.datasetLabel": "Association Strength with High Uric Acid",
+                "s4.tophus.title": "Tophi: The Permanent Mark",
+                "s4.tophus.desc": "When uncontrolled long-term, uric acid crystals form tophi, which erode bones and joints, causing irreversible damage and deformity.",
+                "s4.tophus.subtitle": "Joint Erosion",
+                "s4.tophus.subdesc": "Leads to chronic pain and loss of function",
+                "s5.title": "Taking Back Control: A Comprehensive Management Blueprint",
+                "s5.card1.title": "Adequate Hydration",
+                "s5.card1.desc": "Drinking 2-3 liters of water daily is the simplest, most effective way to dilute uric acid and aid excretion.",
+                "s5.card2.title": "Weight Management",
+                "s5.card2.desc": "Lose weight gradually. Rapid dieting can cause a sharp increase in uric acid.",
+                "s5.card3.title": "Moderate Exercise",
+                "s5.card3.desc": "Regular, moderate-intensity aerobic exercise helps improve overall metabolic health.",
+                "s5.diet.title": "Dietary Wisdom: What to Eat and Avoid",
+                "s5.diet.avoid.title": "❌ Strictly Avoid",
+                "s5.diet.avoid.item1": "Alcohol (especially beer), sugary drinks",
+                "s5.diet.avoid.item2": "Organ meats, thick broths, certain seafood",
+                "s5.diet.encourage.title": "✅ Encourage",
+                "s5.diet.encourage.item1": "Low-fat dairy, coffee, cherries",
+                "s5.diet.encourage.item2": "All vegetables, beans, and soy products",
+                "s5.diet.encourage.item3": "<strong class=\"text-green-700\">Myth Buster:</strong> Plant-based purines (e.g., beans, mushrooms) do not increase gout risk.",
+                "s5.chart.title": "Medication Treatment Goals",
+                "s5.chart.desc": "For patients who can't reach goals with lifestyle changes alone, medication is key. The goal is to keep uric acid in a safe range long-term.",
+                "s5.chart.labels": ['Before Treatment', 'Month 1', 'Month 3', 'Month 6', 'Month 12'],
+                "s5.chart.datasetLabel": "Blood Uric Acid Level (mg/dL)",
+                "s5.chart.annotation": "Treatment Goal ( < 6.0 )",
+                "footer.disclaimer": "This infographic is for informational purposes only and cannot replace professional medical advice. Please consult a doctor for health concerns.",
+                "footer.source": "Source: Uric Acid: A Comprehensive Report on the Body's Double-Edged Sword"
+            }
+        };
+
+        const primaryPalette = {
+            darkBlue: '#003f5c',
+            midBlue: '#2f4b7c',
+            purple: '#665191',
+            magenta: '#d45087',
+            orange: '#ff7c43',
+            yellow: '#ffa600'
+        };
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 12 },
+                        color: '#475569'
+                    }
+                },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    backgroundColor: '#1e293b',
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            }
+        };
+
+        function createCharts(lang) {
+            activeCharts.forEach(chart => chart.destroy());
+            activeCharts = [];
+
+            const langContent = content[lang];
+
+            activeCharts.push(new Chart(document.getElementById('sourceChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: langContent['s1.chart1.labels'],
+                    datasets: [{ data: [80, 20], backgroundColor: [primaryPalette.midBlue, primaryPalette.orange], borderColor: '#ffffff', borderWidth: 2 }]
+                },
+                options: { ...commonChartOptions }
+            }));
+
+            activeCharts.push(new Chart(document.getElementById('excretionChart'), {
+                type: 'pie',
+                data: {
+                    labels: langContent['s1.chart2.labels'],
+                    datasets: [{ data: [67, 33], backgroundColor: [primaryPalette.purple, primaryPalette.yellow], borderColor: '#ffffff', borderWidth: 2 }]
+                },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { position: 'top' } } }
+            }));
+
+            activeCharts.push(new Chart(document.getElementById('causeChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: langContent['s3.chart1.labels'],
+                    datasets: [{ data: [90, 10], backgroundColor: [primaryPalette.magenta, primaryPalette.darkBlue], borderColor: '#ffffff', borderWidth: 2 }]
+                },
+                options: { ...commonChartOptions }
+            }));
+
+            activeCharts.push(new Chart(document.getElementById('triggersChart'), {
+                type: 'bar',
+                data: {
+                    labels: langContent['s3.chart2.labels'],
+                    datasets: [{ label: langContent['s3.chart2.datasetLabel'], data: [100, 90, 70], backgroundColor: [primaryPalette.orange, primaryPalette.magenta, primaryPalette.purple], borderRadius: 4 }]
+                },
+                options: { ...commonChartOptions, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { display: false }, ticks: { color: '#475569' } }, y: { grid: { display: false }, ticks: { color: '#475569' } } }, plugins: { ...commonChartOptions.plugins, legend: { display: false } } }
+            }));
+            
+            activeCharts.push(new Chart(document.getElementById('fourthHighChart'), {
+                type: 'radar',
+                data: {
+                    labels: langContent['s4.chart1.labels'],
+                    datasets: [{ label: langContent['s4.chart1.datasetLabel'], data: [8, 9, 7, 8, 9], fill: true, backgroundColor: 'rgba(160, 81, 149, 0.2)', borderColor: primaryPalette.purple, pointBackgroundColor: primaryPalette.purple, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: primaryPalette.purple }]
+                },
+                options: { ...commonChartOptions, scales: { r: { angleLines: { color: '#cbd5e1' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { size: 12 }, color: '#334155' }, ticks: { display: false, beginAtZero: true } } }, plugins: { ...commonChartOptions.plugins, legend: { display: false } }}
+            }));
+
+            activeCharts.push(new Chart(document.getElementById('treatmentGoalChart'), {
+                type: 'line',
+                data: {
+                    labels: langContent['s5.chart.labels'],
+                    datasets: [{ label: langContent['s5.chart.datasetLabel'], data: [9.5, 7.5, 6.2, 5.5, 5.2], borderColor: primaryPalette.orange, backgroundColor: 'rgba(255, 124, 67, 0.1)', fill: true, tension: 0.3 }]
+                },
+                options: { 
+                    ...commonChartOptions,
+                    scales: { y: { beginAtZero: false, min: 4, max: 10, grid: { color: '#e2e8f0' }, ticks: { color: '#475569' } }, x: { grid: { display: false }, ticks: { color: '#475569' } } },
+                    plugins: {
+                        ...commonChartOptions.plugins,
+                        legend: { display: false },
+                        annotation: { annotations: { line1: { type: 'line', yMin: 6.0, yMax: 6.0, borderColor: 'rgb(74, 222, 128)', borderWidth: 2, borderDash: [6, 6], label: { content: langContent['s5.chart.annotation'], enabled: true, position: 'end', backgroundColor: 'rgba(74, 222, 128, 0.8)' } } } }
+                    }
+                }
+            }));
+        }
+
+        function updateContent(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (content[lang][key]) {
+                    el.innerHTML = content[lang][key];
+                }
+            });
+
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            
+            createCharts(lang);
+        }
+
+        document.getElementById('lang-zh').addEventListener('click', () => updateContent('zh'));
+        document.getElementById('lang-en').addEventListener('click', () => updateContent('en'));
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        updateContent('zh');
+    </script>
+</body>
+</html>
