@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：剖析C++的學習挑戰 / Infographic: The Challenge of Learning C++</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0B2D48;
+            color: #205A8C;
+        }
+        .font-roboto {
+            font-family: 'Roboto', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flowchart-box {
+            border: 2px solid #3E82C3;
+            background-color: #0B2D48;
+            color: #D9D9D9;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .flowchart-arrow {
+            font-size: 2.5rem;
+            color: #F2A71B;
+            align-self: center;
+            margin: 0 1rem;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: 1px solid transparent;
+        }
+        .lang-btn.active {
+            background-color: #F2A71B;
+            color: #0B2D48;
+            font-weight: 700;
+        }
+        .lang-btn:not(.active) {
+            background-color: #3E82C3;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12 relative">
+            <div class="absolute top-0 right-0 flex space-x-2">
+                <button id="lang-zh" class="lang-btn" data-lang="zh">繁體中文</button>
+                <button id="lang-en" class="lang-btn" data-lang="en">English</button>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4" data-lang-key="mainTitle"></h1>
+            <p class="text-lg md:text-xl text-[#D9D9D9]" data-lang-key="mainSubtitle"></p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="philosophy">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-6 text-[#0B2D48]" data-lang-key="philosophyTitle"></h2>
+                    <p class="text-center mb-8 max-w-3xl mx-auto" data-lang-key="philosophyDesc"></p>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0">
+                        <div class="flowchart-box">
+                            <h3 class="font-bold text-lg text-[#F2A71B]" data-lang-key="philosophyBox1"></h3>
+                        </div>
+                        <div class="flowchart-arrow">&rarr;</div>
+                        <div class="flowchart-box">
+                             <h3 class="font-bold text-lg text-[#F2A71B]" data-lang-key="philosophyBox2"></h3>
+                        </div>
+                        <div class="flowchart-arrow">&darr;</div>
+                        <div class="flowchart-box bg-[#F2A71B] text-[#0B2D48]">
+                            <h3 class="font-bold text-xl" data-lang-key="philosophyBox3"></h3>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="memory">
+                 <h2 class="text-3xl font-bold text-center mb-6 text-white" data-lang-key="memoryTitle"></h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-xl p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="memoryBurdenTitle"></h3>
+                        <p class="mb-4" data-lang-key="memoryBurdenDesc"></p>
+                         <div class="chart-container h-64 md:h-72">
+                            <canvas id="memoryIssuesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-xl p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="pointersTitle"></h3>
+                        <p class="mb-4" data-lang-key="pointersDesc"></p>
+                        <div class="flex justify-around items-center h-full mt-4">
+                            <div class="text-center p-4 border-2 border-dashed border-[#3E82C3] rounded-lg">
+                                <h4 class="font-bold text-xl" data-lang-key="stackTitle"></h4>
+                                <p class="text-6xl">⚡</p>
+                                <p data-lang-key="stackProp1"></p>
+                                <p data-lang-key="stackProp2"></p>
+                                <p data-lang-key="stackProp3"></p>
+                            </div>
+                            <div class="text-center p-4 border-2 border-dashed border-[#F2A71B] rounded-lg">
+                                <h4 class="font-bold text-xl" data-lang-key="heapTitle"></h4>
+                                <p class="text-6xl">🧠</p>
+                                <p data-lang-key="heapProp1"></p>
+                                <p data-lang-key="heapProp2"></p>
+                                <p data-lang-key="heapProp3"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ub">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-6 text-[#0B2D48]" data-lang-key="ubTitle"></h2>
+                    <p class="text-center mb-4 max-w-3xl mx-auto" data-lang-key="ubDesc"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="ubTriggersTitle"></h3>
+                            <p class="mb-4 text-center" data-lang-key="ubTriggersDesc"></p>
+                            <div class="chart-container">
+                                <canvas id="ubTriggersChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="text-center p-6 bg-gray-100 rounded-lg">
+                            <p class="text-6xl mb-4">📜</p>
+                            <h3 class="text-2xl font-bold mb-2" data-lang-key="ubContractTitle"></h3>
+                            <p class="mb-4" data-lang-key="ubContractDesc"></p>
+                            <div class="text-left space-y-2">
+                                <p data-lang-key="ubContractDev"></p>
+                                <p data-lang-key="ubContractCompiler"></p>
+                                <p class="mt-4" data-lang-key="ubContractBreach"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="complexity">
+                <h2 class="text-3xl font-bold text-center mb-6 text-white" data-lang-key="complexityTitle"></h2>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-xl p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="paradigmTitle"></h3>
+                        <p class="mb-4" data-lang-key="paradigmDesc"></p>
+                         <div class="chart-container">
+                            <canvas id="paradigmChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-xl p-6">
+                        <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="historyTitle"></h3>
+                        <p class="mb-4" data-lang-key="historyDesc"></p>
+                        <div class="relative p-4 space-y-2">
+                            <div class="p-3 bg-[#F2A71B] text-black rounded-lg text-center z-40 relative"><strong data-lang-key="historyLayer4_1"></strong><br><span data-lang-key="historyLayer4_2"></span></div>
+                             <div class="p-3 bg-[#3E82C3] text-white rounded-lg text-center z-30 relative mt-[-0.5rem] ml-4"><strong data-lang-key="historyLayer3_1"></strong><br><span data-lang-key="historyLayer3_2"></span></div>
+                             <div class="p-3 bg-[#205A8C] text-white rounded-lg text-center z-20 relative mt-[-0.5rem] ml-8"><strong data-lang-key="historyLayer2_1"></strong><br><span data-lang-key="historyLayer2_2"></span></div>
+                             <div class="p-3 bg-[#0B2D48] text-white rounded-lg text-center z-10 relative mt-[-0.5rem] ml-12"><strong data-lang-key="historyLayer1_1"></strong><br><span data-lang-key="historyLayer1_2"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="moderncpp">
+                 <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-6 text-[#0B2D48]" data-lang-key="modernTitle"></h2>
+                    <p class="text-center mb-8 max-w-3xl mx-auto" data-lang-key="modernDesc"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <div>
+                            <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="modernCompareTitle"></h3>
+                             <div class="space-y-4">
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <h4 class="font-bold" data-lang-key="modernCompareMem"></h4>
+                                    <p class="text-red-600 line-through text-sm font-mono">MyClass* p = new MyClass(); delete p;</p>
+                                    <p class="text-green-600 text-sm font-mono">auto p = std::make_unique&lt;MyClass&gt;();</p>
+                                </div>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <h4 class="font-bold" data-lang-key="modernCompareLoop"></h4>
+                                    <p class="text-red-600 line-through text-sm font-mono">for(iterator it = v.begin()...)</p>
+                                    <p class="text-green-600 text-sm font-mono">for(int val : v)</p>
+                                </div>
+                                <div class="bg-gray-100 p-4 rounded-lg">
+                                    <h4 class="font-bold" data-lang-key="modernCompareType"></h4>
+                                    <p class="text-red-600 line-through text-sm font-mono">std::map&lt;...&gt;::iterator it = ...</p>
+                                    <p class="text-green-600 text-sm font-mono">auto it = ...</p>
+                                </div>
+                            </div>
+                         </div>
+                        <div>
+                             <h3 class="text-2xl font-bold text-center mb-4" data-lang-key="modernComplexityTitle"></h3>
+                             <p class="mb-4 text-center" data-lang-key="modernComplexityDesc"></p>
+                             <div class="chart-container">
+                                <canvas id="modernCppComplexityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+            
+            <section id="conclusion">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h2 class="text-3xl font-bold text-center mb-6 text-[#0B2D48]" data-lang-key="conclusionTitle"></h2>
+                    <p class="text-center mb-8 max-w-3xl mx-auto" data-lang-key="conclusionDesc"></p>
+                    <ol class="list-decimal list-inside space-y-4 max-w-2xl mx-auto text-lg">
+                        <li class="p-3 bg-gray-50 rounded-lg" data-lang-key="conclusionPoint1"></li>
+                        <li class="p-3 bg-gray-100 rounded-lg" data-lang-key="conclusionPoint2"></li>
+                        <li class="p-3 bg-gray-50 rounded-lg" data-lang-key="conclusionPoint3"></li>
+                        <li class="p-3 bg-gray-100 rounded-lg" data-lang-key="conclusionPoint4"></li>
+                         <li class="p-3 bg-gray-50 rounded-lg" data-lang-key="conclusionPoint5"></li>
+                    </ol>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center text-white mt-12 py-6 border-t border-gray-700">
+            <p data-lang-key="footerCopyright"></p>
+            <p class="text-sm text-gray-400 mt-2" data-lang-key="footerNotice"></p>
+        </footer>
+    </div>
+
+<script>
+    const translations = {
+        zh: {
+            mainTitle: "剖析C++的學習挑戰",
+            mainSubtitle: "為何這門強大的語言如此令人望而生畏？",
+            philosophyTitle: "一切複雜性的根源：零成本抽象",
+            philosophyDesc: "C++的所有學習難點，幾乎都源自其不妥協的核心設計哲學。這個原則將極致的效能控制權交給開發者，代價則是移除了高階語言中常見的安全網。這不是缺陷，而是一種將巨大責任置於開發者肩上的特性。",
+            philosophyBox1: "你不使用的東西，<br>你不需要為它付出代價。",
+            philosophyBox2: "你確實使用的東西，<br>你能獲得最佳效能。",
+            philosophyBox3: "結論：<br>程式設計師對一切負責",
+            memoryTitle: "第一道懸崖：手動記憶體管理",
+            memoryBurdenTitle: "程式設計師的沉重負擔",
+            memoryBurdenDesc: "「零成本抽象」原則的直接後果就是手動記憶體管理。與Java或Python不同，C++開發者必須手動配置 (`new`) 和釋放 (`delete`) 記憶體。管理不當會引發兩類致命錯誤，這要求開發者必須建立嚴謹的「物件所有權」心智模型。",
+            pointersTitle: "指標：直接記憶體存取的雙面刃",
+            pointersDesc: "指標是C++用以實現手動管理的工具，它儲存變數的記憶體位址。精通指標需要理解堆疊(Stack)與堆(Heap)的區別、值的傳遞與位址的傳遞，以及複雜的指標語法。錯誤的選擇往往不會在編譯時被發現，而是在執行時以隱晦的方式暴露出來。",
+            stackTitle: "堆疊 (Stack)",
+            stackProp1: "自動管理",
+            stackProp2: "生命週期固定",
+            stackProp3: "快速",
+            heapTitle: "堆 (Heap)",
+            heapProp1: "手動管理",
+            heapProp2: "生命週期靈活",
+            heapProp3: "較慢",
+            ubTitle: "無情的契約：理解並規避未定義行為 (UB)",
+            ubDesc: "未定義行為 (UB) 是C++中最危險的概念。它指程式執行了C++標準未作規定的操作，編譯器可以做任何事——崩潰、產出錯誤結果、甚至看似正常。UB的存在是為了給予編譯器極致的最佳化空間，它假設開發者永遠不會寫出這樣的程式碼。",
+            ubTriggersTitle: "常見的UB觸發器",
+            ubTriggersDesc: "UB的觸發條件五花八門，對初學者來說處處是陷阱。以下是一些最常見的例子，它們通常不會產生編譯警告，但在執行時可能導致災難。",
+            ubContractTitle: "效能契約",
+            ubContractDesc: "可以將UB視為開發者與編譯器間的契約：",
+            ubContractDev: "<strong class='text-[#205A8C]'>開發者承諾：</strong>我的程式碼中絕不包含未定義行為。",
+            ubContractCompiler: "<strong class='text-[#F2A71B]'>編譯器回報：</strong>我相信你，並省略對這些情況的檢查，產出高度最佳化的程式碼。",
+            ubContractBreach: "<strong class='text-red-600'>一旦違約：</strong>程式的有效性蕩然無存，可能發生任何事。😈",
+            complexityTitle: "迷宮般的語言：規模與多重典範",
+            paradigmTitle: "一個語言，四種思維",
+            paradigmDesc: "C++並非純粹的物件導向語言，它是一個支援多種程式設計典範的混合體。真正的挑戰在於學會何時使用哪一種，以及如何將它們有效地結合。例如，STL主要是泛型程式設計，其思想與傳統OOP有所不同。",
+            historyTitle: "歷史的沉積",
+            historyDesc: "C++的複雜性是歷史演進的結果。語言在數十年中不斷疊加新的典範，但很少移除舊的。學習者面對的是一個層層疊加的結構，必須學會在這座「語言考古遺址」中導航。",
+            historyLayer4_1: "C++11/14/17/20+",
+            historyLayer4_2: "函式化程式設計 (Lambda), 現代化特性",
+            historyLayer3_1: "C++98/03",
+            historyLayer3_2: "泛型程式設計 (Templates, STL)",
+            historyLayer2_1: "C with Classes",
+            historyLayer2_2: "物件導向程式設計 (OOP)",
+            historyLayer1_1: "C",
+            historyLayer1_2: "程序化程式設計",
+            modernTitle: "現代C++的復興：一把雙面刃",
+            modernDesc: "自C++11以來，語言經歷了一場深刻的變革。現代特性解決了許多經典痛點，讓程式設計更安全、簡潔。然而，這也為本已龐大的語言增添了新的、更抽象的學習內容，造成了「經典C++」與「現代C++」的巨大分裂。",
+            modernCompareTitle: "馴服猛獸：新舊慣用法對比",
+            modernCompareMem: "記憶體管理",
+            modernCompareLoop: "容器遍歷",
+            modernCompareType: "型別推導",
+            modernComplexityTitle: "新的複雜性前沿",
+            modernComplexityDesc: "每一個強大的新特性，都增添了新的學習內容。學習的總負擔實際上增加了，因為學習者不僅要掌握現代方法，還必須能看懂無處不在的經典程式碼。",
+            conclusionTitle: "精通之路：戰略性學習建議",
+            conclusionDesc: "精通C++，與其說是記憶語法，不如說是建立一個關於計算機實際運作方式的深刻心智模型。這需要理解資源所有權、物件生命週期和效能影響。以下是給有志者的建議：",
+            conclusionPoint1: "<strong class='text-[#F2A71B]'>擁抱哲學：</strong>認識到C++是用安全換取控制的權衡，學習用C++的方式思考問題。",
+            conclusionPoint2: "<strong class='text-[#F2A71B]'>從現代起步：</strong>將C++17/20作為起點，優先使用智慧指標、`auto`等現代特性，避免過早陷入底層泥潭。",
+            conclusionPoint3: "<strong class='text-[#F2A71B]'>精通工具：</strong>投入時間學習編譯器、除錯器(GDB)和建置系統(CMake)。它們是管理複雜性的必要工具。",
+            conclusionPoint4: "<strong class='text-[#F2A71B]'>嚴肅對待UB：</strong>將未定義行為視為絕對禁忌，並使用靜態分析工具和消毒劑來提前捕獲它們。",
+            conclusionPoint5: "<strong class='text-[#F2A71B]'>閱讀好程式碼：</strong>研讀使用現代C++風格編寫的開源專案，是將理論轉化為實踐的最佳途徑。",
+            footerCopyright: "&copy; 2025 C++學習挑戰分析報告",
+            footerNotice: "基於《剖析C++的學習挑戰：一份深度分析報告》產生。所有圖表均使用Chart.js和Canvas繪製，未使用SVG或Mermaid.js。",
+            // Chart specific translations
+            chartMemLeak: "記憶體洩漏 (忘記 delete)",
+            chartDangling: "懸空指標 (使用已釋放記憶體)",
+            chartMemErrors: "常見記憶體錯誤",
+            chartUBOutOfBounds: "陣列越界存取",
+            chartUBNULL: "解參考空指標",
+            chartUBSignedOverflow: "有符號整數溢位",
+            chartUBDangling: "使用懸空指標",
+            chartUBDanger: "危險程度 (主觀評估)",
+            chartParadigmProcedural: "程序化",
+            chartParadigmOOP: "物件導向 (OOP)",
+            chartParadigmGP: "泛型 (GP)",
+            chartParadigmFP: "函式化 (FP)",
+            chartParadigmLowLevel: "底層控制",
+            chartParadigmJava: "Java (對比)",
+            chartModernMove: "移動語意 & 右值參考",
+            chartModernForward: "完美轉發",
+            chartModernConcepts: "Concepts",
+            chartModernCoroutines: "協程 (Coroutines)",
+            chartModernAbstract: "概念抽象層級",
+            chartModernSolve: "解決舊問題的能力"
+        },
+        en: {
+            mainTitle: "Dissecting the Challenge of Learning C++",
+            mainSubtitle: "Why is this powerful language so daunting?",
+            philosophyTitle: "The Root of All Complexity: Zero-Cost Abstractions",
+            philosophyDesc: "Almost all of C++'s learning difficulties stem from its uncompromising core design philosophy. This principle gives developers ultimate performance control, at the cost of removing the safety nets common in higher-level languages. This isn't a flaw, but a feature that places immense responsibility on the developer.",
+            philosophyBox1: "You don't pay for<br>what you don't use.",
+            philosophyBox2: "What you do use,<br>you couldn't hand code any better.",
+            philosophyBox3: "Conclusion:<br>The Programmer is Responsible for Everything",
+            memoryTitle: "The First Cliff: Manual Memory Management",
+            memoryBurdenTitle: "The Programmer's Heavy Burden",
+            memoryBurdenDesc: "The direct consequence of the 'zero-cost abstraction' principle is manual memory management. Unlike Java or Python, C++ developers must manually allocate (`new`) and deallocate (`delete`) memory. Mismanagement leads to two types of fatal errors, requiring developers to build a rigorous mental model of 'object ownership'.",
+            pointersTitle: "Pointers: The Double-Edged Sword of Direct Memory Access",
+            pointersDesc: "Pointers are the tool C++ uses to implement manual management, storing a variable's memory address. Mastering them requires understanding the difference between Stack and Heap, pass-by-value vs. pass-by-address, and complex pointer syntax. Wrong choices often aren't caught at compile-time but surface cryptically at runtime.",
+            stackTitle: "Stack",
+            stackProp1: "Automatic",
+            stackProp2: "Fixed Lifetime",
+            stackProp3: "Fast",
+            heapTitle: "Heap",
+            heapProp1: "Manual",
+            heapProp2: "Flexible Lifetime",
+            heapProp3: "Slower",
+            ubTitle: "The Unforgiving Contract: Understanding and Avoiding Undefined Behavior (UB)",
+            ubDesc: "Undefined Behavior (UB) is the most dangerous concept in C++. It refers to operations for which the C++ standard imposes no requirements. The compiler can do anything—crash, produce wrong results, or seem to work fine. UB exists to grant the compiler extreme optimization latitude, assuming the developer never writes such code.",
+            ubTriggersTitle: "Common UB Triggers",
+            ubTriggersDesc: "UB can be triggered in countless ways, creating a minefield for beginners. Here are some of the most common examples, which usually don't produce compile warnings but can lead to disaster at runtime.",
+            ubContractTitle: "The Performance Contract",
+            ubContractDesc: "UB can be seen as a contract between the developer and the compiler:",
+            ubContractDev: "<strong class='text-[#205A8C]'>Developer Promises:</strong> My code will never contain undefined behavior.",
+            ubContractCompiler: "<strong class='text-[#F2A71B]'>Compiler Replies:</strong> I trust you, and will omit checks for these cases to produce highly optimized code.",
+            ubContractBreach: "<strong class='text-red-600'>Upon Breach:</strong> The program's validity is void. Anything can happen. 😈",
+            complexityTitle: "A Labyrinthine Language: Scale and Multi-Paradigm",
+            paradigmTitle: "One Language, Four Mindsets",
+            paradigmDesc: "C++ is not a pure object-oriented language; it's a hybrid that supports multiple programming paradigms. The real challenge is learning when to use which and how to combine them effectively. For example, the STL is primarily generic programming, a different mindset from traditional OOP.",
+            historyTitle: "Historical Sediment",
+            historyDesc: "The complexity of C++ is a result of its historical evolution. Over decades, the language has layered new paradigms on top of old ones, rarely removing anything. The learner faces a layered structure and must learn to navigate this 'language archaeological site'.",
+            historyLayer4_1: "C++11/14/17/20+",
+            historyLayer4_2: "Functional Programming (Lambdas), Modern Features",
+            historyLayer3_1: "C++98/03",
+            historyLayer3_2: "Generic Programming (Templates, STL)",
+            historyLayer2_1: "C with Classes",
+            historyLayer2_2: "Object-Oriented Programming (OOP)",
+            historyLayer1_1: "C",
+            historyLayer1_2: "Procedural Programming",
+            modernTitle: "The Renaissance of Modern C++: A Double-Edged Sword",
+            modernDesc: "Since C++11, the language has undergone a profound transformation. Modern features have solved many classic pain points, making programming safer and cleaner. However, this has also added new, more abstract concepts to an already massive language, creating a great divide between 'classic' and 'modern' C++.",
+            modernCompareTitle: "Taming the Beast: Old vs. New Idioms",
+            modernCompareMem: "Memory Management",
+            modernCompareLoop: "Container Iteration",
+            modernCompareType: "Type Deduction",
+            modernComplexityTitle: "The New Frontier of Complexity",
+            modernComplexityDesc: "Every powerful new feature adds to the learning load. The total burden has actually increased, as learners must not only master modern methods but also be able to understand the classic code that is everywhere.",
+            conclusionTitle: "The Path to Mastery: Strategic Learning Advice",
+            conclusionDesc: "Mastering C++ is less about memorizing syntax and more about building a deep mental model of how computers actually work. This requires understanding resource ownership, object lifetimes, and performance implications. Here is our advice for the aspiring:",
+            conclusionPoint1: "<strong class='text-[#F2A71B]'>Embrace the Philosophy:</strong> Recognize that C++ is a trade-off of safety for control. Learn to think in C++ terms.",
+            conclusionPoint2: "<strong class='text-[#F2A71B]'>Start Modern:</strong> Begin with C++17/20. Prioritize smart pointers, `auto`, and other modern features to avoid getting bogged down in low-level pitfalls too early.",
+            conclusionPoint3: "<strong class='text-[#F2A71B]'>Master the Tools:</strong> Invest time in learning your compiler, debugger (GDB), and build system (CMake). They are essential for managing complexity.",
+            conclusionPoint4: "<strong class='text-[#F2A71B]'>Take UB Seriously:</strong> Treat Undefined Behavior as an absolute taboo. Use static analysis tools and sanitizers to catch it early.",
+            conclusionPoint5: "<strong class='text-[#F2A71B]'>Read Good Code:</strong> Studying open-source projects written in a modern C++ style is the best way to turn theory into practice.",
+            footerCopyright: "&copy; 2025 C++ Learning Challenge Analysis",
+            footerNotice: "Generated based on 'An In-Depth Analysis of C++ Learning Challenges'. All charts rendered with Chart.js and Canvas. No SVG or Mermaid.js was used.",
+            // Chart specific translations
+            chartMemLeak: "Memory Leak (Forgot delete)",
+            chartDangling: "Dangling Pointer (Use after free)",
+            chartMemErrors: "Common Memory Errors",
+            chartUBOutOfBounds: "Array out-of-bounds access",
+            chartUBNULL: "Dereferencing null pointer",
+            chartUBSignedOverflow: "Signed integer overflow",
+            chartUBDangling: "Using a dangling pointer",
+            chartUBDanger: "Danger Level (Subjective)",
+            chartParadigmProcedural: "Procedural",
+            chartParadigmOOP: "Object-Oriented (OOP)",
+            chartParadigmGP: "Generic (GP)",
+            chartParadigmFP: "Functional (FP)",
+            chartParadigmLowLevel: "Low-level Control",
+            chartParadigmJava: "Java (Comparison)",
+            chartModernMove: "Move Semantics & Rvalue Refs",
+            chartModernForward: "Perfect Forwarding",
+            chartModernConcepts: "Concepts",
+            chartModernCoroutines: "Coroutines",
+            chartModernAbstract: "Conceptual Abstraction Level",
+            chartModernSolve: "Power to Solve Old Problems"
+        }
+    };
+
+    let currentLang = 'zh';
+    const chartInstances = {};
+
+    function updateText(lang) {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        const elements = document.querySelectorAll('[data-lang-key]');
+        elements.forEach(el => {
+            const key = el.dataset.langKey;
+            if (translations[lang][key]) {
+                el.innerHTML = translations[lang][key];
+            }
+        });
+    }
+
+    function wrapLabel(str, maxWidth) {
+        if (str.length <= maxWidth) return str;
+        const words = str.split(' ');
+        let currentLine = '';
+        const lines = [];
+        for (const word of words) {
+            if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                if (currentLine.length > 0) currentLine += ' ';
+                currentLine += word;
+            }
+        }
+        lines.push(currentLine);
+        return lines;
+    }
+    
+    const FONT_COLOR = '#0B2D48';
+    const GRID_COLOR = '#D9D9D9';
+    const PRIMARY_COLOR = '#F2A71B';
+    const SECONDARY_COLOR = '#3E82C3';
+    const TERTIARY_COLOR = '#205A8C';
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+    
+    const SHARED_CHART_OPTIONS = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: FONT_COLOR,
+                    font: { size: 14, family: "'Noto Sans TC', sans-serif" }
+                }
+            },
+            tooltip: {
+                callbacks: { title: tooltipTitleCallback },
+                bodyFont: { family: "'Noto Sans TC', sans-serif" },
+                titleFont: { family: "'Noto Sans TC', sans-serif" }
+            }
+        }
+    };
+
+    function createCharts(lang) {
+        Object.values(chartInstances).forEach(chart => chart.destroy());
+
+        const t = translations[lang];
+
+        chartInstances.memoryIssues = new Chart(document.getElementById('memoryIssuesChart'), {
+            type: 'doughnut',
+            data: {
+                labels: [t.chartMemLeak, t.chartDangling],
+                datasets: [{
+                    label: t.chartMemErrors,
+                    data: [55, 45],
+                    backgroundColor: [PRIMARY_COLOR, SECONDARY_COLOR],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 2,
+                }]
+            },
+            options: { ...SHARED_CHART_OPTIONS, plugins: { ...SHARED_CHART_OPTIONS.plugins, legend: { position: 'bottom', ...SHARED_CHART_OPTIONS.plugins.legend } } }
+        });
+
+        chartInstances.ubTriggers = new Chart(document.getElementById('ubTriggersChart'), {
+            type: 'bar',
+            data: {
+                labels: [wrapLabel(t.chartUBOutOfBounds, 16), wrapLabel(t.chartUBNULL, 16), wrapLabel(t.chartUBSignedOverflow, 16), wrapLabel(t.chartUBDangling, 16)],
+                datasets: [{
+                    label: t.chartUBDanger,
+                    data: [90, 85, 70, 95],
+                    backgroundColor: [PRIMARY_COLOR, SECONDARY_COLOR, TERTIARY_COLOR, '#e53e3e'],
+                    borderRadius: 5,
+                }]
+            },
+            options: { ...SHARED_CHART_OPTIONS, indexAxis: 'y', scales: { x: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } }, y: { ticks: { color: FONT_COLOR, font: { size: 12 } }, grid: { display: false } } }, plugins: { ...SHARED_CHART_OPTIONS.plugins, legend: { display: false } } }
+        });
+
+        chartInstances.paradigm = new Chart(document.getElementById('paradigmChart'), {
+            type: 'radar',
+            data: {
+                labels: [t.chartParadigmProcedural, t.chartParadigmOOP, t.chartParadigmGP, t.chartParadigmFP, t.chartParadigmLowLevel],
+                datasets: [{
+                    label: 'C++', data: [9, 9, 10, 7, 10], fill: true, backgroundColor: 'rgba(242, 167, 27, 0.2)', borderColor: PRIMARY_COLOR, pointBackgroundColor: PRIMARY_COLOR, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: PRIMARY_COLOR
+                }, {
+                    label: t.chartParadigmJava, data: [6, 10, 7, 8, 3], fill: true, backgroundColor: 'rgba(62, 130, 195, 0.2)', borderColor: SECONDARY_COLOR, pointBackgroundColor: SECONDARY_COLOR, pointBorderColor: '#fff', pointHoverBackgroundColor: '#fff', pointHoverBorderColor: SECONDARY_COLOR
+                }]
+            },
+            options: { ...SHARED_CHART_OPTIONS, scales: { r: { angleLines: { color: GRID_COLOR }, grid: { color: GRID_COLOR }, pointLabels: { color: FONT_COLOR, font: { size: 14 } }, ticks: { color: FONT_COLOR, backdropColor: 'rgba(255, 255, 255, 0.75)' } } }, plugins: { ...SHARED_CHART_OPTIONS.plugins, legend: { position: 'bottom', ...SHARED_CHART_OPTIONS.plugins.legend } } }
+        });
+
+        chartInstances.modernCppComplexity = new Chart(document.getElementById('modernCppComplexityChart'), {
+            type: 'bar',
+            data: {
+                labels: [wrapLabel(t.chartModernMove, 16), wrapLabel(t.chartModernForward, 16), wrapLabel(t.chartModernConcepts, 16), wrapLabel(t.chartModernCoroutines, 16)],
+                datasets: [{
+                    label: t.chartModernAbstract, data: [8, 9, 7, 10], backgroundColor: PRIMARY_COLOR, stack: 'stack0'
+                }, {
+                    label: t.chartModernSolve, data: [10, 8, 9, 7], backgroundColor: SECONDARY_COLOR, stack: 'stack1'
+                }]
+            },
+            options: { ...SHARED_CHART_OPTIONS, scales: { x: { ticks: { color: FONT_COLOR }, grid: { display: false } }, y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }, stacked: false } }, plugins: { ...SHARED_CHART_OPTIONS.plugins, legend: { position: 'bottom', ...SHARED_CHART_OPTIONS.plugins.legend } } }
+        });
+    }
+
+    function switchLanguage(lang) {
+        currentLang = lang;
+        updateText(lang);
+        createCharts(lang);
+        document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+        document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+        switchLanguage('zh');
+    });
+
+</script>
+</body>
+</html>
