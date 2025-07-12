@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>歐洲失序的夏季：系統性風險資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F8F9FA;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #4A5568;
+        }
+        .kpi-box {
+            background-color: #FFFFFF;
+            border-left: 5px solid #FF5733;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        h1, h2, h3 {
+            font-weight: 900;
+        }
+        .text-balance {
+            text-wrap: balance;
+        }
+        .lang-switcher button.active {
+            background-color: #EF4444;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <div class="lang-switcher flex justify-end mb-4">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button" id="lang-zh" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-red-500 active">
+                    中文
+                </button>
+                <button type="button" id="lang-en" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-r border-gray-200 rounded-r-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-red-500">
+                    English
+                </button>
+            </div>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 mb-4 text-balance" data-key="mainTitle"></h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto text-balance" data-key="mainSubtitle"></p>
+        </header>
+
+        <main>
+            <section id="health" class="mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-slate-800" data-key="section1Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 md:col-span-1 lg:col-span-2">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s1Card1Title"></h3>
+                        <p class="text-gray-600 mb-6" data-key="s1Card1Text"></p>
+                        <div class="flex flex-col md:flex-row items-center justify-around space-y-4 md:space-y-0 md:space-x-4 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-5xl mb-2">☀️</span>
+                                <p class="font-bold" data-key="s1Flow1"></p>
+                            </div>
+                            <div class="flow-arrow hidden md:block">→</div>
+                            <div class="flow-arrow block md:hidden">↓</div>
+                            <div class="flex flex-col items-center p-4 bg-red-100 rounded-lg">
+                                <p class="font-bold text-red-700" data-key="s1Flow2"></p>
+                                <p class="text-sm text-red-600" data-key="s1Flow3"></p>
+                            </div>
+                            <div class="flow-arrow hidden md:block">+</div>
+                            <div class="flex flex-col items-center p-4 bg-blue-100 rounded-lg">
+                                <p class="font-bold text-blue-700" data-key="s1Flow4"></p>
+                                <p class="text-sm text-blue-600" data-key="s1Flow5"></p>
+                            </div>
+                            <div class="flow-arrow hidden md:block">→</div>
+                             <div class="flow-arrow block md:hidden">↓</div>
+                            <div class="flex flex-col items-center">
+                                 <span class="text-5xl mb-2">😫</span>
+                                <p class="font-bold" data-key="s1Flow6"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card p-6 flex flex-col justify-center items-center text-center kpi-box">
+                        <p class="text-lg text-gray-700" data-key="s1Kpi1"></p>
+                        <p class="text-7xl font-black text-red-600 my-2">1,700+</p>
+                        <p class="text-lg text-gray-700" data-key="s1Kpi2"></p>
+                        <p class="text-xs text-gray-500 mt-4" data-key="s1Kpi3"></p>
+                    </div>
+                     <div class="card p-6 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s1Card2Title"></h3>
+                         <p class="text-gray-600 mb-4" data-key="s1Card2Text"></p>
+                        <div class="chart-container mx-auto">
+                            <canvas id="uvRiskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="my-16 border-gray-300">
+
+            <section id="ecology" class="mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-slate-800" data-key="section2Title"></h2>
+                 <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12 text-balance" data-key="section2Subtitle"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s2Card1Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s2Card1Text"></p>
+                        <div class="chart-container">
+                            <canvas id="wildfireChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s2Card2Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s2Card2Text"></p>
+                         <div class="text-center py-8">
+                            <p class="text-lg text-gray-700" data-key="s2Kpi1"></p>
+                            <p class="text-7xl font-black text-cyan-600 my-2">5 km³</p>
+                            <p class="text-lg text-gray-700" data-key="s2Kpi2"></p>
+                            <p class="text-xs text-gray-500 mt-4" data-key="s2Kpi3"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-center" data-key="s2Card3Title"></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 items-center gap-4 text-center">
+                        <div class="p-4 bg-orange-100 rounded-lg">
+                            <span class="text-3xl">🔥</span>
+                            <h4 class="font-bold mt-2" data-key="s2Flow1Title"></h4>
+                            <p class="text-sm" data-key="s2Flow1Text"></p>
+                        </div>
+                        <div class="flow-arrow">→</div>
+                        <div class="p-4 bg-gray-200 rounded-lg">
+                            <span class="text-3xl">💨</span>
+                            <h4 class="font-bold mt-2" data-key="s2Flow2Title"></h4>
+                            <p class="text-sm" data-key="s2Flow2Text"></p>
+                        </div>
+                         <div class="flow-arrow">→</div>
+                        <div class="p-4 bg-cyan-100 rounded-lg">
+                           <span class="text-3xl">💧</span>
+                           <h4 class="font-bold mt-2" data-key="s2Flow3Title"></h4>
+                           <p class="text-sm" data-key="s2Flow3Text"></p>
+                        </div>
+                         <div class="flow-arrow block mx-auto my-4 md:hidden">↓</div>
+                         <div class="hidden md:block w-full border-t-4 border-dashed border-gray-400 col-span-5 my-4"></div>
+                         <div class="flow-arrow block mx-auto my-4 md:hidden">↓</div>
+                         <div class="p-4 bg-yellow-100 rounded-lg col-start-1 md:col-start-5">
+                             <span class="text-3xl">☀️</span>
+                            <h4 class="font-bold mt-2" data-key="s2Flow4Title"></h4>
+                            <p class="text-sm" data-key="s2Flow4Text"></p>
+                         </div>
+                         <div class="flow-arrow md:col-start-4 md:row-start-2">←</div>
+                         <div class="p-4 bg-green-100 rounded-lg md:col-start-3 md:row-start-2">
+                            <span class="text-3xl">🌲</span>
+                            <h4 class="font-bold mt-2" data-key="s2Flow5Title"></h4>
+                            <p class="text-sm" data-key="s2Flow5Text"></p>
+                         </div>
+                         <div class="flow-arrow md:col-start-2 md:row-start-2">←</div>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="my-16 border-gray-300">
+
+            <section id="economy" class="mb-16">
+                 <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-slate-800" data-key="section3Title"></h2>
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                     <div class="card p-6 lg:col-span-3">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s3Card1Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s3Card1Text"></p>
+                        <div class="chart-container">
+                            <canvas id="cropLossChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6 lg:col-span-2">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s3Card2Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s3Card2Text"></p>
+                        <div class="text-center py-4">
+                            <p class="text-lg text-gray-700" data-key="s3Kpi1"></p>
+                            <p class="text-7xl font-black text-amber-600 my-2">↓7.2%</p>
+                            <p class="text-lg text-gray-700" data-key="s3Kpi2"></p>
+                            <p class="text-xs text-gray-500 mt-4" data-key="s3Kpi3"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <hr class="my-16 border-gray-300">
+
+            <section id="energy" class="mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-slate-800" data-key="section4Title"></h2>
+                 <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12 text-balance" data-key="section4Subtitle"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s4Card1Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s4Card1Text"></p>
+                        <div class="chart-container">
+                            <canvas id="acPenetrationChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-2xl font-bold mb-4" data-key="s4Card2Title"></h3>
+                        <p class="text-gray-600 mb-4" data-key="s4Card2Text"></p>
+                        <div class="flex flex-col items-center justify-center space-y-4 text-center h-full pt-6">
+                           <div class="p-3 bg-red-100 rounded-full"><span class="text-3xl">🥵</span></div>
+                           <p class="font-bold" data-key="s4Flow1"></p>
+                           <div class="flow-arrow">↓</div>
+                           <div class="p-3 bg-blue-100 rounded-full"><span class="text-3xl">❄️</span></div>
+                           <p class="font-bold" data-key="s4Flow2"></p>
+                            <div class="flow-arrow">↓</div>
+                           <div class="p-3 bg-yellow-100 rounded-full"><span class="text-3xl">⚡️</span></div>
+                           <p class="font-bold" data-key="s4Flow3"></p>
+                           <div class="flow-arrow">↓</div>
+                           <div class="p-3 bg-gray-200 rounded-full"><span class="text-3xl">🏭</span></div>
+                           <p class="font-bold" data-key="s4Flow4"></p>
+                           <div class="w-24 h-24 border-2 border-dashed border-red-500 rounded-full flex items-center justify-center -ml-32 -mt-10">
+                               <span class="text-2xl text-red-500 transform -rotate-45">→</span>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+             <hr class="my-16 border-gray-300">
+
+            <section id="resilience" class="mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-slate-800" data-key="section5Title"></h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12 text-balance" data-key="section5Subtitle"></p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card p-6 text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                            <span class="text-4xl">🏢</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2" data-key="s5Card1Title"></h3>
+                        <p class="text-gray-600" data-key="s5Card1Text"></p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
+                            <span class="text-4xl">💧</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2" data-key="s5Card2Title"></h3>
+                        <p class="text-gray-600" data-key="s5Card2Text"></p>
+                    </div>
+                    <div class="card p-6 text-center">
+                         <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 mb-4">
+                            <span class="text-4xl">📜</span>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2" data-key="s5Card3Title"></h3>
+                        <p class="text-gray-600" data-key="s5Card3Text"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-300">
+             <p class="text-lg font-bold text-gray-800" data-key="footerTitle"></p>
+            <p class="text-sm text-gray-500 max-w-3xl mx-auto mt-2 text-balance" data-key="footerText"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        const translations = {
+            zh: {
+                mainTitle: "歐洲失序的夏季",
+                mainSubtitle: "曾經的田園牧歌，如今的系統性危機。長時間日照與極端高溫疊加，正成為一個強大的「威脅倍增器」，引發一場席捲公共衛生、生態與經濟的連鎖災難。",
+                section1Title: "第一節：生物層面的代價",
+                s1Card1Title: "內在時鐘的紊亂：荷爾蒙雙重束縛",
+                s1Card1Text: "長時間光照抑制了誘導睡眠的褪黑激素，同時提升了令人亢奮的血清素。這導致「亢奮卻疲憊」的矛盾狀態，引發失眠與焦慮，並與高溫的物理性攻擊相互加劇，形成一場無形的健康危機。",
+                s1Flow1: "長時日照",
+                s1Flow2: "抑制褪黑激素",
+                s1Flow3: "(睡眠困難)",
+                s1Flow4: "提升血清素",
+                s1Flow5: "(焦慮亢奮)",
+                s1Flow6: "健康危機",
+                s1Kpi1: "僅2022年一場熱浪",
+                s1Kpi2: "人在西班牙與葡萄牙<br>因熱壓力超額死亡。",
+                s1Kpi3: "資料來源: 報告 [10, 11, 12]",
+                s1Card2Title: "物理性的侵襲：紫外線與熱壓力",
+                s1Card2Text: "除了荷爾蒙失調，持續的強光和高溫直接對身體造成物理傷害，對老年人和慢性病患者的威脅尤為嚴重。",
+                uvRiskChartTitle: "長時日照對60歲以上族群的健康風險",
+                uvRiskChartLabel1: "皮膚癌風險 (60歲以上)",
+                uvRiskChartLabel2: "白內障風險 (60歲以上)",
+                uvRiskChartDataset: "相對風險增加",
+                section2Title: "第二節：壓力下的歐洲大陸",
+                section2Subtitle: "長時間日照正在觸發一個連鎖反應，其中每一個災難性後果都在為下一個災難的發生創造更有利的條件，使歐洲生態陷入不斷惡化的退化螺旋。",
+                s2Card1Title: "火焚時代的崛起",
+                s2Card1Text: "持續的太陽輻射將植被烘烤成易燃物，高溫和乾風則將星星之火吹成燎原之勢。歐洲正被推向一個「火焚時代」。",
+                wildfireChartTitle: "歐盟年度燒毀面積 (萬公頃)",
+                wildfireChartDataset: "歐盟燒毀面積",
+                s2Card2Title: "冰凍圈的危機",
+                s2Card2Text: "作為「歐洲水塔」的阿爾卑斯山冰川正以前所未有的速度消融，威脅著下游數千萬人的淡水供應。",
+                s2Kpi1: "2022年阿爾卑斯山冰量損失",
+                s2Kpi2: "創下歷史紀錄",
+                s2Kpi3: "資料來源: EEA [15]",
+                s2Card3Title: "生態退化螺旋：一個自我強化的惡性循環",
+                s2Flow1Title: "野火頻發",
+                s2Flow1Text: "釋放大量碳排",
+                s2Flow2Title: "黑碳沉降",
+                s2Flow2Text: "煙塵覆蓋冰川",
+                s2Flow3Title: "冰川加速融化",
+                s2Flow3Text: "降低表面反照率",
+                s2Flow4Title: "乾旱加劇",
+                s2Flow4Text: "河流枯竭，植被死亡",
+                s2Flow5Title: "燃料增加",
+                s2Flow5Text: "為下次野火提供條件",
+                section3Title: "第三節：焦土上的收成",
+                s3Card1Title: "三倍的困境：量化農業損失",
+                s3Card1Text: "熱浪與乾旱對歐洲作物產量的負面影響在近30年內增加了約兩倍，對農業造成毀滅性打擊，並推高食品價格。",
+                cropLossChartTitle: "極端天氣導致的作物產量損失百分比增加趨勢",
+                cropLossChartDataset1: "穀物損失",
+                cropLossChartDataset2: "水果與蔬菜損失 (估算)",
+                s3Card2Title: "枯萎麵包籃的地緣政治",
+                s3Card2Text: "歐洲的農業減產，其影響遠超大陸邊界。在俄烏戰爭導致全球糧食市場緊張的背景下，法國小麥的減產無疑是雪上加霜，成為全球系統中的「威脅倍增器」。",
+                s3Kpi1: "2022年法國軟質小麥出口",
+                s3Kpi2: "削弱全球糧食市場的緩衝能力",
+                s3Kpi3: "資料來源: 報告 [19]",
+                section4Title: "第四節：能源與基礎設施的悖論",
+                section4Subtitle: "致命熱浪正強行改變歐洲對空調的文化抗拒。然而，空調數量的爆炸性增長，正將本已緊張的電力系統推向極限，並製造出一個危險的惡性循環。",
+                s4Card1Title: "空調的窘境：適應差距",
+                s4Card1Text: "相較於中美，歐洲家庭空調普及率極低。但隨著熱浪成為常態，空調銷量正爆炸性增長，預計到2050年歐盟空調保有量將增長近三倍。",
+                acPenetrationChartTitle: "各國家用空調普及率估算 (%)",
+                acPenetrationChartDataset: "家庭空調普及率",
+                acPenetrationChartLabel1: "德國",
+                acPenetrationChartLabel2: "英國",
+                acPenetrationChartLabel3: "法國",
+                acPenetrationChartLabel4: "西班牙",
+                acPenetrationChartLabel5: "義大利",
+                acPenetrationChartLabel6: "美國 (對比)",
+                acPenetrationChartLabel7: "中國 (對比)",
+                s4Card2Title: "冷卻的惡性循環",
+                s4Card2Text: "為應對高溫而大規模使用空調，導致能源消耗急劇增加。若依賴化石燃料，將排放更多溫室氣體，導致更強烈的熱浪，使問題變得更糟。",
+                s4Flow1: "極端高溫",
+                s4Flow2: "大規模使用空調",
+                s4Flow3: "能源消耗劇增",
+                s4Flow4: "溫室氣體排放增加",
+                section5Title: "第五節：適應與韌性",
+                section5Subtitle: "面對新的夏季現實，歐洲社會正在建築、農業和政策層面艱難地學習如何與一個更炎熱、更漫長的夏季共存，尋求系統性的韌性。",
+                s5Card1Title: "建築環境革新",
+                s5Card1Text: "從最大化採光轉向動態光熱管理。採用木結構等隔熱材料，並推廣綠色屋頂、外部遮陽板等被動式設計策略，以降低室內熱增益。",
+                s5Card2Title: "氣候智慧型農業",
+                s5Card2Text: "選育耐高溫、耐乾旱的作物品種。推廣滴灌等精準灌溉技術，並發展溫室農業，以節約寶貴的水資源並確保產量穩定。",
+                s5Card3Title: "新的社會契約",
+                s5Card3Text: "建立熱浪預警系統，設立公共「清涼中心」，推動城市綠化。企業和個人也在調整工作和生活習慣，以適應新的氣候常態。",
+                footerTitle: "呼喚系統性韌性",
+                footerText: "歐洲夏季的挑戰是多維度、跨領域的系統性危機。孤立的、被動的解決方案注定無效。唯有將技術創新、前瞻性政策和文化反思相結合，建立整體的系統性韌性，才是唯一的出路。"
+            },
+            en: {
+                mainTitle: "Europe's Disordered Summer",
+                mainSubtitle: "Once idyllic, now a systemic crisis. Extended daylight, combined with extreme heat, is becoming a powerful 'threat multiplier,' triggering a cascading disaster across public health, ecology, and the economy.",
+                section1Title: "Section 1: The Biological Toll",
+                s1Card1Title: "The Disrupted Inner Clock: A Hormonal Double Bind",
+                s1Card1Text: "Prolonged daylight suppresses melatonin, the hormone that induces sleep, while boosting serotonin, which promotes alertness. This leads to a paradoxical 'wired but tired' state, causing insomnia and anxiety, exacerbated by the physical assault of high temperatures, creating an invisible health crisis.",
+                s1Flow1: "Extended Daylight",
+                s1Flow2: "Suppress Melatonin",
+                s1Flow3: "(Difficulty Sleeping)",
+                s1Flow4: "Boost Serotonin",
+                s1Flow5: "(Anxiety & Alertness)",
+                s1Flow6: "Health Crisis",
+                s1Kpi1: "In a single 2022 heatwave",
+                s1Kpi2: "people died from heat stress<br>in Spain and Portugal.",
+                s1Kpi3: "Source: Report [10, 11, 12]",
+                s1Card2Title: "The Physical Assault: UV Radiation & Heat Stress",
+                s1Card2Text: "Beyond hormonal disruption, constant intense light and heat directly inflict physical harm, posing a particularly severe threat to the elderly and those with chronic illnesses.",
+                uvRiskChartTitle: "Health Risks of Long Daylight for Population Over 60",
+                uvRiskChartLabel1: "Skin Cancer Risk (60+)",
+                uvRiskChartLabel2: "Cataract Risk (60+)",
+                uvRiskChartDataset: "Relative Risk Increase",
+                section2Title: "Section 2: A Continent Under Stress",
+                section2Subtitle: "Extended daylight is triggering a chain reaction where each disastrous consequence creates more favorable conditions for the next, plunging European ecosystems into a worsening spiral of degradation.",
+                s2Card1Title: "The Rise of the Pyrocene",
+                s2Card1Text: "Continuous solar radiation bakes vegetation into tinder, while high temperatures and dry winds turn sparks into infernos. Europe is being pushed into a 'Pyrocene' era.",
+                wildfireChartTitle: "EU Annual Burned Area (10k hectares)",
+                wildfireChartDataset: "EU Burned Area",
+                s2Card2Title: "Crisis in the Cryosphere",
+                s2Card2Text: "The Alpine glaciers, Europe's 'water towers,' are melting at an unprecedented rate, threatening the freshwater supply for tens of millions downstream.",
+                s2Kpi1: "Alpine ice volume loss in 2022",
+                s2Kpi2: "A new historical record",
+                s2Kpi3: "Source: EEA [15]",
+                s2Card3Title: "The Degradation Spiral: A Self-Reinforcing Vicious Cycle",
+                s2Flow1Title: "Frequent Wildfires",
+                s2Flow1Text: "Release massive carbon",
+                s2Flow2Title: "Black Carbon Deposition",
+                s2Flow2Text: "Soot covers glaciers",
+                s2Flow3Title: "Accelerated Glacier Melt",
+                s2Flow3Text: "Reduces surface albedo",
+                s2Flow4Title: "Worsening Drought",
+                s2Flow4Text: "Rivers dry up, vegetation dies",
+                s2Flow5Title: "Increased Fuel Load",
+                s2Flow5Text: "Sets stage for next fire",
+                section3Title: "Section 3: Harvest on Scorched Earth",
+                s3Card1Title: "A Threefold Predicament: Quantifying Agricultural Losses",
+                s3Card1Text: "The negative impact of heatwaves and droughts on European crop yields has roughly tripled in the last 30 years, dealing a devastating blow to agriculture and driving up food prices.",
+                cropLossChartTitle: "Trend of Crop Yield Loss Percentage due to Extreme Weather",
+                cropLossChartDataset1: "Cereal Losses",
+                cropLossChartDataset2: "Fruit & Veg Losses (Est.)",
+                s3Card2Title: "Geopolitics of a Wilting Breadbasket",
+                s3Card2Text: "Europe's agricultural decline has impacts far beyond its borders. Against the backdrop of a global food market strained by the war in Ukraine, France's reduced wheat harvest is a 'threat multiplier' in the global system.",
+                s3Kpi1: "2022 French soft wheat exports",
+                s3Kpi2: "Weakening the global food market's buffer",
+                s3Kpi3: "Source: Report [19]",
+                section4Title: "Section 4: The Energy & Infrastructure Paradox",
+                section4Subtitle: "Deadly heatwaves are forcibly changing Europe's cultural resistance to air conditioning. However, the explosive growth in A/C units is pushing already strained power grids to their limits, creating a dangerous vicious cycle.",
+                s4Card1Title: "The A/C Dilemma: An Adaptation Gap",
+                s4Card1Text: "Compared to the US and China, A/C penetration in European homes is extremely low. But as heatwaves become the norm, sales are exploding, with EU A/C stock projected to nearly triple by 2050.",
+                acPenetrationChartTitle: "Estimated Household A/C Penetration Rate (%) by Country",
+                acPenetrationChartDataset: "Household A/C Penetration",
+                acPenetrationChartLabel1: "Germany",
+                acPenetrationChartLabel2: "United Kingdom",
+                acPenetrationChartLabel3: "France",
+                acPenetrationChartLabel4: "Spain",
+                acPenetrationChartLabel5: "Italy",
+                acPenetrationChartLabel6: "USA (for comparison)",
+                acPenetrationChartLabel7: "China (for comparison)",
+                s4Card2Title: "The Vicious Cycle of Cooling",
+                s4Card2Text: "Massive A/C use to combat heat leads to a sharp increase in energy consumption. If met by fossil fuels, it emits more greenhouse gases, leading to even more intense heatwaves, making the problem worse.",
+                s4Flow1: "Extreme Heat",
+                s4Flow2: "Mass A/C Use",
+                s4Flow3: "Energy Consumption Spikes",
+                s4Flow4: "GHG Emissions Increase",
+                section5Title: "Section 5: Adaptation and Resilience",
+                section5Subtitle: "Facing the new summer reality, European society is painstakingly learning to coexist with a hotter, longer summer, seeking systemic resilience in architecture, agriculture, and policy.",
+                s5Card1Title: "Revolution in the Built Environment",
+                s5Card1Text: "Shifting from maximizing light to dynamic thermal management. Using insulating materials like timber and promoting passive strategies like green roofs and external shading to reduce indoor heat gain.",
+                s5Card2Title: "Climate-Smart Agriculture",
+                s5Card2Text: "Breeding heat and drought-tolerant crop varieties. Promoting precision irrigation like drip systems and developing greenhouse agriculture to conserve precious water and ensure stable yields.",
+                s5Card3Title: "A New Social Contract",
+                s5Card3Text: "Establishing heatwave warning systems, creating public 'cooling centers,' and promoting urban greening. Businesses and individuals are also adjusting work and life habits to the new climate normal.",
+                footerTitle: "A Call for Systemic Resilience",
+                footerText: "Europe's summer challenge is a multidimensional, cross-domain systemic crisis. Isolated, reactive solutions are doomed to fail. Only by combining technological innovation, forward-thinking policy, and cultural reflection to build holistic, systemic resilience is there a way forward."
+            }
+        };
+
+        let currentLang = 'zh';
+        const charts = {};
+
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+            document.querySelectorAll('[data-key]').forEach(elem => {
+                const key = elem.getAttribute('data-key');
+                if (translations[lang] && translations[lang][key]) {
+                    elem.innerHTML = translations[lang][key];
+                }
+            });
+            
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            renderAllCharts(lang);
+        }
+
+        function wrapLabel(label, maxWidth = 16) {
+            if (typeof label !== 'string' || label.length <= maxWidth) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine.length > 0) {
+                lines.push(currentLine);
+            }
+            return lines;
+        }
+        
+        const tooltipTitleCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            if (!item) return '';
+                            let label = item.chart.data.labels[item.dataIndex];
+                            return Array.isArray(label) ? label.join(' ') : label;
+                        }
+                    }
+                }
+            }
+        };
+
+        const chartOptionsBase = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: tooltipTitleCallback.plugins,
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#6B7280' }, grid: { color: '#E5E7EB' } },
+                x: { ticks: { color: '#6B7280' }, grid: { display: false } }
+            }
+        };
+        
+        const chartOptionsNoXGrid = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'top' } },
+            scales: {
+                y: { beginAtZero: true, ticks: { color: '#6B7280', callback: function(value) { return value + '%'; }}, grid: { color: '#E5E7EB' } },
+                x: { ticks: { color: '#6B7280' }, grid: { display: false } }
+            }
+        };
+        
+        const vibrantPalette = {
+            red: '#FF6384', orange: '#FF9F40', yellow: '#FFCD56',
+            green: '#4BC0C0', blue: '#36A2EB', purple: '#9966FF', grey: '#C9CBCF'
+        };
+
+        function renderUVRiskChart(lang) {
+            if (charts.uvRisk) charts.uvRisk.destroy();
+            const ctx = document.getElementById('uvRiskChart').getContext('2d');
+            charts.uvRisk = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [translations[lang].uvRiskChartLabel1, translations[lang].uvRiskChartLabel2],
+                    datasets: [{
+                        label: translations[lang].uvRiskChartDataset,
+                        data: [85, 70],
+                        backgroundColor: [vibrantPalette.red, vibrantPalette.orange],
+                        borderColor: ['#FFFFFF'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...chartOptionsBase, indexAxis: 'y',
+                    plugins: {
+                        ...tooltipTitleCallback.plugins, legend: { display: false },
+                        title: { display: true, text: translations[lang].uvRiskChartTitle, color: '#1F2937', font: { size: 14 } }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { color: '#6B7280' , callback: function(value) { return value + '%'; }}, grid: { color: '#E5E7EB' } },
+                        y: { ticks: { color: '#6B7280' }, grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function renderWildfireChart(lang) {
+            if (charts.wildfire) charts.wildfire.destroy();
+            const ctx = document.getElementById('wildfireChart').getContext('2d');
+            charts.wildfire = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2017', '2018', '2019', '2020', '2021', '2022'],
+                    datasets: [{
+                        label: translations[lang].wildfireChartDataset,
+                        data: [40, 58, 40, 34, 50, 90],
+                        fill: true,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: vibrantPalette.red,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    ...chartOptionsBase,
+                    plugins: {
+                        ...tooltipTitleCallback.plugins, legend: { display: false },
+                        title: { display: true, text: translations[lang].wildfireChartTitle, color: '#1F2937', font: { size: 14 } }
+                    }
+                }
+            });
+        }
+        
+        function renderCropLossChart(lang) {
+            if (charts.cropLoss) charts.cropLoss.destroy();
+            const ctx = document.getElementById('cropLossChart').getContext('2d');
+            charts.cropLoss = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1964-1990', '1991-2015'],
+                    datasets: [
+                        { label: translations[lang].cropLossChartDataset1, data: [2.2, 7.3], backgroundColor: vibrantPalette.orange },
+                        { label: translations[lang].cropLossChartDataset2, data: [3, 15], backgroundColor: vibrantPalette.red }
+                    ]
+                },
+                options: {
+                    ...chartOptionsNoXGrid,
+                    plugins: {
+                        ...tooltipTitleCallback.plugins, legend: { position: 'top' },
+                        title: { display: true, text: translations[lang].cropLossChartTitle, color: '#1F2937', font: { size: 14 } }
+                    }
+                }
+            });
+        }
+        
+        function renderACPenetrationChart(lang) {
+            if (charts.acPenetration) charts.acPenetration.destroy();
+            const ctx = document.getElementById('acPenetrationChart').getContext('2d');
+            const acLabelsRaw = [
+                translations[lang].acPenetrationChartLabel1, translations[lang].acPenetrationChartLabel2,
+                translations[lang].acPenetrationChartLabel3, translations[lang].acPenetrationChartLabel4,
+                translations[lang].acPenetrationChartLabel5, translations[lang].acPenetrationChartLabel6,
+                translations[lang].acPenetrationChartLabel7
+            ];
+            const acLabelsWrapped = acLabelsRaw.map(label => wrapLabel(label));
+            charts.acPenetration = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: acLabelsWrapped,
+                    datasets: [{
+                        label: translations[lang].acPenetrationChartDataset,
+                        data: [10, 10, 25, 40, 40, 90, 60],
+                        backgroundColor: [
+                            vibrantPalette.blue, vibrantPalette.blue, vibrantPalette.blue, vibrantPalette.blue,
+                            vibrantPalette.blue, vibrantPalette.grey, vibrantPalette.grey
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptionsNoXGrid,
+                    plugins: {
+                        ...tooltipTitleCallback.plugins, legend: { display: false },
+                        title: { display: true, text: translations[lang].acPenetrationChartTitle, color: '#1F2937', font: { size: 14 } }
+                    }
+                }
+            });
+        }
+
+        function renderAllCharts(lang) {
+            renderUVRiskChart(lang);
+            renderWildfireChart(lang);
+            renderCropLossChart(lang);
+            renderACPenetrationChart(lang);
+        }
+
+        document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+        document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+
+        // Initial load
+        switchLanguage('zh');
+
+    </script>
+
+</body>
+</html>
