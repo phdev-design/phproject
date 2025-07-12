@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>正在展開的危機：全球暖化數據儀表板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #001219;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 384px;
+            }
+        }
+        .kpi-value {
+            font-weight: 900;
+            font-size: 3.75rem;
+            line-height: 1;
+            color: #EE9B00;
+        }
+        .kpi-label {
+            font-weight: 700;
+            color: #94D2BD;
+        }
+        .card {
+            background-color: #003049;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            color: #E0FBFC;
+            border: 1px solid #0A9396;
+        }
+        h1, h2, h3 {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-weight: 900;
+        }
+        .text-accent { color: #EE9B00; }
+        .bg-accent { background-color: #EE9B00; }
+        .text-primary { color: #94D2BD; }
+        .text-secondary { color: #E9D8A6; }
+        .border-accent { border-color: #CA6702; }
+    </style>
+</head>
+<body class="text-white">
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-12 relative">
+            <h1 class="text-4xl md:text-6xl font-black mb-2 text-primary" data-lang-key="headerTitle"></h1>
+            <p class="text-lg md:text-xl text-secondary" data-lang-key="headerSubtitle"></p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-darkOrange transition-colors">
+                English
+            </button>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="warming-trend">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section1Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">+1.1°C</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi1"></span>
+                    </div>
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">3x</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi2"></span>
+                    </div>
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">100%</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi3"></span>
+                    </div>
+                </div>
+                <div class="card md:col-span-2">
+                    <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="chart1Title"></h3>
+                    <p class="text-center text-gray-300 mb-4 max-w-3xl mx-auto" data-lang-key="chart1Desc"></p>
+                    <div class="chart-container">
+                        <canvas id="tempAnomalyChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t-2 border-dashed border-gray-700 my-16">
+
+            <section id="ghg-sources">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section2Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="chart2Title"></h3>
+                        <p class="text-center text-gray-300 mb-4" data-lang-key="chart2Desc"></p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="emissionsBySectorChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="chart3Title"></h3>
+                        <p class="text-center text-gray-300 mb-4" data-lang-key="chart3Desc"></p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="gwpChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="border-t-2 border-dashed border-gray-700 my-16">
+
+            <section id="physical-impacts">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section3Title"></h2>
+                 <div class="card mb-8">
+                     <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="oceanTripleThreatTitle"></h3>
+                     <p class="text-center text-gray-300 mb-6 max-w-3xl mx-auto" data-lang-key="oceanTripleThreatDesc"></p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                        <div class="bg-[#005f73] p-6 rounded-lg">
+                            <div class="text-6xl mb-2">🌡️</div>
+                            <h4 class="text-xl font-bold text-secondary" data-lang-key="oceanWarmingTitle"></h4>
+                            <p class="mt-2 text-gray-300" data-lang-key="oceanWarmingDesc"></p>
+                        </div>
+                        <div class="bg-[#005f73] p-6 rounded-lg">
+                           <div class="text-6xl mb-2">💧</div>
+                            <h4 class="text-xl font-bold text-secondary" data-lang-key="seaLevelRiseTitle"></h4>
+                            <p class="mt-2 text-gray-300" data-lang-key="seaLevelRiseDesc"></p>
+                        </div>
+                        <div class="bg-[#005f73] p-6 rounded-lg">
+                           <div class="text-6xl mb-2">🧪</div>
+                            <h4 class="text-xl font-bold text-secondary" data-lang-key="oceanAcidificationTitle"></h4>
+                            <p class="mt-2 text-gray-300" data-lang-key="oceanAcidificationDesc"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t-2 border-dashed border-gray-700 my-16">
+
+            <section id="ecological-impacts">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section4Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="card">
+                        <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="chart4Title"></h3>
+                        <p class="text-center text-gray-300 mb-4" data-lang-key="chart4Desc"></p>
+                         <div class="chart-container h-64 md:h-80">
+                            <canvas id="coralReefChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                         <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="extinctionRiskTitle"></h3>
+                         <p class="text-center text-gray-300 mb-4" data-lang-key="extinctionRiskDesc"></p>
+                        <div class="p-4 text-center">
+                            <div class="text-6xl font-black text-accent mb-4">14%</div>
+                            <h4 class="text-xl font-bold text-secondary" data-lang-key="extinctionRiskLabel"></h4>
+                             <div class="grid grid-cols-10 gap-2 mt-6 max-w-sm mx-auto">
+                                <script>
+                                    for(let i=0; i<100; i++) {
+                                        const emoji = '�';
+                                        const colorClass = i < 14 ? 'opacity-20' : 'opacity-100';
+                                        document.write(`<div class="text-2xl ${colorClass}">${emoji}</div>`);
+                                    }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t-2 border-dashed border-gray-700 my-16">
+
+            <section id="human-cost">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section5Title"></h2>
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">~$417B</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi4"></span>
+                    </div>
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">Up to 80%</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi5"></span>
+                    </div>
+                     <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">26.4M</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi6"></span>
+                    </div>
+                    <div class="card flex flex-col justify-center items-center p-6">
+                        <span class="kpi-value">Billions</span>
+                        <span class="kpi-label mt-2" data-lang-key="kpi7"></span>
+                    </div>
+                </div>
+            </section>
+            
+            <hr class="border-t-2 border-dashed border-gray-700 my-16">
+
+            <section id="the-future">
+                <h2 class="text-3xl font-bold text-center mb-8 text-primary" data-lang-key="section6Title"></h2>
+                <div class="card mb-8">
+                     <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="comparisonTitle"></h3>
+                     <p class="text-center text-gray-300 mb-6 max-w-3xl mx-auto" data-lang-key="comparisonDesc"></p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b-2 border-gray-600">
+                                    <th class="p-3 text-secondary" data-lang-key="tableHeader1"></th>
+                                    <th class="p-3 bg-[#0A9396] text-white rounded-t-lg">1.5°C Warming</th>
+                                    <th class="p-3 bg-[#CA6702] text-white rounded-t-lg">2.0°C Warming</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-700">
+                                    <td class="p-3 font-bold" data-lang-key="tableRow1Col1"></td>
+                                    <td class="p-3" data-lang-key="tableRow1Col2"></td>
+                                    <td class="p-3" data-lang-key="tableRow1Col3"></td>
+                                </tr>
+                                <tr class="border-b border-gray-700">
+                                    <td class="p-3 font-bold" data-lang-key="tableRow2Col1"></td>
+                                    <td class="p-3" data-lang-key="tableRow2Col2"></td>
+                                    <td class="p-3" data-lang-key="tableRow2Col3"></td>
+                                </tr>
+                                 <tr class="border-b border-gray-700">
+                                    <td class="p-3 font-bold" data-lang-key="tableRow3Col1"></td>
+                                    <td class="p-3" data-lang-key="tableRow3Col2"></td>
+                                    <td class="p-3" data-lang-key="tableRow3Col3"></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-bold" data-lang-key="tableRow4Col1"></td>
+                                    <td class="p-3" data-lang-key="tableRow4Col2"></td>
+                                    <td class="p-3" data-lang-key="tableRow4Col3"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                     <h3 class="text-2xl font-bold mb-4 text-center text-secondary" data-lang-key="strategyTitle"></h3>
+                      <p class="text-center text-gray-300 mb-6 max-w-3xl mx-auto" data-lang-key="strategyDesc"></p>
+                     <div class="flex flex-col md:flex-row justify-center items-stretch gap-8">
+                        <div class="flex-1 p-6 bg-[#005f73] rounded-lg text-center">
+                            <h4 class="text-2xl font-bold mb-3 text-secondary" data-lang-key="mitigationTitle"></h4>
+                            <p class="mb-4" data-lang-key="mitigationDesc"></p>
+                            <ul class="space-y-2 text-left list-disc list-inside">
+                                <li data-lang-key="mitigationPoint1"></li>
+                                <li data-lang-key="mitigationPoint2"></li>
+                                <li data-lang-key="mitigationPoint3"></li>
+                                <li data-lang-key="mitigationPoint4"></li>
+                            </ul>
+                        </div>
+                        <div class="flex items-center justify-center text-4xl font-bold text-accent">&</div>
+                        <div class="flex-1 p-6 bg-[#005f73] rounded-lg text-center">
+                            <h4 class="text-2xl font-bold mb-3 text-secondary" data-lang-key="adaptationTitle"></h4>
+                             <p class="mb-4" data-lang-key="adaptationDesc"></p>
+                            <ul class="space-y-2 text-left list-disc list-inside">
+                                <li data-lang-key="adaptationPoint1"></li>
+                                <li data-lang-key="adaptationPoint2"></li>
+                                <li data-lang-key="adaptationPoint3"></li>
+                                <li data-lang-key="adaptationPoint4"></li>
+                            </ul>
+                        </div>
+                     </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-700">
+            <p class="text-secondary" data-lang-key="footerSource"></p>
+            <p class="text-gray-400 mt-2" data-lang-key="footerClosing"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        let currentLanguage = 'zh';
+        const charts = {};
+
+        const textData = {
+            headerTitle: {
+                zh: '正在展開的危機',
+                en: 'An Unfolding Crisis'
+            },
+            headerSubtitle: {
+                zh: '一份關於溫室效應與全球暖化的數據儀表板',
+                en: 'A Data Dashboard on the Greenhouse Effect & Global Warming'
+            },
+            section1Title: {
+                zh: '第一部分：不容置疑的暖化趨勢',
+                en: 'Part 1: The Unmistakable Warming Trend'
+            },
+            kpi1: {
+                zh: '自1850年以來全球平均升溫',
+                en: 'Global Avg. Temp. Rise Since 1850'
+            },
+            kpi2: {
+                zh: '自1982年來暖化速率增長',
+                en: 'Warming Rate Increase Since 1982'
+            },
+            kpi3: {
+                zh: '過去十年均為史上最熱',
+                en: 'Hottest Decade on Record'
+            },
+            chart1Title: {
+                zh: '全球溫度距平 (1880-2024)',
+                en: 'Global Temperature Anomaly (1880-2024)'
+            },
+            chart1Desc: {
+                zh: '此圖表顯示了每年全球地表溫度與1951-1980年平均值的差異。近年來壓倒性的紅色柱體清晰地表明，地球正以前所未有的速度持續暖化，這是地球能量失衡的直接物理證據。',
+                en: 'This chart shows the difference in global surface temperature relative to the 1951-1980 average. The overwhelming red bars in recent years clearly indicate the planet is warming at an unprecedented rate, direct physical evidence of Earth\'s energy imbalance.'
+            },
+            section2Title: {
+                zh: '第二部分：溫室氣體的元兇',
+                en: 'Part 2: The Culprits of Greenhouse Gases'
+            },
+            chart2Title: {
+                zh: '全球溫室氣體排放源 (依部門)',
+                en: 'Global Greenhouse Gas Emissions by Sector'
+            },
+            chart2Desc: {
+                zh: '能源部門是溫室氣體排放的最大來源，佔比超過四分之三。這凸顯了從化石燃料向再生能源的轉型是應對氣候變遷的核心任務。農業、工業與廢棄物處理也是重要的排放源。',
+                en: 'The energy sector is the largest source of emissions, accounting for over three-quarters of the total. This highlights the transition from fossil fuels to renewables as the core task in tackling climate change. Agriculture, industry, and waste are also significant sources.'
+            },
+            chart3Title: {
+                zh: '關鍵溫室氣體的暖化潛能 (GWP)',
+                en: 'Global Warming Potential (GWP) of Key Greenhouse Gases'
+            },
+            chart3Desc: {
+                zh: '不同溫室氣體的暖化效應差異巨大。此圖以二氧化碳為基準(1)，比較了主要氣體的百年全球暖化潛能。甲烷和氧化亞氮的效應是二氧化碳的數十甚至數百倍，凸顯了控制多種氣體排放的重要性。',
+                en: 'The warming effect of different greenhouse gases varies greatly. This chart compares the 100-year GWP of major gases, using CO2 as a baseline (1). The effects of methane and nitrous oxide are tens to hundreds of times greater than CO2, highlighting the importance of controlling multiple gases.'
+            },
+            section3Title: {
+                zh: '第三部分：地球物理系統的連鎖後果',
+                en: 'Part 3: Cascading Consequences for Earth\'s Physical Systems'
+            },
+            oceanTripleThreatTitle: {
+                zh: '海洋的三重打擊',
+                en: 'The Ocean\'s Triple Threat'
+            },
+            oceanTripleThreatDesc: {
+                zh: '海洋吸收了約90%的額外熱能，減緩了地表升溫，但自身正承受著暖化、酸化和海平面上升的巨大壓力。這些變化正在重塑海洋生態，威脅全球沿岸社區。',
+                en: 'The ocean has absorbed about 90% of excess heat, slowing surface warming but facing immense stress from warming, acidification, and sea-level rise. These changes are reshaping marine ecosystems and threatening coastal communities worldwide.'
+            },
+            oceanWarmingTitle: {
+                zh: '海洋暖化',
+                en: 'Ocean Warming'
+            },
+            oceanWarmingDesc: {
+                zh: '超過90%的額外熱能被海洋吸收，導致海洋熱浪頻發，威脅海洋生物。',
+                en: 'Over 90% of excess heat is absorbed by the ocean, causing frequent marine heatwaves that threaten marine life.'
+            },
+            seaLevelRiseTitle: {
+                zh: '海平面上升',
+                en: 'Sea Level Rise'
+            },
+            seaLevelRiseDesc: {
+                zh: '因海水熱膨脹與冰川融化，上升速率自1993年來已加倍，威脅沿海城市。',
+                en: 'Due to thermal expansion and melting glaciers, the rate of rise has doubled since 1993, threatening coastal cities.'
+            },
+            oceanAcidificationTitle: {
+                zh: '海洋酸化',
+                en: 'Ocean Acidification'
+            },
+            oceanAcidificationDesc: {
+                zh: '海洋吸收了1/4的人為$CO_2$，酸度增加30%，腐蝕珊瑚與貝類骨骼。',
+                en: 'The ocean has absorbed 1/4 of anthropogenic CO2, increasing acidity by 30% and corroding the shells of corals and shellfish.'
+            },
+            section4Title: {
+                zh: '第四部分：瀕危的生物圈',
+                en: 'Part 4: The Biosphere in Peril'
+            },
+            chart4Title: {
+                zh: '珊瑚礁的命運：升溫1.5°C下的浩劫',
+                en: 'Fate of Coral Reefs: Devastation at 1.5°C Warming'
+            },
+            chart4Desc: {
+                zh: '珊瑚礁是海洋中的生物多樣性熱點，但對溫度極其敏感。即使達成《巴黎協定》最雄心勃勃的1.5°C目標，全球仍將有高達70-90%的珊瑚礁因高溫導致的白化而消失，這是一場生態系統的災難。',
+                en: 'Coral reefs are marine biodiversity hotspots but are extremely sensitive to temperature. Even if the ambitious 1.5°C Paris Agreement target is met, 70-90% of global coral reefs will disappear due to bleaching, an ecological catastrophe.'
+            },
+            extinctionRiskTitle: {
+                zh: '物種滅絕風險',
+                en: 'Species Extinction Risk'
+            },
+            extinctionRiskDesc: {
+                zh: '氣候變遷正驅動第六次大滅絕。在升溫1.5°C情景下，全球14%的陸地物種面臨高度滅絕風險。氣候變化速度已超過許多物種的適應能力，從根本上改寫地球的生命規則。',
+                en: 'Climate change is driving the sixth mass extinction. At 1.5°C warming, 14% of terrestrial species face a high risk of extinction. The pace of change exceeds many species\' ability to adapt, fundamentally rewriting Earth\'s rules of life.'
+            },
+            extinctionRiskLabel: {
+                zh: '陸地物種面臨高度滅絕風險 (於1.5°C升溫)',
+                en: 'of Terrestrial Species at High Risk of Extinction (at 1.5°C warming)'
+            },
+            section5Title: {
+                zh: '第五部分：人類社會的代價',
+                en: 'Part 5: The Cost to Human Society'
+            },
+            kpi4: {
+                zh: '2024年全球自然災害經濟損失',
+                en: 'Global Economic Losses from Natural Disasters in 2024'
+            },
+            kpi5: {
+                zh: '至2050年全球糧食價格可能漲幅',
+                en: 'Potential Rise in Global Food Prices by 2050'
+            },
+            kpi6: {
+                zh: '2023年因災害新增的境內流離失所人次',
+                en: 'New Internal Displacements due to Disasters in 2023'
+            },
+            kpi7: {
+                zh: '人口暴露於新的傳染病風險',
+                en: 'People Exposed to New Infectious Disease Risks'
+            },
+            section6Title: {
+                zh: '第六部分：抉擇的十字路口',
+                en: 'Part 6: Crossroads of Choice'
+            },
+            comparisonTitle: {
+                zh: '0.5°C的差異：1.5°C vs 2°C 的世界',
+                en: 'The 0.5°C Difference: A 1.5°C vs 2°C World'
+            },
+            comparisonDesc: {
+                zh: '將升溫限制在1.5°C而非2°C，能顯著降低風險。這0.5°C的差異，代表著千萬人的家園、整個珊瑚礁生態系的存亡，以及極端天氣的嚴重程度。每一度的升溫都至關重要。',
+                en: 'Limiting warming to 1.5°C instead of 2°C significantly reduces risks. This 0.5°C difference represents the homes of millions, the survival of entire coral reef ecosystems, and the severity of extreme weather. Every fraction of a degree matters.'
+            },
+            tableHeader1: {
+                zh: '影響領域',
+                en: 'Impact Area'
+            },
+            tableRow1Col1: { zh: '極端高溫', en: 'Extreme Heat' },
+            tableRow1Col2: { zh: '中緯度熱日升溫 ~3°C', en: 'Hottest days in mid-latitudes warm by ~3°C' },
+            tableRow1Col3: { zh: '中緯度熱日升溫 ~4°C', en: 'Hottest days in mid-latitudes warm by ~4°C' },
+            tableRow2Col1: { zh: '海平面上升', en: 'Sea Level Rise' },
+            tableRow2Col2: { zh: '減少約1000萬人暴露風險', en: '~10 million fewer people exposed to risk' },
+            tableRow2Col3: { zh: '比1.5°C情景高出0.1米', en: '0.1 meters higher than 1.5°C scenario' },
+            tableRow3Col1: { zh: '珊瑚礁', en: 'Coral Reefs' },
+            tableRow3Col2: { zh: '消失 70-90%', en: '70-90% decline' },
+            tableRow3Col3: { zh: '消失 >99%', en: '>99% decline' },
+            tableRow4Col1: { zh: '北極夏季海冰', en: 'Arctic Summer Sea Ice' },
+            tableRow4Col2: { zh: '每百年1次無冰', en: '1 ice-free summer per century' },
+            tableRow4Col3: { zh: '每十年至少1次無冰', en: 'At least 1 ice-free summer per decade' },
+            strategyTitle: {
+                zh: '雙軌戰略：減緩與調適',
+                en: 'Dual Strategy: Mitigation & Adaptation'
+            },
+            strategyDesc: {
+                zh: '應對氣候危機需要雙管齊下。「減緩」是從根本上減少溫室氣體排放，而「調適」是為已不可避免的影響做好準備。兩者相輔相成，缺一不可。強力的減緩行動是避免觸及「調適極限」的唯一途徑。',
+                en: 'Tackling the climate crisis requires a two-pronged approach. "Mitigation" reduces greenhouse gas emissions at the source, while "Adaptation" prepares for unavoidable impacts. They are complementary and essential. Strong mitigation is the only way to avoid exceeding the limits of adaptation.'
+            },
+            mitigationTitle: { zh: '減緩 (Mitigation)', en: 'Mitigation' },
+            mitigationDesc: { zh: '從根本解決問題', en: 'Tackling the root cause' },
+            mitigationPoint1: { zh: '能源轉型：大規模部署再生能源', en: 'Energy Transition: Mass deployment of renewables' },
+            mitigationPoint2: { zh: '提高能源效率：用更少能源做更多事', en: 'Energy Efficiency: Doing more with less energy' },
+            mitigationPoint3: { zh: '保護森林：增強自然碳匯', en: 'Forest Protection: Enhancing natural carbon sinks' },
+            mitigationPoint4: { zh: '循環經濟：減少資源消耗', en: 'Circular Economy: Reducing resource consumption' },
+            adaptationTitle: { zh: '調適 (Adaptation)', en: 'Adaptation' },
+            adaptationDesc: { zh: '為不可避免的影響做準備', en: 'Preparing for unavoidable impacts' },
+            adaptationPoint1: { zh: '基礎設施：建造防洪堤、海堤', en: 'Infrastructure: Building flood defenses and sea walls' },
+            adaptationPoint2: { zh: '預警系統：預警熱浪、洪水', en: 'Early Warning Systems: For heatwaves and floods' },
+            adaptationPoint3: { zh: '農業創新：開發抗旱作物品種', en: 'Agricultural Innovation: Developing drought-resistant crops' },
+            adaptationPoint4: { zh: '自然解方：恢復濕地、紅樹林', en: 'Nature-based Solutions: Restoring wetlands and mangroves' },
+            footerSource: {
+                zh: '數據來源：聯合國政府間氣候變遷專門委員會(IPCC)、NASA、NOAA等權威機構報告。',
+                en: 'Data Sources: Reports from IPCC, NASA, NOAA, and other authoritative bodies.'
+            },
+            footerClosing: {
+                zh: '機會之窗正在快速關閉。關鍵十年的行動將決定我們共同的未來。',
+                en: 'The window of opportunity is closing fast. The actions of this critical decade will determine our collective future.'
+            }
+        };
+
+        const chartConfigs = {
+            tempAnomaly: {
+                zh: {
+                    title: '全球溫度距平 (°C)',
+                    yAxisLabel: '相對於1951-1980平均值的距平 (°C)'
+                },
+                en: {
+                    title: 'Temperature Anomaly (°C)',
+                    yAxisLabel: 'Anomaly (°C) vs. 1951-1980 Mean'
+                }
+            },
+            emissionsBySector: {
+                zh: {
+                    labels: ['能源 (發電、交通、建築)', '農業、林業與土地利用', '工業製程', '廢棄物處理']
+                },
+                en: {
+                    labels: ['Energy (Power, Transport, Buildings)', 'Agriculture, Forestry & Land Use', 'Industrial Processes', 'Waste Management']
+                }
+            },
+            gwp: {
+                zh: {
+                    label: '百年全球暖化潛能 (GWP)',
+                    labels: ['二氧化碳 (CO2)', '甲烷 (CH4)', '氧化亞氮 (N2O)'],
+                    xAxisLabel: 'GWP (對數尺度)'
+                },
+                en: {
+                    label: '100-Year Global Warming Potential (GWP)',
+                    labels: ['Carbon Dioxide (CO2)', 'Methane (CH4)', 'Nitrous Oxide (N2O)'],
+                    xAxisLabel: 'GWP (Logarithmic Scale)'
+                }
+            },
+            coralReef: {
+                zh: {
+                    labels: ['可能消失的珊瑚礁', '倖存的珊瑚礁']
+                },
+                en: {
+                    labels: ['Coral Reefs Likely to Disappear', 'Surviving Coral Reefs']
+                }
+            }
+        };
+
+        function updateContent(lang) {
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (textData[key] && textData[key][lang]) {
+                    el.innerHTML = textData[key][lang];
+                }
+            });
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        }
+
+        function wrapLabel(str, maxWidth) {
+            if (typeof str !== 'string' || str.length <= maxWidth) return str;
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines.filter(line => line);
+        }
+
+        const brilliantBlues = {
+            darkBlue: '#005F73', teal: '#0A9396', lightTeal: '#94D2BD',
+            paleYellow: '#E9D8A6', orange: '#EE9B00', darkOrange: '#CA6702',
+            rust: '#BB3E03', red: '#AE2012', darkRed: '#9B2226',
+            bg: '#001219', cardBg: '#003049', textPrimary: '#E0FBFC'
+        };
+
+        const globalFontOptions = {
+            color: brilliantBlues.textPrimary,
+            font: { family: "'Inter', 'Noto Sans TC', sans-serif" }
+        };
+
+        const chartTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function renderCharts(lang) {
+            Object.values(charts).forEach(chart => chart.destroy());
+
+            const tempAnomalyData = {
+                years: Array.from({length: 145}, (_, i) => 1880 + i),
+                anomalies: [-0.09,-0.06,-0.09,-0.16,-0.22,-0.24,-0.22,-0.3,-0.16,-0.09,-0.32,-0.23,-0.24,-0.25,-0.26,-0.24,-0.23,-0.09,-0.24,-0.17,-0.08,-0.16,-0.25,-0.37,-0.34,-0.26,-0.33,-0.34,-0.41,-0.42,-0.42,-0.45,-0.27,-0.23,-0.3,-0.24,-0.14,-0.23,-0.14,-0.08,0.01,-0.11,-0.13,-0.18,-0.2,-0.17,-0.24,-0.2,-0.09,-0.16,-0.18,-0.16,-0.07,-0.06,-0.05,0.06,0.1,0.04,0.12,0.18,0.18,0.11,0.22,0.24,0.3,0.32,0.3,0.25,0.27,0.3,0.35,0.46,0.44,0.41,0.4,0.3,0.31,0.46,0.45,0.49,0.53,0.48,0.52,0.56,0.58,0.61,0.62,0.65,0.68,0.61,0.7,0.66,0.7,0.74,0.84,0.89,0.92,0.93,0.95,0.99,1.02,1.01,0.93,1.01,0.97,0.94,0.98,0.85,0.91,0.95,0.85,0.9,0.85,0.89,0.99,1.01,1.05,1.1,1.15,1.18]
+            };
+            charts.tempAnomaly = new Chart(document.getElementById('tempAnomalyChart'), {
+                type: 'bar',
+                data: {
+                    labels: tempAnomalyData.years,
+                    datasets: [{
+                        label: chartConfigs.tempAnomaly[lang].title,
+                        data: tempAnomalyData.anomalies,
+                        backgroundColor: tempAnomalyData.anomalies.map(a => a > 0 ? brilliantBlues.red : brilliantBlues.darkBlue),
+                        borderColor: tempAnomalyData.anomalies.map(a => a > 0 ? brilliantBlues.darkRed : brilliantBlues.teal),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartTooltipOptions,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            grid: { color: 'rgba(148, 210, 189, 0.2)' },
+                            ticks: { color: brilliantBlues.lightTeal },
+                            title: { display: true, text: chartConfigs.tempAnomaly[lang].yAxisLabel, color: brilliantBlues.lightTeal }
+                        },
+                        x: { grid: { display: false }, ticks: { color: brilliantBlues.lightTeal } }
+                    },
+                    plugins: { ...chartTooltipOptions.plugins, legend: { display: false } }
+                }
+            });
+
+            const emissionsLabels = chartConfigs.emissionsBySector[lang].labels.map(label => wrapLabel(label, 16));
+            charts.emissionsBySector = new Chart(document.getElementById('emissionsBySectorChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: emissionsLabels,
+                    datasets: [{
+                        data: [75.6, 11.9, 9, 3.5],
+                        backgroundColor: [brilliantBlues.darkRed, brilliantBlues.darkOrange, brilliantBlues.orange, brilliantBlues.paleYellow],
+                        borderColor: brilliantBlues.cardBg,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    ...chartTooltipOptions,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        ...chartTooltipOptions.plugins,
+                        legend: { position: 'bottom', labels: { ...globalFontOptions, boxWidth: 20 } }
+                    }
+                }
+            });
+
+            const gwpLabels = chartConfigs.gwp[lang].labels.map(label => wrapLabel(label, 16));
+            charts.gwp = new Chart(document.getElementById('gwpChart'), {
+                type: 'bar',
+                data: {
+                    labels: gwpLabels,
+                    datasets: [{
+                        label: chartConfigs.gwp[lang].label,
+                        data: [1, 30, 280],
+                        backgroundColor: [brilliantBlues.lightTeal, brilliantBlues.orange, brilliantBlues.red],
+                        borderColor: [brilliantBlues.teal, brilliantBlues.darkOrange, brilliantBlues.darkRed],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    ...chartTooltipOptions,
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            grid: { color: 'rgba(148, 210, 189, 0.2)' },
+                            ticks: {
+                                color: brilliantBlues.lightTeal,
+                                callback: value => Number(value.toString())
+                            },
+                            title: { display: true, text: chartConfigs.gwp[lang].xAxisLabel, color: brilliantBlues.lightTeal }
+                        },
+                        y: { grid: { display: false }, ticks: { color: brilliantBlues.lightTeal, autoSkip: false } }
+                    },
+                    plugins: { ...chartTooltipOptions.plugins, legend: { display: false } }
+                }
+            });
+
+            charts.coralReef = new Chart(document.getElementById('coralReefChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: chartConfigs.coralReef[lang].labels,
+                    datasets: [{
+                        data: [80, 20],
+                        backgroundColor: [brilliantBlues.rust, brilliantBlues.teal],
+                        borderColor: brilliantBlues.cardBg,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    ...chartTooltipOptions,
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    cutout: '70%',
+                    plugins: {
+                        ...chartTooltipOptions.plugins,
+                        legend: { position: 'bottom', labels: { ...globalFontOptions, boxWidth: 20 } }
+                    }
+                }
+            });
+        }
+
+        function updateUI(lang) {
+            updateContent(lang);
+            renderCharts(lang);
+            document.getElementById('lang-switcher').textContent = lang === 'zh' ? 'English' : '中文';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const langSwitcher = document.getElementById('lang-switcher');
+            langSwitcher.addEventListener('click', () => {
+                currentLanguage = currentLanguage === 'zh' ? 'en' : 'zh';
+                updateUI(currentLanguage);
+            });
+            
+            updateUI(currentLanguage);
+        });
+    </script>
+</body>
+</html>
