@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI機械魚革命：水下自主的新浪潮</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flowchart-arrow {
+            position: relative;
+            width: 1.5rem;
+            height: 1.5rem;
+            margin: 0 1rem;
+        }
+        .flowchart-arrow::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #38bdf8;
+            transform: translateY(-50%);
+        }
+        .flowchart-arrow::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -4px;
+            border: solid #38bdf8;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 4px;
+            transform: translateY(-50%) rotate(-45deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100">
+
+    <div id="lang-switcher" class="fixed top-4 right-4 z-50">
+        <button id="lang-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-colors duration-300">
+            English
+        </button>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 md:py-16">
+
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-6xl font-black text-sky-400 mb-4" data-lang-key="mainTitle"></h1>
+            <p class="text-lg md:text-xl text-slate-300 max-w-3xl mx-auto" data-lang-key="subTitle"></p>
+        </header>
+
+        <main class="space-y-20">
+            <section id="introduction">
+                <h2 class="text-3xl font-bold text-center mb-10 text-sky-300" data-lang-key="section1Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang-key="efficiencyTitle"></h3>
+                        <p class="text-slate-400 mb-4 text-center" data-lang-key="efficiencyDesc"></p>
+                        <div class="flex justify-around items-center gap-4">
+                            <div class="text-center">
+                                <div class="chart-container h-48 w-48 mx-auto">
+                                    <canvas id="propellerEfficiencyChart"></canvas>
+                                </div>
+                                <p class="mt-2 font-semibold" data-lang-key="propellerLabel"></p>
+                            </div>
+                            <div class="text-center">
+                                <div class="chart-container h-48 w-48 mx-auto">
+                                    <canvas id="bioEfficiencyChart"></canvas>
+                                </div>
+                                <p class="mt-2 font-semibold" data-lang-key="bioLabel"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="bg-slate-800 p-6 rounded-lg shadow-xl flex items-center gap-4">
+                            <span class="text-5xl">🤫</span>
+                            <div>
+                                <h3 class="text-xl font-bold" data-lang-key="stealthTitle"></h3>
+                                <p class="text-slate-400" data-lang-key="stealthDesc"></p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-lg shadow-xl flex items-center gap-4">
+                            <span class="text-5xl">🕹️</span>
+                            <div>
+                                <h3 class="text-xl font-bold" data-lang-key="agilityTitle"></h3>
+                                <p class="text-slate-400" data-lang-key="agilityDesc"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="howitworks">
+                <h2 class="text-3xl font-bold text-center mb-10 text-sky-300" data-lang-key="section2Title"></h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold mb-3 text-center">🦾 <span data-lang-key="muscleTitle"></span></h3>
+                        <p class="text-slate-400 mb-4" data-lang-key="muscleDesc"></p>
+                        <ul class="space-y-3 mt-4">
+                            <li class="flex items-start gap-3"><span class="text-sky-400 font-bold">1.</span><span data-lang-key="muscleSol1"></span></li>
+                            <li class="flex items-start gap-3"><span class="text-sky-400 font-bold">2.</span><span data-lang-key="muscleSol2"></span></li>
+                            <li class="flex items-start gap-3"><span class="text-sky-400 font-bold">3.</span><span data-lang-key="muscleSol3"></span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold mb-3 text-center">🧠 <span data-lang-key="brainTitle"></span></h3>
+                        <p class="text-slate-400 mb-4" data-lang-key="brainDesc"></p>
+                         <div class="text-center mt-6">
+                            <span class="text-6xl">🐟</span>
+                             <div class="flex justify-center items-center my-2">
+                                <span class="text-4xl">🐟</span>
+                                <span class="text-6xl mx-4">🐟</span>
+                                <span class="text-4xl">🐟</span>
+                            </div>
+                             <span class="text-6xl">🐟</span>
+                            <p class="font-bold text-lg mt-3" data-lang-key="swarmTitle"></p>
+                            <p class="text-slate-400" data-lang-key="swarmDesc"></p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold mb-3 text-center">👁️ <span data-lang-key="loopTitle"></span></h3>
+                        <p class="text-slate-400 mb-4" data-lang-key="loopDesc"></p>
+                        <div class="flex flex-col md:flex-row lg:flex-col items-center justify-center space-y-4 md:space-y-0 md:space-x-4 lg:space-y-4 lg:space-x-0 mt-6">
+                            <div class="text-center p-3 border-2 border-sky-500 rounded-lg bg-sky-500/10 w-full">
+                                <p class="font-bold text-lg" data-lang-key="loopStep1Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="loopStep1Desc"></p>
+                            </div>
+                             <div class="transform rotate-90 md:rotate-0 lg:rotate-90"><span class="text-2xl text-sky-400">⬇️</span></div>
+                            <div class="text-center p-3 border-2 border-sky-500 rounded-lg bg-sky-500/10 w-full">
+                                <p class="font-bold text-lg" data-lang-key="loopStep2Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="loopStep2Desc"></p>
+                            </div>
+                            <div class="transform rotate-90 md:rotate-0 lg:rotate-90"><span class="text-2xl text-sky-400">⬇️</span></div>
+                            <div class="text-center p-3 border-2 border-sky-500 rounded-lg bg-sky-500/10 w-full">
+                                <p class="font-bold text-lg" data-lang-key="loopStep3Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="loopStep3Desc"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="applications">
+                <h2 class="text-3xl font-bold text-center mb-10 text-sky-300" data-lang-key="section3Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl border-t-4 border-cyan-400">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-cyan-300">💵 <span data-lang-key="appEcoTitle"></span></h3>
+                        <p class="text-slate-400 mb-6 text-center" data-lang-key="appEcoDesc"></p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-4"><span class="text-3xl">🐠</span> <span data-lang-key="appEco1"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">🌍</span> <span data-lang-key="appEco2"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">🏭</span> <span data-lang-key="appEco3"></span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl border-t-4 border-teal-400">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-teal-300">🔬 <span data-lang-key="appSciTitle"></span></h3>
+                        <p class="text-slate-400 mb-6 text-center" data-lang-key="appSciDesc"></p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-4"><span class="text-3xl">👀</span> <span data-lang-key="appSci1"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">🌿</span> <span data-lang-key="appSci2"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">🧬</span> <span data-lang-key="appSci3"></span></li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl border-t-4 border-red-500">
+                        <h3 class="text-2xl font-bold text-center mb-4 text-red-400">🛡️ <span data-lang-key="appDefTitle"></span></h3>
+                        <p class="text-slate-400 mb-6 text-center" data-lang-key="appDefDesc"></p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-4"><span class="text-3xl">🤫</span> <span data-lang-key="appDef1"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">💣</span> <span data-lang-key="appDef2"></span></li>
+                            <li class="flex items-center gap-4"><span class="text-3xl">🎯</span> <span data-lang-key="appDef3"></span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="strategy">
+                <h2 class="text-3xl font-bold text-center mb-10 text-sky-300" data-lang-key="section4Title"></h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang-key="capabilityTitle"></h3>
+                        <p class="text-slate-400 mb-4 text-center" data-lang-key="capabilityDesc"></p>
+                        <div class="chart-container h-80">
+                            <canvas id="capabilityComparisonChart"></canvas>
+                        </div>
+                    </div>
+                     <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold text-center mb-4" data-lang-key="strategyTitle"></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                            <div class="border-l-4 border-blue-500 pl-4">
+                                <h4 class="font-bold text-lg" data-lang-key="usStrategyTitle"></h4>
+                                <p class="text-slate-400 mt-1" data-lang-key="usStrategyDesc"></p>
+                            </div>
+                            <div class="border-l-4 border-red-500 pl-4">
+                                <h4 class="font-bold text-lg" data-lang-key="cnStrategyTitle"></h4>
+                                <p class="text-slate-400 mt-1" data-lang-key="cnStrategyDesc"></p>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-lg text-center mt-8 mb-2" data-lang-key="fusionTitle"></h4>
+                        <div class="flex flex-col md:flex-row items-center justify-center">
+                            <div class="text-center p-3 bg-slate-700 rounded-lg">
+                                <p class="font-bold" data-lang-key="fusionStep1Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="fusionStep1Desc"></p>
+                            </div>
+                            <div class="flowchart-arrow transform rotate-90 md:rotate-0"></div>
+                            <div class="text-center p-3 bg-slate-700 rounded-lg">
+                                <p class="font-bold" data-lang-key="fusionStep2Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="fusionStep2Desc"></p>
+                            </div>
+                            <div class="flowchart-arrow transform rotate-90 md:rotate-0"></div>
+                            <div class="text-center p-3 bg-slate-700 rounded-lg">
+                                <p class="font-bold" data-lang-key="fusionStep3Title"></p>
+                                <p class="text-sm text-slate-300" data-lang-key="fusionStep3Desc"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="ethics-future">
+                <h2 class="text-3xl font-bold text-center mb-10 text-sky-300" data-lang-key="section5Title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold mb-3">🌍 <span data-lang-key="envTitle"></span></h3>
+                        <p class="text-slate-400" data-lang-key="envDesc"></p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                        <h3 class="text-xl font-bold mb-3">⚖️ <span data-lang-key="ethicsTitle"></span></h3>
+                        <p class="text-slate-400" data-lang-key="ethicsDesc"></p>
+                    </div>
+                    <div class="bg-slate-800 p-6 rounded-lg shadow-xl md:col-span-2 lg:col-span-1">
+                        <h3 class="text-xl font-bold mb-3">🎓 <span data-lang-key="socialTitle"></span></h3>
+                        <p class="text-slate-400" data-lang-key="socialDesc"></p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-8 rounded-lg shadow-xl">
+                    <h3 class="text-2xl font-bold text-center mb-6" data-lang-key="trendsTitle"></h3>
+                     <div class="relative w-full px-2">
+                        <div class="absolute left-0 h-full w-0.5 bg-sky-600 top-0"></div>
+                        <div class="relative pl-8 mb-8">
+                            <div class="absolute w-4 h-4 bg-sky-400 rounded-full -left-2 top-1 border-4 border-slate-800"></div>
+                            <h4 class="font-bold text-lg text-sky-300" data-lang-key="trend1Title"></h4>
+                            <p class="text-slate-400" data-lang-key="trend1Desc"></p>
+                        </div>
+                         <div class="relative pl-8 mb-8">
+                            <div class="absolute w-4 h-4 bg-sky-400 rounded-full -left-2 top-1 border-4 border-slate-800"></div>
+                            <h4 class="font-bold text-lg text-sky-300" data-lang-key="trend2Title"></h4>
+                            <p class="text-slate-400" data-lang-key="trend2Desc"></p>
+                        </div>
+                         <div class="relative pl-8">
+                            <div class="absolute w-4 h-4 bg-sky-400 rounded-full -left-2 top-1 border-4 border-slate-800"></div>
+                            <h4 class="font-bold text-lg text-sky-300" data-lang-key="trend3Title"></h4>
+                            <p class="text-slate-400" data-lang-key="trend3Desc"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-20 pt-8 border-t border-slate-700">
+            <p class="text-slate-500" data-lang-key="footerText"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        const translations = {
+            zh: {
+                langBtn: "English",
+                docTitle: "AI機械魚革命：水下自主的新浪潮",
+                mainTitle: "AI機械魚革命",
+                subTitle: "一場正在水下上演的範式轉移：模仿自然，超越傳統，開創商業、科學與國防的藍色新紀元。",
+                section1Title: "為何是「魚」？克服傳統的枷鎖",
+                efficiencyTitle: "推進效率的鴻溝",
+                efficiencyDesc: "傳統螺旋槳因產生巨大渦流而浪費大量能量，而生物擬態推進通過高效的波動實現了近乎完美的能量轉換。",
+                propellerLabel: "傳統螺旋槳",
+                bioLabel: "生物擬態推進",
+                stealthTitle: "隱蔽性與低擾動",
+                stealthDesc: "擺脫螺旋槳的巨大噪音，AI機械魚能安靜地融入環境，無論是對敏感的海洋生物研究，還是隱蔽的軍事偵察，都至關重要。",
+                agilityTitle: "卓越的機動性",
+                agilityDesc: "能夠在珊瑚礁、養殖網箱或水下管道等複雜狹窄空間中靈活穿梭，這是傳統大型AUV無法比擬的優勢。",
+                section2Title: "解構數位生命：核心技術剖析",
+                muscleTitle: "人造肌肉與動力",
+                muscleDesc: "從形狀記憶合金到液壓靜電致動器(HASEL)，新材料正驅動更平滑、高效的運動。然而，續航力是最大挑戰，解決方案正朝三個方向發展：",
+                muscleSol1: "<strong>提升效率：</strong>核心設計理念，從根本上降低能耗。",
+                muscleSol2: "<strong>自主充電：</strong>部署水下充電站，實現長期自主作業。",
+                muscleSol3: "<strong>能量採集：</strong>從海浪或太陽能等環境中獲取能源。",
+                brainTitle: "AI大腦與群體智慧",
+                brainDesc: "AI不僅僅用於導航，其真正威力在於實現「群體智慧」。由大量低成本個體組成的「魚群」具備單一載具無法比擬的韌性和任務能力。",
+                swarmTitle: "去中心化協同",
+                swarmDesc: "無需中央控制，個體間的簡單互動即可湧現出複雜的群體行為。",
+                loopTitle: "感知到行動的閉環",
+                loopDesc: "AI機械魚的價值核心在於創建了一個完整的「數據到行動」管道，將其從一個被動的感測器平台，轉變為一個主動的智慧體。",
+                loopStep1Title: "1. 感知",
+                loopStep1Desc: "視覺、聲納、化學感測器收集數據",
+                loopStep2Title: "2. 處理",
+                loopStep2Desc: "機載AI晶片即時分析、決策",
+                loopStep3Title: "3. 行動",
+                loopStep3Desc: "自主執行任務（追蹤、投餵、修復）",
+                section3Title: "應用的光譜：從商業到衝突",
+                appEcoTitle: "藍色經濟",
+                appEcoDesc: "以低成本、高效率的自動化作業，革新傳統海洋產業。",
+                appEco1: "<strong>精準水產養殖：</strong>自動巡網、監測魚類健康、智慧投餵，降低50%勞力成本。",
+                appEco2: "<strong>環境監測：</strong>組成移動感測網路，即時追蹤水質、定位污染源。",
+                appEco3: "<strong>工業檢查：</strong>安全檢查海上風電基座和水下油氣管道。",
+                appSciTitle: "科學前沿",
+                appSciDesc: "從被動觀察者，轉變為生態系統恢復的積極參與者。",
+                appSci1: "<strong>無擾動觀察：</strong>在不驚擾動物的情況下，研究其自然行為。",
+                appSci2: "<strong>主動生態干預：</strong>播撒珊瑚幼體、管理入侵物種。",
+                appSci3: "<strong>先進數據採集：</strong>收集環境DNA(eDNA)樣本，繪製高解析度海底地圖。",
+                appDefTitle: "軍事國防",
+                appDefDesc: "利用低成本、高隱蔽性的不對稱優勢，改變水下戰場規則。",
+                appDef1: "<strong>隱蔽偵察(ISR)：</strong>在港口、沿岸等高風險區域執行秘密情報蒐集。",
+                appDef2: "<strong>反水雷/反潛：</strong>作為分散式感測網路，安全地搜索水雷或追蹤潛艇。",
+                appDef3: "<strong>追求終極匿蹤：</strong>開發靜音、深潛、可自愈的下一代作戰平台。",
+                section4Title: "地緣政治暗流：水下技術競賽",
+                capabilityTitle: "能力對比：顛覆性優勢所在",
+                capabilityDesc: "AI機械魚並非全面超越，而是在特定維度上提供了傳統載具無法比擬的價值，開闢了新的應用生態位。",
+                strategyTitle: "兩種戰略的較量：美國 vs. 中國",
+                usStrategyTitle: "🇺🇸 美國模式：「尖端精英」",
+                usStrategyDesc: "由國防需求驅動，專注於突破核心技術，旨在打造性能無可匹敵的「超級掠食者」，追求代差級的技術領先。",
+                cnStrategyTitle: "🇨� 中國模式：「規模化」",
+                cnStrategyDesc: "通過「軍民融合」，利用龐大的商業應用（如水產養殖）來快速迭代技術、降低成本、積累海量數據，構建龐大的「超級魚群」。",
+                fusionTitle: "中國的「軍民融合」路徑",
+                fusionStep1Title: "商業應用",
+                fusionStep1Desc: "(如水產養殖)",
+                fusionStep2Title: "技術/數據積累",
+                fusionStep2Desc: "(演算法、經驗)",
+                fusionStep3Title: "國防能力",
+                fusionStep3Desc: "(目標識別、偵察)",
+                section5Title: "漣漪效應：倫理與未來展望",
+                envTitle: "環境影響",
+                envDesc: "大規模部署可能帶來噪音、光污染和化學洩漏風險。開發可生物降解的材料是根本性的解決方案。",
+                ethicsTitle: "倫理困境",
+                ethicsDesc: "觸及「有意義人類控制」的辯論，引發對自主武器、隱私監視和動物福利的深刻擔憂。",
+                socialTitle: "社會普及",
+                socialDesc: "通過STEM教育、玩具和博物館展覽，培養公眾認知，並為未來儲備科技人才。",
+                trendsTitle: "未來十年關鍵趨勢",
+                trend1Title: "群體技術成熟",
+                trend1Desc: "由數百個體組成的協同魚群將從實驗室走向實際部署，執行複雜的分散式任務。",
+                trend2Title: "自主充電網路出現",
+                trend2Desc: "水下無線充電站的部署將解決續航力瓶頸，實現真正意義上的長期作業。",
+                trend3Title: "應用領域兩極分化",
+                trend3Desc: "技術將走向兩極：追求極致性能的「尖端」軍用系統，和注重成本效益的「規模化」商用系統。",
+                footerText: "駕馭水下自主的未來，需要技術的遠見、戰略的智慧與倫理的審慎。",
+                chartEfficiencyLabel: "推進效率",
+                chartLossLabel: "能量損失",
+                chartCapabilityTradLabel: "傳統ROV/AUV",
+                chartCapabilityBioLabel: "AI機械魚",
+                chartCapabilityX1: "成本效益",
+                chartCapabilityX2: "隱蔽性",
+                chartCapabilityX3: "機動性",
+            },
+            en: {
+                langBtn: "中文",
+                docTitle: "The AI Robotic Fish Revolution: A New Wave of Underwater Autonomy",
+                mainTitle: "The AI Robotic Fish Revolution",
+                subTitle: "A paradigm shift unfolding underwater: imitating nature, surpassing tradition, and pioneering a new blue era for commerce, science, and defense.",
+                section1Title: "Why 'Fish'? Overcoming Traditional Shackles",
+                efficiencyTitle: "The Propulsion Efficiency Gap",
+                efficiencyDesc: "Traditional propellers waste significant energy creating vortices, while biomimetic propulsion achieves near-perfect energy conversion through efficient undulation.",
+                propellerLabel: "Traditional Propeller",
+                bioLabel: "Biomimetic Propulsion",
+                stealthTitle: "Stealth & Low Disturbance",
+                stealthDesc: "Free from the loud noise of propellers, AI robotic fish can quietly blend into the environment, crucial for both sensitive marine biology research and covert military reconnaissance.",
+                agilityTitle: "Superior Agility",
+                agilityDesc: "Capable of navigating flexibly through complex and confined spaces like coral reefs, aquaculture pens, or around underwater pipelines—an unparalleled advantage over large, traditional AUVs.",
+                section2Title: "Deconstructing Digital Life: Core Technology Analysis",
+                muscleTitle: "Artificial Muscles & Power",
+                muscleDesc: "From Shape Memory Alloys to HASEL actuators, new materials are driving smoother, more efficient movement. However, endurance is the biggest challenge, with solutions heading in three directions:",
+                muscleSol1: "<strong>Efficiency Gains:</strong> A core design philosophy to fundamentally reduce energy consumption.",
+                muscleSol2: "<strong>Autonomous Charging:</strong> Deploying underwater docking stations to enable long-term autonomous operations.",
+                muscleSol3: "<strong>Energy Harvesting:</strong> Sourcing power from the environment, such as from waves or solar energy.",
+                brainTitle: "AI Brain & Swarm Intelligence",
+                brainDesc: "AI is not just for navigation; its true power lies in enabling 'swarm intelligence.' A 'school' of numerous low-cost individuals offers resilience and mission capabilities beyond any single vehicle.",
+                swarmTitle: "Decentralized Coordination",
+                swarmDesc: "Without central control, complex group behaviors can emerge from simple interactions between individuals.",
+                loopTitle: "The Sense-to-Act Loop",
+                loopDesc: "The core value of AI robotic fish lies in creating a complete 'data-to-action' pipeline, transforming it from a passive sensor platform into an active, intelligent agent.",
+                loopStep1Title: "1. Sense",
+                loopStep1Desc: "Vision, sonar, and chemical sensors gather data",
+                loopStep2Title: "2. Process",
+                loopStep2Desc: "Onboard AI chips analyze and decide in real-time",
+                loopStep3Title: "3. Act",
+                loopStep3Desc: "Autonomously performs tasks (tracking, feeding, repairing)",
+                section3Title: "The Spectrum of Applications: From Commerce to Conflict",
+                appEcoTitle: "The Blue Economy",
+                appEcoDesc: "Revolutionizing traditional marine industries with low-cost, high-efficiency automated operations.",
+                appEco1: "<strong>Precision Aquaculture:</strong> Automated net inspection, fish health monitoring, and smart feeding, reducing labor costs by 50%.",
+                appEco2: "<strong>Environmental Monitoring:</strong> Forming mobile sensor networks to track water quality and locate pollution sources in real-time.",
+                appEco3: "<strong>Industrial Inspection:</strong> Safely inspecting offshore wind turbine foundations and subsea oil and gas pipelines.",
+                appSciTitle: "Scientific Frontiers",
+                appSciDesc: "Transforming from passive observers to active participants in ecosystem restoration.",
+                appSci1: "<strong>Undisturbed Observation:</strong> Studying the natural behavior of animals without startling them.",
+                appSci2: "<strong>Active Ecological Intervention:</strong> Seeding coral larvae and managing invasive species.",
+                appSci3: "<strong>Advanced Data Collection:</strong> Gathering eDNA samples and creating high-resolution seafloor maps.",
+                appDefTitle: "Military & Defense",
+                appDefDesc: "Changing the rules of the underwater battlefield with the asymmetric advantages of low cost and high stealth.",
+                appDef1: "<strong>Covert ISR:</strong> Performing secret intelligence gathering in high-risk areas like ports and coastlines.",
+                appDef2: "<strong>Counter-Mine/ASW:</strong> Acting as a distributed sensor network to safely search for mines or track submarines.",
+                appDef3: "<strong>Pursuit of Ultimate Stealth:</strong> Developing the next generation of silent, deep-diving, self-healing operational platforms.",
+                section4Title: "Geopolitical Undercurrents: The Underwater Tech Race",
+                capabilityTitle: "Capability Comparison: The Disruptive Edge",
+                capabilityDesc: "AI robotic fish do not surpass traditional vehicles in every aspect, but they offer unparalleled value in specific dimensions, opening up new application niches.",
+                strategyTitle: "A Tale of Two Strategies: USA vs. China",
+                usStrategyTitle: "🇺🇸 US Model: 'The Exquisite Elite'",
+                usStrategyDesc: "Driven by defense needs, focusing on breakthrough core technologies to create unrivaled 'super-predators' and achieve a generational technological lead.",
+                cnStrategyTitle: "🇨🇳 China Model: 'Massive Scale'",
+                cnStrategyDesc: "Using 'Military-Civil Fusion' to leverage vast commercial applications (like aquaculture) to rapidly iterate technology, lower costs, and amass huge datasets to build a massive 'super-swarm'.",
+                fusionTitle: "China's Military-Civil Fusion Pathway",
+                fusionStep1Title: "Commercial Apps",
+                fusionStep1Desc: "(e.g., Aquaculture)",
+                fusionStep2Title: "Tech/Data Accumulation",
+                fusionStep2Desc: "(Algorithms, Experience)",
+                fusionStep3Title: "Defense Capability",
+                fusionStep3Desc: "(Target ID, Recon)",
+                section5Title: "Ripple Effects: Ethics & Future Outlook",
+                envTitle: "Environmental Impact",
+                envDesc: "Large-scale deployment could bring risks of noise, light pollution, and chemical leakage. Developing biodegradable materials is a fundamental solution.",
+                ethicsTitle: "Ethical Dilemmas",
+                ethicsDesc: "Touches on the 'meaningful human control' debate, raising deep concerns about autonomous weapons, privacy, and animal welfare.",
+                socialTitle: "Social Adoption",
+                socialDesc: "Fostering public awareness and building a future talent pipeline through STEM education, toys, and museum exhibits.",
+                trendsTitle: "Key Trends for the Next Decade",
+                trend1Title: "Maturity of Swarm Technology",
+                trend1Desc: "Coordinated swarms of hundreds of individuals will move from labs to practical deployment, performing complex, distributed tasks.",
+                trend2Title: "Emergence of Autonomous Charging",
+                trend2Desc: "The deployment of underwater wireless charging stations will solve the endurance bottleneck, enabling truly long-term operations.",
+                trend3Title: "Polarization of Applications",
+                trend3Desc: "Technology will diverge into two poles: 'high-end' military systems pursuing ultimate performance, and 'mass-scale' commercial systems focused on cost-effectiveness.",
+                footerText: "Navigating the future of underwater autonomy requires technological foresight, strategic wisdom, and ethical prudence.",
+                chartEfficiencyLabel: "Propulsion Efficiency",
+                chartLossLabel: "Energy Loss",
+                chartCapabilityTradLabel: "Traditional ROV/AUV",
+                chartCapabilityBioLabel: "AI Robotic Fish",
+                chartCapabilityX1: "Cost-Effectiveness",
+                chartCapabilityX2: "Stealth",
+                chartCapabilityX3: "Agility",
+            }
+        };
+
+        let currentLanguage = 'zh';
+        let charts = {};
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            document.title = translations[lang].docTitle;
+
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            document.getElementById('lang-btn').textContent = translations[lang].langBtn;
+
+            renderCharts(lang);
+        }
+
+        function renderCharts(lang) {
+            Object.values(charts).forEach(chart => chart.destroy());
+
+            const chartTextColor = 'rgb(241, 245, 249)';
+            const gridColor = 'rgba(71, 85, 105, 0.5)';
+            
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                  return label.join(' ');
+                } else {
+                  return label;
+                }
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: chartTextColor
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            };
+
+            const propellerCtx = document.getElementById('propellerEfficiencyChart').getContext('2d');
+            charts.propeller = new Chart(propellerCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [translations[lang].chartEfficiencyLabel, translations[lang].chartLossLabel],
+                    datasets: [{
+                        data: [45, 55],
+                        backgroundColor: ['#14B8A6', '#334155'],
+                        borderColor: '#1E293B',
+                        borderWidth: 2
+                    }]
+                },
+                options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false }, tooltip: { ...defaultChartOptions.plugins.tooltip, bodyAlign: 'center', footerAlign: 'center' } } }
+            });
+
+            const bioCtx = document.getElementById('bioEfficiencyChart').getContext('2d');
+            charts.bio = new Chart(bioCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [translations[lang].chartEfficiencyLabel, translations[lang].chartLossLabel],
+                    datasets: [{
+                        data: [90, 10],
+                        backgroundColor: ['#38BDF8', '#334155'],
+                        borderColor: '#1E293B',
+                        borderWidth: 2
+                    }]
+                },
+                options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: false }, tooltip: { ...defaultChartOptions.plugins.tooltip, bodyAlign: 'center', footerAlign: 'center' } } }
+            });
+
+            const capabilityCtx = document.getElementById('capabilityComparisonChart').getContext('2d');
+            charts.capability = new Chart(capabilityCtx, {
+                type: 'bar',
+                data: {
+                    labels: [translations[lang].chartCapabilityX1, translations[lang].chartCapabilityX2, translations[lang].chartCapabilityX3],
+                    datasets: [
+                        {
+                            label: translations[lang].chartCapabilityTradLabel,
+                            data: [3, 4, 4],
+                            backgroundColor: '#475569',
+                            borderColor: '#64748B',
+                            borderWidth: 1
+                        },
+                        {
+                            label: translations[lang].chartCapabilityBioLabel,
+                            data: [9, 9, 10],
+                            backgroundColor: '#38BDF8',
+                            borderColor: '#0284C7',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: gridColor },
+                            ticks: { color: chartTextColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: chartTextColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const langBtn = document.getElementById('lang-btn');
+            langBtn.addEventListener('click', () => {
+                const newLang = currentLanguage === 'zh' ? 'en' : 'zh';
+                setLanguage(newLang);
+            });
+
+            setLanguage('zh');
+        });
+    </script>
+</body>
+</html>
