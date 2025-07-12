@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海豚悖論：一個互動式資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Palette: Brilliant Blues -->
+    <!-- NEITHER Mermaid JS NOR SVG were used in this output. All diagrams and charts are rendered using HTML/CSS with Tailwind or the Chart.js Canvas renderer. -->
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #003F5C;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .card {
+            background-color: #0F2C47;
+            border: 1px solid #2F4B7C;
+        }
+        .lang-btn.active {
+            background-color: #FFA600;
+            color: #003F5C;
+        }
+    </style>
+</head>
+<body class="text-gray-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="relative text-center mb-12">
+            <div class="absolute top-0 right-0">
+                <button id="lang-zh" class="lang-btn active font-bold py-1 px-3 rounded-l-lg bg-gray-700 hover:bg-gray-600 transition-colors">中</button>
+                <button id="lang-en" class="lang-btn font-bold py-1 px-3 rounded-r-lg bg-gray-700 hover:bg-gray-600 transition-colors">EN</button>
+            </div>
+            <h1 id="main-title" class="text-4xl md:text-6xl font-black text-white mb-4 tracking-wide">海豚悖論</h1>
+            <p id="main-subtitle" class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">牠們是哺乳動物，卻主宰了海洋。牠們需要睡眠，卻從未完全失去意識。深入探索一個演化奇蹟。</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-3 card rounded-xl shadow-2xl p-6 flex flex-col md:flex-row items-center justify-center text-center">
+                 <div class="md:w-1/2 p-4">
+                    <h2 id="q1-title" class="text-2xl font-bold text-white mb-2">牠們是哺乳動物嗎？</h2>
+                    <p id="q1-answer" class="text-[#FFA600] font-bold text-5xl md:text-7xl">是的</p>
+                    <p id="q1-desc" class="mt-4 text-gray-300">與魚類不同，海豚用肺呼吸，是溫血動物，並哺乳幼兒——這些都是牠們陸地祖先留下的明確哺乳動物標記。</p>
+                </div>
+                 <div class="md:w-1/2 p-4 mt-6 md:mt-0 md:border-l border-gray-600">
+                    <h2 id="q2-title" class="text-2xl font-bold text-white mb-2">牠們在水中睡覺嗎？</h2>
+                     <p id="q2-answer" class="text-[#D45087] font-bold text-5xl md:text-7xl">是的</p>
+                    <p id="q2-desc" class="mt-4 text-gray-300">海豚演化出了「單半球睡眠」的驚人能力，讓一半大腦休息，另一半保持清醒，以繼續呼吸和警戒。</p>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 lg:col-span-3 card rounded-xl shadow-2xl p-6">
+                <h2 id="table-title" class="text-2xl font-bold text-center mb-4 text-white">哺乳動物 vs. 魚類：根本性差異</h2>
+                <p id="table-desc" class="text-center text-gray-400 mb-6">海豚的哺乳動物身份是理解其所有生物學特徵的關鍵。下表清晰地展示了牠們與典型魚類的根本區別。</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#2F4B7C]">
+                                <th id="th-feature" class="p-3 font-bold uppercase text-white border border-gray-600">特徵</th>
+                                <th id="th-dolphin" class="p-3 font-bold uppercase text-white border border-gray-600">海豚 (哺乳動物)</th>
+                                <th id="th-fish" class="p-3 font-bold uppercase text-white border border-gray-600">典型硬骨魚</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-[#1a3a5e]">
+                                <td id="td-feature-1" class="p-3 font-bold border border-gray-600">呼吸系統</td>
+                                <td id="td-dolphin-1" class="p-3 border border-gray-600">肺臟；透過頭頂噴氣孔自主呼吸空氣</td>
+                                <td id="td-fish-1" class="p-3 border border-gray-600">鰓；從水中提取溶解氧</td>
+                            </tr>
+                            <tr class="hover:bg-[#1a3a5e]">
+                                <td id="td-feature-2" class="p-3 font-bold border border-gray-600">體溫調節</td>
+                                <td id="td-dolphin-2" class="p-3 border border-gray-600">溫血 (恆溫)</td>
+                                <td id="td-fish-2" class="p-3 border border-gray-600">冷血 (變溫)</td>
+                            </tr>
+                            <tr class="hover:bg-[#1a3a5e]">
+                                <td id="td-feature-3" class="p-3 font-bold border border-gray-600">繁殖方式</td>
+                                <td id="td-dolphin-3" class="p-3 border border-gray-600">胎生 (活產)</td>
+                                <td id="td-fish-3" class="p-3 border border-gray-600">卵生</td>
+                            </tr>
+                             <tr class="hover:bg-[#1a3a5e]">
+                                <td id="td-feature-4" class="p-3 font-bold border border-gray-600">親代撫育</td>
+                                <td id="td-dolphin-4" class="p-3 border border-gray-600">以乳汁哺乳；撫育期長</td>
+                                <td id="td-fish-4" class="p-3 border border-gray-600">通常無親代撫育</td>
+                            </tr>
+                            <tr class="hover:bg-[#1a3a5e]">
+                                <td id="td-feature-5" class="p-3 font-bold border border-gray-600">尾部運動</td>
+                                <td id="td-dolphin-5" class="p-3 border border-gray-600">水平尾鰭，上下擺動</td>
+                                <td id="td-fish-5" class="p-3 border border-gray-600">垂直尾鰭，左右擺動</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 card rounded-xl shadow-2xl p-6">
+                <h2 id="usws-title" class="text-2xl font-bold text-center mb-2 text-white">睡眠的演化驅動力</h2>
+                <p id="usws-desc" class="text-center text-gray-400 mb-8">單半球慢波睡眠 (USWS) 並非偶然，而是為了解決四個生死攸關的生存難題而演化出的精妙方案。</p>
+                <div class="flex flex-col md:flex-row justify-around items-center space-y-8 md:space-y-0 md:space-x-4">
+                    <div class="text-center w-full md:w-1/4">
+                        <div class="text-5xl mb-2">💨</div>
+                        <h3 id="usws-1-title" class="font-bold text-lg text-[#FFA600]">自主呼吸</h3>
+                        <p id="usws-1-desc" class="text-sm text-gray-300">必須保持清醒以浮出水面呼吸，防止溺斃。</p>
+                    </div>
+                    <div class="text-4xl text-gray-500 hidden md:block">&rarr;</div>
+                    <div class="text-center w-full md:w-1/4">
+                        <div class="text-5xl mb-2">🦈</div>
+                        <h3 id="usws-2-title" class="font-bold text-lg text-[#F95D6A]">掠食者偵測</h3>
+                        <p id="usws-2-desc" class="text-sm text-gray-300">在休息時仍能透過視覺和聽覺偵測危險。</p>
+                    </div>
+                     <div class="text-4xl text-gray-500 hidden md:block">&rarr;</div>
+                    <div class="text-center w-full md:w-1/4">
+                        <div class="text-5xl mb-2">👨‍👩‍👧‍👦</div>
+                        <h3 id="usws-3-title" class="font-bold text-lg text-[#A05195]">社會凝聚力</h3>
+                        <p id="usws-3-desc" class="text-sm text-gray-300">睡眠時也能跟隨豚群移動，維持社會連結。</p>
+                    </div>
+                     <div class="text-4xl text-gray-500 hidden md:block">&rarr;</div>
+                    <div class="text-center w-full md:w-1/4">
+                        <div class="text-5xl mb-2">🌡️</div>
+                        <h3 id="usws-4-title" class="font-bold text-lg text-[#665191]">體溫調節</h3>
+                        <p id="usws-4-desc" class="text-sm text-gray-300">持續的緩慢游動有助於在冷水中產生體熱。</p>
+                    </div>
+                </div>
+                 <div class="mt-8 text-center">
+                    <div class="text-4xl text-gray-500 mb-4">&darr;</div>
+                    <div class="bg-[#2F4B7C] p-4 rounded-lg inline-block">
+                        <p id="usws-result-title" class="text-xl font-bold text-white">演化出：單半球慢波睡眠 (USWS)</p>
+                        <p id="usws-result-desc" class="text-gray-300">一個『半睡半醒』的終極解決方案</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 card rounded-xl shadow-2xl p-6">
+                <h2 id="sleep-chart-title" class="text-2xl font-bold text-center mb-4 text-white">一個大腦，兩種狀態：24小時睡眠週期</h2>
+                <p id="sleep-chart-desc" class="text-center text-gray-400 mb-6">海豚透過交替休息左右大腦半球，來獲得約8小時的總睡眠，且從未完全失去知覺。此圖表模擬了一個典型的24小時週期。</p>
+                <div class="chart-container">
+                    <canvas id="sleepCycleChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card rounded-xl shadow-2xl p-6 flex flex-col justify-center">
+                <h2 id="size-chart-title" class="text-2xl font-bold text-center mb-4 text-white">海豚科體型光譜</h2>
+                <p id="size-chart-desc" class="text-center text-gray-400 mb-6">海豚科物種體型差異巨大，從小型海豚到俗稱「鯨」的大型成員，都屬於這個家族。</p>
+                <div class="chart-container h-64 md:h-full">
+                    <canvas id="sizeComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 card rounded-xl shadow-2xl p-6">
+                <h2 id="echo-title" class="text-2xl font-bold text-center mb-4 text-white">用聲音「看見」世界：回聲定位</h2>
+                <p id="echo-desc" class="text-center text-gray-400 mb-8">在USWS提供的持續清醒狀態下，海豚利用其精密的生物聲納系統——回聲定位——來感知周遭環境，即使在完全黑暗中也能導航和捕食。</p>
+                <div class="bg-[#003F5C] p-6 rounded-lg flex items-center justify-around space-x-4">
+                    <div class="text-center">
+                        <p class="text-6xl">🐬</p>
+                        <p id="echo-dolphin" class="font-bold mt-2">海豚</p>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <p id="echo-send" class="text-lg font-semibold text-[#FFA600]">發出「喀噠」聲</p>
+                        <p class="text-4xl text-[#FFA600] tracking-widest">&rarr; &rarr; &rarr;</p>
+                         <p id="echo-receive" class="text-lg font-semibold text-gray-400 mt-4">接收回音</p>
+                        <p class="text-4xl text-gray-400 tracking-widest">&larr; &larr; &larr;</p>
+                    </div>
+                    <div class="text-center">
+                         <p class="text-6xl">🐟</p>
+                        <p id="echo-prey" class="font-bold mt-2">獵物 / 物體</p>
+                    </div>
+                </div>
+                <p id="echo-result" class="mt-6 text-center text-gray-300">這套系統能提供物體的大小、形狀、距離甚至材質的詳細「聲學圖像」。</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const brilliantBluesPalette = {
+            darkBlue: '#003F5C', mediumBlue: '#2F4B7C', purple: '#665191',
+            magenta: '#A05195', pink: '#D45087', redOrange: '#F95D6A',
+            orange: '#FF7C43', yellow: '#FFA600'
+        };
+
+        const langData = {
+            'zh-Hant': {
+                'main-title': '海豚悖論',
+                'main-subtitle': '牠們是哺乳動物，卻主宰了海洋。牠們需要睡眠，卻從未完全失去意識。深入探索一個演化奇蹟。',
+                'q1-title': '牠們是哺乳動物嗎？',
+                'q1-answer': '是的',
+                'q1-desc': '與魚類不同，海豚用肺呼吸，是溫血動物，並哺乳幼兒——這些都是牠們陸地祖先留下的明確哺乳動物標記。',
+                'q2-title': '牠們在水中睡覺嗎？',
+                'q2-answer': '是的',
+                'q2-desc': '海豚演化出了「單半球睡眠」的驚人能力，讓一半大腦休息，另一半保持清醒，以繼續呼吸和警戒。',
+                'table-title': '哺乳動物 vs. 魚類：根本性差異',
+                'table-desc': '海豚的哺乳動物身份是理解其所有生物學特徵的關鍵。下表清晰地展示了牠們與典型魚類的根本區別。',
+                'th-feature': '特徵',
+                'th-dolphin': '海豚 (哺乳動物)',
+                'th-fish': '典型硬骨魚',
+                'td-feature-1': '呼吸系統',
+                'td-dolphin-1': '肺臟；透過頭頂噴氣孔自主呼吸空氣',
+                'td-fish-1': '鰓；從水中提取溶解氧',
+                'td-feature-2': '體溫調節',
+                'td-dolphin-2': '溫血 (恆溫)',
+                'td-fish-2': '冷血 (變溫)',
+                'td-feature-3': '繁殖方式',
+                'td-dolphin-3': '胎生 (活產)',
+                'td-fish-3': '卵生',
+                'td-feature-4': '親代撫育',
+                'td-dolphin-4': '以乳汁哺乳；撫育期長',
+                'td-fish-4': '通常無親代撫育',
+                'td-feature-5': '尾部運動',
+                'td-dolphin-5': '水平尾鰭，上下擺動',
+                'td-fish-5': '垂直尾鰭，左右擺動',
+                'usws-title': '睡眠的演化驅動力',
+                'usws-desc': '單半球慢波睡眠 (USWS) 並非偶然，而是為了解決四個生死攸關的生存難題而演化出的精妙方案。',
+                'usws-1-title': '自主呼吸',
+                'usws-1-desc': '必須保持清醒以浮出水面呼吸，防止溺斃。',
+                'usws-2-title': '掠食者偵測',
+                'usws-2-desc': '在休息時仍能透過視覺和聽覺偵測危險。',
+                'usws-3-title': '社會凝聚力',
+                'usws-3-desc': '睡眠時也能跟隨豚群移動，維持社會連結。',
+                'usws-4-title': '體溫調節',
+                'usws-4-desc': '持續的緩慢游動有助於在冷水中產生體熱。',
+                'usws-result-title': '演化出：單半球慢波睡眠 (USWS)',
+                'usws-result-desc': '一個『半睡半醒』的終極解決方案',
+                'sleep-chart-title': '一個大腦，兩種狀態：24小時睡眠週期',
+                'sleep-chart-desc': '海豚透過交替休息左右大腦半球，來獲得約8小時的總睡眠，且從未完全失去知覺。此圖表模擬了一個典型的24小時週期。',
+                'size-chart-title': '海豚科體型光譜',
+                'size-chart-desc': '海豚科物種體型差異巨大，從小型海豚到俗稱「鯨」的大型成員，都屬於這個家族。',
+                'echo-title': '用聲音「看見」世界：回聲定位',
+                'echo-desc': '在USWS提供的持續清醒狀態下，海豚利用其精密的生物聲納系統——回聲定位——來感知周遭環境，即使在完全黑暗中也能導航和捕食。',
+                'echo-dolphin': '海豚',
+                'echo-send': '發出「喀噠」聲',
+                'echo-receive': '接收回音',
+                'echo-prey': '獵物 / 物體',
+                'echo-result': '這套系統能提供物體的大小、形狀、距離甚至材質的詳細「聲學圖像」。',
+                'sleep-chart-labels': ['左腦休息', '雙腦清醒', '右腦休息', '雙腦清醒', '左腦休息', '雙腦清醒', '右腦休息', '雙腦清醒', '左腦休息', '雙腦清醒', '右腦休息', '雙腦清醒'],
+                'sleep-chart-dataset-label': '大腦活動 (小時)',
+                'size-chart-labels': ["海氏矮海豚 (Heaviside's dolphin)", "寬吻海豚 (Bottlenose Dolphin)", "領航鯨 (Pilot Whale)", "虎鯨 (Orcinus orca)"],
+                'size-chart-dataset-label': '平均體長 (公尺)',
+            },
+            'en': {
+                'main-title': 'The Dolphin Paradox',
+                'main-subtitle': 'They are mammals, yet they master the ocean. They need sleep, yet they never fully lose consciousness. A deep dive into an evolutionary marvel.',
+                'q1-title': 'Are They Mammals?',
+                'q1-answer': 'Yes',
+                'q1-desc': 'Unlike fish, dolphins breathe with lungs, are warm-blooded, and nurse their young—clear mammalian traits from their terrestrial ancestors.',
+                'q2-title': 'Do They Sleep in Water?',
+                'q2-answer': 'Yes',
+                'q2-desc': 'Dolphins evolved "unihemispheric sleep," allowing one half of the brain to rest while the other remains alert for breathing and threats.',
+                'table-title': 'Mammal vs. Fish: The Fundamental Divide',
+                'table-desc': 'The dolphin\'s identity as a mammal is key to understanding its biology. This table clearly shows the fundamental differences from a typical fish.',
+                'th-feature': 'Feature',
+                'th-dolphin': 'Dolphin (Mammal)',
+                'th-fish': 'Typical Bony Fish',
+                'td-feature-1': 'Respiration',
+                'td-dolphin-1': 'Lungs; conscious breathing of air through a blowhole',
+                'td-fish-1': 'Gills; extracts dissolved oxygen from water',
+                'td-feature-2': 'Thermoregulation',
+                'td-dolphin-2': 'Warm-blooded (Endothermic)',
+                'td-fish-2': 'Cold-blooded (Ectothermic)',
+                'td-feature-3': 'Reproduction',
+                'td-dolphin-3': 'Live birth (Viviparous)',
+                'td-fish-3': 'Lays eggs (Oviparous)',
+                'td-feature-4': 'Parental Care',
+                'td-dolphin-4': 'Nurses young with milk; long care period',
+                'td-fish-4': 'Typically no parental care',
+                'td-feature-5': 'Tail Movement',
+                'td-dolphin-5': 'Horizontal flukes, moves up and down',
+                'td-fish-5': 'Vertical tail fin, moves side to side',
+                'usws-title': 'The Evolutionary Drivers of Sleep',
+                'usws-desc': 'Unihemispheric Slow-Wave Sleep (USWS) is no accident. It\'s an elegant solution to four critical, life-or-death survival challenges.',
+                'usws-1-title': 'Conscious Breathing',
+                'usws-1-desc': 'Must stay awake to surface for air and prevent drowning.',
+                'usws-2-title': 'Predator Detection',
+                'usws-2-desc': 'Can still detect danger visually and audibly while resting.',
+                'usws-3-title': 'Social Cohesion',
+                'usws-3-desc': 'Can move with the pod and maintain social bonds during sleep.',
+                'usws-4-title': 'Thermoregulation',
+                'usws-4-desc': 'Constant, slow swimming helps generate body heat in cold water.',
+                'usws-result-title': 'Evolved: Unihemispheric Slow-Wave Sleep (USWS)',
+                'usws-result-desc': 'The ultimate solution for being "half-awake."',
+                'sleep-chart-title': 'One Brain, Two States: The 24-Hour Sleep Cycle',
+                'sleep-chart-desc': 'By alternating hemispheres, dolphins get ~8 hours of total sleep without ever losing consciousness. This chart simulates a typical 24-hour cycle.',
+                'size-chart-title': 'The Delphinidae Size Spectrum',
+                'size-chart-desc': 'The dolphin family varies immensely in size, from small porpoises to large members we colloquially call "whales."',
+                'echo-title': 'Seeing with Sound: Echolocation',
+                'echo-desc': 'Enabled by the constant alertness of USWS, dolphins use their sophisticated biosonar to perceive their world, navigating and hunting even in total darkness.',
+                'echo-dolphin': 'Dolphin',
+                'echo-send': 'Emits "Clicks"',
+                'echo-receive': 'Receives Echoes',
+                'echo-prey': 'Prey / Object',
+                'echo-result': 'This system provides a detailed "acoustic image" of an object\'s size, shape, distance, and even texture.',
+                'sleep-chart-labels': ['Left Brain Rest', 'Both Awake', 'Right Brain Rest', 'Both Awake', 'Left Brain Rest', 'Both Awake', 'Right Brain Rest', 'Both Awake', 'Left Brain Rest', 'Both Awake', 'Right Brain Rest', 'Both Awake'],
+                'sleep-chart-dataset-label': 'Brain Activity (Hours)',
+                'size-chart-labels': ["Heaviside's Dolphin", "Bottlenose Dolphin", "Pilot Whale", "Orca (Killer Whale)"],
+                'size-chart-dataset-label': 'Average Length (meters)',
+            }
+        };
+
+        let sleepCycleChart, sizeComparisonChart;
+
+        const globalChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#E5E7EB' } },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            return Array.isArray(label) ? label.join(' ') : label;
+                        }
+                    }
+                }
+            }
+        };
+
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine.length > 0) lines.push(currentLine);
+            return lines;
+        }
+        
+        function switchLanguage(lang) {
+            const data = langData[lang];
+            for (const id in data) {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.innerHTML = data[id];
+                }
+            }
+            
+            document.documentElement.lang = lang;
+            
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh-Hant');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+            updateCharts(lang);
+        }
+
+        function updateCharts(lang) {
+            const data = langData[lang];
+            
+            sleepCycleChart.data.labels = data['sleep-chart-labels'];
+            sleepCycleChart.data.datasets[0].label = data['sleep-chart-dataset-label'];
+            sleepCycleChart.update();
+
+            const sizeLabels = data['size-chart-labels'].map(label => wrapLabel(label, 16));
+            sizeComparisonChart.data.labels = sizeLabels;
+            sizeComparisonChart.data.datasets[0].label = data['size-chart-dataset-label'];
+            sizeComparisonChart.update();
+        }
+
+        function createCharts() {
+            const sleepCycleCtx = document.getElementById('sleepCycleChart').getContext('2d');
+            sleepCycleChart = new Chart(sleepCycleCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '',
+                        data: [2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1],
+                        backgroundColor: [
+                            brilliantBluesPalette.purple, brilliantBluesPalette.mediumBlue, brilliantBluesPalette.magenta, brilliantBluesPalette.mediumBlue,
+                            brilliantBluesPalette.purple, brilliantBluesPalette.mediumBlue, brilliantBluesPalette.magenta, brilliantBluesPalette.mediumBlue,
+                            brilliantBluesPalette.purple, brilliantBluesPalette.mediumBlue, brilliantBluesPalette.magenta, brilliantBluesPalette.mediumBlue,
+                        ],
+                        borderColor: '#0F2C47',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    ...globalChartOptions,
+                    plugins: {
+                        ...globalChartOptions.plugins,
+                        legend: { display: false },
+                        tooltip: {
+                            ...globalChartOptions.plugins.tooltip,
+                             callbacks: {
+                                ...globalChartOptions.plugins.tooltip.callbacks,
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw} 小時`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const sizeComparisonCtx = document.getElementById('sizeComparisonChart').getContext('2d');
+            sizeComparisonChart = new Chart(sizeComparisonCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '',
+                        data: [1.2, 3.0, 6.5, 9.0],
+                        backgroundColor: [
+                            brilliantBluesPalette.yellow, brilliantBluesPalette.orange,
+                            brilliantBluesPalette.redOrange, brilliantBluesPalette.pink,
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...globalChartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#E5E7EB', callback: value => value + 'm' }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#E5E7EB' }
+                        }
+                    },
+                     plugins: {
+                        ...globalChartOptions.plugins,
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        window.onload = () => {
+            createCharts();
+            switchLanguage('zh-Hant'); 
+
+            document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh-Hant'));
+            document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+        };
+    </script>
+</body>
+</html>
