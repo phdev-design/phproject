@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理健康的生物學前沿：視覺化解析 | Biological Frontiers of Mental Health</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .stat-card {
+            background-color: #003f5c;
+            color: white;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .flowchart-arrow {
+            content: '➔';
+            font-size: 2rem;
+            color: #dd5182;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <header class="bg-[#003f5c] text-white p-8 text-center relative">
+        <h1 class="text-4xl md:text-5xl font-bold mb-2" data-lang-key="headerTitle"></h1>
+        <p class="text-lg md:text-xl max-w-3xl mx-auto text-gray-200" data-lang-key="headerSubtitle"></p>
+        <div class="absolute top-4 right-4">
+            <button id="lang-switcher" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300">
+                English
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="section1" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#003f5c]" data-lang-key="s1Title"></h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-gray-600" data-lang-key="s1Intro"></p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#444e86]" data-lang-key="s1Card1Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s1Card1Desc"></p>
+                    <div class="chart-container">
+                        <canvas id="heritabilityChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#444e86]" data-lang-key="s1Card2Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s1Card2Desc"></p>
+                    <div class="flex flex-col items-center justify-center space-y-4 h-full p-4">
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-[#955196]" data-lang-key="pfcLabel"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="pfcDesc"></div>
+                            <div class="text-2xl mt-1">📉</div>
+                            <div class="font-bold text-red-500" data-lang-key="pfcStatus"></div>
+                        </div>
+                        <div class="flowchart-arrow">↓</div>
+                        <div class="text-center">
+                            <div class="text-lg font-semibold text-[#dd5182]" data-lang-key="amygdalaLabel"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="amygdalaDesc"></div>
+                             <div class="text-2xl mt-1">📈</div>
+                            <div class="font-bold text-green-500" data-lang-key="amygdalaStatus"></div>
+                        </div>
+                        <p class="text-center font-semibold text-lg mt-4 text-[#003f5c]" data-lang-key="emotionRegulationResult"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section2" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#003f5c]" data-lang-key="s2Title"></h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-gray-600" data-lang-key="s2Intro"></p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#955196]" data-lang-key="s2Card1Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s2Card1Desc"></p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 font-semibold" data-lang-key="tableHeader1"></th>
+                                    <th class="p-3 font-semibold" data-lang-key="tableHeader2"></th>
+                                    <th class="p-3 font-semibold" data-lang-key="tableHeader3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-[#444e86]" data-lang-key="serotoninName"></td>
+                                    <td class="p-3" data-lang-key="serotoninFunc"></td>
+                                    <td class="p-3" data-lang-key="serotoninDisorder"></td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-[#955196]" data-lang-key="dopamineName"></td>
+                                    <td class="p-3" data-lang-key="dopamineFunc"></td>
+                                    <td class="p-3" data-lang-key="dopamineDisorder"></td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="p-3 font-medium text-[#dd5182]" data-lang-key="glutamateName"></td>
+                                    <td class="p-3" data-lang-key="glutamateFunc"></td>
+                                    <td class="p-3" data-lang-key="glutamateDisorder"></td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-medium text-[#ff6e54]" data-lang-key="gabaName"></td>
+                                    <td class="p-3" data-lang-key="gabaFunc"></td>
+                                    <td class="p-3" data-lang-key="gabaDisorder"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#955196]" data-lang-key="s2Card2Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s2Card2Desc"></p>
+                    <div class="space-y-6 mt-6">
+                        <div>
+                            <h4 class="font-bold text-lg" data-lang-key="oldTheory"></h4>
+                            <p class="text-sm" data-lang-key="oldTheoryDesc"></p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                <div class="bg-[#444e86] h-2.5 rounded-full" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg" data-lang-key="newTheory"></h4>
+                            <p class="text-sm" data-lang-key="newTheoryDesc"></p>
+                             <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                <div class="bg-[#dd5182] h-2.5 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section3" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#003f5c]" data-lang-key="s3Title"></h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-gray-600" data-lang-key="s3Intro"></p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#dd5182]" data-lang-key="s3Card1Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s3Card1Desc"></p>
+                    <div class="chart-container">
+                        <canvas id="ketamineChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#ff6e54]" data-lang-key="s3Card2Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s3Card2Desc"></p>
+                    <div class="chart-container">
+                        <canvas id="psilocybinChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6 md:col-span-2 lg:col-span-1">
+                    <h3 class="text-xl font-bold mb-4 text-[#ffa600]" data-lang-key="s3Card3Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s3Card3Desc"></p>
+                     <div class="flex flex-col items-center justify-center h-full p-4 bg-amber-50 rounded-lg">
+                        <div class="text-6xl mb-4">💡</div>
+                        <h4 class="text-2xl font-bold text-center text-[#ffa600]" data-lang-key="s3Card3InfoTitle"></h4>
+                        <p class="text-center mt-2" data-lang-key="s3Card3InfoDesc"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section4" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#003f5c]" data-lang-key="s4Title"></h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-gray-600" data-lang-key="s4Intro"></p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#444e86]" data-lang-key="s4Card1Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s4Card1Desc"></p>
+                    <div class="chart-container" style="height: 280px;">
+                        <canvas id="cbtEffectChart"></canvas>
+                    </div>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#955196]" data-lang-key="s4Card2Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s4Card2Desc"></p>
+                     <div class="flex items-center justify-center space-x-2 md:space-x-4 h-full p-4">
+                        <div class="text-center">
+                            <div class="text-lg font-bold" data-lang-key="synergyMedication"></div>
+                            <div class="text-sm text-gray-500" data-lang-key="synergyMedicationApproach"></div>
+                            <div class="text-2xl mt-1">💊</div>
+                            <div class="text-xs" data-lang-key="synergyMedicationDesc"></div>
+                        </div>
+                        <div class="text-4xl font-bold text-[#dd5182]">+</div>
+                        <div class="text-center">
+                            <div class="text-lg font-bold" data-lang-key="synergyPsychotherapy"></div>
+                             <div class="text-sm text-gray-500" data-lang-key="synergyPsychotherapyApproach"></div>
+                            <div class="text-2xl mt-1">🗣️</div>
+                            <div class="text-xs" data-lang-key="synergyPsychotherapyDesc"></div>
+                        </div>
+                         <div class="text-4xl font-bold text-[#003f5c]">=</div>
+                         <div class="text-center">
+                            <div class="text-lg font-bold" data-lang-key="synergyResult"></div>
+                            <div class="text-2xl mt-1">🏆</div>
+                            <div class="text-xs" data-lang-key="synergyResultDesc"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section5" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-2 text-[#003f5c]" data-lang-key="s5Title"></h2>
+            <p class="text-center max-w-2xl mx-auto mb-12 text-gray-600" data-lang-key="s5Intro"></p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#ff6e54]" data-lang-key="s5Card1Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s5Card1Desc"></p>
+                    <div class="flex justify-around items-end pt-8">
+                        <div class="text-center">
+                            <div class="text-4xl">🐌</div>
+                            <div class="h-12 w-8 bg-[#444e86] rounded-t-lg mx-auto"></div>
+                            <p class="font-bold mt-2" data-lang-key="pgxSlow"></p>
+                            <p class="text-xs" data-lang-key="pgxSlowDesc"></p>
+                        </div>
+                        <div class="text-center">
+                             <div class="text-4xl">👤</div>
+                            <div class="h-24 w-8 bg-[#955196] rounded-t-lg mx-auto"></div>
+                            <p class="font-bold mt-2" data-lang-key="pgxNormal"></p>
+                             <p class="text-xs" data-lang-key="pgxNormalDesc"></p>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-4xl">🚀</div>
+                            <div class="h-36 w-8 bg-[#dd5182] rounded-t-lg mx-auto"></div>
+                            <p class="font-bold mt-2" data-lang-key="pgxUltra"></p>
+                             <p class="text-xs" data-lang-key="pgxUltraDesc"></p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="card p-6">
+                    <h3 class="text-xl font-bold mb-4 text-[#ffa600]" data-lang-key="s5Card2Title"></h3>
+                    <p class="text-sm text-gray-600 mb-4" data-lang-key="s5Card2Desc"></p>
+                    <ul class="space-y-4 mt-6">
+                        <li class="flex items-center">
+                            <span class="text-2xl mr-4">🧠</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="bmNeuroimaging"></h4>
+                                <p class="text-sm" data-lang-key="bmNeuroimagingDesc"></p>
+                            </div>
+                        </li>
+                        <li class="flex items-center">
+                             <span class="text-2xl mr-4">🧬</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="bmGenetic"></h4>
+                                <p class="text-sm" data-lang-key="bmGeneticDesc"></p>
+                            </div>
+                        </li>
+                         <li class="flex items-center">
+                            <span class="text-2xl mr-4">🩸</span>
+                            <div>
+                                <h4 class="font-bold" data-lang-key="bmBiochemical"></h4>
+                                <p class="text-sm" data-lang-key="bmBiochemicalDesc"></p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#003f5c] text-white text-center p-6 mt-12">
+        <p data-lang-key="footerDisclaimer"></p>
+        <p class="text-sm text-gray-400 mt-2" data-lang-key="footerCredit"></p>
+    </footer>
+
+<script>
+const langData = {
+    en: {
+        headerTitle: "The Biological Frontiers of Mental Health",
+        headerSubtitle: "A Visual Journey from Neural Circuits to Novel Therapies",
+        s1Title: "Part 1: The Biological Blueprint of Mental Illness",
+        s1Intro: "Modern science confirms that mental illnesses are not character flaws but complex disorders rooted in brain biology. Genetics lay the foundation for our vulnerability, while dysfunction in brain circuits is at the core of symptoms.",
+        s1Card1Title: "The Power of Genes: Heritability of Disorders",
+        s1Card1Desc: "Heritability estimates the proportion of risk for a disorder in a population that can be explained by genetic variation. Twin and family studies show that major mental illnesses are highly heritable.",
+        s1Card2Title: "Failure of 'Top-Down' Control",
+        s1Card2Desc: "At the heart of many mood disorders is a circuit imbalance: the 'amygdala,' responsible for emotional responses, is overactive, while the 'prefrontal cortex,' responsible for rational control, is underactive.",
+        pfcLabel: "Prefrontal Cortex (PFC)",
+        pfcDesc: "Rational thought, decision-making, impulse control",
+        pfcStatus: "Underactive",
+        amygdalaLabel: "Amygdala",
+        amygdalaDesc: "Threat detection, fear, emotional response",
+        amygdalaStatus: "Overactive",
+        emotionRegulationResult: "Leads to difficulty in emotion regulation",
+        heritabilityChartLabel: "Heritability Estimate (%)",
+        heritabilityLabels: ["Schizophrenia", "Bipolar Disorder", ["Attention-Deficit/", "Hyperactivity Disorder (ADHD)"], "Major Depressive Disorder"],
+        s2Title: "Part 2: The Brain's Chemical Symphony",
+        s2Intro: "The brain's function relies on a delicate balance of neurotransmitters. The old 'chemical imbalance' theory has been replaced by more complex views of excitation-inhibition balance and neuroplasticity.",
+        s2Card1Title: "Key Neurotransmitters and Their Functions",
+        s2Card1Desc: "Multiple chemical messengers work together to regulate our moods, thoughts, and behaviors. Imbalances among them are linked to various mental disorders.",
+        tableHeader1: "Substance",
+        tableHeader2: "Primary Function",
+        tableHeader3: "Related Disorders",
+        serotoninName: "Serotonin",
+        serotoninFunc: "Mood regulation, sleep, appetite",
+        serotoninDisorder: "Depression, Anxiety",
+        dopamineName: "Dopamine",
+        dopamineFunc: "Reward, motivation, focus",
+        dopamineDisorder: "Schizophrenia, Addiction, Depression",
+        glutamateName: "Glutamate",
+        glutamateFunc: "Primary excitatory signal, learning & memory",
+        glutamateDisorder: "Depression, Schizophrenia",
+        gabaName: "GABA",
+        gabaFunc: "Primary inhibitory signal, calming & relaxation",
+        gabaDisorder: "Anxiety, Depression",
+        s2Card2Title: "Evolution of Theories",
+        s2Card2Desc: "From simple levels to a focus on the brain's ability to self-repair and remodel.",
+        oldTheory: "Old View: Chemical Imbalance",
+        oldTheoryDesc: "Believed depression was caused by too little serotonin.",
+        newTheory: "New View: Neuroplasticity",
+        newTheoryDesc: "Believes treatment works by 'rewiring' the brain through promoting neuron growth and connections.",
+        s3Title: "Part 3: A Therapeutic Revolution",
+        s3Intro: "Psychopharmacology is undergoing a paradigm shift. New drugs don't just modulate chemical levels; they directly promote brain plasticity or target disease circuits with entirely new mechanisms.",
+        s3Card1Title: "Ketamine: Rapid-Acting Antidepressant",
+        s3Card1Desc: "By acting on the glutamate system, ketamine offers hope to patients with treatment-resistant depression within hours. Its core mechanism is the rapid promotion of synaptogenesis.",
+        ketamineChartTitle: "Response Rate in Treatment-Resistant Depression (%)",
+        ketamineLabels: ["Responded to Treatment", "Did Not Respond"],
+        s3Card2Title: "Psychedelic Renaissance: Psilocybin",
+        s3Card2Desc: "With psychotherapy support, psilocybin (the active ingredient in 'magic mushrooms') can 'reset' brain networks associated with depression, producing lasting therapeutic effects.",
+        psilocybinChartLabel: "Psilocybin Treatment Characteristics",
+        psilocybinLabels: ["Neuroplasticity", ["Breaks Rigid", "Thinking"], "Durability", "Subjective Experience", "Rapid Onset"],
+        s3Card3Title: "New Hope for Schizophrenia",
+        s3Card3Desc: "Xanomeline-Trospium (Cobenfy) is the first non-dopamine D2 receptor mechanism antipsychotic in 70 years. It works by modulating the upstream cholinergic system, resulting in fewer side effects.",
+        s3Card3InfoTitle: "Novel Mechanism",
+        s3Card3InfoDesc: "Avoids side effects of traditional drugs like weight gain and motor impairments.",
+        s4Title: "Part 4: Non-Pharmacological Brain Remodeling",
+        s4Intro: "Psychotherapy and physical interventions are not just 'talk' or 'stimulation'; they are biological interventions that cause substantial, measurable changes in the brain.",
+        s4Card1Title: "Brain Remodeling Effects of CBT",
+        s4Card1Desc: "Through training, Cognitive Behavioral Therapy (CBT) can effectively strengthen the prefrontal cortex's (rational brain) control over the amygdala (emotional brain), fundamentally changing the brain's response patterns to stress.",
+        cbtChartLabel1: "Amygdala (Emotional Brain) Activity",
+        cbtChartLabel2: "Prefrontal Cortex (Rational Brain) Activity",
+        cbtChartLabels: ["Before Treatment", "After Treatment"],
+        s4Card2Title: "Therapeutic Synergy",
+        s4Card2Desc: "Combining medication and psychotherapy is often the gold standard. They repair brain circuits in complementary ways, achieving a 1+1>2 effect.",
+        synergyMedication: "Medication",
+        synergyMedicationApproach: "Bottom-Up",
+        synergyMedicationDesc: "Stabilizes emotional foundation",
+        synergyPsychotherapy: "Psychotherapy",
+        synergyPsychotherapyApproach: "Top-Down",
+        synergyPsychotherapyDesc: "Learns coping skills",
+        synergyResult: "Optimal Efficacy",
+        synergyResultDesc: "Reduces relapse risk",
+        s5Title: "Part 5: The Future of Psychiatry: Precision & Personalization",
+        s5Intro: "The future of psychiatry will move beyond a 'one-size-fits-all' approach towards treatments tailored to each individual's unique biology.",
+        s5Card1Title: "Pharmacogenomics: Personalized Medication",
+        s5Card1Desc: "Genetic testing (e.g., for CYP450 enzymes) can predict how quickly you metabolize drugs, helping doctors choose the right medication and dose to avoid side effects or treatment failure.",
+        pgxSlow: "Poor Metabolizers",
+        pgxSlowDesc: "Drug accumulates, risk of toxicity",
+        pgxNormal: "Normal Metabolizers",
+        pgxNormalDesc: "Standard dose",
+        pgxUltra: "Ultrarapid Metabolizers",
+        pgxUltraDesc: "Drug ineffective, dose increase needed",
+        s5Card2Title: "The Future Hope: Biomarkers",
+        s5Card2Desc: "Scientists are searching for reliable biomarkers (like brain imaging, blood indicators) to enable early diagnosis, predict treatment response, and develop more targeted drugs.",
+        bmNeuroimaging: "Neuroimaging Markers",
+        bmNeuroimagingDesc: "Identifying specific circuit patterns via fMRI, etc.",
+        bmGenetic: "Genetic Markers",
+        bmGeneticDesc: "Using polygenic risk scores to predict disease risk.",
+        bmBiochemical: "Biochemical Markers",
+        bmBiochemicalDesc: "Detecting inflammatory factors or hormone levels in blood.",
+        footerDisclaimer: "This infographic is based on scientific research up to 2025 and is for educational purposes only. It should not be considered medical advice.",
+        footerCredit: "Design & Development: Canvas Infographics",
+    },
+    zh: {
+        headerTitle: "心理健康的生物學前沿",
+        headerSubtitle: "從神經迴路到創新療法：一趟視覺化探索之旅",
+        s1Title: "第一部分：精神疾病的生物學藍圖",
+        s1Intro: "現代科學已證實，精神疾病並非性格缺陷，而是源於大腦的生物學差異。遺傳基因奠定了我們的易感性基礎，而大腦迴路的功能失調則是症狀的核心。",
+        s1Card1Title: "遺傳的力量：疾病的遺傳度",
+        s1Card1Desc: "遺傳度估計了遺傳變異在人群中解釋疾病風險的比例。雙胞胎和家庭研究表明，主要精神疾病具有很高的遺傳性。",
+        s1Card2Title: "「自上而下」的控制失敗",
+        s1Card2Desc: "許多情緒障礙的核心是一種迴路失衡：負責情緒反應的「杏仁核」過度活躍，而負責理性控制的「前額葉皮質」功能不足。",
+        pfcLabel: "前額葉皮質 (PFC)",
+        pfcDesc: "理性思考、決策、抑制衝動",
+        pfcStatus: "功能不足",
+        amygdalaLabel: "杏仁核 (Amygdala)",
+        amygdalaDesc: "威脅偵測、恐懼、情緒反應",
+        amygdalaStatus: "過度活躍",
+        emotionRegulationResult: "導致情緒調節困難",
+        heritabilityChartLabel: "遺傳度估計 (%)",
+        heritabilityLabels: ["思覺失調症", "雙相情緒障礙症", ["注意力不足", "過動症 (ADHD)"], "重度憂鬱症"],
+        s2Title: "第二部分：大腦的化學交響曲",
+        s2Intro: "大腦的功能依賴於神經傳導物質的精確平衡。過去的「化學失衡」理論已被更複雜的「興奮-抑制」平衡和神經可塑性觀點所取代。",
+        s2Card1Title: "關鍵神經傳導物質及其功能",
+        s2Card1Desc: "多種化學信使共同調節我們的情緒、思想和行為。它們之間的失衡與多種精神疾病有關。",
+        tableHeader1: "物質",
+        tableHeader2: "主要功能",
+        tableHeader3: "相關疾病",
+        serotoninName: "血清素",
+        serotoninFunc: "情緒調節、睡眠、食慾",
+        serotoninDisorder: "憂鬱症、焦慮症",
+        dopamineName: "多巴胺",
+        dopamineFunc: "獎勵、動機、專注力",
+        dopamineDisorder: "思覺失調症、成癮、憂鬱症",
+        glutamateName: "麩胺酸",
+        glutamateFunc: "主要興奮性信號，學習記憶",
+        glutamateDisorder: "憂鬱症、思覺失調症",
+        gabaName: "GABA",
+        gabaFunc: "主要抑制性信號，鎮靜放鬆",
+        gabaDisorder: "焦慮症、憂鬱症",
+        s2Card2Title: "理論的演進",
+        s2Card2Desc: "從簡單的水平高低，到關注大腦自我修復和重塑的能力。",
+        oldTheory: "舊觀點：化學失衡",
+        oldTheoryDesc: "認為憂鬱症是因血清素過少。",
+        newTheory: "新觀點：神經可塑性",
+        newTheoryDesc: "認為治療是透過促進神經元生長和連接來「重塑」大腦。",
+        s3Title: "第三部分：一場治療革命",
+        s3Intro: "精神藥理學正經歷一場範式轉移。新藥物不再僅僅調節化學物質水平，而是直接促進大腦可塑性，或以全新的機制靶向疾病迴路。",
+        s3Card1Title: "氯胺酮：速效抗憂鬱",
+        s3Card1Desc: "氯胺酮通過作用於麩胺酸系統，在數小時內為難治性憂鬱症患者帶來希望，其核心是快速促進突觸新生。",
+        ketamineChartTitle: "難治性憂鬱症患者反應率 (%)",
+        ketamineLabels: ["治療有反應", "治療無反應"],
+        s3Card2Title: "迷幻藥復興：裸蓋菇素",
+        s3Card2Desc: "在心理治療輔助下，裸蓋菇素（神奇蘑菇活性成分）能「重置」與憂鬱相關的大腦網絡，產生持久療效。",
+        psilocybinChartLabel: "裸蓋菇素治療特性",
+        psilocybinLabels: ["神經可塑性", ["打破固化", "思維"], "持久性", "主觀體驗", "快速起效"],
+        s3Card3Title: "思覺失調症新希望",
+        s3Card3Desc: "Xanomeline-Trospium (Cobenfy) 是70年來首個非多巴胺D2受體機制的抗精神病藥，通過調節上游膽鹼能系統發揮作用，副作用更少。",
+        s3Card3InfoTitle: "全新機制",
+        s3Card3InfoDesc: "避免傳統藥物的體重增加和運動障礙等副作用。",
+        s4Title: "第四部分：重塑大腦的非藥物方法",
+        s4Intro: "心理治療和物理干預並非只是「談話」或「刺激」，它們是能夠引起大腦實質性、可測量變化的生物學干預。",
+        s4Card1Title: "認知行為療法 (CBT) 的大腦重塑效應",
+        s4Card1Desc: "CBT通過訓練，能有效增強前額葉皮質（理性腦）對杏仁核（情緒腦）的控制力，從根本上改變大腦對壓力的反應模式。",
+        cbtChartLabel1: "杏仁核 (情緒腦) 活動",
+        cbtChartLabel2: "前額葉皮質 (理性腦) 活動",
+        cbtChartLabels: ["治療前", "治療後"],
+        s4Card2Title: "治療的協同作用",
+        s4Card2Desc: "藥物與心理治療結合往往是黃金標準，它們以互補的方式修復大腦迴路，達到1+1>2的效果。",
+        synergyMedication: "藥物",
+        synergyMedicationApproach: "自下而上",
+        synergyMedicationDesc: "穩定情緒基礎",
+        synergyPsychotherapy: "心理治療",
+        synergyPsychotherapyApproach: "自上而下",
+        synergyPsychotherapyDesc: "學習應對技巧",
+        synergyResult: "最佳療效",
+        synergyResultDesc: "降低復發風險",
+        s5Title: "第五部分：精神醫學的未來：精準與個人化",
+        s5Intro: "未來的精神醫學將超越「一體適用」的方法，轉向根據每個人的生物學特性量身定制的治療方案。",
+        s5Card1Title: "藥物基因組學：個人化用藥",
+        s5Card1Desc: "基因檢測（如CYP450酶）可以預測您代謝藥物的速度，幫助醫生選擇正確的藥物和劑量，避免副作用或治療無效。",
+        pgxSlow: "慢代謝者",
+        pgxSlowDesc: "藥物累積，易中毒",
+        pgxNormal: "正常代謝者",
+        pgxNormalDesc: "標準劑量",
+        pgxUltra: "超快代謝者",
+        pgxUltraDesc: "藥物失效，需加量",
+        s5Card2Title: "未來的希望：生物標記",
+        s5Card2Desc: "科學家正在尋找可靠的生物標記（如腦影像、血液指標），以實現早期診斷、預測治療反應和開發更具靶向性的藥物。",
+        bmNeuroimaging: "神經影像標記",
+        bmNeuroimagingDesc: "通過fMRI等識別特定腦迴路模式。",
+        bmGenetic: "遺傳標記",
+        bmGeneticDesc: "利用多基因風險評分預測疾病風險。",
+        bmBiochemical: "生化標記",
+        bmBiochemicalDesc: "檢測血液中的炎症因子或激素水平。",
+        footerDisclaimer: "本資訊圖表基於截至2025年的科學研究，旨在提供教育資訊，不應被視為醫療建議。",
+        footerCredit: "設計與開發：Canvas Infographics",
+    }
+};
+
+let currentCharts = {};
+let currentLang = 'zh';
+
+document.addEventListener('DOMContentLoaded', function () {
+    const switcher = document.getElementById('lang-switcher');
+
+    const updateContent = (lang) => {
+        document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+        const data = langData[lang];
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (data[key]) {
+                el.innerHTML = data[key];
+            }
+        });
+        switcher.textContent = lang === 'zh' ? 'English' : '中文';
+        createCharts(lang);
+    };
+
+    switcher.addEventListener('click', () => {
+        currentLang = currentLang === 'zh' ? 'en' : 'zh';
+        updateContent(currentLang);
+    });
+
+    updateContent(currentLang);
+});
+
+const destroyCharts = () => {
+    Object.values(currentCharts).forEach(chart => {
+        if (chart) chart.destroy();
+    });
+    currentCharts = {};
+};
+
+const createCharts = (lang) => {
+    destroyCharts();
+    const data = langData[lang];
+    const primaryColors = { darkBlue: '#003f5c', indigo: '#444e86', purple: '#955196', magenta: '#dd5182', coral: '#ff6e54', gold: '#ffa600' };
+    const chartFontColor = '#374151';
+    
+    const wrapLabel = (str, maxLen) => {
+        if (typeof str !== 'string' || str.length <= maxLen) return str;
+        const words = str.split(' ');
+        let currentLine = '';
+        const lines = [];
+        for (const word of words) {
+            if ((currentLine + ' ' + word).trim().length > maxLen && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = (currentLine + ' ' + word).trim();
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+        return lines;
+    };
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+
+    const defaultChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { labels: { color: chartFontColor, font: { size: 12 }}},
+            tooltip: { callbacks: { title: tooltipTitleCallback }}
+        },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#e5e7eb' }, ticks: { color: chartFontColor }},
+            x: { grid: { display: false }, ticks: { color: chartFontColor }}
+        }
+    };
+
+    if (document.getElementById('heritabilityChart')) {
+        currentCharts.heritabilityChart = new Chart(document.getElementById('heritabilityChart'), {
+            type: 'bar',
+            data: {
+                labels: data.heritabilityLabels.map(l => Array.isArray(l) ? l : wrapLabel(l, 16)),
+                datasets: [{
+                    label: data.heritabilityChartLabel,
+                    data: [81, 80, 74, 37],
+                    backgroundColor: [primaryColors.indigo, primaryColors.purple, primaryColors.magenta, primaryColors.coral],
+                    borderWidth: 1
+                }]
+            },
+            options: { ...defaultChartOptions, indexAxis: 'y' }
+        });
+    }
+
+    if (document.getElementById('ketamineChart')) {
+        currentCharts.ketamineChart = new Chart(document.getElementById('ketamineChart'), {
+            type: 'doughnut',
+            data: {
+                labels: data.ketamineLabels,
+                datasets: [{ data: [70, 30], backgroundColor: [primaryColors.magenta, '#e5e7eb'], hoverOffset: 4 }]
+            },
+            options: {
+                ...defaultChartOptions,
+                plugins: { ...defaultChartOptions.plugins, title: { display: true, text: data.ketamineChartTitle, color: chartFontColor, font: { size: 14 }}, legend: { position: 'bottom' }},
+                scales: { y: { display: false }, x: { display: false } }
+            }
+        });
+    }
+
+    if (document.getElementById('psilocybinChart')) {
+        currentCharts.psilocybinChart = new Chart(document.getElementById('psilocybinChart'), {
+            type: 'radar',
+            data: {
+                labels: data.psilocybinLabels,
+                datasets: [{
+                    label: data.psilocybinChartLabel,
+                    data: [9, 8, 8, 10, 7],
+                    fill: true,
+                    backgroundColor: 'rgba(255, 110, 84, 0.2)',
+                    borderColor: primaryColors.coral,
+                    pointBackgroundColor: primaryColors.coral,
+                }]
+            },
+            options: {
+                ...defaultChartOptions,
+                scales: { r: { angleLines: { color: '#d1d5db' }, grid: { color: '#e5e7eb' }, pointLabels: { font: { size: 12 }, color: chartFontColor }, ticks: { display: false, backdropColor: 'transparent' }}}
+            }
+        });
+    }
+
+    if (document.getElementById('cbtEffectChart')) {
+        currentCharts.cbtEffectChart = new Chart(document.getElementById('cbtEffectChart'), {
+            type: 'bar',
+            data: {
+                labels: data.cbtChartLabels,
+                datasets: [
+                    { label: data.cbtChartLabel1, data: [85, 40], backgroundColor: primaryColors.magenta },
+                    { label: data.cbtChartLabel2, data: [50, 80], backgroundColor: primaryColors.indigo }
+                ]
+            },
+            options: {
+                ...defaultChartOptions,
+                scales: { y: { ticks: { callback: value => value + '%' }}},
+                plugins: { ...defaultChartOptions.plugins, legend: { position: 'bottom' }}
+            }
+        });
+    }
+};
+</script>
+</body>
+</html>
