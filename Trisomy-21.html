@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：深入了解唐氏症 (Bilingual)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lato', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 40vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .stat-card {
+            background-color: #0A2463;
+            color: white;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #0A2463;
+            color: #0A2463;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active {
+            background-color: #0A2463;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    
+    <header class="bg-white text-center py-6 shadow-md relative">
+        <div class="absolute top-4 right-4">
+            <div class="flex rounded-md overflow-hidden">
+                <button id="lang-en-btn" class="lang-btn">EN</button>
+                <button id="lang-zh-btn" class="lang-btn active">中</button>
+            </div>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold text-[#0A2463] px-16" data-lang-zh="深入了解唐氏症 (21三體症)" data-lang-en="Understanding Down Syndrome (Trisomy 21)">深入了解唐氏症 (21三體症)</h1>
+        <p class="mt-2 text-lg text-gray-600 max-w-3xl mx-auto" data-lang-zh="一份關於成因、風險與生育能力的視覺化指南" data-lang-en="A Visual Guide to Causes, Risks, and Fertility">一份關於成因、風險與生育能力的視覺化指南</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="introduction" class="mb-12">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8 text-center">
+                <h2 class="text-3xl font-bold text-[#0A2463] mb-4" data-lang-zh="什麼是唐氏症？" data-lang-en="What is Down Syndrome?">什麼是唐氏症？</h2>
+                <p class="text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto" data-lang-zh="唐氏症是人類最常見的染色體異常疾病，其根本原因在於細胞中出現了全部或部分的第三條第21號染色體。這份額外的遺傳物質會影響個體的身體發育和認知能力。然而，這並非由父母的行為所致，而多半是隨機發生的遺傳事件。" data-lang-en="Down syndrome is the most common chromosomal disorder in humans, caused by the presence of a full or partial third copy of chromosome 21. This extra genetic material alters the course of development and causes the characteristics associated with Down syndrome. It is not caused by anything the parents did, but is most often a random genetic event.">
+                    唐氏症是人類最常見的染色體異常疾病，其根本原因在於細胞中出現了全部或部分的第三條第21號染色體。這份額外的遺傳物質會影響個體的身體發育和認知能力。然而，這並非由父母的行為所致，而多半是隨機發生的遺傳事件。
+                </p>
+            </div>
+        </section>
+
+        <section id="types" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-8" data-lang-zh="唐氏症的三種主要類型" data-lang-en="The Three Main Types of Down Syndrome">唐氏症的三種主要類型</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 items-center">
+                
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center mb-4 text-[#3E92CC]" data-lang-zh="各類型發生頻率" data-lang-en="Frequency of Each Type">各類型發生頻率</h3>
+                    <div class="chart-container">
+                        <canvas id="typesDonutChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 bg-white rounded-lg shadow-lg p-6">
+                     <p class="text-md text-gray-700 mb-6" data-lang-zh="唐氏症有三種遺傳途徑，了解它們的差異對於遺傳諮詢至關重要。絕大多數案例為標準型，屬於偶發事件，而易位型則有遺傳的可能性。" data-lang-en="There are three genetic variations of Down syndrome. Understanding these differences is crucial for genetic counseling. The vast majority of cases are Standard Trisomy 21, a sporadic event, while Translocation type can be inherited.">唐氏症有三種遺傳途徑，了解它們的差異對於遺傳諮詢至關重要。絕大多數案例為標準型，屬於偶發事件，而易位型則有遺傳的可能性。</p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-2xl text-[#3E92CC] mr-3 font-bold">1.</span>
+                            <div>
+                                <h4 class="font-bold text-lg" data-lang-zh="標準型21三體症 (約 95%)" data-lang-en="Standard Trisomy 21 (approx. 95%)">標準型21三體症 (約 95%)</h4>
+                                <p class="text-gray-600" data-lang-zh="在卵子或精子形成時，第21對染色體未能成功分離所致。這是一個<strong class='text-[#D8315B]'>偶發性</strong>事件，並非遺傳自父母。" data-lang-en="Caused by a failure of the 21st pair of chromosomes to separate during the formation of the egg or sperm. This is a <strong class='text-[#D8315B]'>sporadic</strong> event and is not inherited from the parents.">在卵子或精子形成時，第21對染色體未能成功分離所致。這是一個<strong class="text-[#D8315B]">偶發性</strong>事件，並非遺傳自父母。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-2xl text-[#3E92CC] mr-3 font-bold">2.</span>
+                             <div>
+                                <h4 class="font-bold text-lg" data-lang-zh="易位型 (約 3-4%)" data-lang-en="Translocation (approx. 3-4%)">易位型 (約 3-4%)</h4>
+                                <p class="text-gray-600" data-lang-zh="第21號染色體的一部分斷裂並附著到另一條染色體上。這種情況<strong class='text-[#D8315B]'>可能遺傳</strong>自無症狀的帶因父母。" data-lang-en="Part of chromosome 21 breaks off and attaches to another chromosome. This type <strong class='text-[#D8315B]'>can be inherited</strong> from an unaffected carrier parent.">第21號染色體的一部分斷裂並附著到另一條染色體上。這種情況<strong class="text-[#D8315B]">可能遺傳</strong>自無症狀的帶因父母。</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                             <span class="text-2xl text-[#3E92CC] mr-3 font-bold">3.</span>
+                            <div>
+                                <h4 class="font-bold text-lg" data-lang-zh="鑲嵌型 (約 1-2%)" data-lang-en="Mosaicism (approx. 1-2%)">鑲嵌型 (約 1-2%)</h4>
+                                <p class="text-gray-600" data-lang-zh="錯誤發生在受精後的早期細胞分裂，導致體內同時存在正常與異常的細胞。症狀通常較輕微，也屬於<strong class='text-[#D8315B]'>偶發性</strong>事件。" data-lang-en="The error occurs in early cell division after fertilization, resulting in a mixture of normal and abnormal cells. Symptoms are often milder, and it is also a <strong class='text-[#D8315B]'>sporadic</strong> event.">錯誤發生在受精後的早期細胞分裂，導致體內同時存在正常與異常的細胞。症狀通常較輕微，也屬於<strong class="text-[#D8315B]">偶發性</strong>事件。</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="risk-factors" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-8" data-lang-zh="主要風險因素：母親年齡" data-lang-en="Key Risk Factor: Maternal Age">主要風險因素：母親年齡</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-center mb-2 text-[#3E92CC]" data-lang-zh="母親年齡與唐氏症風險的關聯" data-lang-en="Maternal Age & Down Syndrome Risk">母親年齡與唐氏症風險的關聯</h3>
+                     <p class="text-center text-gray-600 mb-4" data-lang-zh="隨著母親年齡增長，卵子發生染色體不分離的機率會顯著提高，這是生育唐氏症胎兒最主要的風險因素。" data-lang-en="As a mother's age increases, the chance of chromosomal non-disjunction in her eggs rises significantly, making it the primary risk factor for having a child with Down syndrome.">隨著母親年齡增長，卵子發生染色體不分離的機率會顯著提高，這是生育唐氏症胎兒最主要的風險因素。</p>
+                    <div class="chart-container h-[350px] md:h-[400px]">
+                        <canvas id="maternalAgeLineChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="space-y-8">
+                    <div class="stat-card rounded-lg shadow-lg p-8 text-center">
+                        <h3 class="text-2xl font-bold mb-2" data-lang-zh="一個重要的事實" data-lang-en="An Important Fact">一個重要的事實</h3>
+                        <p class="text-6xl font-bold text-[#F4E285]">~80%</p>
+                        <p class="mt-2 text-lg" data-lang-zh="的唐氏症嬰兒，是由<strong class='text-[#F4E285]'>35歲以下</strong>的年輕母親所生。" data-lang-en="of babies with Down syndrome are born to mothers <strong class='text-[#F4E285]'>under 35</strong>.">的唐氏症嬰兒，是由<strong class="text-[#F4E285]">35歲以下</strong>的年輕母親所生。</p>
+                        <p class="text-sm mt-4 text-slate-300" data-lang-zh="這是因為年輕女性的總生育率遠高於高齡女性，因此儘管個人風險較低，但患兒的絕對數量反而更多。這突顯了對所有孕婦進行篩檢的重要性。" data-lang-en="This is because younger women have far more babies overall. Despite a lower individual risk, the absolute number of affected children is higher, highlighting the importance of screening for all pregnant women.">這是因為年輕女性的總生育率遠高於高齡女性，因此儘管個人風險較低，但患兒的絕對數量反而更多。這突顯了對所有孕婦進行篩檢的重要性。</p>
+                    </div>
+                     <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-[#3E92CC] mb-3" data-lang-zh="其他相關因素" data-lang-en="Other Correlated Factors">其他相關因素</h3>
+                        <ul class="space-y-2 text-gray-700">
+                           <li class="flex items-center"><span class="text-[#D8315B] text-2xl mr-2">●</span><span data-lang-zh="父母為易位型帶因者。" data-lang-en="Parents are carriers of the translocation type.">父母為易位型帶因者。</span></li>
+                           <li class="flex items-center"><span class="text-[#D8315B] text-2xl mr-2">●</span><span data-lang-zh="曾生育過唐氏症胎兒的歷史 (復發風險約增加1%)。" data-lang-en="Having previously had a child with Down syndrome (recurrence risk increases by ~1%).">曾生育過唐氏症胎兒的歷史 (復發風險約增加1%)。</span></li>
+                           <li class="flex items-center"><span class="text-[#D8315B] text-2xl mr-2">●</span><span data-lang-zh="高齡父親可能小幅增加風險。" data-lang-en="Advanced paternal age may slightly increase risk.">高齡父親可能小幅增加風險。</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="fertility" class="mb-12">
+            <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-8" data-lang-zh="唐氏症患者可以生育嗎？" data-lang-en="Can People with Down Syndrome Have Children?">唐氏症患者可以生育嗎？</h2>
+            <p class="text-center text-lg text-gray-700 leading-relaxed max-w-4xl mx-auto mb-8" data-lang-zh="關於生育能力，唐氏症患者在性別上存在顯著差異。這是一個複雜且需謹慎評估的議題，涉及遺傳風險與個人健康。" data-lang-en="Regarding fertility, there are significant differences between sexes. This is a complex issue requiring careful consideration of genetic risks and personal health.">
+               關於生育能力，唐氏症患者在性別上存在顯著差異。這是一個複雜且需謹慎評估的議題，涉及遺傳風險與個人健康。
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
+                    <div class="text-center">
+                        <span class="text-6xl" role="img" aria-label="女性符號">♀️</span>
+                        <h3 class="text-2xl font-bold text-[#0A2463] mt-2" data-lang-zh="女性患者" data-lang-en="Female Patients">女性患者</h3>
+                        <p class="text-green-600 font-bold my-2" data-lang-zh="通常具備生育能力" data-lang-en="Usually Fertile">通常具備生育能力</p>
+                        <p class="text-gray-600 text-sm mb-4" data-lang-zh="女性患者通常有正常的月經週期並能夠排卵，但在懷孕期間需面臨較高的健康風險（如心臟問題）。" data-lang-en="Female patients often have regular menstrual cycles and can ovulate, but face higher health risks during pregnancy (e.g., heart conditions).">女性患者通常有正常的月經週期並能夠排卵，但在懷孕期間需面臨較高的健康風險（如心臟問題）。</p>
+                    </div>
+                    <div class="chart-container w-full mt-auto">
+                         <h4 class="text-center font-semibold text-gray-700 mb-2" data-lang-zh="對子代的遺傳風險" data-lang-en="Genetic Risk to Offspring">對子代的遺傳風險</h4>
+                        <canvas id="femaleFertilityDonutChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col items-center">
+                    <div class="text-center">
+                         <span class="text-6xl" role="img" aria-label="男性符號">♂️</span>
+                        <h3 class="text-2xl font-bold text-[#0A2463] mt-2" data-lang-zh="男性患者" data-lang-en="Male Patients">男性患者</h3>
+                        <p class="text-red-600 font-bold my-2" data-lang-zh="絕大多數不具生育能力" data-lang-en="Mostly Infertile">絕大多數不具生育能力</p>
+                        <p class="text-gray-600 text-sm mb-4" data-lang-zh="額外的第21號染色體會嚴重干擾或阻礙精子的生成過程，導致絕大多數男性患者無法生育。僅有極其罕見的例外案例。" data-lang-en="The extra 21st chromosome severely disrupts or prevents sperm production, making most male patients infertile. There are extremely rare exceptions.">額外的第21號染色體會嚴重干擾或阻礙精子的生成過程，導致絕大多數男性患者無法生育。僅有極其罕見的例外案例。</p>
+                    </div>
+                     <div class="mt-auto w-full text-center p-6 bg-slate-100 rounded-lg">
+                        <h4 class="font-semibold text-gray-700 mb-2" data-lang-zh="關鍵生物學因素" data-lang-en="Key Biological Factor">關鍵生物學因素</h4>
+                        <p class="text-lg text-[#3E92CC] font-bold" data-lang-zh="精子生成障礙" data-lang-en="Impaired Spermatogenesis">精子生成障礙</p>
+                        <p class="text-gray-600 text-sm" data-lang-zh="額外的遺傳物質對精子生成的影響遠大於對卵子生成的影響。" data-lang-en="The extra genetic material has a much greater impact on sperm production than on egg production.">額外的遺傳物質對精子生成的影響遠大於對卵子生成的影響。</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+         <section id="support" class="mb-12">
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center text-[#0A2463] mb-8" data-lang-zh="支持系統的重要性" data-lang-en="The Importance of Support Systems">支持系統的重要性</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="flex flex-col items-center">
+                        <div class="bg-[#F4E285] rounded-full p-4 mb-4">
+                           <span class="text-4xl">🧬</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#0A2463] mb-2" data-lang-zh="遺傳諮詢" data-lang-en="Genetic Counseling">遺傳諮詢</h3>
+                        <p class="text-gray-600" data-lang-zh="幫助家庭理解診斷、復發風險與未來規劃，提供知情決策的支持。" data-lang-en="Helps families understand the diagnosis, recurrence risks, and future planning, supporting informed decisions.">幫助家庭理解診斷、復發風險與未來規劃，提供知情決策的支持。</p>
+                    </div>
+                     <div class="flex flex-col items-center">
+                         <div class="bg-[#F4E285] rounded-full p-4 mb-4">
+                           <span class="text-4xl">🧩</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#0A2463] mb-2" data-lang-zh="早期療育" data-lang-en="Early Intervention">早期療育</h3>
+                        <p class="text-gray-600" data-lang-zh="物理、職能和語言治療等早期介入措施，能有效幫助孩子發揮最大潛能。" data-lang-en="Early intervention services like physical, occupational, and speech therapy help children reach their full potential.">物理、職能和語言治療等早期介入措施，能有效幫助孩子發揮最大潛能。</p>
+                    </div>
+                     <div class="flex flex-col items-center">
+                         <div class="bg-[#F4E285] rounded-full p-4 mb-4">
+                           <span class="text-4xl">❤️</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#0A2463] mb-2" data-lang-zh="社區與家庭" data-lang-en="Community & Family">社區與家庭</h3>
+                        <p class="text-gray-600" data-lang-zh="支持網絡提供資訊、倡議與情感連結，讓家庭在旅程中不感孤單。" data-lang-en="Support networks provide information, advocacy, and emotional connection, ensuring families don't feel alone on their journey.">支持網絡提供資訊、倡議與情感連結，讓家庭在旅程中不感孤單。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 bg-gray-800 text-white">
+        <p data-lang-zh="本資訊圖表基於科學報告製作，旨在提供教育與參考資訊。" data-lang-en="This infographic is based on scientific reports and is intended for educational and informational purposes.">本資訊圖表基於科學報告製作，旨在提供教育與參考資訊。</p>
+        <p class="text-sm text-gray-400 mt-1" data-lang-zh="請諮詢專業醫療人員以獲取個人化的醫療建議。" data-lang-en="Please consult a healthcare professional for personalized medical advice.">請諮詢專業醫療人員以獲取個人化的醫療建議。</p>
+    </footer>
+
+<script>
+let currentLang = 'zh';
+let typesDonutChart, maternalAgeLineChart, femaleFertilityDonutChart;
+
+const translations = {
+    charts: {
+        types: {
+            zh: { labels: ['標準型 (95%)', '易位型 (4%)', '鑲嵌型 (1%)'] },
+            en: { labels: ['Standard Trisomy 21 (95%)', 'Translocation (4%)', 'Mosaicism (1%)'] }
+        },
+        maternalAge: {
+            zh: {
+                label: '唐氏症風險 (約 1/x)',
+                yAxis: '風險 (對數尺度，值越小風險越高)',
+                xAxis: '母親年齡'
+            },
+            en: {
+                label: 'Down Syndrome Risk (approx. 1 in x)',
+                yAxis: 'Risk (Log Scale, lower value = higher risk)',
+                xAxis: 'Maternal Age'
+            }
+        },
+        femaleFertility: {
+            zh: { labels: ['患有唐氏症的子女 (50%)', '染色體正常的子女 (50%)'] },
+            en: { labels: ['Child with Down Syndrome (50%)', 'Child with Typical Chromosomes (50%)'] }
+        }
+    }
+};
+
+const tooltipTitleCallback = (tooltipItems) => {
+    const item = tooltipItems[0];
+    let label = item.chart.data.labels[item.dataIndex];
+    if (Array.isArray(label)) {
+        return label.join(' ');
+    }
+    return label;
+};
+
+const sharedChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: {
+            position: 'bottom',
+            labels: {
+                font: {
+                    family: "'Noto Sans TC', 'Lato', sans-serif",
+                    size: 14,
+                }
+            }
+        },
+        tooltip: {
+            callbacks: {
+                title: tooltipTitleCallback
+            },
+            titleFont: { family: "'Noto Sans TC', 'Lato', sans-serif" },
+            bodyFont: { family: "'Noto Sans TC', 'Lato', sans-serif" }
+        }
+    }
+};
+
+function createTypesChart(lang) {
+    if (typesDonutChart) typesDonutChart.destroy();
+    const chartData = {
+        labels: translations.charts.types[lang].labels,
+        datasets: [{
+            data: [95, 4, 1],
+            backgroundColor: ['#3E92CC', '#D8315B', '#F4E285'],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 4
+        }]
+    };
+    typesDonutChart = new Chart(document.getElementById('typesDonutChart'), {
+        type: 'doughnut',
+        data: chartData,
+        options: { ...sharedChartOptions }
+    });
+}
+
+function createMaternalAgeChart(lang) {
+    if (maternalAgeLineChart) maternalAgeLineChart.destroy();
+    const chartData = {
+        labels: ['20', '25', '30', '35', '40', '45'],
+        datasets: [{
+            label: translations.charts.maternalAge[lang].label,
+            data: [1500, 1300, 900, 350, 100, 30],
+            fill: true,
+            backgroundColor: 'rgba(216, 49, 91, 0.2)',
+            borderColor: '#D8315B',
+            tension: 0.4,
+            pointBackgroundColor: '#D8315B',
+            pointRadius: 5,
+            pointHoverRadius: 8
+        }]
+    };
+    maternalAgeLineChart = new Chart(document.getElementById('maternalAgeLineChart'), {
+        type: 'line',
+        data: chartData,
+        options: {
+            ...sharedChartOptions,
+            scales: {
+                y: {
+                    type: 'logarithmic',
+                    title: { display: true, text: translations.charts.maternalAge[lang].yAxis },
+                    ticks: { callback: (value) => '1/' + value }
+                },
+                x: {
+                    title: { display: true, text: translations.charts.maternalAge[lang].xAxis }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback,
+                        label: (context) => {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) { label += 'approx 1/' + context.parsed.y; }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createFemaleFertilityChart(lang) {
+    if (femaleFertilityDonutChart) femaleFertilityDonutChart.destroy();
+    const chartData = {
+        labels: translations.charts.femaleFertility[lang].labels,
+        datasets: [{
+            data: [50, 50],
+            backgroundColor: ['#D8315B', '#3E92CC'],
+            borderColor: '#ffffff',
+            borderWidth: 2,
+            hoverOffset: 4
+        }]
+    };
+    femaleFertilityDonutChart = new Chart(document.getElementById('femaleFertilityDonutChart'), {
+        type: 'pie',
+        data: chartData,
+        options: { ...sharedChartOptions }
+    });
+}
+
+function switchLanguage(lang) {
+    if (lang === currentLang) return;
+    currentLang = lang;
+    
+    document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+
+    document.querySelectorAll('[data-lang-zh]').forEach(el => {
+        el.innerHTML = el.getAttribute(`data-lang-${lang}`);
+    });
+
+    createTypesChart(lang);
+    createMaternalAgeChart(lang);
+    createFemaleFertilityChart(lang);
+
+    document.getElementById('lang-zh-btn').classList.toggle('active', lang === 'zh');
+    document.getElementById('lang-en-btn').classList.toggle('active', lang === 'en');
+}
+
+window.onload = function() {
+    document.getElementById('lang-en-btn').addEventListener('click', () => switchLanguage('en'));
+    document.getElementById('lang-zh-btn').addEventListener('click', () => switchLanguage('zh'));
+    
+    switchLanguage('zh'); // Initial load
+};
+</script>
+
+</body>
+</html>
