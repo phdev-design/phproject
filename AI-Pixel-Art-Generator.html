@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 像素藝術生成器</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入像素風格字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* 自訂樣式 */
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .pixel-border {
+            border-style: solid;
+            border-width: 4px;
+            border-image-slice: 2;
+            border-image-width: 2;
+            border-image-repeat: stretch;
+            border-image-source: url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="6"><g fill="%23fff"><path d="M0 0h2v2H0zM2 2h2v2H2zM4 4h2v2H4zM0 4h2v2H0zM4 0h2v2H4z"/></g></svg>');
+            border-image-outset: 2;
+            position: relative;
+            padding: 1rem;
+        }
+        .btn-pixel {
+            background-color: #5a5a5a;
+            color: white;
+            padding: 10px 20px;
+            border-style: solid;
+            border-width: 4px;
+            border-image-slice: 2;
+            border-image-width: 2;
+            border-image-repeat: stretch;
+            border-image-source: url('data:image/svg+xml;utf8,<svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="6" height="6"><g fill="%23fff"><path d="M0 0h2v2H0zM2 2h2v2H2zM4 4h2v2H4zM0 4h2v2H0zM4 0h2v2H4z"/></g></svg>');
+            border-image-outset: 2;
+            transition: all 0.2s ease;
+        }
+        .btn-pixel:hover {
+            background-color: #7a7a7a;
+            color: #ffff00;
+        }
+        .btn-pixel:active {
+            transform: translateY(2px);
+        }
+        #loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl mx-auto">
+        <header class="text-center mb-8 relative">
+            <h1 id="main-title" class="text-3xl md:text-4xl text-yellow-300 tracking-wider">AI 像素藝術生成器</h1>
+            <div class="absolute top-0 right-0">
+                <button id="lang-toggle-btn" class="btn-pixel !p-2 text-sm">English</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- 輸入區塊 -->
+            <div class="mb-8 pixel-border bg-gray-800">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="text" id="prompt-input" class="w-full bg-gray-900 text-white p-3 text-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="輸入您的想法 (例如: a cat wearing a wizard hat)...">
+                    <button id="generate-btn" class="btn-pixel w-full md:w-auto">生成</button>
+                </div>
+            </div>
+
+            <!-- 圖片顯示區塊 -->
+            <div id="image-container" class="pixel-border bg-gray-900 min-h-[300px] md:min-h-[512px] flex items-center justify-center">
+                <div id="placeholder" class="text-center text-gray-500">
+                    <p>您的像素藝術將會顯示在這裡</p>
+                </div>
+                <div id="loading" class="hidden flex-col items-center justify-center">
+                    <div id="loading-spinner"></div>
+                    <p class="mt-4 text-lg">生成中...</p>
+                </div>
+                <img id="result-image" src="" alt="Generated Pixel Art" class="hidden w-full h-auto max-w-full max-h-full object-contain">
+            </div>
+             <!-- 錯誤訊息區塊 -->
+            <div id="error-message" class="hidden mt-4 p-4 bg-red-800 text-white text-center pixel-border">
+                <p>糟糕！發生錯誤。請稍後再試。</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 獲取 DOM 元素
+        const generateBtn = document.getElementById('generate-btn');
+        const promptInput = document.getElementById('prompt-input');
+        const imageContainer = document.getElementById('image-container');
+        const placeholder = document.getElementById('placeholder');
+        const loading = document.getElementById('loading');
+        const resultImage = document.getElementById('result-image');
+        const errorMessage = document.getElementById('error-message');
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+
+        // 翻譯文字
+        const translations = {
+            en: {
+                title: 'AI Pixel Art Generator',
+                placeholder: 'Enter your idea (e.g., a knight fighting a dragon)...',
+                generateButton: 'Generate',
+                placeholderText: 'Your pixel art will be displayed here',
+                loadingText: 'Generating...',
+                errorText: 'Oops! Something went wrong. Please try again later.',
+                langButton: '中文',
+                alertEmptyInput: 'Please enter some text to generate an image!'
+            },
+            zh: {
+                title: 'AI 像素藝術生成器',
+                placeholder: '輸入您的想法 (例如: 一位騎士正在對抗一條龍)...',
+                generateButton: '生成',
+                placeholderText: '您的像素藝術將會顯示在這裡',
+                loadingText: '生成中...',
+                errorText: '糟糕！發生錯誤。請稍後再試。',
+                langButton: 'English',
+                alertEmptyInput: '請輸入一些文字來生成圖片！'
+            }
+        };
+
+        let currentLang = 'zh'; // 預設語言為中文
+
+        // 需要翻譯的元素
+        const elementsToTranslate = {
+            title: document.getElementById('main-title'),
+            placeholder: document.getElementById('prompt-input'),
+            generateButton: document.getElementById('generate-btn'),
+            placeholderText: document.querySelector('#placeholder p'),
+            loadingText: document.querySelector('#loading p'),
+            errorText: document.querySelector('#error-message p'),
+            langButton: document.getElementById('lang-toggle-btn')
+        };
+
+        /**
+         * 根據選擇的語言設定介面文字
+         * @param {string} lang - 語言代碼 ('en' 或 'zh')
+         */
+        function setLanguage(lang) {
+            elementsToTranslate.title.textContent = translations[lang].title;
+            elementsToTranslate.placeholder.placeholder = translations[lang].placeholder;
+            elementsToTranslate.generateButton.textContent = translations[lang].generateButton;
+            elementsToTranslate.placeholderText.textContent = translations[lang].placeholderText;
+            elementsToTranslate.loadingText.textContent = translations[lang].loadingText;
+            elementsToTranslate.errorText.textContent = translations[lang].errorText;
+            elementsToTranslate.langButton.textContent = translations[lang].langButton;
+        }
+
+        // 語言切換按鈕事件
+        langToggleBtn.addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            setLanguage(currentLang);
+        });
+
+        // 為生成按鈕添加點擊事件監聽器
+        generateBtn.addEventListener('click', generateImage);
+        
+        // 讓使用者按下 Enter 鍵也能觸發生成
+        promptInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                generateImage();
+            }
+        });
+
+        /**
+         * 呼叫 API 生成圖片
+         */
+        async function generateImage() {
+            // 獲取使用者輸入的提示
+            const userInput = promptInput.value.trim();
+            if (!userInput) {
+                alert(translations[currentLang].alertEmptyInput);
+                return;
+            }
+
+            // 準備 UI
+            placeholder.classList.add('hidden');
+            resultImage.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            loading.classList.remove('hidden');
+            loading.classList.add('flex');
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 建立一個更適合像素藝術的提示
+            const prompt = `pixel art style, ${userInput}, 8-bit, 16-bit, detailed, vibrant colors`;
+
+            try {
+                // 準備 API 請求的 payload
+                const payload = {
+                    instances: { prompt: prompt },
+                    parameters: { "sampleCount": 1 }
+                };
+
+                // 您的 API 金鑰 (將會自動提供)
+                const apiKey = "AIzaSyD3Cbuol_Gg8aKoALbtEkxFPylVTgOqRb0"; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+                // 發送 fetch 請求
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // 檢查 API 回應是否有效
+                if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+                    const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                    // 顯示生成的圖片
+                    resultImage.src = imageUrl;
+                    resultImage.classList.remove('hidden');
+                } else {
+                    // 處理 API 回應結構不符預期的情況
+                    throw new Error('Invalid API response structure.');
+                }
+
+            } catch (error) {
+                console.error('Error generating image:', error);
+                // 顯示錯誤訊息
+                errorMessage.classList.remove('hidden');
+            } finally {
+                // 清理 UI
+                loading.classList.add('hidden');
+                loading.classList.remove('flex');
+                generateBtn.disabled = false;
+                generateBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // 頁面載入時初始化語言
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
