@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飲食革命：我們的餐盤如何拯救地球</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Lato', sans-serif;
+            background-color: #F2F2F2;
+            color: #333333;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            text-align: center;
+            border-left: 5px solid #FF6B6B;
+        }
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #FF6B6B;
+            line-height: 1.2;
+        }
+        .stat-label {
+            font-size: 1rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            color: #333333;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: #555;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <header class="bg-white py-6 shadow-md relative">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-black text-gray-800 tracking-tight" data-lang-key="title">飲食革命</h1>
+            <p class="mt-2 text-xl text-gray-600" data-lang-key="subtitle">我們的餐盤如何拯救地球</p>
+        </div>
+        <div class="absolute top-4 right-4">
+            <button id="lang-switcher" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow">
+                English
+            </button>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="problem" class="my-16">
+            <h2 class="section-title" data-lang-key="problem_title">問題的真相：全球飲食的巨大環境足跡</h2>
+            <p class="section-subtitle" data-lang-key="problem_subtitle">我們的食物系統是驅動地球變化的主要力量。從氣候變遷到水資源枯竭，我們餐盤上的選擇正以前所未有的規模影響著地球的健康。</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="stat-card">
+                    <div class="stat-number">~30%</div>
+                    <div class="stat-label" data-lang-key="stat_ghg">的全球溫室氣體排放<br>來自食物系統</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">~50%</div>
+                    <div class="stat-label" data-lang-key="stat_land">的全球宜居土地<br>被用於農業</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">~70%</div>
+                    <div class="stat-label" data-lang-key="stat_water">的全球淡水資源<br>被農業消耗</div>
+                </div>
+            </div>
+             <div class="mt-12 card lg:col-span-2">
+                <h3 class="text-xl font-bold text-center mb-4" data-lang-key="myth_title">迷思破解：「食物里程」真的是關鍵嗎？</h3>
+                <p class="text-center text-gray-600 mb-6" data-lang-key="myth_subtitle">許多人認為「吃在地」是環保的關鍵，但數據揭示了不同的真相。食物的環境足跡絕大部分來自生產階段，而非運輸。</p>
+                <div class="chart-container h-64 md:h-80 mx-auto">
+                    <canvas id="emissionsBreakdownChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="comparison" class="my-16">
+            <h2 class="section-title" data-lang-key="comparison_title">選擇的力量：不同食物的環境影響天差地別</h2>
+            <p class="section-subtitle" data-lang-key="comparison_subtitle">改變飲食習慣是個人最有效的環保行動之一。數據清楚地顯示，減少動物性產品的消費，尤其是牛肉，可以帶來巨大的環境效益。</p>
+            <div class="card">
+                <h3 class="text-xl font-bold text-center mb-2" data-lang-key="food_emissions_title">每公斤食物的溫室氣體排放量比較</h3>
+                <p class="text-center text-gray-600 mb-6" data-lang-key="food_emissions_subtitle">生產一公斤牛肉所產生的碳排放，遠遠超過大多數植物性食物。</p>
+                <div class="chart-container h-96 md:h-[500px] max-w-4xl">
+                    <canvas id="foodEmissionsChart"></canvas>
+                </div>
+            </div>
+            <div class="mt-12 card">
+                <h3 class="text-xl font-bold text-center mb-2" data-lang-key="diet_footprint_title">不同飲食模式的每日環境足跡</h3>
+                 <p class="text-center text-gray-600 mb-6" data-lang-key="diet_footprint_subtitle">從典型雜食轉向純素飲食，可以在溫室氣體、土地和水資源利用上實現驚人的減幅。</p>
+                <div class="chart-container h-96 md:h-[500px] max-w-4xl">
+                    <canvas id="dietFootprintChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="solution" class="my-16">
+            <h2 class="section-title" data-lang-key="solution_title">植物性飲食的承諾與挑戰</h2>
+            <p class="section-subtitle" data-lang-key="solution_subtitle">轉向以植物為主的飲食不僅能釋放大量土地資源用於生態恢復，還能提升全球糧食系統的效率。但我們也必須正視其面臨的挑戰。</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="land_dividend_title">巨大的「土地紅利」</h3>
+                    <div class="text-center">
+                        <span class="text-6xl font-black text-[#4ECDC4]">75%</span>
+                        <p class="mt-2 text-lg text-gray-600" data-lang-key="land_dividend_text">若全球採納純素飲食，農業用地可減少75%，釋放出相當於美國、中國、歐盟和澳洲面積總和的土地用於生態恢復。</p>
+                    </div>
+                </div>
+                <div class="card">
+                     <h3 class="text-xl font-bold text-center mb-4" data-lang-key="soy_paradox_title">大豆的悖論</h3>
+                     <p class="text-center text-gray-600 mb-6" data-lang-key="soy_paradox_text">大豆常被指責為破壞森林的元兇，但事實上，絕大多數的大豆是用作動物飼料，而非直接供人類食用。</p>
+                    <div class="chart-container h-64">
+                         <canvas id="soyUseChart"></canvas>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 card">
+                    <h3 class="text-xl font-bold text-center mb-6" data-lang-key="nutrition_title">植物性飲食的營養指南</h3>
+                    <p class="text-center text-gray-600 mb-6" data-lang-key="nutrition_subtitle">精心規劃的植物性飲食是健康的，但需特別關注某些關鍵營養素的攝取，特別是維生素B12。</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 text-center">
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-bold text-lg text-[#FF6B6B]" data-lang-key="nutrient_b12_title">維生素 B12</p>
+                            <p class="text-sm" data-lang-key="nutrient_b12_text">純素者必需透過強化食品或補充劑獲取。</p>
+                        </div>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                             <p class="font-bold text-lg text-[#4ECDC4]" data-lang-key="nutrient_iron_title">鐵質</p>
+                             <p class="text-sm" data-lang-key="nutrient_iron_text">與富含維生素C的食物同食可提高吸收率。</p>
+                        </div>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-bold text-lg text-[#45B7D1]" data-lang-key="nutrient_calcium_title">鈣質</p>
+                            <p class="text-sm" data-lang-key="nutrient_calcium_text">選擇強化植物奶和鈣凝豆腐是好方法。</p>
+                        </div>
+                         <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-bold text-lg text-[#FED766]" data-lang-key="nutrient_d_title">維生素 D</p>
+                            <p class="text-sm" data-lang-key="nutrient_d_text">多數人無論飲食模式為何，都建議補充。</p>
+                        </div>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-bold text-lg text-[#F0B86E]" data-lang-key="nutrient_omega3_title">Omega-3</p>
+                            <p class="text-sm" data-lang-key="nutrient_omega3_text">亞麻籽、奇亞籽是良好來源，藻油是更直接的選擇。</p>
+                        </div>
+                        <div class="p-4 bg-gray-100 rounded-lg">
+                            <p class="font-bold text-lg text-[#FF6B6B]" data-lang-key="nutrient_iodine_title">碘</p>
+                            <p class="text-sm" data-lang-key="nutrient_iodine_text">使用加碘鹽是確保攝取的最簡單方式。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="security" class="my-16">
+            <h2 class="section-title" data-lang-key="security_title">餵養未來：飲食轉型與全球糧食安全</h2>
+            <p class="section-subtitle" data-lang-key="security_subtitle">問題的關鍵不在於我們能否「生產」足夠的糧食，而在於我們如何更智慧地「分配」。飲食選擇正是解開這個效率枷鎖的鑰匙。</p>
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                 <div class="card">
+                    <h3 class="text-xl font-bold text-center mb-4" data-lang-key="potential_title">釋放糧食潛力</h3>
+                    <p class="text-center text-8xl font-black text-[#FF6B6B]">40億</p>
+                    <p class="text-center text-lg mt-4 text-gray-600" data-lang-key="potential_text">若將目前用於動物飼料的農作物直接供人類食用，可額外養活多達40億人口，使全球可用的卡路里增加70%。</p>
+                </div>
+                 <div class="card">
+                     <h3 class="text-xl font-bold text-center mb-4" data-lang-key="planetary_diet_title">EAT-Lancet「地球健康飲食」</h3>
+                     <p class="text-center text-gray-600 mb-6" data-lang-key="planetary_diet_text">科學家們提出的永續飲食模型，強調以植物為主，這是在地球極限內養活100億人口的必要條件。</p>
+                     <div class="chart-container h-64">
+                        <canvas id="planetaryDietChart"></canvas>
+                     </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="action" class="my-16">
+            <h2 class="section-title" data-lang-key="action_title">前行之路：從認知到行動</h2>
+            <p class="section-subtitle" data-lang-key="action_subtitle">飲食的改變不僅是個人選擇，更需要政策、產業和社會的共同努力。以下是我們可以開始的方向。</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card border-t-4 border-[#FF6B6B]">
+                    <h3 class="font-bold text-2xl text-center mb-4" data-lang-key="consumers_title">消費者 🙋‍♀️</h3>
+                    <ul class="space-y-3 text-gray-700 list-disc list-inside" data-lang-key="consumers_list">
+                        <li>從「彈性素食」開始，逐步減少紅肉攝取。</li>
+                        <li>優先「替代」而非「戒除」，嘗試多樣的植物性食品。</li>
+                        <li>減少食物浪費，從源頭規劃採購。</li>
+                    </ul>
+                </div>
+                <div class="card border-t-4 border-[#4ECDC4]">
+                    <h3 class="font-bold text-2xl text-center mb-4" data-lang-key="industry_title">食品產業 🏭</h3>
+                     <ul class="space-y-3 text-gray-700 list-disc list-inside" data-lang-key="industry_list">
+                        <li>投資研發，讓植物性替代品更美味、更實惠。</li>
+                        <li>投資再生農業，保護土壤與生物多樣性。</li>
+                        <li>提高供應鏈透明度，提供環境影響標籤。</li>
+                    </ul>
+                </div>
+                <div class="card border-t-4 border-[#45B7D1]">
+                     <h3 class="font-bold text-2xl text-center mb-4" data-lang-key="gov_title">政府 🏛️</h3>
+                     <ul class="space-y-3 text-gray-700 list-disc list-inside" data-lang-key="gov_list">
+                        <li>改革農業補貼，將資源從高排放產業轉向永續農業。</li>
+                        <li>推行環境稅與清晰的環境足跡標籤。</li>
+                        <li>支持農民進行「公正轉型」，提供替代生計。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center p-6 mt-16">
+        <p data-lang-key="footer_text">&copy; 2025 飲食革命資訊圖表。基於公開研究數據製作。</p>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const langData = {
+        'zh-Hant': {
+            title: '飲食革命',
+            subtitle: '我們的餐盤如何拯救地球',
+            problem_title: '問題的真相：全球飲食的巨大環境足跡',
+            problem_subtitle: '我們的食物系統是驅動地球變化的主要力量。從氣候變遷到水資源枯竭，我們餐盤上的選擇正以前所未有的規模影響著地球的健康。',
+            stat_ghg: '的全球溫室氣體排放<br>來自食物系統',
+            stat_land: '的全球宜居土地<br>被用於農業',
+            stat_water: '的全球淡水資源<br>被農業消耗',
+            myth_title: '迷思破解：「食物里程」真的是關鍵嗎？',
+            myth_subtitle: '許多人認為「吃在地」是環保的關鍵，但數據揭示了不同的真相。食物的環境足跡絕大部分來自生產階段，而非運輸。',
+            comparison_title: '選擇的力量：不同食物的環境影響天差地別',
+            comparison_subtitle: '改變飲食習慣是個人最有效的環保行動之一。數據清楚地顯示，減少動物性產品的消費，尤其是牛肉，可以帶來巨大的環境效益。',
+            food_emissions_title: '每公斤食物的溫室氣體排放量比較',
+            food_emissions_subtitle: '生產一公斤牛肉所產生的碳排放，遠遠超過大多數植物性食物。',
+            diet_footprint_title: '不同飲食模式的每日環境足跡',
+            diet_footprint_subtitle: '從典型雜食轉向純素飲食，可以在溫室氣體、土地和水資源利用上實現驚人的減幅。',
+            solution_title: '植物性飲食的承諾與挑戰',
+            solution_subtitle: '轉向以植物為主的飲食不僅能釋放大量土地資源用於生態恢復，還能提升全球糧食系統的效率。但我們也必須正視其面臨的挑戰。',
+            land_dividend_title: '巨大的「土地紅利」',
+            land_dividend_text: '若全球採納純素飲食，農業用地可減少75%，釋放出相當於美國、中國、歐盟和澳洲面積總和的土地用於生態恢復。',
+            soy_paradox_title: '大豆的悖論',
+            soy_paradox_text: '大豆常被指責為破壞森林的元兇，但事實上，絕大多數的大豆是用作動物飼料，而非直接供人類食用。',
+            nutrition_title: '植物性飲食的營養指南',
+            nutrition_subtitle: '精心規劃的植物性飲食是健康的，但需特別關注某些關鍵營養素的攝取，特別是維生素B12。',
+            nutrient_b12_title: '維生素 B12',
+            nutrient_b12_text: '純素者必需透過強化食品或補充劑獲取。',
+            nutrient_iron_title: '鐵質',
+            nutrient_iron_text: '與富含維生素C的食物同食可提高吸收率。',
+            nutrient_calcium_title: '鈣質',
+            nutrient_calcium_text: '選擇強化植物奶和鈣凝豆腐是好方法。',
+            nutrient_d_title: '維生素 D',
+            nutrient_d_text: '多數人無論飲食模式為何，都建議補充。',
+            nutrient_omega3_title: 'Omega-3',
+            nutrient_omega3_text: '亞麻籽、奇亞籽是良好來源，藻油是更直接的選擇。',
+            nutrient_iodine_title: '碘',
+            nutrient_iodine_text: '使用加碘鹽是確保攝取的最簡單方式。',
+            security_title: '餵養未來：飲食轉型與全球糧食安全',
+            security_subtitle: '問題的關鍵不在於我們能否「生產」足夠的糧食，而在於我們如何更智慧地「分配」。飲食選擇正是解開這個效率枷鎖的鑰匙。',
+            potential_title: '釋放糧食潛力',
+            potential_text: '若將目前用於動物飼料的農作物直接供人類食用，可額外養活多達40億人口，使全球可用的卡路里增加70%。',
+            planetary_diet_title: 'EAT-Lancet「地球健康飲食」',
+            planetary_diet_text: '科學家們提出的永續飲食模型，強調以植物為主，這是在地球極限內養活100億人口的必要條件。',
+            action_title: '前行之路：從認知到行動',
+            action_subtitle: '飲食的改變不僅是個人選擇，更需要政策、產業和社會的共同努力。以下是我們可以開始的方向。',
+            consumers_title: '消費者 🙋‍♀️',
+            consumers_list: '<li>從「彈性素食」開始，逐步減少紅肉攝取。</li><li>優先「替代」而非「戒除」，嘗試多樣的植物性食品。</li><li>減少食物浪費，從源頭規劃採購。</li>',
+            industry_title: '食品產業 🏭',
+            industry_list: '<li>投資研發，讓植物性替代品更美味、更實惠。</li><li>投資再生農業，保護土壤與生物多樣性。</li><li>提高供應鏈透明度，提供環境影響標籤。</li>',
+            gov_title: '政府 🏛️',
+            gov_list: '<li>改革農業補貼，將資源從高排放產業轉向永續農業。</li><li>推行環境稅與清晰的環境足跡標籤。</li><li>支持農民進行「公正轉型」，提供替代生計。</li>',
+            footer_text: '&copy; 2025 飲食革命資訊圖表。基於公開研究數據製作。',
+            lang_button: 'English',
+            chart_labels: {
+                emissions_breakdown: ['農場生產與土地利用', '運輸', '加工、包裝與零售'],
+                food_emissions: ['牛肉', '羊肉', '豬肉', '雞肉', '豆腐', '豌豆'],
+                food_emissions_label: '公斤 CO2eq / 每公斤食物',
+                diet_footprint: ['溫室氣體 (kg CO2eq/日)', '土地利用 (m²/日)', '水資源消耗 (L/日)'],
+                diet_footprint_dataset_labels: ['典型雜食', '素食', '純素'],
+                diet_footprint_y_axis: '數值 (水資源單位為公升，其他為各自單位)',
+                soy_use: ['動物飼料', '直接供人食用及工業用途'],
+                planetary_diet: ['水果與蔬菜', '全穀物', '植物性蛋白質', '乳製品', '動物性蛋白質', '不飽和脂肪'],
+                 ghg_x_axis: '溫室氣體排放 (公斤 CO2eq)'
+            }
+        },
+        'en': {
+            title: 'Food Revolution',
+            subtitle: 'How Our Plates Can Save the Planet',
+            problem_title: 'The Truth: The Huge Environmental Footprint of Global Diets',
+            problem_subtitle: 'Our food system is a primary driver of planetary change. From climate change to water scarcity, the choices on our plates are impacting Earth\'s health on an unprecedented scale.',
+            stat_ghg: 'of global greenhouse gas emissions<br>come from the food system',
+            stat_land: 'of global habitable land<br>is used for agriculture',
+            stat_water: 'of global freshwater resources<br>are consumed by agriculture',
+            myth_title: 'Myth Busted: Are "Food Miles" Really the Key?',
+            myth_subtitle: 'Many believe "eating local" is key to being green, but data reveals a different truth. The vast majority of a food\'s environmental footprint comes from production, not transportation.',
+            comparison_title: 'The Power of Choice: The Vastly Different Impacts of Foods',
+            comparison_subtitle: 'Changing your diet is one of the most effective environmental actions an individual can take. Data clearly shows that reducing animal product consumption, especially beef, yields huge environmental benefits.',
+            food_emissions_title: 'Greenhouse Gas Emissions per Kilogram of Food',
+            food_emissions_subtitle: 'The carbon emissions from producing one kilogram of beef far exceed those of most plant-based foods.',
+            diet_footprint_title: 'Daily Environmental Footprint of Different Diets',
+            diet_footprint_subtitle: 'Switching from a typical omnivorous diet to a vegan diet can lead to astonishing reductions in greenhouse gases, land use, and water consumption.',
+            solution_title: 'The Promise and Perils of Plant-Based Diets',
+            solution_subtitle: 'Shifting to plant-based diets can free up vast amounts of land for ecological restoration and improve the efficiency of the global food system. But we must also face its challenges.',
+            land_dividend_title: 'The Great "Land Dividend"',
+            land_dividend_text: 'If the world adopted a vegan diet, agricultural land use could be reduced by 75%, freeing up an area equivalent to the US, China, the EU, and Australia combined for ecological restoration.',
+            soy_paradox_title: 'The Soy Paradox',
+            soy_paradox_text: 'Soy is often blamed for deforestation, but in reality, the vast majority is used for animal feed, not direct human consumption.',
+            nutrition_title: 'A Guide to Plant-Based Nutrition',
+            nutrition_subtitle: 'A well-planned plant-based diet is healthy, but special attention must be paid to certain key nutrients, especially Vitamin B12.',
+            nutrient_b12_title: 'Vitamin B12',
+            nutrient_b12_text: 'Vegans must obtain this from fortified foods or supplements.',
+            nutrient_iron_title: 'Iron',
+            nutrient_iron_text: 'Pair with Vitamin C-rich foods to boost absorption.',
+            nutrient_calcium_title: 'Calcium',
+            nutrient_calcium_text: 'Fortified plant milks and calcium-set tofu are great sources.',
+            nutrient_d_title: 'Vitamin D',
+            nutrient_d_text: 'Supplementation is recommended for most people, regardless of diet.',
+            nutrient_omega3_title: 'Omega-3',
+            nutrient_omega3_text: 'Flax and chia seeds are good sources; algae oil is more direct.',
+            nutrient_iodine_title: 'Iodine',
+            nutrient_iodine_text: 'Using iodized salt is the easiest way to ensure intake.',
+            security_title: 'Feeding the Future: Diet Shifts & Global Food Security',
+            security_subtitle: 'The key issue isn\'t whether we can "produce" enough food, but how we can "distribute" it more intelligently. Dietary choice is the key to unlocking this efficiency puzzle.',
+            potential_title: 'Unlocking Food Potential',
+            potential_text: 'If we redirected crops currently used for animal feed to human consumption, we could feed an additional 4 billion people, increasing available calories by 70%.',
+            planetary_diet_title: 'The EAT-Lancet "Planetary Health Diet"',
+            planetary_diet_text: 'Scientists have proposed a sustainable dietary model, emphasizing plant-based foods, as a prerequisite for feeding 10 billion people within planetary boundaries.',
+            action_title: 'The Path Forward: From Awareness to Action',
+            action_subtitle: 'Dietary change is not just a personal choice; it requires a concerted effort from policy, industry, and society. Here’s where we can start.',
+            consumers_title: 'Consumers 🙋‍♀️',
+            consumers_list: '<li>Start with "flexitarianism," gradually reducing red meat.</li><li>Prioritize "swapping" over "quitting"; try diverse plant-based foods.</li><li>Reduce food waste by planning purchases from the source.</li>',
+            industry_title: 'Food Industry 🏭',
+            industry_list: '<li>Invest in R&D to make plant-based alternatives tastier and more affordable.</li><li>Invest in regenerative agriculture to protect soil and biodiversity.</li><li>Increase supply chain transparency and provide environmental impact labels.</li>',
+            gov_title: 'Governments 🏛️',
+            gov_list: '<li>Reform agricultural subsidies, shifting resources from high-emission industries to sustainable farming.</li><li>Implement carbon taxes and clear environmental footprint labeling.</li><li>Support a "just transition" for farmers, providing alternative livelihoods.</li>',
+            footer_text: '&copy; 2025 Food Revolution Infographic. Based on public research data.',
+            lang_button: '繁體中文',
+            chart_labels: {
+                emissions_breakdown: ['Farm & Land Use', 'Transport', 'Processing, Packaging & Retail'],
+                food_emissions: ['Beef', 'Lamb', 'Pork', 'Chicken', 'Tofu', 'Peas'],
+                food_emissions_label: 'kg CO2eq / kg of Food',
+                diet_footprint: ['Greenhouse Gases (kg CO2eq/day)', 'Land Use (m²/day)', 'Water Use (L/day)'],
+                diet_footprint_dataset_labels: ['High Meat-eater', 'Vegetarian', 'Vegan'],
+                diet_footprint_y_axis: 'Value (Water in Liters, others in respective units)',
+                soy_use: ['Animal Feed', 'Direct Human Food & Industrial Use'],
+                planetary_diet: ['Fruits & Vegetables', 'Whole Grains', 'Plant-based Proteins', 'Dairy', 'Animal Proteins', 'Unsaturated Fats'],
+                ghg_x_axis: 'Greenhouse Gas Emissions (kg CO2eq)'
+            }
+        }
+    };
+
+    let currentLang = 'zh-Hant';
+    const charts = {};
+
+    function updateTextContent(lang) {
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.getAttribute('data-lang-key');
+            if (langData[lang][key]) {
+                if (key.endsWith('_list')) {
+                    el.innerHTML = langData[lang][key];
+                } else {
+                    el.innerHTML = langData[lang][key];
+                }
+            }
+        });
+        document.getElementById('lang-switcher').textContent = langData[lang].lang_button;
+        document.documentElement.lang = lang;
+        document.body.style.fontFamily = lang === 'en' ? "'Lato', sans-serif" : "'Noto Sans TC', sans-serif";
+    }
+
+    function updateCharts(lang) {
+        const labels = langData[lang].chart_labels;
+
+        charts.emissionsBreakdown.data.labels = labels.emissions_breakdown;
+        charts.emissionsBreakdown.update();
+
+        charts.foodEmissions.data.labels = labels.food_emissions;
+        charts.foodEmissions.data.datasets[0].label = labels.food_emissions_label;
+        charts.foodEmissions.options.scales.x.title.text = labels.ghg_x_axis;
+        charts.foodEmissions.update();
+        
+        charts.dietFootprint.data.labels = labels.diet_footprint;
+        charts.dietFootprint.data.datasets[0].label = labels.diet_footprint_dataset_labels[0];
+        charts.dietFootprint.data.datasets[1].label = labels.diet_footprint_dataset_labels[1];
+        charts.dietFootprint.data.datasets[2].label = labels.diet_footprint_dataset_labels[2];
+        charts.dietFootprint.options.scales.y.title.text = labels.diet_footprint_y_axis;
+        charts.dietFootprint.update();
+
+        charts.soyUse.data.labels = labels.soy_use;
+        charts.soyUse.update();
+
+        charts.planetaryDiet.data.labels = labels.planetary_diet;
+        charts.planetaryDiet.update();
+    }
+
+
+    const langSwitcher = document.getElementById('lang-switcher');
+    langSwitcher.addEventListener('click', () => {
+        currentLang = currentLang === 'zh-Hant' ? 'en' : 'zh-Hant';
+        updateTextContent(currentLang);
+        updateCharts(currentLang);
+    });
+    
+    const chartColors = {
+        coral: '#FF6B6B',
+        turquoise: '#4ECDC4',
+        blue: '#45B7D1',
+        yellow: '#FED766',
+        orange: '#F0B86E',
+        lightGray: '#E0E0E0'
+    };
+    
+    const textColor = '#333333';
+    Chart.defaults.color = textColor;
+    Chart.defaults.font.family = "'Noto Sans TC', 'Lato', sans-serif";
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'top',
+                 labels: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    title: tooltipTitleCallback
+                },
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleFont: { size: 14 },
+                bodyFont: { size: 12 },
+                padding: 10
+            }
+        },
+        scales: {
+             x: {
+                ticks: { color: textColor, font: { size: 12 } },
+                grid: { display: false }
+            },
+            y: {
+                ticks: { color: textColor, font: { size: 12 } },
+                grid: { color: '#E0E0E0' }
+            }
+        }
+    };
+    
+    charts.emissionsBreakdown = new Chart(document.getElementById('emissionsBreakdownChart'), {
+        type: 'doughnut',
+        data: {
+            labels: langData[currentLang].chart_labels.emissions_breakdown,
+            datasets: [{
+                data: [71, 5, 24],
+                backgroundColor: [chartColors.coral, chartColors.blue, chartColors.yellow],
+                borderColor: '#F2F2F2',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: { callbacks: { title: tooltipTitleCallback } }
+            },
+            cutout: '60%'
+        }
+    });
+
+    charts.foodEmissions = new Chart(document.getElementById('foodEmissionsChart'), {
+        type: 'bar',
+        data: {
+            labels: langData[currentLang].chart_labels.food_emissions,
+            datasets: [{
+                label: langData[currentLang].chart_labels.food_emissions_label,
+                data: [60, 24, 7, 6, 2, 1],
+                backgroundColor: [chartColors.coral, '#ff8a8a', chartColors.orange, chartColors.yellow, '#90ee90', chartColors.turquoise],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            ...commonOptions,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: { display: true, text: langData[currentLang].chart_labels.ghg_x_axis }
+                },
+                y: { grid: { display: false } }
+            },
+            plugins: { ...commonOptions.plugins, legend: { display: false } }
+        }
+    });
+
+    charts.dietFootprint = new Chart(document.getElementById('dietFootprintChart'), {
+        type: 'bar',
+        data: {
+            labels: langData[currentLang].chart_labels.diet_footprint,
+            datasets: [
+                {
+                    label: langData[currentLang].chart_labels.diet_footprint_dataset_labels[0],
+                    data: [5.3, 6.35, 514 / 100], 
+                    backgroundColor: chartColors.coral,
+                    borderRadius: 5
+                },
+                {
+                    label: langData[currentLang].chart_labels.diet_footprint_dataset_labels[1],
+                    data: [2.75, 2.25, 420 / 100],
+                    backgroundColor: chartColors.yellow,
+                    borderRadius: 5
+                },
+                 {
+                    label: langData[currentLang].chart_labels.diet_footprint_dataset_labels[2],
+                    data: [1.75, 1.8, 404 / 100],
+                    backgroundColor: chartColors.turquoise,
+                    borderRadius: 5
+                }
+            ]
+        },
+        options: {
+            ...commonOptions,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, values) {
+                            if (this.getLabelForValue(value).includes(langData[currentLang].chart_labels.diet_footprint[2])) {
+                                return value * 100;
+                            }
+                            return value;
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: langData[currentLang].chart_labels.diet_footprint_y_axis
+                    }
+                }
+            },
+            plugins: {
+                ...commonOptions.plugins,
+                tooltip: {
+                    ...commonOptions.plugins.tooltip,
+                    callbacks: {
+                         ...commonOptions.plugins.tooltip.callbacks,
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            let value = context.parsed.y;
+                            if (context.label.includes(langData[currentLang].chart_labels.diet_footprint[2])) {
+                                value *= 100;
+                            }
+                            return label + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    charts.soyUse = new Chart(document.getElementById('soyUseChart'), {
+        type: 'pie',
+        data: {
+            labels: langData[currentLang].chart_labels.soy_use,
+            datasets: [{
+                data: [77, 23],
+                backgroundColor: [chartColors.orange, chartColors.turquoise],
+                borderColor: '#FFFFFF',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: { callbacks: { title: tooltipTitleCallback } }
+            }
+        }
+    });
+
+    charts.planetaryDiet = new Chart(document.getElementById('planetaryDietChart'), {
+        type: 'doughnut',
+        data: {
+            labels: langData[currentLang].chart_labels.planetary_diet,
+            datasets: [{
+                data: [50, 20, 10, 7, 7, 6],
+                backgroundColor: [chartColors.turquoise, chartColors.yellow, chartColors.coral, chartColors.lightGray, chartColors.orange, chartColors.blue],
+                borderColor: '#FFFFFF',
+                borderWidth: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 15, padding: 15 } },
+                tooltip: { callbacks: { title: tooltipTitleCallback } }
+            },
+            cutout: '60%'
+        }
+    });
+
+    updateTextContent(currentLang);
+});
+</script>
+</body>
+</html>
