@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自動波車 P檔卡死解決方案</title>
+    <style>
+        /* CSS 樣式 (與之前相同，新增語言切換按鈕樣式) */
+        :root {
+            --primary-color: #005A9C;
+            --secondary-color: #f4f4f4;
+            --danger-color: #D93025;
+            --success-color: #1E8E3E;
+            --text-color: #333;
+            --light-text-color: #fff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .hero {
+            background-color: var(--primary-color);
+            color: var(--light-text-color);
+            text-align: center;
+            padding: 50px 20px;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            position: relative;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .hero p {
+            font-size: 1.2em;
+        }
+
+        /* Language Switcher */
+        #lang-switcher {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: var(--light-text-color);
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            border: 1px solid var(--light-text-color);
+            font-weight: bold;
+        }
+        #lang-switcher:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s;
+            text-decoration: none;
+            color: var(--light-text-color);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background-color: var(--success-color);
+        }
+        .btn-primary:hover {
+            background-color: #1a7d36;
+        }
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+        .btn-danger:hover {
+            background-color: #b0261c;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* Sections */
+        .section {
+            background-color: #fff;
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        .section h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+        .section h2 .step-number {
+             color: var(--danger-color);
+        }
+
+        /* Interactive Elements */
+        .hidden {
+            display: none;
+        }
+
+        .checklist label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+        .checklist input {
+            margin-right: 10px;
+        }
+        
+        .diagnostic-options .option-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            margin-bottom: 10px;
+            background-color: var(--primary-color);
+        }
+        
+        .solution-step {
+            border-left: 3px solid var(--primary-color);
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        .solution-step img {
+            max-width: 100%;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 {
+            color: var(--danger-color);
+            font-size: 1.5em;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <button id="lang-switcher">English</button>
+        <div class="container">
+            <h1 data-lang-key="heroTitle">自動波車撻唔着，P檔卡死點算好？</h1>
+            <p data-lang-key="heroSubtitle">互動式網頁教學，一步步教你安全移開部車。</p>
+            <a href="#safety-section" class="btn btn-primary" data-lang-key="startBtn">立即開始</a>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section id="safety-section" class="section">
+            <h2 data-lang-key="safetyTitle"><span class="step-number">第一步：</span> 安全至上！</h2>
+            <p data-lang-key="safetyDesc">在進行任何操作前，請務必確認以下安全措施：</p>
+            <div id="safety-checklist" class="checklist">
+                <label><input type="checkbox" name="safety"> <span data-lang-key="checkHandbrake">我已拉緊手煞車 (Handbrake / EPB)</span></label>
+                <label><input type="checkbox" name="safety"> <span data-lang-key="checkFlatGround">車輛已停在平坦地面</span></label>
+                <label><input type="checkbox" name="safety"> <span data-lang-key="checkBlocks">我已在車輪前後放置障礙物 (如磚塊)</span></label>
+            </div>
+            <button id="start-diagnostic-btn" class="btn btn-primary" disabled data-lang-key="confirmSafetyBtn">我已確認安全，開始診斷</button>
+        </section>
+
+        <section id="diagnostic-section" class="section hidden">
+            <h2 data-lang-key="diagnosticTitle"><span class="step-number">第二步：</span> 問題診斷</h2>
+            <p data-lang-key="diagnosticDesc">請回答以下問題，讓我們為你推薦最合適的方案。</p>
+            <div id="q1">
+                <h3 data-lang-key="q1Title">問題 1: 你部車嘅電力反應係點？</h3>
+                <div class="diagnostic-options">
+                    <button class="btn option-btn" onclick="showSolution('jump-start')" data-lang-key="q1OptA">A. 完全無反應，儀錶板、車燈都唔著。</button>
+                    <button class="btn option-btn" onclick="showQuestion(2)" data-lang-key="q1OptB">B. 有撻車聲，但引擎發動唔到。</button>
+                    <button class="btn option-btn" onclick="showQuestion(2)" data-lang-key="q1OptC">C. 儀錶板著，但撻車完全無反應。</button>
+                </div>
+            </div>
+            <div id="q2" class="hidden">
+                <h3 data-lang-key="q2Title">問題 2: 你熟悉汽車維修嗎？</h3>
+                <div class="diagnostic-options">
+                    <button class="btn option-btn" onclick="showSolution('professional-help')" data-lang-key="q2OptA">A. 完全唔熟，唔想自己搞。</button>
+                    <button class="btn option-btn" onclick="showSolution('bsi-reset')" data-lang-key="q2OptB">B. 有基本認識，可以試吓。</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Solution Sections -->
+        <div id="solutions-container">
+            <section id="jump-start" class="section hidden solution-content">
+                <h2 data-lang-key="jumpStartTitle">建議方案：跨線搭電 (Jump Start)</h2>
+                <p data-lang-key="jumpStartDesc">你的情況很可能只是電池完全耗盡。這是最簡單的解決方法。</p>
+                <div class="solution-step">
+                    <h4 data-lang-key="toolsTitle">所需工具：</h4>
+                    <ul>
+                        <li data-lang-key="toolCables">一組跨接電纜 (過江龍)</li>
+                        <li data-lang-key="toolCar">另一輛電池正常的汽車</li>
+                    </ul>
+                </div>
+                <div class="solution-step">
+                    <h4 data-lang-key="stepsTitle">步驟：</h4>
+                    <p data-lang-key="jumpStartStep1">1. 將兩車靠近，但不要接觸。</p>
+                    <p data-lang-key="jumpStartStep2">2. 按照「正接正，負接鐵」的原則連接電纜。</p>
+                    <p data-lang-key="jumpStartStep3">3. 啟動輔助車輛，等待幾分鐘。</p>
+                    <p data-lang-key="jumpStartStep4">4. 嘗試啟動你的汽車。如果成功，即可正常移動。</p>
+                    <img src="https://i.imgur.com/3sYsoA7.png" alt="Jump Start Diagram" data-lang-key-alt="jumpStartAlt">
+                </div>
+            </section>
+            
+            <section id="bsi-reset" class="section hidden solution-content">
+                <h2 data-lang-key="bsiResetTitle">建議方案：BSI 電腦重設 (軟重啟)</h2>
+                <p data-lang-key="bsiResetDesc">這方法風險低，有機會解決因電子系統失靈導致的排檔鎖死。</p>
+                <div class="solution-step">
+                    <h4 data-lang-key="bsiStep1Title">步驟 1: 準備工作</h4>
+                    <p data-lang-key="bsiStep1Desc">降下駕駛座車窗，打開引擎蓋，關閉所有車門及電器，拔出車匙。</p>
+                </div>
+                 <div class="solution-step">
+                    <h4 data-lang-key="bsiStep2Title">步驟 2: 系統休眠</h4>
+                    <p data-lang-key="bsiStep2Desc">靜待 <strong>3 分鐘</strong>，讓車輛系統完全進入休眠狀態。</p>
+                </div>
+                <div class="solution-step">
+                    <h4 data-lang-key="bsiStep3Title">步驟 3: 斷電與重連</h4>
+                    <p data-lang-key="bsiStep3Desc">斷開電池負極，等15秒後重新接上。再等10秒。</p>
+                </div>
+                <div class="solution-step">
+                    <h4 data-lang-key="bsiStep4Title">步驟 4: 重新啟動</h4>
+                    <p data-lang-key="bsiStep4Desc">手伸入車窗打開小燈，然後坐進車內，通電並嘗試排入N檔。</p>
+                </div>
+                <div class="solution-step">
+                    <h4 data-lang-key="bsiAfterTitle">完成後：</h4>
+                    <button class="btn btn-secondary" onclick="showSolution('mechanical-release')" data-lang-key="bsiFailBtn">如果仍然失敗，請嘗試最終機械方法</button>
+                </div>
+            </section>
+
+            <section id="mechanical-release" class="section hidden solution-content">
+                <h2 data-lang-key="mechReleaseTitle"><span class="step-number">最終方案：</span>手動機械解鎖</h2>
+                <p data-lang-key="mechReleaseDesc"><strong>高度警告：</strong> 此步驟需一定動手能力，操作不當可能損壞車輛。如不確定，請直接聯絡專業人士。</p>
+                <button class="btn btn-danger" id="show-mechanical-steps-btn" data-lang-key="mechReleaseConfirmBtn">我明白風險，繼續查看步驟</button>
+                <div id="mechanical-steps" class="hidden" style="margin-top: 20px;">
+                    <div class="solution-step">
+                        <h4 data-lang-key="mechReleaseTarget">目標：</h4>
+                        <p data-lang-key="mechReleaseTargetDesc">在引擎室的變速箱頂部，找到手動解鎖裝置。</p>
+                    </div>
+                    <div class="solution-step">
+                        <h4 data-lang-key="mechReleasePos">可能位置 (根據標致/雪鐵龍車款)：</h4>
+                        <p data-lang-key="mechReleasePosDesc">拆開位於變速箱頂部的ECU(行車電腦)後，下方會有一個可用 <strong>6mm扳手</strong> 操作的軸心。順時針轉動一格即可排入空檔。</p>
+                        <img src="https://i.imgur.com/JFL3wzR.png" alt="Gearbox Manual Release Point" data-lang-key-alt="mechReleaseAlt">
+                        <p><small data-lang-key="mechReleaseImgCredit">圖片來源: Reddit r/MechanicAdvice。此圖顯示了ECU及下方可能的解鎖點。</small></p>
+                    </div>
+                     <div class="solution-step">
+                        <h4 data-lang-key="mechReleaseNotFound">如果找不到？</h4>
+                        <p data-lang-key="mechReleaseNotFoundDesc">不要強行操作！立即跳至最後一步，尋求專業協助。</p>
+                        <button class="btn btn-primary" onclick="showSolution('professional-help')" data-lang-key="seekHelpBtn">尋求專業協助</button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="professional-help" class="section hidden solution-content">
+                <h2 data-lang-key="profHelpTitle">最佳方案：尋求專業協助</h2>
+                <p data-lang-key="profHelpDesc">這是最安全、最可靠的方法。聯絡維修廠或拖車公司時，請提供以下關鍵資訊，可以大大節省他們的時間。</p>
+                <div class="solution-step">
+                    <h4 data-lang-key="profHelpMsgTitle">給師傅的求助訊息：</h4>
+                    <textarea id="copy-text" rows="4" style="width: 100%;" readonly></textarea>
+                    <button id="copy-btn" class="btn btn-primary copy-btn" data-lang-key="copyBtn">一鍵複製訊息</button>
+                    <p id="copy-success" style="color: var(--success-color); font-weight: bold; display: none;" data-lang-key="copySuccess">已成功複製！</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal for Mechanical Release Warning -->
+    <div id="mechanical-warning-modal" class="modal">
+        <div class="modal-content">
+            <h3 data-lang-key="modalTitle"><span class="danger-icon">⚠️</span> 高風險操作警告</h3>
+            <p data-lang-key="modalDesc">此操作需要拆卸車輛部件，並有損壞變速箱的潛在風險。我們強烈建議由經驗豐富的技師執行。您確定要繼續查看詳細步驟嗎？</p>
+            <button id="confirm-mechanical-view" class="btn btn-danger" data-lang-key="modalConfirm">我確定，繼續查看</button>
+            <button id="cancel-mechanical-view" class="btn btn-secondary" data-lang-key="modalCancel">取消，返回</button>
+        </div>
+    </div>
+
+
+    <footer>
+        <p data-lang-key="footerText">本教學僅供參考，不對任何因操作不當導致的車輛損壞負責。安全第一，量力而為。</p>
+    </footer>
+
+    <script>
+        // JavaScript 互動功能
+        const langData = {
+            'zh': {
+                langSwitcher: 'English',
+                heroTitle: '自動波車撻唔着，P檔卡死點算好？',
+                heroSubtitle: '互動式網頁教學，一步步教你安全移開部車。',
+                startBtn: '立即開始',
+                safetyTitle: '<span class="step-number">第一步：</span> 安全至上！',
+                safetyDesc: '在進行任何操作前，請務必確認以下安全措施：',
+                checkHandbrake: '我已拉緊手煞車 (Handbrake / EPB)',
+                checkFlatGround: '車輛已停在平坦地面',
+                checkBlocks: '我已在車輪前後放置障礙物 (如磚塊)',
+                confirmSafetyBtn: '我已確認安全，開始診斷',
+                diagnosticTitle: '<span class="step-number">第二步：</span> 問題診斷',
+                diagnosticDesc: '請回答以下問題，讓我們為你推薦最合適的方案。',
+                q1Title: '問題 1: 你部車嘅電力反應係點？',
+                q1OptA: 'A. 完全無反應，儀錶板、車燈都唔著。',
+                q1OptB: 'B. 有撻車聲，但引擎發動唔到。',
+                q1OptC: 'C. 儀錶板著，但撻車完全無反應。',
+                q2Title: '問題 2: 你熟悉汽車維修嗎？',
+                q2OptA: 'A. 完全唔熟，唔想自己搞。',
+                q2OptB: 'B. 有基本認識，可以試吓。',
+                jumpStartTitle: '建議方案：跨線搭電 (Jump Start)',
+                jumpStartDesc: '你的情況很可能只是電池完全耗盡。這是最簡單的解決方法。',
+                toolsTitle: '所需工具：',
+                toolCables: '一組跨接電纜 (過江龍)',
+                toolCar: '另一輛電池正常的汽車',
+                stepsTitle: '步驟：',
+                jumpStartStep1: '1. 將兩車靠近，但不要接觸。',
+                jumpStartStep2: '2. 按照「正接正，負接鐵」的原則連接電纜。',
+                jumpStartStep3: '3. 啟動輔助車輛，等待幾分鐘。',
+                jumpStartStep4: '4. 嘗試啟動你的汽車。如果成功，即可正常移動。',
+                jumpStartAlt: '跨線搭電示意圖',
+                bsiResetTitle: '建議方案：BSI 電腦重設 (軟重啟)',
+                bsiResetDesc: '這方法風險低，有機會解決因電子系統失靈導致的排檔鎖死。',
+                bsiStep1Title: '步驟 1: 準備工作',
+                bsiStep1Desc: '降下駕駛座車窗，打開引擎蓋，關閉所有車門及電器，拔出車匙。',
+                bsiStep2Title: '步驟 2: 系統休眠',
+                bsiStep2Desc: '靜待 <strong>3 分鐘</strong>，讓車輛系統完全進入休眠狀態。',
+                bsiStep3Title: '步驟 3: 斷電與重連',
+                bsiStep3Desc: '斷開電池負極，等15秒後重新接上。再等10秒。',
+                bsiStep4Title: '步驟 4: 重新啟動',
+                bsiStep4Desc: '手伸入車窗打開小燈，然後坐進車內，通電並嘗試排入N檔。',
+                bsiAfterTitle: '完成後：',
+                bsiFailBtn: '如果仍然失敗，請嘗試最終機械方法',
+                mechReleaseTitle: '<span class="step-number">最終方案：</span>手動機械解鎖',
+                mechReleaseDesc: '<strong>高度警告：</strong> 此步驟需一定動手能力，操作不當可能損壞車輛。如不確定，請直接聯絡專業人士。',
+                mechReleaseConfirmBtn: '我明白風險，繼續查看步驟',
+                mechReleaseTarget: '目標：',
+                mechReleaseTargetDesc: '在引擎室的變速箱頂部，找到手動解鎖裝置。',
+                mechReleasePos: '可能位置 (根據標致/雪鐵龍車款)：',
+                mechReleasePosDesc: '拆開位於變速箱頂部的ECU(行車電腦)後，下方會有一個可用 <strong>6mm扳手</strong> 操作的軸心。順時針轉動一格即可排入空檔。',
+                mechReleaseAlt: '變速箱手動解鎖點',
+                mechReleaseImgCredit: '圖片來源: Reddit r/MechanicAdvice。此圖顯示了ECU及下方可能的解鎖點。',
+                mechReleaseNotFound: '如果找不到？',
+                mechReleaseNotFoundDesc: '不要強行操作！立即跳至最後一步，尋求專業協助。',
+                seekHelpBtn: '尋求專業協助',
+                profHelpTitle: '最佳方案：尋求專業協助',
+                profHelpDesc: '這是最安全、最可靠的方法。聯絡維修廠或拖車公司時，請提供以下關鍵資訊，可以大大節省他們的時間。',
+                profHelpMsgTitle: '給師傅的求助訊息：',
+                copyText: '師傅你好，我部自動波車撻唔着，卡死P檔。根據網上資料，手動解鎖裝置可能喺引擎室變速箱頂，ECU下方，需要用6mm扳手操作。麻煩你帶備相關工具檢查，謝謝。',
+                copyBtn: '一鍵複製訊息',
+                copySuccess: '已成功複製！',
+                modalTitle: '<span class="danger-icon">⚠️</span> 高風險操作警告',
+                modalDesc: '此操作需要拆卸車輛部件，並有損壞變速箱的潛在風險。我們強烈建議由經驗豐富的技師執行。您確定要繼續查看詳細步驟嗎？',
+                modalConfirm: '我確定，繼續查看',
+                modalCancel: '取消，返回',
+                footerText: '本教學僅供參考，不對任何因操作不當導致的車輛損壞負責。安全第一，量力而為。'
+            },
+            'en': {
+                langSwitcher: '中文',
+                heroTitle: 'Car Won\'t Start & Stuck in Park?',
+                heroSubtitle: 'An interactive guide to help you safely move your vehicle.',
+                startBtn: 'Get Started',
+                safetyTitle: '<span class="step-number">Step 1:</span> Safety First!',
+                safetyDesc: 'Before proceeding, you must confirm the following safety measures:',
+                checkHandbrake: 'The handbrake (or EPB) is fully engaged.',
+                checkFlatGround: 'The vehicle is on flat, level ground.',
+                checkBlocks: 'I have placed blocks (e.g., bricks) in front of and behind the wheels.',
+                confirmSafetyBtn: 'Safety Confirmed, Start Diagnosis',
+                diagnosticTitle: '<span class="step-number">Step 2:</span> Problem Diagnosis',
+                diagnosticDesc: 'Answer the following questions to find the best solution for you.',
+                q1Title: 'Question 1: What is your car\'s electrical response?',
+                q1OptA: 'A. No power at all. The dashboard and lights are dead.',
+                q1OptB: 'B. The engine cranks but won\'t start.',
+                q1OptC: 'C. The dashboard lights up, but there\'s no cranking sound.',
+                q2Title: 'Question 2: Are you familiar with car mechanics?',
+                q2OptA: 'A. Not at all. I prefer not to do it myself.',
+                q2OptB: 'B. I have some basic knowledge and can try.',
+                jumpStartTitle: 'Recommended Solution: Jump Start',
+                jumpStartDesc: 'Your issue is likely a completely dead battery. This is the simplest fix.',
+                toolsTitle: 'Tools Required:',
+                toolCables: 'A set of jumper cables',
+                toolCar: 'Another vehicle with a healthy battery',
+                stepsTitle: 'Steps:',
+                jumpStartStep1: '1. Park the helper car close, but not touching.',
+                jumpStartStep2: '2. Connect the cables in the correct order (positive to positive, negative to metal ground).',
+                jumpStartStep3: '3. Start the helper car and let it run for a few minutes.',
+                jumpStartStep4: '4. Try to start your car. If it starts, you can now move it.',
+                jumpStartAlt: 'Jump Start Diagram',
+                bsiResetTitle: 'Recommended Solution: BSI Computer Reset (Soft Reboot)',
+                bsiResetDesc: 'This is a low-risk method that can fix electronic glitches causing the gear lock.',
+                bsiStep1Title: 'Step 1: Preparation',
+                bsiStep1Desc: 'Lower the driver\'s window, open the hood, close all doors, turn off all electronics, and remove the key.',
+                bsiStep2Title: 'Step 2: System Shutdown',
+                bsiStep2Desc: 'Wait for <strong>3 minutes</strong> to allow all systems to fully shut down.',
+                bsiStep3Title: 'Step 3: Disconnect & Reconnect',
+                bsiStep3Desc: 'Disconnect the negative battery terminal, wait 15 seconds, then reconnect it. Wait another 10 seconds.',
+                bsiStep4Title: 'Step 4: Restart',
+                bsiStep4Desc: 'Reach through the window to turn on the side lights, then get in, turn on the ignition, and try to shift to Neutral.',
+                bsiAfterTitle: 'Afterwards:',
+                bsiFailBtn: 'If it still fails, try the final mechanical method',
+                mechReleaseTitle: '<span class="step-number">Final Solution:</span> Manual Mechanical Release',
+                mechReleaseDesc: '<strong>HIGH-RISK WARNING:</strong> This step requires mechanical skill and can damage your vehicle if done incorrectly. If unsure, call a professional.',
+                mechReleaseConfirmBtn: 'I Understand the Risk, Show Steps',
+                mechReleaseTarget: 'Objective:',
+                mechReleaseTargetDesc: 'Locate the manual release mechanism on the gearbox itself, inside the engine bay.',
+                mechReleasePos: 'Possible Location (for Peugeot/Citroën models):',
+                mechReleasePosDesc: 'After removing the ECU (computer) on top of the gearbox, there should be an axle underneath that can be turned with a <strong>6mm wrench</strong>. A single clockwise turn should shift it to Neutral.',
+                mechReleaseAlt: 'Gearbox Manual Release Point',
+                mechReleaseImgCredit: 'Image Source: Reddit r/MechanicAdvice. This image shows the ECU and the likely release point underneath.',
+                mechReleaseNotFound: 'Can\'t find it?',
+                mechReleaseNotFoundDesc: 'Do not force anything! Proceed to the final step and call for professional help immediately.',
+                seekHelpBtn: 'Call for Professional Help',
+                profHelpTitle: 'Best Solution: Call for Professional Help',
+                profHelpDesc: 'This is the safest and most reliable method. When you contact a mechanic or tow service, provide them with the following key information to save time.',
+                profHelpMsgTitle: 'Message for the Mechanic:',
+                copyText: 'Hello, my automatic car won\'t start and is stuck in Park. Online info suggests the manual release is in the engine bay, on the gearbox under the ECU, and requires a 6mm wrench. Please bring the necessary tools to check this. Thanks.',
+                copyBtn: 'Copy Message',
+                copySuccess: 'Copied to clipboard!',
+                modalTitle: '<span class="danger-icon">⚠️</span> High-Risk Operation Warning',
+                modalDesc: 'This procedure involves dismantling vehicle components and carries a risk of damaging the gearbox. We strongly recommend it be performed by an experienced technician. Are you sure you want to view the steps?',
+                modalConfirm: 'Yes, I\'m sure',
+                modalCancel: 'Cancel, Go Back',
+                footerText: 'This guide is for informational purposes only. We are not responsible for any damage caused by improper operation. Safety first.'
+            }
+        };
+
+        let currentLang = 'zh';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const langSwitcher = document.getElementById('lang-switcher');
+            const copyTextEl = document.getElementById('copy-text');
+
+            function switchLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                const elements = document.querySelectorAll('[data-lang-key]');
+                elements.forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (langData[lang][key]) {
+                        el.innerHTML = langData[lang][key];
+                    }
+                });
+
+                const altElements = document.querySelectorAll('[data-lang-key-alt]');
+                altElements.forEach(el => {
+                    const key = el.getAttribute('data-lang-key-alt');
+                    if(langData[lang][key]) {
+                        el.alt = langData[lang][key];
+                    }
+                });
+                
+                // Update textarea content separately
+                copyTextEl.value = langData[lang]['copyText'];
+            }
+
+            langSwitcher.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                switchLanguage(newLang);
+            });
+            
+            // Initialize with default language
+            switchLanguage(currentLang);
+
+            // --- Existing JS Logic ---
+            const safetyCheckboxes = document.querySelectorAll('#safety-checklist input[name="safety"]');
+            const startDiagnosticBtn = document.getElementById('start-diagnostic-btn');
+            const diagnosticSection = document.getElementById('diagnostic-section');
+
+            safetyCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const allChecked = Array.from(safetyCheckboxes).every(c => c.checked);
+                    startDiagnosticBtn.disabled = !allChecked;
+                });
+            });
+
+            startDiagnosticBtn.addEventListener('click', () => {
+                if (!startDiagnosticBtn.disabled) {
+                    diagnosticSection.classList.remove('hidden');
+                    startDiagnosticBtn.parentElement.classList.add('hidden');
+                    window.scrollTo({ top: diagnosticSection.offsetTop, behavior: 'smooth' });
+                }
+            });
+
+            window.showQuestion = function(qNum) {
+                document.getElementById('q1').classList.add('hidden');
+                document.getElementById('q2').classList.remove('hidden');
+            }
+
+            window.showSolution = function(solutionId) {
+                document.getElementById('diagnostic-section').classList.add('hidden');
+                const allSolutions = document.querySelectorAll('.solution-content');
+                allSolutions.forEach(sol => sol.classList.add('hidden'));
+                const targetSolution = document.getElementById(solutionId);
+                targetSolution.classList.remove('hidden');
+                window.scrollTo({ top: targetSolution.offsetTop, behavior: 'smooth' });
+            }
+
+            const showMechanicalBtn = document.getElementById('show-mechanical-steps-btn');
+            const mechanicalSteps = document.getElementById('mechanical-steps');
+            const modal = document.getElementById('mechanical-warning-modal');
+            const confirmBtn = document.getElementById('confirm-mechanical-view');
+            const cancelBtn = document.getElementById('cancel-mechanical-view');
+
+            showMechanicalBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+            
+            confirmBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                mechanicalSteps.classList.remove('hidden');
+                showMechanicalBtn.classList.add('hidden');
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            const copyBtn = document.getElementById('copy-btn');
+            const copySuccessMsg = document.getElementById('copy-success');
+
+            copyBtn.addEventListener('click', () => {
+                copyTextEl.select();
+                document.execCommand('copy');
+                copySuccessMsg.style.display = 'block';
+                setTimeout(() => {
+                    copySuccessMsg.style.display = 'none';
+                }, 2000);
+            });
+        });
+    </script>
+
+</body>
+</html>
