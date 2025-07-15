@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprinter P02D0 + P0299 互動式診斷助理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A task-oriented "Diagnostic Assistant" SPA. It starts with a high-level visual explanation of the core problem (causal chain), then guides the user through a prioritized, tabbed interactive diagnostic checklist (Air System -> Exhaust -> etc.). A key feature is the "Symptom Analyzer," an interactive radar chart that allows users to select observed symptoms to visually pinpoint the most likely fault systems, dynamically linking symptoms to the diagnostic checklist. The app concludes with preventative maintenance tips. This structure was chosen to transform a static report into an active, guided tool, making the complex diagnostic process more manageable, intuitive, and efficient for a user who needs to solve a problem, rather than just read about it. -->
+    <!-- Visualization & Content Choices: 
+        - Causal Chain (Inform): Presented as a simple, clear HTML/CSS flow diagram with Unicode arrows. This avoids library overhead and directly communicates the core concept.
+        - Symptom Analyzer (Relationships/Compare): A Chart.js Radar Chart. Goal: To visually correlate user-selected symptoms with potential root causes. Interaction: User clicks symptom buttons, JS updates chart data, providing instant visual feedback. Justification: More engaging and insightful than a static table, providing a "smart tool" feel.
+        - Diagnostic Steps (Organize/Guide): A tabbed interface with expandable detail cards. Goal: To break down the complex diagnostic procedure into logical, prioritized steps. Interaction: Users click tabs to navigate systems and click cards to see details. Justification: Manages complexity and guides the user through the most likely fixes first.
+        - Maintenance Tips (Inform): Styled HTML cards. Goal: To present actionable advice clearly. Interaction: Simple hover effects. Justification: Easy to scan and digest.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif', '微軟正黑體', 'Microsoft JhengHei';
+            background-color: #f8f7f2;
+            color: #333333;
+        }
+        .tab-active {
+            border-color: #5F7A8D;
+            background-color: #5F7A8D;
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .tab-inactive {
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .symptom-btn-active {
+            background-color: #C77D55;
+            color: #ffffff;
+            border-color: #C77D55;
+            transform: scale(1.05);
+        }
+        .symptom-btn-inactive {
+             background-color: #ffffff;
+             color: #4a5568;
+             border-color: #cbd5e0;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .content-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.2s ease-in-out;
+        }
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .flow-step {
+            flex: 1;
+            min-width: 120px;
+        }
+        .flow-arrow {
+            color: #C77D55;
+        }
+        .lang-btn-active {
+            background-color: #5F7A8D;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        <header class="text-center mb-10 relative">
+            <div class="absolute top-0 right-0">
+                <div id="lang-switcher" class="flex border border-gray-300 rounded-lg">
+                    <button id="lang-zh" class="px-3 py-1 text-sm rounded-l-md">繁體中文</button>
+                    <button id="lang-en" class="px-3 py-1 text-sm rounded-r-md">English</button>
+                </div>
+            </div>
+            <h1 id="main-title" class="text-3xl md:text-4xl font-bold text-gray-800"></h1>
+            <h2 id="subtitle" class="text-2xl md:text-3xl font-semibold text-[#5F7A8D]"></h2>
+            <p id="header-desc" class="mt-2 text-gray-600 max-w-3xl mx-auto"></p>
+        </header>
+
+        <main>
+            <!-- Section 1: Problem Overview -->
+            <section id="overview" class="mb-12">
+                <div class="content-card p-6">
+                    <h3 id="overview-title" class="text-xl font-bold mb-4 text-[#5F7A8D] flex items-center"></h3>
+                    <p id="overview-desc" class="text-gray-700 mb-6"></p>
+                    <div id="overview-flow" class="flex flex-wrap items-center justify-center gap-4 text-center text-sm md:text-base">
+                        <!-- Flow steps generated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Symptom Analyzer -->
+            <section id="symptom-analyzer" class="mb-12">
+                <div class="content-card p-6">
+                    <h3 id="symptom-analyzer-title" class="text-xl font-bold mb-2 text-[#5F7A8D] flex items-center"></h3>
+                    <p id="symptom-analyzer-desc" class="text-gray-700 mb-4"></p>
+                    <div id="symptom-buttons" class="flex flex-wrap gap-2 mb-6">
+                        <!-- Symptom buttons will be generated here by JS -->
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="symptom-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- Section 3: Interactive Diagnostic Flow -->
+            <section id="diagnostic-flow" class="mb-12">
+                <div class="content-card p-6">
+                     <h3 id="diagnostic-flow-title" class="text-xl font-bold mb-4 text-[#5F7A8D] flex items-center"></h3>
+                    <div class="w-full">
+                        <nav id="diagnostic-tabs" class="flex border-b border-gray-200 mb-6 overflow-x-auto">
+                            <!-- Tabs will be generated here -->
+                        </nav>
+                        <div id="diagnostic-content">
+                            <!-- Content for tabs will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Section 4: Preventative Maintenance -->
+            <section id="maintenance">
+                 <div class="content-card p-6">
+                    <h3 id="maintenance-title" class="text-xl font-bold mb-4 text-[#5F7A8D] flex items-center"></h3>
+                    <div id="maintenance-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Maintenance cards will be generated here by JS -->
+                    </div>
+                 </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const translations = {
+                en: {
+                    mainTitle: "Mercedes-Benz Sprinter",
+                    subtitle: "P02D0 + P0299 Interactive Diagnostic Assistant",
+                    headerDesc: "This tool will guide you to systematically find the root cause. Remember: P02D0 is often a result of P0299.",
+                    overviewTitle: "💡 Fault Cascade: How Does It Happen?",
+                    overviewDesc: "These two codes appearing together form a typical 'cascade failure'. The root cause is usually 'unmetered air' entering the engine, causing the computer's fuel trim to reach its limit. This is not an injector problem, but the final result of an imbalanced air management system.",
+                    flowSteps: [
+                        { title: "1. Boost Leak", subtitle: "(Start of P0299)" },
+                        { title: "2. Lean Air-Fuel Ratio", subtitle: "(Too much air)" },
+                        { title: "3. ECU Correction Fails", subtitle: "(Incorrect judgment)" },
+                        { title: "4. Injection at Min. Limit", subtitle: "(Triggers P02D0)" }
+                    ],
+                    symptomAnalyzerTitle: "📈 Symptom Correlation Analyzer",
+                    symptomAnalyzerDesc: "Click on the symptoms you observe. The radar chart below will instantly analyze the most likely fault sources and suggest which system to check first.",
+                    diagnosticFlowTitle: "🛠️ Interactive Diagnostic Flow",
+                    maintenanceTitle: "🛡️ Preventative Maintenance & Long-Term Reliability",
+                    chartLabel: "Fault Likelihood Score",
+                    systems: [
+                        { id: 'air', name: 'Air Management System (Top Priority)', checks: [ { title: 'Intake & Boost Leak Test (Smoke Test)', details: 'This is the most common cause. Use a smoke machine to check all pipes from the air filter to the intake manifold.' }, { title: 'Intercooler Hose Inspection', details: 'Check red and other hoses for cracks, swelling, or oil saturation, especially at bends.' }, { title: 'Turbo Resonator Inspection', details: 'Check the stock plastic resonator for cracks at the seams. Many owners upgrade to a more durable aluminum part.' }, { title: 'Intake Manifold & Gasket Inspection', details: 'Check the plastic intake manifold body for cracks and for failed, aging gaskets.' } ] },
+                        { id: 'exhaust', name: 'Exhaust & Emissions System', checks: [ { title: 'DPF Differential Pressure Sensor Test', details: 'Use a scan tool to check pressure readings at idle and during acceleration. Check connecting hoses for melting or blockages. A bad reading can simulate a clogged DPF.' }, { title: 'EGR Valve Function Test & Cleaning', details: 'Use a scan tool to actively test valve opening and closing. Removal and cleaning of carbon buildup is crucial preventive maintenance. A stuck EGR severely impacts performance.' }, { title: 'Exhaust System Visual Inspection', details: 'Check for black soot marks around the exhaust manifold or turbo, indicating an exhaust leak.' } ] },
+                        { id: 'control', name: 'Turbo Control & Sensors', checks: [ { title: 'Electronic Turbo Actuator Inspection', details: 'A common failure point. Worn internal gears prevent precise boost control, causing P0299. Often requires professional repair.' }, { title: 'VNT/Wastegate Linkage Check', details: 'Manually check if the control linkage is stuck due to carbon buildup.' }, { title: 'Turbo Pressure Transducer Inspection', details: 'Failure of this small, vacuum-controlled part can cause intermittent limp mode.' }, { title: 'MAP/MAF Sensor Rationality Check', details: 'With ignition on, engine off, compare MAP and atmospheric pressure readings. Observe if MAF data increases smoothly with acceleration.' } ] },
+                        { id: 'advanced', name: 'Advanced Diagnostics', checks: [ { title: 'Harness Oil Contamination Check', details: 'Disconnect ECU and camshaft sensor connectors to check for oil wicking. Oil can disrupt signals, causing various strange electronic faults.' }, { title: 'Injector IQA Code Verification', details: 'Ensure the calibration code for each injector is correctly programmed into the ECU. Incorrect codes lead to faulty fuel calculations.' }, { title: 'Fuel System Pressure Check', details: 'As a final step, use a scan tool to check if low and high fuel pressures are within spec under load.' } ] }
+                    ],
+                    symptoms: [
+                        { id: 'limp_mode', name: 'Limp mode when going uphill', causes: ['air', 'exhaust', 'control'] }, { id: 'hissing_sound', name: 'Hissing/whistling from engine bay', causes: ['air'] }, { id: 'black_smoke', name: 'Black smoke from exhaust', causes: ['exhaust', 'air'] }, { id: 'rough_idle', name: 'Rough or unstable idle', causes: ['air', 'exhaust', 'control', 'advanced'] }, { id: 'poor_mpg', name: 'Significant drop in fuel economy', causes: ['exhaust', 'air', 'control'] }, { id: 'code_migrate', name: 'Fault code migrates between cylinders', causes: ['air', 'advanced'] }, { id: 'poor_accel', name: 'Sluggish acceleration, lack of power', causes: ['air', 'exhaust', 'control'] }
+                    ],
+                    maintenance: [
+                        { title: 'Optimize Driving Habits', details: 'Avoid frequent short trips. Regular highway driving helps the DPF complete its regeneration cycle.', icon: '🛣️' }, { title: 'Use Correct Oil', details: 'Always use Low-SAPS oil that meets Mercedes specs to protect the DPF.', icon: '💧' }, { title: 'Regular EGR Cleaning', details: 'It is recommended to clean the EGR valve every 50k-80k km to prevent carbon buildup.', icon: '🧼' }, { title: 'Proactive Upgrades', details: 'Consider replacing the plastic turbo resonator with an aluminum one for a permanent fix.', icon: '🔩' }
+                    ]
+                },
+                zh: {
+                    mainTitle: "Mercedes-Benz Sprinter",
+                    subtitle: "P02D0 + P0299 互動式診斷助理",
+                    headerDesc: "這份工具將引導您系統性地找出問題根源。請記住：P02D0 通常是 P0299 所引發的結果。",
+                    overviewTitle: "💡 故障連鎖反應：問題是如何發生的？",
+                    overviewDesc: "這兩個故障碼同時出現，形成了一個典型的「連鎖故障」。根本原因通常是「未被計算的空氣」進入引擎，導致電腦的燃油修正達到極限。這不是噴油嘴的問題，而是空氣管理系統失衡的最終結果。",
+                    flowSteps: [
+                        { title: "1. 增壓洩漏", subtitle: "(P0299 的起點)" },
+                        { title: "2. 空燃比過稀", subtitle: "(空氣過多)" },
+                        { title: "3. ECU 修正失敗", subtitle: "(錯誤判斷)" },
+                        { title: "4. 噴油達下限", subtitle: "(觸發 P02D0)" }
+                    ],
+                    symptomAnalyzerTitle: "📈 症狀關聯分析器",
+                    symptomAnalyzerDesc: "點選您觀察到的症狀，下方的雷達圖將即時分析最可能的故障來源，並建議您優先檢查的系統。",
+                    diagnosticFlowTitle: "🛠️ 互動式診斷流程",
+                    maintenanceTitle: "🛡️ 預防性維護與長期可靠性建議",
+                    chartLabel: "故障可能性評分",
+                    systems: [
+                        { id: 'air', name: '空氣管理系統 (最高優先級)', checks: [ { title: '進氣與增壓洩漏檢測 (煙霧測試)', details: '這是最常見的原因。使用煙霧測試機檢查從空氣濾清器到進氣歧管的所有管路。' }, { title: '中冷器軟管檢查', details: '檢查紅色及其他軟管是否有破裂、膨脹或油污浸潤，特別是在彎曲處。' }, { title: '渦輪諧振器檢查', details: '檢查原廠塑膠諧振器接合處是否有裂縫。許多車主會升級為更耐用的鋁合金件。' }, { title: '進氣歧管與墊片檢查', details: '檢查塑膠進氣歧管本體是否有裂痕，以及墊片是否老化失效。' } ] },
+                        { id: 'exhaust', name: '排氣與排放系統', checks: [ { title: 'DPF 壓差感知器測試', details: '使用診斷儀器檢查怠速和加速時的壓力讀數。檢查連接軟管是否熔化或堵塞。錯誤的讀數會模擬 DPF 堵塞。' }, { title: 'EGR 閥功能測試與清潔', details: '使用診斷儀器主動測試閥門開閉。拆下清潔積碳是重要的預防性保養。卡滯的 EGR 會嚴重影響性能。' }, { title: '排氣系統目視檢查', details: '檢查排氣歧管或渦輪周圍是否有黑煙灰痕跡，這表示存在排氣洩漏。' } ] },
+                        { id: 'control', name: '渦輪控制與感知器', checks: [ { title: '電子渦輪作動器檢查', details: '這是常見故障點。內部齒輪磨損會導致無法精確控制增壓，引發 P0299。通常需要專業修復。' }, { title: 'VNT/廢氣門連桿檢查', details: '手動檢查控制連桿是否因積碳而卡滯。' }, { title: '渦輪壓力轉換器檢查', details: '這個真空控制的小零件故障會導致間歇性的跛行模式。' }, { title: 'MAP/MAF 感知器合理性檢查', details: '在點火開、引擎關的狀態下，比對 MAP 和大氣壓力讀數。觀察怠速和加速時 MAF 數據是否平順增加。' } ] },
+                        { id: 'advanced', name: '進階診斷', checks: [ { title: '線束油污滲透檢查', details: '斷開 ECU 和凸輪軸感知器接頭，檢查是否有機油滲入。機油會干擾信號，導致各種奇怪的電子故障。' }, { title: '噴油器 IQA 編碼驗證', details: '確認每個噴油器的校準碼已正確寫入 ECU。錯誤的編碼會導致燃油計算失準。' }, { title: '燃油系統壓力檢查', details: '作為最後一步，使用診斷儀器檢查低壓和高壓燃油壓力在負載下是否符合規格。' } ] }
+                    ],
+                    symptoms: [
+                        { id: 'limp_mode', name: '上坡時進入跛行模式', causes: ['air', 'exhaust', 'control'] }, { id: 'hissing_sound', name: '引擎室有嘶嘶/嘯叫聲', causes: ['air'] }, { id: 'black_smoke', name: '排氣管冒黑煙', causes: ['exhaust', 'air'] }, { id: 'rough_idle', name: '怠速不穩或抖動', causes: ['air', 'exhaust', 'control', 'advanced'] }, { id: 'poor_mpg', name: '油耗顯著增加', causes: ['exhaust', 'air', 'control'] }, { id: 'code_migrate', name: '故障碼在不同汽缸間遷移', causes: ['air', 'advanced'] }, { id: 'poor_accel', name: '加速遲滯、無力', causes: ['air', 'exhaust', 'control'] }
+                    ],
+                    maintenance: [
+                        { title: '優化駕駛習慣', details: '避免頻繁短途行駛，定期上高速公路幫助 DPF 完成再生。', icon: '🛣️' }, { title: '使用正確機油', details: '務必使用符合賓士規範的 Low-SAPS (低硫灰) 機油以保護 DPF。', icon: '💧' }, { title: '定期清潔 EGR', details: '建議每 5-8 萬公里清潔一次 EGR 閥，預防積碳卡滯。', icon: '🧼' }, { title: '主動性升級', details: '考慮將塑膠渦輪諧振器更換為鋁合金件，一勞永逸。', icon: '🔩' }
+                    ]
+                }
+            };
+
+            let currentLanguage = 'zh';
+            let activeSymptoms = new Set();
+            let chart;
+            let activeTabId = translations.zh.systems[0].id;
+
+            function renderContent(lang) {
+                const T = translations[lang];
+                
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.title = T.subtitle;
+
+                // Update headers
+                document.getElementById('main-title').textContent = T.mainTitle;
+                document.getElementById('subtitle').textContent = T.subtitle;
+                document.getElementById('header-desc').textContent = T.headerDesc;
+
+                // Update section titles
+                document.getElementById('overview-title').innerHTML = `<span class="mr-2">💡</span> ${T.overviewTitle}`;
+                document.getElementById('overview-desc').textContent = T.overviewDesc;
+                document.getElementById('symptom-analyzer-title').innerHTML = `<span class="mr-2">📈</span> ${T.symptomAnalyzerTitle}`;
+                document.getElementById('symptom-analyzer-desc').textContent = T.symptomAnalyzerDesc;
+                document.getElementById('diagnostic-flow-title').innerHTML = `<span class="mr-2">🛠️</span> ${T.diagnosticFlowTitle}`;
+                document.getElementById('maintenance-title').innerHTML = `<span class="mr-2">🛡️</span> ${T.maintenanceTitle}`;
+
+                // Update language switcher style
+                document.getElementById('lang-zh').classList.toggle('lang-btn-active', lang === 'zh');
+                document.getElementById('lang-en').classList.toggle('lang-btn-active', lang === 'en');
+
+                createOverviewFlow(T.flowSteps);
+                createSymptomButtons(T.symptoms);
+                createDiagnosticTabsAndContent(T.systems);
+                createMaintenanceCards(T.maintenance);
+                if (chart) chart.destroy();
+                createChart(T);
+                setActiveTab(activeTabId);
+            }
+            
+            function createOverviewFlow(steps) {
+                const container = document.getElementById('overview-flow');
+                container.innerHTML = '';
+                steps.forEach((step, index) => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = `flow-step p-3 rounded-lg border ${index === 3 ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'}`;
+                    stepDiv.innerHTML = `<p class="font-semibold ${index === 3 ? 'text-red-700' : ''}">${step.title}</p><p class="text-xs text-gray-500 ${index === 3 ? 'text-red-500' : ''}">${step.subtitle}</p>`;
+                    container.appendChild(stepDiv);
+
+                    if (index < steps.length - 1) {
+                        const arrowDiv = document.createElement('div');
+                        arrowDiv.className = 'flow-arrow font-bold text-2xl hidden md:block';
+                        arrowDiv.textContent = '➡️';
+                        container.appendChild(arrowDiv);
+                        const arrowDivMobile = document.createElement('div');
+                        arrowDivMobile.className = 'flow-arrow font-bold text-2xl md:hidden w-full text-center';
+                        arrowDivMobile.textContent = '⬇️';
+                        container.appendChild(arrowDivMobile);
+                    }
+                });
+            }
+
+            function createSymptomButtons(symptoms) {
+                const container = document.getElementById('symptom-buttons');
+                container.innerHTML = '';
+                symptoms.forEach(symptom => {
+                    const button = document.createElement('button');
+                    button.textContent = symptom.name;
+                    button.dataset.symptomId = symptom.id;
+                    const isActive = activeSymptoms.has(symptom.id);
+                    button.className = `py-2 px-4 rounded-full border text-sm font-semibold transition-all duration-200 ${isActive ? 'symptom-btn-active' : 'symptom-btn-inactive'}`;
+                    button.addEventListener('click', () => toggleSymptom(symptom.id, button));
+                    container.appendChild(button);
+                });
+            }
+
+            function createDiagnosticTabsAndContent(systems) {
+                const tabsContainer = document.getElementById('diagnostic-tabs');
+                const contentContainer = document.getElementById('diagnostic-content');
+                tabsContainer.innerHTML = '';
+                contentContainer.innerHTML = '';
+
+                systems.forEach(system => {
+                    const tab = document.createElement('button');
+                    tab.textContent = system.name;
+                    tab.dataset.tabId = system.id;
+                    tab.className = 'tab-inactive py-2 px-4 -mb-px border-t border-l border-r rounded-t-lg text-sm md:text-base flex-shrink-0';
+                    tab.addEventListener('click', () => setActiveTab(system.id));
+                    tabsContainer.appendChild(tab);
+
+                    const content = document.createElement('div');
+                    content.id = `content-${system.id}`;
+                    content.className = 'hidden';
+                    
+                    const grid = document.createElement('div');
+                    grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+                    
+                    system.checks.forEach(check => {
+                        const card = document.createElement('div');
+                        card.className = 'bg-gray-50 p-4 rounded-lg border border-gray-200';
+                        card.innerHTML = `<h4 class="font-semibold text-gray-800">${check.title}</h4><p class="text-sm text-gray-600 mt-1">${check.details}</p>`;
+                        grid.appendChild(card);
+                    });
+                    
+                    content.appendChild(grid);
+                    contentContainer.appendChild(content);
+                });
+            }
+
+            function createMaintenanceCards(maintenanceItems) {
+                const container = document.getElementById('maintenance-cards');
+                container.innerHTML = '';
+                maintenanceItems.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col items-center text-center h-full';
+                    card.innerHTML = `<div class="text-4xl mb-2">${item.icon}</div><h4 class="font-semibold text-gray-800">${item.title}</h4><p class="text-sm text-gray-600 mt-1">${item.details}</p>`;
+                    container.appendChild(card);
+                });
+            }
+            
+            function setActiveTab(tabId) {
+                activeTabId = tabId;
+                document.querySelectorAll('#diagnostic-tabs button').forEach(tab => {
+                    tab.classList.toggle('tab-active', tab.dataset.tabId === tabId);
+                    tab.classList.toggle('tab-inactive', tab.dataset.tabId !== tabId);
+                });
+                document.querySelectorAll('#diagnostic-content > div').forEach(content => {
+                    content.classList.toggle('hidden', content.id !== `content-${tabId}`);
+                });
+            }
+
+            function toggleSymptom(symptomId, button) {
+                button.classList.toggle('symptom-btn-active');
+                button.classList.toggle('symptom-btn-inactive');
+                if (activeSymptoms.has(symptomId)) {
+                    activeSymptoms.delete(symptomId);
+                } else {
+                    activeSymptoms.add(symptomId);
+                }
+                updateChartAndRecommendations();
+            }
+
+            function updateChartAndRecommendations() {
+                const T = translations[currentLanguage];
+                const causeScores = {};
+                T.systems.forEach(s => causeScores[s.id] = 0);
+
+                if (activeSymptoms.size > 0) {
+                    activeSymptoms.forEach(symptomId => {
+                        const symptom = T.symptoms.find(s => s.id === symptomId);
+                        symptom.causes.forEach(causeId => {
+                            causeScores[causeId] += 1;
+                        });
+                    });
+                }
+                
+                const scores = T.systems.map(s => causeScores[s.id]);
+                chart.data.datasets[0].data = scores;
+                chart.update();
+
+                const maxScore = Math.max(...scores);
+                if (maxScore > 0) {
+                    const topCause = T.systems.find(sys => causeScores[sys.id] === maxScore);
+                    if (topCause) {
+                       setActiveTab(topCause.id);
+                    }
+                }
+            }
+
+            function createChart(T) {
+                const ctx = document.getElementById('symptom-chart').getContext('2d');
+                const labels = T.systems.map(s => s.name.split('(')[0].trim());
+                const initialData = T.systems.map(s => 0);
+                
+                chart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: T.chartLabel,
+                            data: initialData,
+                            backgroundColor: 'rgba(199, 125, 85, 0.2)',
+                            borderColor: 'rgba(199, 125, 85, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: 'rgba(199, 125, 85, 1)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgba(199, 125, 85, 1)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                                grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                                pointLabels: { font: { size: 12 }, color: '#333' },
+                                suggestedMin: 0,
+                                suggestedMax: 3,
+                                ticks: { stepSize: 1, backdropColor: 'transparent' }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.dataset.label}: ${context.raw}`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                updateChartAndRecommendations();
+            }
+
+            function initializeApp() {
+                document.getElementById('lang-zh').addEventListener('click', () => {
+                    currentLanguage = 'zh';
+                    renderContent(currentLanguage);
+                });
+                document.getElementById('lang-en').addEventListener('click', () => {
+                    currentLanguage = 'en';
+                    renderContent(currentLanguage);
+                });
+                renderContent(currentLanguage);
+            }
+
+            initializeApp();
+        });
+    </script>
+</body>
+</html>
