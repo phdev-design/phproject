@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑪利歐法則：解構一個數位王朝</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F4F8; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .kpi-title {
+            font-size: 1rem;
+            color: #665191; /* Accent Purple */
+            font-weight: 700;
+        }
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #003F5C; /* Deep Blue */
+            line-height: 1.2;
+        }
+        .flowchart-node {
+            background-color: #2F4B7C;
+            color: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .flowchart-arrow {
+            color: #665191;
+            font-weight: bold;
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #D45087; /* Magenta */
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+            padding: 0 2rem;
+            margin-bottom: 2rem;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        .timeline-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .timeline-dot {
+            content: '';
+            position: absolute;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FF7C43; /* Orange */
+            border: 4px solid #D45087; /* Magenta */
+        }
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -10px;
+            transform: translateX(50%);
+        }
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -10px;
+            transform: translateX(-50%);
+        }
+        h1, h2, h3 {
+            color: #003F5C;
+        }
+        .section-intro {
+            color: #2F4B7C;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="fixed top-4 right-4 z-50">
+        <button id="lang-toggle" class="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 transition">
+            English
+        </button>
+    </div>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black mb-2" data-key="mainTitle"></h1>
+            <p class="text-xl md:text-2xl text-gray-600" data-key="subtitle"></p>
+        </header>
+
+        <section id="intro" class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="kpi-card">
+                    <p class="kpi-title" data-key="kpi1Title"></p>
+                    <p class="kpi-value">8億+</p>
+                    <p class="text-gray-500 text-sm" data-key="kpi1Desc"></p>
+                </div>
+                <div class="kpi-card">
+                    <p class="kpi-title" data-key="kpi2Title"></p>
+                    <p class="kpi-value">$13.6億+</p>
+                    <p class="text-gray-500 text-sm" data-key="kpi2Desc"></p>
+                </div>
+                <div class="kpi-card">
+                    <p class="kpi-title" data-key="kpi3Title"></p>
+                    <p class="kpi-value" data-key="kpi3Value"></p>
+                    <p class="text-gray-500 text-sm" data-key="kpi3Desc"></p>
+                </div>
+            </div>
+            <p class="max-w-4xl mx-auto mt-8 text-center text-lg section-intro" data-key="introParagraph"></p>
+        </section>
+
+        <div class="space-y-16">
+            <section id="pillar1" class="p-6 md:p-8 bg-white rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-2" data-key="p1Title"></h2>
+                <h3 class="text-xl text-center text-gray-500 mb-8" data-key="p1Subtitle"></h3>
+                <p class="max-w-3xl mx-auto text-center mb-12 section-intro" data-key="p1Paragraph"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-key="p1Chart1Title"></h3>
+                        <p class="text-center mb-4 section-intro" data-key="p1Chart1Desc"></p>
+                        <div class="chart-container h-64 md:h-80">
+                            <canvas id="marketCrashChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-key="p1DiagramTitle"></h3>
+                        <p class="text-center mb-4 section-intro" data-key="p1DiagramDesc"></p>
+                        <div class="flex flex-col items-center space-y-2">
+                            <div class="flowchart-node w-full md:w-3/4">
+                                <span class="font-bold" data-key="p1Node1Title"></span><br><span data-key="p1Node1Desc"></span>
+                            </div>
+                            <div class="flowchart-arrow">↓</div>
+                            <div class="flowchart-node w-full md:w-3/4">
+                                <span class="font-bold" data-key="p1Node2Title"></span><br><span data-key="p1Node2Desc"></span>
+                            </div>
+                            <div class="flowchart-arrow">↓</div>
+                            <div class="flowchart-node w-full md:w-3/4">
+                                <span class="font-bold" data-key="p1Node3Title"></span><br><span data-key="p1Node3Desc"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pillar2" class="p-6 md:p-8 bg-white rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-2" data-key="p2Title"></h2>
+                <h3 class="text-xl text-center text-gray-500 mb-8" data-key="p2Subtitle"></h3>
+                <p class="max-w-3xl mx-auto text-center mb-12 section-intro" data-key="p2Paragraph"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-key="p2ChartTitle"></h3>
+                        <p class="text-center mb-4 section-intro" data-key="p2ChartDesc"></p>
+                        <div class="chart-container h-72 md:h-96">
+                            <canvas id="feelPhilosophyChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-D45087" data-key="p2Box1Title"></h4>
+                            <p class="text-gray-600" data-key="p2Box1Desc"></p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-D45087" data-key="p2Box2Title"></h4>
+                            <p class="text-gray-600" data-key="p2Box2Desc"></p>
+                        </div>
+                         <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-D45087" data-key="p2Box3Title"></h4>
+                            <p class="text-gray-600" data-key="p2Box3Desc"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pillar3" class="p-6 md:p-8 bg-white rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-2" data-key="p3Title"></h2>
+                <h3 class="text-xl text-center text-gray-500 mb-8" data-key="p3Subtitle"></h3>
+                <p class="max-w-3xl mx-auto text-center mb-12 section-intro" data-key="p3Paragraph"></p>
+                <div class="timeline mx-auto max-w-4xl">
+                    <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4 class="font-bold text-lg text-f95d6a" data-key="p3Time1Title"></h4>
+                            <p data-key="p3Time1Desc"></p>
+                        </div>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4 class="font-bold text-lg text-f95d6a" data-key="p3Time2Title"></h4>
+                            <p data-key="p3Time2Desc"></p>
+                        </div>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4 class="font-bold text-lg text-f95d6a" data-key="p3Time3Title"></h4>
+                            <p data-key="p3Time3Desc"></p>
+                        </div>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <h4 class="font-bold text-lg text-f95d6a" data-key="p3Time4Title"></h4>
+                            <p data-key="p3Time4Desc"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="pillar4" class="p-6 md:p-8 bg-white rounded-xl shadow-lg">
+                <h2 class="text-3xl font-bold text-center mb-2" data-key="p4Title"></h2>
+                <h3 class="text-xl text-center text-gray-500 mb-8" data-key="p4Subtitle"></h3>
+                 <p class="max-w-3xl mx-auto text-center mb-12 section-intro" data-key="p4Paragraph"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-key="p4Chart1Title"></h3>
+                        <p class="text-center mb-4 section-intro" data-key="p4Chart1Desc"></p>
+                        <div class="chart-container h-72 md:h-96">
+                            <canvas id="marioKartSalesChart"></canvas>
+                        </div>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-bold mb-4 text-center" data-key="p4Chart2Title"></h3>
+                        <p class="text-center mb-4 section-intro" data-key="p4Chart2Desc"></p>
+                        <div class="chart-container h-72 md:h-96">
+                            <canvas id="brandExpansionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="text-center p-8 mt-8 text-gray-500">
+        <p data-key="footer"></p>
+    </footer>
+
+    <script>
+        const translations = {
+            zh: {
+                docTitle: '瑪利歐法則：解構一個數位王朝',
+                mainTitle: '瑪利歐法則',
+                subtitle: '解構一個長達四十年的數位王朝：是運氣，還是方法？',
+                kpi1Title: '全球遊戲銷量',
+                kpi1Desc: '系列總計',
+                kpi2Title: '2023電影票房',
+                kpi2Desc: '全球範圍',
+                kpi3Title: '文化符號價值',
+                kpi3Value: '無可估量',
+                kpi3Desc: '橫跨世代的影響力',
+                introParagraph: '《超級瑪利歐》的輝煌成就，常被歸於運氣。然而，深入剖析其四十年的發展歷程，我們發現一個清晰的、可被執行的戰略體系——「瑪利歐法則」。本資訊圖表將透過數據與分析，揭示支撐這個數位娛樂帝國的四大核心支柱。',
+                p1Title: '支柱一：鳳凰策略',
+                p1Subtitle: '從產業灰燼中建立帝國',
+                p1Paragraph: '在1983年北美遊戲市場大崩潰的廢墟上，任天堂並非單純發售一款遊戲。它透過精準的商業策略，重建了消費者信任，並建立起一個由自己主導的全新市場秩序。',
+                p1Chart1Title: '市場崩潰與復甦',
+                p1Chart1Desc: '1983年的崩潰幾乎摧毀了整個行業，卻為任天堂創造了前所未有的市場真空。',
+                p1DiagramTitle: '任天堂的「圍牆花園」',
+                p1DiagramDesc: '以「品質封印」為核心，任天堂打造了一個封閉但高品質的生態系統，徹底掌控了市場。',
+                p1Node1Title: '10NES 鎖定晶片',
+                p1Node1Desc: '杜絕未授權遊戲',
+                p1Node2Title: '嚴格授權條款',
+                p1Node2Desc: '限制數量，保證品質',
+                p1Node3Title: '壟斷生產製造',
+                p1Node3Desc: '掌控供應鏈與利潤',
+                p2Title: '支柱二：宮本茂法則',
+                p2Subtitle: '將「有趣」編纂為設計科學',
+                p2Paragraph: '宮本茂的天才並非靈光乍現，而是一套源於工業設計、以使用者為中心的理性方法論。他將「有趣」這一主觀感受，轉化為可以被分析和執行的設計準則。',
+                p2ChartTitle: '「手感」哲學的構成',
+                p2ChartDesc: '遊戲的核心樂趣源於玩家的直觀互動，而非故事。控制、節奏、聲音與步調共同構成了完美的「手感」。',
+                p2Box1Title: '玩家中心思維',
+                p2Box1Desc: '「如果玩家不明白，那就是我的設計有問題。」—— 這條準則將設計失敗的責任完全歸於設計師，驅動了極致的易用性。',
+                p2Box2Title: '「好點子」框架',
+                p2Box2Desc: '一個真正的好點子，是「能夠一口氣解決複數問題」的優雅方案，體現了對系統性思維的推崇。',
+                p2Box3Title: '源於生活的創作',
+                p2Box3Desc: '從童年探險到園藝愛好，將普世的生活體驗轉化為遊戲核心樂趣，極大地拓寬了遊戲的受眾。',
+                p3Title: '支柱三：躍進的遺產',
+                p3Subtitle: '作為增長引擎的玩法創新',
+                p3Paragraph: '瑪利歐系列的核心使命是引領而非追隨。每一款旗艦作品都承載著一次對玩法和技術的根本性突破，不斷為整個行業定義新的標準。',
+                p3Time1Title: '1985: 超級瑪利歐兄弟',
+                p3Time1Desc: '引入連續橫向捲軸，為2D平台跳躍遊戲立下至今仍在沿用的「文法」。',
+                p3Time2Title: '1996: 超級瑪利歐64',
+                p3Time2Desc: '透過類比搖桿和動態3D攝影機，為3D遊戲時代繪製了第一張精確藍圖。',
+                p3Time3Title: '2007: 超級瑪利歐銀河',
+                p3Time3Desc: '顛覆性的球形重力物理，將關卡設計從平面擴展到三維球體，釋放了設計自由度。',
+                p3Time4Title: '2017: 超級瑪利歐奧德賽',
+                p3Time4Desc: '「附身」能力創造了極具擴展性的玩法，極大鼓勵了玩家的探索和創造力。',
+                p4Title: '支柱四：蘑菇王國霸權',
+                p4Subtitle: '培養一個跨媒體巨擘',
+                p4Paragraph: '任天堂有策略地將瑪利歐從一個遊戲角色，培養成一個全球公認的文化IP。透過衍生作品和跨媒體佈局，其影響力遠超遊戲主機的範疇。',
+                p4Chart1Title: '卡丁車現象：重新定義社交',
+                p4Chart1Desc: '《瑪利歐賽車》憑藉「易上手難精通」和充滿變數的道具系統，成為終極派對遊戲，銷量驚人。',
+                p4Chart2Title: 'IP擴張的領域',
+                p4Chart2Desc: '從「普通人」的角色原型，到電影、主題公園，瑪利歐的品牌價值被不斷放大。',
+                footer: '&copy; 2024 瑪利歐法則分析報告。本資訊圖表基於公開資料與研究報告製作。',
+                charts: {
+                    marketCrash: {
+                        label: '北美遊戲市場營收 (億美元)'
+                    },
+                    feelPhilosophy: {
+                        label: '「手感」哲學要素',
+                        labels: ['控制精準度', '聲音反饋', '視覺節奏', '操作步調', '參與感']
+                    },
+                    marioKart: {
+                        label: '主要賽車遊戲銷量 (百萬套)',
+                        labels: ['瑪利歐賽車8 豪華版', 'GT賽車7', '極限競速 地平線5']
+                    },
+                    brandExpansion: {
+                        label: 'IP價值構成',
+                        labels: ['核心遊戲', '衍生系列 (賽車/派對)', '電影與媒體', '主題公園與周邊']
+                    }
+                }
+            },
+            en: {
+                docTitle: 'The Mario Doctrine: Deconstructing a Digital Dynasty',
+                mainTitle: 'The Mario Doctrine',
+                subtitle: 'Deconstructing a Four-Decade Digital Dynasty: Luck, or a Method?',
+                kpi1Title: 'Global Game Sales',
+                kpi1Desc: 'Series Total',
+                kpi2Title: '2023 Movie Box Office',
+                kpi2Desc: 'Worldwide',
+                kpi3Title: 'Cultural Icon Value',
+                kpi3Value: 'Incalculable',
+                kpi3Desc: 'Cross-Generational Impact',
+                introParagraph: 'The brilliant success of "Super Mario" is often attributed to luck. However, a deep analysis of its forty-year history reveals a clear, executable strategic system—the "Mario Doctrine." This infographic will use data and analysis to unveil the four core pillars supporting this digital entertainment empire.',
+                p1Title: 'Pillar 1: The Phoenix Strategy',
+                p1Subtitle: 'Building an Empire from the Ashes of an Industry',
+                p1Paragraph: 'On the ruins of the 1983 North American video game market crash, Nintendo didn\'t just release a game. It rebuilt consumer trust through precise business strategies and established a new market order under its own control.',
+                p1Chart1Title: 'Market Crash & Recovery',
+                p1Chart1Desc: 'The 1983 crash nearly destroyed the industry, but it created an unprecedented market vacuum for Nintendo.',
+                p1DiagramTitle: 'Nintendo\'s "Walled Garden"',
+                p1DiagramDesc: 'With the "Seal of Quality" at its core, Nintendo built a closed but high-quality ecosystem, completely controlling the market.',
+                p1Node1Title: '10NES Lockout Chip',
+                p1Node1Desc: 'Blocks unlicensed games',
+                p1Node2Title: 'Strict Licensing Terms',
+                p1Node2Desc: 'Limits quantity, ensures quality',
+                p1Node3Title: 'Monopoly on Manufacturing',
+                p1Node3Desc: 'Controls supply chain & profits',
+                p2Title: 'Pillar 2: The Miyamoto Doctrine',
+                p2Subtitle: 'Codifying "Fun" into a Design Science',
+                p2Paragraph: 'Shigeru Miyamoto\'s genius isn\'t a flash of inspiration but a rational, user-centric methodology rooted in industrial design. He transformed the subjective feeling of "fun" into analyzable and executable design principles.',
+                p2ChartTitle: 'The Composition of "Feel" Philosophy',
+                p2ChartDesc: 'The core fun of a game comes from intuitive interaction, not story. Control, rhythm, sound, and pacing combine to create the perfect "feel."',
+                p2Box1Title: 'Player-Centric Mindset',
+                p2Box1Desc: '"If the player doesn\'t get it, it\'s my design that\'s flawed." — This principle places full responsibility on the designer, driving extreme usability.',
+                p2Box2Title: '"Good Idea" Framework',
+                p2Box2Desc: 'A true good idea is an elegant solution that "solves multiple problems at once," reflecting a commitment to systemic thinking.',
+                p2Box3Title: 'Creation from Life',
+                p2Box3Desc: 'From childhood explorations to gardening, translating universal life experiences into core game fun vastly broadens the audience.',
+                p3Title: 'Pillar 3: A Legacy of Leaps',
+                p3Subtitle: 'Gameplay Innovation as a Growth Engine',
+                p3Paragraph: 'The core mission of the Mario series is to lead, not follow. Each flagship title carries a fundamental breakthrough in gameplay and technology, constantly defining new standards for the entire industry.',
+                p3Time1Title: '1985: Super Mario Bros.',
+                p3Time1Desc: 'Introduced continuous side-scrolling, establishing the "grammar" for 2D platformers that is still used today.',
+                p3Time2Title: '1996: Super Mario 64',
+                p3Time2Desc: 'Drew the first precise blueprint for the 3D era with its analog stick and dynamic 3D camera.',
+                p3Time3Title: '2007: Super Mario Galaxy',
+                p3Time3Desc: 'Revolutionary spherical gravity physics expanded level design from planes to 3D spheres, unleashing design freedom.',
+                p3Time4Title: '2017: Super Mario Odyssey',
+                p3Time4Desc: 'The "capture" ability created a highly extensible gameplay system, greatly encouraging player exploration and creativity.',
+                p4Title: 'Pillar 4: Mushroom Kingdom Hegemony',
+                p4Subtitle: 'Cultivating a Transmedia Behemoth',
+                p4Paragraph: 'Nintendo strategically cultivated Mario from a game character into a globally recognized cultural IP. Through spin-offs and transmedia strategies, its influence extends far beyond the realm of game consoles.',
+                p4Chart1Title: 'The Karting Phenomenon: Redefining Social Play',
+                p4Chart1Desc: 'With its "easy to learn, hard to master" design and variable item system, Mario Kart became the ultimate party game with staggering sales.',
+                p4Chart2Title: 'The Realms of IP Expansion',
+                p4Chart2Desc: 'From an "everyman" character archetype to movies and theme parks, Mario\'s brand value is constantly being amplified.',
+                footer: '&copy; 2024 Mario Doctrine Analysis. This infographic is based on public data and research reports.',
+                charts: {
+                    marketCrash: {
+                        label: 'North American Video Game Market Revenue (in Billions USD)'
+                    },
+                    feelPhilosophy: {
+                        label: '"Feel" Philosophy Elements',
+                        labels: ['Control Precision', 'Audio Feedback', 'Visual Rhythm', 'Gameplay Pacing', 'Engagement']
+                    },
+                    marioKart: {
+                        label: 'Major Racing Game Sales (in Millions)',
+                        labels: ['Mario Kart 8 Deluxe', 'Gran Turismo 7', 'Forza Horizon 5']
+                    },
+                    brandExpansion: {
+                        label: 'IP Value Composition',
+                        labels: ['Core Games', 'Spin-off Series (Kart/Party)', 'Film & Media', 'Theme Parks & Merchandise']
+                    }
+                }
+            }
+        };
+
+        let currentLang = 'zh';
+        let charts = {};
+
+        const vibrantPalette = {
+            deepBlue: '#003F5C',
+            midBlue: '#2F4B7C',
+            purple: '#665191',
+            violet: '#A05195',
+            magenta: '#D45087',
+            pink: '#F95D6A',
+            orange: '#FF7C43',
+            yellow: '#FFA600',
+        };
+
+        function wrapLabel(str, maxWidth) {
+            if (typeof str !== 'string' || str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).length > maxWidth) {
+                    lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const commonChartOptions = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: vibrantPalette.deepBlue,
+                        font: {
+                            family: "'Roboto', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: vibrantPalette.midBlue },
+                    grid: { display: false }
+                },
+                y: {
+                    ticks: { color: vibrantPalette.midBlue },
+                    grid: { color: '#e0e0e0' }
+                }
+            }
+        };
+
+        function renderCharts(lang) {
+            Object.values(charts).forEach(chart => chart.destroy());
+            const chartData = translations[lang].charts;
+            
+            charts.marketCrash = new Chart(document.getElementById('marketCrashChart'), {
+                type: 'line',
+                data: {
+                    labels: ['1982', '1983', '1984', '1985'],
+                    datasets: [{
+                        label: chartData.marketCrash.label,
+                        data: [32, 18, 12, 1],
+                        borderColor: vibrantPalette.pink,
+                        backgroundColor: 'rgba(249, 93, 106, 0.2)',
+                        fill: true,
+                        tension: 0.1
+                    }]
+                },
+                options: { ...commonChartOptions, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, beginAtZero: true, ticks: { callback: (value) => (lang === 'zh' ? `$${value}億` : `$${value}B`) } } } }
+            });
+
+            charts.feelPhilosophy = new Chart(document.getElementById('feelPhilosophyChart'), {
+                type: 'radar',
+                data: {
+                    labels: chartData.feelPhilosophy.labels,
+                    datasets: [{
+                        label: chartData.feelPhilosophy.label,
+                        data: [95, 85, 90, 80, 100],
+                        backgroundColor: 'rgba(102, 81, 145, 0.2)',
+                        borderColor: vibrantPalette.purple,
+                        pointBackgroundColor: vibrantPalette.purple,
+                        pointBorderColor: '#fff',
+                    }]
+                },
+                options: { ...commonChartOptions, scales: { r: { angleLines: { color: '#ddd' }, grid: { color: '#ddd' }, pointLabels: { font: { size: 14, family: "'Roboto', 'Noto Sans TC', sans-serif" }, color: vibrantPalette.deepBlue }, ticks: { backdropColor: 'transparent', color: vibrantPalette.midBlue } } } }
+            });
+
+            charts.marioKartSales = new Chart(document.getElementById('marioKartSalesChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.marioKart.labels.map(l => wrapLabel(l, 16)),
+                    datasets: [{
+                        label: chartData.marioKart.label,
+                        data: [69.04, 15, 12],
+                        backgroundColor: [vibrantPalette.orange, vibrantPalette.purple, vibrantPalette.midBlue],
+                    }]
+                },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { display: false } }, scales: { ...commonChartOptions.scales, y: { ...commonChartOptions.scales.y, beginAtZero: true } } }
+            });
+
+            charts.brandExpansion = new Chart(document.getElementById('brandExpansionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.brandExpansion.labels,
+                    datasets: [{
+                        label: chartData.brandExpansion.label,
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [vibrantPalette.deepBlue, vibrantPalette.magenta, vibrantPalette.yellow, vibrantPalette.orange],
+                        borderColor: '#F0F4F8',
+                        borderWidth: 4
+                    }]
+                },
+                options: { ...commonChartOptions, plugins: { ...commonChartOptions.plugins, legend: { position: 'bottom', labels: { ...commonChartOptions.plugins.legend.labels, padding: 20 } } }, scales: { x: { display: false }, y: { display: false } } }
+            });
+        }
+
+        function updateText(lang) {
+            const content = translations[lang];
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+            document.title = content.docTitle;
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.dataset.key;
+                if (content[key]) {
+                    el.innerHTML = content[key];
+                }
+            });
+            renderCharts(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const langToggle = document.getElementById('lang-toggle');
+            langToggle.addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                langToggle.textContent = currentLang === 'zh' ? 'English' : '中文';
+                updateText(currentLang);
+            });
+            updateText(currentLang);
+        });
+    </script>
+</body>
+</html>
