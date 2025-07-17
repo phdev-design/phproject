@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Coordinate Tutorial: Why Do My Objects Fly Away?</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #e2e8f0;
+            transition: font-family 0.3s ease-in-out;
+        }
+        .font-en { font-family: 'Roboto', sans-serif; }
+        .font-zh { font-family: 'Noto Sans TC', sans-serif; }
+        .container-box {
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            position: absolute;
+            transition: all 0.5s ease-in-out;
+        }
+        .object-box {
+            border: 2px solid;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 1s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+        .code-block {
+            background-color: #2d3748;
+            border-left: 4px solid #4fd1c5;
+            color: #e2e8f0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .log-item {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .lang-btn.active {
+            background-color: #4fd1c5;
+            color: #1a202c;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 font-en">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="relative text-center mb-12">
+            <div class="absolute top-0 right-0">
+                <div class="flex rounded-lg bg-slate-700 p-1">
+                    <button id="lang-en" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md active">EN</button>
+                    <button id="lang-zh" class="lang-btn px-3 py-1 text-sm font-semibold rounded-md">繁體</button>
+                </div>
+            </div>
+            <h1 data-lang-key="main_title" class="text-4xl md:text-5xl font-bold text-teal-300 mb-2">Godot Coordinate Tutorial</h1>
+            <p data-lang-key="subtitle" class="text-xl md:text-2xl text-slate-300">Why Do My Objects Fly Away?</p>
+        </header>
+
+        <main>
+            <!-- Introduction -->
+            <section class="mb-12 bg-slate-800 p-6 rounded-lg shadow-xl">
+                <h2 data-lang-key="problem_title" class="text-2xl font-bold text-teal-300 mb-4 border-b-2 border-teal-400 pb-2">The Problem</h2>
+                <p data-lang-key="problem_desc" class="text-lg leading-relaxed">Have you ever encountered this situation? You chop down a tree in your game, eagerly waiting for it to drop a log, but instead, the log instantly teleports to a far, distant location? This is a classic problem for Godot beginners, and its root lies in understanding the coordinate system.</p>
+            </section>
+
+            <!-- Core Concepts -->
+            <section class="mb-12 bg-slate-800 p-6 rounded-lg shadow-xl">
+                <h2 data-lang-key="concepts_title" class="text-2xl font-bold text-teal-300 mb-4 border-b-2 border-teal-400 pb-2">Core Concepts: Local vs. Global Position</h2>
+                <div class="grid md:grid-cols-2 gap-6 text-lg">
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h3 class="font-semibold text-xl mb-2">📍 <code class="text-pink-400">position</code> (Local Position)</h3>
+                        <p data-lang-key="concept_local_desc">A node's position relative to its "parent" node. It's like your position in a room, measured from the corner of that room.</p>
+                    </div>
+                    <div class="bg-slate-700 p-4 rounded">
+                        <h3 class="font-semibold text-xl mb-2">🌍 <code class="text-pink-400">global_position</code> (Global Position)</h3>
+                        <p data-lang-key="concept_global_desc">A node's absolute position in the entire game world. It's like your latitude and longitude on Earth, measured from a fixed world origin.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Simulation -->
+            <section class="mb-12">
+                <h2 data-lang-key="sim_title" class="text-2xl font-bold text-center text-teal-300 mb-4">Interactive Simulation</h2>
+                <div class="bg-slate-800 p-6 rounded-lg shadow-xl">
+                    <div id="simulation-area" class="relative w-full h-96 bg-slate-900 rounded-lg overflow-hidden mb-6 border-2 border-slate-700">
+                        <div id="world-container" class="container-box top-0 left-0 w-full h-full">
+                            <span class="absolute top-1 left-2 text-xs text-slate-400">World (0, 0)</span>
+                        </div>
+                        <div id="level-container" class="container-box" style="top: 20%; left: 15%; width: 70%; height: 60%;">
+                             <span id="level-label" class="absolute top-1 left-2 text-xs text-slate-400">Level (Local: 72, 77)</span>
+                        </div>
+                        <div id="tree" class="object-box bg-green-600 border-green-400" style="top: 45%; left: 45%; width: 40px; height: 40px;">🌳</div>
+                        <div id="log" class="object-box bg-yellow-700 border-yellow-500 hidden" style="width: 25px; height: 25px;">🪵</div>
+                    </div>
+                    
+                    <div class="flex justify-center gap-4 mb-6">
+                        <button id="wrong-btn" data-lang-key="btn_wrong" class="btn bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-lg">Simulate Incorrect Code</button>
+                        <button id="correct-btn" data-lang-key="btn_correct" class="btn bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded-lg">Simulate Correct Code</button>
+                        <button id="reset-btn" data-lang-key="btn_reset" class="btn bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Reset</button>
+                    </div>
+                    
+                    <div id="explanation-log" class="p-4 rounded-lg bg-slate-900 h-48 overflow-y-auto font-mono text-sm">
+                        <p data-lang-key="log_initial" class="text-slate-400">Click a button to start the simulation...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- The Solution -->
+            <section class="mb-12">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-red-900/50 border border-red-500 p-6 rounded-lg">
+                        <h3 data-lang-key="solution_wrong_title" class="text-2xl font-bold text-red-300 mb-3">❌ The Incorrect Way</h3>
+                        <p data-lang-key="solution_wrong_desc" class="mb-4">Set position first, then add to scene tree.</p>
+                        <div class="code-block p-4 rounded">
+<pre><code>func add_log_scene():
+    var log = log_scene.instantiate()
+    
+    # Error! `log` is not in the scene yet.
+    # Setting global_position has no effect.
+    log.global_position = self.global_position
+    
+    get_parent().add_child(log)</code></pre>
+                        </div>
+                        <p data-lang-key="solution_wrong_result" class="mt-4 text-red-200"><strong>Result:</strong> When `add_child` is called, Godot sets the log's local `position` to `(0,0)` because the previous global position assignment was invalid. This causes the log to appear at its parent's origin, not at the tree's location.</p>
+                    </div>
+                    
+                    <div class="bg-green-900/50 border border-green-500 p-6 rounded-lg">
+                        <h3 data-lang-key="solution_correct_title" class="text-2xl font-bold text-green-300 mb-3">✅ The Correct Solution</h3>
+                        <p data-lang-key="solution_correct_desc" class="mb-4">Add to scene tree first, then set global position.</p>
+                        <div class="code-block p-4 rounded">
+<pre><code>func add_log_scene():
+    var log = log_scene.instantiate()
+    
+    # 1. Correct: Add `log` to the scene tree first.
+    get_parent().add_child(log)
+    
+    # 2. After it's part of the scene,
+    #    set its global_position.
+    log.global_position = self.global_position</code></pre>
+                        </div>
+                        <p data-lang-key="solution_correct_result" class="mt-4 text-green-200"><strong>Result:</strong> When setting `global_position`, Godot knows who the log's parent is. It can then correctly calculate the required local `position` to place it precisely at the tree's location.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary -->
+            <section class="text-center bg-slate-800 p-8 rounded-lg shadow-xl">
+                <h2 data-lang-key="summary_title" class="text-3xl font-bold text-teal-300 mb-4">The Golden Rule</h2>
+                <p data-lang-key="summary_desc" class="text-xl max-w-3xl mx-auto leading-relaxed">When you need to dynamically create an object and place it at a specific location in the world, always remember this order:</p>
+                <div class="mt-6 text-2xl font-bold text-yellow-300 bg-slate-900 p-4 rounded-md inline-block">
+                    First `add_child()`, then set `global_position`.
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- Translation Data ---
+        const translations = {
+            en: {
+                main_title: "Godot Coordinate Tutorial",
+                subtitle: "Why Do My Objects Fly Away?",
+                problem_title: "The Problem",
+                problem_desc: "Have you ever encountered this situation? You chop down a tree in your game, eagerly waiting for it to drop a log, but instead, the log instantly teleports to a far, distant location? This is a classic problem for Godot beginners, and its root lies in understanding the coordinate system.",
+                concepts_title: "Core Concepts: Local vs. Global Position",
+                concept_local_desc: "A node's position relative to its \"parent\" node. It's like your position in a room, measured from the corner of that room.",
+                concept_global_desc: "A node's absolute position in the entire game world. It's like your latitude and longitude on Earth, measured from a fixed world origin.",
+                sim_title: "Interactive Simulation",
+                btn_wrong: "Simulate Incorrect Code",
+                btn_correct: "Simulate Correct Code",
+                btn_reset: "Reset",
+                log_initial: "Click a button to start the simulation...",
+                solution_wrong_title: "❌ The Incorrect Way",
+                solution_wrong_desc: "Set position first, then add to scene tree.",
+                solution_wrong_result: "<strong>Result:</strong> When `add_child` is called, Godot sets the log's local `position` to `(0,0)` because the previous global position assignment was invalid. This causes the log to appear at its parent's origin, not at the tree's location.",
+                solution_correct_title: "✅ The Correct Solution",
+                solution_correct_desc: "Add to scene tree first, then set global position.",
+                solution_correct_result: "<strong>Result:</strong> When setting `global_position`, Godot knows who the log's parent is. It can then correctly calculate the required local `position` to place it precisely at the tree's location.",
+                summary_title: "The Golden Rule",
+                summary_desc: "When you need to dynamically create an object and place it at a specific location in the world, always remember this order:",
+                level_label_prefix: "Level (Local:",
+                log_1: "1. Instantiating `log`...",
+                log_wrong_2: "2. <span class='text-red-400'>Error:</span> Setting `log.global_position` before adding to scene...",
+                log_wrong_3: "   ...`log` has no parent, so the assignment is invalid.",
+                log_wrong_4: "3. Calling `get_parent().add_child(log)`...",
+                log_wrong_5: "   ...`log` is added to `Level` with a default local `position` of (0,0).",
+                log_wrong_6: "4. <span class='text-red-300 font-bold'>Result:</span> The log appears at the Level's origin, not the tree's location!",
+                log_correct_2: "2. <span class='text-green-400'>Correct:</span> Calling `get_parent().add_child(log)`...",
+                log_correct_3: "   ...`log` is added to `Level` and becomes part of the scene.",
+                log_correct_4: "3. <span class='text-green-400'>Correct:</span> Setting `log.global_position` to the tree's `global_position`...",
+                log_correct_5: "   ...Godot automatically calculates the correct local `position`.",
+                log_correct_6: "4. <span class='text-green-300 font-bold'>Result:</span> The log appears precisely at the tree's location!",
+            },
+            zh: {
+                main_title: "Godot 座標教學",
+                subtitle: "為何我的物件會飛到天邊？",
+                problem_title: "問題情境",
+                problem_desc: "你是否也遇過這種情況：在遊戲中砍倒一棵樹，滿心期待地看著它掉落木頭，結果木頭卻瞬間移動到一個非常非常遙遠的地方？這是一個 Godot 新手經常遇到的經典問題，而它的根源，就藏在對「座標系統」的理解上。",
+                concepts_title: "核心概念：本地座標 vs. 全域座標",
+                concept_local_desc: "一個節點相對於其「父節點」的位置。就像你在一個房間裡的位置，是以房間的角落為基準。",
+                concept_global_desc: "一個節點在整個遊戲世界中的絕對位置。就像你在地球上的經緯度，是以一個固定的世界原點為基準。",
+                sim_title: "互動式模擬",
+                btn_wrong: "模擬錯誤的程式碼",
+                btn_correct: "模擬正確的程式碼",
+                btn_reset: "重設",
+                log_initial: "點擊按鈕開始模擬...",
+                solution_wrong_title: "❌ 錯誤的作法",
+                solution_wrong_desc: "先設定座標，再加入場景樹。",
+                solution_wrong_result: "<strong>結果：</strong>當 `add_child` 時，Godot 會將木頭的本地座標 `position` 設為 `(0,0)`，因為之前設定的全域座標無效。這導致木頭出現在父節點的原點，而不是樹的位置。",
+                solution_correct_title: "✅ 正確的解決方案",
+                solution_correct_desc: "先加入場景樹，再設定全域座標。",
+                solution_correct_result: "<strong>結果：</strong>當設定 `global_position` 時，Godot 知道木頭的父節點是誰，因此可以正確地計算出它應該在的本地座標 `position`，讓它精準地出現在樹的位置。",
+                summary_title: "黃金法則",
+                summary_desc: "當你需要動態生成一個物件並將它放置在世界上的某個特定位置時，請永遠記住這個順序：",
+                level_label_prefix: "關卡 (本地:",
+                log_1: "1. 建立木頭實例 `log`...",
+                log_wrong_2: "2. <span class='text-red-400'>錯誤：</span>在 `log` 加入場景前，設定 `log.global_position`...",
+                log_wrong_3: "   ...此時 `log` 沒有父節點，設定無效。",
+                log_wrong_4: "3. 執行 `get_parent().add_child(log)`...",
+                log_wrong_5: "   ...`log` 被加入到 `Level` 中，其 `position` 為預設的 (0,0)。",
+                log_wrong_6: "4. <span class='text-red-300 font-bold'>結果：</span>木頭出現在關卡的原點，而不是樹的位置！",
+                log_correct_2: "2. <span class='text-green-400'>正確：</span>執行 `get_parent().add_child(log)`...",
+                log_correct_3: "   ...`log` 被加入到 `Level` 中，成為場景的一部分。",
+                log_correct_4: "3. <span class='text-green-400'>正確：</span>設定 `log.global_position` 為樹的 `global_position`...",
+                log_correct_5: "   ...Godot 自動計算出正確的本地 `position`。",
+                log_correct_6: "4. <span class='text-green-300 font-bold'>結果：</span>木頭精準地出現在樹的位置！",
+            }
+        };
+
+        let currentLang = 'en';
+
+        const setLanguage = (lang) => {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.body.classList.remove('font-en', 'font-zh');
+            document.body.classList.add(lang === 'en' ? 'font-en' : 'font-zh');
+
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            
+            updateLevelLabel();
+        };
+
+        // --- Simulation Logic ---
+        const world = document.getElementById('world-container');
+        const level = document.getElementById('level-container');
+        const tree = document.getElementById('tree');
+        const log = document.getElementById('log');
+        const wrongBtn = document.getElementById('wrong-btn');
+        const correctBtn = document.getElementById('correct-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const explanationLog = document.getElementById('explanation-log');
+        const levelLabel = document.getElementById('level-label');
+
+        const initialLogState = () => {
+            log.classList.add('hidden');
+            log.style.transition = 'all 1s ease-in-out';
+            log.style.top = '50%';
+            log.style.left = '50%';
+            explanationLog.innerHTML = `<p data-lang-key="log_initial" class="text-slate-400">${translations[currentLang].log_initial}</p>`;
+        };
+
+        const logMessage = (key, color = 'text-slate-300') => {
+            const p = document.createElement('p');
+            p.className = `log-item ${color}`;
+            p.innerHTML = translations[currentLang][key] || key;
+            explanationLog.appendChild(p);
+            explanationLog.scrollTop = explanationLog.scrollHeight;
+        };
+
+        const disableButtons = (disabled) => {
+            wrongBtn.disabled = disabled;
+            correctBtn.disabled = disabled;
+            wrongBtn.classList.toggle('opacity-50', disabled);
+            correctBtn.classList.toggle('opacity-50', disabled);
+        };
+
+        resetBtn.addEventListener('click', initialLogState);
+
+        wrongBtn.addEventListener('click', () => {
+            initialLogState();
+            explanationLog.innerHTML = '';
+            disableButtons(true);
+            
+            log.classList.remove('hidden');
+            
+            setTimeout(() => logMessage('log_1'), 100);
+            setTimeout(() => logMessage('log_wrong_2'), 1000);
+            setTimeout(() => logMessage('log_wrong_3'), 2000);
+            setTimeout(() => logMessage('log_wrong_4'), 3000);
+            setTimeout(() => {
+                logMessage('log_wrong_5');
+                const levelRect = level.getBoundingClientRect();
+                const worldRect = world.getBoundingClientRect();
+                log.style.top = `${levelRect.top - worldRect.top}px`;
+                log.style.left = `${levelRect.left - worldRect.left}px`;
+            }, 4000);
+            setTimeout(() => {
+                logMessage('log_wrong_6');
+                disableButtons(false);
+            }, 5500);
+        });
+
+        correctBtn.addEventListener('click', () => {
+            initialLogState();
+            explanationLog.innerHTML = '';
+            disableButtons(true);
+
+            log.classList.remove('hidden');
+
+            setTimeout(() => logMessage('log_1'), 100);
+            setTimeout(() => logMessage('log_correct_2'), 1000);
+            setTimeout(() => {
+                 logMessage('log_correct_3');
+                 log.style.transition = 'none';
+                 const levelRect = level.getBoundingClientRect();
+                 const worldRect = world.getBoundingClientRect();
+                 log.style.top = `${levelRect.top - worldRect.top}px`;
+                 log.style.left = `${levelRect.left - worldRect.left}px`;
+            }, 2000);
+             setTimeout(() => {
+                 log.style.transition = 'all 1s ease-in-out';
+            }, 2100);
+            setTimeout(() => logMessage('log_correct_4'), 3000);
+            setTimeout(() => {
+                logMessage('log_correct_5');
+                const treeRect = tree.getBoundingClientRect();
+                const worldRect = world.getBoundingClientRect();
+                log.style.top = `${treeRect.top - worldRect.top}px`;
+                log.style.left = `${treeRect.left - worldRect.left}px`;
+            }, 4000);
+             setTimeout(() => {
+                logMessage('log_correct_6');
+                disableButtons(false);
+            }, 5500);
+        });
+        
+        const updateLevelLabel = () => {
+            const levelRect = level.getBoundingClientRect();
+            const worldRect = world.getBoundingClientRect();
+            levelLabel.textContent = `${translations[currentLang].level_label_prefix} ${Math.round(levelRect.left - worldRect.left)}, ${Math.round(levelRect.top - worldRect.top)})`;
+        }
+
+        // --- Event Listeners for Language Switch ---
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh'));
+        
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            setLanguage('en'); // Set default language
+            initialLogState();
+        });
+
+    </script>
+</body>
+</html>
