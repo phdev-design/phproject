@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Godot Y-Sort 互動式教學</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+        .card {
+            background-color: #2d3748;
+            border-radius: 0.75rem;
+            border: 1px solid #4a5568;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #4a5568;
+            padding: 1rem 1.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .code {
+            background-color: #1a202c;
+            color: #90cdf4;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #48bb78;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        canvas {
+            background-color: #4a5568;
+            border-radius: 0.5rem;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .lang-switcher {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background-color: #4a5568;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .lang-switcher:hover {
+            background-color: #718096;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-4xl mx-auto space-y-8 relative">
+        <button id="langSwitcher" class="lang-switcher">English</button>
+        <header class="text-center pt-8">
+            <h1 class="text-4xl font-bold text-white" data-lang="title">深入理解 Godot 的 Y-Sort</h1>
+            <p class="text-lg text-gray-400 mt-2" data-lang="subtitle">一個解決 2D 排序問題的互動指南</p>
+        </header>
+
+        <!-- Interactive Demo -->
+        <div class="card">
+            <div class="card-header" data-lang="demoHeader">互動範例：眼見為憑</div>
+            <div class="card-body md:flex md:space-x-6 items-center">
+                <div class="flex-grow">
+                    <canvas id="demoCanvas" width="400" height="300"></canvas>
+                    <p class="text-sm text-gray-400 mt-2 text-center" data-lang="demoHint">提示：用滑鼠拖曳角色來移動</p>
+                </div>
+                <div class="mt-4 md:mt-0 md:w-1/3 space-y-4">
+                    <p data-lang="demoInstructions">試著拖曳「角色」，讓他從「樹」的前方和後方經過，觀察他的圖層變化。</p>
+                    <div class="flex items-center justify-between bg-gray-700 p-3 rounded-lg">
+                        <span class="font-bold text-lg" data-lang="demoToggleLabel">修正排序原點</span>
+                        <label class="switch">
+                            <input type="checkbox" id="fixOriginToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div id="statusText" class="text-center font-bold text-xl p-2 rounded-lg"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Core Problem -->
+        <div class="card">
+            <div class="card-header" data-lang="problemHeader">核心問題：你以為的「位置」不是 Godot 以為的位置</div>
+            <div class="card-body space-y-4">
+                <p data-lang="problemDesc1">當你啟用 <code class="code">Y Sort Enabled</code> 時，Godot 會根據子節點的 Y 座標來決定繪製順序：Y 值越大（在畫面上越下方）的節點，會被畫在越上層。</p>
+                <p class="font-bold text-xl" data-lang="problemDesc2">但關鍵在於，Godot 比較的不是整個圖片的位置，而是每個節點的「原點 (Origin)」的 Y 座標。</p>
+                <div class="grid md:grid-cols-2 gap-4 text-center">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-red-400" data-lang="problemWrongTitle">❌ 錯誤的排序 (預設情況)</h3>
+                        <img src="https://placehold.co/300x200/2d3748/e2e8f0?text=Incorrect Sorting Diagram" alt="Incorrect Sorting Diagram" class="mx-auto my-2 rounded">
+                        <p class="text-sm" data-lang="problemWrongDesc">角色和樹的原點都在左上角。當角色在樹的前方時，他的原點 Y 座標比樹的原點小，所以被畫在樹的後面。</p>
+                    </div>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <h3 class="font-bold text-lg text-green-400" data-lang="problemRightTitle">✅ 正確的排序</h3>
+                        <img src="https://placehold.co/300x200/2d3748/e2e8f0?text=Correct Sorting Diagram" alt="Correct Sorting Diagram" class="mx-auto my-2 rounded">
+                        <p class="text-sm" data-lang="problemRightDesc">將原點移到物件的「腳下」。現在當角色在樹的前方時，他的原點 Y 座標比樹大，因此被正確地畫在樹的前面。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solutions -->
+        <div class="space-y-8">
+            <h2 class="text-3xl font-bold text-center text-white" data-lang="solutionsHeader">解決方案</h2>
+            
+            <div class="card">
+                <div class="card-header" data-lang="solution1Header">方法一：針對獨立節點 (如 Player, Tree)</div>
+                <div class="card-body space-y-4">
+                    <p data-lang="solution1Desc">對於獨立的場景實例（例如玩家、NPC、可拾取的道具、單獨放置的樹），你需要調整它們 Sprite 的原點。</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li data-lang="solution1Step1">打開你的物件場景 (例如 `Player.tscn` 或 `Tree.tscn`)。</li>
+                        <li data-lang="solution1Step2">在場景樹中選擇負責顯示圖形的 <code class="code">Sprite2D</code> 或 <code class="code">AnimatedSprite2D</code> 節點。</li>
+                        <li data-lang="solution1Step3">在右邊的【屬性面板】中，找到 <code class="code">Transform</code> 分類下的 <code class="code">Offset</code> 屬性。</li>
+                        <li data-lang="solution1Step4">調整 <code class="code">Offset</code> 的 Y 值，將圖片向上移動，直到節點的原點 (那個小小的十字) 對準物件的腳下。通常 Y 值會是一個負數。</li>
+                    </ol>
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <p class="font-bold" data-lang="solution1TipTitle">💡 提示：</p>
+                        <p data-lang="solution1TipDesc">在 2D 視圖中，選擇移動工具 (W)，然後按住 <code class="code">Alt</code> 鍵拖曳你的 Sprite。這樣可以直接修改 Offset，非常直觀。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header" data-lang="solution2Header">方法二：針對 TileMap</div>
+                <div class="card-body space-y-4">
+                    <p data-lang="solution2Desc">當你的遮擋物（例如樹、牆壁）是畫在 <code class="code">TileMap</code> 上時，設定會稍微不同，需要兩步關鍵操作。</p>
+                    <h3 class="font-bold text-lg" data-lang="solution2Step1Title">第一步：在 TileMap 圖層上啟用 Y-Sort</h3>
+                    <p data-lang="solution2Step1Desc">你需要告訴 Godot，這個圖層上的瓦片需要彼此之間進行 Y 軸排序。</p>
+                     <ol class="list-decimal list-inside space-y-2">
+                        <li data-lang="solution2_1_Step1">在你的主場景中，點選 `TileMap` 節點下的那個**圖層 (Layer)**，例如 `Trees` 圖層。</li>
+                        <li data-lang="solution2_1_Step2">在【屬性面板】中，找到 <code class="code">Ordering</code> 分類，並勾選 <code class="code">Y Sort Enabled</code>。</li>
+                        <li data-lang="solution2_1_Step3"><strong class="text-yellow-400">注意：</strong> 是在**圖層**上啟用，而不是在 `TileMap` 主節點上！</li>
+                    </ol>
+                    
+                    <h3 class="font-bold text-lg mt-4" data-lang="solution2Step2Title">第二步：在 TileSet 中設定瓦片原點</h3>
+                    <p data-lang="solution2Step2Desc">你需要為每一個需要遮擋的瓦片（如樹）設定它的排序「腳本」。</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li data-lang="solution2_2_Step1">在編輯器下方，打開 <code class="code">TileSet</code> 面板。</li>
+                        <li data-lang="solution2_2_Step2">點選你的樹木瓦片。</li>
+                        <li data-lang="solution2_2_Step3">在右邊的屬性中，找到 <code class="code">Rendering</code> 分類。</li>
+                        <li data-lang="solution2_2_Step4">將 <code class="code">Y Sort Origin</code> 的 Y 值設定為你瓦片的高度 (例如，16x16 的瓦片就設為 16)。</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="card">
+            <div class="card-header" data-lang="summaryHeader">總結與除錯清單</div>
+            <div class="card-body">
+                <p data-lang="summaryDesc">當 Y-Sort 失效時，按照以下步驟檢查：</p>
+                <ul class="list-disc list-inside space-y-2 mt-4">
+                    <li data-lang="summaryCheck1"><strong class="text-green-400">父節點檢查：</strong> 所有需要互相排序的物件（玩家、樹、TileMap）是否都在同一個父節點下？該父節點是否已啟用 <code class="code">Y Sort Enabled</code>？</li>
+                    <li data-lang="summaryCheck2"><strong class="text-green-400">物件原點檢查：</strong> 對於獨立的 `Sprite2D` 物件，它的 <code class="code">Offset</code> 是否已調整到腳下？</li>
+                    <li data-lang="summaryCheck3"><strong class="text-green-400">TileMap 圖層檢查：</strong> 對於 `TileMap`，是否是在**圖層**上啟用 <code class="code">Y Sort Enabled</code>，而不是主節點？</li>
+                    <li data-lang="summaryCheck4"><strong class="text-green-400">TileSet 瓦片檢查：</strong> 在 `TileSet` 中，遮擋物瓦片的 <code class="code">Y Sort Origin</code> 是否已設定？</li>
+                    <li data-lang="summaryCheck5"><strong class="text-green-400">Z Index 檢查：</strong> 所有參與排序的物件的 <code class="code">Z Index</code> 是否都為 0？Z Index 會覆蓋 Y-Sort 的效果。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            'zh-Hant': {
+                title: '深入理解 Godot 的 Y-Sort',
+                subtitle: '一個解決 2D 排序問題的互動指南',
+                demoHeader: '互動範例：眼見為憑',
+                demoHint: '提示：用滑鼠拖曳角色來移動',
+                demoInstructions: '試著拖曳「角色」，讓他從「樹」的前方和後方經過，觀察他的圖層變化。',
+                demoToggleLabel: '修正排序原點',
+                statusFixed: '狀態：已修正',
+                statusDefault: '狀態：預設 (錯誤)',
+                problemHeader: '核心問題：你以為的「位置」不是 Godot 以為的位置',
+                problemDesc1: '當你啟用 <code class="code">Y Sort Enabled</code> 時，Godot 會根據子節點的 Y 座標來決定繪製順序：Y 值越大（在畫面上越下方）的節點，會被畫在越上層。',
+                problemDesc2: '但關鍵在於，Godot 比較的不是整個圖片的位置，而是每個節點的「原點 (Origin)」的 Y 座標。',
+                problemWrongTitle: '❌ 錯誤的排序 (預設情況)',
+                problemWrongDesc: '角色和樹的原點都在左上角。當角色在樹的前方時，他的原點 Y 座標比樹的原點小，所以被畫在樹的後面。',
+                problemRightTitle: '✅ 正確的排序',
+                problemRightDesc: '將原點移到物件的「腳下」。現在當角色在樹的前方時，他的原點 Y 座標比樹大，因此被正確地畫在樹的前面。',
+                solutionsHeader: '解決方案',
+                solution1Header: '方法一：針對獨立節點 (如 Player, Tree)',
+                solution1Desc: '對於獨立的場景實例（例如玩家、NPC、可拾取的道具、單獨放置的樹），你需要調整它們 Sprite 的原點。',
+                solution1Step1: '打開你的物件場景 (例如 `Player.tscn` 或 `Tree.tscn`)。',
+                solution1Step2: '在場景樹中選擇負責顯示圖形的 <code class="code">Sprite2D</code> 或 <code class="code">AnimatedSprite2D</code> 節點。',
+                solution1Step3: '在右邊的【屬性面板】中，找到 <code class="code">Transform</code> 分類下的 <code class="code">Offset</code> 屬性。',
+                solution1Step4: '調整 <code class="code">Offset</code> 的 Y 值，將圖片向上移動，直到節點的原點 (那個小小的十字) 對準物件的腳下。通常 Y 值會是一個負數。',
+                solution1TipTitle: '💡 提示：',
+                solution1TipDesc: '在 2D 視圖中，選擇移動工具 (W)，然後按住 <code class="code">Alt</code> 鍵拖曳你的 Sprite。這樣可以直接修改 Offset，非常直觀。',
+                solution2Header: '方法二：針對 TileMap',
+                solution2Desc: '當你的遮擋物（例如樹、牆壁）是畫在 <code class="code">TileMap</code> 上時，設定會稍微不同，需要兩步關鍵操作。',
+                solution2Step1Title: '第一步：在 TileMap 圖層上啟用 Y-Sort',
+                solution2Step1Desc: '你需要告訴 Godot，這個圖層上的瓦片需要彼此之間進行 Y 軸排序。',
+                solution2_1_Step1: '在你的主場景中，點選 `TileMap` 節點下的那個**圖層 (Layer)**，例如 `Trees` 圖層。',
+                solution2_1_Step2: '在【屬性面板】中，找到 <code class="code">Ordering</code> 分類，並勾選 <code class="code">Y Sort Enabled</code>。',
+                solution2_1_Step3: '<strong class="text-yellow-400">注意：</strong> 是在**圖層**上啟用，而不是在 `TileMap` 主節點上！',
+                solution2Step2Title: '第二步：在 TileSet 中設定瓦片原點',
+                solution2Step2Desc: '你需要為每一個需要遮擋的瓦片（如樹）設定它的排序「腳本」。',
+                solution2_2_Step1: '在編輯器下方，打開 <code class="code">TileSet</code> 面板。',
+                solution2_2_Step2: '點選你的樹木瓦片。',
+                solution2_2_Step3: '在右邊的屬性中，找到 <code class="code">Rendering</code> 分類。',
+                solution2_2_Step4: '將 <code class="code">Y Sort Origin</code> 的 Y 值設定為你瓦片的高度 (例如，16x16 的瓦片就設為 16)。',
+                summaryHeader: '總結與除錯清單',
+                summaryDesc: '當 Y-Sort 失效時，按照以下步驟檢查：',
+                summaryCheck1: '<strong class="text-green-400">父節點檢查：</strong> 所有需要互相排序的物件（玩家、樹、TileMap）是否都在同一個父節點下？該父節點是否已啟用 <code class="code">Y Sort Enabled</code>？',
+                summaryCheck2: '<strong class="text-green-400">物件原點檢查：</strong> 對於獨立的 `Sprite2D` 物件，它的 <code class="code">Offset</code> 是否已調整到腳下？',
+                summaryCheck3: '<strong class="text-green-400">TileMap 圖層檢查：</strong> 對於 `TileMap`，是否是在**圖層**上啟用 <code class="code">Y Sort Enabled</code>，而不是主節點？',
+                summaryCheck4: '<strong class="text-green-400">TileSet 瓦片檢查：</strong> 在 `TileSet` 中，遮擋物瓦片的 <code class="code">Y Sort Origin</code> 是否已設定？',
+                summaryCheck5: '<strong class="text-green-400">Z Index 檢查：</strong> 所有參與排序的物件的 <code class="code">Z Index</code> 是否都為 0？Z Index 會覆蓋 Y-Sort 的效果。',
+                playerName: '角色',
+                treeName: '樹',
+                langBtn: 'English',
+            },
+            'en': {
+                title: 'Deep Dive into Godot\'s Y-Sort',
+                subtitle: 'An Interactive Guide to Solving 2D Sorting Problems',
+                demoHeader: 'Interactive Demo: Seeing is Believing',
+                demoHint: 'Hint: Drag the character with your mouse to move.',
+                demoInstructions: 'Try dragging the "Character" to pass in front of and behind the "Tree" to observe the layer changes.',
+                demoToggleLabel: 'Fix Sort Origin',
+                statusFixed: 'Status: Fixed',
+                statusDefault: 'Status: Default (Incorrect)',
+                problemHeader: 'The Core Problem: Your "Position" vs. Godot\'s "Position"',
+                problemDesc1: 'When you enable <code class="code">Y Sort Enabled</code>, Godot decides the drawing order based on the Y coordinate of its child nodes: nodes with a larger Y value (further down the screen) are drawn on top.',
+                problemDesc2: 'The key, however, is that Godot compares the Y coordinate of each node\'s "Origin", not the position of the entire sprite.',
+                problemWrongTitle: '❌ Incorrect Sorting (Default)',
+                problemWrongDesc: 'The origins of the character and the tree are at their top-left corners. When the character is in front of the tree, its origin\'s Y coordinate is smaller than the tree\'s, so it\'s drawn behind the tree.',
+                problemRightTitle: '✅ Correct Sorting',
+                problemRightDesc: 'Move the origin to the "feet" of the objects. Now, when the character is in front of the tree, its origin\'s Y coordinate is larger, so it\'s correctly drawn on top.',
+                solutionsHeader: 'Solutions',
+                solution1Header: 'Method 1: For Standalone Nodes (e.g., Player, Tree)',
+                solution1Desc: 'For standalone scene instances (like players, NPCs, items, individual trees), you need to adjust their Sprite\'s origin.',
+                solution1Step1: 'Open your object\'s scene (e.g., `Player.tscn` or `Tree.tscn`).',
+                solution1Step2: 'In the scene tree, select the <code class="code">Sprite2D</code> or <code class="code">AnimatedSprite2D</code> node responsible for the graphics.',
+                solution1Step3: 'In the Inspector on the right, find the <code class="code">Offset</code> property under the <code class="code">Transform</code> category.',
+                solution1Step4: 'Adjust the Y value of the <code class="code">Offset</code> to move the texture upwards until the node\'s origin (the small cross) is at the object\'s feet. The Y value will typically be negative.',
+                solution1TipTitle: '💡 Pro Tip:',
+                solution1TipDesc: 'In the 2D viewport, select the Move Tool (W), then hold down the <code class="code">Alt</code> key while dragging your Sprite. This directly modifies the Offset, which is very intuitive.',
+                solution2Header: 'Method 2: For TileMaps',
+                solution2Desc: 'When your obstacles (like trees or walls) are drawn on a <code class="code">TileMap</code>, the setup is slightly different and requires two key steps.',
+                solution2Step1Title: 'Step 1: Enable Y-Sort on the TileMap Layer',
+                solution2Step1Desc: 'You need to tell Godot that the tiles on this layer should be Y-sorted among themselves.',
+                solution2_1_Step1: 'In your main scene, select the **layer** under the `TileMap` node, for example, the `Trees` layer.',
+                solution2_1_Step2: 'In the Inspector, find the <code class="code">Ordering</code> category and check <code class="code">Y Sort Enabled</code>.',
+                solution2_1_Step3: '<strong class="text-yellow-400">Note:</strong> Enable it on the **layer**, not on the main `TileMap` node!',
+                solution2Step2Title: 'Step 2: Set Tile Origin in the TileSet',
+                solution2Step2Desc: 'You need to define the sorting "base" for each obstacle tile (like a tree).',
+                solution2_2_Step1: 'At the bottom of the editor, open the <code class="code">TileSet</code> panel.',
+                solution2_2_Step2: 'Click on your tree tile.',
+                solution2_2_Step3: 'In the properties on the right, find the <code class="code">Rendering</code> category.',
+                solution2_2_Step4: 'Set the Y value of the <code class="code">Y Sort Origin</code> to your tile\'s height (e.g., set it to 16 for a 16x16 tile).',
+                summaryHeader: 'Summary & Debugging Checklist',
+                summaryDesc: 'When Y-Sort fails, check the following steps:',
+                summaryCheck1: '<strong class="text-green-400">Parent Node Check:</strong> Are all objects to be sorted (Player, Trees, TileMap) direct children of the same parent node? Is <code class="code">Y Sort Enabled</code> on that parent?',
+                summaryCheck2: '<strong class="text-green-400">Object Origin Check:</strong> For standalone `Sprite2D` objects, is their <code class="code">Offset</code> adjusted to their feet?',
+                summaryCheck3: '<strong class="text-green-400">TileMap Layer Check:</strong> For `TileMap`, is <code class="code">Y Sort Enabled</code> on the **layer**, not the main node?',
+                summaryCheck4: '<strong class="text-green-400">TileSet Tile Check:</strong> In the `TileSet`, is the <code class="code">Y Sort Origin</code> set for the obstacle tiles?',
+                summaryCheck5: '<strong class="text-green-400">Z Index Check:</strong> Is the <code class="code">Z Index</code> of all sorted objects set to 0? Z Index overrides Y-Sort.',
+                playerName: 'Character',
+                treeName: 'Tree',
+                langBtn: '中文',
+            }
+        };
+
+        const canvas = document.getElementById('demoCanvas');
+        const ctx = canvas.getContext('2d');
+        const toggle = document.getElementById('fixOriginToggle');
+        const statusText = document.getElementById('statusText');
+        const langSwitcher = document.getElementById('langSwitcher');
+
+        let currentLanguage = 'zh-Hant';
+        let useFixedOrigin = false;
+
+        const player = { x: 180, y: 200, width: 40, height: 60, color: '#3b82f6' };
+        const tree = { x: 150, y: 100, width: 100, height: 120, color: '#16a34a' };
+        
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.dataset.lang;
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            langSwitcher.textContent = translations[lang].langBtn;
+        }
+
+        function drawObject(obj) {
+            const name = obj === player ? translations[currentLanguage].playerName : translations[currentLanguage].treeName;
+            ctx.fillStyle = obj.color;
+            ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Inter, Noto Sans TC';
+            ctx.textAlign = 'center';
+            ctx.fillText(name, obj.x + obj.width / 2, obj.y + obj.height / 2);
+
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            const originY = useFixedOrigin ? obj.y + obj.height : obj.y;
+            ctx.arc(obj.x, originY, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'yellow';
+            ctx.font = '12px monospace';
+            ctx.fillText(`y: ${Math.round(originY)}`, obj.x, originY - 10);
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const objects = [player, tree];
+
+            objects.sort((a, b) => {
+                const yA = useFixedOrigin ? a.y + a.height : a.y;
+                const yB = useFixedOrigin ? b.y + b.height : b.y;
+                return yA - yB;
+            });
+
+            objects.forEach(drawObject);
+            
+            if (useFixedOrigin) {
+                statusText.innerHTML = translations[currentLanguage].statusFixed;
+                statusText.className = 'text-center font-bold text-xl p-2 rounded-lg bg-green-700 text-green-100';
+            } else {
+                statusText.innerHTML = translations[currentLanguage].statusDefault;
+                statusText.className = 'text-center font-bold text-xl p-2 rounded-lg bg-red-700 text-red-100';
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        toggle.addEventListener('change', (e) => {
+            useFixedOrigin = e.target.checked;
+        });
+        
+        langSwitcher.addEventListener('click', () => {
+            const newLang = currentLanguage === 'zh-Hant' ? 'en' : 'zh-Hant';
+            setLanguage(newLang);
+        });
+        
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            if (mouseX >= player.x && mouseX <= player.x + player.width &&
+                mouseY >= player.y && mouseY <= player.y + player.height) {
+                isDragging = true;
+                dragOffsetX = mouseX - player.x;
+                dragOffsetY = mouseY - player.y;
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => { isDragging = false; });
+        canvas.addEventListener('mouseout', () => { isDragging = false; });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const rect = canvas.getBoundingClientRect();
+                player.x = e.clientX - rect.left - dragOffsetX;
+                player.y = e.clientY - rect.top - dragOffsetY;
+            }
+        });
+
+        // Initial setup
+        setLanguage(currentLanguage);
+        gameLoop();
+    </script>
+</body>
+</html>
