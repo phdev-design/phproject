@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李小龍死因解構：醫學謎團的最終答案</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #0F172A; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .stat-card h3 {
+            color: #48C2D4;
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            color: #48C2D4;
+            line-height: 1;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -31px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #48C2D4;
+            border: 4px solid #1E293B;
+        }
+        .lang-switcher button.active {
+            background-color: #48C2D4;
+            color: #0F172A;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-2" data-lang-key="header_title"></h1>
+            <p class="text-xl md:text-2xl text-cyan-300" data-lang-key="header_subtitle"></p>
+        </header>
+
+        <div class="lang-switcher flex justify-center mb-12 space-x-2">
+            <button onclick="switchLanguage('zh')" id="lang-btn-zh" class="px-4 py-2 rounded-md bg-slate-700 text-white transition-colors duration-300">繁體中文</button>
+            <button onclick="switchLanguage('en')" id="lang-btn-en" class="px-4 py-2 rounded-md bg-slate-700 text-white transition-colors duration-300">English</button>
+        </div>
+
+        <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <section class="lg:col-span-2 bg-slate-800 rounded-lg shadow-2xl p-6">
+                <h2 class="text-3xl font-bold text-white mb-4 text-center" data-lang-key="section1_title"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    <div class="stat-card text-center p-4">
+                        <h3 class="text-2xl font-bold mb-2" data-lang-key="section1_card1_title"></h3>
+                        <p class="text-slate-300" data-lang-key="section1_card1_text"></p>
+                    </div>
+                    <div class="stat-card text-center p-4">
+                        <p class="text-7xl font-black text-white">+13%</p>
+                        <h3 class="text-2xl font-bold mt-2" data-lang-key="section1_card2_title"></h3>
+                        <p class="text-slate-300" data-lang-key="section1_card2_text"></p>
+                    </div>
+                    <div class="chart-container h-64 md:h-auto">
+                         <canvas id="equagesicChart"></canvas>
+                         <p class="text-center text-sm text-slate-400 mt-2" data-lang-key="section1_chart_caption"></p>
+                    </div>
+                </div>
+                 <div class="mt-6 p-4 bg-slate-900 rounded-lg">
+                    <h4 class="font-bold text-lg text-red-400 text-center" data-lang-key="section1_doubt_title"></h4>
+                    <ul class="list-inside list-disc text-slate-300 mt-2 space-y-1 text-center">
+                        <li data-lang-key="section1_doubt_1"></li>
+                        <li data-lang-key="section1_doubt_2"></li>
+                        <li data-lang-key="section1_doubt_3"></li>
+                        <li data-lang-key="section1_doubt_4"></li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="lg:col-span-2 bg-slate-800 rounded-lg shadow-2xl p-6">
+                <h2 class="text-3xl font-bold text-white mb-6 text-center" data-lang-key="section2_title"></h2>
+                <div class="relative border-l-4 border-slate-700 ml-8 md:ml-4 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="mb-8 pl-8 relative timeline-item">
+                            <h3 class="text-2xl font-bold text-cyan-300">1973-05-10</h3>
+                            <p class="font-bold text-lg text-white" data-lang-key="section2_event1_title"></p>
+                            <ul class="mt-2 text-slate-300 space-y-1">
+                                <li><span class="font-bold text-amber-400" data-lang-key="location"></span>: <span data-lang-key="section2_event1_location"></span></li>
+                                <li><span class="font-bold text-amber-400" data-lang-key="symptoms"></span>: <span data-lang-key="section2_event1_symptoms"></span></li>
+                                <li><span class="font-bold text-amber-400" data-lang-key="diagnosis"></span>: <span data-lang-key="section2_event1_diagnosis"></span></li>
+                                <li><span class="font-bold text-green-400" data-lang-key="treatment"></span>: <span data-lang-key="section2_event1_treatment"></span></li>
+                                <li><span class="font-bold text-red-400" data-lang-key="clue"></span>: <span data-lang-key="section2_event1_clue"></span></li>
+                            </ul>
+                        </div>
+                        <div class="mb-4 pl-8 relative timeline-item">
+                            <h3 class="text-2xl font-bold text-cyan-300">1973-07-20</h3>
+                            <p class="font-bold text-lg text-white" data-lang-key="section2_event2_title"></p>
+                            <ul class="mt-2 text-slate-300 space-y-1">
+                                <li><span class="font-bold text-amber-400" data-lang-key="location"></span>: <span data-lang-key="section2_event2_location"></span></li>
+                                <li><span class="font-bold text-amber-400" data-lang-key="symptoms"></span>: <span data-lang-key="section2_event2_symptoms"></span></li>
+                                <li><span class="font-bold text-amber-400" data-lang-key="diagnosis"></span>: <span data-lang-key="section2_event2_diagnosis"></span></li>
+                                <li><span class="font-bold text-red-400" data-lang-key="result"></span>: <span data-lang-key="section2_event2_result"></span></li>
+                                <li><span class="font-bold text-slate-400" data-lang-key="factor"></span>: <span data-lang-key="section2_event2_factor"></span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center mt-4 text-slate-400" data-lang-key="section2_conclusion"></p>
+            </section>
+
+            <section class="lg:col-span-2 bg-slate-800 rounded-lg shadow-2xl p-6">
+                <h2 class="text-3xl font-bold text-white mb-6 text-center" data-lang-key="section3_title"></h2>
+                <p class="text-center text-slate-300 mb-6 max-w-3xl mx-auto" data-lang-key="section3_subtitle"></p>
+                <div class="chart-container" style="max-width: 800px; height: 400px;">
+                    <canvas id="theoryComparisonChart"></canvas>
+                </div>
+                <p class="text-center mt-4 text-slate-300" data-lang-key="section3_conclusion"></p>
+            </section>
+
+            <section class="lg:col-span-2 bg-slate-800 rounded-lg shadow-2xl p-6">
+                <h2 class="text-3xl font-bold text-white mb-2 text-center" data-lang-key="section4_title"></h2>
+                <p class="text-center text-slate-300 mb-6 max-w-3xl mx-auto" data-lang-key="section4_subtitle"></p>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 p-4">
+                    <div class="text-center p-4 bg-slate-900 rounded-lg">
+                        <h4 class="text-lg font-bold text-cyan-300 mb-2" data-lang-key="section4_box1_title"></h4>
+                        <div class="flex justify-center flex-wrap gap-4">
+                            <div class="text-center">
+                                <span class="text-4xl">💧</span>
+                                <p class="text-sm" data-lang-key="section4_risk1"></p>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-4xl">🌿</span>
+                                <p class="text-sm" data-lang-key="section4_risk2"></p>
+                            </div>
+                             <div class="text-center">
+                                <span class="text-4xl">💊</span>
+                                <p class="text-sm" data-lang-key="section4_risk3"></p>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-4xl">💪</span>
+                                <p class="text-sm" data-lang-key="section4_risk4"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flowchart-arrow hidden md:block">→</div>
+                    <div class="flowchart-arrow md:hidden">↓</div>
+
+                    <div class="text-center p-4 bg-slate-900 rounded-lg">
+                        <h4 class="text-lg font-bold text-cyan-300 mb-2" data-lang-key="section4_box2_title"></h4>
+                         <p class="text-slate-300" data-lang-key="section4_process"></p>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="lg:col-span-2 text-center mt-8 p-6 bg-slate-800 rounded-lg shadow-2xl">
+                <h2 class="text-3xl font-bold text-white mb-4" data-lang-key="footer_title"></h2>
+                <p class="text-lg text-slate-300 max-w-prose mx-auto" data-lang-key="footer_text"></p>
+            </footer>
+
+        </main>
+    </div>
+
+    <script>
+        let equagesicChartInstance;
+        let theoryComparisonChartInstance;
+
+        const translations = {
+            zh: {
+                header_title: "一代巨龍的殞落",
+                header_subtitle: "李小龍死因之謎：科學證據的最終審判",
+                section1_title: "謎團的開端：1973年的官方裁決",
+                section1_card1_title: "死於非命",
+                section1_card1_text: "1973年死因庭裁定，李小龍死於對止痛藥Equagesic的過敏反應，屬意外死亡。",
+                section1_card2_title: "急性腦水腫",
+                section1_card2_text: "驗屍報告顯示其大腦由正常1400克增至1575克，嚴重腫脹。",
+                section1_chart_caption: "官方認定的「元兇」：Equagesic成分",
+                section1_doubt_title: "但，這個裁決充滿疑點...",
+                section1_doubt_1: "李小龍曾服用過該藥卻無事。",
+                section1_doubt_2: "頭痛（腦水腫症狀）在服藥前已出現。",
+                section1_doubt_3: "屍檢缺乏過敏反應的典型證據。",
+                section1_doubt_4: "最關鍵：死前兩個月的另一次腦水腫事件中，並未服用此藥。",
+                section2_title: "悲劇的預演：兩次致命的腦水腫事件",
+                section2_event1_title: "首次虛脫 (倖存)",
+                location: "地點",
+                symptoms: "症狀",
+                diagnosis: "診斷",
+                treatment: "關鍵治療",
+                clue: "重要線索",
+                result: "結果",
+                factor: "干擾因素",
+                section2_event1_location: "悶熱的配音室",
+                section2_event1_symptoms: "暈倒、抽搐、嘔吐",
+                section2_event1_diagnosis: "急性腦水腫",
+                section2_event1_treatment: "注射利尿劑甘露醇 (Mannitol)",
+                section2_event1_clue: "未服用Equagesic",
+                section2_event2_title: "二次發作 (殞命)",
+                section2_event2_location: "丁珮寓所",
+                section2_event2_symptoms: "頭痛、暈眩，隨後昏迷",
+                section2_event2_diagnosis: "急性腦水腫",
+                section2_event2_result: "送院後證實死亡",
+                section2_event2_factor: "服用了Equagesic",
+                section2_conclusion: "兩次事件的病理核心相同，證明存在一個與Equagesic無關的、反覆發作的根本問題。",
+                section3_title: "現代科學假說對決",
+                section3_subtitle: "隨著醫學進步，多個理論試圖解釋真相。下圖比較了三大主流理論對關鍵證據的解釋力。",
+                section3_conclusion: "結論顯而易見：低血鈉症假說提供了最全面、最一致的解釋。",
+                section4_title: "最終答案：低血鈉症 (Hyponatremia)",
+                section4_subtitle: "這是2022年由腎臟專家提出的最新、最權威理論。李小龍的死因極可能是腎臟無法及時排出足夠的水分，導致體內水分與電解質致命失衡。",
+                section4_box1_title: "多重風險因素疊加",
+                section4_risk1: "大量飲水<br>&流質飲食",
+                section4_risk2: "使用大麻<br>增加口渴",
+                section4_risk3: "藥物影響<br>腎功能",
+                section4_risk4: "劇烈運動<br>水分滯留",
+                section4_box2_title: "致命的生理過程",
+                section4_process: "水分攝入 > 腎臟排出能力 → 血液鈉濃度過低 → 水分湧入腦細胞 → 急性腦水腫 → 死亡",
+                footer_title: "悲劇性的諷刺",
+                footer_text: "一位將「<span class=\"text-cyan-300 font-bold\">Be water, my friend</span>」（如水一般，我的朋友）作為人生哲學的巨星，最終極有可能因體內「水」的致命失衡而倒下。他的殞落，不僅是一個時代的損失，也是一則關於人體生理極限的深刻警示。",
+                equagesic_chart_title: "Equagesic 成分",
+                equagesic_aspirin: "阿斯匹靈 (Aspirin)",
+                equagesic_meprobamate: "安寧 (Meprobamate)",
+                theory_chart_title: "三大主流理論解釋力對比",
+                theory_chart_x_axis: "解釋力評分 (1-10)",
+                theory_chart_allergy: "Equagesic過敏論",
+                theory_chart_heatstroke: "中暑論",
+                theory_chart_hyponatremia: "低血鈉症論",
+                theory_chart_y_axis_1: "解釋5月10日事件",
+                theory_chart_y_axis_2: "符合屍檢結果",
+                theory_chart_y_axis_3: "整合生活風險",
+            },
+            en: {
+                header_title: "The Fall of a Dragon",
+                header_subtitle: "The Mystery of Bruce Lee's Death: The Final Verdict of Science",
+                section1_title: "The Beginning of the Mystery: The Official 1973 Ruling",
+                section1_card1_title: "Death by Misadventure",
+                section1_card1_text: "The 1973 inquest ruled Bruce Lee's death an accident caused by an allergic reaction to the painkiller Equagesic.",
+                section1_card2_title: "Acute Cerebral Edema",
+                section1_card2_text: "The autopsy showed his brain had swollen from a normal 1400g to 1575g.",
+                section1_chart_caption: "The Official 'Culprit': Equagesic Components",
+                section1_doubt_title: "But, this ruling was full of doubts...",
+                section1_doubt_1: "Lee had taken the drug before without issue.",
+                section1_doubt_2: "The headache (a symptom of edema) appeared before he took the drug.",
+                section1_doubt_3: "The autopsy lacked typical evidence of a fatal allergic reaction.",
+                section1_doubt_4: "Crucially, he did not take this drug during another edema episode two months prior.",
+                section2_title: "A Tragic Rehearsal: Two Fatal Cerebral Edema Events",
+                section2_event1_title: "First Collapse (Survived)",
+                location: "Location",
+                symptoms: "Symptoms",
+                diagnosis: "Diagnosis",
+                treatment: "Key Treatment",
+                clue: "Key Clue",
+                result: "Result",
+                factor: "Confounding Factor",
+                section2_event1_location: "A stuffy dubbing room",
+                section2_event1_symptoms: "Fainting, convulsions, vomiting",
+                section2_event1_diagnosis: "Acute Cerebral Edema",
+                section2_event1_treatment: "Injection of the diuretic Mannitol",
+                section2_event1_clue: "Did not take Equagesic",
+                section2_event2_title: "Second Attack (Fatal)",
+                section2_event2_location: "Betty Ting Pei's apartment",
+                section2_event2_symptoms: "Headache, dizziness, then coma",
+                section2_event2_diagnosis: "Acute Cerebral Edema",
+                section2_event2_result: "Pronounced dead on arrival at hospital",
+                section2_event2_factor: "Took Equagesic",
+                section2_conclusion: "The core pathology of both events was identical, proving a recurring, underlying problem unrelated to Equagesic.",
+                section3_title: "Modern Scientific Hypotheses Face Off",
+                section3_subtitle: "As medicine advanced, new theories emerged. The chart below compares how well the three main theories explain the key evidence.",
+                section3_conclusion: "The conclusion is clear: the hyponatremia hypothesis provides the most comprehensive and consistent explanation.",
+                section4_title: "The Final Answer: Hyponatremia",
+                section4_subtitle: "This is the latest and most authoritative theory, proposed by kidney specialists in 2022. Lee's death was most likely caused by his kidneys' inability to excrete enough water, leading to a fatal imbalance.",
+                section4_box1_title: "A Cascade of Risk Factors",
+                section4_risk1: "High intake of water<br>& liquid diet",
+                section4_risk2: "Cannabis use<br>increasing thirst",
+                section4_risk3: "Drugs affecting<br>kidney function",
+                section4_risk4: "Intense exercise<br>causing water retention",
+                section4_box2_title: "The Fatal Physiological Process",
+                section4_process: "Water Intake > Kidney Excretion Capacity → Low Blood Sodium → Water Floods Brain Cells → Acute Cerebral Edema → Death",
+                footer_title: "A Tragic Irony",
+                footer_text: "A global icon whose philosophy was \"<span class='text-cyan-300 font-bold'>Be water, my friend</span>,\" likely succumbed to a fatal imbalance of 'water' in his own body. His fall is not just the loss of an era, but a profound lesson on the limits of human physiology.",
+                equagesic_chart_title: "Equagesic Components",
+                equagesic_aspirin: "Aspirin",
+                equagesic_meprobamate: "Meprobamate",
+                theory_chart_title: "Explanatory Power of Main Theories",
+                theory_chart_x_axis: "Explanatory Score (1-10)",
+                theory_chart_allergy: "Equagesic Allergy",
+                theory_chart_heatstroke: "Heatstroke",
+                theory_chart_hyponatremia: "Hyponatremia",
+                theory_chart_y_axis_1: "Explains May 10 event",
+                theory_chart_y_axis_2: "Matches autopsy findings",
+                theory_chart_y_axis_3: "Integrates lifestyle risks",
+            }
+        };
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+
+            updateCharts(lang);
+
+            document.getElementById('lang-btn-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-btn-en').classList.toggle('active', lang === 'en');
+        }
+
+        function updateCharts(lang) {
+            if (equagesicChartInstance) equagesicChartInstance.destroy();
+            if (theoryComparisonChartInstance) theoryComparisonChartInstance.destroy();
+            
+            const chartJsTooltip = {
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            const equagesicData = {
+                labels: [translations[lang].equagesic_aspirin, translations[lang].equagesic_meprobamate],
+                datasets: [{
+                    label: translations[lang].equagesic_chart_title,
+                    data: [50, 50],
+                    backgroundColor: ['#00A1B4', '#48C2D4'],
+                    borderColor: '#0F172A',
+                    borderWidth: 4,
+                    hoverOffset: 4
+                }]
+            };
+            equagesicChartInstance = new Chart(document.getElementById('equagesicChart'), {
+                type: 'doughnut',
+                data: equagesicData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        ...chartJsTooltip.plugins,
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#cbd5e1', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+
+            const theoryComparisonData = {
+                labels: [
+                    translations[lang].theory_chart_y_axis_1, 
+                    translations[lang].theory_chart_y_axis_2, 
+                    translations[lang].theory_chart_y_axis_3
+                ],
+                datasets: [
+                    {
+                        label: translations[lang].theory_chart_allergy,
+                        data: [1, 3, 2],
+                        backgroundColor: '#D4F4F8',
+                        borderColor: '#8EDCE6',
+                        borderWidth: 1
+                    },
+                    {
+                        label: translations[lang].theory_chart_heatstroke,
+                        data: [6, 5, 7],
+                        backgroundColor: '#48C2D4',
+                        borderColor: '#00A1B4',
+                        borderWidth: 1
+                    },
+                    {
+                        label: translations[lang].theory_chart_hyponatremia,
+                        data: [10, 10, 10],
+                        backgroundColor: '#00A1B4',
+                        borderColor: '#007A8A',
+                        borderWidth: 1
+                    }
+                ]
+            };
+            theoryComparisonChartInstance = new Chart(document.getElementById('theoryComparisonChart'), {
+                type: 'bar',
+                data: theoryComparisonData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: translations[lang].theory_chart_x_axis,
+                                color: '#94a3b8'
+                            },
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.2)' }
+                        },
+                        y: {
+                            ticks: { color: '#cbd5e1', font: { size: 14 } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        ...chartJsTooltip.plugins,
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#cbd5e1', font: { size: 14 } }
+                        },
+                        title: {
+                            display: true,
+                            text: translations[lang].theory_chart_title,
+                            color: '#FFFFFF',
+                            font: { size: 18, weight: 'bold' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            switchLanguage('zh');
+        });
+    </script>
+</body>
+</html>
