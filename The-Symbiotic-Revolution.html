@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式報告：自動駕駛與智能交通的融合之路</title>
+    <!-- Chosen Palette: Calm Tech -->
+    <!-- Application Structure Plan: The SPA is designed as a top-down narrative journey, transforming the dense report into an intuitive, exploratory story. The structure is thematic: 1. Introduction with key metrics to hook the user. 2. Deep dive into the two core pillars, AV and ITS, using interactive elements. 3. The climax explaining the "Vehicle-Road-Cloud" symbiotic model. 4. The impact on urban life, visualized through charts and timelines. 5. The challenges, presented in an easily digestible card format. 6. A concluding section with actionable recommendations. This structure prioritizes user understanding and synthesis over mirroring the report's linear chapter format, making complex information accessible and engaging. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Key benefits (accident/congestion reduction). Goal: Inform. Viz: Large KPI numbers. Method: HTML/CSS. Justification: Immediate high-impact communication.
+        - Report Info: SAE Levels. Goal: Organize. Viz: Interactive tabbed component. Method: HTML/CSS/JS. Justification: More engaging and space-efficient than a static table.
+        - Report Info: AV Tech Pillars. Goal: Organize. Viz: Flowchart. Method: HTML/CSS with Unicode arrows. Justification: Clearly illustrates the process flow without SVG/Mermaid.
+        - Report Info: Global ITS Models (Singapore, Helsinki, UK). Goal: Compare. Viz: Radar Chart. Method: Chart.js/Canvas. Justification: Effectively compares multiple entities across multiple quantitative dimensions.
+        - Report Info: Vehicle-Road-Cloud Model. Goal: Organize. Viz: Flowchart. Method: HTML/CSS. Justification: Visualizes the core symbiotic relationship clearly.
+        - Report Info: MaaS Impact (Helsinki). Goal: Inform. Viz: Donut Chart. Method: Chart.js/Canvas. Justification: Excellent for showing part-to-whole relationships (users abandoning private cars).
+        - Report Info: Labor Market Shift. Goal: Compare/Change. Viz: Diverging Bar Chart. Method: Chart.js/Canvas. Justification: Powerfully shows the contrast between declining and emerging job roles.
+        - Report Info: Development Timeline. Goal: Change/Organize. Viz: Vertical Timeline. Method: HTML/CSS. Justification: A classic and effective way to present chronological information.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f8f9fa; /* Light grey background */
+            color: #343a40; /* Dark grey text */
+        }
+        .calm-tech-bg { background-color: #e9ecef; }
+        .calm-tech-primary { color: #0077b6; }
+        .calm-tech-primary-bg { background-color: #0077b6; }
+        .calm-tech-secondary { color: #495057; }
+        .calm-tech-accent { color: #00b4d8; }
+        .calm-tech-accent-bg { background-color: #00b4d8; }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .kpi-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .nav-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-button.active, .nav-button:hover {
+            color: #0077b6;
+            border-bottom-color: #0077b6;
+        }
+        .tab-button.active {
+            background-color: #0077b6;
+            color: white;
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <header class="text-center py-12 md:py-16 relative">
+            <h1 class="text-4xl md:text-5xl font-bold calm-tech-primary mb-4" data-lang-key="headerTitle"></h1>
+            <p class="text-lg md:text-xl calm-tech-secondary max-w-3xl mx-auto" data-lang-key="headerSubtitle"></p>
+            <button id="lang-switcher" class="absolute top-4 right-4 px-4 py-2 text-sm font-medium calm-tech-primary border border-gray-300 rounded-full hover:bg-gray-100 transition-colors">English</button>
+        </header>
+
+        <main>
+            <section id="intro" class="mb-16">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="introTitle"></h2>
+                    <p class="calm-tech-secondary" data-lang-key="introSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center">
+                    <div class="card p-8">
+                        <p class="kpi-value calm-tech-primary">90%</p>
+                        <p class="text-lg font-semibold mt-2" data-lang-key="kpi1Title"></p>
+                        <p class="text-sm calm-tech-secondary mt-2" data-lang-key="kpi1Subtitle"></p>
+                    </div>
+                    <div class="card p-8">
+                        <p class="kpi-value calm-tech-accent">35%</p>
+                        <p class="text-lg font-semibold mt-2" data-lang-key="kpi2Title"></p>
+                        <p class="text-sm calm-tech-secondary mt-2" data-lang-key="kpi2Subtitle"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="pillars" class="mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="pillarsTitle"></h2>
+                    <p class="calm-tech-secondary max-w-3xl mx-auto" data-lang-key="pillarsSubtitle"></p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <div class="card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-4 calm-tech-primary" data-lang-key="pillar1Title"></h3>
+                        <p class="mb-6 calm-tech-secondary" data-lang-key="pillar1Subtitle"></p>
+                        <div id="sae-levels-container">
+                            <div class="flex flex-wrap justify-center gap-2 mb-4">
+                                <button data-level="l0-l2" class="tab-button active px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium" data-lang-key="saeTab1"></button>
+                                <button data-level="l3" class="tab-button px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium" data-lang-key="saeTab2"></button>
+                                <button data-level="l4-l5" class="tab-button px-4 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium" data-lang-key="saeTab3"></button>
+                            </div>
+                            <div id="sae-content" class="p-4 bg-gray-50 rounded-lg min-h-[150px]">
+                            </div>
+                        </div>
+                        <h4 class="text-lg font-bold mt-8 mb-4" data-lang-key="techCoreTitle"></h4>
+                        <div class="space-y-4 text-sm">
+                            <div class="flex items-center"><span class="calm-tech-primary-bg text-white rounded-full w-6 h-6 flex items-center justify-center font-bold mr-3">1</span><div data-lang-key="techCore1"></div></div>
+                            <div class="flex items-center"><span class="calm-tech-primary-bg text-white rounded-full w-6 h-6 flex items-center justify-center font-bold mr-3">2</span><div data-lang-key="techCore2"></div></div>
+                            <div class="flex items-center"><span class="calm-tech-primary-bg text-white rounded-full w-6 h-6 flex items-center justify-center font-bold mr-3">3</span><div data-lang-key="techCore3"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-4 calm-tech-accent" data-lang-key="pillar2Title"></h3>
+                        <p class="mb-6 calm-tech-secondary" data-lang-key="pillar2Subtitle"></p>
+                        <div class="chart-container h-[400px]">
+                            <canvas id="itsModelsChart"></canvas>
+                        </div>
+                        <p class="text-sm calm-tech-secondary mt-4 text-center" data-lang-key="itsChartSubtitle"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="symbiosis" class="mb-16 p-8 rounded-lg calm-tech-bg">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="symbiosisTitle"></h2>
+                    <p class="calm-tech-secondary max-w-3xl mx-auto" data-lang-key="symbiosisSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 items-center gap-8 text-center">
+                    <div class="p-6 bg-white rounded-lg shadow">
+                        <h4 class="text-xl font-bold calm-tech-primary" data-lang-key="smartVehicleTitle"></h4>
+                        <p class="text-sm mt-2" data-lang-key="smartVehicleSubtitle"></p>
+                    </div>
+                    <div class="text-5xl font-bold calm-tech-primary">+</div>
+                    <div class="p-6 bg-white rounded-lg shadow">
+                        <h4 class="text-xl font-bold calm-tech-accent" data-lang-key="smartRoadTitle"></h4>
+                        <p class="text-sm mt-2" data-lang-key="smartRoadSubtitle"></p>
+                    </div>
+                </div>
+                <div class="flex justify-center my-4">
+                    <div class="text-5xl font-bold calm-tech-secondary transform rotate-90 md:rotate-0">→</div>
+                </div>
+                <div class="p-8 bg-white rounded-lg shadow text-center max-w-2xl mx-auto">
+                    <h4 class="text-2xl font-bold text-green-600" data-lang-key="vrcIntegrationTitle"></h4>
+                    <p class="mt-2" data-lang-key="vrcIntegrationSubtitle"></p>
+                </div>
+            </section>
+            
+            <section id="impact" class="mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="impactTitle"></h2>
+                    <p class="calm-tech-secondary max-w-3xl mx-auto" data-lang-key="impactSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="card p-6 md:col-span-2 lg:col-span-1">
+                        <h3 class="text-xl font-bold mb-4" data-lang-key="maasTitle"></h3>
+                        <p class="text-sm calm-tech-secondary mb-4" data-lang-key="maasSubtitle"></p>
+                        <div class="chart-container h-64">
+                            <canvas id="maasChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6 md:col-span-2">
+                        <h3 class="text-xl font-bold mb-4" data-lang-key="laborTitle"></h3>
+                        <p class="text-sm calm-tech-secondary mb-4" data-lang-key="laborSubtitle"></p>
+                        <div class="chart-container h-64">
+                            <canvas id="laborMarketChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-6 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="timelineTitle"></h3>
+                        <div class="relative border-l-2 border-dashed border-gray-300 ml-4 py-4">
+                            <div class="mb-8 pl-8 relative">
+                                <div class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 calm-tech-primary-bg rounded-full"></div>
+                                <p class="font-bold calm-tech-primary" data-lang-key="timeline1Title"></p>
+                                <p class="text-sm calm-tech-secondary" data-lang-key="timeline1Content"></p>
+                            </div>
+                            <div class="mb-8 pl-8 relative">
+                                <div class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 calm-tech-accent-bg rounded-full"></div>
+                                <p class="font-bold calm-tech-accent" data-lang-key="timeline2Title"></p>
+                                <p class="text-sm calm-tech-secondary" data-lang-key="timeline2Content"></p>
+                            </div>
+                            <div class="pl-8 relative">
+                                <div class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-gray-400 rounded-full"></div>
+                                <p class="font-bold text-gray-600" data-lang-key="timeline3Title"></p>
+                                <p class="text-sm calm-tech-secondary" data-lang-key="timeline3Content"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="challenges" class="mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="challengesTitle"></h2>
+                    <p class="calm-tech-secondary max-w-3xl mx-auto" data-lang-key="challengesSubtitle"></p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card p-6">
+                        <h4 class="text-lg font-bold mb-2" data-lang-key="challenge1Title"></h4>
+                        <p class="text-sm calm-tech-secondary" data-lang-key="challenge1Content"></p>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="text-lg font-bold mb-2" data-lang-key="challenge2Title"></h4>
+                        <p class="text-sm calm-tech-secondary" data-lang-key="challenge2Content"></p>
+                    </div>
+                    <div class="card p-6">
+                        <h4 class="text-lg font-bold mb-2" data-lang-key="challenge3Title"></h4>
+                        <p class="text-sm calm-tech-secondary" data-lang-key="challenge3Content"></p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-8 border-t border-gray-200">
+            <p class="text-sm calm-tech-secondary" data-lang-key="footer1"></p>
+            <p class="text-xs text-gray-400 mt-1" data-lang-key="footer2"></p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let currentLang = 'zh';
+            let charts = {};
+
+            const langData = {
+                zh: {
+                    headerTitle: '共生革命',
+                    headerSubtitle: '一份關於自動駕駛（AV）與智能交通系統（ITS）融合的互動式分析報告，探索通往更安全、高效、永續的智慧城市未來之路。',
+                    introTitle: '融合的巨大潛力',
+                    introSubtitle: 'AV與ITS的結合不僅是技術的疊加，更是效益的倍增，有望從根本上解決當今的交通困境。',
+                    kpi1Title: '交通事故減少潛力',
+                    kpi1Subtitle: '麥肯錫預測，自動化將大幅降低人為失誤，重塑道路安全格局。',
+                    kpi2Title: '交通流量疏通潛力',
+                    kpi2Subtitle: '透過車隊協同和智慧信號，車輛通行效率將顯著提升，緩解擁堵。',
+                    pillarsTitle: '兩大革命性力量',
+                    pillarsSubtitle: '要理解這場變革，我們必須首先深入了解構成其基礎的兩大支柱：智慧的車輛與智慧的道路。',
+                    pillar1Title: '支柱一：智慧車輛的崛起',
+                    pillar1Subtitle: '自動駕駛汽車是這場革命的移動主角。其發展並非單一概念，而是由國際汽車工程師學會（SAE）定義的一系列清晰等級。',
+                    saeTab1: 'L0-L2: 駕駛輔助',
+                    saeTab2: 'L3: 有條件自動化',
+                    saeTab3: 'L4-L5: 高度/完全自動化',
+                    saeLevel_l0l2_title: '駕駛員輔助 (L0-L2)',
+                    saeLevel_l0l2_content: '系統僅提供輔助，如主動巡航或車道維持。駕駛員需時刻監控並承擔全部法律責任。這是當前市場的主流技術。',
+                    saeLevel_l3_title: '有條件自動化 (L3)',
+                    saeLevel_l3_content: '在特定條件下，系統完全負責駕駛，允許駕駛員視線離開。這是法律與技術的巨大鴻溝，因為責任從駕駛員轉移至系統（製造商）。',
+                    saeLevel_l4l5_title: '高度/完全自動化 (L4-L5)',
+                    saeLevel_l4l5_content: '在設計範圍內（L4）或所有條件下（L5），系統完全負責駕駛，無需人類干預。這是RoboTaxi等服務的技術基礎，也是自動駕駛的終極目標。',
+                    techCoreTitle: '技術核心：感知-決策-通訊',
+                    techCore1: '<strong class="calm-tech-primary">感知 (Perception):</strong> 光達、攝影機與雷達融合，提供全方位環境數據。',
+                    techCore2: '<strong class="calm-tech-primary">決策 (Decision):</strong> AI大腦分析數據，預測行為並規劃路徑。',
+                    techCore3: '<strong class="calm-tech-primary">通訊 (Communication):</strong> V2X技術構建互聯神經系統，實現超越視線的協同。',
+                    pillar2Title: '支柱二：智慧道路的覺醒',
+                    pillar2Subtitle: '智能交通系統（ITS）是智慧城市的基礎設施。全球城市正以不同策略推進ITS，展現了多樣化的發展路徑。',
+                    itsChartSubtitle: '此雷達圖比較了三大先鋒模式的戰略重點，揭示了其在政府主導、市場驅動和法規建設上的不同側重。',
+                    symbiosisTitle: '核心論點：從孤島到共生',
+                    symbiosisSubtitle: '真正的革命並非源於單車智慧，而是「車、路、雲」一體化的協同模式。智慧的道路不再被動，而是成為車輛感知和決策系統的主動延伸。',
+                    smartVehicleTitle: '智慧的車',
+                    smartVehicleSubtitle: '搭載先進感測器與AI的自動駕駛汽車。',
+                    smartRoadTitle: '智慧的路',
+                    smartRoadSubtitle: '配備感測器與通訊單元，提供「上帝視角」。',
+                    vrcIntegrationTitle: '車路雲一體化',
+                    vrcIntegrationSubtitle: '一個由車、路、雲端平台協同工作的綜合性系統，共同分擔感知與決策任務，從而降低單車成本與技術複雜性，加速高級別自動駕駛的商業化落地。',
+                    impactTitle: '重塑城市新範式',
+                    impactSubtitle: 'AV與ITS的融合將引發連鎖反應，深刻改變我們的出行方式、勞動市場乃至城市空間的利用。',
+                    maasTitle: '交通即服務 (MaaS)',
+                    maasSubtitle: '以赫爾辛基為例，MaaS整合所有出行方式，為基礎設施投資提供了可持續的商業模式。',
+                    laborTitle: '勞動市場的技能大轉移',
+                    laborSubtitle: '傳統駕駛崗位面臨挑戰，同時催生了遠程監控、數據分析等新興技術崗位，凸顯了技能轉型的緊迫性。',
+                    timelineTitle: '未來發展軌跡',
+                    timeline1Title: '近期 (1-5年)',
+                    timeline1Content: 'L2+系統普及；在港口、礦區等限定場景實現L4商業化。',
+                    timeline2Title: '中期 (5-10年)',
+                    timeline2Content: 'L3私家車謹慎推廣；RoboTaxi服務在主要城市核心區擴張。',
+                    timeline3Title: '遠期 (10年以上)',
+                    timeline3Content: 'L4系統廣泛應用；城市空間被重塑；L5仍是長期目標。',
+                    challengesTitle: '應對關鍵挑戰',
+                    challengesSubtitle: '通往智慧城市的道路並非一帆風順，我們必須正視並解決法律、安全和社會層面的重大障礙。',
+                    challenge1Title: '監管與倫理迷宮',
+                    challenge1Content: '事故責任歸屬、演算法的道德決策（電車難題）以及全球統一標準的缺失是首要障礙。',
+                    challenge2Title: '數位安全堡壘',
+                    challenge2Content: '互聯系統面臨遠程控制、感測器欺騙等攻擊風險，海量個人數據的隱私保護至關重要。',
+                    challenge3Title: '社會經濟轉型',
+                    challenge3Content: '職業駕駛員崗位受衝擊，引發「技能大轉移」，需要大規模的再培訓和社會保障計畫。',
+                    footer1: '本互動式報告由AI根據「共生革命：描繪自動駕駛與智能交通的融合之路」報告生成。',
+                    footer2: '所有數據與分析均源自原始報告內容。'
+                },
+                en: {
+                    headerTitle: 'The Symbiotic Revolution',
+                    headerSubtitle: 'An interactive analysis of the fusion between Autonomous Vehicles (AV) and Intelligent Transportation Systems (ITS), exploring the path to safer, more efficient, and sustainable smart cities.',
+                    introTitle: 'The Immense Potential of Fusion',
+                    introSubtitle: 'The combination of AV and ITS is not just a technological superposition but a multiplier of benefits, promising to fundamentally solve today\'s traffic dilemmas.',
+                    kpi1Title: 'Potential Reduction in Accidents',
+                    kpi1Subtitle: 'McKinsey predicts that automation will significantly reduce human error, reshaping road safety.',
+                    kpi2Title: 'Potential Improvement in Traffic Flow',
+                    kpi2Subtitle: 'Through vehicle platooning and smart signals, traffic efficiency will be significantly enhanced, alleviating congestion.',
+                    pillarsTitle: 'Two Revolutionary Forces',
+                    pillarsSubtitle: 'To understand this transformation, we must first delve into the two pillars that form its foundation: intelligent vehicles and intelligent roads.',
+                    pillar1Title: 'Pillar 1: The Rise of Intelligent Vehicles',
+                    pillar1Subtitle: 'Autonomous vehicles are the mobile protagonists of this revolution. Their development is not a single concept but a series of clear levels defined by the Society of Automotive Engineers (SAE).',
+                    saeTab1: 'L0-L2: Driver Assistance',
+                    saeTab2: 'L3: Conditional Automation',
+                    saeTab3: 'L4-L5: High/Full Automation',
+                    saeLevel_l0l2_title: 'Driver Assistance (L0-L2)',
+                    saeLevel_l0l2_content: 'The system only provides assistance, such as adaptive cruise control or lane-keeping. The driver must constantly monitor and assume full legal responsibility. This is the mainstream technology in the current market.',
+                    saeLevel_l3_title: 'Conditional Automation (L3)',
+                    saeLevel_l3_content: 'Under specific conditions, the system is fully responsible for driving, allowing the driver to take their eyes off the road. This represents a huge legal and technical gap, as responsibility shifts from the driver to the system (manufacturer).',
+                    saeLevel_l4l5_title: 'High/Full Automation (L4-L5)',
+                    saeLevel_l4l5_content: 'Within its operational design domain (L4) or under all conditions (L5), the system is fully responsible for driving without human intervention. This is the technical basis for services like RoboTaxis and the ultimate goal of autonomous driving.',
+                    techCoreTitle: 'Technical Core: Perception-Decision-Communication',
+                    techCore1: '<strong class="calm-tech-primary">Perception:</strong> LiDAR, cameras, and radar fusion provide comprehensive environmental data.',
+                    techCore2: '<strong class="calm-tech-primary">Decision:</strong> The AI brain analyzes data, predicts behavior, and plans the route.',
+                    techCore3: '<strong class="calm-tech-primary">Communication:</strong> V2X technology builds an interconnected nervous system, enabling beyond-line-of-sight coordination.',
+                    pillar2Title: 'Pillar 2: The Awakening of Intelligent Roads',
+                    pillar2Subtitle: 'Intelligent Transportation Systems (ITS) are the infrastructure of smart cities. Cities worldwide are advancing ITS with different strategies, showing diverse development paths.',
+                    itsChartSubtitle: 'This radar chart compares the strategic focuses of the three pioneer models, revealing their different emphases on government leadership, market drive, and regulatory construction.',
+                    symbiosisTitle: 'Core Thesis: From Silos to Symbiosis',
+                    symbiosisSubtitle: 'The real revolution stems not from standalone vehicle intelligence, but from the integrated "Vehicle-Road-Cloud" collaborative model. Intelligent roads are no longer passive but become an active extension of the vehicle\'s perception and decision-making system.',
+                    smartVehicleTitle: 'Intelligent Vehicle',
+                    smartVehicleSubtitle: 'An autonomous vehicle equipped with advanced sensors and AI.',
+                    smartRoadTitle: 'Intelligent Road',
+                    smartRoadSubtitle: 'Equipped with sensors and communication units, providing a "God\'s-eye view".',
+                    vrcIntegrationTitle: 'Vehicle-Road-Cloud Integration',
+                    vrcIntegrationSubtitle: 'A comprehensive system where vehicles, roads, and cloud platforms work together, sharing perception and decision-making tasks to reduce vehicle cost and complexity, accelerating high-level autonomous driving deployment.',
+                    impactTitle: 'Reshaping the Urban Paradigm',
+                    impactSubtitle: 'The fusion of AV and ITS will trigger a chain reaction, profoundly changing our mobility, labor market, and even the use of urban space.',
+                    maasTitle: 'Mobility as a Service (MaaS)',
+                    maasSubtitle: 'Using Helsinki as an example, MaaS integrates all modes of transport, providing a sustainable business model for infrastructure investment.',
+                    laborTitle: 'The Great Skill Shift in the Labor Market',
+                    laborSubtitle: 'Traditional driving jobs face challenges, while new tech roles like remote monitoring and data analysis emerge, highlighting the urgency of skill transformation.',
+                    timelineTitle: 'Future Development Trajectory',
+                    timeline1Title: 'Near Term (1-5 years)',
+                    timeline1Content: 'L2+ systems become widespread; L4 commercialization in limited scenarios like ports and mining areas.',
+                    timeline2Title: 'Mid Term (5-10 years)',
+                    timeline2Content: 'Cautious rollout of L3 private cars; RoboTaxi services expand in major urban core areas.',
+                    timeline3Title: 'Long Term (10+ years)',
+                    timeline3Content: 'Widespread application of L4 systems; urban spaces are reshaped; L5 remains a long-term goal.',
+                    challengesTitle: 'Addressing Key Challenges',
+                    challengesSubtitle: 'The road to smart cities is not smooth. We must face and solve major legal, security, and social obstacles.',
+                    challenge1Title: 'Regulatory and Ethical Maze',
+                    challenge1Content: 'Liability in accidents, algorithmic moral decisions (the trolley problem), and the lack of global standards are primary hurdles.',
+                    challenge2Title: 'Digital Fortress',
+                    challenge2Content: 'Connected systems face risks like remote control and sensor spoofing. The privacy of massive personal data is crucial.',
+                    challenge3Title: 'Socio-Economic Transformation',
+                    challenge3Content: 'The impact on professional drivers creates a "great skill shift," requiring large-scale retraining and social safety nets.',
+                    footer1: 'This interactive report was generated by AI based on the "The Symbiotic Revolution: Charting the Fusion of Autonomous Driving and Intelligent Transportation" report.',
+                    footer2: 'All data and analysis are derived from the original report content.'
+                }
+            };
+            
+            const renderText = (lang) => {
+                document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+                document.querySelector('body').style.fontFamily = lang === 'zh' ? "'Noto Sans TC', 'Roboto', sans-serif" : "'Roboto', 'Noto Sans TC', sans-serif";
+
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (langData[lang][key]) {
+                        el.innerHTML = langData[lang][key];
+                    }
+                });
+                
+                document.getElementById('lang-switcher').textContent = lang === 'zh' ? 'English' : '繁體中文';
+
+                renderCharts(lang);
+                updateSaeContent(document.querySelector('.tab-button.active').dataset.level, lang);
+            };
+
+            const renderCharts = (lang) => {
+                Object.values(charts).forEach(chart => chart.destroy());
+
+                const FONT_COLOR = '#343a40';
+                const GRID_COLOR = '#e9ecef';
+                const FONT_FAMILY = lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif";
+                
+                const defaultChartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: FONT_COLOR,
+                                font: { family: FONT_FAMILY }
+                            }
+                        },
+                        tooltip: {
+                            titleFont: { family: FONT_FAMILY },
+                            bodyFont: { family: FONT_FAMILY }
+                        }
+                    }
+                };
+
+                const itsModelsCtx = document.getElementById('itsModelsChart')?.getContext('2d');
+                if (itsModelsCtx) {
+                    const itsLabels = lang === 'zh' ? ['政府主導', '市場/用戶驅動', '法規/安全框架', '基礎設施投資', '數據開放度'] : ['Gov-led', 'Market/User-driven', 'Regulatory/Safety', 'Infrastructure Inv.', 'Data Openness'];
+                    const itsDatasets = [
+                        { label: lang === 'zh' ? '新加坡' : 'Singapore', data: [9, 6, 8, 9, 5], backgroundColor: 'rgba(0, 119, 182, 0.2)', borderColor: '#0077b6', pointBackgroundColor: '#0077b6' },
+                        { label: lang === 'zh' ? '赫爾辛基' : 'Helsinki', data: [5, 9, 6, 6, 9], backgroundColor: 'rgba(0, 180, 216, 0.2)', borderColor: '#00b4d8', pointBackgroundColor: '#00b4d8' },
+                        { label: lang === 'zh' ? '英國' : 'UK', data: [6, 7, 9, 7, 7], backgroundColor: 'rgba(108, 117, 125, 0.2)', borderColor: '#6c757d', pointBackgroundColor: '#6c757d' }
+                    ];
+                    charts.itsModels = new Chart(itsModelsCtx, {
+                        type: 'radar',
+                        data: { labels: itsLabels, datasets: itsDatasets },
+                        options: { ...defaultChartOptions, scales: { r: { angleLines: { color: GRID_COLOR }, grid: { color: GRID_COLOR }, pointLabels: { color: FONT_COLOR, font: { size: 12, family: FONT_FAMILY } }, ticks: { backdropColor: 'rgba(248, 249, 250, 0.75)', color: FONT_COLOR }, suggestedMin: 0, suggestedMax: 10 } } }
+                    });
+                }
+
+                const maasCtx = document.getElementById('maasChart')?.getContext('2d');
+                if (maasCtx) {
+                    const maasLabels = lang === 'zh' ? ['因MaaS放棄私家車的用戶', '其他用戶'] : ['Users who gave up private cars for MaaS', 'Other Users'];
+                    charts.maas = new Chart(maasCtx, {
+                        type: 'doughnut',
+                        data: { labels: maasLabels, datasets: [{ data: [12, 88], backgroundColor: ['#00b4d8', '#e9ecef'], borderColor: '#ffffff', borderWidth: 4 }] },
+                        options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, legend: { display: true, position: 'bottom' }, title: { display: true, text: lang === 'zh' ? '赫爾辛基MaaS用戶行為轉變' : 'Helsinki MaaS User Behavior Shift', color: FONT_COLOR, font: { size: 14, family: FONT_FAMILY } } } }
+                    });
+                }
+
+                const laborMarketCtx = document.getElementById('laborMarketChart')?.getContext('2d');
+                if (laborMarketCtx) {
+                    const laborLabels = lang === 'zh' ? ['崗位變化趨勢'] : ['Job Change Trend'];
+                    const laborDatasets = [
+                        { label: lang === 'zh' ? '傳統駕駛崗位' : 'Traditional Driving Jobs', data: [-60], backgroundColor: '#6c757d' },
+                        { label: lang === 'zh' ? '新興技術崗位' : 'Emerging Tech Jobs', data: [40], backgroundColor: '#0077b6' }
+                    ];
+                    charts.laborMarket = new Chart(laborMarketCtx, {
+                        type: 'bar',
+                        data: { labels: laborLabels, datasets: laborDatasets },
+                        options: { ...defaultChartOptions, indexAxis: 'y', scales: { x: { stacked: true, grid: { color: GRID_COLOR }, ticks: { color: FONT_COLOR }, title: { display: true, text: lang === 'zh' ? '崗位數量變化指數 (示意)' : 'Job Volume Change Index (Illustrative)', color: FONT_COLOR } }, y: { stacked: true, grid: { display: false } } }, plugins: { ...defaultChartOptions.plugins, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${Math.abs(context.raw)}` } } } }
+                    });
+                }
+            };
+            
+            const saeContainer = document.getElementById('sae-levels-container');
+            const saeContentDiv = document.getElementById('sae-content');
+            const saeButtons = saeContainer.querySelectorAll('.tab-button');
+
+            const updateSaeContent = (level, lang) => {
+                const titleKey = `saeLevel_${level.replace('-', '')}_title`;
+                const contentKey = `saeLevel_${level.replace('-', '')}_content`;
+                const data = {
+                    title: langData[lang][titleKey],
+                    content: langData[lang][contentKey]
+                };
+                saeContentDiv.innerHTML = `<h5 class="font-bold mb-2">${data.title}</h5><p class="text-sm calm-tech-secondary">${data.content}</p>`;
+                saeButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.level === level);
+                });
+            };
+
+            saeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    updateSaeContent(button.dataset.level, currentLang);
+                });
+            });
+
+            document.getElementById('lang-switcher').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                renderText(currentLang);
+            });
+
+            renderText(currentLang);
+        });
+    </script>
+
+</body>
+</html>
