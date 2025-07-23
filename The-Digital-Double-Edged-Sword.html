@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網絡成癮與青少年心理健康：數據透視</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #001f3f;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .text-brand-accent { color: #FF5E5B; }
+        .bg-brand-accent { background-color: #FF5E5B; }
+        .bg-brand-secondary { background-color: #00CECB; }
+        .text-brand-secondary { color: #00CECB; }
+        .bg-brand-light { background-color: #FFFFEA; }
+        .text-brand-dark { color: #00796B; }
+        .border-brand-accent { border-color: #FF5E5B; }
+        .kpi-value {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        .kpi-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .flowchart-arrow {
+            font-size: 2.5rem;
+            color: #00CECB;
+            line-height: 1;
+        }
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            line-height: 1.2;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(200, 200, 200, 0.2);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="fixed top-4 right-4 z-50">
+        <button id="lang-switcher" class="bg-brand-secondary text-white font-bold py-2 px-4 rounded-full shadow-lg hover:bg-brand-accent transition-colors duration-300">
+            English
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-16 text-white">
+            <h1 class="text-4xl md:text-6xl font-black mb-4 text-brand-secondary" data-lang-key="headerTitle">數位雙面刃</h1>
+            <p class="text-lg md:text-2xl max-w-4xl mx-auto" data-lang-key="headerSubtitle">深入剖析網絡成癮與社交媒體對青少年心理健康的深遠影響</p>
+        </header>
+
+        <section id="prevalence" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-2" data-lang-key="prevalenceTitle">問題的規模有多大？</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="prevalenceIntro">全球流行病學數據揭示了一個令人擔憂的趨勢。由於缺乏統一的診斷標準，數據存在差異，但整體方向明確指向問題的普遍性與嚴重性，尤其在特定群體中。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center mb-12">
+                    <div class="bg-brand-light p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value text-brand-accent">7.02%</p>
+                        <p class="kpi-label text-brand-dark" data-lang-key="kpi1">全球廣義網絡成癮盛行率</p>
+                    </div>
+                    <div class="bg-brand-light p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value text-brand-accent">41.8%</p>
+                        <p class="kpi-label text-brand-dark" data-lang-key="kpi2">大學生群體盛行率 (COVID-19後)</p>
+                    </div>
+                    <div class="bg-brand-light p-6 rounded-lg shadow-lg">
+                        <p class="kpi-value text-brand-accent">>2x</p>
+                        <p class="kpi-label text-brand-dark" data-lang-key="kpi3">亞洲國家盛行率通常高於歐美國家</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="prevalenceChart"></canvas>
+                </div>
+                <p class="text-center text-gray-500 mt-4 text-sm" data-lang-key="prevalenceCaption">此圖表比較了不同研究中報告的網絡成癮盛行率，突顯了大學生等高壓群體的脆弱性，以及亞洲地區相對較高的盛行率。</p>
+            </div>
+        </section>
+
+        <section id="risk-factors" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-2" data-lang-key="riskTitle">誰是高風險群體？</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="riskIntro">研究一致指出，年齡和性別是關鍵的風險預測指標。青少年大腦的發展特性使其對網絡的即時回饋尤為敏感，而性別則影響了問題性網絡使用的具體形式。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-brand-dark" data-lang-key="genderChartTitle">性別差異：網絡遊戲障礙(IGD)</h3>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-500 mt-4 text-sm" data-lang-key="genderCaption">數據顯示，男性在網絡遊戲成癮方面的風險顯著高於女性。這種性別差異在低年齡段（如國小）最為明顯，並隨年齡增長而略有縮小。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-center mb-4 text-brand-dark" data-lang-key="comorbidityChartTitle">常見共病問題</h3>
+                        <div class="chart-container h-80 md:h-96">
+                            <canvas id="comorbidityChart"></canvas>
+                        </div>
+                        <p class="text-center text-gray-500 mt-4 text-sm" data-lang-key="comorbidityCaption">網絡成癮並非孤立存在，它常與抑鬱、焦慮及ADHD等心理健康問題同時出現，形成一個複雜的相互作用網絡。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="mechanisms" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-2" data-lang-key="mechanismsTitle">成癮的引擎</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="mechanismsIntro">問題性網絡使用並非意志力薄弱的結果，而是精心設計的技術系統與青少年發展階段的心理脆弱性相互作用的產物。平台透過劫持大腦的獎勵機制，製造了一個難以抗拒的多巴胺循環。</p>
+                <div class="border-2 border-brand-secondary rounded-lg p-6">
+                    <h3 class="text-2xl font-bold text-center mb-6 text-brand-dark" data-lang-key="dopamineTitle">多巴胺獎勵循環示意圖</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-around space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="text-center">
+                            <p class="text-5xl mb-2">📱</p>
+                            <p class="font-bold" data-lang-key="dopamine1_1">平台觸發</p>
+                            <p class="text-sm text-gray-500" data-lang-key="dopamine1_2">(通知、無限滾動)</p>
+                        </div>
+                        <div class="flowchart-arrow transform md:-rotate-0">→</div>
+                        <div class="text-center">
+                            <p class="text-5xl mb-2">🧠</p>
+                            <p class="font-bold" data-lang-key="dopamine2_1">渴望與期待</p>
+                            <p class="text-sm text-gray-500" data-lang-key="dopamine2_2">(尋求不可預測的獎勵)</p>
+                        </div>
+                        <div class="flowchart-arrow transform md:-rotate-0">→</div>
+                        <div class="text-center">
+                            <p class="text-5xl mb-2">❤️</p>
+                            <p class="font-bold" data-lang-key="dopamine3_1">獲得獎勵</p>
+                            <p class="text-sm text-gray-500" data-lang-key="dopamine3_2">(點讚、評論、新內容)</p>
+                        </div>
+                        <div class="flowchart-arrow transform md:-rotate-0">→</div>
+                        <div class="text-center">
+                            <p class="text-5xl mb-2">🔁</p>
+                            <p class="font-bold" data-lang-key="dopamine4_1">強化行為</p>
+                            <p class="text-sm text-gray-500" data-lang-key="dopamine4_2">(多巴胺釋放，加深依賴)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="harms-benefits" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-8" data-lang-key="harmsBenefitsTitle">一把雙刃劍：風險與益處</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border-4 border-red-300 rounded-lg p-6">
+                        <h3 class="text-3xl font-bold text-red-500 text-center mb-4" data-lang-key="harmsTitle">潛在危害</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-red-500 font-bold text-2xl mr-3">⚠️</span>
+                                <div data-lang-key="harm1"><strong class="text-red-700">抑鬱與焦慮風險增加：</strong>每天使用超過3小時，風險倍增，常伴隨睡眠剝奪。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 font-bold text-2xl mr-3">⚠️</span>
+                                <div data-lang-key="harm2"><strong class="text-red-700">身體意象不滿：</strong>46%青少年承認社交媒體讓他們對自己身體感覺更糟。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-red-500 font-bold text-2xl mr-3">⚠️</span>
+                                <div data-lang-key="harm3"><strong class="text-red-700">網絡欺凌：</strong>因其持續性、普遍性與匿名性，傷害尤為嚴重，與自殺意念強烈相關。</div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="border-4 border-teal-300 rounded-lg p-6">
+                        <h3 class="text-3xl font-bold text-teal-600 text-center mb-4" data-lang-key="benefitsTitle">潛在益處</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="text-teal-500 font-bold text-2xl mr-3">✅</span>
+                                <div data-lang-key="benefit1"><strong class="text-teal-700">社會連結與支持：</strong>80%青少年感覺與朋友聯繫更緊密，尤其對邊緣化群體意義重大。</div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-teal-500 font-bold text-2xl mr-3">✅</span>
+                                <div data-lang-key="benefit2"><strong class="text-teal-700">身份認同探索：</strong>71%青少年認為社交媒體提供了展示創造性一面的平台。</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-teal-500 font-bold text-2xl mr-3">✅</span>
+                                <div data-lang-key="benefit3"><strong class="text-teal-700">資訊獲取：</strong>成為獲取健康知識、打破污名、鼓勵求助的重要渠道。</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="treatment" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-2" data-lang-key="treatmentTitle">康復之路</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="treatmentIntro">認知行為治療（CBT）是目前證據最充分的黃金標準干預方法。其針對網絡成癮的特化版本（CBT-IA）提供了一個結構化的三階段治療模型，目標是實現有節制的健康使用，而非完全戒除。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center border-2 border-brand-accent p-6 rounded-lg">
+                        <p class="text-6xl mb-4">1️⃣</p>
+                        <h3 class="text-xl font-bold mb-2 text-brand-dark" data-lang-key="cbt1_title">行為修正</h3>
+                        <p class="text-gray-600" data-lang-key="cbt1_desc">透過自我監控、時間管理等技術，重新獲得對上網行為的控制權。</p>
+                    </div>
+                    <div class="text-center border-2 border-brand-accent p-6 rounded-lg">
+                        <p class="text-6xl mb-4">2️⃣</p>
+                        <h3 class="text-xl font-bold mb-2 text-brand-dark" data-lang-key="cbt2_title">認知重建</h3>
+                        <p class="text-gray-600" data-lang-key="cbt2_desc">識別並挑戰導致成癮的非理性信念，如「我必須在線才能不被拋棄」。</p>
+                    </div>
+                    <div class="text-center border-2 border-brand-accent p-6 rounded-lg">
+                        <p class="text-6xl mb-4">3️⃣</p>
+                        <h3 class="text-xl font-bold mb-2 text-brand-dark" data-lang-key="cbt3_title">傷害減免</h3>
+                        <p class="text-gray-600" data-lang-key="cbt3_desc">學習新的應對技巧，處理潛在的心理問題，預防復發。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="prevention" class="mb-16">
+            <div class="card rounded-xl shadow-2xl p-6 md:p-8">
+                <h2 class="section-title text-center mb-2" data-lang-key="preventionTitle">建立數位韌性</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-8" data-lang-key="preventionIntro">有效的預防是一個多層次的生態系統工程，需要家庭、學校和青少年個體共同努力，從被動應對轉向主動預防。</p>
+                <div class="relative w-full max-w-lg mx-auto mt-8" style="height: 400px;">
+                    <div class="absolute bottom-0 w-full h-full bg-brand-secondary opacity-50 rounded-t-full" style="clip-path: polygon(0 100%, 100% 100%, 50% 0);"></div>
+                    <div class="absolute w-full h-2/3 bottom-0 bg-brand-secondary opacity-70 rounded-t-full" style="clip-path: polygon(15% 100%, 85% 100%, 50% 0);"></div>
+                    <div class="absolute w-full h-1/3 bottom-0 bg-brand-secondary rounded-t-full" style="clip-path: polygon(30% 100%, 70% 100%, 50% 0);"></div>
+                    <div class="absolute inset-0 flex flex-col justify-around items-center text-white font-bold text-center p-4">
+                        <div class="w-full pt-4">
+                            <p class="text-2xl">👤</p>
+                            <h3 class="text-xl" data-lang-key="pyramid1_title">賦予青少年權能</h3>
+                            <p class="text-sm font-normal" data-lang-key="pyramid1_desc">(正念使用、自我調節)</p>
+                        </div>
+                        <div class="w-full pt-8">
+                            <p class="text-2xl">🏫</p>
+                            <h3 class="text-xl" data-lang-key="pyramid2_title">學校的角色</h3>
+                            <p class="text-sm font-normal" data-lang-key="pyramid2_desc">(數位素養教育、早期篩檢)</p>
+                        </div>
+                        <div class="w-full pt-12">
+                            <p class="text-2xl">👨‍👩‍👧‍👦</p>
+                            <h3 class="text-xl" data-lang-key="pyramid3_title">家庭的角色</h3>
+                            <p class="text-sm font-normal" data-lang-key="pyramid3_desc">(制定規則、以身作則、開放溝通)</p>
+                        </div>
+                    </div>
+                </div>
+                 <p class="text-center text-gray-500 mt-4 text-sm" data-lang-key="pyramidCaption">此金字塔圖展示了預防策略的生態系統方法。家庭是基石，提供基礎支持；學校建立系統性教育；最終目標是賦予青少年個體自我管理的能力。</p>
+            </div>
+        </section>
+
+        <footer class="text-center text-white py-8">
+            <p class="font-bold text-brand-secondary" data-lang-key="footerTitle">未來挑戰：元宇宙與沉浸式技術</p>
+            <p class="max-w-3xl mx-auto text-gray-300" data-lang-key="footerSubtitle">新技術可能放大現有風險，我們必須將從社交媒體時代吸取的教訓，應用於對未來的主動塑造和監管之上，將青少年的福祉置於核心。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const FONT_COLOR = '#00796B';
+        const GRID_COLOR = 'rgba(0, 121, 107, 0.1)';
+        let currentLang = 'zh';
+        let charts = {};
+
+        const langData = {
+            zh: {
+                langButton: 'English',
+                pageTitle: '網絡成癮與青少年心理健康：數據透視',
+                headerTitle: '數位雙面刃',
+                headerSubtitle: '深入剖析網絡成癮與社交媒體對青少年心理健康的深遠影響',
+                prevalenceTitle: '問題的規模有多大？',
+                prevalenceIntro: '全球流行病學數據揭示了一個令人擔憂的趨勢。由於缺乏統一的診斷標準，數據存在差異，但整體方向明確指向問題的普遍性與嚴重性，尤其在特定群體中。',
+                kpi1: '全球廣義網絡成癮盛行率',
+                kpi2: '大學生群體盛行率 (COVID-19後)',
+                kpi3: '亞洲國家盛行率通常高於歐美國家',
+                prevalenceCaption: '此圖表比較了不同研究中報告的網絡成癮盛行率，突顯了大學生等高壓群體的脆弱性，以及亞洲地區相對較高的盛行率。',
+                riskTitle: '誰是高風險群體？',
+                riskIntro: '研究一致指出，年齡和性別是關鍵的風險預測指標。青少年大腦的發展特性使其對網絡的即時回饋尤為敏感，而性別則影響了問題性網絡使用的具體形式。',
+                genderChartTitle: '性別差異：網絡遊戲障礙(IGD)',
+                genderCaption: '數據顯示，男性在網絡遊戲成癮方面的風險顯著高於女性。這種性別差異在低年齡段（如國小）最為明顯，並隨年齡增長而略有縮小。',
+                comorbidityChartTitle: '常見共病問題',
+                comorbidityCaption: '網絡成癮並非孤立存在，它常與抑鬱、焦慮及ADHD等心理健康問題同時出現，形成一個複雜的相互作用網絡。',
+                mechanismsTitle: '成癮的引擎',
+                mechanismsIntro: '問題性網絡使用並非意志力薄弱的結果，而是精心設計的技術系統與青少年發展階段的心理脆弱性相互作用的產物。平台透過劫持大腦的獎勵機制，製造了一個難以抗拒的多巴胺循環。',
+                dopamineTitle: '多巴胺獎勵循環示意圖',
+                dopamine1_1: '平台觸發',
+                dopamine1_2: '(通知、無限滾動)',
+                dopamine2_1: '渴望與期待',
+                dopamine2_2: '(尋求不可預測的獎勵)',
+                dopamine3_1: '獲得獎勵',
+                dopamine3_2: '(點讚、評論、新內容)',
+                dopamine4_1: '強化行為',
+                dopamine4_2: '(多巴胺釋放，加深依賴)',
+                harmsBenefitsTitle: '一把雙刃劍：風險與益處',
+                harmsTitle: '潛在危害',
+                harm1: '<strong class="text-red-700">抑鬱與焦慮風險增加：</strong>每天使用超過3小時，風險倍增，常伴隨睡眠剝奪。',
+                harm2: '<strong class="text-red-700">身體意象不滿：</strong>46%青少年承認社交媒體讓他們對自己身體感覺更糟。',
+                harm3: '<strong class="text-red-700">網絡欺凌：</strong>因其持續性、普遍性與匿名性，傷害尤為嚴重，與自殺意念強烈相關。',
+                benefitsTitle: '潛在益處',
+                benefit1: '<strong class="text-teal-700">社會連結與支持：</strong>80%青少年感覺與朋友聯繫更緊密，尤其對邊緣化群體意義重大。',
+                benefit2: '<strong class="text-teal-700">身份認同探索：</strong>71%青少年認為社交媒體提供了展示創造性一面的平台。',
+                benefit3: '<strong class="text-teal-700">資訊獲取：</strong>成為獲取健康知識、打破污名、鼓勵求助的重要渠道。',
+                treatmentTitle: '康復之路',
+                treatmentIntro: '認知行為治療（CBT）是目前證據最充分的黃金標準干預方法。其針對網絡成癮的特化版本（CBT-IA）提供了一個結構化的三階段治療模型，目標是實現有節制的健康使用，而非完全戒除。',
+                cbt1_title: '行為修正',
+                cbt1_desc: '透過自我監控、時間管理等技術，重新獲得對上網行為的控制權。',
+                cbt2_title: '認知重建',
+                cbt2_desc: '識別並挑戰導致成癮的非理性信念，如「我必須在線才能不被拋棄」。',
+                cbt3_title: '傷害減免',
+                cbt3_desc: '學習新的應對技巧，處理潛在的心理問題，預防復發。',
+                preventionTitle: '建立數位韌性',
+                preventionIntro: '有效的預防是一個多層次的生態系統工程，需要家庭、學校和青少年個體共同努力，從被動應對轉向主動預防。',
+                pyramid1_title: '賦予青少年權能',
+                pyramid1_desc: '(正念使用、自我調節)',
+                pyramid2_title: '學校的角色',
+                pyramid2_desc: '(數位素養教育、早期篩檢)',
+                pyramid3_title: '家庭的角色',
+                pyramid3_desc: '(制定規則、以身作則、開放溝通)',
+                pyramidCaption: '此金字塔圖展示了預防策略的生態系統方法。家庭是基石，提供基礎支持；學校建立系統性教育；最終目標是賦予青少年個體自我管理的能力。',
+                footerTitle: '未來挑戰：元宇宙與沉浸式技術',
+                footerSubtitle: '新技術可能放大現有風險，我們必須將從社交媒體時代吸取的教訓，應用於對未來的主動塑造和監管之上，將青少年的福祉置於核心。',
+                chart_prevalence_label: '報告盛行率 (%)',
+                chart_prevalence_cats: ['全球廣義網絡成癮', '全球網絡遊戲障礙', '香港高中生', '歐洲青少年', '全球大學生'],
+                chart_gender_title: '網絡依賴程度的性別差異 (效應值 g)',
+                chart_gender_male: '男性',
+                chart_gender_female: '女性',
+                chart_gender_cats: ['國小階段', '大專院校'],
+                chart_comorbidity_label: '常見共病',
+                chart_comorbidity_cats: ['抑鬱症', '焦慮症', '注意力不足過動症 (ADHD)'],
+            },
+            en: {
+                langButton: '中文',
+                pageTitle: 'Internet Addiction & Adolescent Mental Health: A Data Deep Dive',
+                headerTitle: 'The Digital Double-Edged Sword',
+                headerSubtitle: 'A Deep Dive into Internet Addiction and Social Media\'s Profound Impact on Adolescent Mental Health',
+                prevalenceTitle: 'How Big is the Problem?',
+                prevalenceIntro: 'Global epidemiological data reveals a worrying trend. Due to a lack of uniform diagnostic criteria, data varies, but the overall direction clearly points to the prevalence and severity of the issue, especially in specific groups.',
+                kpi1: 'Global Prevalence of Generalized Internet Addiction',
+                kpi2: 'Prevalence in University Students (Post-COVID-19)',
+                kpi3: 'Prevalence in Asian countries is often >2x higher than in Western countries',
+                prevalenceCaption: 'This chart compares reported prevalence rates of internet addiction from various studies, highlighting the vulnerability of high-stress groups like university students and the relatively high rates in Asia.',
+                riskTitle: 'Who is at High Risk?',
+                riskIntro: 'Research consistently points to age and gender as key risk predictors. The developmental characteristics of the adolescent brain make it particularly sensitive to the instant feedback of the internet, while gender influences the specific forms of problematic internet use.',
+                genderChartTitle: 'Gender Differences: Internet Gaming Disorder (IGD)',
+                genderCaption: 'Data shows that males are at a significantly higher risk for internet gaming addiction than females. This gender gap is most pronounced at younger ages (e.g., elementary school) and narrows slightly with age.',
+                comorbidityChartTitle: 'Common Comorbidities',
+                comorbidityCaption: 'Internet addiction does not exist in isolation. It often co-occurs with mental health issues like depression, anxiety, and ADHD, forming a complex interactive network.',
+                mechanismsTitle: 'The Engine of Addiction',
+                mechanismsIntro: 'Problematic internet use is not a result of weak willpower, but a product of the interaction between meticulously designed tech systems and the psychological vulnerabilities of adolescent development. Platforms hijack the brain\'s reward system, creating an irresistible dopamine loop.',
+                dopamineTitle: 'The Dopamine Reward Loop',
+                dopamine1_1: 'Platform Trigger',
+                dopamine1_2: '(Notifications, infinite scroll)',
+                dopamine2_1: 'Craving & Anticipation',
+                dopamine2_2: '(Seeking unpredictable rewards)',
+                dopamine3_1: 'Reward Received',
+                dopamine3_2: '(Likes, comments, new content)',
+                dopamine4_1: 'Behavior Reinforced',
+                dopamine4_2: '(Dopamine release, deepens dependency)',
+                harmsBenefitsTitle: 'A Double-Edged Sword: Risks & Benefits',
+                harmsTitle: 'Potential Harms',
+                harm1: '<strong class="text-red-700">Increased Risk of Depression & Anxiety:</strong> Risk doubles with over 3 hours of daily use, often accompanied by sleep deprivation.',
+                harm2: '<strong class="text-red-700">Body Image Dissatisfaction:</strong> 46% of adolescents admit social media makes them feel worse about their bodies.',
+                harm3: '<strong class="text-red-700">Cyberbullying:</strong> The harm is particularly severe due to its persistent, pervasive, and anonymous nature, strongly linked to suicidal ideation.',
+                benefitsTitle: 'Potential Benefits',
+                benefit1: '<strong class="text-teal-700">Social Connection & Support:</strong> 80% of teens feel more connected to their friends, especially significant for marginalized groups.',
+                benefit2: '<strong class="text-teal-700">Identity Exploration:</strong> 71% of teens see social media as a platform to showcase their creative side.',
+                benefit3: '<strong class="text-teal-700">Access to Information:</strong> It serves as a vital channel for health knowledge, breaking stigma, and encouraging help-seeking.',
+                treatmentTitle: 'The Path to Recovery',
+                treatmentIntro: 'Cognitive Behavioral Therapy (CBT) is the gold standard intervention with the most evidence. Its specialized version for internet addiction (CBT-IA) offers a structured, three-stage model aiming for controlled, healthy use rather than complete abstinence.',
+                cbt1_title: 'Behavior Modification',
+                cbt1_desc: 'Regain control over online behavior through techniques like self-monitoring and time management.',
+                cbt2_title: 'Cognitive Restructuring',
+                cbt2_desc: 'Identify and challenge irrational beliefs driving the addiction, such as "I must be online to not be left out."',
+                cbt3_title: 'Harm Reduction',
+                cbt3_desc: 'Learn new coping skills, address underlying psychological issues, and prevent relapse.',
+                preventionTitle: 'Building Digital Resilience',
+                preventionIntro: 'Effective prevention is a multi-layered, ecosystemic effort requiring collaboration between families, schools, and adolescents, shifting from reactive response to proactive prevention.',
+                pyramid1_title: 'Empowering Adolescents',
+                pyramid1_desc: '(Mindful use, self-regulation)',
+                pyramid2_title: 'The Role of Schools',
+                pyramid2_desc: '(Digital literacy education, early screening)',
+                pyramid3_title: 'The Role of Families',
+                pyramid3_desc: '(Setting rules, role modeling, open communication)',
+                pyramidCaption: 'This pyramid illustrates the ecosystem approach to prevention. Family is the foundation, providing basic support; schools build systematic education; the ultimate goal is to empower individuals with self-management skills.',
+                footerTitle: 'Future Challenge: The Metaverse & Immersive Tech',
+                footerSubtitle: 'New technologies may amplify existing risks. We must apply the lessons learned from the social media era to proactively shape and regulate the future, placing adolescent well-being at the core.',
+                chart_prevalence_label: 'Reported Prevalence (%)',
+                chart_prevalence_cats: ['Generalized Internet Addiction', 'Internet Gaming Disorder', 'Hong Kong High Schoolers', 'European Adolescents', 'Global University Students'],
+                chart_gender_title: 'Gender Difference in Internet Dependence (Effect Size g)',
+                chart_gender_male: 'Male',
+                chart_gender_female: 'Female',
+                chart_gender_cats: ['Elementary School', 'College/University'],
+                chart_comorbidity_label: 'Common Comorbidities',
+                chart_comorbidity_cats: ['Depression', 'Anxiety', 'ADHD'],
+            }
+        };
+
+        function wrapLabel(str, maxLen = 16) {
+            if (str.length <= maxLen) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLen && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines.filter(line => line.length > 0);
+        }
+
+        const tooltipTitleCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) return label.join(' ');
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+        
+        const chartColors = { red: '#FF5E5B', teal: '#00CECB', yellow: '#FFED66', darkTeal: '#00796B' };
+
+        function renderContent(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+            document.title = langData[lang].pageTitle;
+            document.getElementById('lang-switcher').textContent = langData[lang].langButton;
+            
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (langData[lang][key]) {
+                    el.innerHTML = langData[lang][key];
+                }
+            });
+        }
+
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        function renderCharts(lang) {
+            destroyCharts();
+
+            const prevalenceCtx = document.getElementById('prevalenceChart').getContext('2d');
+            charts.prevalence = new Chart(prevalenceCtx, {
+                type: 'bar',
+                data: {
+                    labels: langData[lang].chart_prevalence_cats.map(label => wrapLabel(label)),
+                    datasets: [{
+                        label: langData[lang].chart_prevalence_label,
+                        data: [7.02, 2.47, 26.7, 4.4, 41.84],
+                        backgroundColor: [chartColors.red, chartColors.teal, chartColors.yellow, chartColors.teal, chartColors.red],
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderWidth: 1
+                    }]
+                },
+                options: { ...tooltipTitleCallback, responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { ...tooltipTitleCallback.plugins, legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { color: FONT_COLOR, callback: value => value + '%' }, grid: { color: GRID_COLOR } }, y: { ticks: { color: FONT_COLOR }, grid: { display: false } } } }
+            });
+
+            const genderCtx = document.getElementById('genderChart').getContext('2d');
+            charts.gender = new Chart(genderCtx, {
+                type: 'bar',
+                data: {
+                    labels: langData[lang].chart_gender_cats,
+                    datasets: [ { label: langData[lang].chart_gender_male, data: [0.43, 0.24], backgroundColor: chartColors.teal }, { label: langData[lang].chart_gender_female, data: [0, 0], backgroundColor: chartColors.red } ]
+                },
+                options: { ...tooltipTitleCallback, responsive: true, maintainAspectRatio: false, plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'top', labels: { color: FONT_COLOR } }, title: { display: true, text: langData[lang].chart_gender_title, color: FONT_COLOR } }, scales: { x: { ticks: { color: FONT_COLOR }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } } }
+            });
+
+            const comorbidityCtx = document.getElementById('comorbidityChart').getContext('2d');
+            charts.comorbidity = new Chart(comorbidityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: langData[lang].chart_comorbidity_cats,
+                    datasets: [{ label: langData[lang].chart_comorbidity_label, data: [35, 30, 25], backgroundColor: [chartColors.red, chartColors.yellow, chartColors.teal], hoverOffset: 4 }]
+                },
+                options: { ...tooltipTitleCallback, responsive: true, maintainAspectRatio: false, plugins: { ...tooltipTitleCallback.plugins, legend: { position: 'bottom', labels: { color: FONT_COLOR } } } }
+            });
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            renderContent(currentLang);
+            renderCharts(currentLang);
+        });
+
+        window.onload = () => {
+            renderContent(currentLang);
+            renderCharts(currentLang);
+        };
+    </script>
+</body>
+</html>
