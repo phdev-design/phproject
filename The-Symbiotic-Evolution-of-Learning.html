@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學習的共生演化：AI與腦科學的教育應用</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Blue/Green Accents -->
+    <!-- Application Structure Plan: The application abandons the report's linear five-part structure for a thematic, three-tab navigation: "AI-Driven Teaching," "The Brain's Learning Code," and "Integration & Future." This user-centric design allows non-linear exploration based on interest. Key interactions include interactive cards for AI technologies, a "Myth vs. Fact" component for neuromyths, a comparative bar chart for AI platforms, and an interactive grid for ethical risks. This structure was chosen to distill the dense report into digestible, engaging modules, promoting user discovery and understanding over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - AI Core Tech (Table 1): Report Info -> 4 core AI techs. Goal -> Inform/Organize. Viz -> Interactive Cards. Interaction -> Click to reveal details. Justification -> More engaging than a static table, uses progressive disclosure. Library -> HTML/CSS/JS.
+        - Neuromyths (Table 2): Report Info -> 4 common neuromyths. Goal -> Compare/Debunk. Viz -> "Myth vs. Fact" toggle component. Interaction -> Click on a myth to see the scientific consensus. Justification -> Dynamically juxtaposes misinformation with facts, enhancing learning. Library -> HTML/CSS/JS.
+        - AI Platforms (Table 3): Report Info -> 5 leading AI platforms. Goal -> Compare. Viz -> Horizontal Bar Chart. Interaction -> Hover over bars to see details. Justification -> Provides a quick visual comparison of different platforms' focus. Library -> Chart.js (Canvas).
+        - Ethical Risks (Table 4): Report Info -> 4 ethical risk areas. Goal -> Organize/Inform. Viz -> Interactive Accordion. Interaction -> Click a risk to expand and see harms/mitigation strategies. Justification -> Breaks down complex ethical considerations into manageable sections. Library -> HTML/CSS/JS.
+        - Personalization Evolution: Report Info -> Progression from behavioral to neural data. Goal -> Show Change/Process. Viz -> HTML/CSS timeline. Interaction -> Hover to highlight stages. Justification -> Visually communicates a key trend discussed in the report. Library -> HTML/CSS/JS.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #FDFBF8; /* Warm Neutral Background */
+            color: #3a3a3a;
+        }
+        .nav-btn {
+            transition: all 0.3s ease;
+            border-bottom: 4px solid transparent;
+        }
+        .nav-btn.active {
+            color: #2563eb; /* Accent Blue */
+            border-bottom-color: #2563eb;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        .myth-buster-container .myth-item.active {
+            background-color: #E0E7FF; /* Light accent for active myth */
+        }
+        .myth-buster-container .fact-content {
+            background-color: #F0F9FF;
+        }
+        .accordion-item-header {
+            cursor: pointer;
+        }
+        .accordion-item-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 20px;
+            bottom: 20px;
+            width: 4px;
+            background-color: #DBEAFE;
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            width: 50%;
+        }
+        .timeline-item:nth-child(odd) {
+            left: 0;
+            padding-right: 3rem;
+        }
+        .timeline-item:nth-child(even) {
+            left: 50%;
+            padding-left: 3rem;
+        }
+        .timeline-dot {
+            content: '';
+            position: absolute;
+            top: 20px;
+            width: 20px;
+            height: 20px;
+            background-color: #60A5FA;
+            border: 4px solid #FDFBF8;
+            border-radius: 50%;
+            z-index: 10;
+        }
+        .timeline-item:nth-child(odd) .timeline-dot {
+            right: -10px;
+            transform: translateX(50%);
+        }
+        .timeline-item:nth-child(even) .timeline-dot {
+            left: -10px;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="relative text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4" data-lang-key="mainTitle"></h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto" data-lang-key="mainSubtitle"></p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"></button>
+        </header>
+
+        <nav class="flex justify-center border-b border-gray-200 mb-12">
+            <button class="nav-btn active text-lg font-semibold py-4 px-6 text-gray-500 hover:text-blue-600" data-target="ai-teaching" data-lang-key="navAITeaching"></button>
+            <button class="nav-btn text-lg font-semibold py-4 px-6 text-gray-500 hover:text-blue-600" data-target="brain-learning" data-lang-key="navBrainLearning"></button>
+            <button class="nav-btn text-lg font-semibold py-4 px-6 text-gray-500 hover:text-blue-600" data-target="integration-future" data-lang-key="navIntegrationFuture"></button>
+        </nav>
+
+        <main>
+            <!-- Section 1: AI-Driven Teaching -->
+            <section id="ai-teaching" class="content-section active">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2" data-lang-key="aiTitle"></h2>
+                    <p class="text-md text-gray-600 max-w-2xl mx-auto" data-lang-key="aiSubtitle"></p>
+                </div>
+
+                <h3 class="text-2xl font-bold text-center text-gray-700 mb-8" data-lang-key="aiCoreTechTitle"></h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">🧠</div>
+                        <h4 class="text-xl font-bold mb-2" data-lang-key="coreTechMLTitle"></h4>
+                        <p class="text-gray-600" data-lang-key="coreTechMLDesc"></p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">💬</div>
+                        <h4 class="text-xl font-bold mb-2" data-lang-key="coreTechNLPTitle"></h4>
+                        <p class="text-gray-600" data-lang-key="coreTechNLPDesc"></p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">✨</div>
+                        <h4 class="text-xl font-bold mb-2" data-lang-key="coreTechGenAITitle"></h4>
+                        <p class="text-gray-600" data-lang-key="coreTechGenAIDesc"></p>
+                    </div>
+                    <div class="card p-6 text-center">
+                        <div class="text-4xl mb-4">📈</div>
+                        <h4 class="text-xl font-bold mb-2" data-lang-key="coreTechCogModTitle"></h4>
+                        <p class="text-gray-600" data-lang-key="coreTechCogModDesc"></p>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-center text-gray-700 mb-8" data-lang-key="aiPlatformsTitle"></h3>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-lang-key="aiPlatformsDesc"></p>
+                <div class="card p-4 md:p-8">
+                    <div class="chart-container">
+                        <canvas id="platformsChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Brain's Learning Code -->
+            <section id="brain-learning" class="content-section">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2" data-lang-key="brainTitle"></h2>
+                    <p class="text-md text-gray-600 max-w-2xl mx-auto" data-lang-key="brainSubtitle"></p>
+                </div>
+
+                <div class="grid md:grid-cols-5 gap-8 items-center mb-16">
+                    <div class="md:col-span-3">
+                        <h3 class="text-2xl font-bold text-gray-700 mb-4" data-lang-key="neuroplasticityTitle"></h3>
+                        <p class="text-gray-600 mb-4" data-lang-key="neuroplasticityDesc"></p>
+                        <ul class="list-disc list-inside text-gray-600 space-y-2">
+                            <li data-lang-key="neuroplasticityLi1"></li>
+                            <li data-lang-key="neuroplasticityLi2"></li>
+                            <li data-lang-key="neuroplasticityLi3"></li>
+                        </ul>
+                    </div>
+                    <div class="md:col-span-2 card p-6">
+                        <div class="flex items-center justify-center space-x-4">
+                            <span class="text-5xl">🧠</span>
+                            <span id="connection-line" class="h-1 bg-gray-300 w-16 transition-all duration-500"></span>
+                            <span class="text-5xl">💡</span>
+                        </div>
+                        <p class="text-center text-sm text-gray-500 mt-4" data-lang-key="neuroplasticityCaption"></p>
+                        <button id="plasticity-btn" class="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition" data-lang-key="neuroplasticityButton"></button>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold text-center text-gray-700 mb-8" data-lang-key="neuromythsTitle"></h3>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-lang-key="neuromythsDesc"></p>
+                <div class="myth-buster-container max-w-4xl mx-auto grid md:grid-cols-2 gap-0 shadow-lg rounded-lg overflow-hidden border border-gray-200">
+                    <div id="myth-list" class="flex flex-col border-r border-gray-200 bg-white"></div>
+                    <div id="fact-content" class="p-8 fact-content"></div>
+                </div>
+            </section>
+
+            <!-- Section 3: Integration & Future -->
+            <section id="integration-future" class="content-section">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2" data-lang-key="integrationTitle"></h2>
+                    <p class="text-md text-gray-600 max-w-2xl mx-auto" data-lang-key="integrationSubtitle"></p>
+                </div>
+
+                <h3 class="text-2xl font-bold text-center text-gray-700 mb-8" data-lang-key="evolutionTitle"></h3>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto" data-lang-key="evolutionDesc"></p>
+                <div class="relative max-w-4xl mx-auto">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="card p-6 mr-4">
+                                <h4 class="font-bold text-lg text-blue-600" data-lang-key="evolutionStep1Title"></h4>
+                                <p class="text-sm text-gray-600 mt-2" data-lang-key="evolutionStep1Desc"></p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="card p-6 ml-4">
+                                <h4 class="font-bold text-lg text-green-600" data-lang-key="evolutionStep2Title"></h4>
+                                <p class="text-sm text-gray-600 mt-2" data-lang-key="evolutionStep2Desc"></p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="card p-6 mr-4">
+                                <h4 class="font-bold text-lg text-purple-600" data-lang-key="evolutionStep3Title"></h4>
+                                <p class="text-sm text-gray-600 mt-2" data-lang-key="evolutionStep3Desc"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold text-center text-gray-700 mt-20 mb-8" data-lang-key="ethicsTitle"></h3>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-lang-key="ethicsDesc"></p>
+                <div id="ethics-accordion" class="max-w-4xl mx-auto space-y-4"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DATA STORE ---
+            const translations = {
+                zh: {
+                    mainTitle: "學習的共生演化",
+                    mainSubtitle: "整合人工智慧與神經科學，探索下一代教育的無限可能。本報告將帶您深入了解AI如何重塑教學，以及大腦學習的奧秘。",
+                    langButton: "English",
+                    navAITeaching: "AI 驅動的教學",
+                    navBrainLearning: "大腦的學習密碼",
+                    navIntegrationFuture: "融合與未來",
+                    aiTitle: "AI 驅動的教學",
+                    aiSubtitle: "本節將深入探討AI如何作為智慧導師，透過核心技術實現個人化學習、自動化評量與內容生成，並比較全球領先的教育平台。",
+                    aiCoreTechTitle: "AI教育核心技術",
+                    coreTechMLTitle: "機器學習",
+                    coreTechMLDesc: "從海量數據中識別模式，為學生推薦適應性學習路徑，實現真正的個人化教育。",
+                    coreTechNLPTitle: "自然語言處理",
+                    coreTechNLPDesc: "賦予系統理解與生成人類語言的能力，實現對話式家教、自動作文評分等功能。",
+                    coreTechGenAITitle: "生成式AI",
+                    coreTechGenAIDesc: "創造全新的多模態內容，自動生成教案、教材與互動式模擬場景，革新教學體驗。",
+                    coreTechCogModTitle: "認知建模",
+                    coreTechCogModDesc: "建立學生的知識狀態模型，精準診斷知識弱點，並預測學習困難點，提供主動指導。",
+                    aiPlatformsTitle: "全球領先AI教育平台比較",
+                    aiPlatformsDesc: "全球AI教育市場呈現多元發展，各平台採用不同技術路徑與教育哲學。此圖表比較了幾家代表性平台。將滑鼠懸停在長條上以查看詳細資訊。",
+                    platformChartLabel: "平台特色",
+                    platformDetails: [
+                        { tech: '機器學習/神經科學原則', focus: 'K-12個人化學習路徑', users: '學校/教師' },
+                        { tech: '機器學習/知識空間理論', focus: 'K-12適應性輔導', users: '學生/家長' },
+                        { tech: '生成式AI/蘇格拉底式提問法', focus: 'K-12+引導式探究', users: '學生/教師' },
+                        { tech: '自然語言處理/寫作評估', focus: '高等教育/寫作技巧', users: '大學/學生' },
+                        { tech: '規則導向/步驟式引導', focus: 'STEM學科解題', users: '學生' }
+                    ],
+                    brainTitle: "大腦的學習密碼",
+                    brainSubtitle: "本節回歸學習的生物學本質，闡釋神經可塑性如何驅動記憶形成，並揭示教育界常見的「神經迷思」，幫助我們區分科學與偽科學。",
+                    neuroplasticityTitle: "神經可塑性：大腦的終身學習能力",
+                    neuroplasticityDesc: "神經可塑性是大腦因應經驗而改變自身結構與功能的能力，是終身學習的生物學基礎。每一次學習與練習，都在雕塑大腦的神經網路。根據赫布定律：「共同激發的神經元會連結在一起」，重複的活化會強化神經元之間的突觸連結，形成穩固的記憶迴路。",
+                    neuroplasticityLi1: "<b>結構性可塑性:</b> 神經元連結的物理性改變，如新突觸生成。",
+                    neuroplasticityLi2: "<b>功能性可塑性:</b> 大腦功能在受損後轉移至其他區域的能力。",
+                    neuroplasticityLi3: "<b>驅動因素:</b> 經驗、練習、注意力與情緒共同作用。",
+                    neuroplasticityCaption: "重複練習強化神經連結",
+                    neuroplasticityButton: "點擊模擬活化",
+                    neuromythsTitle: "解構神經迷思",
+                    neuromythsDesc: "點擊下方的迷思，查看對應的科學共識，建立正確的腦科學認知。",
+                    myths: [
+                        { myth: '學習風格 (VAK)', consensus: '尚無可靠證據支持。所有學習者在資訊以多種模態（如圖文並茂）呈現時，學習效果都會更好。', implication: '應專注於提供豐富、多樣化的多模態教學。' },
+                        { myth: '左右腦主導論', consensus: '這是對大腦功能的過度簡化。多數複雜任務都需要左右腦半球的協同工作。', implication: '應設計能同時激發分析與創造性思維的整合性學習活動。' },
+                        { myth: '我們只用了10%的大腦', consensus: '此說法完全錯誤。腦功能成像顯示，大腦幾乎所有區域都有其功能並被活化。', implication: '強調所有學生都擁有巨大的學習潛力，關鍵在於有效策略。' },
+                        { myth: '關鍵期是絕對的學習死線', consensus: '這是對「敏感期」的誤解。雖然在敏感期學習更容易，但終身學習都是可能的。', implication: '鼓勵並支持所有年齡段的學習者，相信大腦終身具有可塑性。' }
+                    ],
+                    mythLabel: "迷思：",
+                    consensusLabel: "科學共識：",
+                    implicationLabel: "教育啟示：",
+                    integrationTitle: "融合與未來",
+                    integrationSubtitle: "本節探討AI與神經科學如何綜效，從管理認知負荷到情感計算，並前瞻性地審視倫理挑戰與未來教育的發展方向。",
+                    evolutionTitle: "AI個人化技術的演進",
+                    evolutionDesc: "AI個人化技術正從間接推斷走向直接測量，每一次躍升都帶來更精準的教育，也伴隨著更深刻的倫理挑戰。",
+                    evolutionStep1Title: "行為數據推斷",
+                    evolutionStep1Desc: "傳統ITS依賴答題對錯、反應時間等外部表現來推斷學生的知識水平與困難點。",
+                    evolutionStep2Title: "情感表達分析",
+                    evolutionStep2Desc: "情感計算系統從面部表情、文字語氣等推斷情緒狀態，提供更人性化的互動。",
+                    evolutionStep3Title: "神經活動測量",
+                    evolutionStep3Desc: "神經同步AI利用腦機介面(BCI)直接測量注意力、認知負荷等大腦狀態，實現即時回饋。",
+                    ethicsTitle: "倫理風險與緩解框架",
+                    ethicsDesc: "AI教育的發展必須正視演算法偏見、數據隱私等倫理挑戰。點擊下方各風險領域以展開緩解策略。",
+                    ethicsData: [
+                        { risk: '演算法偏見', harm: '固化社會刻板印象、產生不公平的評分與機會。', devStrategy: '使用多元化、具代表性的訓練數據；實施可解釋性AI（XAI）以供審計。', eduStrategy: '教授學生批判性評估AI生成內容；要求供應商提供透明度報告。' },
+                        { risk: '數據隱私', harm: '身份盜竊、敏感個人資訊濫用、認知狀態被監控。', devStrategy: '數據匿名化與加密；設計透明的用戶同意流程；最小化數據收集。', eduStrategy: '制定嚴格的數據保護法規；審慎審核技術供應商的隱私政策。' },
+                        { risk: '人際互動減少', harm: '損害學生的社交情感技能、造成學習孤立感。', devStrategy: '設計促進協作的學習任務；強調「人在迴路」中的人機互動模式。', eduStrategy: '優先採用混合式學習模式；確保課堂有充足的師生與同儕互動時間。' },
+                        { risk: '數位落差', harm: '加劇因社經地位導致的教育不平等。', devStrategy: '開發低頻寬、可離線使用的版本；提供價格更易負擔的方案。', eduStrategy: '投資數位基礎設施建設；為弱勢學生提供設備與網路補助。' }
+                    ],
+                    harmLabel: "潛在危害：",
+                    devStrategyLabel: "開發者緩解策略：",
+                    eduStrategyLabel: "教育者/政策制定者緩解策略：",
+                },
+                en: {
+                    mainTitle: "The Symbiotic Evolution of Learning",
+                    mainSubtitle: "Integrating AI and neuroscience to explore the future of education. This report delves into how AI is reshaping teaching and the mysteries of brain-based learning.",
+                    langButton: "中文",
+                    navAITeaching: "AI-Driven Teaching",
+                    navBrainLearning: "The Brain's Learning Code",
+                    navIntegrationFuture: "Integration & Future",
+                    aiTitle: "AI-Driven Teaching",
+                    aiSubtitle: "This section explores how AI acts as an intelligent tutor, enabling personalized learning, automated assessment, and content generation, while comparing leading global platforms.",
+                    aiCoreTechTitle: "Core AI Technologies in Education",
+                    coreTechMLTitle: "Machine Learning",
+                    coreTechMLDesc: "Identifies patterns in vast data to recommend adaptive learning paths for true personalization.",
+                    coreTechNLPTitle: "Natural Language Processing",
+                    coreTechNLPDesc: "Enables systems to understand and generate human language for conversational tutoring and automated essay scoring.",
+                    coreTechGenAITitle: "Generative AI",
+                    coreTechGenAIDesc: "Creates novel, multimodal content, automating the generation of lesson plans, materials, and interactive simulations.",
+                    coreTechCogModTitle: "Cognitive Modeling",
+                    coreTechCogModDesc: "Builds a model of a student's knowledge state to diagnose weaknesses and predict difficulties, offering proactive guidance.",
+                    aiPlatformsTitle: "Comparison of Leading Global AI Education Platforms",
+                    aiPlatformsDesc: "The global AI education market is diverse, with platforms adopting various technologies and philosophies. This chart compares several representative platforms. Hover over bars for details.",
+                    platformChartLabel: "Platform Focus",
+                    platformDetails: [
+                        { tech: 'Machine Learning / Neuroscience Principles', focus: 'K-12 Personalized Learning Paths', users: 'Schools / Teachers' },
+                        { tech: 'Machine Learning / Knowledge Space Theory', focus: 'K-12 Adaptive Tutoring', users: 'Students / Parents' },
+                        { tech: 'Generative AI / Socratic Method', focus: 'K-12+ Guided Inquiry', users: 'Students / Teachers' },
+                        { tech: 'Natural Language Processing / Writing Assessment', focus: 'Higher Education / Writing Skills', users: 'Universities / Students' },
+                        { tech: 'Rule-Based / Step-by-Step Guidance', focus: 'STEM Problem Solving', users: 'Students' }
+                    ],
+                    brainTitle: "The Brain's Learning Code",
+                    brainSubtitle: "This section returns to the biological basis of learning, explaining how neuroplasticity drives memory and debunking common 'neuromyths' to distinguish science from pseudoscience.",
+                    neuroplasticityTitle: "Neuroplasticity: The Brain's Lifelong Learning Ability",
+                    neuroplasticityDesc: "Neuroplasticity is the brain's ability to change its structure and function in response to experience, forming the biological basis for lifelong learning. Every learning session sculpts the brain's neural networks. According to Hebb's Law, 'neurons that fire together, wire together,' repeated activation strengthens synaptic connections, forming stable memory circuits.",
+                    neuroplasticityLi1: "<b>Structural Plasticity:</b> Physical changes in neural connections, like new synapse formation.",
+                    neuroplasticityLi2: "<b>Functional Plasticity:</b> The brain's ability to shift functions to other areas after damage.",
+                    neuroplasticityLi3: "<b>Driving Factors:</b> A combination of experience, practice, attention, and emotion.",
+                    neuroplasticityCaption: "Repetition strengthens neural connections",
+                    neuroplasticityButton: "Click to Simulate Activation",
+                    neuromythsTitle: "Debunking Neuromyths",
+                    neuromythsDesc: "Click on a myth below to view the scientific consensus and build an accurate understanding of brain science.",
+                    myths: [
+                        { myth: 'Learning Styles (VAK)', consensus: 'No reliable evidence supports this. All learners benefit when information is presented in multiple modalities (e.g., visual and text).', implication: 'Focus on providing rich, varied, multimodal instruction for all students.' },
+                        { myth: 'Left-Brain vs. Right-Brain Dominance', consensus: 'This is an oversimplification. Most complex tasks require the coordinated effort of both brain hemispheres.', implication: 'Design integrated learning activities that engage both analytical and creative thinking.' },
+                        { myth: 'We Only Use 10% of Our Brains', consensus: 'This is completely false. Brain imaging shows that nearly all regions of the brain are active at various times.', implication: 'Emphasize that all students have immense potential; the key is effective strategies.' },
+                        { myth: 'Critical Periods are Absolute Deadlines', consensus: 'This misinterprets \'sensitive periods.\' While learning is easier during these times, lifelong learning is possible.', implication: 'Encourage and support learners of all ages, trusting in the brain\'s lifelong plasticity.' }
+                    ],
+                    mythLabel: "Myth: ",
+                    consensusLabel: "Scientific Consensus: ",
+                    implicationLabel: "Educational Implication: ",
+                    integrationTitle: "Integration & Future",
+                    integrationSubtitle: "This section examines the synergy between AI and neuroscience, from managing cognitive load to affective computing, and looks ahead at ethical challenges and future directions.",
+                    evolutionTitle: "The Evolution of AI Personalization",
+                    evolutionDesc: "AI personalization is evolving from indirect inference to direct measurement. Each leap offers more precise education but also brings deeper ethical challenges.",
+                    evolutionStep1Title: "Behavioral Data Inference",
+                    evolutionStep1Desc: "Traditional ITS infers student knowledge and difficulties from external behaviors like answer correctness and response time.",
+                    evolutionStep2Title: "Affective Expression Analysis",
+                    evolutionStep2Desc: "Affective computing systems infer emotional states from facial expressions or tone of voice to provide more humane interaction.",
+                    evolutionStep3Title: "Neural Activity Measurement",
+                    evolutionStep3Desc: "Neuro-adaptive AI uses Brain-Computer Interfaces (BCI) to directly measure cognitive states like attention and cognitive load for real-time feedback.",
+                    ethicsTitle: "Ethical Risks & Mitigation Framework",
+                    ethicsDesc: "The development of AI in education must address ethical challenges like algorithmic bias and data privacy. Click each risk area below to expand mitigation strategies.",
+                    ethicsData: [
+                         { risk: 'Algorithmic Bias', harm: 'Reinforces social stereotypes; produces unfair assessments and opportunities.', devStrategy: 'Use diverse, representative training data; implement Explainable AI (XAI) for auditing.', eduStrategy: 'Teach students to critically evaluate AI output; demand transparency reports from vendors.' },
+                         { risk: 'Data Privacy', harm: 'Identity theft; misuse of sensitive personal information; monitoring of cognitive states.', devStrategy: 'Anonymize and encrypt data; design transparent user consent processes; minimize data collection.', eduStrategy: 'Establish robust data protection regulations; carefully vet privacy policies of tech vendors.' },
+                         { risk: 'Reduced Human Interaction', harm: 'Damages students\' social-emotional skills; creates a sense of learning in isolation.', devStrategy: 'Design collaborative learning tasks; emphasize human-in-the-loop interaction models.', eduStrategy: 'Prioritize blended learning models; ensure ample time for teacher-student and peer interaction.' },
+                         { risk: 'Digital Divide', harm: 'Exacerbates educational inequality based on socioeconomic status.', devStrategy: 'Develop low-bandwidth and offline-capable versions; offer more affordable pricing tiers.', eduStrategy: 'Invest in digital infrastructure; provide device and internet subsidies for disadvantaged students.' }
+                    ],
+                    harmLabel: "Potential Harm: ",
+                    devStrategyLabel: "Developer Mitigation Strategy: ",
+                    eduStrategyLabel: "Educator/Policymaker Mitigation Strategy: ",
+                }
+            };
+
+            // --- STATE & ELEMENTS ---
+            let currentLanguage = 'zh';
+            let platformsChart = null;
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const contentSections = document.querySelectorAll('.content-section');
+            const langSwitcher = document.getElementById('lang-switcher');
+
+            // --- FUNCTIONS ---
+            function updateTextElements(lang) {
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    const translation = translations[lang][key];
+                    if (translation) {
+                        // Use innerHTML for keys that might contain bold tags etc.
+                        if (key.includes('Li')) {
+                           el.innerHTML = translation;
+                        } else {
+                           el.textContent = translation;
+                        }
+                    }
+                });
+                langSwitcher.textContent = translations[lang].langButton;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            }
+
+            function createPlatformsChart(lang) {
+                if (platformsChart) {
+                    platformsChart.destroy();
+                }
+                const langData = translations[lang];
+                const platformsData = {
+                    labels: ['Century Tech', '松鼠AI (Squirrel AI)', 'Khanmigo', 'Cognii', 'Querium'],
+                    datasets: [{
+                        label: langData.platformChartLabel,
+                        data: [5, 5, 5, 5, 5],
+                        backgroundColor: ['rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)', 'rgba(249, 115, 22, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(239, 68, 68, 0.7)'],
+                        borderColor: ['rgba(59, 130, 246, 1)', 'rgba(16, 185, 129, 1)', 'rgba(249, 115, 22, 1)', 'rgba(139, 92, 246, 1)', 'rgba(239, 68, 68, 1)'],
+                        borderWidth: 1
+                    }]
+                };
+
+                const ctx = document.getElementById('platformsChart').getContext('2d');
+                platformsChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: platformsData,
+                    options: {
+                        indexAxis: 'y',
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const details = langData.platformDetails[context.dataIndex];
+                                        return [
+                                            `${lang === 'zh' ? '技術' : 'Tech'}: ${details.tech}`,
+                                            `${lang === 'zh' ? '焦點' : 'Focus'}: ${details.focus}`,
+                                            `${lang === 'zh' ? '用戶' : 'Users'}: ${details.users}`
+                                        ];
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { display: false },
+                            y: { ticks: { font: { size: 14, family: "'Noto Sans TC', 'Roboto', sans-serif" } } }
+                        }
+                    }
+                });
+            }
+            
+            function createMythBuster(lang) {
+                const langData = translations[lang];
+                const mythListContainer = document.getElementById('myth-list');
+                const factContentContainer = document.getElementById('fact-content');
+                mythListContainer.innerHTML = '';
+                factContentContainer.innerHTML = '';
+
+                langData.myths.forEach((item, index) => {
+                    const mythItem = document.createElement('div');
+                    mythItem.className = 'myth-item p-4 cursor-pointer hover:bg-gray-100 transition';
+                    if (index === 0) mythItem.classList.add('active');
+                    mythItem.textContent = item.myth;
+                    mythItem.addEventListener('click', () => {
+                        displayFact(index, lang);
+                        document.querySelectorAll('.myth-item').forEach(el => el.classList.remove('active'));
+                        mythItem.classList.add('active');
+                    });
+                    mythListContainer.appendChild(mythItem);
+                });
+                
+                displayFact(0, lang);
+            }
+
+            function displayFact(index, lang) {
+                const langData = translations[lang];
+                const item = langData.myths[index];
+                const factContentContainer = document.getElementById('fact-content');
+                factContentContainer.innerHTML = `
+                    <h4 class="text-xl font-bold text-red-600 mb-4">${langData.mythLabel}${item.myth}</h4>
+                    <h5 class="font-semibold text-gray-800 mb-2">${langData.consensusLabel}</h5>
+                    <p class="text-gray-600 mb-4">${item.consensus}</p>
+                    <h5 class="font-semibold text-gray-800 mb-2">${langData.implicationLabel}</h5>
+                    <p class="text-gray-600">${item.implication}</p>
+                `;
+            }
+
+            function createEthicsAccordion(lang) {
+                const langData = translations[lang];
+                const accordionContainer = document.getElementById('ethics-accordion');
+                accordionContainer.innerHTML = '';
+
+                langData.ethicsData.forEach(item => {
+                    const accordionItem = document.createElement('div');
+                    accordionItem.className = 'accordion-item border border-gray-200 rounded-lg overflow-hidden bg-white';
+                    accordionItem.innerHTML = `
+                        <div class="accordion-item-header flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100">
+                            <h4 class="font-semibold text-lg text-gray-700">${item.risk}</h4>
+                            <span class="transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-item-body p-4 border-t border-gray-200">
+                            <p class="font-semibold text-red-600 mb-2">${langData.harmLabel}${item.harm}</p>
+                            <div class="mt-4">
+                                <h5 class="font-semibold text-blue-700">${langData.devStrategyLabel}</h5>
+                                <p class="text-gray-600">${item.devStrategy}</p>
+                            </div>
+                            <div class="mt-4">
+                                <h5 class="font-semibold text-green-700">${langData.eduStrategyLabel}</h5>
+                                <p class="text-gray-600">${item.eduStrategy}</p>
+                            </div>
+                        </div>
+                    `;
+                    accordionContainer.appendChild(accordionItem);
+                });
+
+                 document.querySelectorAll('.accordion-item-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        const body = header.nextElementSibling;
+                        const icon = header.querySelector('span');
+                        
+                        if (body.style.maxHeight) {
+                            body.style.maxHeight = null;
+                            icon.style.transform = 'rotate(0deg)';
+                        } else {
+                            document.querySelectorAll('.accordion-item-body').forEach(b => b.style.maxHeight = null);
+                            document.querySelectorAll('.accordion-item-header span').forEach(i => i.style.transform = 'rotate(0deg)');
+                            body.style.maxHeight = body.scrollHeight + "px";
+                            icon.style.transform = 'rotate(180deg)';
+                        }
+                    });
+                });
+            }
+
+            function updateUIForLanguage(lang) {
+                updateTextElements(lang);
+                createPlatformsChart(lang);
+                createMythBuster(lang);
+                createEthicsAccordion(lang);
+            }
+
+            // --- EVENT LISTENERS ---
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    navButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    const targetId = button.dataset.target;
+                    contentSections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetId) {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            document.getElementById('plasticity-btn').addEventListener('click', () => {
+                const connectionLine = document.getElementById('connection-line');
+                connectionLine.style.backgroundColor = '#3B82F6';
+                connectionLine.style.transform = 'scaleX(1.5)';
+                setTimeout(() => {
+                    connectionLine.style.backgroundColor = '#D1D5DB';
+                    connectionLine.style.transform = 'scaleX(1)';
+                }, 1000);
+            });
+
+            langSwitcher.addEventListener('click', () => {
+                currentLanguage = (currentLanguage === 'zh') ? 'en' : 'zh';
+                updateUIForLanguage(currentLanguage);
+            });
+
+            // --- INITIALIZATION ---
+            updateUIForLanguage(currentLanguage);
+        });
+    </script>
+</body>
+</html>
