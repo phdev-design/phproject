@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神經治療學新紀元：資訊圖表 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-line {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .flow-line::before {
+            content: '';
+            position: absolute;
+            left: 0.5rem;
+            top: 1.5rem;
+            bottom: 0;
+            width: 2px;
+            background-color: #00b4d8;
+        }
+        .flow-line:last-child::before {
+            display: none;
+        }
+        .flow-dot {
+            position: absolute;
+            left: calc(0.5rem - 0.4rem);
+            top: 0.75rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            background-color: #0077b6;
+            border: 2px solid #caf0f8;
+        }
+        .kpi-card {
+            background: linear-gradient(135deg, #0077b6, #00b4d8);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            border: 1px solid transparent;
+        }
+        .lang-btn.active {
+            background-color: #0077b6;
+            color: white;
+            border-color: #0077b6;
+        }
+        .lang-btn:not(.active) {
+            background-color: transparent;
+            color: #0077b6;
+            border-color: #0077b6;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+
+        <div class="flex justify-end mb-4">
+            <div class="flex space-x-2 border border-sky-300 rounded-full p-1">
+                <button id="lang-en" class="lang-btn">EN</button>
+                <button id="lang-zh" class="lang-btn active">中</button>
+            </div>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-sky-800 mb-4" data-lang-key="mainTitle">神經治療學新紀元</h1>
+            <p class="text-lg text-slate-600 max-w-3xl mx-auto" data-lang-key="mainSubtitle">深入剖析阿爾茨海默病、帕金森病、再生醫學與抗衰老研究的革命性進展。</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div class="kpi-card">
+                <h3 class="text-xl font-semibold mb-2" data-lang-key="kpi1Title">全球失智症患者</h3>
+                <p class="text-5xl font-bold">50M+</p>
+                <p class="text-sm mt-2 opacity-80" data-lang-key="kpi1Subtitle">一個日益嚴峻的全球健康挑戰</p>
+            </div>
+            <div class="kpi-card md:col-span-2 lg:col-span-1">
+                <h3 class="text-xl font-semibold mb-2" data-lang-key="kpi2Title">美國年度照護成本 (預估至2025)</h3>
+                <p class="text-5xl font-bold">$384B</p>
+                <p class="text-sm mt-2 opacity-80" data-lang-key="kpi2Subtitle">對社會經濟造成巨大負擔</p>
+            </div>
+            <div class="kpi-card">
+                <h3 class="text-xl font-semibold mb-2" data-lang-key="kpi3Title">PD誤診率</h3>
+                <p class="text-5xl font-bold">15-24%</p>
+                <p class="text-sm mt-2 opacity-80" data-lang-key="kpi3Subtitle">凸顯對客觀生物標記物的迫切需求</p>
+            </div>
+        </div>
+
+        <section id="alzheimers" class="mb-16">
+            <h2 class="text-3xl font-bold text-sky-700 mb-6 text-center" data-lang-key="section1Title">第一節：阿爾茨海默病的演進格局</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col justify-center">
+                    <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s1c1Title">診斷革命：從症狀到血液檢測</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s1c1Desc">傳統診斷依賴晚期症狀，但現在我們已進入生物標記物時代。p-tau217和miRNAs等血液檢測技術，能夠在症狀出現前數年識別疾病風險，為早期干預提供了關鍵窗口，並極大地提高了臨床試驗的效率。</p>
+                    <div class="chart-container h-64 sm:h-72">
+                        <canvas id="biomarkerChart"></canvas>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-4 text-center" data-lang-key="s1c1Note">此圖表比較了不同診斷方法的特性，突顯了血液檢測在可及性和早期預測方面的巨大優勢。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s1c2Title">免疫療法的突破與未來</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s1c2Desc">以Lecanemab為代表的抗澱粉樣蛋白藥物獲批，標誌著首批能改變病程的療法問世。然而，科學界已迅速轉向下一波浪潮：靶向與症狀關聯更密切的Tau蛋白，並探索疫苗等主動免疫策略，開啟「澱粉樣蛋白+」組合治療時代。</p>
+                    <div class="chart-container">
+                        <canvas id="adTherapyChart"></canvas>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-4 text-center" data-lang-key="s1c2Note">此圖比較了主要的AD免疫療法，顯示了從靶向Aβ到靶向Tau的演進趨勢。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="parkinsons" class="mb-16">
+            <h2 class="text-3xl font-bold text-sky-700 mb-6 text-center" data-lang-key="section2Title">第二節：帕金森病治療的新前沿</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s2c1Title">適應性深腦電刺激 (aDBS)</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s2c1Desc">aDBS是神經調控的重大突破。它不再是恆定刺激，而是能實時監測大腦信號、自動調整刺激的「閉環」系統。這項技術不僅顯著改善PD症狀，更為其他神經疾病的「智能神經藥物」開發鋪平了道路。</p>
+                    <div class="chart-container">
+                        <canvas id="dbsComparisonChart"></canvas>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-4 text-center" data-lang-key="s2c1Note">此圖展示了aDBS相比傳統DBS在症狀控制上的顯著優勢。</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s2c2Title">PD的精準化未來</h3>
+                    <p class="text-slate-600 mb-4" data-lang-key="s2c2Desc">PD正從單一疾病概念轉向生物學亞型分類。通過ecto-GPR37（預後）、皮膚P-SYN（診斷）和GBA1（遺傳）等生物標記物，未來的治療將不再千篇一律，而是針對患者亞型（如「GBA1陽性，快速進展型」）的精準干預。</p>
+                    <div class="bg-sky-50 rounded-lg p-4 mt-6">
+                        <h4 class="font-semibold text-lg mb-2 text-sky-800" data-lang-key="s2c2FlowTitle">未來PD治療路徑</h4>
+                        <div class="relative pl-4">
+                            <div class="flow-line">
+                                <div class="flow-dot"></div>
+                                <h5 class="font-bold" data-lang-key="s2c2Flow1Title">1. 生物學分層</h5>
+                                <p class="text-sm text-slate-600 ml-4" data-lang-key="s2c2Flow1Desc">利用血液、皮膚、遺傳標記物確定患者亞型。</p>
+                            </div>
+                            <div class="flow-line">
+                                <div class="flow-dot"></div>
+                                <h5 class="font-bold" data-lang-key="s2c2Flow2Title">2. 個性化方案</h5>
+                                <p class="text-sm text-slate-600 ml-4" data-lang-key="s2c2Flow2Desc">根據亞型選擇靶向藥物（如Ambroxol）或設備療法。</p>
+                            </div>
+                            <div class="flow-line">
+                                <div class="flow-dot"></div>
+                                <h5 class="font-bold" data-lang-key="s2c2Flow3Title">3. 精準神經調控</h5>
+                                <p class="text-sm text-slate-600 ml-4" data-lang-key="s2c2Flow3Desc">採用AI驅動的aDBS進行閉環症狀管理。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="regenerative" class="mb-16">
+            <h2 class="text-3xl font-bold text-sky-700 mb-6 text-center" data-lang-key="section3Title">第三節：再生醫學 - 重建受損的大腦</h2>
+            <div class="bg-white rounded-xl shadow-lg p-6 lg:p-8">
+                <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s3c1Title">幹細胞療法的多重機制</h3>
+                <p class="text-slate-600 mb-6 max-w-4xl mx-auto text-center" data-lang-key="s3c1Desc">幹細胞療法不僅是替換死亡細胞，其更關鍵的作用在於作為「微型藥廠」，通過旁分泌效應提供營養支持、調節免疫反應、促進血管生成，為組織修復創造有利環境。這一認知正指導著當前的臨床開發策略。</p>
+                <div class="chart-container">
+                    <canvas id="stemCellMechanismsChart"></canvas>
+                </div>
+                <p class="text-sm text-slate-500 mt-4 text-center" data-lang-key="s3c1Note">此雷達圖展示了幹細胞療法的多維度作用機制，突顯了旁分泌效應和免疫調節的重要性。</p>
+                
+                <h3 class="text-2xl font-semibold my-8 text-center" data-lang-key="s3c2Title">臨床試驗的兩條路徑：個性化 vs. 現貨型</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+                    <div class="border-2 border-sky-200 rounded-lg p-4 text-center">
+                        <h4 class="text-xl font-bold text-sky-800" data-lang-key="s3c2Path1Title">自體移植 (個性化)</h4>
+                        <p class="text-3xl my-4">👤</p>
+                        <p class="text-slate-600" data-lang-key="s3c2Path1Desc">使用患者自身細胞（如iPSCs），完全避免免疫排斥。</p>
+                        <p class="mt-2"><span class="font-semibold" data-lang-key="s3c2Path1Adv">優點:</span> <span data-lang-key="s3c2Path1AdvText">免疫匹配完美。</span></p>
+                        <p><span class="font-semibold" data-lang-key="s3c2Path1Chal">挑戰:</span> <span data-lang-key="s3c2Path1ChalText">成本高昂，流程複雜。</span></p>
+                    </div>
+                    <div class="border-2 border-teal-200 rounded-lg p-4 text-center">
+                        <h4 class="text-xl font-bold text-teal-800" data-lang-key="s3c2Path2Title">同種異體 (現貨型)</h4>
+                        <p class="text-3xl my-4">📦</p>
+                        <p class="text-slate-600" data-lang-key="s3c2Path2Desc">使用健康捐贈者細胞，可規模化生產。</p>
+                        <p class="mt-2"><span class="font-semibold" data-lang-key="s3c2Path2Adv">優點:</span> <span data-lang-key="s3c2Path2AdvText">可擴展性強，成本較低。</span></p>
+                        <p><span class="font-semibold" data-lang-key="s3c2Path2Chal">挑戰:</span> <span data-lang-key="s3c2Path2ChalText">需要免疫抑制藥物。</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="geroscience" class="mb-16">
+            <h2 class="text-3xl font-bold text-sky-700 mb-6 text-center" data-lang-key="section4Title">第四節：衰老科學假說 - 從根源抗擊疾病</h2>
+            <div class="bg-white rounded-xl shadow-lg p-6 lg:p-8">
+                 <p class="text-slate-600 mb-6 max-w-4xl mx-auto text-center" data-lang-key="s4c1Desc">一個革命性的理念正在興起：與其針對特定疾病，不如靶向衰老這一根本生物學過程。該假說將代謝失調、慢性炎症和衰老細胞積累等風險因素統一在衰老這一核心驅動因素之下。</p>
+                <div class="bg-sky-50 rounded-lg p-6">
+                    <h4 class="font-semibold text-xl mb-4 text-sky-800 text-center" data-lang-key="s4c1FlowTitle">衰老科學的因果鏈</h4>
+                    <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                        <div class="p-4 bg-white rounded-lg shadow"><p class="font-bold" data-lang-key="s4c1Flow1">衰老</p></div>
+                        <p class="text-2xl font-bold text-sky-500">→</p>
+                        <div class="p-4 bg-white rounded-lg shadow"><p class="font-bold" data-lang-key="s4c1Flow2">細胞衰老<br>免疫衰老<br>代謝失調</p></div>
+                        <p class="text-2xl font-bold text-sky-500">→</p>
+                        <div class="p-4 bg-white rounded-lg shadow"><p class="font-bold" data-lang-key="s4c1Flow3">慢性炎症</p><p class="text-sm" data-lang-key="s4c1Flow3Sub">(外周與中樞)</p></div>
+                        <p class="text-2xl font-bold text-sky-500">→</p>
+                        <div class="p-4 bg-white rounded-lg shadow"><p class="font-bold" data-lang-key="s4c1Flow4">神經退行性變</p><p class="text-sm" data-lang-key="s4c1Flow4Sub">(AD/PD易感性增加)</p></div>
+                    </div>
+                </div>
+                <div class="mt-8">
+                    <h3 class="text-2xl font-semibold mb-4 text-center" data-lang-key="s4c2Title">Senolytics: 清除「殭屍細胞」</h3>
+                    <p class="text-slate-600 mb-4 text-center max-w-3xl mx-auto" data-lang-key="s4c2Desc">Senolytics藥物（如D+Q）旨在選擇性清除衰老的「殭屍」細胞，以減輕其引發的慢性炎症。SToMP-AD試驗已成功驗證藥物可穿過血腦屏障，為更大規模的II期研究掃清了障礙。</p>
+                    <div class="chart-container h-64 sm:h-72">
+                         <canvas id="senolyticsTrialChart"></canvas>
+                    </div>
+                     <p class="text-sm text-slate-500 mt-4 text-center" data-lang-key="s4c2Note">此圖展示了Senolytics藥物在AD動物模型中的潛在效果，以及臨床試驗的關鍵進展。</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-16 pt-8 border-t border-slate-200">
+            <p class="text-slate-600" data-lang-key="footer1">這份資訊圖表綜合了2024-2025年間關於神經退行性疾病的最新研究進展。</p>
+            <p class="text-sm text-slate-400 mt-2" data-lang-key="footer2">資訊來源：神經治療學新紀元綜合分析報告。僅供參考，不構成醫療建議。</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const langData = {
+            'zh-TW': {
+                mainTitle: '神經治療學新紀元',
+                mainSubtitle: '深入剖析阿爾茨海默病、帕金森病、再生醫學與抗衰老研究的革命性進展。',
+                kpi1Title: '全球失智症患者',
+                kpi1Subtitle: '一個日益嚴峻的全球健康挑戰',
+                kpi2Title: '美國年度照護成本 (預估至2025)',
+                kpi2Subtitle: '對社會經濟造成巨大負擔',
+                kpi3Title: 'PD誤診率',
+                kpi3Subtitle: '凸顯對客觀生物標記物的迫切需求',
+                section1Title: '第一節：阿爾茨海默病的演進格局',
+                s1c1Title: '診斷革命：從症狀到血液檢測',
+                s1c1Desc: '傳統診斷依賴晚期症狀，但現在我們已進入生物標記物時代。p-tau217和miRNAs等血液檢測技術，能夠在症狀出現前數年識別疾病風險，為早期干預提供了關鍵窗口，並極大地提高了臨床試驗的效率。',
+                s1c1Note: '此圖表比較了不同診斷方法的特性，突顯了血液檢測在可及性和早期預測方面的巨大優勢。',
+                s1c2Title: '免疫療法的突破與未來',
+                s1c2Desc: '以Lecanemab為代表的抗澱粉樣蛋白藥物獲批，標誌著首批能改變病程的療法問世。然而，科學界已迅速轉向下一波浪潮：靶向與症狀關聯更密切的Tau蛋白，並探索疫苗等主動免疫策略，開啟「澱粉樣蛋白+」組合治療時代。',
+                s1c2Note: '此圖比較了主要的AD免疫療法，顯示了從靶向Aβ到靶向Tau的演進趨勢。',
+                section2Title: '第二節：帕金森病治療的新前沿',
+                s2c1Title: '適應性深腦電刺激 (aDBS)',
+                s2c1Desc: 'aDBS是神經調控的重大突破。它不再是恆定刺激，而是能實時監測大腦信號、自動調整刺激的「閉環」系統。這項技術不僅顯著改善PD症狀，更為其他神經疾病的「智能神經藥物」開發鋪平了道路。',
+                s2c1Note: '此圖展示了aDBS相比傳統DBS在症狀控制上的顯著優勢。',
+                s2c2Title: 'PD的精準化未來',
+                s2c2Desc: 'PD正從單一疾病概念轉向生物學亞型分類。通過ecto-GPR37（預後）、皮膚P-SYN（診斷）和GBA1（遺傳）等生物標記物，未來的治療將不再千篇一律，而是針對患者亞型（如「GBA1陽性，快速進展型」）的精準干預。',
+                s2c2FlowTitle: '未來PD治療路徑',
+                s2c2Flow1Title: '1. 生物學分層',
+                s2c2Flow1Desc: '利用血液、皮膚、遺傳標記物確定患者亞型。',
+                s2c2Flow2Title: '2. 個性化方案',
+                s2c2Flow2Desc: '根據亞型選擇靶向藥物（如Ambroxol）或設備療法。',
+                s2c2Flow3Title: '3. 精準神經調控',
+                s2c2Flow3Desc: '採用AI驅動的aDBS進行閉環症狀管理。',
+                section3Title: '第三節：再生醫學 - 重建受損的大腦',
+                s3c1Title: '幹細胞療法的多重機制',
+                s3c1Desc: '幹細胞療法不僅是替換死亡細胞，其更關鍵的作用在於作為「微型藥廠」，通過旁分泌效應提供營養支持、調節免疫反應、促進血管生成，為組織修復創造有利環境。這一認知正指導著當前的臨床開發策略。',
+                s3c1Note: '此雷達圖展示了幹細胞療法的多維度作用機制，突顯了旁分泌效應和免疫調節的重要性。',
+                s3c2Title: '臨床試驗的兩條路徑：個性化 vs. 現貨型',
+                s3c2Path1Title: '自體移植 (個性化)',
+                s3c2Path1Desc: '使用患者自身細胞（如iPSCs），完全避免免疫排斥。',
+                s3c2Path1Adv: '優點:',
+                s3c2Path1AdvText: '免疫匹配完美。',
+                s3c2Path1Chal: '挑戰:',
+                s3c2Path1ChalText: '成本高昂，流程複雜。',
+                s3c2Path2Title: '同種異體 (現貨型)',
+                s3c2Path2Desc: '使用健康捐贈者細胞，可規模化生產。',
+                s3c2Path2Adv: '優點:',
+                s3c2Path2AdvText: '可擴展性強，成本較低。',
+                s3c2Path2Chal: '挑戰:',
+                s3c2Path2ChalText: '需要免疫抑制藥物。',
+                section4Title: '第四節：衰老科學假說 - 從根源抗擊疾病',
+                s4c1Desc: '一個革命性的理念正在興起：與其針對特定疾病，不如靶向衰老這一根本生物學過程。該假說將代謝失調、慢性炎症和衰老細胞積累等風險因素統一在衰老這一核心驅動因素之下。',
+                s4c1FlowTitle: '衰老科學的因果鏈',
+                s4c1Flow1: '衰老',
+                s4c1Flow2: '細胞衰老<br>免疫衰老<br>代謝失調',
+                s4c1Flow3: '慢性炎症',
+                s4c1Flow3Sub: '(外周與中樞)',
+                s4c1Flow4: '神經退行性變',
+                s4c1Flow4Sub: '(AD/PD易感性增加)',
+                s4c2Title: 'Senolytics: 清除「殭屍細胞」',
+                s4c2Desc: 'Senolytics藥物（如D+Q）旨在選擇性清除衰老的「殭屍」細胞，以減輕其引發的慢性炎症。SToMP-AD試驗已成功驗證藥物可穿過血腦屏障，為更大規模的II期研究掃清了障礙。',
+                s4c2Note: '此圖展示了Senolytics藥物在AD動物模型中的潛在效果，以及臨床試驗的關鍵進展。',
+                footer1: '這份資訊圖表綜合了2024-2025年間關於神經退行性疾病的最新研究進展。',
+                footer2: '資訊來源：神經治療學新紀元綜合分析報告。僅供參考，不構成醫療建議。'
+            },
+            'en': {
+                mainTitle: 'A New Era in Neurotherapeutics',
+                mainSubtitle: 'An in-depth analysis of revolutionary advances in Alzheimer\'s, Parkinson\'s, regenerative medicine, and geroscience.',
+                kpi1Title: 'Global Dementia Patients',
+                kpi1Subtitle: 'A growing global health challenge',
+                kpi2Title: 'Annual US Care Costs (Est. 2025)',
+                kpi2Subtitle: 'A huge socioeconomic burden',
+                kpi3Title: 'PD Misdiagnosis Rate',
+                kpi3Subtitle: 'Highlights the urgent need for objective biomarkers',
+                section1Title: 'Section 1: The Evolving Landscape of Alzheimer\'s Disease',
+                s1c1Title: 'Diagnostic Revolution: From Symptoms to Blood Tests',
+                s1c1Desc: 'Traditional diagnosis relied on late-stage symptoms, but we are now in the biomarker era. Blood tests like p-tau217 and miRNAs can identify disease risk years before symptoms appear, providing a critical window for early intervention and greatly improving clinical trial efficiency.',
+                s1c1Note: 'This chart compares the characteristics of different diagnostic methods, highlighting the huge advantages of blood tests in accessibility and early prediction.',
+                s1c2Title: 'Immunotherapy Breakthroughs and Future',
+                s1c2Desc: 'The approval of anti-amyloid drugs like Lecanemab marks the first disease-modifying therapies. However, the scientific community is rapidly moving to the next wave: targeting Tau protein, which is more closely linked to symptoms, and exploring active immunities like vaccines, heralding the "Amyloid+" combination therapy era.',
+                s1c2Note: 'This chart compares major AD immunotherapies, showing the evolutionary trend from targeting Aβ to targeting Tau.',
+                section2Title: 'Section 2: New Frontiers in Parkinson\'s Disease Treatment',
+                s2c1Title: 'Adaptive Deep Brain Stimulation (aDBS)',
+                s2c1Desc: 'aDBS is a major breakthrough in neuromodulation. It\'s no longer constant stimulation but a "closed-loop" system that monitors brain signals in real-time and automatically adjusts stimulation. This technology not only significantly improves PD symptoms but also paves the way for "intelligent neuro-pharmaceuticals" for other neurological diseases.',
+                s2c1Note: 'This chart shows the significant advantage of aDBS over traditional DBS in symptom control.',
+                s2c2Title: 'The Precision Future of PD',
+                s2c2Desc: 'PD is shifting from a single disease concept to biological subtyping. With biomarkers like ecto-GPR37 (prognosis), skin P-SYN (diagnosis), and GBA1 (genetics), future treatments will be precision interventions tailored to patient subtypes (e.g., "GBA1-positive, rapid progressor").',
+                s2c2FlowTitle: 'Future PD Treatment Pathway',
+                s2c2Flow1Title: '1. Biological Stratification',
+                s2c2Flow1Desc: 'Use blood, skin, and genetic markers to determine patient subtype.',
+                s2c2Flow2Title: '2. Personalized Regimen',
+                s2c2Flow2Desc: 'Select targeted drugs (e.g., Ambroxol) or device therapies based on subtype.',
+                s2c2Flow3Title: '3. Precision Neuromodulation',
+                s2c2Flow3Desc: 'Use AI-driven aDBS for closed-loop symptom management.',
+                section3Title: 'Section 3: Regenerative Medicine - Rebuilding the Damaged Brain',
+                s3c1Title: 'Multiple Mechanisms of Stem Cell Therapy',
+                s3c1Desc: 'Stem cell therapy isn\'t just about replacing dead cells. Its more critical role is as a "micro-pharmacy," providing trophic support, modulating immune responses, and promoting angiogenesis via paracrine effects, creating a favorable environment for tissue repair. This understanding is guiding current clinical development.',
+                s3c1Note: 'This radar chart illustrates the multidimensional mechanisms of stem cell therapy, highlighting the importance of paracrine effects and immunomodulation.',
+                s3c2Title: 'Two Paths in Clinical Trials: Personalized vs. Off-the-Shelf',
+                s3c2Path1Title: 'Autologous (Personalized)',
+                s3c2Path1Desc: 'Uses the patient\'s own cells (e.g., iPSCs), completely avoiding immune rejection.',
+                s3c2Path1Adv: 'Pros:',
+                s3c2Path1AdvText: 'Perfect immune match.',
+                s3c2Path1Chal: 'Cons:',
+                s3c2Path1ChalText: 'High cost, complex process.',
+                s3c2Path2Title: 'Allogeneic (Off-the-Shelf)',
+                s3c2Path2Desc: 'Uses cells from healthy donors, allowing for scalable production.',
+                s3c2Path2Adv: 'Pros:',
+                s3c2Path2AdvText: 'Highly scalable, lower cost.',
+                s3c2Path2Chal: 'Cons:',
+                s3c2Path2ChalText: 'Requires immunosuppressants.',
+                section4Title: 'Section 4: The Geroscience Hypothesis - Fighting Disease at its Root',
+                s4c1Desc: 'A revolutionary idea is emerging: instead of targeting specific diseases, target the fundamental biological process of aging. This hypothesis unifies risk factors like metabolic dysfunction, chronic inflammation, and senescent cell accumulation under the core driver of aging.',
+                s4c1FlowTitle: 'The Causal Chain of Geroscience',
+                s4c1Flow1: 'Aging',
+                s4c1Flow2: 'Cellular Senescence<br>Immunosenescence<br>Metabolic Dysfunction',
+                s4c1Flow3: 'Chronic Inflammation',
+                s4c1Flow3Sub: '(Peripheral & Central)',
+                s4c1Flow4: 'Neurodegeneration',
+                s4c1Flow4Sub: '(Increased AD/PD Susceptibility)',
+                s4c2Title: 'Senolytics: Clearing "Zombie" Cells',
+                s4c2Desc: 'Senolytic drugs (like D+Q) aim to selectively clear senescent "zombie" cells to reduce the chronic inflammation they cause. The SToMP-AD trial successfully verified that the drug can cross the blood-brain barrier, clearing the way for larger Phase II studies.',
+                s4c2Note: 'This chart shows the potential effects of senolytics in AD animal models and key progress in clinical trials.',
+                footer1: 'This infographic summarizes the latest research advances in neurodegenerative diseases for 2024-2025.',
+                footer2: 'Source: A New Era in Neurotherapeutics comprehensive analysis report. For informational purposes only, not medical advice.'
+            }
+        };
+
+        const chartConfigs = {};
+        let currentLang = 'zh-TW';
+
+        const brilliantBlues = {
+            darkBlue: '#00509d',
+            midBlue: '#0077b6',
+            lightBlue: '#00b4d8',
+            skyBlue: '#90e0ef',
+            paleBlue: '#caf0f8'
+        };
+
+        function wrapText(str, maxWidth) {
+            if (typeof str !== 'string' || str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const defaultChartOptions = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#475569',
+                        font: {
+                            family: "'Roboto', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    },
+                    backgroundColor: 'rgba(0, 80, 157, 0.9)',
+                    titleFont: { size: 14, family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                    bodyFont: { size: 12, family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                    padding: 10,
+                    cornerRadius: 4
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#64748b' },
+                    grid: { color: '#e2e8f0' }
+                },
+                x: {
+                    ticks: { color: '#64748b' },
+                    grid: { display: false }
+                }
+            }
+        };
+        
+        function createCharts(lang) {
+            Object.values(chartConfigs).forEach(chart => chart.instance?.destroy());
+
+            const biomarkerChartLabels = {
+                'zh-TW': ['傳統臨床評估', '腦脊髓液/PET', wrapText('血液檢測 (p-tau217, miRNAs)', 16)],
+                'en': ['Clinical Assessment', 'CSF/PET Scans', wrapText('Blood Tests (p-tau217, miRNAs)', 16)]
+            };
+            const biomarkerChartDatasets = {
+                'zh-TW': ['可及性/成本效益', '早期預測能力'],
+                'en': ['Accessibility/Cost', 'Early Prediction Power']
+            };
+            chartConfigs.biomarkerChart = {
+                id: 'biomarkerChart',
+                config: {
+                    type: 'bar',
+                    data: {
+                        labels: biomarkerChartLabels[lang],
+                        datasets: [{
+                            label: biomarkerChartDatasets[lang][0],
+                            data: [3, 5, 10],
+                            backgroundColor: brilliantBlues.lightBlue,
+                        }, {
+                            label: biomarkerChartDatasets[lang][1],
+                            data: [2, 7, 9],
+                            backgroundColor: brilliantBlues.darkBlue,
+                        }]
+                    },
+                    options: { ...defaultChartOptions }
+                }
+            };
+            
+            const adTherapyLabels = {
+                'zh-TW': ['Lecanemab', 'Donanemab', wrapText('Posdinemab (J&J)', 16), wrapText('UNM Tau 疫苗', 16)],
+                'en': ['Lecanemab', 'Donanemab', wrapText('Posdinemab (J&J)', 16), wrapText('UNM Tau Vaccine', 16)]
+            };
+            const adTherapyDatasetLabel = {
+                'zh-TW': '研發階段 (1:臨床前, 2:II期, 3:已批准)',
+                'en': 'Dev. Stage (1:Preclinical, 2:Phase II, 3:Approved)'
+            };
+            const adTherapyTicks = {
+                'zh-TW': {1: '臨床前', 2: 'II期', 3: '已批准'},
+                'en': {1: 'Preclinical', 2: 'Phase II', 3: 'Approved'}
+            };
+            chartConfigs.adTherapyChart = {
+                id: 'adTherapyChart',
+                config: {
+                    type: 'bar',
+                    data: {
+                        labels: adTherapyLabels[lang],
+                        datasets: [{
+                            label: adTherapyDatasetLabel[lang],
+                            data: [3, 3, 2, 1],
+                            backgroundColor: [brilliantBlues.darkBlue, brilliantBlues.darkBlue, brilliantBlues.midBlue, brilliantBlues.lightBlue],
+                        }],
+                    },
+                    options: {
+                        ...defaultChartOptions,
+                        indexAxis: 'y',
+                        plugins: { ...defaultChartOptions.plugins, legend: { display: false } },
+                        scales: { x: { ticks: { callback: (value) => adTherapyTicks[lang][value] || '' } } }
+                    }
+                }
+            };
+
+            const dbsLabels = {
+                'zh-TW': ['aDBS 改善部分', '傳統DBS效果', '剩餘症狀'],
+                'en': ['aDBS Improvement', 'Traditional DBS Effect', 'Remaining Symptoms']
+            };
+            chartConfigs.dbsComparisonChart = {
+                id: 'dbsComparisonChart',
+                config: {
+                    type: 'doughnut',
+                    data: {
+                        labels: dbsLabels[lang],
+                        datasets: [{
+                            data: [50, 25, 25],
+                            backgroundColor: [brilliantBlues.darkBlue, brilliantBlues.lightBlue, brilliantBlues.paleBlue],
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: { ...defaultChartOptions, cutout: '60%', scales: { y: { display: false }, x: { display: false } } }
+                }
+            };
+
+            const stemCellLabels = {
+                'zh-TW': ['細胞替換', '營養支持', '免疫調節', '血管生成', '抗纖維化'],
+                'en': ['Cell Replacement', 'Trophic Support', 'Immunomodulation', 'Angiogenesis', 'Anti-fibrosis']
+            };
+            const stemCellDatasetLabel = {
+                'zh-TW': '幹細胞作用機制重要性',
+                'en': 'Importance of Stem Cell Mechanisms'
+            };
+            chartConfigs.stemCellMechanismsChart = {
+                id: 'stemCellMechanismsChart',
+                config: {
+                    type: 'radar',
+                    data: {
+                        labels: stemCellLabels[lang],
+                        datasets: [{
+                            label: stemCellDatasetLabel[lang],
+                            data: [6, 9, 8, 7, 5],
+                            fill: true,
+                            backgroundColor: 'rgba(0, 180, 216, 0.2)',
+                            borderColor: brilliantBlues.lightBlue,
+                            pointBackgroundColor: brilliantBlues.lightBlue,
+                        }]
+                    },
+                    options: { ...defaultChartOptions, scales: { r: { angleLines: { color: '#cbd5e1' }, grid: { color: '#e2e8f0' }, pointLabels: { font: { size: 12 }, color: '#334155' }, ticks: { backdropColor: 'transparent', color: '#64748b' } } } }
+                }
+            };
+
+            const senolyticsLabels = {
+                'zh-TW': ['基線', '動物模型預期', 'I期試驗結果', 'II期試驗目標'],
+                'en': ['Baseline', 'Animal Model Goal', 'Phase I Result', 'Phase II Goal']
+            };
+            const senolyticsDatasets = {
+                'zh-TW': ['Tau蛋白病理水平', '安全性/藥物入腦驗證'],
+                'en': ['Tau Pathology Level', 'Safety/BBB Penetration']
+            };
+            const senolyticsTooltip = {
+                'zh-TW': { tau: '% (相對基線)', safety: '已驗證' },
+                'en': { tau: '% (vs. Baseline)', safety: 'Verified' }
+            };
+            chartConfigs.senolyticsTrialChart = {
+                id: 'senolyticsTrialChart',
+                config: {
+                    type: 'line',
+                    data: {
+                        labels: senolyticsLabels[lang],
+                        datasets: [{
+                            label: senolyticsDatasets[lang][0],
+                            data: [100, 40, 98, 60],
+                            borderColor: brilliantBlues.darkBlue,
+                            backgroundColor: 'rgba(0, 80, 157, 0.1)',
+                            fill: true,
+                            tension: 0.1
+                        }, {
+                            label: senolyticsDatasets[lang][1],
+                            data: [null, null, 100, 100],
+                            borderColor: brilliantBlues.lightBlue,
+                            borderDash: [5, 5],
+                            fill: false
+                        }]
+                    },
+                    options: { ...defaultChartOptions, plugins: { ...defaultChartOptions.plugins, tooltip: { ...defaultChartOptions.plugins.tooltip, callbacks: { ...defaultChartOptions.plugins.tooltip.callbacks, label: (c) => { let l = c.dataset.label || ''; if(l){l+=': '}; if(c.parsed.y !== null){l += c.datasetIndex === 0 ? c.parsed.y + senolyticsTooltip[lang].tau : senolyticsTooltip[lang].safety;} return l; } } } } }
+                }
+            };
+
+            Object.values(chartConfigs).forEach(chart => {
+                const ctx = document.getElementById(chart.id).getContext('2d');
+                chart.instance = new Chart(ctx, chart.config);
+            });
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh-TW' ? 'zh-TW' : 'en';
+            
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                if (langData[lang][key]) {
+                    el.innerHTML = langData[lang][key];
+                }
+            });
+
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh-TW');
+
+            createCharts(lang);
+        }
+
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh-TW'));
+
+        window.onload = () => {
+            setLanguage(currentLang);
+        };
+    </script>
+</body>
+</html>
