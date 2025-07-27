@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aseprite 高效動畫製作資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #FAFAFA;
+            color: #2A363B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 384px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #FF4E50, #FC913A);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid #FF4E50;
+        }
+        .flowchart-step {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1rem;
+            border: 1px solid #E5E7EB;
+        }
+        .flowchart-arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: #FC913A;
+            margin: -0.5rem 0;
+        }
+        .lang-switcher button.active {
+            background-color: #FF4E50;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl relative">
+
+        <div class="lang-switcher absolute top-4 right-4 bg-gray-200 rounded-full p-1 flex space-x-1">
+            <button id="lang-zh" class="px-3 py-1 text-sm font-bold rounded-full transition-colors duration-300">中</button>
+            <button id="lang-en" class="px-3 py-1 text-sm font-bold rounded-full transition-colors duration-300">EN</button>
+        </div>
+
+        <header class="text-center mb-12 pt-12">
+            <h1 id="header-title" class="text-4xl md:text-6xl font-black mb-2 gradient-text"></h1>
+            <h2 id="header-subtitle" class="text-2xl md:text-3xl font-bold text-gray-700"></h2>
+            <p id="header-desc" class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto"></p>
+        </header>
+
+        <main class="space-y-16">
+
+            <section id="problem">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h3 id="problem-title" class="text-3xl font-bold text-center mb-8"></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                        <div class="order-2 md:order-1">
+                            <h4 id="problem-subtitle" class="text-2xl font-bold mb-4 text-gray-800"></h4>
+                            <p id="problem-desc" class="text-gray-600 mb-6"></p>
+                            <div class="flowchart">
+                                <div class="flowchart-step">
+                                    <span class="text-3xl mr-4">✏️</span>
+                                    <div><strong id="flow-step1-title" class="text-gray-900"></strong><p id="flow-step1-desc" class="text-sm text-gray-500"></p></div>
+                                </div>
+                                <div class="flowchart-arrow">↓</div>
+                                <div class="flowchart-step">
+                                    <span class="text-3xl mr-4">📄</span>
+                                    <div><strong id="flow-step2-title" class="text-gray-900"></strong><p id="flow-step2-desc" class="text-sm text-gray-500"></p></div>
+                                </div>
+                                <div class="flowchart-arrow">↓</div>
+                                <div class="flowchart-step bg-red-50 border-l-4 border-red-500">
+                                    <span class="text-3xl mr-4">🔄</span>
+                                    <div><strong id="flow-step3-title" class="text-red-700"></strong><p id="flow-step3-desc" class="text-sm text-red-500"></p></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-1 md:order-2">
+                             <div class="kpi-card border-l-8 border-red-500">
+                                <div class="text-7xl font-black text-red-500">90%</div>
+                                <div id="kpi-text" class="text-xl font-bold mt-2 text-gray-700"></div>
+                                <p id="kpi-desc" class="text-gray-600 mt-2"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="paradigm-shift">
+                <h3 id="shift-title" class="text-3xl font-bold text-center mb-8"></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 id="shift-subtitle" class="text-2xl font-bold mb-4"></h4>
+                        <p id="shift-desc" class="text-gray-600 mb-4"></p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start"><span class="text-2xl mr-3">🧩</span> <div><strong id="pillar1-title" class="text-gray-800"></strong><span id="pillar1-desc"></span></div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">🏃</span> <div><strong id="pillar2-title" class="text-gray-800"></strong><span id="pillar2-desc"></span></div></li>
+                            <li class="flex items-start"><span class="text-2xl mr-3">✨</span> <div><strong id="pillar3-title" class="text-gray-800"></strong><span id="pillar3-desc"></span></div></li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <div class="chart-container">
+                            <canvas id="pillarsChart"></canvas>
+                        </div>
+                        <p id="pillars-chart-desc" class="text-center text-sm text-gray-500 mt-2"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="core-tools">
+                 <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h3 id="tools-title" class="text-3xl font-bold text-center mb-8"></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                        <div class="md:col-span-3">
+                            <h4 id="tools-subtitle" class="text-2xl font-bold mb-4"></h4>
+                            <p id="tools-desc" class="text-gray-600 mb-6"></p>
+                            <div class="chart-container h-96 md:h-[450px]">
+                                <canvas id="toolsImpactChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                             <h4 id="tools-limit-title" class="text-2xl font-bold mb-4"></h4>
+                             <p id="tools-limit-desc" class="text-gray-600 mb-6"></p>
+                             <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <span class="text-3xl">⚠️</span>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 id="limit-box-title" class="text-lg font-medium text-amber-800"></h3>
+                                        <div class="mt-2 text-sm text-amber-700">
+                                            <p id="limit-box-desc"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="automation">
+                <h3 id="automation-title" class="text-3xl font-bold text-center mb-8"></h3>
+                <p id="automation-desc" class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12"></p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 id="tweencel-title" class="text-2xl font-bold mb-2"></h4>
+                        <p id="tweencel-desc" class="text-gray-600 mb-4"></p>
+                        <div class="chart-container">
+                            <canvas id="easingChart"></canvas>
+                        </div>
+                         <p id="easing-chart-desc" class="text-center text-sm text-gray-500 mt-2"></p>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 id="parallixel-title" class="text-2xl font-bold mb-2"></h4>
+                        <p id="parallixel-desc" class="text-gray-600 mb-4"></p>
+                        <div class="chart-container">
+                            <canvas id="lcmChart"></canvas>
+                        </div>
+                        <p id="lcm-chart-desc" class="text-center text-sm text-gray-500 mt-2"></p>
+                    </div>
+                </div>
+            </section>
+
+             <section id="new-workflow">
+                <div class="bg-white rounded-lg shadow-xl p-6 md:p-8">
+                    <h3 id="workflow-title" class="text-3xl font-bold text-center mb-8"></h3>
+                    <p id="workflow-desc" class="text-lg text-gray-600 max-w-3xl mx-auto text-center mb-12"></p>
+                    <div class="max-w-2xl mx-auto">
+                        <div class="flowchart-step">
+                            <span class="text-3xl mr-4">🧩</span>
+                            <div><strong id="workflow1-title" class="text-gray-900"></strong><p id="workflow1-desc" class="text-sm text-gray-500"></p></div>
+                        </div>
+                        <div class="flowchart-arrow">↓</div>
+                        <div class="flowchart-step">
+                            <span class="text-3xl mr-4">🔗</span>
+                            <div><strong id="workflow2-title" class="text-gray-900"></strong><p id="workflow2-desc" class="text-sm text-gray-500"></p></div>
+                        </div>
+                        <div class="flowchart-arrow">↓</div>
+                        <div class="flowchart-step">
+                            <span class="text-3xl mr-4">🏃</span>
+                            <div><strong id="workflow3-title" class="text-gray-900"></strong><p id="workflow3-desc" class="text-sm text-gray-500"></p></div>
+                        </div>
+                        <div class="flowchart-arrow">↓</div>
+                         <div class="flowchart-step bg-green-50 border-l-4 border-green-500">
+                            <span class="text-3xl mr-4">✨</span>
+                            <div><strong id="workflow4-title" class="text-green-700"></strong><p id="workflow4-desc" class="text-sm text-green-500"></p></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 pt-8 border-t border-gray-200">
+            <h3 id="footer-title" class="text-2xl font-bold mb-4"></h3>
+            <p id="footer-desc" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-center space-x-4">
+                <a href="#" id="footer-link1" class="text-blue-600 hover:underline"></a>
+                <a href="#" id="footer-link2" class="text-blue-600 hover:underline"></a>
+                <a href="#" id="footer-link3" class="text-blue-600 hover:underline"></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const langData = {
+            zh: {
+                headerTitle: "Aseprite 用戶福音",
+                headerSubtitle: "告別逐格重繪，擁抱高效動畫工作流",
+                headerDesc: "這是一份為 Aseprite 用戶量身打造的視覺指南，旨在將您從繁瑣的逐格繪製中解放出來，邁向更智慧、更快速的創作之道。",
+                problemTitle: "動畫師的瓶頸：傳統工作流的挑戰",
+                problemSubtitle: "傳統流程：脆弱的線性循環",
+                problemDesc: "傳統的逐格動畫工作流程就像一條脆弱的鎖鏈。當一個微小的細節（如配件顏色）需要修改時，往往意味著對後續所有畫格的連鎖重繪，極大地消耗了創作時間並扼殺了實驗的靈活性。",
+                flowStep1Title: "繪製關鍵幀",
+                flowStep1Desc: "定義主要動作",
+                flowStep2Title: "逐格重繪中間幀",
+                flowStep2Desc: "耗時且重複的勞動",
+                flowStep3Title: "發現需要修改？",
+                flowStep3Desc: "返回上一步，大量重繪",
+                kpiText: "的時間",
+                kpiDesc: "可能耗費在重複的修改與重繪上，而非創意本身。",
+                shiftTitle: "典範轉移：從「影格」到「組件」的思維躍進",
+                shiftSubtitle: "效率提升的三大支柱",
+                shiftDesc: "現代化的工作流程建立在三大核心策略之上，將動畫視為由多個可獨立操控的「組件」構成的動態系統。",
+                pillar1Title: "解構與複用:",
+                pillar1Desc: " 利用圖層和連結影格，將角色拆解為可複用組件。",
+                pillar2Title: "非破壞性動畫:",
+                pillar2Desc: " 應用「傀儡式」工作流程，在不破壞原始圖像的情況下進行動態調整。",
+                pillar3Title: "自動化與增強:",
+                pillar3Desc: " 利用社群腳本和擴充功能，將重複性任務自動化。",
+                pillarsChartDesc: "現代化工作流程的構成",
+                pillarsChartLabels: ['解構與複用', '非破壞性動畫', '自動化與增強'],
+                toolsTitle: "精通核心工具：效率的基石",
+                toolsSubtitle: "原生工具效率影響力排行",
+                toolsDesc: "熟練掌握 Aseprite 的內建功能是構建高效工作流程的基礎。它們各自在不同層面提升您的生產力。",
+                toolsImpactChartLabel: "對效率的影響力",
+                toolsImpactChartLabels: ['圖層 (Layers)', '連結影格 (Linked Cels)', '標籤 (Tags)', '洋蔥皮 (Onion Skinning)'],
+                toolsLimitTitle: "關鍵限制",
+                toolsLimitDesc: "然而，原生工具並非完美。特別是「連結影格」，它存在一個驅使我們尋求更強大方案的根本原因。",
+                limitBoxTitle: "連結影格的「位置共享」限制",
+                limitBoxDesc: "連結的 Cel 不僅共享圖像，還共享位置。這意味著您無法在保持圖像連結的同時，為不同 Cel 設定獨立的位移，這使得製作自然的次級動態（如頭部擺動）變得極其困難。",
+                automationTitle: "終極強化：用腳本與擴充功能自動化",
+                automationDesc: "社群的力量填補了原生功能的空白。腳本和擴充功能是將您的 Aseprite 體驗從「高效」提升到「自動化」的關鍵。",
+                tweencelTitle: "動畫師的魔杖：Tweencel",
+                tweencelDesc: "Tweencel 這類擴充功能可以自動生成中間影格，讓您透過設定緩動函數，輕鬆創造出富有生命力的動態效果。",
+                easingChartDesc: "不同緩動函數下的動畫速率曲線",
+                easingLabels: ['線性 (Linear)', '緩入緩出 (Ease In/Out)', '彈跳 (Bounce)'],
+                parallixelTitle: "一鍵生成複雜特效：Parallixel",
+                parallixelDesc: "Parallixel 能自動計算不同長度動畫圖層的最小公倍數 (LCM)，一鍵生成完美無縫的視差滾動背景。",
+                lcmChartDesc: "LCM 確保不同週期的圖層完美循環",
+                lcmChartLabel: "LCM (40 幀) 確保完美循環",
+                lcmDatasetLabels: ['前景 (4 幀循環)', '中景 (8 幀循環)', '遠景 (10 幀循環)'],
+                workflowTitle: "現代化的 Aseprite 工作流程",
+                workflowDesc: "整合所有技巧，這是一套模組化、靈活且可迭代的全新工作流程，將繪製與變換分離，並將自動化融入其中。",
+                workflow1Title: "1. 解構 (Deconstruct)",
+                workflow1Desc: "將角色拆解為有意義的組件（圖層）。",
+                workflow2Title: "2. 複用 (Reuse)",
+                workflow2Desc: "對靜態或重複元素使用連結影格。",
+                workflow3Title: "3. 非破壞性動畫 (Animate)",
+                workflow3Desc: "使用移動工具而非重繪來製作動畫。",
+                workflow4Title: "4. 自動化 (Automate)",
+                workflow4Desc: "利用 Tweencel, Parallixel 等腳本處理過渡和特效。",
+                footerTitle: "擁抱 Aseprite 生態系統",
+                footerDesc: "Aseprite 的真正力量在於其充滿活力的社群。探索、學習並貢獻，成為這個強大生態系統的一部分。",
+                footerLink1: "官方社群論壇",
+                footerLink2: "GitHub",
+                footerLink3: "Itch.io"
+            },
+            en: {
+                headerTitle: "Aseprite User's Gospel",
+                headerSubtitle: "Goodbye Frame-by-Frame, Hello Efficient Animation Workflow",
+                headerDesc: "This is a visual guide tailored for Aseprite users, designed to free you from tedious frame-by-frame drawing and move towards a smarter, faster way of creation.",
+                problemTitle: "The Animator's Bottleneck: Challenges of Traditional Workflow",
+                problemSubtitle: "Traditional Process: A Fragile Linear Cycle",
+                problemDesc: "The traditional frame-by-frame animation workflow is like a fragile chain. When a tiny detail (like an accessory's color) needs changing, it often means a cascade of redrawing all subsequent frames, consuming vast amounts of creative time and killing flexibility.",
+                flowStep1Title: "Draw Keyframes",
+                flowStep1Desc: "Define main actions",
+                flowStep2Title: "Redraw In-betweens Frame by Frame",
+                flowStep2Desc: "Time-consuming and repetitive labor",
+                flowStep3Title: "Need a change?",
+                flowStep3Desc: "Go back, redraw everything",
+                kpiText: "of the time",
+                kpiDesc: "can be spent on repetitive modifications and redrawing, rather than on creativity itself.",
+                shiftTitle: "Paradigm Shift: From 'Frames' to 'Components'",
+                shiftSubtitle: "The Three Pillars of Efficiency",
+                shiftDesc: "A modern workflow is built on three core strategies, viewing animation as a dynamic system of independently controllable 'components'.",
+                pillar1Title: "Deconstruction & Reuse:",
+                pillar1Desc: " Use layers and linked cels to break down characters into reusable components.",
+                pillar2Title: "Non-Destructive Animation:",
+                pillar2Desc: " Apply a 'puppet-style' workflow to make dynamic adjustments without destroying the original artwork.",
+                pillar3Title: "Automation & Augmentation:",
+                pillar3Desc: " Automate repetitive tasks using community scripts and extensions.",
+                pillarsChartDesc: "Composition of a Modern Workflow",
+                pillarsChartLabels: ['Deconstruction & Reuse', 'Non-Destructive Animation', 'Automation & Augmentation'],
+                toolsTitle: "Mastering Core Tools: The Foundation of Efficiency",
+                toolsSubtitle: "Native Tools Efficiency Impact Ranking",
+                toolsDesc: "Mastering Aseprite's built-in features is fundamental to building an efficient workflow. Each enhances your productivity in different ways.",
+                toolsImpactChartLabel: "Impact on Efficiency",
+                toolsImpactChartLabels: ['Layers', 'Linked Cels', 'Tags', 'Onion Skinning'],
+                toolsLimitTitle: "The Key Limitation",
+                toolsLimitDesc: "However, native tools aren't perfect. 'Linked Cels', in particular, have a fundamental issue that drives us to seek more powerful solutions.",
+                limitBoxTitle: "The 'Shared Position' Limitation of Linked Cels",
+                limitBoxDesc: "Linked cels share not only their image but also their position. This means you cannot set independent offsets for different cels while keeping the image linked, making it extremely difficult to create natural secondary motion like a head bob.",
+                automationTitle: "Ultimate Enhancement: Automate with Scripts & Extensions",
+                automationDesc: "The power of the community fills the gaps left by native features. Scripts and extensions are the key to elevating your Aseprite experience from 'efficient' to 'automated'.",
+                tweencelTitle: "The Animator's Magic Wand: Tweencel",
+                tweencelDesc: "Extensions like Tweencel can automatically generate in-between frames, allowing you to create lively motion with ease by setting easing functions.",
+                easingChartDesc: "Animation velocity curves with different easing functions",
+                easingLabels: ['Linear', 'Ease In/Out', 'Bounce'],
+                parallixelTitle: "One-Click Complex Effects: Parallixel",
+                parallixelDesc: "Parallixel automatically calculates the Least Common Multiple (LCM) of animated layers with different lengths to generate a perfectly seamless parallax scrolling background with one click.",
+                lcmChartDesc: "LCM ensures perfect looping for layers with different cycles",
+                lcmChartLabel: "LCM (40 frames) ensures a perfect loop",
+                lcmDatasetLabels: ['Foreground (4-frame loop)', 'Midground (8-frame loop)', 'Background (10-frame loop)'],
+                workflowTitle: "The Modern Aseprite Workflow",
+                workflowDesc: "Integrating all techniques, this is a modular, flexible, and iterative new workflow that separates drawing from transforming and incorporates automation.",
+                workflow1Title: "1. Deconstruct",
+                workflow1Desc: "Break down the character into meaningful components (layers).",
+                workflow2Title: "2. Reuse",
+                workflow2Desc: "Use linked cels for static or repeating elements.",
+                workflow3Title: "3. Animate (Non-Destructively)",
+                workflow3Desc: "Use the move tool to animate, not redraw.",
+                workflow4Title: "4. Automate",
+                workflow4Desc: "Use scripts like Tweencel and Parallixel for transitions and effects.",
+                footerTitle: "Embrace the Aseprite Ecosystem",
+                footerDesc: "Aseprite's true power lies in its vibrant community. Explore, learn, and contribute to become part of this powerful ecosystem.",
+                footerLink1: "Official Community Forum",
+                footerLink2: "GitHub",
+                footerLink3: "Itch.io"
+            }
+        };
+
+        let currentLang = 'zh';
+        let charts = {};
+
+        const vibrantPalette = {
+            primary: '#FF4E50',
+            secondary: '#FC913A',
+            tertiary: '#F9D423',
+            text: '#2A363B'
+        };
+
+        function wrapLabel(str, maxWidth) {
+            if (!str || str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const sharedChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: vibrantPalette.text,
+                        font: { size: 14 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: vibrantPalette.text },
+                    grid: { color: '#E5E7EB' }
+                },
+                x: {
+                    ticks: { color: vibrantPalette.text },
+                    grid: { color: '#FFFFFF' }
+                }
+            }
+        };
+
+        function createCharts(lang) {
+            Object.values(charts).forEach(chart => chart.destroy());
+            const data = langData[lang];
+
+            charts.pillarsChart = new Chart(document.getElementById('pillarsChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: data.pillarsChartLabels,
+                    datasets: [{
+                        data: [30, 40, 30],
+                        backgroundColor: [vibrantPalette.primary, vibrantPalette.secondary, vibrantPalette.tertiary],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 4,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: vibrantPalette.text, font: { size: 14 } } }, tooltip: { callbacks: { title: tooltipTitleCallback } } }
+                }
+            });
+
+            charts.toolsImpactChart = new Chart(document.getElementById('toolsImpactChart'), {
+                type: 'bar',
+                data: {
+                    labels: data.toolsImpactChartLabels,
+                    datasets: [{
+                        label: data.toolsImpactChartLabel,
+                        data: [95, 85, 75, 60],
+                        backgroundColor: [vibrantPalette.primary, vibrantPalette.secondary, vibrantPalette.tertiary, '#EDE574'],
+                        borderRadius: 4,
+                    }]
+                },
+                options: { ...sharedChartOptions, indexAxis: 'y' }
+            });
+
+            charts.easingChart = new Chart(document.getElementById('easingChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Start', '', '', '', '', 'End'],
+                    datasets: [{
+                        label: data.easingLabels[0], data: [0, 0.2, 0.4, 0.6, 0.8, 1],
+                        borderColor: vibrantPalette.tertiary, tension: 0, fill: false
+                    }, {
+                        label: data.easingLabels[1], data: [0, 0.1, 0.5, 0.9, 1, 1],
+                        borderColor: vibrantPalette.secondary, cubicInterpolationMode: 'monotone', tension: 0.4, fill: false
+                    }, {
+                        label: data.easingLabels[2], data: [0, 0.5, 0.1, 0.8, 0.4, 1],
+                        borderColor: vibrantPalette.primary, tension: 0.4, fill: false
+                    }]
+                },
+                options: sharedChartOptions
+            });
+
+            charts.lcmChart = new Chart(document.getElementById('lcmChart'), {
+                type: 'bar',
+                data: {
+                    labels: [wrapLabel(data.lcmChartLabel, 20)],
+                    datasets: [{
+                        label: data.lcmDatasetLabels[0], data: [10], backgroundColor: vibrantPalette.primary,
+                    }, {
+                        label: data.lcmDatasetLabels[1], data: [20], backgroundColor: vibrantPalette.secondary,
+                    }, {
+                        label: data.lcmDatasetLabels[2], data: [10], backgroundColor: vibrantPalette.tertiary,
+                    }]
+                },
+                options: {
+                    ...sharedChartOptions, indexAxis: 'y',
+                    scales: { x: { stacked: true, ticks: { display: false }, grid: { display: false } }, y: { stacked: true, grid: { display: false } } },
+                    plugins: {
+                         legend: { position: 'bottom', labels: { color: vibrantPalette.text, font: { size: 14 } } },
+                         tooltip: { callbacks: { title: tooltipTitleCallback, label: (c) => `${c.dataset.label || ''}: ${c.raw}` } }
+                    }
+                }
+            });
+        }
+        
+        function updateLanguage(lang) {
+            currentLang = lang;
+            const data = langData[lang];
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+            Object.keys(data).forEach(key => {
+                const element = document.getElementById(key.replace(/([A-Z])/g, "-$1").toLowerCase());
+                if (element && typeof data[key] === 'string') {
+                    element.innerHTML = data[key];
+                }
+            });
+
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            
+            createCharts(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('lang-zh').addEventListener('click', () => updateLanguage('zh'));
+            document.getElementById('lang-en').addEventListener('click', () => updateLanguage('en'));
+            updateLanguage('zh');
+        });
+    </script>
+</body>
+</html>
