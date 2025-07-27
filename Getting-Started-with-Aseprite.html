@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started with Aseprite: An Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8;
+            color: #1E293B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .stat-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .flowchart-step {
+            background-color: #4F46E5;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            position: relative;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            color: #4F46E5;
+            margin: 0.5rem 0;
+        }
+        .table-header {
+            background-color: #3730A3;
+            color: white;
+        }
+        .table-row-even {
+            background-color: #E0E7FF;
+        }
+        .table-row-odd {
+            background-color: #C7D2FE;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: #E0E7FF;
+            color: #3730A3;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .lang-btn.active, .lang-btn:hover {
+            background-color: #4F46E5;
+            color: white;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center my-8 md:my-12 relative">
+            <div class="absolute top-0 right-0 flex space-x-2">
+                <button id="lang-en" class="lang-btn active">EN</button>
+                <button id="lang-zh" class="lang-btn">中</button>
+            </div>
+            <h1 id="main-title" class="text-4xl md:text-6xl font-black text-indigo-800 tracking-tight">Getting Started with Aseprite</h1>
+            <p id="main-subtitle" class="mt-4 text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">A visual guide to mastering the fundamentals of pixel art animation, from core concepts to exporting your first masterpiece.</p>
+        </header>
+
+        <main>
+            <section id="core-concepts" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="concepts-title" class="text-3xl font-bold text-indigo-700">The Animator's Canvas</h2>
+                    <p id="concepts-subtitle" class="mt-2 text-md text-slate-500">Aseprite's power comes from its unique, frame-centric philosophy. Understanding its structure is the first step.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="stat-card">
+                        <h3 id="concept-sprite-title" class="font-bold text-xl text-indigo-600">Sprite</h3>
+                        <p id="concept-sprite-desc" class="text-slate-600 mt-2">The entire project file (.aseprite), containing all your frames, layers, and palettes.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="concept-frame-title" class="font-bold text-xl text-indigo-600">Frame</h3>
+                        <p id="concept-frame-desc" class="text-slate-600 mt-2">A single image in the animation sequence, representing a moment in time across all layers.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="concept-layer-title" class="font-bold text-xl text-indigo-600">Layer</h3>
+                        <p id="concept-layer-desc" class="text-slate-600 mt-2">Used to separate and organize elements, like a character from their background.</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="concept-cel-title" class="font-bold text-xl text-indigo-600">Cel</h3>
+                        <p id="concept-cel-desc" class="text-slate-600 mt-2">The most basic unit: the intersection of a single frame and a single layer, containing pixel data.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="workflow" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="workflow-title" class="text-3xl font-bold text-indigo-700">A Frame-Centric Workflow</h2>
+                    <p id="workflow-subtitle" class="mt-2 text-md text-slate-500">Unlike layer-based editors, Aseprite's timeline allows for independent animation loops on different layers without conflict. This chart shows how different animation cycles can coexist.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="chart-container">
+                        <canvas id="workflowChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bouncing-ball" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="bouncing-ball-title" class="text-3xl font-bold text-indigo-700">Your First Animation: The Bouncing Ball</h2>
+                    <p id="bouncing-ball-subtitle" class="mt-2 text-md text-slate-500">This classic exercise teaches the core principles of animation. Follow these steps to bring a simple shape to life.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="flowchart-step" id="flowchart-step1"><span class="font-bold">Step 1:</span> Block Out Motion</div>
+                    <div class="flowchart-arrow">▼</div>
+                    <div class="flowchart-step" id="flowchart-step2"><span class="font-bold">Step 2:</span> Adjust Timing & Spacing</div>
+                    <div class="flowchart-arrow">▼</div>
+                    <div class="flowchart-step" id="flowchart-step3"><span class="font-bold">Step 3:</span> Apply Squash & Stretch</div>
+                </div>
+                <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+                     <p id="squash-stretch-desc" class="text-center text-slate-600 mb-4">The "Squash and Stretch" principle is key to showing an object's weight and momentum. The chart below illustrates how the ball's shape changes at different points in the bounce, while its volume remains constant.</p>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="squashStretchChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="shortcuts" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="shortcuts-title" class="text-3xl font-bold text-indigo-700">Essential Keyboard Shortcuts</h2>
+                    <p id="shortcuts-subtitle" class="mt-2 text-md text-slate-500">Mastering these shortcuts will dramatically speed up your animation workflow.</p>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+                    <table class="w-full text-left">
+                        <thead class="table-header">
+                            <tr>
+                                <th id="th-shortcut" class="p-4 font-bold">Shortcut</th>
+                                <th id="th-action" class="p-4 font-bold">Action</th>
+                                <th id="th-context" class="p-4 font-bold">Context</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shortcuts-tbody">
+                            <tr class="table-row-odd">
+                                <td class="p-4 font-mono">Alt+N</td>
+                                <td class="p-4" data-lang-key="shortcut-action-1">New Frame (Copy)</td>
+                                <td class="p-4" data-lang-key="shortcut-context-1">Duplicates the current frame for iterative changes.</td>
+                            </tr>
+                            <tr class="table-row-even">
+                                <td class="p-4 font-mono">Alt+B</td>
+                                <td class="p-4" data-lang-key="shortcut-action-2">New Empty Frame</td>
+                                <td class="p-4" data-lang-key="shortcut-context-2">Creates a blank frame for a new key pose.</td>
+                            </tr>
+                            <tr class="table-row-odd">
+                                <td class="p-4 font-mono">Enter</td>
+                                <td class="p-4" data-lang-key="shortcut-action-3">Play/Stop Animation</td>
+                                <td class="p-4" data-lang-key="shortcut-context-3">Starts or stops playback in the main editor.</td>
+                            </tr>
+                            <tr class="table-row-even">
+                                <td class="p-4 font-mono">Tab</td>
+                                <td class="p-4" data-lang-key="shortcut-action-4">Show/Hide Timeline</td>
+                                <td class="p-4" data-lang-key="shortcut-context-4">Quickly maximizes your drawing space.</td>
+                            </tr>
+                            <tr class="table-row-odd">
+                                <td class="p-4 font-mono">F3</td>
+                                <td class="p-4" data-lang-key="shortcut-action-5">Toggle Onion Skin</td>
+                                <td class="p-4" data-lang-key="shortcut-context-5">See previous/next frames for reference.</td>
+                            </tr>
+                            <tr class="table-row-even">
+                                <td class="p-4 font-mono">F7</td>
+                                <td class="p-4" data-lang-key="shortcut-action-6">Toggle Preview Window</td>
+                                <td class="p-4" data-lang-key="shortcut-context-6">Opens a real-time playback window.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="exporting" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="exporting-title" class="text-3xl font-bold text-indigo-700">From Aseprite to the World</h2>
+                    <p id="exporting-subtitle" class="mt-2 text-md text-slate-500">Choosing the right export format is critical. Your choice depends entirely on where your animation will be used.</p>
+                </div>
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <p id="exporting-desc" class="text-center text-slate-600 mb-4">This chart compares the most common export formats based on their primary use case. Game development relies on optimized Sprite Sheets, while web sharing often uses GIFs.</p>
+                    <div class="chart-container">
+                        <canvas id="exportChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="community" class="mb-16">
+                <div class="text-center mb-10">
+                    <h2 id="community-title" class="text-3xl font-bold text-indigo-700">Join the Community</h2>
+                    <p id="community-subtitle" class="mt-2 text-md text-slate-500">You're not alone! Aseprite has a vibrant and supportive community across several platforms.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="stat-card flex items-center space-x-4">
+                        <div class="text-4xl">💬</div>
+                        <div>
+                            <h3 id="community-forum-title" class="font-bold text-xl text-indigo-600">Official Forum</h3>
+                            <p id="community-forum-desc" class="text-slate-600 mt-1">For structured help, tutorials, and sharing artwork.</p>
+                        </div>
+                    </div>
+                    <div class="stat-card flex items-center space-x-4">
+                        <div class="text-4xl">🎮</div>
+                        <div>
+                            <h3 id="community-discord-title" class="font-bold text-xl text-indigo-600">Discord Server</h3>
+                            <p id="community-discord-desc" class="text-slate-600 mt-1">For real-time chat, quick questions, and live feedback.</p>
+                        </div>
+                    </div>
+                    <div class="stat-card flex items-center space-x-4">
+                        <div class="text-4xl">🌐</div>
+                        <div>
+                            <h3 id="community-reddit-title" class="font-bold text-xl text-indigo-600">Subreddit (r/aseprite)</h3>
+                            <p id="community-reddit-desc" class="text-slate-600 mt-1">An informal space to share art and discuss projects.</p>
+                        </div>
+                    </div>
+                     <div class="stat-card flex items-center space-x-4">
+                        <div class="text-4xl">📖</div>
+                        <div>
+                            <h3 id="community-reading-title" class="font-bold text-xl text-indigo-600">Essential Reading</h3>
+                            <p id="community-reading-desc" class="text-slate-600 mt-1">"The Animator's Survival Kit" by Richard Williams is universally recommended.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 py-6 border-t border-slate-300">
+            <p id="footer-text" class="text-slate-500">Infographic created with data from the "Comprehensive Guide to Animation in Aseprite".</p>
+        </footer>
+
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                docTitle: "Getting Started with Aseprite: An Infographic",
+                'main-title': "Getting Started with Aseprite",
+                'main-subtitle': "A visual guide to mastering the fundamentals of pixel art animation, from core concepts to exporting your first masterpiece.",
+                'concepts-title': "The Animator's Canvas",
+                'concepts-subtitle': "Aseprite's power comes from its unique, frame-centric philosophy. Understanding its structure is the first step.",
+                'concept-sprite-title': "Sprite",
+                'concept-sprite-desc': "The entire project file (.aseprite), containing all your frames, layers, and palettes.",
+                'concept-frame-title': "Frame",
+                'concept-frame-desc': "A single image in the animation sequence, representing a moment in time across all layers.",
+                'concept-layer-title': "Layer",
+                'concept-layer-desc': "Used to separate and organize elements, like a character from their background.",
+                'concept-cel-title': "Cel",
+                'concept-cel-desc': "The most basic unit: the intersection of a single frame and a single layer, containing pixel data.",
+                'workflow-title': "A Frame-Centric Workflow",
+                'workflow-subtitle': "Unlike layer-based editors, Aseprite's timeline allows for independent animation loops on different layers without conflict. This chart shows how different animation cycles can coexist.",
+                'bouncing-ball-title': "Your First Animation: The Bouncing Ball",
+                'bouncing-ball-subtitle': "This classic exercise teaches the core principles of animation. Follow these steps to bring a simple shape to life.",
+                'flowchart-step1': `<span class="font-bold">Step 1:</span> Block Out Motion`,
+                'flowchart-step2': `<span class="font-bold">Step 2:</span> Adjust Timing & Spacing`,
+                'flowchart-step3': `<span class="font-bold">Step 3:</span> Apply Squash & Stretch`,
+                'squash-stretch-desc': `The "Squash and Stretch" principle is key to showing an object's weight and momentum. The chart below illustrates how the ball's shape changes at different points in the bounce, while its volume remains constant.`,
+                'shortcuts-title': "Essential Keyboard Shortcuts",
+                'shortcuts-subtitle': "Mastering these shortcuts will dramatically speed up your animation workflow.",
+                'th-shortcut': "Shortcut",
+                'th-action': "Action",
+                'th-context': "Context",
+                'shortcut-action-1': "New Frame (Copy)",
+                'shortcut-context-1': "Duplicates the current frame for iterative changes.",
+                'shortcut-action-2': "New Empty Frame",
+                'shortcut-context-2': "Creates a blank frame for a new key pose.",
+                'shortcut-action-3': "Play/Stop Animation",
+                'shortcut-context-3': "Starts or stops playback in the main editor.",
+                'shortcut-action-4': "Show/Hide Timeline",
+                'shortcut-context-4': "Quickly maximizes your drawing space.",
+                'shortcut-action-5': "Toggle Onion Skin",
+                'shortcut-context-5': "See previous/next frames for reference.",
+                'shortcut-action-6': "Toggle Preview Window",
+                'shortcut-context-6': "Opens a real-time playback window.",
+                'exporting-title': "From Aseprite to the World",
+                'exporting-subtitle': "Choosing the right export format is critical. Your choice depends entirely on where your animation will be used.",
+                'exporting-desc': "This chart compares the most common export formats based on their primary use case. Game development relies on optimized Sprite Sheets, while web sharing often uses GIFs.",
+                'community-title': "Join the Community",
+                'community-subtitle': "You're not alone! Aseprite has a vibrant and supportive community across several platforms.",
+                'community-forum-title': "Official Forum",
+                'community-forum-desc': "For structured help, tutorials, and sharing artwork.",
+                'community-discord-title': "Discord Server",
+                'community-discord-desc': "For real-time chat, quick questions, and live feedback.",
+                'community-reddit-title': "Subreddit (r/aseprite)",
+                'community-reddit-desc': "An informal space to share art and discuss projects.",
+                'community-reading-title': "Essential Reading",
+                'community-reading-desc': `"The Animator's Survival Kit" by Richard Williams is universally recommended.`,
+                'footer-text': `Infographic created with data from the "Comprehensive Guide to Animation in Aseprite".`,
+                charts: {
+                    workflow: {
+                        dataset1: 'Character Walk Cycle',
+                        dataset2: 'Background Rain Loop',
+                        dataset3: 'Character Blink'
+                    },
+                    squashStretch: {
+                        title: 'Ball Shape Deformation (Volume is Constant)',
+                        label1: 'Apex (Stretch)',
+                        label2: 'Mid-Fall (Stretch)',
+                        label3: 'Impact (Squash)',
+                        label4: 'Mid-Rise (Stretch)',
+                        label5: 'Anticipation (Squash)',
+                        dataset1: 'Vertical Shape',
+                        dataset2: 'Horizontal Shape'
+                    },
+                    export: {
+                        title: 'Format Suitability by Use Case (%)',
+                        label1: 'Web & Social Media (Simple Sharing)',
+                        label2: 'Video Editing & High Quality Archives',
+                        label3: 'Game Development (Optimized for Engines)',
+                        dataset1: 'GIF',
+                        dataset2: 'PNG Sequence',
+                        dataset3: 'Sprite Sheet (JSON)'
+                    }
+                }
+            },
+            'zh-TW': {
+                docTitle: "Aseprite 入門指南：資訊圖表",
+                'main-title': "Aseprite 入門指南",
+                'main-subtitle': "一份視覺化指南，帶您掌握像素藝術動畫的基礎知識，從核心概念到導出您的第一個傑作。",
+                'concepts-title': "動畫師的畫布",
+                'concepts-subtitle': "Aseprite 的強大之處在於其獨特的「以影格為中心」的理念。理解其結構是第一步。",
+                'concept-sprite-title': "精靈 (Sprite)",
+                'concept-sprite-desc': "整個專案檔案 (.aseprite)，包含您所有的影格、圖層和調色盤。",
+                'concept-frame-title': "影格 (Frame)",
+                'concept-frame-desc': "動畫序列中的單一圖像，代表所有圖層在某一時間點的狀態。",
+                'concept-layer-title': "圖層 (Layer)",
+                'concept-layer-desc': "用於分離和組織元素，例如將角色與背景分開。",
+                'concept-cel-title': "儲存格 (Cel)",
+                'concept-cel-desc': "最基本的單位：特定影格和特定圖層的交集，包含像素資料。",
+                'workflow-title': "以影格為中心的工作流程",
+                'workflow-subtitle': "與基於圖層的編輯器不同，Aseprite 的時間軸允許不同圖層上的動畫循環獨立運行而不會產生衝突。此圖表顯示了不同的動畫週期如何共存。",
+                'bouncing-ball-title': "您的第一個動畫：彈跳球",
+                'bouncing-ball-subtitle': "這個經典練習教導了動畫的核心原則。請按照以下步驟讓一個簡單的形狀活起來。",
+                'flowchart-step1': `<span class="font-bold">步驟 1：</span> 規劃動態`,
+                'flowchart-step2': `<span class="font-bold">步驟 2：</span> 調整時間與間距`,
+                'flowchart-step3': `<span class="font-bold">步驟 3：</span> 應用擠壓與拉伸`,
+                'squash-stretch-desc': `「擠壓與拉伸」原則是展現物體重量和動量的關鍵。下面的圖表說明了球在彈跳的不同點上形狀如何變化，而其體積保持不變。`,
+                'shortcuts-title': "必要鍵盤快捷鍵",
+                'shortcuts-subtitle': "掌握這些快捷鍵將極大地加快您的動畫工作流程。",
+                'th-shortcut': "快捷鍵",
+                'th-action': "功能",
+                'th-context': "說明",
+                'shortcut-action-1': "新影格 (複製)",
+                'shortcut-context-1': "複製當前影格以進行迭代更改。",
+                'shortcut-action-2': "新空白影格",
+                'shortcut-context-2': "創建一個空白影格以繪製新的關鍵姿勢。",
+                'shortcut-action-3': "播放/停止動畫",
+                'shortcut-context-3': "在主編輯器中開始或停止播放。",
+                'shortcut-action-4': "顯示/隱藏時間軸",
+                'shortcut-context-4': "快速最大化您的繪圖空間。",
+                'shortcut-action-5': "切換洋蔥皮",
+                'shortcut-context-5': "查看前後影格以供參考。",
+                'shortcut-action-6': "切換預覽視窗",
+                'shortcut-context-6': "打開一個即時播放視窗。",
+                'exporting-title': "從 Aseprite 到全世界",
+                'exporting-subtitle': "選擇正確的導出格式至關重要。您的選擇完全取決於動畫的使用場景。",
+                'exporting-desc': "此圖表根據主要使用案例比較了最常見的導出格式。遊戲開發依賴優化的精靈圖表，而網路分享通常使用 GIF。",
+                'community-title': "加入社群",
+                'community-subtitle': "您並不孤單！Aseprite 在多個平台上擁有一個充滿活力且互相支持的社群。",
+                'community-forum-title': "官方論壇",
+                'community-forum-desc': "用於尋求有結構的幫助、教學和分享藝術作品。",
+                'community-discord-title': "Discord 伺服器",
+                'community-discord-desc': "用於即時聊天、快速提問和獲取即時反饋。",
+                'community-reddit-title': "Subreddit (r/aseprite)",
+                'community-reddit-desc': "一個分享藝術和討論專案的非正式空間。",
+                'community-reading-title': "必讀書籍",
+                'community-reading-desc': `普遍推薦理查·威廉斯的《動畫師生存手冊》。`,
+                'footer-text': `資訊圖表根據「Aseprite 動畫綜合指南」的資料創建。`,
+                charts: {
+                    workflow: {
+                        dataset1: '角色走路循環',
+                        dataset2: '背景下雨循環',
+                        dataset3: '角色眨眼'
+                    },
+                    squashStretch: {
+                        title: '球體變形 (體積不變)',
+                        label1: '頂點 (拉伸)',
+                        label2: '下落中段 (拉伸)',
+                        label3: '撞擊 (擠壓)',
+                        label4: '上升中段 (拉伸)',
+                        label5: '預備動作 (擠壓)',
+                        dataset1: '垂直形狀',
+                        dataset2: '水平形狀'
+                    },
+                    export: {
+                        title: '格式適用性依使用案例 (%)',
+                        label1: '網路與社群媒體 (簡易分享)',
+                        label2: '影片剪輯與高品質存檔',
+                        label3: '遊戲開發 (針對引擎優化)',
+                        dataset1: 'GIF',
+                        dataset2: 'PNG 序列',
+                        dataset3: '精靈圖表 (JSON)'
+                    }
+                }
+            }
+        };
+
+        let currentLang = 'en';
+        let charts = {};
+
+        const energeticPalette = {
+            primary: '#4F46E5',
+            secondary: '#EC4899',
+            accent: '#F59E0B',
+            neutral: '#64748B',
+            background: '#F1F5F9',
+            text: '#1E293B'
+        };
+
+        const tooltipPlugin = {
+            tooltip: {
+                callbacks: {
+                    title: function(tooltipItems) {
+                        const item = tooltipItems[0];
+                        let label = item.chart.data.labels[item.dataIndex];
+                        if (Array.isArray(label)) {
+                            return label.join(' ');
+                        } else {
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+        
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) return str;
+            const words = str.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                if (currentLine.length + word.length + 1 < maxWidth) {
+                    currentLine += ' ' + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        function updateTextContent(lang) {
+            document.title = translations[lang].docTitle;
+            document.documentElement.lang = lang === 'zh-TW' ? 'zh-Hant' : 'en';
+
+            for (const key in translations[lang]) {
+                if (key !== 'charts' && key !== 'docTitle') {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.innerHTML = translations[lang][key];
+                    } else {
+                        const elements = document.querySelectorAll(`[data-lang-key="${key}"]`);
+                        elements.forEach(el => el.innerHTML = translations[lang][key]);
+                    }
+                }
+            }
+        }
+
+        function createCharts(lang) {
+            Object.values(charts).forEach(chart => chart.destroy());
+
+            const chartTranslations = translations[lang].charts;
+
+            const workflowCtx = document.getElementById('workflowChart').getContext('2d');
+            charts.workflow = new Chart(workflowCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Frame 1', 'Frame 2', 'Frame 3', 'Frame 4', 'Frame 5', 'Frame 6', 'Frame 7', 'Frame 8'],
+                    datasets: [{
+                        label: chartTranslations.workflow.dataset1,
+                        data: [1, 2, 3, 4, 1, 2, 3, 4],
+                        borderColor: energeticPalette.primary,
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true, tension: 0.4,
+                    }, {
+                        label: chartTranslations.workflow.dataset2,
+                        data: [3, 4, 1, 2, 3, 4, 1, 2],
+                        borderColor: energeticPalette.secondary,
+                        backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                        fill: true, tension: 0.4,
+                    }, {
+                        label: chartTranslations.workflow.dataset3,
+                        data: [null, null, 2, 1, 2, null, null, null],
+                        borderColor: energeticPalette.accent,
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        fill: false, stepped: true,
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: tooltipPlugin, scales: { y: { beginAtZero: true, ticks: { display: false }, grid: { drawOnChartArea: false } }, x: { grid: { display: false } } } }
+            });
+
+            const squashStretchCtx = document.getElementById('squashStretchChart').getContext('2d');
+            charts.squashStretch = new Chart(squashStretchCtx, {
+                type: 'bar',
+                data: {
+                    labels: [chartTranslations.squashStretch.label1, chartTranslations.squashStretch.label2, chartTranslations.squashStretch.label3, chartTranslations.squashStretch.label4, chartTranslations.squashStretch.label5],
+                    datasets: [{
+                        label: chartTranslations.squashStretch.dataset1,
+                        data: [110, 120, 80, 120, 90],
+                        backgroundColor: energeticPalette.primary, borderColor: '#3730A3', borderWidth: 2
+                    }, {
+                        label: chartTranslations.squashStretch.dataset2,
+                        data: [90, 80, 120, 80, 110],
+                        backgroundColor: energeticPalette.secondary, borderColor: '#9D2463', borderWidth: 2
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { ...tooltipPlugin, legend: { position: 'top' }, title: { display: true, text: chartTranslations.squashStretch.title } }, scales: { x: { stacked: true, display: false, }, y: { stacked: true, grid: { display: false } } } }
+            });
+            
+            const exportCtx = document.getElementById('exportChart').getContext('2d');
+            const exportLabels = [
+                chartTranslations.export.label1, 
+                chartTranslations.export.label2, 
+                chartTranslations.export.label3
+            ].map(label => wrapLabel(label, 20));
+
+            charts.export = new Chart(exportCtx, {
+                type: 'bar',
+                data: {
+                    labels: exportLabels,
+                    datasets: [{
+                        label: chartTranslations.export.dataset1, data: [90, 20, 10], backgroundColor: energeticPalette.primary,
+                    }, {
+                        label: chartTranslations.export.dataset2, data: [40, 95, 60], backgroundColor: energeticPalette.secondary,
+                    }, {
+                        label: chartTranslations.export.dataset3, data: [5, 50, 98], backgroundColor: energeticPalette.accent,
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { ...tooltipPlugin, title: { display: true, text: chartTranslations.export.title } }, scales: { y: { beginAtZero: true, max: 100, ticks: { callback: function(value) { return value + '%' } } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            updateTextContent(lang);
+            createCharts(lang);
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh-TW');
+        }
+
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+        document.getElementById('lang-zh').addEventListener('click', () => setLanguage('zh-TW'));
+
+        // Initial load
+        setLanguage('en');
+    </script>
+</body>
+</html>
