@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動像素動畫教學：製作走路循環</title>
+    <style>
+        /* 基本頁面樣式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f4f7f9;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 0;
+        }
+        h1 {
+             border-bottom: none;
+             padding-bottom: 0;
+        }
+        /* 主要容器佈局 */
+        .tutorial-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        .instructions {
+            flex: 1;
+            min-width: 300px;
+        }
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 340px;
+        }
+        /* 畫布樣式，確保像素清晰 */
+        .canvas-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin-bottom: 15px;
+        }
+        #pixel-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            border: 2px solid #34495e;
+            cursor: crosshair;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            width: 320px;
+            height: 320px;
+            background-color: #fff;
+            z-index: 10;
+        }
+        #onion-skin-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 320px;
+            height: 320px;
+            pointer-events: none;
+            opacity: 0.35;
+            image-rendering: pixelated;
+            z-index: 5;
+        }
+        /* 控制項樣式 */
+        .controls, .frame-controls, .animation-controls {
+            margin-top: 15px;
+            text-align: center;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: 100%;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        #lang-switch-button {
+            background-color: #2ecc71;
+        }
+        #lang-switch-button:hover {
+            background-color: #27ae60;
+        }
+        /* 調色盤 */
+        .palette {
+            margin-bottom: 10px;
+        }
+        .palette-color {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            cursor: pointer;
+            border: 2px solid #fff;
+            margin: 2px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .palette-color:hover {
+            transform: scale(1.1);
+        }
+        .palette-color.selected {
+            border-color: #3498db;
+            transform: scale(1.2);
+        }
+        /* 預覽畫布 */
+        #preview-canvas {
+            border: 1px solid #bdc3c7;
+            width: 128px;
+            height: 128px;
+            image-rendering: pixelated;
+            background-color: #ecf0f1;
+            margin-bottom: 10px;
+        }
+        /* 教學步驟樣式 */
+        .step {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-left: 5px solid #3498db;
+        }
+        .step h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .walk-cycle-diagram {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <h1 data-lang-key="main_title"></h1>
+        <button id="lang-switch-button">English</button>
+    </div>
+    <p data-lang-key="intro_p"></p>
+
+    <div class="tutorial-container">
+        <div class="instructions">
+            <div id="step-1" class="step">
+                <h3 data-lang-key="step1_h3"></h3>
+                <p data-lang-key="step1_p1"></p>
+                <p><b data-lang-key="step1_task_b"></b><span data-lang-key="step1_task_span"></span></p>
+                <svg viewBox="0 0 400 100" class="walk-cycle-diagram">
+                    <defs>
+                        <g id="stick-figure">
+                            <circle cx="0" cy="-35" r="5" fill="#3498db"></circle>
+                            <line x1="0" y1="-30" x2="0" y2="-10" stroke="#34495e" stroke-width="2"></line>
+                        </g>
+                    </defs>
+                    <!-- Pose 1: Contact -->
+                    <g transform="translate(50, 50)">
+                        <use href="#stick-figure"></use>
+                        <line x1="0" y1="-10" x2="-10" y2="10" stroke="#e74c3c" stroke-width="2" id="l-leg-1"></line>
+                        <line x1="0" y1="-10" x2="10" y2="10" stroke="#3498db" stroke-width="2" id="r-leg-1"></line>
+                        <line x1="0" y1="-25" x2="10" y2="-5" stroke="#e74c3c" stroke-width="2" id="l-arm-1"></line>
+                        <line x1="0" y1="-25" x2="-10" y2="-5" stroke="#3498db" stroke-width="2" id="r-arm-1"></line>
+                        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#2c3e50" data-lang-key="svg_contact"></text>
+                    </g>
+                    <!-- Pose 2: Down -->
+                    <g transform="translate(150, 55)">
+                        <use href="#stick-figure"></use>
+                        <line x1="0" y1="-10" x2="-5" y2="5" stroke="#e74c3c" stroke-width="2" id="l-leg-2"></line>
+                        <line x1="-5" y1="5" x2="0" y2="10" stroke="#e74c3c" stroke-width="2"></line>
+                        <line x1="0" y1="-10" x2="5" y2="0" stroke="#3498db" stroke-width="2" id="r-leg-2"></line>
+                        <line x1="0" y1="-25" x2="5" y2="-10" stroke="#e74c3c" stroke-width="2" id="l-arm-2"></line>
+                        <line x1="0" y1="-25" x2="-5" y2="-10" stroke="#3498db" stroke-width="2" id="r-arm-2"></line>
+                        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#2c3e50" data-lang-key="svg_down"></text>
+                    </g>
+                    <!-- Pose 3: Passing -->
+                    <g transform="translate(250, 50)">
+                        <use href="#stick-figure"></use>
+                        <line x1="0" y1="-10" x2="10" y2="10" stroke="#e74c3c" stroke-width="2" id="l-leg-3"></line>
+                        <line x1="0" y1="-10" x2="-10" y2="10" stroke="#3498db" stroke-width="2" id="r-leg-3"></line>
+                        <line x1="0" y1="-25" x2="-10" y2="-5" stroke="#e74c3c" stroke-width="2" id="l-arm-3"></line>
+                        <line x1="0" y1="-25" x2="10" y2="-5" stroke="#3498db" stroke-width="2" id="r-arm-3"></line>
+                        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#2c3e50" data-lang-key="svg_passing"></text>
+                    </g>
+                     <!-- Pose 4: Down (Mirrored) -->
+                    <g transform="translate(350, 55)">
+                        <use href="#stick-figure"></use>
+                        <line x1="0" y1="-10" x2="5" y2="5" stroke="#3498db" stroke-width="2" id="l-leg-4"></line>
+                        <line x1="5" y1="5" x2="0" y2="10" stroke="#3498db" stroke-width="2"></line>
+                        <line x1="0" y1="-10" x2="-5" y2="0" stroke="#e74c3c" stroke-width="2" id="r-leg-4"></line>
+                        <line x1="0" y1="-25" x2="-5" y2="-10" stroke="#3498db" stroke-width="2" id="l-arm-4"></line>
+                        <line x1="0" y1="-25" x2="5" y2="-10" stroke="#e74c3c" stroke-width="2" id="r-arm-4"></line>
+                        <text x="0" y="30" text-anchor="middle" font-size="12" fill="#2c3e50" data-lang-key="svg_down"></text>
+                    </g>
+                </svg>
+            </div>
+            <div id="step-2" class="step" style="display: none;">
+                <h3 data-lang-key="step2_h3"></h3>
+                <p data-lang-key="step2_p1"></p>
+                <p><b data-lang-key="step2_tip_b"></b><span data-lang-key="step2_tip_span"></span></p>
+                <p><b data-lang-key="step2_task_b"></b><span data-lang-key="step2_task_span"></span></p>
+            </div>
+            <div id="step-3" class="step" style="display: none;">
+                <h3 data-lang-key="step3_h3"></h3>
+                <p data-lang-key="step3_p1"></p>
+                <p><b data-lang-key="step3_task_b"></b><span data-lang-key="step3_task_span"></span></p>
+            </div>
+            <div id="step-4" class="step" style="display: none;">
+                <h3 data-lang-key="step4_h3"></h3>
+                <p data-lang-key="step4_p1"></p>
+                <p><b data-lang-key="step4_task_b"></b><span data-lang-key="step4_task_span"></span></p>
+            </div>
+             <div id="step-5" class="step" style="display: none;">
+                <h3 data-lang-key="step5_h3"></h3>
+                <p data-lang-key="step5_p1"></p>
+                <p data-lang-key="step5_p2"></p>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <h2 data-lang-key="drawing_area_h2"></h2>
+            <div class="canvas-wrapper">
+                <canvas id="onion-skin-canvas" width="32" height="32"></canvas>
+                <canvas id="pixel-canvas" width="32" height="32"></canvas>
+            </div>
+            <div class="controls">
+                <div class="palette">
+                    <span class="palette-color selected" style="background-color: #2c3e50;" data-color="#2c3e50" title="深藍 (線稿) / Dark Blue (Outline)"></span>
+                    <span class="palette-color" style="background-color: #e74c3c;" data-color="#e74c3c" title="紅色 (衣服) / Red (Shirt)"></span>
+                    <span class="palette-color" style="background-color: #3498db;" data-color="#3498db" title="藍色 (褲子) / Blue (Pants)"></span>
+                    <span class="palette-color" style="background-color: #f1c40f;" data-color="#f1c40f" title="黃色 (頭髮) / Yellow (Hair)"></span>
+                    <span class="palette-color" style="background-color: #e67e22;" data-color="#e67e22" title="橘色 (皮膚) / Orange (Skin)"></span>
+                    <span class="palette-color" style="background-color: #ecf0f1;" data-color="#ecf0f1" title="橡皮擦/白色 / Eraser/White"></span>
+                </div>
+                <button id="clear-button" data-lang-key="clear_button"></button>
+                <label>
+                    <input type="checkbox" id="onion-skin-toggle"> <span data-lang-key="onion_skin_label"></span>
+                </label>
+            </div>
+            <div class="frame-controls">
+                <h3 data-lang-key="frame_controls_h3"></h3>
+                <button id="prev-frame-button" data-lang-key="prev_frame_button"></button>
+                <span id="frame-indicator"></span>
+                <button id="next-frame-button" data-lang-key="next_frame_button"></button>
+            </div>
+            <div class="animation-controls">
+                 <h3 data-lang-key="animation_preview_h3"></h3>
+                <canvas id="preview-canvas" width="32" height="32"></canvas>
+                <button id="play-pause-button" data-lang-key="play_button"></button>
+                <div>
+                    <label for="fps-slider"><span data-lang-key="fps_label"></span>: <span id="fps-value">8</span></label>
+                    <input type="range" id="fps-slider" min="1" max="24" value="8" style="vertical-align: middle;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 語言內容 ---
+            const langContent = {
+                zh: {
+                    doc_title: "互動像素動畫教學：製作走路循環",
+                    main_title: "互動像素動畫教學：製作走路循環",
+                    intro_p: "歡迎來到像素動畫的世界！本教學將引導你建立一個經典的 4 影格走路動畫。跟著步驟，你將親手畫出一個會動的角色。",
+                    step1_h3: "第一步：接觸點 (Contact Pose)",
+                    step1_p1: "這是走路循環的起始點。想像角色一隻腳剛踏出，另一隻腳在後方完全伸展。這是雙腳距離最遠、最高點的時刻。",
+                    step1_task_b: "任務：",
+                    step1_task_span: "在右邊的畫布上，畫出這個姿勢。我們已經為你準備好了一個簡單的範本，你可以直接上色，或點擊「清除畫布」來從頭開始。",
+                    svg_contact: "接觸點",
+                    svg_down: "低點",
+                    svg_passing: "經過點",
+                    step2_h3: "第二步：低點 (Down Pose)",
+                    step2_p1: "角色的身體在此刻達到最低點。前腳彎曲以吸收身體的重量，後腳準備離地。這是身體最低點的時刻。",
+                    step2_tip_b: "提示：",
+                    step2_tip_span: "整個角色會比上一個影格低 1 個像素。你可以開啟「洋蔥皮」功能來參考前一格的殘影。",
+                    step2_task_b: "任務：",
+                    step2_task_span: "畫出這個低點姿勢。",
+                    step3_h3: "第三步：經過點 (Passing Pose)",
+                    step3_p1: "這是另一隻腳的「接觸點」，與第一格左右相反。後腳向前移動，經過支撐身體的腳。此刻身體再次回到最高點。",
+                    step3_task_b: "任務：",
+                    step3_task_span: "畫出這個左右相反的接觸點姿勢。這是動畫循環的後半段的開始。",
+                    step4_h3: "第四步：另一個低點 (Second Down Pose)",
+                    step4_p1: "與第二步類似，但左右相反。現在是另一隻腳承受重量，身體再次下降。",
+                    step4_task_b: "任務：",
+                    step4_task_span: "畫出這個左右相反的低點姿勢。完成後，我們就擁有了一個完整的走路循環！",
+                    step5_h3: "恭喜！你已完成所有影格！",
+                    step5_p1: "你已經畫好了一個完整的走路動畫所需的所有關鍵影格。",
+                    step5_p2: "現在，點擊下方的「播放動畫」按鈕，看看你的角色動起來的樣子吧！你可以隨時切換回任何影格進行修改，動畫預覽會即時更新。",
+                    drawing_area_h2: "繪圖區",
+                    clear_button: "清除畫布",
+                    onion_skin_label: "洋蔥皮",
+                    frame_controls_h3: "影格控制",
+                    prev_frame_button: "&lt; 上一格",
+                    next_frame_button: "下一格 &gt;",
+                    frame_indicator_template: "影格 {current} / {total}",
+                    animation_preview_h3: "動畫預覽",
+                    play_button: "播放動畫",
+                    pause_button: "暫停動畫",
+                    fps_label: "速度 (FPS)",
+                    lang_switch_en: "English"
+                },
+                en: {
+                    doc_title: "Interactive Pixel Animation Tutorial: Walk Cycle",
+                    main_title: "Interactive Pixel Animation Tutorial: Walk Cycle",
+                    intro_p: "Welcome to the world of pixel animation! This tutorial will guide you to create a classic 4-frame walk cycle. Follow the steps, and you'll draw a moving character with your own hands.",
+                    step1_h3: "Step 1: Contact Pose",
+                    step1_p1: "This is the starting point of the walk cycle. Imagine the character has just stepped forward with one foot, and the other foot is fully extended behind. This is the moment when the feet are furthest apart and the body is at its highest point.",
+                    step1_task_b: "Task:",
+                    step1_task_span: " On the canvas to the right, draw this pose. We've prepared a simple template for you. You can color it directly or click 'Clear Canvas' to start from scratch.",
+                    svg_contact: "Contact",
+                    svg_down: "Down",
+                    svg_passing: "Passing",
+                    step2_h3: "Step 2: Down Pose",
+                    step2_p1: "The character's body is at its lowest point here. The front leg is bent to absorb the body's weight, and the back foot is about to lift off the ground. This is the lowest point of the body.",
+                    step2_tip_b: "Tip:",
+                    step2_tip_span: " The entire character will be 1 pixel lower than the previous frame. You can enable 'Onion Skin' to see a faint image of the previous frame as a reference.",
+                    step2_task_b: "Task:",
+                    step2_task_span: " Draw this down pose.",
+                    step3_h3: "Step 3: Passing Pose",
+                    step3_p1: "This is the 'Contact Pose' for the other leg, a mirror image of the first frame. The back leg moves forward, passing the supporting leg. The body returns to its highest point.",
+                    step3_task_b: "Task:",
+                    step3_task_span: " Draw this mirrored contact pose. This marks the beginning of the second half of the animation cycle.",
+                    step4_h3: "Step 4: Second Down Pose",
+                    step4_p1: "Similar to Step 2, but mirrored. Now the other leg is bearing the weight, and the body lowers again.",
+                    step4_task_b: "Task:",
+                    step4_task_span: " Draw this mirrored down pose. Once done, we'll have a complete walk cycle!",
+                    step5_h3: "Congratulations! You've completed all frames!",
+                    step5_p1: "You have drawn all the keyframes needed for a full walking animation.",
+                    step5_p2: "Now, click the 'Play Animation' button below to see your character come to life! You can switch back to any frame to make changes, and the animation preview will update in real-time.",
+                    drawing_area_h2: "Drawing Area",
+                    clear_button: "Clear Canvas",
+                    onion_skin_label: "Onion Skin",
+                    frame_controls_h3: "Frame Controls",
+                    prev_frame_button: "&lt; Prev Frame",
+                    next_frame_button: "Next Frame &gt;",
+                    frame_indicator_template: "Frame {current} / {total}",
+                    animation_preview_h3: "Animation Preview",
+                    play_button: "Play Animation",
+                    pause_button: "Pause Animation",
+                    fps_label: "Speed (FPS)",
+                    lang_switch_en: "中文"
+                }
+            };
+            let currentLang = 'zh';
+
+            // --- 元素獲取 ---
+            const canvas = document.getElementById('pixel-canvas');
+            const ctx = canvas.getContext('2d');
+            const previewCanvas = document.getElementById('preview-canvas');
+            const previewCtx = previewCanvas.getContext('2d');
+            const onionCanvas = document.getElementById('onion-skin-canvas');
+            const onionCtx = onionCanvas.getContext('2d');
+            
+            const paletteColors = document.querySelectorAll('.palette-color');
+            const clearButton = document.getElementById('clear-button');
+            const onionSkinToggle = document.getElementById('onion-skin-toggle');
+            
+            const prevFrameButton = document.getElementById('prev-frame-button');
+            const nextFrameButton = document.getElementById('next-frame-button');
+            const frameIndicator = document.getElementById('frame-indicator');
+            
+            const playPauseButton = document.getElementById('play-pause-button');
+            const fpsSlider = document.getElementById('fps-slider');
+            const fpsValue = document.getElementById('fps-value');
+            const langSwitchButton = document.getElementById('lang-switch-button');
+
+            const steps = [
+                document.getElementById('step-1'),
+                document.getElementById('step-2'),
+                document.getElementById('step-3'),
+                document.getElementById('step-4'),
+                document.getElementById('step-5'),
+            ];
+
+            // 變數初始化
+            const NUM_FRAMES = 4;
+            let currentFrame = 0;
+            let framesData = Array(NUM_FRAMES).fill(null).map(() => ctx.createImageData(32, 32));
+            let currentColor = '#2c3e50';
+            let isDrawing = false;
+            let isPlaying = false;
+            let animationFrameId;
+
+            // 預設範本
+            const template = {
+                outline: '#2c3e50', skin: '#e67e22', shirt: '#e74c3c', pants: '#3498db', hair: '#f1c40f',
+                frames: [
+                    [[15, 8, 'hair'], [16, 8, 'hair'], [14, 9, 'hair'], [15, 9, 'hair'], [16, 9, 'hair'], [17, 9, 'hair'],[14, 10, 'skin'], [15, 10, 'skin'], [16, 10, 'skin'], [17, 10, 'skin'], [15, 11, 'skin'], [16, 11, 'skin'],[14, 12, 'shirt'], [15, 12, 'shirt'], [16, 12, 'shirt'], [17, 12, 'shirt'], [13, 13, 'shirt'], [14, 13, 'shirt'], [15, 13, 'shirt'], [16, 13, 'shirt'], [17, 13, 'shirt'],[12, 14, 'skin'], [18, 14, 'skin'],[14, 14, 'pants'], [15, 14, 'pants'], [16, 14, 'pants'], [13, 15, 'pants'], [17, 15, 'pants'],[12, 16, 'pants'], [18, 16, 'pants'], [12, 17, 'pants'], [18, 17, 'pants'],[11, 18, 'outline'], [19, 18, 'outline']],
+                    [[15, 9, 'hair'], [16, 9, 'hair'], [14, 10, 'hair'], [15, 10, 'hair'], [16, 10, 'hair'], [17, 10, 'hair'],[14, 11, 'skin'], [15, 11, 'skin'], [16, 11, 'skin'], [17, 11, 'skin'], [15, 12, 'skin'], [16, 12, 'skin'],[14, 13, 'shirt'], [15, 13, 'shirt'], [16, 13, 'shirt'], [17, 13, 'shirt'], [13, 14, 'shirt'], [14, 14, 'shirt'], [15, 14, 'shirt'], [16, 14, 'shirt'], [17, 14, 'shirt'],[12, 15, 'skin'], [18, 15, 'skin'],[14, 15, 'pants'], [15, 15, 'pants'], [16, 15, 'pants'], [13, 16, 'pants'], [17, 16, 'pants'],[13, 17, 'pants'], [17, 17, 'pants'], [13, 18, 'pants'],[12, 19, 'outline'], [18, 18, 'outline']]
+                ]
+            };
+            template.frames[2] = template.frames[0].map(([x, y, c]) => [31 - x, y, c]);
+            template.frames[3] = template.frames[1].map(([x, y, c]) => [31 - x, y, c]);
+
+            function drawTemplate(frameIndex) {
+                clearCanvas();
+                const frameTemplate = template.frames[frameIndex];
+                frameTemplate.forEach(([x, y, colorKey]) => {
+                    ctx.fillStyle = template[colorKey];
+                    ctx.fillRect(x, y, 1, 1);
+                });
+                saveFrame();
+            }
+
+            // 繪圖邏輯
+            function getMousePos(event) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = Math.floor((event.clientX - rect.left) * scaleX);
+                const y = Math.floor((event.clientY - rect.top) * scaleY);
+                return {x, y};
+            }
+
+            function drawPixel(pos) {
+                ctx.fillStyle = currentColor;
+                ctx.fillRect(pos.x, pos.y, 1, 1);
+            }
+
+            function handleDraw(event) {
+                if (!isDrawing) return;
+                const pos = getMousePos(event);
+                drawPixel(pos);
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                const pos = getMousePos(e);
+                drawPixel(pos);
+            });
+            canvas.addEventListener('mousemove', handleDraw);
+            document.addEventListener('mouseup', () => {
+                if (isDrawing) {
+                    isDrawing = false;
+                    saveFrame();
+                }
+            });
+            
+            // 控制項邏輯
+            paletteColors.forEach(p => {
+                p.addEventListener('click', () => {
+                    currentColor = p.dataset.color;
+                    paletteColors.forEach(el => el.classList.remove('selected'));
+                    p.classList.add('selected');
+                });
+            });
+
+            clearButton.addEventListener('click', () => {
+                clearCanvas();
+                saveFrame();
+            });
+            
+            function clearCanvas() {
+                ctx.clearRect(0, 0, 32, 32);
+            }
+
+            onionSkinToggle.addEventListener('change', drawOnionSkin);
+
+            // 影格管理
+            function saveFrame() {
+                framesData[currentFrame] = ctx.getImageData(0, 0, 32, 32);
+                updatePreview();
+            }
+
+            function loadFrame(frameIndex) {
+                clearCanvas();
+                if (framesData[frameIndex]) {
+                    ctx.putImageData(framesData[frameIndex], 0, 0);
+                }
+            }
+            
+            function updateUI() {
+                const content = langContent[currentLang];
+                frameIndicator.textContent = content.frame_indicator_template
+                    .replace('{current}', currentFrame + 1)
+                    .replace('{total}', NUM_FRAMES);
+                
+                prevFrameButton.disabled = currentFrame === 0;
+                nextFrameButton.disabled = currentFrame === NUM_FRAMES - 1;
+
+                steps.forEach((step, index) => {
+                    step.style.display = 'none';
+                });
+                const isLastFrame = currentFrame === NUM_FRAMES - 1;
+                steps[isLastFrame ? 4 : currentFrame].style.display = 'block';
+            }
+
+            function changeFrame(direction) {
+                saveFrame();
+                currentFrame = Math.max(0, Math.min(NUM_FRAMES - 1, currentFrame + direction));
+                loadFrame(currentFrame);
+                updateUI();
+                drawOnionSkin();
+            }
+            
+            nextFrameButton.addEventListener('click', () => changeFrame(1));
+            prevFrameButton.addEventListener('click', () => changeFrame(-1));
+
+            function drawOnionSkin() {
+                onionCtx.clearRect(0, 0, 32, 32);
+                if (onionSkinToggle.checked && currentFrame > 0) {
+                    onionCtx.putImageData(framesData[currentFrame - 1], 0, 0);
+                }
+            }
+
+            // 動畫邏輯
+            function updatePreview() {
+                previewCtx.clearRect(0, 0, 32, 32);
+                previewCtx.putImageData(framesData[currentFrame], 0, 0);
+            }
+
+            let lastTime = 0;
+            let frameCounter = 0;
+            function animate(timestamp) {
+                if (!isPlaying) return;
+                const fps = parseInt(fpsSlider.value);
+                const interval = 1000 / fps;
+                if (timestamp - lastTime >= interval) {
+                    lastTime = timestamp;
+                    previewCtx.clearRect(0, 0, 32, 32);
+                    previewCtx.putImageData(framesData[frameCounter], 0, 0);
+                    frameCounter = (frameCounter + 1) % NUM_FRAMES;
+                }
+                animationFrameId = requestAnimationFrame(animate);
+            }
+
+            playPauseButton.addEventListener('click', () => {
+                isPlaying = !isPlaying;
+                const content = langContent[currentLang];
+                if (isPlaying) {
+                    playPauseButton.textContent = content.pause_button;
+                    saveFrame();
+                    frameCounter = 0;
+                    lastTime = performance.now();
+                    requestAnimationFrame(animate);
+                } else {
+                    playPauseButton.textContent = content.play_button;
+                    cancelAnimationFrame(animationFrameId);
+                    updatePreview();
+                }
+            });
+
+            fpsSlider.addEventListener('input', (e) => {
+                fpsValue.textContent = e.target.value;
+            });
+
+            // 語言切換邏輯
+            function updateLanguage() {
+                const content = langContent[currentLang];
+                document.querySelectorAll('[data-lang-key]').forEach(element => {
+                    const key = element.dataset.langKey;
+                    if (content[key]) {
+                         element.innerHTML = content[key];
+                    }
+                });
+                document.title = content.doc_title;
+                langSwitchButton.textContent = content.lang_switch_en;
+                if(isPlaying) {
+                    playPauseButton.textContent = content.pause_button;
+                } else {
+                    playPauseButton.textContent = content.play_button;
+                }
+                updateUI(); // Re-render frame indicator text
+            }
+
+            langSwitchButton.addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage();
+            });
+            
+            // 初始化
+            function init() {
+                ctx.imageSmoothingEnabled = false;
+                previewCtx.imageSmoothingEnabled = false;
+                onionCtx.imageSmoothingEnabled = false;
+                updateLanguage();
+                drawTemplate(0);
+                updatePreview();
+            }
+
+            init();
+        });
+    </script>
+
+</body>
+</html>
