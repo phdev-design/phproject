@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動式圖層動畫範例 (中英雙語版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .character-part {
+            position: absolute;
+            background-color: #a0aec0;
+            border: 2px solid #4a5568;
+            border-radius: 10px;
+            transition: all 0.2s ease-in-out;
+        }
+        .animation-canvas {
+            position: relative;
+            width: 200px;
+            height: 350px;
+            background-color: #e2e8f0;
+            border-radius: 1rem;
+            margin: 0 auto;
+            border: 2px dashed #cbd5e0;
+            overflow: hidden;
+        }
+        #head {
+            width: 60px;
+            height: 60px;
+            background-color: #f6ad55;
+            top: 50px;
+            left: 70px;
+            z-index: 10;
+            border-radius: 50%;
+        }
+        #torso {
+            width: 80px;
+            height: 120px;
+            background-color: #4299e1;
+            top: 100px;
+            left: 60px;
+            z-index: 5;
+        }
+        #left-arm {
+            width: 25px;
+            height: 100px;
+            background-color: #68d391;
+            top: 110px;
+            left: 40px;
+            z-index: 4;
+            transform-origin: top center;
+        }
+        #right-arm {
+            width: 25px;
+            height: 100px;
+            background-color: #68d391;
+            top: 110px;
+            left: 135px;
+            z-index: 6;
+            transform-origin: top center;
+        }
+        #left-leg {
+            width: 30px;
+            height: 110px;
+            background-color: #f56565;
+            top: 210px;
+            left: 60px;
+            z-index: 4;
+            transform-origin: top center;
+        }
+        #right-leg {
+            width: 30px;
+            height: 110px;
+            background-color: #f56565;
+            top: 210px;
+            left: 110px;
+            z-index: 6;
+            transform-origin: top center;
+        }
+        .control-panel {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .frame-btn.active {
+            background-color: #4299e1;
+            color: white;
+            font-weight: bold;
+        }
+        .lang-btn.active {
+            background-color: #4a5568;
+            color: white;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-4xl mx-auto relative">
+        <!-- Language Switcher -->
+        <div class="absolute top-0 right-0 flex space-x-1 p-1 bg-gray-200 rounded-lg">
+            <button id="lang-zh" class="lang-btn px-3 py-1 text-sm rounded-md transition">中文</button>
+            <button id="lang-en" class="lang-btn px-3 py-1 text-sm rounded-md transition">EN</button>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-4 mt-12 md:mt-0" data-lang="mainTitle"></h1>
+        <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-lang="mainDesc"></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <!-- Animation Viewer -->
+            <div class="flex flex-col items-center">
+                <h2 class="text-xl font-bold text-gray-700 mb-4" data-lang="previewTitle"></h2>
+                <div class="animation-canvas shadow-lg">
+                    <div id="left-arm" class="character-part"></div>
+                    <div id="right-arm" class="character-part"></div>
+                    <div id="left-leg" class="character-part"></div>
+                    <div id="right-leg" class="character-part"></div>
+                    <div id="torso" class="character-part"></div>
+                    <div id="head" class="character-part"></div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="control-panel">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-700 mb-4" data-lang="layerTitle"></h2>
+                    <p class="text-sm text-gray-600 mb-4" data-lang="layerDesc"></p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-500 rounded" data-part="head" checked>
+                            <span class="text-gray-700" data-lang="partHead"></span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-blue-500 rounded" data-part="torso" checked>
+                            <span class="text-gray-700" data-lang="partTorso"></span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 rounded" data-part="left-arm" checked>
+                            <span class="text-gray-700" data-lang="partLeftArm"></span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-green-500 rounded" data-part="right-arm" checked>
+                            <span class="text-gray-700" data-lang="partRightArm"></span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-red-500 rounded" data-part="left-leg" checked>
+                            <span class="text-gray-700" data-lang="partLeftLeg"></span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="form-checkbox h-5 w-5 text-red-500 rounded" data-part="right-leg" checked>
+                            <span class="text-gray-700" data-lang="partRightLeg"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-bold text-gray-700 mb-4" data-lang="timelineTitle"></h2>
+                    <p class="text-sm text-gray-600 mb-4" data-lang="timelineDesc"></p>
+                    <div class="flex space-x-2">
+                        <button class="frame-btn flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md transition" data-frame="1" data-lang="frame1"></button>
+                        <button class="frame-btn flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md transition" data-frame="2" data-lang="frame2"></button>
+                        <button class="frame-btn flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md transition" data-frame="3" data-lang="frame3"></button>
+                        <button class="frame-btn flex-1 py-2 px-4 bg-gray-200 text-gray-700 rounded-md transition" data-frame="4" data-lang="frame4"></button>
+                    </div>
+                     <button id="play-btn" class="mt-4 w-full py-2 px-4 bg-green-500 text-white rounded-md font-bold hover:bg-green-600 transition" data-lang="playBtn"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 語言資料 ---
+        const translations = {
+            zh: {
+                mainTitle: "圖層如何讓動畫更簡單？",
+                mainDesc: "將角色的不同部位放在獨立的圖層上，就像把拼圖的每一片分開處理。您可以單獨移動、旋轉或隱藏任何一個部位，而不會影響到其他部分。這使得修改和創作複雜動畫變得非常有效率。",
+                previewTitle: "動畫預覽",
+                layerTitle: "1. 圖層控制",
+                layerDesc: "試著取消勾選，看看每個身體部位是如何獨立存在的。這就是圖層的力量！",
+                partHead: "頭部",
+                partTorso: "身體",
+                partLeftArm: "左臂",
+                partRightArm: "右臂",
+                partLeftLeg: "左腿",
+                partRightLeg: "右腿",
+                timelineTitle: "2. 動畫時間軸",
+                timelineDesc: "點擊下方的幀數按鈕，觀看所有圖層組合起來的走路動畫。",
+                frame1: "第 1 幀",
+                frame2: "第 2 幀",
+                frame3: "第 3 幀",
+                frame4: "第 4 幀",
+                playBtn: "自動播放",
+                stopBtn: "停止播放"
+            },
+            en: {
+                mainTitle: "How Layers Make Animation Easier",
+                mainDesc: "Placing different parts of a character on separate layers is like handling each piece of a puzzle individually. You can move, rotate, or hide any part without affecting the others, making it efficient to modify and create complex animations.",
+                previewTitle: "Animation Preview",
+                layerTitle: "1. Layer Control",
+                layerDesc: "Try unchecking the boxes to see how each body part exists independently. This is the power of layers!",
+                partHead: "Head",
+                partTorso: "Torso",
+                partLeftArm: "Left Arm",
+                partRightArm: "Right Arm",
+                partLeftLeg: "Left Leg",
+                partRightLeg: "Right Leg",
+                timelineTitle: "2. Animation Timeline",
+                timelineDesc: "Click the frame buttons below to see the walking animation created by combining all layers.",
+                frame1: "Frame 1",
+                frame2: "Frame 2",
+                frame3: "Frame 3",
+                frame4: "Frame 4",
+                playBtn: "Play",
+                stopBtn: "Stop"
+            }
+        };
+
+        // --- 動畫數據 ---
+        const animationData = {
+            1: { // 站立/接觸地面
+                head: { top: '52px', left: '70px' },
+                torso: { top: '102px', left: '60px' },
+                leftArm: { transform: 'rotate(15deg)', zIndex: 4 },
+                rightArm: { transform: 'rotate(-15deg)', zIndex: 6 },
+                leftLeg: { transform: 'rotate(-20deg)', zIndex: 6 },
+                rightLeg: { transform: 'rotate(20deg)', zIndex: 4 }
+            },
+            2: { // 過渡/抬腿
+                head: { top: '50px', left: '70px' },
+                torso: { top: '100px', left: '60px' },
+                leftArm: { transform: 'rotate(0deg)', zIndex: 4 },
+                rightArm: { transform: 'rotate(0deg)', zIndex: 6 },
+                leftLeg: { transform: 'rotate(0deg)', zIndex: 6 },
+                rightLeg: { transform: 'rotate(0deg)', zIndex: 4 }
+            },
+            3: { // 跨步/接觸地面
+                head: { top: '52px', left: '70px' },
+                torso: { top: '102px', left: '60px' },
+                leftArm: { transform: 'rotate(-15deg)', zIndex: 6 },
+                rightArm: { transform: 'rotate(15deg)', zIndex: 4 },
+                leftLeg: { transform: 'rotate(20deg)', zIndex: 4 },
+                rightLeg: { transform: 'rotate(-20deg)', zIndex: 6 }
+            },
+            4: { // 過渡/抬腿
+                head: { top: '50px', left: '70px' },
+                torso: { top: '100px', left: '60px' },
+                leftArm: { transform: 'rotate(0deg)', zIndex: 6 },
+                rightArm: { transform: 'rotate(0deg)', zIndex: 4 },
+                leftLeg: { transform: 'rotate(0deg)', zIndex: 4 },
+                rightLeg: { transform: 'rotate(0deg)', zIndex: 6 }
+            }
+        };
+
+        const parts = {
+            head: document.getElementById('head'),
+            torso: document.getElementById('torso'),
+            leftArm: document.getElementById('left-arm'),
+            rightArm: document.getElementById('right-arm'),
+            leftLeg: document.getElementById('left-leg'),
+            rightLeg: document.getElementById('right-leg')
+        };
+        
+        const frameButtons = document.querySelectorAll('.frame-btn');
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const playButton = document.getElementById('play-btn');
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+
+        let currentFrame = 1;
+        let isPlaying = false;
+        let playInterval;
+        let currentLang = 'zh';
+
+        // --- 函數 ---
+
+        // 設定語言
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+            const langData = translations[lang];
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                const key = el.dataset.lang;
+                if (langData[key]) {
+                    el.textContent = langData[key];
+                }
+            });
+            updatePlayButtonText(); // 更新播放按鈕文字
+            
+            // 更新語言按鈕樣式
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+        }
+        
+        // 更新播放按鈕文字
+        function updatePlayButtonText() {
+            if (isPlaying) {
+                playButton.textContent = translations[currentLang].stopBtn;
+            } else {
+                playButton.textContent = translations[currentLang].playBtn;
+            }
+        }
+
+        // 根據幀數更新角色姿勢的函數
+        function goToFrame(frameNumber) {
+            const frameData = animationData[frameNumber];
+            for (const partName in frameData) {
+                const partElement = parts[partName];
+                const partStyles = frameData[partName];
+                if (partElement) {
+                    Object.assign(partElement.style, partStyles);
+                }
+            }
+            
+            frameButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.frame == frameNumber);
+            });
+            currentFrame = frameNumber;
+        }
+
+        // --- 事件監聽 ---
+
+        // 處理幀按鈕點擊事件
+        frameButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const frame = button.dataset.frame;
+                goToFrame(frame);
+            });
+        });
+
+        // 處理核取方塊點擊事件
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('click', () => {
+                const partName = checkbox.dataset.part;
+                const partElement = parts[partName];
+                if (partElement) {
+                    partElement.style.display = checkbox.checked ? 'block' : 'none';
+                }
+            });
+        });
+
+        // 處理播放按鈕
+        playButton.addEventListener('click', () => {
+            if (isPlaying) {
+                clearInterval(playInterval);
+                playButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+                playButton.classList.add('bg-green-500', 'hover:bg-green-600');
+            } else {
+                playButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+                playButton.classList.add('bg-red-500', 'hover:bg-red-600');
+                playInterval = setInterval(() => {
+                    currentFrame = (currentFrame % 4) + 1;
+                    goToFrame(currentFrame);
+                }, 300);
+            }
+            isPlaying = !isPlaying;
+            updatePlayButtonText();
+        });
+        
+        // 處理語言切換按鈕
+        langZhBtn.addEventListener('click', () => setLanguage('zh'));
+        langEnBtn.addEventListener('click', () => setLanguage('en'));
+
+        // --- 初始化 ---
+        goToFrame(1);
+        setLanguage('zh'); // 預設為中文
+    </script>
+</body>
+</html>
