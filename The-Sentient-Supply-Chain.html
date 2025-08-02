@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資訊圖表：智慧感知供應鏈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F2F5;
+            color: #1f2937;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .kpi-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .flow-item {
+            background-color: #ffffff;
+            border: 1px solid #E0E1DD;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 150px;
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            color: #778DA9;
+            align-self: center;
+        }
+        .lang-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .lang-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #3b82f6;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .slider-text {
+            color: white;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .slider-text.en {
+            right: 8px;
+        }
+        .slider-text.zh {
+            left: 8px;
+        }
+        @media (max-width: 768px) {
+            .flow-container {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+        <div class="flex justify-center items-center mb-4 relative">
+            <div class="absolute right-0 top-0 flex items-center space-x-2">
+                <span class="text-sm font-semibold text-gray-600" data-translate-key="lang_zh">中</span>
+                <label class="lang-switch">
+                    <input type="checkbox" id="languageToggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="text-sm font-semibold text-gray-600" data-translate-key="lang_en">EN</span>
+            </div>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-gray-900 mb-2" data-translate-key="main_title">智慧感知供應鏈</h1>
+            <p class="text-lg md:text-xl text-gray-600" data-translate-key="main_subtitle">駕馭次世代物流技術的風險與契機</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="kpi-card">
+                    <h3 class="text-5xl md:text-6xl font-bold gradient-text mb-2">2.2s</h3>
+                    <p class="text-gray-700 font-semibold" data-translate-key="kpi1_title">食品溯源時間</p>
+                    <p class="text-sm text-gray-500" data-translate-key="kpi1_desc">從傳統的7天急劇縮短，由區塊鏈技術實現。</p>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-5xl md:text-6xl font-bold gradient-text mb-2">>95%</h3>
+                    <p class="text-gray-700 font-semibold" data-translate-key="kpi2_title">庫存準確率</p>
+                    <p class="text-sm text-gray-500" data-translate-key="kpi2_desc">透過物聯網自動追蹤，遠超人工盤點的63%。</p>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-5xl md:text-6xl font-bold gradient-text mb-2">40%</h3>
+                    <p class="text-gray-700 font-semibold" data-translate-key="kpi3_title">貨運時間縮短</p>
+                    <p class="text-sm text-gray-500" data-translate-key="kpi3_desc">TradeLens平台透過數位化文件流程，大幅提升效率。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="automation" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8" data-translate-key="ch1_title">第一章：自動化革命</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="kpi-card">
+                        <h3 class="text-2xl font-bold mb-4" data-translate-key="ch1_1_title">無人機配送：最後一哩路的革新</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-semibold text-blue-600" data-translate-key="ch1_1_zipline_title">Zipline：醫療物流模式</h4>
+                                <p class="text-sm text-gray-600" data-translate-key="ch1_1_zipline_desc">在盧安達等地運送救命物資，航程達160公里，承擔了首都外超過75%的血液供應。</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-purple-600" data-translate-key="ch1_1_wing_title">Google Wing：商業配送模式</h4>
+                                <p class="text-sm text-gray-600" data-translate-key="ch1_1_wing_desc">在澳洲提供即時消費品配送，最快紀錄僅2分47秒，專注於速度與便利性。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <h3 class="text-2xl font-bold mb-4" data-translate-key="ch1_2_title">自動駕駛貨運</h3>
+                        <p class="text-base text-gray-600 mb-4" data-translate-key="ch1_2_desc">透過「樞紐到樞紐」模式，自動駕駛卡車專注於長途高速公路運輸，有望將總擁有成本降低達</p>
+                        <p class="text-5xl font-extrabold text-center gradient-text">42%</p>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-2xl font-bold mb-4" data-translate-key="ch1_3_title">智慧倉儲的崛起</h3>
+                    <p class="text-base text-gray-600 mb-4" data-translate-key="ch1_3_desc">亞馬遜的Kiva機器人系統採用「貨到人」模式，極大地提升了倉儲效率。</p>
+                    <div class="text-center mt-auto">
+                        <p class="text-gray-600" data-translate-key="ch1_3_kpi1">儲存密度提升</p>
+                        <p class="text-4xl font-bold text-blue-600 mb-2">50%</p>
+                        <p class="text-gray-600" data-translate-key="ch1_3_kpi2">整體揀選效率提升</p>
+                        <p class="text-4xl font-bold text-purple-600">3.5 - 5x</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="trust" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8" data-translate-key="ch2_title">第二章：建立數位信任層</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="kpi-card">
+                    <h3 class="text-xl font-bold mb-2" data-translate-key="ch2_1_title">區塊鏈減少80%文書工作</h3>
+                    <p class="text-gray-600 text-sm mb-4" data-translate-key="ch2_1_desc">IBM與馬士基的TradeLens平台，將繁瑣的航運文件數位化，大幅減少了文書工作量，提升了全球貿易的透明度與效率。</p>
+                    <div class="chart-container h-64 mt-auto">
+                        <canvas id="tradelensChart"></canvas>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-xl font-bold mb-2" data-translate-key="ch2_2_title">物聯網提升庫存準確率</h3>
+                     <p class="text-gray-600 text-sm mb-4" data-translate-key="ch2_2_desc">物聯網感測器與RFID標籤能即時、自動地追蹤庫存，準確率遠高於傳統的人工盤點方法，有效減少缺貨與庫存積壓。</p>
+                    <div class="chart-container h-64 mt-auto">
+                        <canvas id="inventoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="predictive" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8" data-translate-key="ch3_title">第三章：從被動到預測</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                <div class="kpi-card">
+                    <h3 class="text-xl font-bold mb-2" data-translate-key="ch3_1_title">AI驅動的需求預測</h3>
+                    <p class="text-gray-600 text-sm mb-4" data-translate-key="ch3_1_desc">AI模型能分析天氣、社群媒體等多維度數據，將預測錯誤率降低30-50%，並減少高達65%的缺貨損失。</p>
+                    <div class="chart-container h-64 mt-auto">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-xl font-bold mb-2" data-translate-key="ch3_2_title">數位分身：模擬未來</h3>
+                    <p class="text-gray-600 text-sm mb-4" data-translate-key="ch3_2_desc">數位分身是實體供應鏈的虛擬複製品，可在無風險環境中進行壓力測試與情境規劃，以增強營運韌性。</p>
+                    <div class="space-y-3 text-center mt-auto">
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <p class="font-semibold text-blue-800" data-translate-key="ch3_2_kpi1">降低20%維護成本</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <p class="font-semibold text-purple-800" data-translate-key="ch3_2_kpi2">減少25%設備停機時間</p>
+                        </div>
+                         <div class="bg-green-50 p-3 rounded-lg">
+                            <p class="font-semibold text-green-800" data-translate-key="ch3_2_kpi3">節省7%網絡成本</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ecosystem" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8" data-translate-key="ch4_title">第四章：融合的生態系統</h2>
+            <div class="kpi-card p-6 md:p-8">
+                <p class="text-center text-gray-600 mb-6" data-translate-key="ch4_desc">這些技術的真正力量在於其協同整合，共同創造出一個具備感知、分析和行動能力的「智慧感知供應鏈」。</p>
+                <div class="flex items-center justify-center gap-4 md:gap-6 flow-container">
+                    <div class="flow-item">
+                        <div class="text-4xl mb-2">📡</div>
+                        <h4 class="font-bold" data-translate-key="flow1_title">物聯網 (IoT)</h4>
+                        <p class="text-xs text-gray-500" data-translate-key="flow1_desc">神經系統 (感知)</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">
+                        <div class="text-4xl mb-2">🔗</div>
+                        <h4 class="font-bold" data-translate-key="flow2_title">區塊鏈</h4>
+                        <p class="text-xs text-gray-500" data-translate-key="flow2_desc">記錄系統 (信任)</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">
+                        <div class="text-4xl mb-2">🧠</div>
+                        <h4 class="font-bold" data-translate-key="flow3_title">人工智慧 (AI/ML)</h4>
+                        <p class="text-xs text-gray-500" data-translate-key="flow3_desc">大腦 (分析)</p>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">
+                        <div class="text-4xl mb-2">🤖</div>
+                        <h4 class="font-bold" data-translate-key="flow4_title">機器人與自動化</h4>
+                        <p class="text-xs text-gray-500" data-translate-key="flow4_desc">肌肉 (行動)</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="future" class="text-center">
+             <h2 class="text-3xl font-bold text-center mb-8" data-translate-key="ch5_title">展望2030：未來的供應鏈</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div class="kpi-card">
+                     <p class="text-2xl font-bold text-gray-700 mb-2" data-translate-key="ch5_1_title">超自動化與代理式AI</p>
+                     <p class="text-gray-600" data-translate-key="ch5_1_desc1">預計AI代理將接管超過</p>
+                     <p class="text-6xl font-black gradient-text my-2">50%</p>
+                     <p class="text-gray-600" data-translate-key="ch5_1_desc2">的供應鏈任務，實現更高層次的自主決策。</p>
+                 </div>
+                 <div class="kpi-card">
+                     <p class="text-2xl font-bold text-gray-700 mb-2" data-translate-key="ch5_2_title">全球市場規模</p>
+                     <p class="text-gray-600" data-translate-key="ch5_2_desc1">全球物流市場規模預計將接近</p>
+                     <p class="text-6xl font-black gradient-text my-2">$6 Trillion</p>
+                     <p class="text-gray-600" data-translate-key="ch5_2_desc2">美元，由智慧與韌性驅動。</p>
+                 </div>
+             </div>
+        </section>
+    </div>
+    
+    <footer class="text-center p-6 mt-8 bg-gray-800 text-gray-300">
+        <p data-translate-key="footer_text">這份資訊圖表綜合分析了物流技術的創新與供應鏈風險管理。NEITHER Mermaid JS NOR SVG were used in this output.</p>
+    </footer>
+
+    <script>
+        const translations = {
+            en: {
+                lang_zh: "中",
+                lang_en: "EN",
+                main_title: "The Sentient Supply Chain",
+                main_subtitle: "Navigating Risks and Opportunities in Next-Gen Logistics",
+                kpi1_title: "Food Traceability Time",
+                kpi1_desc: "Drastically reduced from 7 days with blockchain technology.",
+                kpi2_title: "Inventory Accuracy",
+                kpi2_desc: "Via IoT tracking, far surpassing the 63% from manual counts.",
+                kpi3_title: "Reduction in Transit Time",
+                kpi3_desc: "TradeLens platform boosts efficiency via digital documentation.",
+                ch1_title: "Chapter 1: The Automation Revolution",
+                ch1_1_title: "Drone Delivery: Reinventing the Last Mile",
+                ch1_1_zipline_title: "Zipline: Medical Logistics Model",
+                ch1_1_zipline_desc: "Delivers life-saving supplies in Rwanda with a 160km range, handling over 75% of blood supply outside the capital.",
+                ch1_1_wing_title: "Google Wing: Commercial Delivery Model",
+                ch1_1_wing_desc: "Provides on-demand consumer goods in Australia, with a record of 2m 47s, focusing on speed and convenience.",
+                ch1_2_title: "Autonomous Trucking",
+                ch1_2_desc: "Using a 'hub-to-hub' model, autonomous trucks focus on long-haul highway transport, potentially reducing Total Cost of Ownership by",
+                ch1_3_title: "The Rise of Smart Warehousing",
+                ch1_3_desc: "Amazon's Kiva robotics system uses a 'goods-to-person' model, dramatically increasing warehouse efficiency.",
+                ch1_3_kpi1: "Increase in Storage Density",
+                ch1_3_kpi2: "Increase in Overall Picking Efficiency",
+                ch2_title: "Chapter 2: Building the Digital Trust Layer",
+                ch2_1_title: "Blockchain Reduces Paperwork by 80%",
+                ch2_1_desc: "IBM and Maersk's TradeLens platform digitizes complex shipping documents, significantly reducing paperwork and enhancing global trade transparency.",
+                ch2_2_title: "IoT Improves Inventory Accuracy",
+                ch2_2_desc: "IoT sensors and RFID tags enable real-time, automated inventory tracking, far exceeding the accuracy of manual methods and reducing stockouts.",
+                ch3_title: "Chapter 3: From Reactive to Predictive",
+                ch3_1_title: "AI-Driven Demand Forecasting",
+                ch3_1_desc: "AI models analyze multi-dimensional data like weather and social media, reducing forecast errors by 30-50% and stockout losses by up to 65%.",
+                ch3_2_title: "Digital Twin: Simulating the Future",
+                ch3_2_desc: "A digital twin is a virtual replica of the physical supply chain, used for stress testing and scenario planning in a risk-free environment to build resilience.",
+                ch3_2_kpi1: "20% Reduction in Maintenance Costs",
+                ch3_2_kpi2: "25% Reduction in Equipment Downtime",
+                ch3_2_kpi3: "7% Savings in Network Costs",
+                ch4_title: "Chapter 4: The Converged Ecosystem",
+                ch4_desc: "The true power of these technologies lies in their synergistic integration, creating a 'Sentient Supply Chain' that can sense, analyze, and act.",
+                flow1_title: "Internet of Things (IoT)",
+                flow1_desc: "Nervous System (Sensing)",
+                flow2_title: "Blockchain",
+                flow2_desc: "System of Record (Trust)",
+                flow3_title: "Artificial Intelligence (AI/ML)",
+                flow3_desc: "The Brain (Analysis)",
+                flow4_title: "Robotics & Automation",
+                flow4_desc: "The Muscles (Action)",
+                ch5_title: "Outlook 2030: The Future Supply Chain",
+                ch5_1_title: "Hyperautomation & Agentic AI",
+                ch5_1_desc1: "AI agents are expected to take over",
+                ch5_1_desc2: "of supply chain tasks, enabling a higher level of autonomous decision-making.",
+                ch5_2_title: "Global Market Size",
+                ch5_2_desc1: "The global logistics market is projected to approach",
+                ch5_2_desc2: "driven by intelligence and resilience.",
+                footer_text: "This infographic synthesizes an analysis of logistics technology innovation and supply chain risk management. NEITHER Mermaid JS NOR SVG were used in this output.",
+                chart_tradelens_label: "Paperwork Volume",
+                chart_tradelens_item1: "Paperwork Reduced",
+                chart_tradelens_item2: "Remaining Work",
+                chart_inventory_label: "Inventory Accuracy (%)",
+                chart_inventory_item1: "Traditional Manual Count",
+                chart_inventory_item2: "IoT Automated Tracking",
+                chart_forecast_label1: "Traditional Method Error Rate",
+                chart_forecast_label2: "AI Prediction Error Rate",
+                chart_forecast_q1: "Q1",
+                chart_forecast_q2: "Q2",
+                chart_forecast_q3: "Q3",
+                chart_forecast_q4: "Q4",
+            },
+            zh: {
+                lang_zh: "中",
+                lang_en: "EN",
+                main_title: "智慧感知供應鏈",
+                main_subtitle: "駕馭次世代物流技術的風險與契機",
+                kpi1_title: "食品溯源時間",
+                kpi1_desc: "從傳統的7天急劇縮短，由區塊鏈技術實現。",
+                kpi2_title: "庫存準確率",
+                kpi2_desc: "透過物聯網自動追蹤，遠超人工盤點的63%。",
+                kpi3_title: "貨運時間縮短",
+                kpi3_desc: "TradeLens平台透過數位化文件流程，大幅提升效率。",
+                ch1_title: "第一章：自動化革命",
+                ch1_1_title: "無人機配送：最後一哩路的革新",
+                ch1_1_zipline_title: "Zipline：醫療物流模式",
+                ch1_1_zipline_desc: "在盧安達等地運送救命物資，航程達160公里，承擔了首都外超過75%的血液供應。",
+                ch1_1_wing_title: "Google Wing：商業配送模式",
+                ch1_1_wing_desc: "在澳洲提供即時消費品配送，最快紀錄僅2分47秒，專注於速度與便利性。",
+                ch1_2_title: "自動駕駛貨運",
+                ch1_2_desc: "透過「樞紐到樞紐」模式，自動駕駛卡車專注於長途高速公路運輸，有望將總擁有成本降低達",
+                ch1_3_title: "智慧倉儲的崛起",
+                ch1_3_desc: "亞馬遜的Kiva機器人系統採用「貨到人」模式，極大地提升了倉儲效率。",
+                ch1_3_kpi1: "儲存密度提升",
+                ch1_3_kpi2: "整體揀選效率提升",
+                ch2_title: "第二章：建立數位信任層",
+                ch2_1_title: "區塊鏈減少80%文書工作",
+                ch2_1_desc: "IBM與馬士基的TradeLens平台，將繁瑣的航運文件數位化，大幅減少了文書工作量，提升了全球貿易的透明度與效率。",
+                ch2_2_title: "物聯網提升庫存準確率",
+                ch2_2_desc: "物聯網感測器與RFID標籤能即時、自動地追蹤庫存，準確率遠高於傳統的人工盤點方法，有效減少缺貨與庫存積壓。",
+                ch3_title: "第三章：從被動到預測",
+                ch3_1_title: "AI驅動的需求預測",
+                ch3_1_desc: "AI模型能分析天氣、社群媒體等多維度數據，將預測錯誤率降低30-50%，並減少高達65%的缺貨損失。",
+                ch3_2_title: "數位分身：模擬未來",
+                ch3_2_desc: "數位分身是實體供應鏈的虛擬複製品，可在無風險環境中進行壓力測試與情境規劃，以增強營運韌性。",
+                ch3_2_kpi1: "降低20%維護成本",
+                ch3_2_kpi2: "減少25%設備停機時間",
+                ch3_2_kpi3: "節省7%網絡成本",
+                ch4_title: "第四章：融合的生態系統",
+                ch4_desc: "這些技術的真正力量在於其協同整合，共同創造出一個具備感知、分析和行動能力的「智慧感知供應鏈」。",
+                flow1_title: "物聯網 (IoT)",
+                flow1_desc: "神經系統 (感知)",
+                flow2_title: "區塊鏈",
+                flow2_desc: "記錄系統 (信任)",
+                flow3_title: "人工智慧 (AI/ML)",
+                flow3_desc: "大腦 (分析)",
+                flow4_title: "機器人與自動化",
+                flow4_desc: "肌肉 (行動)",
+                ch5_title: "展望2030：未來的供應鏈",
+                ch5_1_title: "超自動化與代理式AI",
+                ch5_1_desc1: "預計AI代理將接管超過",
+                ch5_1_desc2: "的供應鏈任務，實現更高層次的自主決策。",
+                ch5_2_title: "全球市場規模",
+                ch5_2_desc1: "全球物流市場規模預計將接近",
+                ch5_2_desc2: "美元，由智慧與韌性驅動。",
+                footer_text: "這份資訊圖表綜合分析了物流技術的創新與供應鏈風險管理。NEITHER Mermaid JS NOR SVG were used in this output.",
+                chart_tradelens_label: "文書工作量",
+                chart_tradelens_item1: "文書工作減少",
+                chart_tradelens_item2: "剩餘工作",
+                chart_inventory_label: "庫存準確率 (%)",
+                chart_inventory_item1: "傳統人工盤點",
+                chart_inventory_item2: "物聯網自動追蹤",
+                chart_forecast_label1: "傳統方法錯誤率",
+                chart_forecast_label2: "AI預測錯誤率",
+                chart_forecast_q1: "第一季",
+                chart_forecast_q2: "第二季",
+                chart_forecast_q3: "第三季",
+                chart_forecast_q4: "第四季",
+            }
+        };
+
+        let currentLang = 'zh';
+        let charts = {};
+
+        const vibrantPalette = {
+            primary: 'rgba(59, 130, 246, 0.8)',
+            secondary: 'rgba(139, 92, 246, 0.8)',
+            background: 'rgba(59, 130, 246, 0.2)',
+            backgroundSecondary: 'rgba(139, 92, 246, 0.2)',
+            grid: 'rgba(229, 231, 235, 1)',
+            text: '#1f2937'
+        };
+
+        const tooltipCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                              return label.join(' ');
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    labels: {
+                        color: vibrantPalette.text,
+                        font: {
+                            family: "'Roboto', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                }
+            }
+        };
+        
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+        }
+
+        function createCharts(lang) {
+            destroyCharts();
+            const T = translations[lang];
+
+            const tradelensCtx = document.getElementById('tradelensChart').getContext('2d');
+            charts.tradelens = new Chart(tradelensCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [T.chart_tradelens_item1, T.chart_tradelens_item2],
+                    datasets: [{
+                        label: T.chart_tradelens_label,
+                        data: [80, 20],
+                        backgroundColor: [vibrantPalette.primary, vibrantPalette.background],
+                        borderColor: ['#ffffff'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: tooltipCallback.plugins
+                }
+            });
+
+            const inventoryCtx = document.getElementById('inventoryChart').getContext('2d');
+            charts.inventory = new Chart(inventoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: [T.chart_inventory_item1, T.chart_inventory_item2],
+                    datasets: [{
+                        label: T.chart_inventory_label,
+                        data: [63, 95],
+                        backgroundColor: [vibrantPalette.secondary, vibrantPalette.primary],
+                        borderRadius: 4,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: vibrantPalette.grid },
+                            ticks: { color: vibrantPalette.text, font: { family: "'Roboto', 'Noto Sans TC', sans-serif" } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: vibrantPalette.text, font: { family: "'Roboto', 'Noto Sans TC', sans-serif" } }
+                        }
+                    },
+                    plugins: { ...tooltipCallback.plugins, legend: { display: false } }
+                }
+            });
+            
+            const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+            charts.forecast = new Chart(forecastCtx, {
+                type: 'line',
+                data: {
+                    labels: [T.chart_forecast_q1, T.chart_forecast_q2, T.chart_forecast_q3, T.chart_forecast_q4],
+                    datasets: [{
+                        label: T.chart_forecast_label1,
+                        data: [45, 50, 40, 55],
+                        borderColor: vibrantPalette.secondary,
+                        backgroundColor: vibrantPalette.backgroundSecondary,
+                        tension: 0.3,
+                        borderDash: [5, 5]
+                    }, {
+                        label: T.chart_forecast_label2,
+                        data: [25, 20, 22, 18],
+                        borderColor: vibrantPalette.primary,
+                        backgroundColor: vibrantPalette.background,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                         y: {
+                            beginAtZero: true,
+                            grid: { color: vibrantPalette.grid },
+                            ticks: { color: vibrantPalette.text, font: { family: "'Roboto', 'Noto Sans TC', sans-serif" } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: vibrantPalette.text, font: { family: "'Roboto', 'Noto Sans TC', sans-serif" } }
+                        }
+                    },
+                    plugins: tooltipCallback.plugins
+                }
+            });
+        }
+
+        function updateText(lang) {
+            document.querySelectorAll('[data-translate-key]').forEach(el => {
+                const key = el.getAttribute('data-translate-key');
+                if (translations[lang] && translations[lang][key]) {
+                    el.innerHTML = translations[lang][key];
+                }
+            });
+            document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en';
+            document.title = lang === 'zh' ? '資訊圖表：智慧感知供應鏈' : 'Infographic: The Sentient Supply Chain';
+            createCharts(lang);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('languageToggle');
+            
+            toggle.addEventListener('change', (event) => {
+                currentLang = event.target.checked ? 'en' : 'zh';
+                updateText(currentLang);
+            });
+
+            updateText(currentLang);
+        });
+    </script>
+
+</body>
+</html>
