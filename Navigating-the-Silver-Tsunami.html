@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人口老齡化：挑戰與和諧資訊圖表</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        .stat-card h3 {
+            color: #059669;
+        }
+        .flowchart-node {
+            border: 2px solid #F9D423;
+            background-color: #FFFAF0;
+            color: #333;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .flowchart-arrow {
+            font-size: 2.5rem;
+            color: #FC913A;
+            align-self: center;
+            margin: 0.5rem 0;
+        }
+        #lang-toggle {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <header class="bg-emerald-700 text-white text-center py-10 px-4 relative">
+        <div class="absolute top-4 right-4">
+            <button id="lang-toggle" class="bg-white/20 hover:bg-white/30 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                <span data-lang-key="langSwitch">English</span>
+            </button>
+        </div>
+        <h1 class="text-4xl md:text-5xl font-bold mb-2" data-lang-key="headerTitle">駕馭銀色浪潮</h1>
+        <p class="text-lg md:text-xl max-w-3xl mx-auto" data-lang-key="headerSubtitle">剖析全球人口老齡化對經濟、勞動力與社會的挑戰，並探索創造代際和諧的新路徑。</p>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="global-trends" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-emerald-600" data-lang-key="section1Title">全球趨勢：一個加速變老的世界</h2>
+            <p class="text-center max-w-2xl mx-auto mb-8 text-slate-600" data-lang-key="section1Desc">全球人口結構正經歷劇變。到 2050 年，每六個人中就有一位年齡超過 65 歲。這不僅改變了社會面貌，也對各國的經濟和社會體系構成嚴峻考驗。</p>
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-bold mb-4 text-center" data-lang-key="chart1Title">主要經濟體老齡化趨勢比較 (2024 vs 2050預測)</h3>
+                <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="chart1Desc">此圖表比較了部分國家在 2024 年與 2050 年預測的 65 歲以上人口比例。數據清晰顯示，所有國家的老齡化程度都將顯著加深，特別是亞洲和歐洲國家。</p>
+                <div class="chart-container h-96 max-h-[50vh]">
+                    <canvas id="populationAgingChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="my-12 border-slate-300">
+
+        <section id="workforce" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-8 text-emerald-600" data-lang-key="section2Title">勞動力市場轉型</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-2 text-center" data-lang-key="chart2Title">高齡工作者的未開發潛力</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="chart2Desc">儘管高齡工作者的勞動參與率有所上升，但仍有巨大潛力未被開發。在 OECD 國家，60-64 歲年齡組中有近半數未在就業，這代表著寶貴經驗與技能的流失。</p>
+                    <div class="chart-container flex-grow">
+                        <canvas id="olderWorkersPotentialChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                    <h3 class="text-xl font-bold mb-2 text-center" data-lang-key="chart3Title">結構性技能投資缺口</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="chart3Desc">企業對高齡員工的培訓投資嚴重不足，形成惡性循環。年輕員工獲得技能發展機會的比例遠高於年長同事，這加劇了技能過時問題，而非生理老化本身。</p>
+                    <div class="chart-container flex-grow">
+                        <canvas id="skillGapChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-300">
+
+        <section id="economy" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-8 text-emerald-600" data-lang-key="section3Title">經濟的雙面刃：財政壓力與銀髮商機</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold mb-2 text-center" data-lang-key="chart4Title">攀升的財政負擔</h3>
+                    <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="chart4Desc">若無政策干預，與年齡相關的支出（退休金、健康照護）將使公共債務不堪重負。以英國為例，預計到 2070 年代，公共債務可能飆升至 GDP 的 270% 以上。</p>
+                    <div class="chart-container">
+                        <canvas id="fiscalPressureChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col justify-center items-center text-center">
+                    <h3 class="text-xl font-bold mb-4" data-lang-key="statCardTitle">長壽紅利：銀髮經濟的崛起</h3>
+                    <p class="text-sm text-slate-500 mb-6" data-lang-key="statCardDesc">挑戰的另一面是巨大的經濟機遇。滿足高齡人口需求的「銀髮經濟」是一個龐大且快速增長的市場，涵蓋健康、住房、科技和休閒等多個領域。</p>
+                    <div class="stat-card bg-emerald-50 p-8 rounded-xl">
+                        <div class="text-6xl mb-4">💰</div>
+                        <h3 class="text-5xl font-bold text-emerald-700 mb-2">$15 Trillion</h3>
+                        <p class="text-slate-600" data-lang-key="statCardValueDesc">預計到 2030 年全球市場規模</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-300">
+        
+        <section id="social-fabric" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-8 text-emerald-600" data-lang-key="section4Title">社會結構：駕馭代際公平與衝突</h2>
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                 <h3 class="text-xl font-bold mb-2 text-center" data-lang-key="chart5Title">巨大的財富鴻溝</h3>
+                 <p class="text-sm text-center text-slate-500 mb-4" data-lang-key="chart5Desc">資產價格（特別是房地產）的長期上漲，導致財富向年長世代高度集中。年輕一代面臨薪資停滯和高昂住房成本的雙重壓力，加劇了代際間的不平等感。</p>
+                 <div class="chart-container">
+                    <canvas id="wealthGapChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-12 border-slate-300">
+
+        <section id="solutions" class="mb-12">
+            <h2 class="text-3xl font-bold text-center mb-2 text-emerald-600" data-lang-key="section5Title">鑄造新社會契約</h2>
+            <p class="text-center max-w-3xl mx-auto mb-8 text-slate-600" data-lang-key="section5Desc">應對老齡化需要一個整體的策略，協調經濟、勞動和社會政策，以創建一個不僅財政上可持續，而且社會凝聚力強的社會。</p>
+            <div class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 items-stretch">
+                    <div class="flowchart-node">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="flowchart1Title">挑戰</h4>
+                        <p class="text-sm" data-lang-key="flowchart1Desc">技能過時、勞動力短缺、財政壓力、代際財富鴻溝、社會孤立</p>
+                    </div>
+                    <div class="flowchart-arrow transform md:rotate-0 rotate-90">➔</div>
+                    <div class="flowchart-node">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="flowchart2Title">政策槓桿</h4>
+                        <p class="text-sm" data-lang-key="flowchart2Desc">終身學習、彈性工作、改革退休金、整合照護、代際共居、年齡友善城市</p>
+                    </div>
+                    <div class="flowchart-arrow transform md:rotate-0 rotate-90">➔</div>
+                    <div class="flowchart-node">
+                        <h4 class="font-bold text-lg mb-2" data-lang-key="flowchart3Title">代際影響</h4>
+                        <p class="text-sm" data-lang-key="flowchart3Desc">提升高齡工作者價值、平衡財政負擔、提高生活品質、促進代際團結與互助</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white text-center p-4 mt-8">
+        <p class="text-sm" data-lang-key="footerText">&copy; 2025 人口老齡化洞察報告。基於公開研究數據製作。</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const FONT_COLOR = '#374151';
+            const GRID_COLOR = '#e5e7eb';
+            const PALETTE = {
+                red: '#FF4E50',
+                orange: '#FC913A',
+                yellow: '#F9D423',
+                lightGreen: '#EDE574',
+                paleGreen: '#E1F5C4',
+                emerald: '#059669',
+                slate: '#475569'
+            };
+
+            const translations = {
+                headerTitle: { zh: '駕馭銀色浪潮', en: 'Navigating the Silver Tsunami' },
+                headerSubtitle: { zh: '剖析全球人口老齡化對經濟、勞動力與社會的挑戰，並探索創造代際和諧的新路徑。', en: 'Analyzing the challenges of global aging on the economy, workforce, and society, and exploring new paths to create intergenerational harmony.' },
+                section1Title: { zh: '全球趨勢：一個加速變老的世界', en: 'Global Trends: A World Aging Faster' },
+                section1Desc: { zh: '全球人口結構正經歷劇變。到 2050 年，每六個人中就有一位年齡超過 65 歲。這不僅改變了社會面貌，也對各國的經濟和社會體系構成嚴峻考驗。', en: 'The global population structure is undergoing a dramatic shift. By 2050, one in six people will be over 65. This not only changes the face of society but also poses severe tests for national economic and social systems.' },
+                chart1Title: { zh: '主要經濟體老齡化趨勢比較 (2024 vs 2050預測)', en: 'Aging Trends in Major Economies (2024 vs. 2050 Forecast)' },
+                chart1Desc: { zh: '此圖表比較了部分國家在 2024 年與 2050 年預測的 65 歲以上人口比例。數據清晰顯示，所有國家的老齡化程度都將顯著加深，特別是亞洲和歐洲國家。', en: 'This chart compares the projected population aged 65+ in 2024 and 2050 for selected countries. The data clearly shows a significant increase in aging across all nations, especially in Asia and Europe.' },
+                section2Title: { zh: '勞動力市場轉型', en: 'Workforce Transformation' },
+                chart2Title: { zh: '高齡工作者的未開發潛力', en: 'The Untapped Potential of Older Workers' },
+                chart2Desc: { zh: '儘管高齡工作者的勞動參與率有所上升，但仍有巨大潛力未被開發。在 OECD 國家，60-64 歲年齡組中有近半數未在就業，這代表著寶貴經驗與技能的流失。', en: 'While labor participation of older workers is rising, significant potential remains untapped. In OECD countries, nearly half of the 60-64 age group is not employed, representing a loss of valuable experience and skills.' },
+                chart3Title: { zh: '結構性技能投資缺口', en: 'Structural Skills Investment Gap' },
+                chart3Desc: { zh: '企業對高齡員工的培訓投資嚴重不足，形成惡性循環。年輕員工獲得技能發展機會的比例遠高於年長同事，這加劇了技能過時問題，而非生理老化本身。', en: 'Underinvestment in training for older employees creates a vicious cycle. Younger employees are far more likely to receive skills development opportunities, exacerbating skills obsolescence rather than being a result of biological aging.' },
+                section3Title: { zh: '經濟的雙面刃：財政壓力與銀髮商機', en: 'The Economic Double-Edged Sword: Fiscal Pressure & The Silver Economy' },
+                chart4Title: { zh: '攀升的財政負擔', en: 'Rising Fiscal Burdens' },
+                chart4Desc: { zh: '若無政策干預，與年齡相關的支出（退休金、健康照護）將使公共債務不堪重負。以英國為例，預計到 2070 年代，公共債務可能飆升至 GDP 的 270% 以上。', en: 'Without policy intervention, age-related spending (pensions, healthcare) will overwhelm public debt. In the UK, public debt could soar to over 270% of GDP by the 2070s.' },
+                statCardTitle: { zh: '長壽紅利：銀髮經濟的崛起', en: 'Longevity Dividend: The Rise of the Silver Economy' },
+                statCardDesc: { zh: '挑戰的另一面是巨大的經濟機遇。滿足高齡人口需求的「銀髮經濟」是一個龐大且快速增長的市場，涵蓋健康、住房、科技和休閒等多個領域。', en: 'The flip side of the challenge is a huge economic opportunity. The "Silver Economy," catering to the needs of older adults, is a massive and rapidly growing market spanning health, housing, technology, and leisure.' },
+                statCardValueDesc: { zh: '預計到 2030 年全球市場規模', en: 'Projected global market size by 2030' },
+                section4Title: { zh: '社會結構：駕馭代際公平與衝突', en: 'Social Fabric: Navigating Intergenerational Equity and Conflict' },
+                chart5Title: { zh: '巨大的財富鴻溝', en: 'The Great Wealth Divide' },
+                chart5Desc: { zh: '資產價格（特別是房地產）的長期上漲，導致財富向年長世代高度集中。年輕一代面臨薪資停滯和高昂住房成本的雙重壓力，加劇了代際間的不平等感。', en: 'Long-term asset price inflation, especially in housing, has concentrated wealth in older generations. Younger generations face stagnant wages and high housing costs, fueling a sense of intergenerational inequality.' },
+                section5Title: { zh: '鑄造新社會契約', en: 'Forging a New Social Contract' },
+                section5Desc: { zh: '應對老齡化需要一個整體的策略，協調經濟、勞動和社會政策，以創建一個不僅財政上可持續，而且社會凝聚力強的社會。', en: 'Tackling aging requires a holistic strategy that aligns economic, labor, and social policies to create a society that is not only fiscally sustainable but also socially cohesive.' },
+                flowchart1Title: { zh: '挑戰', en: 'Challenges' },
+                flowchart1Desc: { zh: '技能過時、勞動力短缺、財政壓力、代際財富鴻溝、社會孤立', en: 'Skills obsolescence, labor shortages, fiscal pressure, wealth gaps, social isolation' },
+                flowchart2Title: { zh: '政策槓桿', en: 'Policy Levers' },
+                flowchart2Desc: { zh: '終身學習、彈性工作、改革退休金、整合照護、代際共居、年齡友善城市', en: 'Lifelong learning, flexible work, pension reform, integrated care, co-housing, age-friendly cities' },
+                flowchart3Title: { zh: '代際影響', en: 'Intergenerational Impact' },
+                flowchart3Desc: { zh: '提升高齡工作者價值、平衡財政負擔、提高生活品質、促進代際團結與互助', en: 'Valuing older workers, balancing fiscal burdens, improving quality of life, fostering solidarity' },
+                footerText: { zh: '&copy; 2025 人口老齡化洞察報告。基於公開研究數據製作。', en: '&copy; 2025 Population Aging Insights. Created based on public research data.' },
+                langSwitch: { zh: 'English', en: '中文' },
+                chartLabels: {
+                    countries: { zh: ['日本', '義大利', '德國', '英國', '美國', '中國', '全球平均'], en: ['Japan', 'Italy', 'Germany', 'UK', 'USA', 'China', 'Global Avg.'] },
+                    pop2024: { zh: '65歲+人口比例 (2024)', en: 'Pop. 65+ (2024)' },
+                    pop2050: { zh: '65歲+人口比例 (2050預測)', en: 'Pop. 65+ (2050 Est.)' },
+                    popRatio: { zh: '人口比例 (%)', en: 'Population Ratio (%)' },
+                    oecdWorkers: { zh: ['未就業', '在職'], en: ['Not Employed', 'Employed'] },
+                    oecdTitle: { zh: 'OECD 60-64歲人口就業狀況', en: 'OECD 60-64 Employment Status' },
+                    skillGapLabels: { zh: ['18-24歲員工', '55歲以上員工'], en: ['18-24 y/o Employees', '55+ y/o Employees'] },
+                    skillGapTitle: { zh: '認為工作提供良好技能發展機會的比例 (%)', en: 'Perceive Good Skills Development Opportunities at Work (%)' },
+                    skillGapAxis: { zh: '比例 (%)', en: 'Percentage (%)' },
+                    fiscalYears: { zh: ['2025', '2035', '2045', '2055', '2065', '2075'], en: ['2025', '2035', '2045', '2055', '2065', '2075'] },
+                    fiscalDebtLabel: { zh: '英國公共債務佔GDP比例預測', en: 'UK Public Debt to GDP Forecast' },
+                    fiscalDebtAxis: { zh: '佔GDP比例 (%)', en: '% of GDP' },
+                    wealthGapLabels: { zh: ['年輕世代財富', '嬰兒潮世代財富'], en: ['Younger Gen. Wealth', 'Boomer Gen. Wealth'] },
+                    wealthGapLabel: { zh: '相對財富水平', en: 'Relative Wealth Level' },
+                    wealthGapAxis: { zh: '相對財富倍數', en: 'Relative Wealth Multiple' },
+                    wealthGapTitle: { zh: '年輕人需將財富增加5.5倍才能追上嬰兒潮世代', en: 'Younger generations need 5.5x more wealth to match Boomers' }
+                }
+            };
+            
+            let currentLang = 'zh';
+            let charts = {};
+
+            function updateLanguage(lang) {
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (translations[key] && translations[key][lang]) {
+                        el.innerHTML = translations[key][lang];
+                    }
+                });
+                
+                // Update charts
+                const chartLang = translations.chartLabels;
+                
+                // Chart 1: Population Aging
+                charts.populationAgingChart.data.labels = chartLang.countries[lang];
+                charts.populationAgingChart.data.datasets[0].label = chartLang.pop2024[lang];
+                charts.populationAgingChart.data.datasets[1].label = chartLang.pop2050[lang];
+                charts.populationAgingChart.options.scales.y.title.text = chartLang.popRatio[lang];
+                charts.populationAgingChart.update();
+
+                // Chart 2: Older Workers Potential
+                charts.olderWorkersPotentialChart.data.labels = chartLang.oecdWorkers[lang];
+                charts.olderWorkersPotentialChart.options.plugins.title.text = chartLang.oecdTitle[lang];
+                charts.olderWorkersPotentialChart.update();
+
+                // Chart 3: Skill Gap
+                charts.skillGapChart.data.labels = chartLang.skillGapLabels[lang];
+                charts.skillGapChart.data.datasets[0].label = chartLang.skillGapTitle[lang];
+                charts.skillGapChart.options.scales.x.title.text = chartLang.skillGapAxis[lang];
+                charts.skillGapChart.update();
+
+                // Chart 4: Fiscal Pressure
+                charts.fiscalPressureChart.data.datasets[0].label = chartLang.fiscalDebtLabel[lang];
+                charts.fiscalPressureChart.options.scales.y.title.text = chartLang.fiscalDebtAxis[lang];
+                charts.fiscalPressureChart.update();
+
+                // Chart 5: Wealth Gap
+                charts.wealthGapChart.data.labels = chartLang.wealthGapLabels[lang];
+                charts.wealthGapChart.data.datasets[0].label = chartLang.wealthGapLabel[lang];
+                charts.wealthGapChart.options.scales.x.title.text = chartLang.wealthGapAxis[lang];
+                charts.wealthGapChart.options.plugins.title.text = chartLang.wealthGapTitle[lang];
+                charts.wealthGapChart.update();
+
+            }
+
+            document.getElementById('lang-toggle').addEventListener('click', () => {
+                currentLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateLanguage(currentLang);
+            });
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: FONT_COLOR
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: FONT_COLOR },
+                        grid: { color: GRID_COLOR }
+                    },
+                    y: {
+                        ticks: { color: FONT_COLOR },
+                        grid: { color: GRID_COLOR },
+                        beginAtZero: true
+                    }
+                }
+            };
+            
+            charts.populationAgingChart = new Chart(document.getElementById('populationAgingChart'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: '',
+                            data: [30, 24, 22, 19, 18, 14, 9],
+                            backgroundColor: PALETTE.orange,
+                        },
+                        {
+                            label: '',
+                            data: [37, 35, 30, 27, 23, 26, 16],
+                            backgroundColor: PALETTE.red,
+                        }
+                    ]
+                },
+                options: { ...defaultChartOptions,
+                    scales: {
+                        y: { ...defaultChartOptions.scales.y, title: { display: true, text: '', color: FONT_COLOR } }
+                    }
+                }
+            });
+
+            charts.olderWorkersPotentialChart = new Chart(document.getElementById('olderWorkersPotentialChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'OECD 60-64歲人口就業狀況',
+                        data: [44.1, 55.9],
+                        backgroundColor: [PALETTE.red, PALETTE.emerald],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { color: FONT_COLOR } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } },
+                        title: { display: true, text: '', color: FONT_COLOR }
+                    }
+                }
+            });
+
+            charts.skillGapChart = new Chart(document.getElementById('skillGapChart'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '',
+                        data: [73, 47],
+                        backgroundColor: [PALETTE.emerald, PALETTE.orange],
+                        barPercentage: 0.5
+                    }]
+                },
+                options: { ...defaultChartOptions, indexAxis: 'y',
+                    scales: {
+                        x: { ...defaultChartOptions.scales.x, max: 100, title: { display: true, text: '', color: FONT_COLOR } }
+                    },
+                    plugins: {
+                         legend: { display: false },
+                         tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+
+            charts.fiscalPressureChart = new Chart(document.getElementById('fiscalPressureChart'), {
+                type: 'line',
+                data: {
+                    labels: translations.chartLabels.fiscalYears.zh,
+                    datasets: [{
+                        label: '',
+                        data: [95, 110, 135, 170, 220, 270],
+                        fill: true,
+                        borderColor: PALETTE.red,
+                        backgroundColor: 'rgba(255, 78, 80, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: { ...defaultChartOptions,
+                    scales: {
+                        y: { ...defaultChartOptions.scales.y, title: { display: true, text: '', color: FONT_COLOR } }
+                    }
+                }
+            });
+
+            charts.wealthGapChart = new Chart(document.getElementById('wealthGapChart'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: '',
+                        data: [1, 5.5],
+                        backgroundColor: [PALETTE.orange, PALETTE.emerald],
+                        barPercentage: 0.6
+                    }]
+                },
+                options: { ...defaultChartOptions, indexAxis: 'y',
+                    scales: {
+                        x: { ...defaultChartOptions.scales.x, title: { display: true, text: '', color: FONT_COLOR } }
+                    },
+                    plugins: {
+                         legend: { display: false },
+                         tooltip: { callbacks: { title: tooltipTitleCallback } },
+                         title: { display: true, text: '', color: FONT_COLOR }
+                    }
+                }
+            });
+
+            updateLanguage(currentLang);
+        });
+    </script>
+</body>
+</html>
