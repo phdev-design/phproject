@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記憶卡選購終極指南 - Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #F0F4F8;
+            color: #1A202C;
+        }
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .lang-btn.active {
+            background-color: #0077C0;
+            color: white;
+            border-color: #005082;
+        }
+        .lang-btn:not(.active) {
+            background-color: white;
+            color: #0077C0;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .bg-primary { background-color: #0077C0; }
+        .text-primary { color: #0077C0; }
+        .bg-accent { background-color: #00A1E4; }
+        .text-accent { color: #00A1E4; }
+        .bg-dark { background-color: #005082; }
+        .text-dark { color: #005082; }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-12 relative">
+            <div class="absolute top-0 right-0">
+                <div class="flex space-x-2 p-1 bg-gray-200 rounded-lg">
+                    <button id="lang-zh" class="lang-btn active" data-lang="zh">繁中</button>
+                    <button id="lang-en" class="lang-btn" data-lang="en">EN</button>
+                </div>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-black text-dark mb-2" data-lang-key="header_title">記憶卡選購終極指南</h1>
+            <p class="text-lg text-gray-600" data-lang-key="header_subtitle">別再買錯了！一頁看懂所有規格，為您的設備找到完美神卡。</p>
+        </header>
+
+        <main class="space-y-16">
+            <section id="decode" class="card p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-dark" data-lang-key="decode_title">破解記憶卡上的「字母湯」</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-10" data-lang-key="decode_intro">卡片上的每個符號都代表一項關鍵性能。理解它們，是做出正確選擇的第一步。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">SDXC</p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_capacity_title">容量規格</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_capacity_desc">決定卡片的最大容量。SDHC (最大32GB) 會將大影片分割成4GB片段，而 SDXC (32GB-2TB) 則無此限制，是錄製4K影片的必備。</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">V30</p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_vclass_title">影片速度等級 (V-Class)</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_vclass_desc">最重要的錄影指標！代表「最低持續寫入速度」。V30 = 30MB/s，V60 = 60MB/s。這個速度必須高於您相機的影片流量。</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">U3</p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_uclass_title">UHS 速度等級 (U-Class)</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_uclass_desc">較早的速度標準，U1等於V10 (10MB/s)，U3等於V30 (30MB/s)。V標誌是更新、更精確的指標。</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">I</p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_bus_title">匯流排介面 (Bus)</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_bus_desc">卡片與設備間的「高速公路」。UHS-I (I) 最高104MB/s，是主流。UHS-II (II) 最高312MB/s，適合專業攝影師高速連拍與傳輸。</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">A2</p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_aclass_title">應用程式效能 (A-Class)</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_aclass_desc">衡量讀寫小檔案的速度，對手機App和遊戲載入至關重要。A2比A1快很多，但需要手機或遊戲機本身支援才能發揮全力。</p>
+                    </div>
+                    <div class="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg">
+                        <p class="text-5xl font-black text-accent">170<span class="text-2xl">MB/s</span></p>
+                        <h3 class="font-bold mt-2 text-lg" data-lang-key="spec_readspeed_title">最高讀取速度</h3>
+                        <p class="text-gray-600 mt-1 text-sm" data-lang-key="spec_readspeed_desc">最常見的陷阱！這是將檔案「複製到電腦」的速度，與錄影、拍照的「寫入」性能無關。選購時請專注V標誌。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="speed-trap" class="card p-6 md:p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h2 class="text-3xl font-bold mb-4 text-dark" data-lang-key="trap_title">常見陷阱：讀取 vs. 寫入速度</h2>
+                        <p class="text-gray-600 mb-6" data-lang-key="trap_desc">廠商最愛宣傳的「最高速度」是讀取速度，能加快您將照片傳到電腦的時間。但真正決定您錄影、連拍是否順暢的，是字體較小的「V-Class」所代表的最低寫入速度。兩者天差地別。</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <p class="font-bold" data-lang-key="trap_conversion_title">關鍵換算：</p>
+                            <p class="text-gray-700" data-lang-key="trap_conversion_desc">將相機的影片流量 (Mbps) 除以 8，就能得到所需的最低寫入速度 (MB/s)。</p>
+                            <p class="font-mono mt-2 text-lg bg-white inline-block p-2 rounded">400 Mbps ÷ 8 = 50 MB/s</p>
+                            <p class="text-gray-700 mt-1" data-lang-key="trap_conversion_result">這表示您至少需要一張 V60 (60MB/s) 的卡。</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="speedCompareChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recommendations" class="card p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-dark" data-lang-key="reco_title">為您的設備匹配完美神卡</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="p-6 bg-gray-50 rounded-lg flex flex-col">
+                        <div class="text-center">
+                            <span class="text-6xl">📷</span>
+                            <h3 class="text-2xl font-bold mt-2 text-dark" data-lang-key="reco_camera_title">專業相機 / 空拍機</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="reco_camera_use">錄影與連拍</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex-grow">
+                            <p class="font-bold text-primary" data-lang-key="reco_camera_priority">優先指標：V-Class (影片速度)</p>
+                            <p class="text-sm text-gray-700 mb-2" data-lang-key="reco_camera_priority_desc">確保錄影不掉格的生命線。</p>
+                            <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="reco_camera_points" data-type="list"></ul>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg flex flex-col">
+                        <div class="text-center">
+                            <span class="text-6xl">📱</span>
+                            <h3 class="text-2xl font-bold mt-2 text-dark" data-lang-key="reco_phone_title">智慧型手機 / 平板</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="reco_phone_use">App與媒體儲存</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex-grow">
+                            <p class="font-bold text-primary" data-lang-key="reco_phone_priority">優先指標：A-Class (應用程式效能)</p>
+                            <p class="text-sm text-gray-700 mb-2" data-lang-key="reco_phone_priority_desc">決定App啟動與反應速度。</p>
+                            <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="reco_phone_points" data-type="list"></ul>
+                        </div>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg flex flex-col">
+                        <div class="text-center">
+                            <span class="text-6xl">🎮</span>
+                            <h3 class="text-2xl font-bold mt-2 text-dark" data-lang-key="reco_game_title">遊戲主機 (Switch/Steam Deck)</h3>
+                            <p class="text-gray-600 mt-1" data-lang-key="reco_game_use">遊戲載入與儲存</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200 flex-grow">
+                            <p class="font-bold text-primary" data-lang-key="reco_game_priority">優先指標：容量 & A-Class</p>
+                            <p class="text-sm text-gray-700 mb-2" data-lang-key="reco_game_priority_desc">裝更多遊戲，載入更快。</p>
+                            <ul class="list-disc list-inside text-sm space-y-1" data-lang-key="reco_game_points" data-type="list"></ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="mt-12">
+                    <h3 class="text-2xl font-bold text-center mb-6 text-dark" data-lang-key="reco_chart_title">錄影規格快速參考</h3>
+                    <div class="chart-container h-64 md:h-80">
+                        <canvas id="videoSpecChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="endurance" class="bg-dark text-white rounded-lg p-8 flex flex-col md:flex-row items-center gap-8">
+                <div class="text-center md:text-left">
+                    <p class="text-6xl">🚗</p>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="endurance_title">特殊需求：行車記錄器 & 監控</h2>
+                    <p class="text-blue-200" data-lang-key="endurance_desc">對於需要7x24小時不斷覆寫的設備，請務必選擇包裝上標有「<span class="font-bold text-white bg-accent p-1 rounded" data-lang-key="endurance_highlight">高耐用度 (High Endurance)</span>」的記憶卡。它們使用特殊顆粒，壽命是普通卡的數十倍，能避免關鍵時刻因卡片損毀而失去重要影像。</p>
+                </div>
+            </section>
+
+            <section id="checklist" class="card p-6 md:p-8">
+                <h2 class="text-3xl font-bold text-center mb-8 text-dark" data-lang-key="checklist_title">精明買家最終檢查清單</h2>
+                <div class="max-w-2xl mx-auto space-y-4">
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl text-green-500">✅</span>
+                        <div>
+                            <h3 class="font-bold" data-lang-key="checklist_1_title">確認設備規格</h3>
+                            <p class="text-gray-600" data-lang-key="checklist_1_desc">查閱說明書，確認設備支援的尺寸 (SD/microSD) 和最高容量 (SDHC/SDXC)。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl text-green-500">✅</span>
+                        <div>
+                            <h3 class="font-bold" data-lang-key="checklist_2_title">匹配關鍵速度</h3>
+                            <p class="text-gray-600" data-lang-key="checklist_2_desc">錄影看V標誌，App看A標誌，別被最大讀取速度迷惑。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl text-green-500">✅</span>
+                        <div>
+                            <h3 class="font-bold" data-lang-key="checklist_3_title">選擇可信賴的通路</h3>
+                            <p class="text-gray-600" data-lang-key="checklist_3_desc">從官方授權經銷商或大型電商平台購買 SanDisk, Samsung, Lexar 等信譽品牌，避免來路不明的假貨。</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <span class="text-3xl text-green-500">✅</span>
+                        <div>
+                            <h3 class="font-bold" data-lang-key="checklist_4_title">使用前務必測試</h3>
+                            <p class="text-gray-600" data-lang-key="checklist_4_desc">新卡到手後，用 H2testw (Windows) 或 F3 (Mac) 等軟體完整測試，確保容量真實、卡片無損，保護您的珍貴資料。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 py-6 border-t border-gray-300">
+            <p class="text-gray-500" data-lang-key="footer_text">Infographic created based on "記憶卡選購終極指南".</p>
+        </footer>
+    </div>
+
+    <script>
+        const langData = {
+            zh: {
+                header_title: '記憶卡選購終極指南',
+                header_subtitle: '別再買錯了！一頁看懂所有規格，為您的設備找到完美神卡。',
+                decode_title: '破解記憶卡上的「字母湯」',
+                decode_intro: '卡片上的每個符號都代表一項關鍵性能。理解它們，是做出正確選擇的第一步。',
+                spec_capacity_title: '容量規格',
+                spec_capacity_desc: '決定卡片的最大容量。SDHC (最大32GB) 會將大影片分割成4GB片段，而 SDXC (32GB-2TB) 則無此限制，是錄製4K影片的必備。',
+                spec_vclass_title: '影片速度等級 (V-Class)',
+                spec_vclass_desc: '最重要的錄影指標！代表「最低持續寫入速度」。V30 = 30MB/s，V60 = 60MB/s。這個速度必須高於您相機的影片流量。',
+                spec_uclass_title: 'UHS 速度等級 (U-Class)',
+                spec_uclass_desc: '較早的速度標準，U1等於V10 (10MB/s)，U3等於V30 (30MB/s)。V標誌是更新、更精確的指標。',
+                spec_bus_title: '匯流排介面 (Bus)',
+                spec_bus_desc: '卡片與設備間的「高速公路」。UHS-I (I) 最高104MB/s，是主流。UHS-II (II) 最高312MB/s，適合專業攝影師高速連拍與傳輸。',
+                spec_aclass_title: '應用程式效能 (A-Class)',
+                spec_aclass_desc: '衡量讀寫小檔案的速度，對手機App和遊戲載入至關重要。A2比A1快很多，但需要手機或遊戲機本身支援才能發揮全力。',
+                spec_readspeed_title: '最高讀取速度',
+                spec_readspeed_desc: '最常見的陷阱！這是將檔案「複製到電腦」的速度，與錄影、拍照的「寫入」性能無關。選購時請專注V標誌。',
+                trap_title: '常見陷阱：讀取 vs. 寫入速度',
+                trap_desc: '廠商最愛宣傳的「最高速度」是讀取速度，能加快您將照片傳到電腦的時間。但真正決定您錄影、連拍是否順暢的，是字體較小的「V-Class」所代表的最低寫入速度。兩者天差地別。',
+                trap_conversion_title: '關鍵換算：',
+                trap_conversion_desc: '將相機的影片流量 (Mbps) 除以 8，就能得到所需的最低寫入速度 (MB/s)。',
+                trap_conversion_result: '這表示您至少需要一張 V60 (60MB/s) 的卡。',
+                reco_title: '為您的設備匹配完美神卡',
+                reco_camera_title: '專業相機 / 空拍機',
+                reco_camera_use: '錄影與連拍',
+                reco_camera_priority: '優先指標：V-Class (影片速度)',
+                reco_camera_priority_desc: '確保錄影不掉格的生命線。',
+                reco_camera_points: ['<span class="font-bold">V30:</span> 4K 錄影基本門檻。', '<span class="font-bold">V60:</span> 高幀率4K或部分6K影片。', '<span class="font-bold">V90:</span> 專業8K或電影級錄製。', '<span class="font-bold">UHS-II:</span> 高速連拍與快速傳檔首選。'],
+                reco_phone_title: '智慧型手機 / 平板',
+                reco_phone_use: 'App與媒體儲存',
+                reco_phone_priority: '優先指標：A-Class (應用程式效能)',
+                reco_phone_priority_desc: '決定App啟動與反應速度。',
+                reco_phone_points: ['<span class="font-bold">A2:</span> 最佳選擇，體驗最流暢。', '<span class="font-bold">A1:</span> 基本款，仍優於無A標示的卡。', '<span class="font-bold">V30:</span> 同時確保手機錄製4K影片順暢。'],
+                reco_game_title: '遊戲主機 (Switch/Steam Deck)',
+                reco_game_use: '遊戲載入與儲存',
+                reco_game_priority: '優先指標：容量 & A-Class',
+                reco_game_priority_desc: '裝更多遊戲，載入更快。',
+                reco_game_points: ['<span class="font-bold">容量:</span> 256GB以上是基本，512GB或1TB更佳。', '<span class="font-bold">A1/A2:</span> 縮短遊戲載入時間的關鍵。'],
+                reco_chart_title: '錄影規格快速參考',
+                endurance_title: '特殊需求：行車記錄器 & 監控',
+                endurance_desc: '對於需要7x24小時不斷覆寫的設備，請務必選擇包裝上標有「<span class="font-bold text-white bg-accent p-1 rounded" data-lang-key="endurance_highlight">高耐用度 (High Endurance)</span>」的記憶卡。它們使用特殊顆粒，壽命是普通卡的數十倍，能避免關鍵時刻因卡片損毀而失去重要影像。',
+                endurance_highlight: '高耐用度 (High Endurance)',
+                checklist_title: '精明買家最終檢查清單',
+                checklist_1_title: '確認設備規格',
+                checklist_1_desc: '查閱說明書，確認設備支援的尺寸 (SD/microSD) 和最高容量 (SDHC/SDXC)。',
+                checklist_2_title: '匹配關鍵速度',
+                checklist_2_desc: '錄影看V標誌，App看A標誌，別被最大讀取速度迷惑。',
+                checklist_3_title: '選擇可信賴的通路',
+                checklist_3_desc: '從官方授權經銷商或大型電商平台購買 SanDisk, Samsung, Lexar 等信譽品牌，避免來路不明的假貨。',
+                checklist_4_title: '使用前務必測試',
+                checklist_4_desc: '新卡到手後，用 H2testw (Windows) 或 F3 (Mac) 等軟體完整測試，確保容量真實、卡片無損，保護您的珍貴資料。',
+                footer_text: 'Infographic created based on "記憶卡選購終極指南".',
+                charts: {
+                    speedCompare: {
+                        labels: ['最低持續寫入速度 (V30)', '最低持續寫入速度 (V60)', '最高理論讀取速度'],
+                        datasetLabel: '速度 (MB/s)',
+                        yAxisLabel: '速度 (MB/s)'
+                    },
+                    videoSpec: {
+                        labels: ['Full HD (1080p)', '標準 4K', '高幀率 4K / 6K', '專業 8K'],
+                        datasetLabel: '建議最低寫入速度 (MB/s)',
+                        xAxisLabel: '所需最低寫入速度 (MB/s)'
+                    }
+                }
+            },
+            en: {
+                header_title: 'The Ultimate SD Card Guide',
+                header_subtitle: 'Stop buying the wrong card! Understand all the specs in one page and find the perfect match for your device.',
+                decode_title: 'Decoding the "Alphabet Soup" on SD Cards',
+                decode_intro: 'Every symbol on the card represents a key performance metric. Understanding them is the first step to making the right choice.',
+                spec_capacity_title: 'Capacity Standard',
+                spec_capacity_desc: 'Determines the max capacity. SDHC (up to 32GB) splits large videos into 4GB files, while SDXC (32GB-2TB) has no such limit, essential for 4K video.',
+                spec_vclass_title: 'Video Speed Class (V-Class)',
+                spec_vclass_desc: 'The most important metric for video! Represents "minimum sustained write speed". V30 = 30MB/s, V60 = 60MB/s. This must be higher than your camera\'s video bitrate.',
+                spec_uclass_title: 'UHS Speed Class (U-Class)',
+                spec_uclass_desc: 'An older speed standard. U1 is equivalent to V10 (10MB/s), and U3 is equivalent to V30 (30MB/s). The V-Class is the newer, more precise indicator.',
+                spec_bus_title: 'Bus Interface',
+                spec_bus_desc: 'The "highway" between the card and the device. UHS-I (I) maxes out at 104MB/s and is the mainstream. UHS-II (II) reaches 312MB/s, ideal for pro burst shooting.',
+                spec_aclass_title: 'Application Performance (A-Class)',
+                spec_aclass_desc: 'Measures speed for small files, crucial for phone apps and games. A2 is much faster than A1 but requires host device support to reach its full potential.',
+                spec_readspeed_title: 'Maximum Read Speed',
+                spec_readspeed_desc: 'The most common trap! This is the speed for copying files "to your computer," irrelevant for the "write" performance needed for recording. Focus on the V-Class.',
+                trap_title: 'Common Trap: Read vs. Write Speed',
+                trap_desc: 'The "max speed" manufacturers love to advertise is the read speed, which speeds up transferring files to your PC. But what determines smooth recording and burst shooting is the minimum write speed, indicated by the smaller V-Class symbol.',
+                trap_conversion_title: 'Key Conversion:',
+                trap_conversion_desc: 'Divide your camera\'s video bitrate (in Mbps) by 8 to get the required minimum write speed (in MB/s).',
+                trap_conversion_result: 'This means you need a card that is at least V60 (60MB/s).',
+                reco_title: 'Matching the Perfect Card to Your Device',
+                reco_camera_title: 'Pro Cameras / Drones',
+                reco_camera_use: 'Video & Burst Shooting',
+                reco_camera_priority: 'Priority: V-Class (Video Speed)',
+                reco_camera_priority_desc: 'The lifeline that ensures you don\'t drop frames.',
+                reco_camera_points: ['<span class="font-bold">V30:</span> The basic entry for 4K video.', '<span class="font-bold">V60:</span> For high frame rate 4K or some 6K video.', '<span class="font-bold">V90:</span> For professional 8K or cinema-grade recording.', '<span class="font-bold">UHS-II:</span> The top choice for high-speed burst shooting and fast transfers.'],
+                reco_phone_title: 'Smartphones / Tablets',
+                reco_phone_use: 'Apps & Media Storage',
+                reco_phone_priority: 'Priority: A-Class (App Performance)',
+                reco_phone_priority_desc: 'Determines how fast your apps launch and respond.',
+                reco_phone_points: ['<span class="font-bold">A2:</span> The best choice for the smoothest experience.', '<span class="font-bold">A1:</span> A good baseline, still better than cards with no A-rating.', '<span class="font-bold">V30:</span> Also ensures smooth 4K video recording on your phone.'],
+                reco_game_title: 'Game Consoles (Switch/Steam Deck)',
+                reco_game_use: 'Game Loading & Storage',
+                reco_game_priority: 'Priority: Capacity & A-Class',
+                reco_game_priority_desc: 'Install more games, load them faster.',
+                reco_game_points: ['<span class="font-bold">Capacity:</span> 256GB is a good start, 512GB or 1TB is better.', '<span class="font-bold">A1/A2:</span> Key to reducing game load times.'],
+                reco_chart_title: 'Video Spec Quick Reference',
+                endurance_title: 'Special Use: Dashcams & Surveillance',
+                endurance_desc: 'For devices that rewrite data 24/7, you must choose a card labeled "<span class="font-bold text-white bg-accent p-1 rounded" data-lang-key="endurance_highlight">High Endurance</span>". They use special flash memory to last tens of times longer, preventing data loss at critical moments.',
+                endurance_highlight: 'High Endurance',
+                checklist_title: 'The Smart Buyer\'s Final Checklist',
+                checklist_1_title: 'Check Device Specs',
+                checklist_1_desc: 'Read the manual to confirm the supported size (SD/microSD) and maximum capacity standard (SDHC/SDXC).',
+                checklist_2_title: 'Match the Key Speed',
+                checklist_2_desc: 'Look at V-Class for video, A-Class for apps. Don\'t be fooled by the max read speed.',
+                checklist_3_title: 'Buy from Trusted Retailers',
+                checklist_3_desc: 'Purchase reputable brands like SanDisk, Samsung, or Lexar from authorized dealers to avoid counterfeit cards.',
+                checklist_4_title: 'Always Test Before Use',
+                checklist_4_desc: 'Use software like H2testw (Windows) or F3 (Mac) to verify the true capacity and health of a new card to protect your precious data.',
+                footer_text: 'Infographic created based on "The Ultimate SD Card Guide".',
+                charts: {
+                    speedCompare: {
+                        labels: ['Min. Sustained Write (V30)', 'Min. Sustained Write (V60)', 'Max. Theoretical Read Speed'],
+                        datasetLabel: 'Speed (MB/s)',
+                        yAxisLabel: 'Speed (MB/s)'
+                    },
+                    videoSpec: {
+                        labels: ['Full HD (1080p)', 'Standard 4K', 'High-FPS 4K / 6K', 'Professional 8K'],
+                        datasetLabel: 'Recommended Min. Write Speed (MB/s)',
+                        xAxisLabel: 'Required Minimum Write Speed (MB/s)'
+                    }
+                }
+            }
+        };
+
+        let currentLang = 'zh';
+        let speedCompareChart, videoSpecChart;
+
+        function wrapLabel(label) {
+            const maxLength = 16;
+            if (typeof label !== 'string' || label.length <= maxLength) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxLength) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join(' ') : label;
+        };
+        
+        const createCharts = (lang) => {
+            const chartLangData = langData[lang].charts;
+            const defaultFont = lang === 'zh' ? "'Noto Sans TC', sans-serif" : "'Roboto', sans-serif";
+            
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { family: defaultFont, size: 14 } } },
+                    tooltip: { callbacks: { title: tooltipTitleCallback }, titleFont: { family: defaultFont }, bodyFont: { family: defaultFont } }
+                },
+                scales: {
+                    x: { ticks: { font: { family: defaultFont } }, grid: { display: false } },
+                    y: { ticks: { font: { family: defaultFont } }, grid: { color: '#E5E7EB' } }
+                }
+            };
+            
+            if (speedCompareChart) speedCompareChart.destroy();
+            const speedCompareCtx = document.getElementById('speedCompareChart').getContext('2d');
+            speedCompareChart = new Chart(speedCompareCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLangData.speedCompare.labels.map(wrapLabel),
+                    datasets: [{
+                        label: chartLangData.speedCompare.datasetLabel,
+                        data: [30, 60, 170],
+                        backgroundColor: ['#0077C0', '#005082', '#00A1E4'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    plugins: { ...defaultChartOptions.plugins, legend: { display: false } },
+                    scales: { ...defaultChartOptions.scales, y: { ...defaultChartOptions.scales.y, beginAtZero: true, title: { display: true, text: chartLangData.speedCompare.yAxisLabel, font: { family: defaultFont } } } }
+                }
+            });
+
+            if (videoSpecChart) videoSpecChart.destroy();
+            const videoSpecCtx = document.getElementById('videoSpecChart').getContext('2d');
+            videoSpecChart = new Chart(videoSpecCtx, {
+                type: 'bar',
+                data: {
+                    labels: chartLangData.videoSpec.labels,
+                    datasets: [{
+                        label: chartLangData.videoSpec.datasetLabel,
+                        data: [10, 30, 60, 90],
+                        backgroundColor: ['#00A1E4', '#0077C0', '#005082', '#1A202C'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    indexAxis: 'y',
+                    plugins: { ...defaultChartOptions.plugins, legend: { display: false } },
+                    scales: { ...defaultChartOptions.scales, x: { ...defaultChartOptions.scales.x, title: { display: true, text: chartLangData.videoSpec.xAxisLabel, font: { family: defaultFont } } }, y: { ...defaultChartOptions.scales.y, grid: { display: false } } }
+                }
+            });
+        };
+        
+        const updateTextContent = (lang) => {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            document.body.style.fontFamily = lang === 'zh' ? "'Noto Sans TC', 'Roboto', sans-serif" : "'Roboto', 'Noto Sans TC', sans-serif";
+            
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.getAttribute('data-lang-key');
+                const type = el.getAttribute('data-type');
+                const textData = langData[lang][key];
+                
+                if (textData) {
+                    if (type === 'list') {
+                        el.innerHTML = textData.map(item => `<li>${item}</li>`).join('');
+                    } else {
+                        el.innerHTML = textData;
+                    }
+                }
+            });
+
+            document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        };
+
+        const switchLanguage = (lang) => {
+            if (currentLang === lang) return;
+            currentLang = lang;
+            updateTextContent(lang);
+            createCharts(lang);
+        };
+
+        document.getElementById('lang-zh').addEventListener('click', () => switchLanguage('zh'));
+        document.getElementById('lang-en').addEventListener('click', () => switchLanguage('en'));
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateTextContent(currentLang);
+            createCharts(currentLang);
+        });
+    </script>
+</body>
+</html>
