@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>區塊鏈技術應用深度解析 / Blockchain Technology Deep Dive</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .flow-arrow {
+            font-size: 2rem;
+            line-height: 1;
+            color: #0077E6;
+        }
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #B3D5FF;
+            transform: translateX(-50%);
+        }
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #0077E6;
+            border: 4px solid #B3D5FF;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body class="text-gray-700">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12 relative">
+            <h1 id="header-title" class="text-4xl md:text-5xl font-bold text-[#00449E] mb-4"></h1>
+            <p id="header-subtitle" class="text-lg md:text-xl text-[#005CB9]"></p>
+            <button id="lang-switcher" class="absolute top-0 right-0 bg-[#0077E6] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#005CB9] transition-colors">
+                English
+            </button>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <div class="card md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8 items-center bg-gradient-to-r from-[#00449E] to-[#0077E6] text-white p-8">
+                <div class="md:col-span-2">
+                    <h2 id="hero-title" class="text-3xl font-bold mb-2"></h2>
+                    <p id="hero-desc" class="text-lg text-blue-100"></p>
+                </div>
+                <div class="text-center">
+                    <div class="text-7xl font-bold text-white">2.2</div>
+                    <div id="hero-unit" class="text-2xl font-medium text-blue-200"></div>
+                </div>
+            </div>
+
+            <div class="card lg:col-span-2">
+                <h2 id="governance-title" class="text-2xl font-bold text-[#00449E] mb-4 text-center"></h2>
+                <p id="governance-desc" class="text-center mb-6"></p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <h3 id="governance-success-title" class="font-bold text-green-800 text-lg mb-2"></h3>
+                        <ul id="governance-success-list" class="list-disc list-inside space-y-1 text-green-700"></ul>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <h3 id="governance-fail-title" class="font-bold text-red-800 text-lg mb-2"></h3>
+                        <ul id="governance-fail-list" class="list-disc list-inside space-y-1 text-red-700"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 id="trilemma-title" class="text-2xl font-bold text-[#00449E] mb-4 text-center"></h2>
+                 <p id="trilemma-desc" class="text-center mb-6"></p>
+                <div class="chart-container" style="height: 280px;">
+                    <canvas id="trilemmaChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card md:col-span-2 lg:col-span-3">
+                <h2 id="identity-title" class="text-2xl font-bold text-[#00449E] mb-6 text-center"></h2>
+                <p id="identity-desc" class="text-center mb-8"></p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                    <div class="text-center flex flex-col items-center">
+                        <div class="p-4 bg-[#B3D5FF] rounded-lg w-full">
+                            <h3 id="identity-centralized-title" class="font-bold text-[#00449E]"></h3>
+                        </div>
+                        <div class="flow-arrow mt-2">↓</div>
+                        <p id="identity-centralized-desc" class="text-sm p-2 bg-gray-100 rounded-md w-full"></p>
+                    </div>
+                    <div class="text-center flex flex-col items-center">
+                        <div class="p-4 bg-[#58A6FF] rounded-lg w-full">
+                            <h3 id="identity-federated-title" class="font-bold text-[#00449E]"></h3>
+                        </div>
+                        <div class="flow-arrow mt-2">↓</div>
+                        <p id="identity-federated-desc" class="text-sm p-2 bg-gray-100 rounded-md w-full"></p>
+                    </div>
+                    <div class="text-center flex flex-col items-center">
+                        <div class="p-4 bg-[#0077E6] rounded-lg text-white w-full">
+                            <h3 id="identity-ssi-title" class="font-bold"></h3>
+                        </div>
+                        <div class="flow-arrow mt-2">↓</div>
+                        <p id="identity-ssi-desc" class="text-sm p-2 bg-gray-100 rounded-md w-full"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 id="dao-gov-title" class="text-2xl font-bold text-[#00449E] mb-4 text-center"></h2>
+                <p id="dao-gov-desc" class="text-center mb-6"></p>
+                <div class="chart-container">
+                    <canvas id="daoGovernanceChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card md:col-span-2">
+                <h2 id="dao-hack-title" class="text-2xl font-bold text-[#00449E] mb-4 text-center"></h2>
+                <p id="dao-hack-desc" class="text-center mb-8"></p>
+                <div class="relative px-4">
+                    <div class="timeline-line"></div>
+                    <div class="relative mb-8">
+                        <div class="timeline-dot" style="top: 0;"></div>
+                        <div class="ml-10 pl-4">
+                            <h4 id="hack-step1-title" class="font-bold text-[#005CB9]"></h4>
+                            <p id="hack-step1-desc" class="text-sm"></p>
+                        </div>
+                    </div>
+                    <div class="relative mb-8">
+                        <div class="timeline-dot" style="top: 0;"></div>
+                        <div class="ml-10 pl-4">
+                            <h4 id="hack-step2-title" class="font-bold text-[#005CB9]"></h4>
+                            <p id="hack-step2-desc" class="text-sm"></p>
+                        </div>
+                    </div>
+                    <div class="relative mb-8">
+                        <div class="timeline-dot" style="top: 0;"></div>
+                        <div class="ml-10 pl-4">
+                            <h4 id="hack-step3-title" class="font-bold text-red-600"></h4>
+                            <p id="hack-step3-desc" class="text-sm"></p>
+                        </div>
+                    </div>
+                     <div class="relative">
+                        <div class="timeline-dot" style="top: 0;"></div>
+                        <div class="ml-10 pl-4">
+                            <h4 id="hack-step4-title" class="font-bold text-[#005CB9]"></h4>
+                            <p id="hack-step4-desc" class="text-sm"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card md:col-span-2 lg:col-span-3">
+                <h2 id="adoption-title" class="text-2xl font-bold text-[#00449E] mb-4 text-center"></h2>
+                <p id="adoption-desc" class="text-center mb-8"></p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">⛓️</div>
+                        <h3 id="adoption-interop-title" class="font-bold text-lg mb-2 text-[#005CB9]"></h3>
+                        <p id="adoption-interop-desc" class="text-sm"></p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">🤦</div>
+                        <h3 id="adoption-ux-title" class="font-bold text-lg mb-2 text-[#005CB9]"></h3>
+                        <p id="adoption-ux-desc" class="text-sm"></p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-6xl mb-2">📜</div>
+                        <h3 id="adoption-reg-title" class="font-bold text-lg mb-2 text-[#005CB9]"></h3>
+                        <p id="adoption-reg-desc" class="text-sm"></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p id="footer-text"></p>
+        </footer>
+    </div>
+
+    <script>
+        const langData = {
+            'zh-TW': {
+                htmlLang: 'zh-TW',
+                switchButtonText: 'English',
+                header: {
+                    title: '區塊鏈勢在必行',
+                    subtitle: '解構供應鏈、數位身份與DAO的變革潛力'
+                },
+                hero: {
+                    title: '供應鏈革命：從7天到2.2秒',
+                    desc: '透過IBM Food Trust平台，沃爾瑪將食品溯源時間從傳統方式的一週急劇縮短至驚人的2.2秒。這不僅是效率的提升，更是對消費者安全的根本性保障，展示了區塊鏈在解決信任赤字方面的巨大價值。',
+                    unit: '秒'
+                },
+                governance: {
+                    title: '供應鏈的成敗：治理重於技術',
+                    desc: '區塊鏈聯盟的成功與否，關鍵在於能否解決參與者間的博弈困境。IBM Food Trust的成功與TradeLens的失敗形成了鮮明對比，揭示了中立治理與共同動機的重要性。',
+                    successTitle: '✅ 成功: IBM Food Trust',
+                    successList: [
+                        '<strong>共同動機:</strong> 參與方（零售商、供應商）有共同的、非競爭性目標——食品安全。',
+                        '<strong>主導力量:</strong> 沃爾瑪等巨頭自上而下推動，迅速達到臨界質量。',
+                        '<strong>博弈結果:</strong> 合作是正和博弈，共同受益。'
+                    ],
+                    failTitle: '❌ 失敗: TradeLens',
+                    failList: [
+                        '<strong>利益衝突:</strong> 參與方是直接競爭對手，不願共享敏感數據。',
+                        '<strong>治理疑慮:</strong> 由最大競爭對手馬士基主導，缺乏中立性與信任。',
+                        '<strong>博弈結果:</strong> 零和博弈困境，戰略風險大於效率提升。'
+                    ]
+                },
+                trilemma: {
+                    title: '區塊鏈不可能三角',
+                    desc: '任何區塊鏈都難以同時實現去中心化、安全性與可擴展性。這是一個基礎性的權衡，決定了不同鏈的特性與適用場景。',
+                    chart: {
+                        labels: ['去中心化 (Decentralization)', '安全性 (Security)', '可擴展性 (Scalability)'],
+                        datasets: [
+                            { label: '理想狀態', data: [10, 10, 10] },
+                            { label: '典型公有鏈 (如早期以太坊)', data: [9, 9, 3] }
+                        ]
+                    }
+                },
+                identity: {
+                    title: '數位身份的演進：從平台中心到用戶中心',
+                    desc: '自主權身份（SSI）將數據控制權從大型平台歸還給用戶，透過去中心化標識符（DID）和可驗證憑證（VC）實現了真正的數位主權。',
+                    centralizedTitle: '中心化身份',
+                    centralizedDesc: '每個網站獨立帳號，數據孤島，易洩露。',
+                    federatedTitle: '聯邦式身份',
+                    federatedDesc: '平台（如Google）控制身份，方便但犧牲隱私。',
+                    ssiTitle: '自主權身份 (SSI)',
+                    ssiDesc: '用戶控制個人錢包，選擇性披露，保護隱私。'
+                },
+                daoGov: {
+                    title: 'DAO治理的挑戰：財閥統治',
+                    desc: '在「一枚代幣，一票」的治理模式下，持有大量代幣的「鯨魚」可能主導決策，使去中心化治理滑向財閥政治。',
+                    chart: {
+                        labels: ['小型持有者 (500人)', '中型持有者 (50人)', '鯨魚 (5人)'],
+                        datasetLabel: '總投票權 (%)'
+                    }
+                },
+                daoHack: {
+                    title: '警鐘：「The DAO」駭客事件',
+                    desc: '2016年的「The DAO」事件因「重入攻擊」漏洞損失1.5億美元，深刻揭示了「程式碼即法律」的雙刃劍效應，智能合約安全必須是最高優先級。',
+                    step1Title: '1. 提款請求',
+                    step1Desc: '駭客的惡意合約調用The DAO的提款函數。',
+                    step2Title: '2. 轉移資金 (漏洞點)',
+                    step2Desc: 'The DAO合約先轉帳，再更新內部餘額。',
+                    step3Title: '3. 重入攻擊',
+                    step3Desc: '駭客合約收到款項後，在The DAO更新餘額前，再次調用提款函數，循環盜取資金。',
+                    step4Title: '4. 後果',
+                    step4Desc: '導致以太坊硬分叉，分裂出ETC。行業開始重視「先更新狀態，再交互」的安全模式。'
+                },
+                adoption: {
+                    title: '通往大規模採用的挑戰',
+                    desc: '除了不可能三角，互操作性、用戶體驗和監管不確定性是區塊鏈走向主流必須克服的關鍵障礙。',
+                    interopTitle: '互操作性',
+                    interopDesc: '區塊鏈是孤立的「圍牆花園」，需要像Polkadot和Cosmos這樣的跨鏈協議來連接。',
+                    uxTitle: '用戶體驗 (UX)',
+                    uxDesc: '複雜的私鑰管理和Gas費用對普通用戶極不友好，是進入Web3的最大門檻。',
+                    regTitle: '監管不確定性',
+                    regDesc: '全球缺乏統一的法律框架，為企業和投資者帶來巨大的合規風險。'
+                },
+                footer: '本資訊圖表基於區塊鏈技術的戰略分析報告製作。© 2025 Canvas Infographics. All rights reserved.'
+            },
+            'en': {
+                htmlLang: 'en',
+                switchButtonText: '中文',
+                header: {
+                    title: 'The Blockchain Imperative',
+                    subtitle: 'Deconstructing the Transformative Potential of Supply Chains, Digital Identity, and DAOs'
+                },
+                hero: {
+                    title: 'Supply Chain Revolution: From 7 Days to 2.2 Seconds',
+                    desc: 'Using the IBM Food Trust platform, Walmart dramatically reduced food traceability time from a week to an astonishing 2.2 seconds. This isn\'t just an efficiency gain; it\'s a fundamental enhancement to consumer safety, showcasing blockchain\'s immense value in solving trust deficits.',
+                    unit: 'Seconds'
+                },
+                governance: {
+                    title: 'Supply Chain Success & Failure: Governance Over Technology',
+                    desc: 'The success of a blockchain consortium hinges on resolving the game-theory dilemmas among participants. The contrast between IBM Food Trust\'s success and TradeLens\'s failure reveals the critical importance of neutral governance and shared incentives.',
+                    successTitle: '✅ Success: IBM Food Trust',
+                    successList: [
+                        '<strong>Shared Incentive:</strong> Participants (retailers, suppliers) had a common, non-competitive goal—food safety.',
+                        '<strong>Driving Force:</strong> Top-down push from giants like Walmart quickly achieved critical mass.',
+                        '<strong>Game Theory:</strong> Collaboration was a positive-sum game with mutual benefits.'
+                    ],
+                    failTitle: '❌ Failure: TradeLens',
+                    failList: [
+                        '<strong>Conflict of Interest:</strong> Participants were direct competitors, unwilling to share sensitive data.',
+                        '<strong>Governance Doubts:</strong> Led by Maersk, the largest competitor, lacking neutrality and trust.',
+                        '<strong>Game Theory:</strong> A zero-sum dilemma where strategic risks outweighed efficiency gains.'
+                    ]
+                },
+                trilemma: {
+                    title: 'The Blockchain Trilemma',
+                    desc: 'Any blockchain struggles to simultaneously achieve decentralization, security, and scalability. This fundamental trade-off defines the characteristics and use cases of different chains.',
+                    chart: {
+                        labels: ['Decentralization', 'Security', 'Scalability'],
+                        datasets: [
+                            { label: 'Ideal State', data: [10, 10, 10] },
+                            { label: 'Typical Public Chain (e.g., early Ethereum)', data: [9, 9, 3] }
+                        ]
+                    }
+                },
+                identity: {
+                    title: 'The Evolution of Digital Identity: From Platform-Centric to User-Centric',
+                    desc: 'Self-Sovereign Identity (SSI) returns data control from large platforms to users, achieving true digital sovereignty through Decentralized Identifiers (DIDs) and Verifiable Credentials (VCs).',
+                    centralizedTitle: 'Centralized Identity',
+                    centralizedDesc: 'Separate accounts for each site, creating data silos and leak risks.',
+                    federatedTitle: 'Federated Identity',
+                    federatedDesc: 'Platforms (e.g., Google) control identity; convenient but sacrifices privacy.',
+                    ssiTitle: 'Self-Sovereign Identity (SSI)',
+                    ssiDesc: 'User controls a personal wallet, enabling selective disclosure and protecting privacy.'
+                },
+                daoGov: {
+                    title: 'DAO Governance Challenge: Plutocracy',
+                    desc: 'In a "1 token, 1 vote" model, "whales" holding large amounts of tokens can dominate decisions, turning decentralized governance into a plutocracy.',
+                    chart: {
+                        labels: ['Small Holders (500)', 'Medium Holders (50)', 'Whales (5)'],
+                        datasetLabel: 'Total Voting Power (%)'
+                    }
+                },
+                daoHack: {
+                    title: 'Warning: "The DAO" Hack',
+                    desc: 'The 2016 "The DAO" incident, a $150M loss due to a "re-entrancy attack," starkly revealed the double-edged sword of "code is law," making smart contract security the highest priority.',
+                    step1Title: '1. Withdrawal Request',
+                    step1Desc: 'The hacker\'s malicious contract calls The DAO\'s withdrawal function.',
+                    step2Title: '2. Fund Transfer (The Flaw)',
+                    step2Desc: 'The DAO contract transfers funds BEFORE updating the internal balance.',
+                    step3Title: '3. Re-entrancy Attack',
+                    step3Desc: 'Upon receiving funds, the hacker\'s contract re-enters the withdrawal function before the balance is updated, draining funds recursively.',
+                    step4Title: '4. The Aftermath',
+                    step4Desc: 'Led to the Ethereum hard fork, creating ETC. The industry adopted the "Checks-Effects-Interactions" security pattern.'
+                },
+                adoption: {
+                    title: 'Challenges to Mass Adoption',
+                    desc: 'Beyond the trilemma, interoperability, user experience, and regulatory uncertainty are key hurdles for blockchain to overcome on its path to mainstream adoption.',
+                    interopTitle: 'Interoperability',
+                    interopDesc: 'Blockchains are isolated "walled gardens," requiring cross-chain protocols like Polkadot and Cosmos to connect them.',
+                    uxTitle: 'User Experience (UX)',
+                    uxDesc: 'Complex private key management and Gas fees are extremely unfriendly to average users, posing the biggest barrier to Web3 entry.',
+                    regTitle: 'Regulatory Uncertainty',
+                    regDesc: 'The lack of a unified global legal framework creates significant compliance risks for businesses and investors.'
+                },
+                footer: 'This infographic is based on a strategic analysis of blockchain technology. © 2025 Canvas Infographics. All rights reserved.'
+            }
+        };
+
+        let currentLang = 'zh-TW';
+        let trilemmaChartInstance, daoGovernanceChartInstance;
+
+        const brilliantBlues = {
+            deep: '#00449E',
+            primary: '#005CB9',
+            bright: '#0077E6',
+            light: '#58A6FF',
+            veryLight: '#B3D5FF',
+            text: '#4B5563'
+        };
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        color: brilliantBlues.text,
+                        font: {
+                           family: "'Roboto', 'Noto Sans TC', sans-serif"
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    },
+                    titleFont: {
+                        family: "'Roboto', 'Noto Sans TC', sans-serif"
+                    },
+                    bodyFont: {
+                         family: "'Roboto', 'Noto Sans TC', sans-serif"
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: brilliantBlues.text },
+                    grid: { color: '#e5e7eb' }
+                },
+                x: {
+                    ticks: { color: brilliantBlues.text },
+                    grid: { display: false }
+                }
+            }
+        };
+
+        function createTrilemmaChart(lang) {
+            if (trilemmaChartInstance) {
+                trilemmaChartInstance.destroy();
+            }
+            const ctx = document.getElementById('trilemmaChart').getContext('2d');
+            const chartData = langData[lang].trilemma.chart;
+            trilemmaChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: chartData.datasets[0].label,
+                        data: chartData.datasets[0].data,
+                        fill: true,
+                        backgroundColor: 'rgba(0, 119, 230, 0.2)',
+                        borderColor: brilliantBlues.bright,
+                        pointBackgroundColor: brilliantBlues.bright,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: brilliantBlues.bright
+                    }, {
+                        label: chartData.datasets[1].label,
+                        data: chartData.datasets[1].data,
+                        fill: true,
+                        backgroundColor: 'rgba(88, 166, 255, 0.2)',
+                        borderColor: brilliantBlues.light,
+                        pointBackgroundColor: brilliantBlues.light,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: brilliantBlues.light
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#e5e7eb' },
+                            grid: { color: '#e5e7eb' },
+                            pointLabels: {
+                                font: { size: 12, family: "'Roboto', 'Noto Sans TC', sans-serif" },
+                                color: brilliantBlues.text
+                            },
+                            ticks: {
+                                display: false,
+                                stepSize: 2
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDaoGovernanceChart(lang) {
+            if (daoGovernanceChartInstance) {
+                daoGovernanceChartInstance.destroy();
+            }
+            const ctx = document.getElementById('daoGovernanceChart').getContext('2d');
+            const chartData = langData[lang].daoGov.chart;
+            daoGovernanceChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: [{
+                        label: chartData.datasetLabel,
+                        data: [20, 30, 50],
+                        backgroundColor: [
+                            brilliantBlues.light,
+                            brilliantBlues.bright,
+                            brilliantBlues.deep
+                        ],
+                        borderColor: [
+                            brilliantBlues.light,
+                            brilliantBlues.bright,
+                            brilliantBlues.deep
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...defaultChartOptions,
+                    indexAxis: 'y',
+                    plugins: {
+                        ...defaultChartOptions.plugins,
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                callback: function(value) {
+                                    return value + "%"
+                                },
+                                color: brilliantBlues.text
+                            },
+                            grid: { color: '#e5e7eb' }
+                        },
+                        y: {
+                            ticks: { color: brilliantBlues.text },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function renderContent(lang) {
+            const data = langData[lang];
+            document.documentElement.lang = data.htmlLang;
+            document.getElementById('lang-switcher').textContent = data.switchButtonText;
+
+            document.getElementById('header-title').textContent = data.header.title;
+            document.getElementById('header-subtitle').textContent = data.header.subtitle;
+
+            document.getElementById('hero-title').textContent = data.hero.title;
+            document.getElementById('hero-desc').textContent = data.hero.desc;
+            document.getElementById('hero-unit').textContent = data.hero.unit;
+
+            document.getElementById('governance-title').textContent = data.governance.title;
+            document.getElementById('governance-desc').textContent = data.governance.desc;
+            document.getElementById('governance-success-title').innerHTML = data.governance.successTitle;
+            document.getElementById('governance-success-list').innerHTML = data.governance.successList.map(item => `<li>${item}</li>`).join('');
+            document.getElementById('governance-fail-title').innerHTML = data.governance.failTitle;
+            document.getElementById('governance-fail-list').innerHTML = data.governance.failList.map(item => `<li>${item}</li>`).join('');
+
+            document.getElementById('trilemma-title').textContent = data.trilemma.title;
+            document.getElementById('trilemma-desc').textContent = data.trilemma.desc;
+            
+            document.getElementById('identity-title').textContent = data.identity.title;
+            document.getElementById('identity-desc').textContent = data.identity.desc;
+            document.getElementById('identity-centralized-title').textContent = data.identity.centralizedTitle;
+            document.getElementById('identity-centralized-desc').textContent = data.identity.centralizedDesc;
+            document.getElementById('identity-federated-title').textContent = data.identity.federatedTitle;
+            document.getElementById('identity-federated-desc').textContent = data.identity.federatedDesc;
+            document.getElementById('identity-ssi-title').textContent = data.identity.ssiTitle;
+            document.getElementById('identity-ssi-desc').textContent = data.identity.ssiDesc;
+
+            document.getElementById('dao-gov-title').textContent = data.daoGov.title;
+            document.getElementById('dao-gov-desc').textContent = data.daoGov.desc;
+
+            document.getElementById('dao-hack-title').textContent = data.daoHack.title;
+            document.getElementById('dao-hack-desc').textContent = data.daoHack.desc;
+            document.getElementById('hack-step1-title').textContent = data.daoHack.step1Title;
+            document.getElementById('hack-step1-desc').textContent = data.daoHack.step1Desc;
+            document.getElementById('hack-step2-title').textContent = data.daoHack.step2Title;
+            document.getElementById('hack-step2-desc').textContent = data.daoHack.step2Desc;
+            document.getElementById('hack-step3-title').textContent = data.daoHack.step3Title;
+            document.getElementById('hack-step3-desc').textContent = data.daoHack.step3Desc;
+            document.getElementById('hack-step4-title').textContent = data.daoHack.step4Title;
+            document.getElementById('hack-step4-desc').textContent = data.daoHack.step4Desc;
+
+            document.getElementById('adoption-title').textContent = data.adoption.title;
+            document.getElementById('adoption-desc').textContent = data.adoption.desc;
+            document.getElementById('adoption-interop-title').textContent = data.adoption.interopTitle;
+            document.getElementById('adoption-interop-desc').textContent = data.adoption.interopDesc;
+            document.getElementById('adoption-ux-title').textContent = data.adoption.uxTitle;
+            document.getElementById('adoption-ux-desc').textContent = data.adoption.uxDesc;
+            document.getElementById('adoption-reg-title').textContent = data.adoption.regTitle;
+            document.getElementById('adoption-reg-desc').textContent = data.adoption.regDesc;
+            
+            document.getElementById('footer-text').textContent = data.footer;
+
+            createTrilemmaChart(lang);
+            createDaoGovernanceChart(lang);
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            currentLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+            renderContent(currentLang);
+        });
+
+        window.onload = () => {
+            renderContent(currentLang);
+        };
+    </script>
+</body>
+</html>
