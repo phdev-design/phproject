@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>記憶卡選購全方位指南 - Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 450px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #00A6A6, #F28F3B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-[#4C4C4C]">
+    
+    <div class="fixed top-4 right-4 z-50">
+        <button id="lang-switcher" class="bg-white px-4 py-2 rounded-full shadow-lg text-sm font-bold text-[#00A6A6] hover:bg-gray-200 transition-colors">
+            English
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center my-12">
+            <h1 id="main-title" class="text-4xl md:text-6xl font-black mb-4 gradient-text"></h1>
+            <p id="main-subtitle" class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto"></p>
+        </header>
+
+        <section id="capacity" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="capacity-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="capacity-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+                    <p class="text-2xl font-bold text-[#00A6A6]">SD</p>
+                    <p class="text-5xl font-black my-2">2<span class="text-2xl">GB</span></p>
+                    <p id="capacity-sd-desc" class="text-gray-500"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+                    <p class="text-2xl font-bold text-[#00A6A6]">SDHC</p>
+                    <p class="text-5xl font-black my-2">32<span class="text-2xl">GB</span></p>
+                    <p id="capacity-sdhc-desc" class="text-gray-500"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+                    <p class="text-2xl font-bold text-[#F28F3B]">SDXC</p>
+                    <p class="text-5xl font-black my-2">2<span class="text-2xl">TB</span></p>
+                    <p id="capacity-sdxc-desc" class="text-gray-500"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-transform">
+                    <p class="text-2xl font-bold text-[#E84855]">SDUC</p>
+                    <p class="text-5xl font-black my-2">128<span class="text-2xl">TB</span></p>
+                    <p id="capacity-sduc-desc" class="text-gray-500"></p>
+                </div>
+            </div>
+             <div class="bg-white p-8 rounded-xl shadow-lg mt-12">
+                <h3 id="compatibility-title" class="text-2xl font-bold text-center mb-6"></h3>
+                <p id="compatibility-subtitle" class="text-center text-gray-600 mb-8"></p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center p-4 bg-blue-100 rounded-lg">
+                        <p id="compatibility-sdxc-device" class="font-bold text-lg"></p>
+                    </div>
+                    <div class="text-3xl font-bold text-blue-400 transform md:rotate-0 rotate-90">➔</div>
+                     <div class="text-center p-4 bg-green-100 rounded-lg">
+                        <p id="compatibility-sdhc-device" class="font-bold text-lg"></p>
+                    </div>
+                    <div class="text-3xl font-bold text-green-400 transform md:rotate-0 rotate-90">➔</div>
+                    <div class="text-center p-4 bg-yellow-100 rounded-lg">
+                        <p id="compatibility-sd-device" class="font-bold text-lg"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="speed" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="speed-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="speed-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 id="speed-class-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <div class="chart-container">
+                        <canvas id="speedClassChart"></canvas>
+                    </div>
+                     <p id="speed-class-chart-desc" class="text-center text-gray-600 mt-4"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                     <h3 id="read-write-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <div class="chart-container">
+                        <canvas id="readWriteDonutChart"></canvas>
+                    </div>
+                    <p id="read-write-chart-desc" class="text-center text-gray-600 mt-4"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="bus" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="bus-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="bus-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 id="bus-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                <div class="chart-container">
+                    <canvas id="busSpeedChart"></canvas>
+                </div>
+                <p id="bus-chart-desc" class="text-center text-gray-600 mt-4"></p>
+            </div>
+        </section>
+
+        <section id="cfexpress" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="cfexpress-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="cfexpress-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                <div class="md:col-span-3 bg-white p-6 rounded-xl shadow-lg">
+                    <h3 id="cfexpress-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <div class="chart-container">
+                        <canvas id="cfexpressSpeedChart"></canvas>
+                    </div>
+                </div>
+                <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-lg flex flex-col justify-center">
+                    <h3 id="cfexpress-key-diff-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <ul class="space-y-4 text-lg">
+                        <li class="flex items-start"><span class="text-2xl mr-3">↔️</span><div id="cfexpress-type-a-desc"></div></li>
+                        <li class="flex items-start"><span class="text-2xl mr-3">↔️</span><div id="cfexpress-type-b-desc"></div></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <section id="use-case" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="use-case-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="use-case-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform">
+                    <p class="text-6xl mb-4">📷</p>
+                    <h3 id="use-case-pro-title" class="text-xl font-bold"></h3>
+                    <p id="use-case-pro-desc" class="text-gray-600 my-2"></p>
+                    <p class="text-2xl font-black text-[#E84855] mt-4">V90 / CFexpress</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform">
+                    <p class="text-6xl mb-4">🎮</p>
+                    <h3 id="use-case-gamer-title" class="text-xl font-bold"></h3>
+                    <p id="use-case-gamer-desc" class="text-gray-600 my-2"></p>
+                    <p class="text-2xl font-black text-[#00A6A6] mt-4">A2</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform">
+                    <p class="text-6xl mb-4">🚁</p>
+                    <h3 id="use-case-drone-title" class="text-xl font-bold"></h3>
+                    <p id="use-case-drone-desc" class="text-gray-600 my-2"></p>
+                    <p class="text-2xl font-black text-[#F28F3B] mt-4">V30 / A2</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition-transform">
+                    <p class="text-6xl mb-4">🚗</p>
+                    <h3 id="use-case-dashcam-title" class="text-xl font-bold"></h3>
+                    <p id="use-case-dashcam-desc" class="text-gray-600 my-2"></p>
+                    <p id="use-case-dashcam-rec" class="text-2xl font-black text-[#C5D86D] mt-4"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="nand" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="nand-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="nand-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 id="nand-longevity-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <div class="chart-container">
+                        <canvas id="nandLongevityChart"></canvas>
+                    </div>
+                     <p id="nand-longevity-chart-desc" class="text-center text-gray-600 mt-4"></p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                     <h3 id="nand-market-chart-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <div class="chart-container">
+                        <canvas id="nandMarketShareChart"></canvas>
+                    </div>
+                     <p id="nand-market-chart-desc" class="text-center text-gray-600 mt-4"></p>
+                </div>
+            </div>
+        </section>
+
+        <section id="workflow" class="my-16">
+            <div class="text-center mb-12">
+                <h2 id="workflow-title" class="text-3xl font-bold mb-2"></h2>
+                <p id="workflow-subtitle" class="text-gray-600"></p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 id="workflow-bottleneck-title" class="text-2xl font-bold text-center mb-6"></h3>
+                    <p id="workflow-bottleneck-desc" class="text-center text-gray-600 mb-8"></p>
+                    <div class="space-y-2 text-center">
+                        <div id="workflow-bottleneck-1" class="p-3 bg-gray-200 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-gray-400">▼</div>
+                        <div id="workflow-bottleneck-2" class="p-3 bg-gray-200 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-gray-400">▼</div>
+                        <div id="workflow-bottleneck-3" class="p-3 bg-gray-200 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-gray-400">▼</div>
+                        <div id="workflow-bottleneck-4" class="p-3 bg-red-200 rounded-lg font-semibold"></div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg">
+                    <h3 id="workflow-format-title" class="text-2xl font-bold text-center mb-6"></h3>
+                     <p id="workflow-format-desc" class="text-center text-gray-600 mb-8"></p>
+                     <div class="space-y-2 text-center">
+                        <div id="workflow-format-1" class="p-3 bg-green-100 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-green-400">▼</div>
+                        <div id="workflow-format-2" class="p-3 bg-green-100 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-green-400">▼</div>
+                        <div id="workflow-format-3" class="p-3 bg-green-100 rounded-lg font-semibold"></div>
+                        <div class="text-2xl text-green-400">▼</div>
+                        <div id="workflow-format-4" class="p-3 bg-orange-200 rounded-lg font-bold"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center mt-16 py-8 border-t border-gray-300">
+            <p id="footer-source" class="text-gray-600"></p>
+            <p id="footer-tech" class="text-sm text-gray-400 mt-2"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        const TEXT_CONTENT = {
+            'zh': {
+                langButton: 'English',
+                mainTitle: '記憶卡選購全方位指南',
+                mainSubtitle: '解開小小晶片背後的巨大秘密，從容量、速度到壽命，助您做出最精明的選擇。',
+                capacityTitle: 'SD 卡宇宙：容量的演進',
+                capacitySubtitle: '每一代技術的躍升，都意味著儲存空間的巨大擴展。',
+                capacitySdDesc: '標準容量',
+                capacitySdhcDesc: '高容量 (FAT32)',
+                capacitySdxcDesc: '擴展容量 (exFAT)',
+                capacitySducDesc: '超大容量',
+                compatibilityTitle: '兼容性的黃金法則：向下兼容',
+                compatibilitySubtitle: '新設備能讀舊卡，但舊設備無法識別新卡。這是選購時最容易犯的錯誤之一。',
+                compatibilitySdxcDevice: 'SDXC 裝置',
+                compatibilitySdhcDevice: 'SDHC 裝置',
+                compatibilitySdDevice: 'SD 裝置',
+                speedTitle: '解碼速度標示',
+                speedSubtitle: '別被最大的數字迷惑，錄影性能看的是「最低保證速度」。',
+                speedClassChartTitle: '速度等級比一比 (最低持續寫入速度)',
+                speedClassChartDesc: '對於高畫質錄影，V 等級 (Video Speed Class) 是最可靠的指標。',
+                speedClassChartLabel: '最低持續寫入速度 (MB/s)',
+                readWriteChartTitle: '別被誤導：讀取速度 vs. 寫入保證',
+                readWriteChartDesc: '卡片上最醒目的數字通常是「最大讀取速度」，對錄影參考價值有限。',
+                readWriteChartLabels: ['最大讀取速度 (市場行銷)', '最低寫入保證 (錄影關鍵)'],
+                busTitle: '物理鴻溝：UHS-I vs. UHS-II',
+                busSubtitle: '多一排針腳，速度潛力大不同。設備與卡片必須匹配才能發揮效能。',
+                busChartTitle: '匯流排理論速度上限',
+                busChartDesc: 'V60/V90 的高速需求，必須有 UHS-II 的匯流排頻寬才能穩定支持。',
+                busChartLabel: '理論速度上限 (MB/s)',
+                cfexpressTitle: '專業之選：CFexpress 的速度新紀元',
+                cfexpressSubtitle: '採用 SSD 技術，為極致的 RAW 影片和高速連拍而生。',
+                cfexpressChartTitle: 'CFexpress Type A vs. Type B 速度對決',
+                cfexpressChartLabel2: 'CFexpress 2.0 (MB/s)',
+                cfexpressChartLabel4: 'CFexpress 4.0 (MB/s)',
+                cfexpressKeyDiffTitle: '關鍵差異',
+                cfexpressTypeADesc: '<strong class="text-[#00A6A6]">Type A:</strong> 體積小巧，與 SD 卡相仿，主要獲 Sony 採用。',
+                cfexpressTypeBDesc: '<strong class="text-[#F28F3B]">Type B:</strong> 體積較大，速度更快，獲 Canon, Nikon 等廣泛採用。',
+                useCaseTitle: '為您的需求量身打造',
+                useCaseSubtitle: '不同的應用場景，需要不同的記憶卡。選對了，才能事半功倍。',
+                useCaseProTitle: '專業攝影師',
+                useCaseProDesc: '處理 8K RAW 影片與高速連拍。',
+                useCaseGamerTitle: '手機遊戲玩家',
+                useCaseGamerDesc: '在卡上運行大型應用程式。',
+                useCaseDroneTitle: '空拍/運動相機',
+                useCaseDroneDesc: '錄製 4K 影片並兼具耐用性。',
+                useCaseDashcamTitle: '行車/安防紀錄',
+                useCaseDashcamDesc: '承受 24/7 持續覆寫。',
+                useCaseDashcamRec: '高耐用度',
+                nandTitle: '看不見的內在：真正決定壽命的因素',
+                nandSubtitle: '記憶卡的壽命並非無限，其核心的 NAND 晶片類型是關鍵。',
+                nandLongevityChartTitle: 'NAND 快閃記憶體壽命 (P/E 抹寫次數)',
+                nandLongevityChartDesc: '在容量與成本的背後，是壽命的權衡。TLC 是目前市場主流。',
+                nandLongevityChartLabel: 'P/E 抹寫次數 (對數尺度)',
+                nandMarketChartTitle: '消費市場 NAND 類型佔比',
+                nandMarketChartDesc: '低成本、高容量的 TLC/QLC 主導了市場，但也意味著較短的壽命。',
+                nandMarketChartLabels: ['TLC', 'QLC', 'MLC/SLC'],
+                workflowTitle: '最佳實踐：完整工作流程',
+                workflowSubtitle: '從購買到格式化，遵循正確的步驟才能發揮最大性能並確保數據安全。',
+                workflowBottleneckTitle: '數據傳輸的瓶頸效應',
+                workflowBottleneckDesc: '最終速度取決於鏈條中最慢的一環。',
+                workflowBottleneck1: '記憶卡',
+                workflowBottleneck2: '讀卡器',
+                workflowBottleneck3: '傳輸線/接口',
+                workflowBottleneck4: '目標硬碟 (瓶頸!)',
+                workflowFormatTitle: '格式化的鐵律',
+                workflowFormatDesc: '在相機內格式化，是確保性能與數據完整的關鍵。',
+                workflowFormat1: '1. 拍攝',
+                workflowFormat2: '2. 傳輸 & 備份檔案',
+                workflowFormat3: '3. 將卡放回相機',
+                workflowFormat4: '4. 在相機內格式化',
+                footerSource: '數據來源：記憶卡技術權威指南報告。本資訊圖表僅供參考。',
+                footerTech: 'Infographic created with Chart.js and Tailwind CSS. No SVG or Mermaid JS was used.',
+            },
+            'en': {
+                langButton: '中文',
+                mainTitle: 'The Ultimate Memory Card Buying Guide',
+                mainSubtitle: 'Unlock the secrets behind the tiny chip. From capacity and speed to lifespan, make the smartest choice for your needs.',
+                capacityTitle: 'The SD Card Universe: An Evolution of Capacity',
+                capacitySubtitle: 'Each technological leap signifies a massive expansion in storage space.',
+                capacitySdDesc: 'Standard Capacity',
+                capacitySdhcDesc: 'High Capacity (FAT32)',
+                capacitySdxcDesc: 'eXtended Capacity (exFAT)',
+                capacitySducDesc: 'Ultra Capacity',
+                compatibilityTitle: 'The Golden Rule of Compatibility: Backwards Compatibility',
+                compatibilitySubtitle: 'New devices can read old cards, but old devices cannot recognize new cards. This is a common purchasing mistake.',
+                compatibilitySdxcDevice: 'SDXC Device',
+                compatibilitySdhcDevice: 'SDHC Device',
+                compatibilitySdDevice: 'SD Device',
+                speedTitle: 'Decoding Speed Ratings',
+                speedSubtitle: "Don't be fooled by the biggest number. For video, it's all about the 'minimum guaranteed speed'.",
+                speedClassChartTitle: 'Speed Class Comparison (Minimum Sustained Write Speed)',
+                speedClassChartDesc: 'For high-quality video recording, the V-Class (Video Speed Class) is the most reliable indicator.',
+                speedClassChartLabel: 'Min. Sustained Write Speed (MB/s)',
+                readWriteChartTitle: "Don't Be Misled: Read Speed vs. Write Guarantee",
+                readWriteChartDesc: 'The most prominent number on the card is usually the "max read speed," which has limited value for recording.',
+                readWriteChartLabels: ['Max Read Speed (Marketing)', 'Min. Write Guarantee (Video Key)'],
+                busTitle: 'The Physical Divide: UHS-I vs. UHS-II',
+                busSubtitle: 'An extra row of pins makes a world of difference in speed potential. Device and card must match to perform.',
+                busChartTitle: 'Bus Interface Theoretical Speed Limits',
+                busChartDesc: 'The high-speed demands of V60/V90 require the bandwidth of a UHS-II bus for stable support.',
+                busChartLabel: 'Theoretical Max Speed (MB/s)',
+                cfexpressTitle: "The Pro's Choice: A New Era of Speed with CFexpress",
+                cfexpressSubtitle: 'Utilizing SSD technology, built for extreme RAW video and high-speed burst shooting.',
+                cfexpressChartTitle: 'CFexpress Type A vs. Type B Speed Showdown',
+                cfexpressChartLabel2: 'CFexpress 2.0 (MB/s)',
+                cfexpressChartLabel4: 'CFexpress 4.0 (MB/s)',
+                cfexpressKeyDiffTitle: 'Key Differences',
+                cfexpressTypeADesc: '<strong class="text-[#00A6A6]">Type A:</strong> Compact size, similar to an SD card, primarily adopted by Sony.',
+                cfexpressTypeBDesc: '<strong class="text-[#F28F3B]">Type B:</strong> Larger size, faster speeds, widely adopted by Canon, Nikon, etc.',
+                useCaseTitle: 'Tailored For Your Needs',
+                useCaseSubtitle: 'Different scenarios require different cards. Choosing the right one is key to success.',
+                useCaseProTitle: 'Professional Photographer',
+                useCaseProDesc: 'Handling 8K RAW video and high-speed bursts.',
+                useCaseGamerTitle: 'Mobile Gamer',
+                useCaseGamerDesc: 'Running large applications from the card.',
+                useCaseDroneTitle: 'Drone / Action Cam',
+                useCaseDroneDesc: 'Recording 4K video with durability.',
+                useCaseDashcamTitle: 'Dashcam / Security Cam',
+                useCaseDashcamDesc: 'Enduring 24/7 constant overwriting.',
+                useCaseDashcamRec: 'High Endurance',
+                nandTitle: "The Unseen Interior: What Truly Defines Lifespan",
+                nandSubtitle: "A memory card's life is not infinite. The type of its core NAND chip is the key.",
+                nandLongevityChartTitle: 'NAND Flash Memory Lifespan (P/E Cycles)',
+                nandLongevityChartDesc: 'Behind capacity and cost lies a trade-off in longevity. TLC is the current market mainstream.',
+                nandLongevityChartLabel: 'P/E Cycles (Logarithmic Scale)',
+                nandMarketChartTitle: 'Consumer Market NAND Type Share',
+                nandMarketChartDesc: 'Low-cost, high-capacity TLC/QLC dominate the market, but this also means shorter lifespans.',
+                nandMarketChartLabels: ['TLC', 'QLC', 'MLC/SLC'],
+                workflowTitle: 'Best Practices: The Complete Workflow',
+                workflowSubtitle: 'From purchase to formatting, following the right steps ensures maximum performance and data safety.',
+                workflowBottleneckTitle: 'The Bottleneck Effect in Data Transfer',
+                workflowBottleneckDesc: 'The final speed is determined by the slowest link in the chain.',
+                workflowBottleneck1: 'Memory Card',
+                workflowBottleneck2: 'Card Reader',
+                workflowBottleneck3: 'Cable / Port',
+                workflowBottleneck4: 'Target Drive (Bottleneck!)',
+                workflowFormatTitle: 'The Iron Law of Formatting',
+                workflowFormatDesc: 'Formatting in-camera is crucial for ensuring performance and data integrity.',
+                workflowFormat1: '1. Shoot',
+                workflowFormat2: '2. Transfer & Backup Files',
+                workflowFormat3: '3. Return Card to Camera',
+                workflowFormat4: '4. Format In-Camera',
+                footerSource: 'Data Source: The Authoritative Guide to Memory Card Technology Report. This infographic is for reference only.',
+                footerTech: 'Infographic created with Chart.js and Tailwind CSS. No SVG or Mermaid JS was used.',
+            }
+        };
+
+        let currentLang = 'zh';
+        let charts = {};
+
+        const FONT_COLOR = '#4C4C4C';
+        const GRID_COLOR = '#E5E7EB';
+        const PALETTE = {
+            teal: '#00A6A6',
+            orange: '#F28F3B',
+            red: '#E84855',
+            lime: '#C5D86D',
+            gray: '#4C4C4C'
+        };
+
+        function wrapLabel(label, maxLength = 16) {
+            if (typeof label !== 'string' || label.length <= maxLength) {
+                return label;
+            }
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + word).length > maxLength && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = '';
+                }
+                currentLine += word + ' ';
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+        
+        const SHARED_CHART_OPTIONS = {
+            maintainAspectRatio: false,
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: FONT_COLOR,
+                        font: { size: 14 }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: FONT_COLOR },
+                    grid: { color: GRID_COLOR }
+                },
+                x: {
+                    ticks: { color: FONT_COLOR },
+                    grid: { color: 'transparent' }
+                }
+            }
+        };
+        
+        function destroyCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        function createCharts(lang) {
+            destroyCharts();
+            const text = TEXT_CONTENT[lang];
+
+            charts.speedClassChart = new Chart(document.getElementById('speedClassChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['C10', 'U1', 'U3', 'V30', 'V60', 'V90'],
+                    datasets: [{
+                        label: text.speedClassChartLabel,
+                        data: [10, 10, 30, 30, 60, 90],
+                        backgroundColor: [PALETTE.teal, PALETTE.teal, PALETTE.orange, PALETTE.orange, PALETTE.red, PALETTE.red],
+                    }]
+                },
+                options: { ...SHARED_CHART_OPTIONS }
+            });
+
+            charts.readWriteDonutChart = new Chart(document.getElementById('readWriteDonutChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: text.readWriteChartLabels.map(l => wrapLabel(l)),
+                    datasets: [{
+                        data: [170, 30],
+                        backgroundColor: [PALETTE.teal, PALETTE.red],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: FONT_COLOR, font: { size: 14 } } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+
+            charts.busSpeedChart = new Chart(document.getElementById('busSpeedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['UHS-I', 'UHS-II', 'SD Express'],
+                    datasets: [{
+                        label: text.busChartLabel,
+                        data: [104, 312, 985],
+                        backgroundColor: [PALETTE.teal, PALETTE.orange, PALETTE.red],
+                    }]
+                },
+                options: { ...SHARED_CHART_OPTIONS }
+            });
+
+            charts.cfexpressSpeedChart = new Chart(document.getElementById('cfexpressSpeedChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Type A', 'Type B'],
+                    datasets: [
+                        { label: text.cfexpressChartLabel2, data: [1000, 2000], backgroundColor: PALETTE.teal },
+                        { label: text.cfexpressChartLabel4, data: [2000, 4000], backgroundColor: PALETTE.orange }
+                    ]
+                },
+                options: { ...SHARED_CHART_OPTIONS }
+            });
+            
+            charts.nandLongevityChart = new Chart(document.getElementById('nandLongevityChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['QLC', 'TLC', 'MLC', 'SLC'],
+                    datasets: [{
+                        label: text.nandLongevityChartLabel,
+                        data: [1000, 3000, 10000, 100000],
+                        backgroundColor: [PALETTE.lime, PALETTE.teal, PALETTE.orange, PALETTE.red],
+                    }]
+                },
+                options: {
+                    ...SHARED_CHART_OPTIONS,
+                    indexAxis: 'y',
+                    scales: {
+                        x: { type: 'logarithmic', ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } },
+                        y: { ticks: { color: FONT_COLOR }, grid: { color: 'transparent' } }
+                    }
+                }
+            });
+
+            charts.nandMarketShareChart = new Chart(document.getElementById('nandMarketShareChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: text.nandMarketChartLabels,
+                    datasets: [{
+                        data: [75, 20, 5],
+                        backgroundColor: [PALETTE.teal, PALETTE.lime, PALETTE.gray],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: FONT_COLOR, font: { size: 14 } } },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+        }
+
+        function updateContent(lang) {
+            const text = TEXT_CONTENT[lang];
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+
+            Object.keys(text).forEach(key => {
+                const element = document.getElementById(key.replace(/([A-Z])/g, "-$1").toLowerCase());
+                if (element) {
+                    element.innerHTML = text[key];
+                }
+            });
+            
+            document.getElementById('lang-switcher').textContent = text.langButton;
+            createCharts(lang);
+        }
+
+        document.getElementById('lang-switcher').addEventListener('click', () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateContent(currentLang);
+        });
+
+        window.addEventListener('load', () => {
+            updateContent(currentLang);
+        });
+
+    </script>
+</body>
+</html>
