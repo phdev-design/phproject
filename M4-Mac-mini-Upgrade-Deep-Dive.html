@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M4 Mac mini SSD 升級指南與成本分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 350px;
+        }
+        .lang-btn.active {
+            background-color: #004AAD;
+            color: white;
+        }
+        .flow-line {
+            width: 2px;
+            background-color: #BDEFFF;
+            height: 4rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="absolute top-4 right-4 z-50">
+        <div class="flex space-x-2 bg-white p-1 rounded-full shadow-md">
+            <button id="lang-zh" class="lang-btn px-4 py-1.5 border-transparent rounded-full text-sm font-semibold transition active">繁中</button>
+            <button id="lang-en" class="lang-btn px-4 py-1.5 border-transparent rounded-full text-sm font-semibold transition">EN</button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+
+        <header class="text-center py-16 px-4">
+            <h1 class="text-4xl md:text-6xl font-bold text-[#004AAD] mb-4" data-lang-key="headerTitle"></h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto" data-lang-key="headerSubtitle"></p>
+        </header>
+
+        <main class="space-y-12 md:space-y-16 px-4">
+
+            <section class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2" data-lang-key="costTitle"></h2>
+                    <p class="text-gray-700 leading-relaxed max-w-3xl mx-auto mb-8" data-lang-key="costParagraph"></p>
+                </div>
+                <div class="chart-container mx-auto" style="max-width: 700px; height: 400px;">
+                    <canvas id="costComparisonChart"></canvas>
+                </div>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-[#004AAD] mb-4 text-center" data-lang-key="totalCostTitle"></h3>
+                    <p class="text-gray-700 mb-4 text-center text-sm" data-lang-key="totalCostParagraph"></p>
+                    <div class="chart-container">
+                        <canvas id="stackedBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-[#004AAD] mb-4 text-center" data-lang-key="savingsTitle"></h3>
+                    <p class="text-gray-700 mb-4 text-center text-sm" data-lang-key="savingsParagraph"></p>
+                    <div class="chart-container">
+                        <canvas id="savingsDonutChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                 <div class="text-center">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2" data-lang-key="toolsTitle"></h2>
+                    <p class="text-gray-700 leading-relaxed max-w-3xl mx-auto mb-8" data-lang-key="toolsParagraph"></p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">💻</span>
+                        <span class="font-medium" data-lang-key="tool1"></span>
+                    </div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">💾</span>
+                        <span class="font-medium" data-lang-key="tool2"></span>
+                    </div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">🖥️</span>
+                        <span class="font-medium" data-lang-key="tool3"></span>
+                    </div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">💽</span>
+                        <span class="font-medium" data-lang-key="tool4"></span>
+                    </div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">🔌</span>
+                        <span class="font-medium" data-lang-key="tool5"></span>
+                    </div>
+                     <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">🔩</span>
+                        <span class="font-medium" data-lang-key="tool6"></span>
+                    </div>
+                    <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg">
+                        <span class="text-4xl mb-2">🔧</span>
+                        <span class="font-medium" data-lang-key="tool7"></span>
+                    </div>
+                     <div class="flex flex-col items-center p-4 bg-gray-50 rounded-lg text-[#0079FF]">
+                        <span class="text-4xl mb-2">💡</span>
+                        <span class="font-medium" data-lang-key="tool8"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="py-12">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold text-[#004AAD] mb-2" data-lang-key="flowchartTitle"></h2>
+                    <p class="text-gray-700 leading-relaxed max-w-3xl mx-auto mb-12" data-lang-key="flowchartParagraph"></p>
+                </div>
+                <div class="relative flex flex-col items-center">
+                    <div class="flow-step flex items-center gap-6 w-full">
+                        <div class="bg-[#0079FF] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">1</div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex-1">
+                            <h3 class="font-bold text-lg" data-lang-key="step1Title"></h3>
+                            <p class="text-sm text-gray-600" data-lang-key="step1Desc"></p>
+                        </div>
+                    </div>
+                    <div class="flow-line"></div>
+                     <div class="flow-step flex items-center gap-6 w-full">
+                        <div class="bg-[#0079FF] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">2</div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex-1">
+                            <h3 class="font-bold text-lg" data-lang-key="step2Title"></h3>
+                            <p class="text-sm text-gray-600" data-lang-key="step2Desc"></p>
+                        </div>
+                    </div>
+                     <div class="flow-line"></div>
+                     <div class="flow-step flex items-center gap-6 w-full">
+                        <div class="bg-[#0079FF] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">3</div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex-1">
+                            <h3 class="font-bold text-lg" data-lang-key="step3Title"></h3>
+                            <p class="text-sm text-gray-600" data-lang-key="step3Desc"></p>
+                        </div>
+                    </div>
+                    <div class="flow-line"></div>
+                     <div class="flow-step flex items-center gap-6 w-full">
+                        <div class="bg-[#0079FF] text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">4</div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex-1">
+                            <h3 class="font-bold text-lg" data-lang-key="step4Title"></h3>
+                            <p class="text-sm text-gray-600" data-lang-key="step4Desc"></p>
+                        </div>
+                    </div>
+                    <div class="flow-line"></div>
+                    <div class="flow-step flex items-center gap-6 w-full">
+                         <div class="bg-green-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">🎉</div>
+                        <div class="bg-white p-4 rounded-lg shadow-md flex-1">
+                            <h3 class="font-bold text-lg" data-lang-key="step5Title"></h3>
+                            <p class="text-sm text-gray-600" data-lang-key="step5Desc"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center py-10 mt-12 text-gray-500 text-sm border-t border-gray-200">
+            <p data-lang-key="footer1"></p>
+            <p data-lang-key="footer2"></p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const languageData = {
+                headerTitle: { zh: 'M4 Mac mini 升級大解密', en: 'M4 Mac mini Upgrade Deep Dive' },
+                headerSubtitle: { zh: '自行升級 SSD，不僅可行，更能為您省下大筆開銷。', en: 'Upgrading the SSD yourself is not only possible, it saves you a fortune.' },
+                costTitle: { zh: '原廠升級的驚人代價', en: 'The Shocking Cost of an Official Upgrade' },
+                costParagraph: { zh: '基本款 M4 Mac mini 是一台性價比極高的電腦。然而，若選擇蘋果官方的 2TB 儲存空間升級，您需要額外支付高達 $800 美元。這筆費用幾乎可以再買一台 Mac mini，使得總價大幅攀升。', en: 'The base M4 Mac mini offers great value. However, opting for Apple\'s official 2TB storage upgrade costs an extra $800. This fee could almost buy another Mac mini, significantly increasing the total price.' },
+                totalCostTitle: { zh: '總成本構成', en: 'Total Cost Breakdown' },
+                totalCostParagraph: { zh: '官方方案的總價由主機和高昂的升級費疊加而成。', en: 'The official plan\'s price is the sum of the base computer and the expensive upgrade fee.' },
+                savingsTitle: { zh: '升級成果：您的節省', en: 'The Result: Your Savings' },
+                savingsParagraph: { zh: '與官方相比，DIY 方案為您省下近 500 美元。', en: 'Compared to the official price, the DIY solution saves you nearly $500.' },
+                toolsTitle: { zh: '🛠️ 裝備檢查清單', en: '🛠️ Your Gear Checklist' },
+                toolsParagraph: { zh: '準備好這些工具和組件，就能順利開始您的升級之旅。', en: 'Get these tools and components ready to start your upgrade journey smoothly.' },
+                tool1: { zh: 'M4 Mac mini (基本款)', en: 'M4 Mac mini (Base)' },
+                tool2: { zh: '2TB SSD 升級套件', en: '2TB SSD Upgrade Kit' },
+                tool3: { zh: '另一台 Mac (macOS 14+)', en: 'Another Mac (macOS 14+)' },
+                tool4: { zh: '外接備份硬碟', en: 'External Backup SSD' },
+                tool5: { zh: 'USB-C 數據線', en: 'USB-C Data Cable' },
+                tool6: { zh: '星形螺絲起子', en: 'Torx Drivers (T3, T5, T8)' },
+                tool7: { zh: '撬棒與撬片', en: 'Pry Tool & Picks' },
+                tool8: { zh: '耐心與細心', en: 'Patience & Care' },
+                flowchartTitle: { zh: '升級四部曲', en: 'The 4-Step Upgrade Path' },
+                flowchartParagraph: { zh: '整個升級過程可以分為幾個關鍵階段。雖然需要細心和耐心，但只要按照步驟操作，就能成功完成。', en: 'The entire upgrade process can be divided into several key stages. Although it requires care and patience, you can succeed by following the steps.' },
+                step1Title: { zh: '備份資料', en: 'Back Up Data' },
+                step1Desc: { zh: '使用「時光機」完整備份您的 Mac。', en: 'Use Time Machine to create a full backup of your Mac.' },
+                step2Title: { zh: '拆機換碟', en: 'Swap the Drive' },
+                step2Desc: { zh: '小心地拆開 Mac mini 並更換 SSD 固態硬碟。', en: 'Carefully open the Mac mini and replace the SSD.' },
+                step3Title: { zh: 'DFU 還原', en: 'DFU Restore' },
+                step3Desc: { zh: '使用另一台 Mac 透過 DFU 模式來安裝系統。', en: 'Use another Mac to install macOS via DFU mode.' },
+                step4Title: { zh: '移轉資料', en: 'Migrate Data' },
+                step4Desc: { zh: '從「時光機」備份還原您的所有資料。', en: 'Restore all your data from the Time Machine backup.' },
+                step5Title: { zh: '大功告成', en: 'All Done!' },
+                step5Desc: { zh: '享受全新的 2TB 大容量儲存空間！', en: 'Enjoy your new 2TB of storage space!' },
+                footer1: { zh: '資訊圖表根據 9to5Mac 教學製作。所有數據僅供參考。', en: 'Infographic based on the 9to5Mac tutorial. All data is for reference only.' },
+                footer2: { zh: '此為非官方指南，請自行承擔操作風險。', en: 'This is an unofficial guide. Proceed at your own risk.' },
+                chart1Label: { zh: '2TB 升級費用 (美元)', en: '2TB Upgrade Cost (USD)' },
+                chart1Item1: { zh: '蘋果官方升級', en: 'Apple Official Upgrade' },
+                chart1Item2: { zh: 'DIY 自行升級', en: 'DIY Upgrade' },
+                chart2Label1: { zh: '主機費用', en: 'Base Cost' },
+                chart2Label2: { zh: '升級費用', en: 'Upgrade Cost' },
+                chart2Item1: { zh: '蘋果官方方案', en: 'Apple Official Plan' },
+                chart2Item2: { zh: 'DIY 升級方案', en: 'DIY Upgrade Plan' },
+                chart3Label1: { zh: '省下的金額 ($480)', en: 'Amount Saved ($480)' },
+                chart3Label2: { zh: 'DIY 花費 ($320)', en: 'DIY Cost ($320)' },
+                chart3Title: { zh: '相對於蘋果 $800 升級費', en: 'Relative to Apple\'s $800 Upgrade Fee' }
+            };
+
+            const brilliantBlues = {
+                dark: '#004AAD',
+                primary: '#0079FF',
+                light: '#52A5FF',
+                lighter: '#BDEFFF',
+                text: '#333'
+            };
+
+            let currentLang = 'zh';
+            let charts = {};
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            const defaultChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: brilliantBlues.text,
+                            font: { size: 14, family: "'Noto Sans TC', 'Roboto', sans-serif" }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: { title: tooltipTitleCallback },
+                        titleFont: { family: "'Noto Sans TC', 'Roboto', sans-serif" },
+                        bodyFont: { family: "'Noto Sans TC', 'Roboto', sans-serif" }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: brilliantBlues.text, font: { family: "'Noto Sans TC', 'Roboto', sans-serif" }},
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: brilliantBlues.text, font: { family: "'Noto Sans TC', 'Roboto', sans-serif" }},
+                        grid: { color: '#e5e7eb' }
+                    }
+                }
+            };
+
+            function createCharts(lang) {
+                Object.values(charts).forEach(chart => chart.destroy());
+
+                const costComparisonCtx = document.getElementById('costComparisonChart').getContext('2d');
+                charts.costComparison = new Chart(costComparisonCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [languageData.chart1Item1[lang], languageData.chart1Item2[lang]],
+                        datasets: [{
+                            label: languageData.chart1Label[lang],
+                            data: [800, 320],
+                            backgroundColor: [brilliantBlues.primary, brilliantBlues.light],
+                            borderColor: [brilliantBlues.dark, brilliantBlues.primary],
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            barThickness: 50
+                        }]
+                    },
+                    options: { ...defaultChartOptions }
+                });
+
+                const stackedBarCtx = document.getElementById('stackedBarChart').getContext('2d');
+                charts.stackedBar = new Chart(stackedBarCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [languageData.chart2Item1[lang], languageData.chart2Item2[lang]],
+                        datasets: [
+                            { label: languageData.chart2Label1[lang], data: [600, 600], backgroundColor: brilliantBlues.light, borderRadius: 5 },
+                            { label: languageData.chart2Label2[lang], data: [800, 320], backgroundColor: brilliantBlues.dark, borderRadius: 5 }
+                        ]
+                    },
+                    options: { ...defaultChartOptions, scales: { x: { ...defaultChartOptions.scales.x, stacked: true }, y: { ...defaultChartOptions.scales.y, stacked: true } } }
+                });
+                
+                const savingsDonutCtx = document.getElementById('savingsDonutChart').getContext('2d');
+                charts.savingsDonut = new Chart(savingsDonutCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [languageData.chart3Label1[lang], languageData.chart3Label2[lang]],
+                        datasets: [{ data: [480, 320], backgroundColor: [brilliantBlues.light, brilliantBlues.dark], hoverOffset: 8, borderColor: '#fff', borderWidth: 4 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: true, position: 'bottom', labels: { color: brilliantBlues.text, font: { size: 14, family: "'Noto Sans TC', 'Roboto', sans-serif" }, boxWidth: 15, padding: 20 } },
+                            tooltip: { callbacks: { title: tooltipTitleCallback }, titleFont: { family: "'Noto Sans TC', 'Roboto', sans-serif" }, bodyFont: { family: "'Noto Sans TC', 'Roboto', sans-serif" } },
+                            title: { display: true, text: languageData.chart3Title[lang], color: brilliantBlues.text, font: { size: 16, family: "'Noto Sans TC', 'Roboto', sans-serif" }, padding: { bottom: 20 } }
+                        }
+                    }
+                });
+            }
+
+            function updateLanguage(lang) {
+                currentLang = lang;
+                document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+                
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.getAttribute('data-lang-key');
+                    if (languageData[key] && languageData[key][lang]) {
+                        el.innerHTML = languageData[key][lang];
+                    }
+                });
+
+                document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+                document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+                
+                createCharts(lang);
+            }
+
+            document.getElementById('lang-zh').addEventListener('click', () => updateLanguage('zh'));
+            document.getElementById('lang-en').addEventListener('click', () => updateLanguage('en'));
+
+            updateLanguage('zh');
+        });
+    </script>
+</body>
+</html>
