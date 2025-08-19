@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayStation 越獄進展資訊圖表 (2025)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans TC', sans-serif;
+            background-color: #111827;
+            color: #E0E0E0;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flowchart-node {
+            border: 2px solid #004FFF;
+            background-color: #1F2937;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .flowchart-arrow {
+            font-size: 2rem;
+            color: #87F1FF;
+            margin: 0.5rem 0;
+        }
+        .security-layer {
+            border: 2px dashed;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto p-4 md:p-8">
+
+        <div class="text-right mb-4">
+            <button id="lang-toggle" class="bg-gray-700 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                English
+            </button>
+        </div>
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-6xl font-black text-white mb-2" data-lang-key="mainTitle">解鎖 PlayStation</h1>
+            <p class="text-xl md:text-2xl text-[#87F1FF]" data-lang-key="subtitle">2025 年 PS4 與 PS5 越獄深度剖析</p>
+        </header>
+
+        <section id="intro" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#B5FF7D]" data-lang-key="introTitle">一場雙線戰爭</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg mb-10" data-lang-key="introDesc">在 2025 年，PlayStation 破解領域呈現出鮮明對比。PS4 的生態已臻於成熟，幾乎全面勝利；而 PS5 則是一座被先進安全措施層層加固的全新堡壘。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-gray-800 p-8 rounded-xl shadow-2xl text-center border-l-4 border-[#004FFF]">
+                    <h3 class="text-3xl font-bold text-white mb-2">PlayStation 4</h3>
+                    <p class="text-6xl font-black text-[#B5FF7D] my-4" data-lang-key="ps4Status">完全解鎖</p>
+                    <p class="text-lg text-gray-300" data-lang-key="ps4Desc">得益於多樣化的攻擊向量，高達 11.00 甚至更新的固件版本均可破解，自製軟體生態系統穩定且功能豐富。</p>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl shadow-2xl text-center border-l-4 border-[#FF8A54]">
+                    <h3 class="text-3xl font-bold text-white mb-2">PlayStation 5</h3>
+                    <p class="text-6xl font-black text-[#FF8A54] my-4" data-lang-key="ps5Status">安全堡壘</p>
+                    <p class="text-lg text-gray-300" data-lang-key="ps5Desc">破解高度依賴 ≤ 7.61 的早期固件，Hypervisor 架構使高版本破解變得極其困難，用戶處於漫長的等待中。</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-700 my-16">
+
+        <section id="ps4" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#B5FF7D]" data-lang-key="ps4SectionTitle">PS4 戰線：一個成熟且具備韌性的生態系統</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#87F1FF]" data-lang-key="ps4ChartTitle">主要漏洞利用演進與固件覆蓋範圍</h3>
+                    <p class="text-center text-gray-400 mb-4" data-lang-key="ps4ChartDesc">PS4 破解已從依賴單一瀏覽器漏洞，演變為多樣化的攻擊向量，覆蓋了絕大多數固件版本。</p>
+                    <div class="chart-container">
+                        <canvas id="ps4FirmwareChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#87F1FF]" data-lang-key="goldhenTitle">GoldHEN：實質上的標準載入程式</h3>
+                    <p class="text-center text-gray-400 mb-6" data-lang-key="goldhenDesc">在成功破解後，GoldHEN 提供了全面的功能，成為 PS4 自製軟體社群的基石。</p>
+                    <ul class="space-y-4 text-lg">
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">🎮</span> <span data-lang-key="goldhenFeat1">運行未簽名遊戲與自製軟體</span></li>
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">🛠️</span> <span data-lang-key="goldhenFeat2">解鎖開發者專用調試設定</span></li>
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">🌐</span> <span data-lang-key="goldhenFeat3">透過網路遠程安裝 PKG 檔案</span></li>
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">📁</span> <span data-lang-key="goldhenFeat4">內建 FTP 伺服器以管理檔案</span></li>
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">🌙</span> <span data-lang-key="goldhenFeat5">完美的待命模式支援</span></li>
+                        <li class="flex items-center"><span class="text-2xl mr-4 text-[#B5FF7D]">🎯</span> <span data-lang-key="goldhenFeat6">整合式金手指選單與 FPS 計數器</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-700 my-16">
+
+        <section id="ps5" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-[#FF8A54]" data-lang-key="ps5SectionTitle">PS5 堡壘：固件至上的等待遊戲</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#FFF7AD]" data-lang-key="ps5TiersTitle">PS5 破解可能性層級</h3>
+                    <p class="text-center text-gray-400 mb-6" data-lang-key="ps5TiersDesc">固件版本是決定一切的命脈。索尼在特定版本進行了重大安全修訂，形成了難以逾越的鴻溝。</p>
+                    <div class="space-y-4">
+                        <div class="border-2 border-[#FF8A54] p-4 rounded-lg bg-red-900/30">
+                            <h4 class="font-bold text-xl text-[#FF8A54]" data-lang-key="ps5Tier1Title">銅牆鐵壁 (固件 8.00+)</h4>
+                            <p data-lang-key="ps5Tier1Desc">已知內核漏洞均已修補，目前無任何公開破解方法。用戶只能等待全新的漏洞鏈。</p>
+                        </div>
+                        <div class="border-2 border-[#FFF7AD] p-4 rounded-lg bg-yellow-900/30">
+                            <h4 class="font-bold text-xl text-[#FFF7AD]" data-lang-key="ps5Tier2Title">BD-JB 時代 (固件 3.xx - 7.61)</h4>
+                            <p data-lang-key="ps5Tier2Desc">當前破解焦點。依賴藍光光碟 (BD-JB) 作為入口點，功能仍在發展中，且必須有光碟機。</p>
+                        </div>
+                        <div class="border-2 border-[#B5FF7D] p-4 rounded-lg bg-green-900/30">
+                            <h4 class="font-bold text-xl text-[#B5FF7D]" data-lang-key="ps5Tier3Title">黃金固件 (固件 1.00 - 4.51)</h4>
+                            <p data-lang-key="ps5Tier3Desc">擁有 WebKit 瀏覽器入口點，破解相對直接，可實現較為完整的自製軟體體驗。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#FFF7AD]" data-lang-key="bdjbTitle">藍光賭局：BD-JB 破解流程</h3>
+                    <p class="text-center text-gray-400 mb-6" data-lang-key="bdjbDesc">對於 7.61 及以下固件，BD-JB 是主要手段，但它對硬體有嚴格要求，形成了一個「第 22 條軍規」式的困境。</p>
+                    <div class="flex flex-col items-center">
+                        <div class="flowchart-node w-full"><span data-lang-key="bdjbStep1">1. 燒錄特製的 ISO 映像檔至空白藍光光碟</span></div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node w-full"><span data-lang-key="bdjbStep2">2. 將光碟放入帶光碟機的 PS5 (固件 ≤ 7.61)</span></div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node w-full"><span data-lang-key="bdjbStep3">3. 運行光碟，觸發 Java 漏洞獲得用戶層控制權</span></div>
+                        <div class="flowchart-arrow">▼</div>
+                        <div class="flowchart-node bg-[#004FFF] text-white w-full"><span data-lang-key="bdjbStep4">4. 載入 etaHEN，成功啟用自製軟體</span></div>
+                        <div class="mt-6 p-4 bg-red-900/50 rounded-lg text-center w-full">
+                            <p class="font-bold" data-lang-key="bdjbLimitTitle">關鍵限制：</p>
+                            <p data-lang-key="bdjbLimitDesc">數位版主機無法使用。Slim 版光碟機首次配對需連網，可能強制升級固件導致破解失效。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="border-gray-700 my-16">
+
+        <section id="tech" class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-white" data-lang-key="techTitle">技術深度剖析：為何 PS5 如此堅固？</h2>
+            <p class="max-w-3xl mx-auto text-center text-lg mb-10" data-lang-key="techDesc">PS5 引入了 Hypervisor，一個位於作業系統之下的全新安全層，從根本上改變了攻防格局，使得傳統的內核攻擊方式幾乎完全失效。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#87F1FF]" data-lang-key="ps4SecurityTitle">PS4 安全模型</h3>
+                    <div class="security-layer border-[#87F1FF]">
+                        <h4 class="font-bold text-lg" data-lang-key="userland">用戶層 (Userland)</h4>
+                        <p class="text-sm text-gray-400" data-lang-key="userlandExamples">(瀏覽器, 藍光播放器)</p>
+                        <div class="text-2xl my-2">▼</div>
+                        <h4 class="font-bold text-lg" data-lang-key="kernel">內核層 (Kernel)</h4>
+                        <p class="text-sm text-gray-400" data-lang-key="kernelExamples">(作業系統核心)</p>
+                    </div>
+                    <p class="mt-4 text-center" data-lang-key="ps4SecurityDesc">攻擊者找到用戶層入口點後，可直接攻擊內核以獲取最高權限。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-4 text-[#FF8A54]" data-lang-key="ps5SecurityTitle">PS5 安全模型</h3>
+                    <div class="security-layer border-[#FF8A54]">
+                        <h4 class="font-bold text-lg" data-lang-key="hypervisor">Hypervisor (Ring -1)</h4>
+                        <p class="text-sm text-gray-400" data-lang-key="hypervisorDesc">(硬體級哨兵)</p>
+                        <div class="security-layer border-gray-500">
+                            <h4 class="font-bold text-lg" data-lang-key="userlandVM">用戶層 (Userland)</h4>
+                            <p class="text-sm text-gray-400" data-lang-key="userlandVMDesc">(在虛擬機中運行)</p>
+                            <div class="text-2xl my-2">▼</div>
+                            <h4 class="font-bold text-lg" data-lang-key="kernelVM">內核層 (Kernel)</h4>
+                             <p class="text-sm text-gray-400" data-lang-key="kernelVMDesc">(在虛擬機中運行)</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-center" data-lang-key="ps5SecurityDesc">整個作業系統運行在虛擬機中，Hypervisor 實施 XOM (僅執行記憶體) 等硬體級防禦，阻止對內核的讀取和修改。</p>
+                </div>
+            </div>
+        </section>
+        
+        <hr class="border-gray-700 my-16">
+
+        <section id="conclusion" class="text-center">
+            <h2 class="text-3xl font-bold text-center mb-8 text-white" data-lang-key="conclusionTitle">戰略建議</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-[#B5FF7D]">
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="advice1Title">對於「即插即用」型用戶</h3>
+                    <p data-lang-key="advice1Desc">優先考慮一台固件版本 ≤ 11.00 的 PS4。這是目前獲得最穩定、功能最完整破解體驗的最佳選擇。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-[#FFF7AD]">
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="advice2Title">對於有耐心的 PS5 擁有者</h3>
+                    <p data-lang-key="advice2Desc">立即斷網，絕對不要更新固件！保持低版本 (≤ 7.61) 是參與未來 PS5 破解的唯一入場券。</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-lg shadow-lg border-t-4 border-[#FF8A54]">
+                    <h3 class="text-xl font-bold mb-2" data-lang-key="advice3Title">對於二手主機購買者</h3>
+                    <p data-lang-key="advice3Desc">購買二手 PS5 時，驗證固件版本是首要任務。高版本固件在破解層面與全新主機無異。</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const translations = {
+            'zh-Hant': {
+                mainTitle: '解鎖 PlayStation',
+                subtitle: '2025 年 PS4 與 PS5 越獄深度剖析',
+                introTitle: '一場雙線戰爭',
+                introDesc: '在 2025 年，PlayStation 破解領域呈現出鮮明對比。PS4 的生態已臻於成熟，幾乎全面勝利；而 PS5 則是一座被先進安全措施層層加固的全新堡壘。',
+                ps4Status: '完全解鎖',
+                ps4Desc: '得益於多樣化的攻擊向量，高達 11.00 甚至更新的固件版本均可破解，自製軟體生態系統穩定且功能豐富。',
+                ps5Status: '安全堡壘',
+                ps5Desc: '破解高度依賴 ≤ 7.61 的早期固件，Hypervisor 架構使高版本破解變得極其困難，用戶處於漫長的等待中。',
+                ps4SectionTitle: 'PS4 戰線：一個成熟且具備韌性的生態系統',
+                ps4ChartTitle: '主要漏洞利用演進與固件覆蓋範圍',
+                ps4ChartDesc: 'PS4 破解已從依賴單一瀏覽器漏洞，演變為多樣化的攻擊向量，覆蓋了絕大多數固件版本。',
+                goldhenTitle: 'GoldHEN：實質上的標準載入程式',
+                goldhenDesc: '在成功破解後，GoldHEN 提供了全面的功能，成為 PS4 自製軟體社群的基石。',
+                goldhenFeat1: '運行未簽名遊戲與自製軟體',
+                goldhenFeat2: '解鎖開發者專用調試設定',
+                goldhenFeat3: '透過網路遠程安裝 PKG 檔案',
+                goldhenFeat4: '內建 FTP 伺服器以管理檔案',
+                goldhenFeat5: '完美的待命模式支援',
+                goldhenFeat6: '整合式金手指選單與 FPS 計數器',
+                ps5SectionTitle: 'PS5 堡壘：固件至上的等待遊戲',
+                ps5TiersTitle: 'PS5 破解可能性層級',
+                ps5TiersDesc: '固件版本是決定一切的命脈。索尼在特定版本進行了重大安全修訂，形成了難以逾越的鴻溝。',
+                ps5Tier1Title: '銅牆鐵壁 (固件 8.00+)',
+                ps5Tier1Desc: '已知內核漏洞均已修補，目前無任何公開破解方法。用戶只能等待全新的漏洞鏈。',
+                ps5Tier2Title: 'BD-JB 時代 (固件 3.xx - 7.61)',
+                ps5Tier2Desc: '當前破解焦點。依賴藍光光碟 (BD-JB) 作為入口點，功能仍在發展中，且必須有光碟機。',
+                ps5Tier3Title: '黃金固件 (固件 1.00 - 4.51)',
+                ps5Tier3Desc: '擁有 WebKit 瀏覽器入口點，破解相對直接，可實現較為完整的自製軟體體驗。',
+                bdjbTitle: '藍光賭局：BD-JB 破解流程',
+                bdjbDesc: '對於 7.61 及以下固件，BD-JB 是主要手段，但它對硬體有嚴格要求，形成了一個「第 22 條軍規」式的困境。',
+                bdjbStep1: '1. 燒錄特製的 ISO 映像檔至空白藍光光碟',
+                bdjbStep2: '2. 將光碟放入帶光碟機的 PS5 (固件 ≤ 7.61)',
+                bdjbStep3: '3. 運行光碟，觸發 Java 漏洞獲得用戶層控制權',
+                bdjbStep4: '4. 載入 etaHEN，成功啟用自製軟體',
+                bdjbLimitTitle: '關鍵限制：',
+                bdjbLimitDesc: '數位版主機無法使用。Slim 版光碟機首次配對需連網，可能強制升級固件導致破解失效。',
+                techTitle: '技術深度剖析：為何 PS5 如此堅固？',
+                techDesc: 'PS5 引入了 Hypervisor，一個位於作業系統之下的全新安全層，從根本上改變了攻防格局，使得傳統的內核攻擊方式幾乎完全失效。',
+                ps4SecurityTitle: 'PS4 安全模型',
+                userland: '用戶層 (Userland)',
+                userlandExamples: '(瀏覽器, 藍光播放器)',
+                kernel: '內核層 (Kernel)',
+                kernelExamples: '(作業系統核心)',
+                ps4SecurityDesc: '攻擊者找到用戶層入口點後，可直接攻擊內核以獲取最高權限。',
+                ps5SecurityTitle: 'PS5 安全模型',
+                hypervisor: 'Hypervisor (Ring -1)',
+                hypervisorDesc: '(硬體級哨兵)',
+                userlandVM: '用戶層 (Userland)',
+                userlandVMDesc: '(在虛擬機中運行)',
+                kernelVM: '內核層 (Kernel)',
+                kernelVMDesc: '(在虛擬機中運行)',
+                ps5SecurityDesc: '整個作業系統運行在虛擬機中，Hypervisor 實施 XOM (僅執行記憶體) 等硬體級防禦，阻止對內核的讀取和修改。',
+                conclusionTitle: '戰略建議',
+                advice1Title: '對於「即插即用」型用戶',
+                advice1Desc: '優先考慮一台固件版本 ≤ 11.00 的 PS4。這是目前獲得最穩定、功能最完整破解體驗的最佳選擇。',
+                advice2Title: '對於有耐心的 PS5 擁有者',
+                advice2Desc: '立即斷網，絕對不要更新固件！保持低版本 (≤ 7.61) 是參與未來 PS5 破解的唯一入場券。',
+                advice3Title: '對於二手主機購買者',
+                advice3Desc: '購買二手 PS5 時，驗證固件版本是首要任務。高版本固件在破解層面與全新主機無異。',
+                chartXAxis: '固件版本',
+                chartTooltipRange: '版本範圍',
+                chartLabels: {
+                    webkit: 'WebKit Exploit',
+                    poobs4: 'pOObs4 (WebKit + USB)',
+                    pppwn: 'PPPwn (PPPoE)',
+                    bdj: 'BD-J / Lua / Mast1c0re + Lapse'
+                }
+            },
+            'en': {
+                mainTitle: 'Unlocking PlayStation',
+                subtitle: 'A Deep Dive into the PS4 & PS5 Jailbreak Scene in 2025',
+                introTitle: 'A Tale of Two Consoles',
+                introDesc: 'In 2025, the PlayStation hacking scene presents a stark contrast. The PS4 ecosystem has reached maturity, achieving a near-total victory, while the PS5 stands as a new fortress, heavily fortified with advanced security measures.',
+                ps4Status: 'Fully Unlocked',
+                ps4Desc: 'Thanks to diverse attack vectors, firmware up to 11.00 and beyond is exploitable. The homebrew ecosystem is stable and feature-rich.',
+                ps5Status: 'Security Fortress',
+                ps5Desc: 'Exploits heavily rely on early firmware (≤ 7.61). The Hypervisor architecture makes hacking higher versions extremely difficult, leaving users in a long waiting game.',
+                ps4SectionTitle: 'The PS4 Front: A Mature and Resilient Ecosystem',
+                ps4ChartTitle: 'Major Exploit Evolution & Firmware Coverage',
+                ps4ChartDesc: 'PS4 hacking has evolved from relying on a single browser exploit to a diverse range of attack vectors, covering the vast majority of firmware versions.',
+                goldhenTitle: 'GoldHEN: The De Facto Standard Payload',
+                goldhenDesc: 'After a successful exploit, GoldHEN provides a comprehensive suite of features, becoming the cornerstone of the PS4 homebrew community.',
+                goldhenFeat1: 'Run unsigned games and homebrew',
+                goldhenFeat2: 'Unlock developer debug settings',
+                goldhenFeat3: 'Remote install PKG files over network',
+                goldhenFeat4: 'Built-in FTP server for file management',
+                goldhenFeat5: 'Perfect Rest Mode support',
+                goldhenFeat6: 'Integrated cheat menu and FPS counter',
+                ps5SectionTitle: 'The PS5 Fortress: A Waiting Game of Firmware',
+                ps5TiersTitle: 'PS5 Exploitability Tiers',
+                ps5TiersDesc: 'Firmware version is the lifeblood. Sony made significant security revisions at specific versions, creating insurmountable gaps.',
+                ps5Tier1Title: 'The Iron Wall (Firmware 8.00+)',
+                ps5Tier1Desc: 'Known kernel exploits are patched. No public jailbreak methods exist. Users can only wait for an entirely new exploit chain.',
+                ps5Tier2Title: 'The BD-JB Era (Firmware 3.xx - 7.61)',
+                ps5Tier2Desc: 'The current focus of the scene. Relies on the Blu-ray Disc (BD-JB) entry point. Functionality is still developing, and a disc drive is mandatory.',
+                ps5Tier3Title: 'The Golden Firmwares (Firmware 1.00 - 4.51)',
+                ps5Tier3Desc: 'Possesses a WebKit browser entry point, making the jailbreak process relatively straightforward for a more complete homebrew experience.',
+                bdjbTitle: 'The Blu-ray Gamble: BD-JB Exploit Flow',
+                bdjbDesc: 'For firmware 7.61 and below, BD-JB is the primary method, but its strict hardware requirements create a "Catch-22" situation.',
+                bdjbStep1: '1. Burn a custom ISO image to a blank Blu-ray disc',
+                bdjbStep2: '2. Insert disc into a PS5 with a drive (Firmware ≤ 7.61)',
+                bdjbStep3: '3. Run the disc, triggering a Java exploit to gain userland control',
+                bdjbStep4: '4. Load etaHEN payload, successfully enabling homebrew',
+                bdjbLimitTitle: 'Key Limitation:',
+                bdjbLimitDesc: 'Digital Edition consoles cannot be used. The Slim disc drive requires online pairing for first use, which may force a firmware update, voiding the exploit.',
+                techTitle: 'Technical Deep Dive: Why is the PS5 So Tough?',
+                techDesc: 'The PS5 introduces a Hypervisor, a new security layer below the OS, fundamentally changing the attack landscape and rendering traditional kernel exploits nearly useless.',
+                ps4SecurityTitle: 'PS4 Security Model',
+                userland: 'Userland',
+                userlandExamples: '(Browser, Blu-ray Player)',
+                kernel: 'Kernel',
+                kernelExamples: '(Operating System Core)',
+                ps4SecurityDesc: 'After finding a userland entry point, an attacker can directly target the kernel to gain full system privileges.',
+                ps5SecurityTitle: 'PS5 Security Model',
+                hypervisor: 'Hypervisor (Ring -1)',
+                hypervisorDesc: '(Hardware-level Sentinel)',
+                userlandVM: 'Userland',
+                userlandVMDesc: '(Running in a Virtual Machine)',
+                kernelVM: 'Kernel',
+                kernelVMDesc: '(Running in a Virtual Machine)',
+                ps5SecurityDesc: 'The entire OS runs in a VM. The Hypervisor enforces hardware-level defenses like XOM (eXecute-Only Memory), preventing kernel reads and modifications.',
+                conclusionTitle: 'Strategic Recommendations',
+                advice1Title: 'For "Plug-and-Play" Users',
+                advice1Desc: 'Prioritize a PS4 on firmware ≤ 11.00. This is the best choice for the most stable and feature-complete jailbreak experience currently available.',
+                advice2Title: 'For Patient PS5 Owners',
+                advice2Desc: 'Disconnect from the internet now and never update! Staying on a low firmware (≤ 7.61) is the only ticket to future PS5 jailbreaking.',
+                advice3Title: 'For Second-Hand Buyers',
+                advice3Desc: 'When buying a used PS5, verifying the firmware version is the top priority. A high-firmware console is no different from a new one in terms of hacking.',
+                chartXAxis: 'Firmware Version',
+                chartTooltipRange: 'Version Range',
+                chartLabels: {
+                    webkit: 'WebKit Exploit',
+                    poobs4: 'pOObs4 (WebKit + USB)',
+                    pppwn: 'PPPwn (PPPoE)',
+                    bdj: 'BD-J / Lua / Mast1c0re + Lapse'
+                }
+            }
+        };
+
+        let currentLanguage = 'zh-Hant';
+        let ps4Chart = null;
+
+        const wrapLabel = (label, maxWidth = 16) => {
+            if (label.length <= maxWidth) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if (currentLine) lines.push(currentLine.trim());
+            return lines;
+        };
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            return Array.isArray(label) ? label.join(' ') : label;
+        };
+
+        function renderChart(lang) {
+            if (ps4Chart) {
+                ps4Chart.destroy();
+            }
+            const langData = translations[lang];
+            const ps4FirmwareData = {
+                labels: [
+                    wrapLabel(langData.chartLabels.webkit),
+                    wrapLabel(langData.chartLabels.poobs4),
+                    wrapLabel(langData.chartLabels.pppwn),
+                    wrapLabel(langData.chartLabels.bdj)
+                ],
+                datasets: [{
+                    label: '最低固件',
+                    data: [5.05, 9.00, 7.00, 11.02],
+                    backgroundColor: '#004FFF',
+                    borderColor: '#87F1FF',
+                    borderWidth: 1,
+                    borderSkipped: false,
+                }, {
+                    label: '最高固件',
+                    data: [7.55 - 5.05, 9.00 - 9.00, 11.00 - 7.00, 12.02 - 11.02],
+                    backgroundColor: '#87F1FF',
+                    borderColor: '#87F1FF',
+                    borderWidth: 1,
+                }]
+            };
+
+            ps4Chart = new Chart(document.getElementById('ps4FirmwareChart'), {
+                type: 'bar',
+                data: ps4FirmwareData,
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: { display: true, text: langData.chartXAxis, color: '#E0E0E0', font: { size: 14 } },
+                            ticks: { color: '#E0E0E0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            stacked: true,
+                            ticks: { color: '#E0E0E0', font: { size: 12 } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: tooltipTitleCallback,
+                                label: function(context) {
+                                    const datasetIndex = context.datasetIndex;
+                                    const dataIndex = context.dataIndex;
+                                    const data = context.chart.data.datasets;
+                                    if (datasetIndex === 0) {
+                                        const min = data[0].data[dataIndex];
+                                        const max = min + data[1].data[dataIndex];
+                                        return `${langData.chartTooltipRange}: ${min.toFixed(2)} - ${max.toFixed(2)}`;
+                                    }
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateText(lang) {
+            document.querySelectorAll('[data-lang-key]').forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang][key]) {
+                    element.innerHTML = translations[lang][key];
+                }
+            });
+            document.documentElement.lang = lang;
+        }
+
+        document.getElementById('lang-toggle').addEventListener('click', () => {
+            currentLanguage = currentLanguage === 'zh-Hant' ? 'en' : 'zh-Hant';
+            const toggleButton = document.getElementById('lang-toggle');
+            toggleButton.textContent = currentLanguage === 'zh-Hant' ? 'English' : '中文 (繁體)';
+            updateText(currentLanguage);
+            renderChart(currentLanguage);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateText(currentLanguage);
+            renderChart(currentLanguage);
+        });
+    </script>
+</body>
+</html>
