@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenPose視角影響分析圖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #0a9396, #005f73);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <button id="lang-toggle" class="fixed top-4 right-4 bg-[#005f73] text-white px-4 py-2 rounded-lg shadow-lg z-50 hover:bg-[#0a9396] transition-colors">
+        English
+    </button>
+
+    <div class="container mx-auto p-4 md:p-8">
+        
+        <header class="text-center mb-12">
+            <h1 id="main-title" class="text-4xl md:text-5xl font-bold mb-2 gradient-text"></h1>
+            <p id="subtitle" class="text-lg md:text-xl text-slate-600"></p>
+        </header>
+
+        <main class="space-y-12">
+
+            <section id="how-it-works" class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 id="how-it-works-title" class="text-2xl font-bold text-center mb-6 text-[#005f73]"></h2>
+                <p id="how-it-works-desc" class="text-center text-slate-600 max-w-3xl mx-auto mb-8"></p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl mb-2">🖼️</div>
+                        <h3 id="step1-title" class="font-bold text-[#0a9396]"></h3>
+                        <p id="step1-desc" class="text-sm text-slate-500"></p>
+                    </div>
+                    <div class="text-2xl text-slate-400">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl mb-2">📍</div>
+                        <h3 id="step2-title" class="font-bold text-[#0a9396]"></h3>
+                        <p id="step2-desc" class="text-sm text-slate-500"></p>
+                    </div>
+                    <div class="text-2xl text-slate-400">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl mb-2">🔗</div>
+                        <h3 id="step3-title" class="font-bold text-[#0a9396]"></h3>
+                        <p id="step3-desc" class="text-sm text-slate-500"></p>
+                    </div>
+                    <div class="text-2xl text-slate-400">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl mb-2">🏃</div>
+                        <h3 id="step4-title" class="font-bold text-[#0a9396]"></h3>
+                        <p id="step4-desc" class="text-sm text-slate-500"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="errors" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 id="error1-title" class="text-xl font-bold text-center mb-4 text-[#005f73]"></h3>
+                    <p id="error1-desc" class="text-slate-600 mb-4 text-center"></p>
+                    <div class="w-full h-40 bg-slate-100 rounded-lg flex items-center justify-center p-4">
+                        <div class="relative w-full h-full flex items-center justify-center">
+                            <div class="absolute w-2/3 h-1 bg-[#94d2bd] top-1/2 left-0 transform -translate-y-1/2"></div>
+                            <div class="absolute w-2/3 h-1 bg-[#ee9b00] top-1/2 left-0 origin-left transform -translate-y-1/2 rotate-[-45deg] scale-x-75"></div>
+                            <div class="absolute w-1/3 h-1 bg-slate-400 top-1/2 left-0 origin-left transform -translate-y-1/2 -rotate-45"></div>
+                            <div id="error1-label1" class="absolute text-sm text-[#005f73] top-1/2 left-0 -mt-8"></div>
+                            <div id="error1-label2" class="absolute text-sm text-[#ca6702] top-1/2 left-0 mt-6"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 id="error2-title" class="text-xl font-bold text-center mb-4 text-[#005f73]"></h3>
+                    <p id="error2-desc" class="text-slate-600 mb-4 text-center"></p>
+                    <div class="w-full h-40 bg-slate-100 rounded-lg flex items-center justify-center p-4">
+                        <div class="relative w-full h-full">
+                            <div class="absolute w-12 h-12 bg-[#94d2bd] rounded-full top-1/2 right-8 transform -translate-y-1/2"></div>
+                            <div class="absolute w-20 h-20 bg-[#ee9b00] rounded-full top-1/2 left-8 transform -translate-y-1/2"></div>
+                            <div id="error2-label1" class="absolute text-sm text-[#005f73] bottom-2 right-8"></div>
+                            <div id="error2-label2" class="absolute text-sm text-[#ca6702] bottom-2 left-8"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="data-insights" class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 id="data-title" class="text-2xl font-bold text-center mb-8 text-[#005f73]"></h2>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    <div class="lg:col-span-2">
+                        <h3 id="chart1-title" class="text-xl font-bold text-center mb-4"></h3>
+                        <p id="chart1-desc" class="text-center text-slate-600 mb-4"></p>
+                        <div class="chart-container">
+                            <canvas id="viewComparisonChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="text-center p-6 bg-slate-100 rounded-xl">
+                        <h3 id="kpi1-title" class="text-xl font-bold mb-2"></h3>
+                        <p id="kpi1-subtitle" class="text-slate-600 mb-4"></p>
+                        <p class="text-6xl font-bold text-[#ae2012]">~29°</p>
+                        <p id="kpi1-desc" class="text-slate-600 mt-2"></p>
+                    </div>
+                </div>
+                 <div class="mt-12">
+                    <h3 id="chart2-title" class="text-xl font-bold text-center mb-4"></h3>
+                    <p id="chart2-desc" class="text-center text-slate-600 mb-4"></p>
+                    <div class="chart-container h-80 md:h-96">
+                        <canvas id="jointVulnerabilityChart"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="recommendations">
+                <h2 id="recommendations-title" class="text-2xl font-bold text-center mb-8 text-[#005f73]"></h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#0a9396]">
+                        <h3 id="rec1-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec1-desc" class="text-slate-600"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#94d2bd]">
+                        <h3 id="rec2-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec2-desc" class="text-slate-600"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#e9d8a6]">
+                        <h3 id="rec3-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec3-desc" class="text-slate-600"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#ee9b00]">
+                        <h3 id="rec4-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec4-desc" class="text-slate-600"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#ca6702]">
+                        <h3 id="rec5-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec5-desc" class="text-slate-600"></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-[#bb3e03]">
+                        <h3 id="rec6-title" class="font-bold text-lg mb-2"></h3>
+                        <p id="rec6-desc" class="text-slate-600"></p>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="text-center pt-8 border-t border-slate-200">
+                <h2 id="footer-title" class="text-2xl font-bold text-center mb-6 text-[#005f73]"></h2>
+                <p id="footer-desc" class="text-slate-600 max-w-3xl mx-auto"></p>
+            </footer>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const translations = {
+                'zh-TW': {
+                    'lang-toggle': 'English',
+                    'main-title': '數位觀察者效應',
+                    'subtitle': '相機視角如何決定OpenPose運動分析的準確性',
+                    'how-it-works-title': 'OpenPose如何看見動作：由下而上的視角',
+                    'how-it-works-desc': 'OpenPose不先找人，而是先偵測影像中所有的身體關鍵點，然後像拼圖一樣將它們組合成骨架。這個高效的方法雖然快，但也使其對視角造成的遮蔽和失真極為敏感。',
+                    'step1-title': '1. 影像輸入',
+                    'step1-desc': '原始影片畫面',
+                    'step2-title': '2. 偵測關鍵點',
+                    'step2-desc': '找出所有手肘、膝蓋等',
+                    'step3-title': '3. 關聯肢段',
+                    'step3-desc': '用PAFs連接點與點',
+                    'step4-title': '4. 組成骨架',
+                    'step4-desc': '輸出最終人體姿態',
+                    'error1-title': '縮短效應 (Foreshortening)',
+                    'error1-desc': '指向或遠離相機的肢段，在2D影像中會被「壓縮」，看起來比實際短。這會直接扭曲關節角度的計算，將3D旋轉誤判為2D屈曲。',
+                    'error1-label1': '真實3D肢段',
+                    'error1-label2': '2D投影 (變短)',
+                    'error2-title': '透視失真 (Perspective Distortion)',
+                    'error2-desc': '靠近相機的物體會不成比例地放大。在深蹲時，靠近鏡頭的膝蓋可能看起來比臀部大，從而扭曲整個下肢的幾何關係。',
+                    'error2-label1': '遠端物體',
+                    'error2-label2': '近端物體(放大)',
+                    'data-title': '量化影響：數據怎麼說',
+                    'chart1-title': '不同視角的準確性比較 (ICC)',
+                    'chart1-desc': '組內相關係數(ICC)衡量一致性，越高越好。數據顯示，後視角在多種運動中表現出乎意料地穩健，可能是因為它能減少關鍵點的遮蔽。',
+                    'kpi1-title': '肩關節',
+                    'kpi1-subtitle': '持續的挑戰',
+                    'kpi1-desc': '在某些運動中，肩關節的均方根誤差(RMSE)可高達近30度，是所有關節中最不穩定的。',
+                    'chart2-title': '關節的脆弱性分析',
+                    'chart2-desc': '不同關節對視角變化的敏感度不同。肩關節因其高度自由度而最易出錯，而結構較簡單的膝關節則相對穩健。',
+                    'recommendations-title': '最佳實踐：數據採集協議檢查清單',
+                    'rec1-title': '1. 定義主要運動平面',
+                    'rec1-desc': '分析的動作是矢狀面（如行走）還是額狀面（如側平舉）？',
+                    'rec2-title': '2. 選擇最佳觀察角度',
+                    'rec2-desc': '優先選擇與運動平面垂直的視角。**後視角**通常是下肢運動的絕佳選擇。',
+                    'rec3-title': '3. 考慮相機高度與距離',
+                    'rec3-desc': '調整位置以最小化遮蔽，同時避免過高或過低角度造成的嚴重失真。',
+                    'rec4-title': '4. 注意鏡頭選擇',
+                    'rec4-desc': '近距離拍攝時避免使用廣角鏡頭，以減少透視失真。',
+                    'rec5-title': '5. 預判遮蔽問題',
+                    'rec5-desc': '確保關鍵關節在整個運動過程中都可見，特別是矢狀面視角下對側肢體的遮蔽。',
+                    'rec6-title': '6. 承認關節脆弱性',
+                    'rec6-desc': '解讀肩關節數據時要格外謹慎，其誤差率最高。',
+                    'footer-title': '未來展望：通往視角無關的分析之路',
+                    'footer-desc': '該領域的未來在於開發能從任何視角準確理解人體姿態的「視角不變」模型。這將把無標記點動捕技術從受限的實驗室工具，轉變為可在任何現實環境中使用的普適性方法。',
+                    'chart1-x-axis': '組內相關係數 (ICC)',
+                    'chart1-label': '平均一致性 (ICC)',
+                    'chart1-categories': ['矢狀面', '額狀面', '後視角', '斜向視角'],
+                    'chart2-label': '相對穩定性 (越高越穩定)',
+                    'chart2-categories': ['膝關節', '髖關節', '踝關節', '肩關節']
+                },
+                'en': {
+                    'lang-toggle': '中文',
+                    'main-title': 'The Digital Observer Effect',
+                    'subtitle': 'How Camera Perspective Dictates Accuracy in OpenPose Motion Analysis',
+                    'how-it-works-title': 'How OpenPose Sees Motion: A Bottom-Up Approach',
+                    'how-it-works-desc': 'OpenPose doesn\'t look for people first. Instead, it detects all anatomical keypoints in an image and then assembles them into skeletons. This efficient method is fast but makes it highly sensitive to occlusion and distortion caused by perspective.',
+                    'step1-title': '1. Image Input',
+                    'step1-desc': 'Raw video frame',
+                    'step2-title': '2. Detect Keypoints',
+                    'step2-desc': 'Find all elbows, knees, etc.',
+                    'step3-title': '3. Associate Limbs',
+                    'step3-desc': 'Connect dots with PAFs',
+                    'step4-title': '4. Assemble Skeletons',
+                    'step4-desc': 'Output final human poses',
+                    'error1-title': 'Foreshortening',
+                    'error1-desc': 'Limbs pointing toward or away from the camera are compressed in the 2D image, appearing shorter than they are. This directly distorts joint angle calculations, misinterpreting 3D rotation as 2D flexion.',
+                    'error1-label1': 'True 3D Limb',
+                    'error1-label2': '2D Projection (Shorter)',
+                    'error2-title': 'Perspective Distortion',
+                    'error2-desc': 'Objects closer to the camera appear disproportionately large. During a squat, a knee closer to the lens can seem larger than the hip, warping the geometry of the entire lower body.',
+                    'error2-label1': 'Distant Object',
+                    'error2-label2': 'Near Object (Larger)',
+                    'data-title': 'Quantifying the Impact: What the Data Says',
+                    'chart1-title': 'Accuracy Comparison by View (ICC)',
+                    'chart1-desc': 'The Intraclass Correlation Coefficient (ICC) measures consistency; higher is better. Data shows the posterior view is surprisingly robust for many movements, likely because it reduces keypoint occlusion.',
+                    'kpi1-title': 'The Shoulder Joint',
+                    'kpi1-subtitle': 'A Constant Challenge',
+                    'kpi1-desc': 'In some movements, the Root Mean Square Error (RMSE) for the shoulder can be nearly 30 degrees, making it the most unstable joint.',
+                    'chart2-title': 'Joint Vulnerability Analysis',
+                    'chart2-desc': 'Different joints have varying sensitivity to perspective changes. The shoulder, with its high degrees of freedom, is most prone to error, while the simpler knee joint is relatively robust.',
+                    'recommendations-title': 'Best Practices: A Data Capture Protocol Checklist',
+                    'rec1-title': '1. Define the Primary Plane of Motion',
+                    'rec1-desc': 'Is the analysis of a sagittal movement (like walking) or a frontal one (like a lateral raise)?',
+                    'rec2-title': '2. Select the Optimal Viewing Angle',
+                    'rec2-desc': 'Prioritize a view perpendicular to the plane of motion. The **posterior view** is often an excellent choice for lower-body movements.',
+                    'rec3-title': '3. Consider Camera Height & Distance',
+                    'rec3-desc': 'Adjust placement to minimize occlusion while avoiding the severe distortion from very high or low angles.',
+                    'rec4-title': '4. Be Mindful of Lens Choice',
+                    'rec4-desc': 'Avoid wide-angle lenses for close-up shots to reduce perspective distortion.',
+                    'rec5-title': '5. Anticipate Occlusion',
+                    'rec5-desc': 'Ensure key joints are visible throughout the movement, especially contralateral limbs in a sagittal view.',
+                    'rec6-title': '6. Acknowledge Joint Vulnerability',
+                    'rec6-desc': 'Interpret shoulder data with extra caution, as its error rates are consistently the highest.',
+                    'footer-title': 'The Future: Towards View-Agnostic Analysis',
+                    'footer-desc': 'The future of the field lies in developing "view-invariant" models that can accurately understand human pose from any perspective. This will transform markerless motion capture from a constrained lab tool into a ubiquitous method for use in any real-world environment.',
+                    'chart1-x-axis': 'Intraclass Correlation Coefficient (ICC)',
+                    'chart1-label': 'Average Consistency (ICC)',
+                    'chart1-categories': ['Sagittal', 'Frontal', 'Posterior', 'Oblique'],
+                    'chart2-label': 'Relative Stability (Higher is Better)',
+                    'chart2-categories': ['Knee', 'Hip', 'Ankle', 'Shoulder']
+                }
+            };
+
+            let currentLang = 'zh-TW';
+            let viewComparisonChart, jointVulnerabilityChart;
+
+            const updateText = (lang) => {
+                document.documentElement.lang = lang;
+                for (const id in translations[lang]) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.innerHTML = translations[lang][id];
+                    }
+                }
+                createCharts(lang);
+            };
+
+            const toggleLanguage = () => {
+                currentLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+                updateText(currentLang);
+            };
+
+            document.getElementById('lang-toggle').addEventListener('click', toggleLanguage);
+            
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            const palette = {
+                blue: '#0a9396',
+                teal: '#94d2bd',
+                sand: '#e9d8a6',
+                orange: '#ee9b00',
+                darkOrange: '#ca6702',
+                red: '#ae2012',
+                darkBlue: '#005f73'
+            };
+
+            const createCharts = (lang) => {
+                if (viewComparisonChart) {
+                    viewComparisonChart.destroy();
+                }
+                const ctxView = document.getElementById('viewComparisonChart').getContext('2d');
+                viewComparisonChart = new Chart(ctxView, {
+                    type: 'bar',
+                    data: {
+                        labels: translations[lang]['chart1-categories'],
+                        datasets: [{
+                            label: translations[lang]['chart1-label'],
+                            data: [0.85, 0.70, 0.92, 0.78],
+                            backgroundColor: [palette.blue, palette.teal, palette.darkBlue, palette.sand],
+                            borderColor: 'rgba(255, 255, 255, 0)',
+                            borderWidth: 1,
+                            borderRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 1.0,
+                                title: {
+                                    display: true,
+                                    text: translations[lang]['chart1-x-axis']
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+
+                if (jointVulnerabilityChart) {
+                    jointVulnerabilityChart.destroy();
+                }
+                const ctxJoint = document.getElementById('jointVulnerabilityChart').getContext('2d');
+                jointVulnerabilityChart = new Chart(ctxJoint, {
+                    type: 'radar',
+                    data: {
+                        labels: translations[lang]['chart2-categories'],
+                        datasets: [{
+                            label: translations[lang]['chart2-label'],
+                            data: [9, 7, 6, 3],
+                            backgroundColor: 'rgba(10, 147, 150, 0.2)',
+                            borderColor: palette.blue,
+                            pointBackgroundColor: palette.blue,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: palette.blue
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 10,
+                                ticks: { stepSize: 2 },
+                                pointLabels: { font: { size: 14 } }
+                            }
+                        },
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            };
+
+            updateText(currentLang);
+        });
+    </script>
+
+</body>
+</html>
