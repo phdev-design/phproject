@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vodafone 搬家總覽</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .task-item {
+            transition: all 0.3s ease;
+        }
+        .task-item.completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .task-item.completed .task-icon {
+            background-color: #28a745;
+            color: white;
+        }
+        .task-icon {
+            transition: all 0.3s ease;
+            min-width: 24px; /* Ensure consistent width */
+        }
+        .btn-call {
+            transition: all 0.2s ease;
+        }
+        .btn-call:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        
+        <!-- Language Switcher -->
+        <div class="text-right mb-4">
+            <button id="lang-switcher" onclick="toggleLanguage()" class="bg-white border border-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-100 transition">English</button>
+        </div>
+        
+        <!-- Header -->
+        <header class="text-center mb-8 fade-in">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-16 h-16 mx-auto mb-2 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/><path d="M12 6c-3.309 0-6 2.691-6 6s2.691 6 6 6c3.309 0 6-2.691 6-6s-2.691-6-6-6zm0 10c-2.206 0-4-1.794-4-4s1.794-4 4-4 4 1.794 4 4-1.794 4-4 4z"/></svg>
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900" data-lang-zh="您的 Vodafone 總覽" data-lang-en="Your Vodafone Overview">您的 Vodafone 總覽</h1>
+            <p class="text-gray-600 mt-2" data-lang-zh="目前的方案資訊與搬家待辦事項" data-lang-en="Current plan information and moving checklist">目前的方案資訊與搬家待辦事項</p>
+        </header>
+
+        <!-- Current Plans Section -->
+        <section class="mb-8 fade-in" style="animation-delay: 0.2s;">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2" data-lang-zh="您的現有方案" data-lang-en="Your Current Plans">您的現有方案</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Broadband Card -->
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 mr-3"><path d="M5 12.55a8 8 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a4 4 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg>
+                        <h3 class="text-xl font-bold text-gray-800" data-lang-zh="寬頻網路 (Broadband)" data-lang-en="Broadband">寬頻網路 (Broadband)</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong data-lang-zh="方案 ID：" data-lang-en="Plan ID:">方案 ID：</strong> VFS991845</li>
+                        <li><strong data-lang-zh="方案名稱：" data-lang-en="Plan Name:">方案名稱：</strong> Fibre 2</li>
+                        <li><strong data-lang-zh="帳單費用：" data-lang-en="Bill Amount:">帳單費用：</strong> £27.66 <span data-lang-zh="/月" data-lang-en="/month">/月</span></li>
+                        <li class="text-sm text-gray-500 pl-4" data-lang-zh="(原價 £39.66, 折扣 -£12.00)" data-lang-en="(Original Price £39.66, Discount -£12.00)">(原價 £39.66, 折扣 -£12.00)</li>
+                        <li><strong data-lang-zh="合約到期：" data-lang-en="Contract Ends:">合約到期：</strong> 2026年5月16日</li>
+                    </ul>
+                </div>
+
+                <!-- Airtime Card -->
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+                    <div class="flex items-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 mr-3"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <h3 class="text-xl font-bold text-gray-800" data-lang-zh="通話方案 (Airtime)" data-lang-en="Airtime Plan">通話方案 (Airtime)</h3>
+                    </div>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong data-lang-zh="帳單費用：" data-lang-en="Bill Amount:">帳單費用：</strong> £0.00 <span data-lang-zh="/月" data-lang-en="/month">/月</span></li>
+                        <li><strong data-lang-zh="綁定電話：" data-lang-en="Associated Number:">綁定電話：</strong> 01616069556</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Moving House Checklist -->
+        <section class="fade-in" style="animation-delay: 0.4s;">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2" data-lang-zh="搬家待辦清單" data-lang-en="Moving Checklist">搬家待辦清單</h2>
+            <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200">
+
+                <!-- Step 1: Prepare -->
+                <div class="task-item mb-6" id="step1">
+                    <div class="flex items-start cursor-pointer" onclick="toggleTask('step1')">
+                        <div class="task-icon flex-shrink-0 w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center mr-4 mt-1">1</div>
+                        <div>
+                            <h3 class="text-lg font-semibold" data-lang-zh="第一步：準備好您的資訊" data-lang-en="Step 1: Prepare Your Information">第一步：準備好您的資訊</h3>
+                            <p class="text-gray-600" data-lang-zh="在打電話前，請先備妥以下資料。" data-lang-en="Before you call, please have the following information ready.">在打電話前，請先備妥以下資料。</p>
+                            <div class="mt-4 space-y-3">
+                                <div>
+                                    <label class="font-medium text-gray-700" data-lang-zh="Vodafone 帳戶號碼 (Account number)" data-lang-en="Vodafone Account Number">Vodafone 帳戶號碼 (Account number)</label>
+                                    <div class="flex items-center mt-1">
+                                        <input type="text" value="7087387276" id="accountNumber" class="w-full p-2 border rounded-md bg-gray-100" readonly>
+                                        <button onclick="copyToClipboard(event)" class="ml-2 px-3 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition" data-lang-zh="複製" data-lang-en="Copy">複製</button>
+                                    </div>
+                                    <span id="copyFeedback" class="text-sm text-green-600 opacity-0 transition-opacity" data-lang-zh="已複製！" data-lang-en="Copied!">已複製！</span>
+                                </div>
+                                <div>
+                                    <label class="font-medium text-gray-700" data-lang-zh="您的新地址 (New address)" data-lang-en="Your New Address">您的新地址 (New address)</label>
+                                    <input type="text" id="newAddress" placeholder="例如：25, HIGHLAND ROAD, BOLTON, BL6 6LP" data-lang-placeholder-zh="例如：25, HIGHLAND ROAD, BOLTON, BL6 6LP" data-lang-placeholder-en="e.g., 25, HIGHLAND ROAD, BOLTON, BL6 6LP" class="w-full p-2 border rounded-md mt-1 focus:ring-2 focus:ring-red-500">
+                                </div>
+                                <div>
+                                    <label class="font-medium text-gray-700" data-lang-zh="您的搬家日期 (Moving date)" data-lang-en="Your Moving Date">您的搬家日期 (Moving date)</label>
+                                    <input type="date" class="w-full p-2 border rounded-md mt-1 focus:ring-2 focus:ring-red-500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Call -->
+                <div class="task-item mb-6" id="step2">
+                    <div class="flex items-start cursor-pointer" onclick="toggleTask('step2')">
+                        <div class="task-icon flex-shrink-0 w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center mr-4 mt-1">2</div>
+                        <div>
+                            <h3 class="text-lg font-semibold" data-lang-zh="第二步：致電 Vodafone 安排搬家" data-lang-en="Step 2: Call Vodafone to Arrange Your Move">第二步：致電 Vodafone 安排搬家</h3>
+                            <p class="text-gray-600" data-lang-zh="這是最重要的步驟！請告知客服您要辦理 &quot;Home Move&quot;。" data-lang-en="This is the most important step! Please inform customer service that you are arranging a &quot;Home Move&quot;.">這是最重要的步驟！請告知客服您要辦理 "Home Move"。</p>
+                            <div class="mt-4 grid sm:grid-cols-2 gap-4">
+                                <a href="tel:191" class="btn-call text-center bg-red-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-red-700">
+                                    <span class="block text-lg" data-lang-zh="撥打 191" data-lang-en="Call 191">撥打 191</span>
+                                    <span class="text-sm font-normal" data-lang-zh="(用 Vodafone 手機)" data-lang-en="(from your Vodafone mobile)">(用 Vodafone 手機)</span>
+                                </a>
+                                <a href="tel:03333040191" class="btn-call text-center bg-gray-700 text-white font-bold py-3 px-4 rounded-lg hover:bg-gray-800">
+                                    <span class="block text-lg" data-lang-zh="撥打 0333 304 0191" data-lang-en="Call 0333 304 0191">撥打 0333 304 0191</span>
+                                    <span class="text-sm font-normal" data-lang-zh="(用其他電話)" data-lang-en="(from any other phone)">(用其他電話)</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Moving Day -->
+                <div class="task-item" id="step3">
+                    <div class="flex items-start cursor-pointer" onclick="toggleTask('step3')">
+                        <div class="task-icon flex-shrink-0 w-6 h-6 rounded-full bg-gray-300 text-white flex items-center justify-center mr-4 mt-1">3</div>
+                        <div>
+                            <h3 class="text-lg font-semibold" data-lang-zh="第三步：搬家當天" data-lang-en="Step 3: On Moving Day">第三步：搬家當天</h3>
+                            <p class="text-gray-600" data-lang-zh="當天需要完成的事項。" data-lang-en="Tasks to complete on the day.">當天需要完成的事項。</p>
+                            <ul class="mt-4 space-y-2 list-disc list-inside text-gray-700">
+                                <li data-lang-zh="將您目前的路由器 (Router) 帶到新家。" data-lang-en="Bring your current router to your new home.">將您目前的路由器 (Router) 帶到新家。</li>
+                                <li data-lang-zh="在新家網路啟用日，將路由器恢復原廠設定 (Factory reset)。" data-lang-en="On your activation day, factory reset your router.">在新家網路啟用日，將路由器恢復原廠設定 (Factory reset)。</li>
+                                <li data-lang-zh="依照官方指南完成設定。" data-lang-en="Follow the official guide to get set up.">依照官方指南完成設定。</li>
+                                <li data-lang-zh="網路設定成功後，記得上網更新您的帳單地址。" data-lang-en="After setup is complete, remember to update your billing address online.">網路設定成功後，記得上網更新您的帳單地址。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const translations = {};
+        const elementsToTranslate = document.querySelectorAll('[data-lang-zh]');
+        elementsToTranslate.forEach(el => {
+            const key = el.dataset.langZh;
+            translations[key] = {
+                zh: el.dataset.langZh,
+                en: el.dataset.langEn
+            };
+        });
+
+        function switchLanguage(lang) {
+            elementsToTranslate.forEach(el => {
+                const zhText = el.dataset.langZh;
+                if (translations[zhText] && translations[zhText][lang]) {
+                    el.innerText = translations[zhText][lang];
+                }
+            });
+            
+            // Handle placeholders
+            const newAddressInput = document.getElementById('newAddress');
+            if (lang === 'en') {
+                newAddressInput.placeholder = newAddressInput.dataset.langPlaceholderEn;
+            } else {
+                newAddressInput.placeholder = newAddressInput.dataset.langPlaceholderZh;
+            }
+
+            // Update switcher button text
+            const switcher = document.getElementById('lang-switcher');
+            switcher.innerText = lang === 'en' ? '中文' : 'English';
+            
+            // Set html lang attribute
+            document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+
+            // Store preference
+            localStorage.setItem('language', lang);
+        }
+        
+        function toggleLanguage() {
+            const currentLang = localStorage.getItem('language') || 'zh';
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            switchLanguage(newLang);
+        }
+
+        // Function to toggle task completion status
+        function toggleTask(stepId) {
+            const taskElement = document.getElementById(stepId);
+            if (taskElement) {
+                taskElement.classList.toggle('completed');
+            }
+        }
+
+        // Function to copy account number to clipboard
+        function copyToClipboard(event) {
+            event.stopPropagation(); // Prevent the task from being marked as complete
+            const accountNumberInput = document.getElementById('accountNumber');
+            
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = accountNumberInput.value;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            // Show feedback message
+            const feedback = document.getElementById('copyFeedback');
+            const currentLang = localStorage.getItem('language') || 'zh';
+            feedback.innerText = feedback.dataset[currentLang === 'zh' ? 'langZh' : 'langEn'];
+            feedback.style.opacity = '1';
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+            }, 2000);
+        }
+
+        // Set initial language on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('language') || 'zh';
+            switchLanguage(savedLang);
+        });
+    </script>
+</body>
+</html>
+
