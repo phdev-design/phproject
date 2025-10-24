@@ -4,8 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>金稻 (Golden Harvest) - 中英對照餐單</title>
-    <!-- 載入 Tailwind CSS -->
+    
+    <!-- **** 修正：調換載入順序 **** -->
+    
+    <!-- 1. 先載入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. 接著才設定 Dark Mode -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    
     <!-- 載入 Inter 字體 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1171,6 +1182,7 @@
                     <span class="text-xl font-bold">總計 (Total):</span>
                     <span id="cart-total-price" class="text-2xl font-bold text-amber-600">£0.00</span>
                 </div>
+                <!-- **** MODIFIED BUTTON **** -->
                 <button id="reset-cart-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors disabled:bg-gray-400" disabled>
                     重新下訂單 (Reset Order)
                 </button>
@@ -1178,7 +1190,7 @@
         </div>
     </div>
     
-    <!-- Theme Toggle Button -->
+    <!-- **** ADDED THEME TOGGLE BUTTON **** -->
     <button id="theme-toggle-btn" class="fixed bottom-6 left-6 bg-gray-700 dark:bg-amber-600 hover:bg-gray-600 dark:hover:bg-amber-500 text-white font-bold p-4 rounded-full shadow-lg z-50 transition-all hover:scale-110">
         <!-- Moon Icon -->
         <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1208,10 +1220,10 @@
         const cartItemCount = document.getElementById('cart-item-count');
         const cartTotalPrice = document.getElementById('cart-total-price');
         const emptyCartMsg = document.getElementById('empty-cart-msg');
-        const resetCartBtn = document.getElementById('reset-cart-btn'); // <-- Changed from checkoutBtn
+        const resetCartBtn = document.getElementById('reset-cart-btn'); // <-- MODIFIED ID
         const toastNotification = document.getElementById('toast-notification');
 
-        // --- Theme Toggle Elements ---
+        // --- **** ADDED THEME TOGGLE ELEMENTS **** ---
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
         const themeIconMoon = document.getElementById('theme-icon-moon');
         const themeIconSun = document.getElementById('theme-icon-sun');
@@ -1220,7 +1232,7 @@
         let cart = {}; // e.g. { "BBQ Ribs": { price: 7.50, quantity: 2 } }
         let toastTimer;
 
-        // --- Theme Toggle Logic ---
+        // --- **** ADDED THEME TOGGLE LOGIC **** ---
         const userTheme = localStorage.getItem('theme');
         const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
@@ -1273,7 +1285,6 @@
                     quantity: 1
                 };
             }
-            // console.log(cart); // For debugging
             updateCartUI();
             showToast(`已添加: ${name.split('(')[0]}`);
         }
@@ -1316,11 +1327,11 @@
             const itemNames = Object.keys(cart);
 
             if (itemNames.length === 0) {
-            // Cart is empty
-            cartItemsList.appendChild(emptyCartMsg);
-            resetCartBtn.disabled = true; // <-- Changed from checkoutBtn
-        } else {
-            // Cart has items
+                // Cart is empty
+                cartItemsList.appendChild(emptyCartMsg);
+                resetCartBtn.disabled = true; // <-- MODIFIED ID
+            } else {
+                // Cart has items
                 itemNames.forEach(name => {
                     const item = cart[name];
                     const itemTotal = item.price * item.quantity;
@@ -1347,7 +1358,7 @@
                     `;
                     cartItemsList.appendChild(itemElement);
                 });
-                resetCartBtn.disabled = false; // <-- Changed from checkoutBtn
+                resetCartBtn.disabled = false; // <-- MODIFIED ID
             }
 
             // Update totals
@@ -1407,21 +1418,18 @@
         }
 
         /**
-         * Simulates placing an order.
+         * Resets the cart.
          */
-        function handleResetCart() { // <-- Renamed from handleCheckout
+        function handleResetCart() { // <-- MODIFIED FUNCTION
             if (Object.keys(cart).length === 0) {
                 showToast("購物車已經是空的 (Cart is already empty)");
                 return;
             }
-
-            // console.log("--- ORDER RESET ---"); // Optional: for debugging
             
             // Reset cart
             cart = {};
             updateCartUI();
-            // toggleCartModal(); // Keep modal open to show it's empty
-            showToast("訂單已重設 (Order reset)"); // <-- Changed message
+            showToast("訂單已重設 (Order reset)"); // <-- MODIFIED MESSAGE
         }
 
 
@@ -1457,15 +1465,14 @@
         // Listen for clicks inside the cart (increase, decrease, remove)
         cartItemsList.addEventListener('click', handleCartActions);
 
-    // Reset button
-    resetCartBtn.addEventListener('click', handleResetCart); // <-- Updated listener
+        // Reset button
+        resetCartBtn.addEventListener('click', handleResetCart); // <-- MODIFIED LISTENER
 
-    // --- 5. Initial UI Update ---
-    updateCartUI();
+        // --- 5. Initial UI Update ---
+        updateCartUI();
     });
     </script>
 
 </body>
 </html>
-
 
