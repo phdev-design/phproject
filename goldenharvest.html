@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-Hant" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1171,13 +1171,25 @@
                     <span class="text-xl font-bold">總計 (Total):</span>
                     <span id="cart-total-price" class="text-2xl font-bold text-amber-600">£0.00</span>
                 </div>
-                <button id="checkout-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors disabled:bg-gray-400" disabled>
-                    下訂單 (Place Order)
+                <button id="reset-cart-btn" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors disabled:bg-gray-400" disabled>
+                    重新下訂單 (Reset Order)
                 </button>
             </div>
         </div>
     </div>
     
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle-btn" class="fixed bottom-6 left-6 bg-gray-700 dark:bg-amber-600 hover:bg-gray-600 dark:hover:bg-amber-500 text-white font-bold p-4 rounded-full shadow-lg z-50 transition-all hover:scale-110">
+        <!-- Moon Icon -->
+        <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+        <!-- Sun Icon -->
+        <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+    </button>
+
     <!-- 
       =================================
       MERGED JAVASCRIPT CONTENT
@@ -1196,12 +1208,54 @@
         const cartItemCount = document.getElementById('cart-item-count');
         const cartTotalPrice = document.getElementById('cart-total-price');
         const emptyCartMsg = document.getElementById('empty-cart-msg');
-        const checkoutBtn = document.getElementById('checkout-btn');
+        const resetCartBtn = document.getElementById('reset-cart-btn'); // <-- Changed from checkoutBtn
         const toastNotification = document.getElementById('toast-notification');
+
+        // --- Theme Toggle Elements ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIconMoon = document.getElementById('theme-icon-moon');
+        const themeIconSun = document.getElementById('theme-icon-sun');
 
         // --- 2. Main State ---
         let cart = {}; // e.g. { "BBQ Ribs": { price: 7.50, quantity: 2 } }
         let toastTimer;
+
+        // --- Theme Toggle Logic ---
+        const userTheme = localStorage.getItem('theme');
+        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Function to set the theme
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                themeIconMoon.classList.add('hidden');
+                themeIconSun.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIconMoon.classList.remove('hidden');
+                themeIconSun.classList.add('hidden');
+            }
+        }
+
+        // Initial theme check on load
+        if (userTheme === 'dark' || (!userTheme && systemIsDark)) {
+            setTheme(true);
+        } else {
+            setTheme(false);
+        }
+
+        // Event listener for the toggle button
+        themeToggleBtn.addEventListener('click', () => {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            if (isCurrentlyDark) {
+                setTheme(false);
+                localStorage.setItem('theme', 'light');
+            } else {
+                setTheme(true);
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
 
         // --- 3. Core Functions ---
 
@@ -1262,11 +1316,11 @@
             const itemNames = Object.keys(cart);
 
             if (itemNames.length === 0) {
-                // Cart is empty
-                cartItemsList.appendChild(emptyCartMsg);
-                checkoutBtn.disabled = true;
-            } else {
-                // Cart has items
+            // Cart is empty
+            cartItemsList.appendChild(emptyCartMsg);
+            resetCartBtn.disabled = true; // <-- Changed from checkoutBtn
+        } else {
+            // Cart has items
                 itemNames.forEach(name => {
                     const item = cart[name];
                     const itemTotal = item.price * item.quantity;
@@ -1293,7 +1347,7 @@
                     `;
                     cartItemsList.appendChild(itemElement);
                 });
-                checkoutBtn.disabled = false;
+                resetCartBtn.disabled = false; // <-- Changed from checkoutBtn
             }
 
             // Update totals
@@ -1355,21 +1409,19 @@
         /**
          * Simulates placing an order.
          */
-        function handleCheckout() {
+        function handleResetCart() { // <-- Renamed from handleCheckout
             if (Object.keys(cart).length === 0) {
-                showToast("購物車是空的 (Cart is empty)");
+                showToast("購物車已經是空的 (Cart is already empty)");
                 return;
             }
 
-            console.log("--- NEW ORDER ---");
-            console.log(JSON.stringify(cart, null, 2));
-            console.log(`Total: £${cartTotalPrice.textContent}`);
+            // console.log("--- ORDER RESET ---"); // Optional: for debugging
             
             // Reset cart
             cart = {};
             updateCartUI();
-            toggleCartModal();
-            showToast("訂單已提交！ (Order placed!)");
+            // toggleCartModal(); // Keep modal open to show it's empty
+            showToast("訂單已重設 (Order reset)"); // <-- Changed message
         }
 
 
@@ -1405,13 +1457,15 @@
         // Listen for clicks inside the cart (increase, decrease, remove)
         cartItemsList.addEventListener('click', handleCartActions);
 
-        // Checkout button
-        checkoutBtn.addEventListener('click', handleCheckout);
+    // Reset button
+    resetCartBtn.addEventListener('click', handleResetCart); // <-- Updated listener
 
-        // --- 5. Initial UI Update ---
-        updateCartUI();
+    // --- 5. Initial UI Update ---
+    updateCartUI();
     });
     </script>
 
 </body>
 </html>
+
+
