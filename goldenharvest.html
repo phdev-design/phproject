@@ -24,6 +24,43 @@
         .dark .menu-item {
             border-bottom: 1px dashed #4b5563; /* Tailwind gray-700 */
         }
+
+        /* 新增的樣式 for Toast & Cart */
+        #toast-notification {
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            opacity: 0;
+            transform: translateY(-20px);
+            z-index: 100;
+        }
+        #toast-notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #cart-item-count {
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        #cart-item-count.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Custom scrollbar for cart list */
+        #cart-items-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        #cart-items-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #cart-items-list::-webkit-scrollbar-thumb {
+            background-color: #d1d5db; /* dark: #4b5563 */
+            border-radius: 4px;
+        }
+        .dark #cart-items-list::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -75,122 +112,135 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">開胃菜及點心 (Appetisers & Dim Sum)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <!-- 
+                      MODIFICATION: 
+                      - Added `add-to-cart-btn`, `cursor-pointer`, `hover:bg-gray-50`, `dark:hover:bg-gray-700`, `transition-colors`
+                      - Added `data-name` and `data-price` attributes to each item.
+                    -->
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="1. BBQ排骨 (Barbecued Spare Ribs)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">1. BBQ排骨 (Barbecued Spare Ribs)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="2. OK汁排骨 (Spare Ribs in OK Sauce)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">2. OK汁排骨 (Spare Ribs in OK Sauce)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="3. 京汁排骨 (Spare Ribs in Peking Sauce)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">3. 京汁排骨 (Spare Ribs in Peking Sauce)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="4. 椒鹽排骨 (Salt & Pepper Ribs) ❤" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">4. 椒鹽排骨 (Salt & Pepper Ribs) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="5. 椒鹽大蝦 (Salt & Pepper King Prawns) ❤" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">5. 椒鹽大蝦 (Salt & Pepper King Prawns) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="6. 蝦多士 (Sesame Prawn on Toast)" data-price="6.00">
                         <div>
                             <p class="font-semibold text-lg">6. 蝦多士 (Sesame Prawn on Toast)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="7. 春卷 (Spring Rolls) (6條)" data-price="3.80">
                         <div>
                             <p class="font-semibold text-lg">7. 春卷 (Spring Rolls) (6條)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="8. 素春卷 (Vegetarian Spring Rolls) (4條)" data-price="4.00">
                         <div>
                             <p class="font-semibold text-lg">8. 素春卷 (Vegetarian Spring Rolls) (4條)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="9. 炸海草 (Crispy Seaweed)" data-price="4.00">
                         <div>
                             <p class="font-semibold text-lg">9. 炸海草 (Crispy Seaweed)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="10. 雞肉咖喱角 (Chicken Samosa) (4個)" data-price="4.50">
                         <div>
                             <p class="font-semibold text-lg">10. 雞肉咖喱角 (Chicken Samosa) (4個)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="11. 椒鹽雞翼 (Salt & Pepper Chicken Wings) ❤" data-price="6.00">
                         <div>
                             <p class="font-semibold text-lg">11. 椒鹽雞翼 (Salt & Pepper Chicken Wings) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="12. 甜辣醬雞翼 (Chicken Wings in Sweet Chilli Sauce) ❤" data-price="6.00">
                         <div>
                             <p class="font-semibold text-lg">12. 甜辣醬雞翼 (Chicken Wings in Sweet Chilli Sauce) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="13. 炸雞球 (淨) (Deep Fried Chicken Balls - Plain)" data-price="6.00">
                         <div>
                             <p class="font-semibold text-lg">13. 炸雞球 (淨) (Deep Fried Chicken Balls - Plain)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="14. 椒鹽雞球 (Salt & Pepper Deep Fried Chicken Balls) ❤" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">14. 椒鹽雞球 (Salt & Pepper Deep Fried Chicken Balls) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="15. 海草拼盤 (Seaweed Special Combination)" data-price="8.00">
                         <div>
                             <p class="font-semibold text-lg">15. 海草拼盤 (Seaweed Special Combination)</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">(包括: 海草, 春卷, 蝦多士, 雞肉咖喱角 & 醬)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£8.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="16. 金稻拼盤 (Golden Special Combination)" data-price="10.00">
                         <div>
                             <p class="font-semibold text-lg">16. 金稻拼盤 (Golden Special Combination)</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">(包括: BBQ排骨, 海草, 春卷, 蝦多士, 雞肉咖喱角 & 醬)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£10.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <!-- MODIFICATION: Split item 17 into two clickable items -->
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="17. 香酥鴨 (Quarter)" data-price="9.50">
                         <div>
                             <p class="font-semibold text-lg">17. 香酥鴨 (Aromatic Crispy Duck)</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">四分之一 (Quarter) (配薄餅)</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">二分之一 (Half) (配薄餅)</p>
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-lg whitespace-nowrap">£9.50</p>
+                        </div>
+                    </div>
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="17. 香酥鴨 (Half)" data-price="18.00">
+                         <div>
+                            <p class="font-semibold text-lg">17. 香酥鴨 (Aromatic Crispy Duck)</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">二分之一 (Half) (配薄餅)</p>
+                        </div>
+                        <div class="text-right">
                             <p class="font-bold text-lg whitespace-nowrap">£18.00</p>
                         </div>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="18. 蒸燒賣 (Steamed Prawn & Meat Balls)" data-price="4.50">
                         <div>
                             <p class="font-semibold text-lg">18. 蒸燒賣 (Steamed Prawn & Meat Balls)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="19. 蒸蝦餃 (Steamed Prawn Dumplings)" data-price="4.50">
                         <div>
                             <p class="font-semibold text-lg">19. 蒸蝦餃 (Steamed Prawn Dumplings)</p>
                         </div>
@@ -203,37 +253,37 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">湯 (Soup)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="20. 雞茸粟米湯 (Chicken & Sweetcorn Soup)" data-price="3.50">
                         <div>
                             <p class="font-semibold text-lg">20. 雞茸粟米湯 (Chicken & Sweetcorn Soup)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="21. 酸辣湯 (Hot & Sour Soup) ❤" data-price="3.90">
                         <div>
                             <p class="font-semibold text-lg">21. 酸辣湯 (Hot & Sour Soup) <span class="text-red-500">❤</span></p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.90</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="22. 蘑菇雞湯 (Chicken & Mushroom Soup)" data-price="3.50">
                         <div>
                             <p class="font-semibold text-lg">22. 蘑菇雞湯 (Chicken & Mushroom Soup)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="23. 蕃茄免治牛肉湯 (Minced Beef & Tomato Soup)" data-price="3.50">
                         <div>
                             <p class="font-semibold text-lg">23. 蕃茄免治牛肉湯 (Minced Beef & Tomato Soup)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="24. 雲吞湯 (Wun Tun Soup - Clear)" data-price="4.00">
                         <div>
                             <p class="font-semibold text-lg">24. 雲吞湯 (Wun Tun Soup - Clear)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="25. 雜菜湯 (Mixed Vegetables Soup)" data-price="3.40">
                         <div>
                             <p class="font-semibold text-lg">25. 雜菜湯 (Mixed Vegetables Soup)</p>
                         </div>
@@ -246,25 +296,25 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">甜酸菜式 (Sweet & Sour Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="26. 甜酸大蝦 (Sweet & Sour King Prawns)" data-price="8.00">
                         <div>
                             <p class="font-semibold text-lg">26. 甜酸大蝦 (Sweet & Sour King Prawns)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£8.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="27. 甜酸雞 (Sweet & Sour Chicken)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">27. 甜酸雞 (Sweet & Sour Chicken)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="28. 甜酸豬 (Sweet & Sour Pork)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">28. 甜酸豬 (Sweet & Sour Pork)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="29. 甜酸雜錦 (Sweet & Sour Mixed)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">29. 甜酸雜錦 (Sweet & Sour Mixed)</p>
                         </div>
@@ -277,50 +327,50 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">咖喱菜式 (Curry Dishes) <span class="text-red-500">❤</span></h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="30. 咖喱大蝦 (King Prawns Curry)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">30. 咖喱大蝦 (King Prawns Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="31. 咖喱蝦 (Prawn Curry)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">31. 咖喱蝦 (Prawn Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="32. 招牌咖喱 (Special Curry)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">32. 招牌咖喱 (Special Curry)</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">(雜錦肉 - Mixed Meat)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="33. 咖喱雞 (Chicken Curry)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">33. 咖喱雞 (Chicken Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="34. 咖喱牛 (Beef Curry)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">34. 咖喱牛 (Beef Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="35. 咖喱豬 (Pork Curry)" data-price="7.00">
                         <div>
                             <p class="font-semibold text-lg">35. 咖喱豬 (Pork Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="36. 咖喱雜菜 (Mixed Vegetable Curry)" data-price="6.50">
                         <div>
                             <p class="font-semibold text-lg">36. 咖喱雜菜 (Mixed Vegetable Curry)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="37. 咖喱蘑菇 (Mushroom Curry)" data-price="6.50">
                         <div>
                             <p class="font-semibold text-lg">37. 咖喱蘑菇 (Mushroom Curry)</p>
                         </div>
@@ -333,31 +383,31 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">蘑菇菜式 (Mushroom Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="38. 蘑菇大蝦 (King Prawn with Mushrooms)" data-price="7.50">
                         <div><p class="font-semibold text-lg">38. 蘑菇大蝦 (King Prawn with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="39. 招牌蘑菇 (Special with Mushrooms)" data-price="7.50">
                         <div><p class="font-semibold text-lg">39. 招牌蘑菇 (Special with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="40. 蘑菇蝦 (Prawns with Mushrooms)" data-price="7.00">
                         <div><p class="font-semibold text-lg">40. 蘑菇蝦 (Prawns with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="41. 蘑菇牛 (Beef with Mushrooms)" data-price="7.00">
                         <div><p class="font-semibold text-lg">41. 蘑菇牛 (Beef with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="42. 蘑菇雞 (Chicken with Mushrooms)" data-price="7.00">
                         <div><p class="font-semibold text-lg">42. 蘑菇雞 (Chicken with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="43. 蘑菇豬 (Pork with Mushrooms)" data-price="7.00">
                         <div><p class="font-semibold text-lg">43. 蘑菇豬 (Pork with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="44. 蘑菇叉燒 (Char Siu with Mushrooms)" data-price="7.00">
                         <div><p class="font-semibold text-lg">44. 蘑菇叉燒 (Char Siu with Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -368,27 +418,27 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">沙爹菜式 (Satay Dishes) <span class="text-blue-500">#</span></h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="45. 沙爹大蝦 (King Prawns in Satay Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">45. 沙爹大蝦 (King Prawns in Satay Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="46. 招牌沙爹 (Satay Special)" data-price="7.50">
                         <div><p class="font-semibold text-lg">46. 招牌沙爹 (Satay Special)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="47. 沙爹牛 (Beef in Satay Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">47. 沙爹牛 (Beef in Satay Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="48. 沙爹雞 (Chicken in Satay Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">48. 沙爹雞 (Chicken in Satay Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="49. 沙爹豬 (Pork in Satay Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">49. 沙爹豬 (Pork in Satay Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="50. 沙爹雜菜 (Mixed Vegetables in Satay Sauce)" data-price="6.50">
                         <div><p class="font-semibold text-lg">50. 沙爹雜菜 (Mixed Vegetables in Satay Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
@@ -399,27 +449,27 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">芙蓉菜式 (Foo Yung Dishes - 蛋)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="51. 招牌芙蓉 (Special Foo Yung)" data-price="7.50">
                         <div><p class="font-semibold text-lg">51. 招牌芙蓉 (Special Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="52. 大蝦芙蓉 (King Prawns Foo Yung)" data-price="7.50">
                         <div><p class="font-semibold text-lg">52. 大蝦芙蓉 (King Prawns Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="53. 蝦仔芙蓉 (Prawns Foo Yung)" data-price="7.00">
                         <div><p class="font-semibold text-lg">53. 蝦仔芙蓉 (Prawns Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="54. 雞芙蓉 (Chicken Foo Yung)" data-price="7.00">
                         <div><p class="font-semibold text-lg">54. 雞芙蓉 (Chicken Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="55. 叉燒芙蓉 (Char Siu Foo Yung)" data-price="7.00">
                         <div><p class="font-semibold text-lg">55. 叉燒芙蓉 (Char Siu Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="56. 蘑菇芙蓉 (Mushrooms Foo Yung)" data-price="6.50">
                         <div><p class="font-semibold text-lg">56. 蘑菇芙蓉 (Mushrooms Foo Yung)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
@@ -430,19 +480,19 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">素食 (Vegetarian Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="57. 腰果雜菜 (Mixed Vegetables & Cashew Nuts) #" data-price="6.80">
                         <div><p class="font-semibold text-lg">57. 腰果雜菜 (Mixed Vegetables & Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="58. 豉汁雜菜 (Mixed Vegetables in Black Bean Sauce)" data-price="6.50">
                         <div><p class="font-semibold text-lg">58. 豉汁雜菜 (Mixed Vegetables in Black Bean Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="59. 四川雜菜 (Mixed Vegetables in Szechuan Style) ❤" data-price="6.50">
                         <div><p class="font-semibold text-lg">59. 四川雜菜 (Mixed Vegetables in Szechuan Style) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="60. 甜酸雜菜 (Mixed Vegetables with Sweet & Sour Sauce)" data-price="6.50">
                         <div><p class="font-semibold text-lg">60. 甜酸雜菜 (Mixed Vegetables with Sweet & Sour Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.50</p>
                     </div>
@@ -453,23 +503,23 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">四川菜式 (Szechuan Style Dishes) <span class="text-red-500">❤</span></h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="61. 四川大蝦 (King Prawns in Szechuan Style)" data-price="7.50">
                         <div><p class="font-semibold text-lg">61. 四川大蝦 (King Prawns in Szechuan Style)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="62. 招牌四川 (Szechuan Special)" data-price="7.50">
                         <div><p class="font-semibold text-lg">62. 招牌四川 (Szechuan Special)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="63. 四川牛 (Beef in Szechuan Style)" data-price="7.00">
                         <div><p class="font-semibold text-lg">63. 四川牛 (Beef in Szechuan Style)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="64. 四川雞 (Chicken in Szechuan Style)" data-price="7.00">
                         <div><p class="font-semibold text-lg">64. 四川雞 (Chicken in Szechuan Style)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="65. 四川豬 (Pork in Szechuan Style)" data-price="7.00">
                         <div><p class="font-semibold text-lg">65. 四川豬 (Pork in Szechuan Style)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -480,43 +530,43 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">大蝦菜式 (King Prawn Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="66. OK汁大蝦 (King Prawns in OK Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">66. OK汁大蝦 (King Prawns in OK Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="67. 豉椒大蝦 (King Prawns & Green Pepper in Black Bean Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">67. 豉椒大蝦 (King Prawns & Green Pepper in Black Bean Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="68. 蠔油大蝦 (King Prawns in Oyster Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">68. 蠔油大蝦 (King Prawns in Oyster Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="69. 腰果大蝦 (King Prawns with Cashew Nuts) #" data-price="7.80">
                         <div><p class="font-semibold text-lg">69. 腰果大蝦 (King Prawns with Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="70. 蕃茄大蝦 (King Prawns with Tomato)" data-price="7.50">
                         <div><p class="font-semibold text-lg">70. 蕃茄大蝦 (King Prawns with Tomato)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="71. 菠蘿大蝦 (King Prawns with Pineapple)" data-price="7.50">
                         <div><p class="font-semibold text-lg">71. 菠蘿大蝦 (King Prawns with Pineapple)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="72. 大蝦雜水 (King Prawns Chop Suey)" data-price="7.50">
                         <div><p class="font-semibold text-lg">72. 大蝦雜水 (King Prawns Chop Suey)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="73. 招牌雜水 (Special Chop Suey)" data-price="7.50">
                         <div><p class="font-semibold text-lg">73. 招牌雜水 (Special Chop Suey)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="74. 薑蔥大蝦 (King Prawns with Ginger & Spring Onions)" data-price="7.50">
                         <div><p class="font-semibold text-lg">74. 薑蔥大蝦 (King Prawns with Ginger & Spring Onions)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="75. 宮保大蝦 (Kung Po King Prawns) #❤" data-price="7.80">
                         <div><p class="font-semibold text-lg">75. 宮保大蝦 (Kung Po King Prawns) <span class="text-blue-500">#</span><span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.80</p>
                     </div>
@@ -527,59 +577,59 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">雞肉菜式 (Chicken Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="76. OK汁雞 (Chicken in OK Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">76. OK汁雞 (Chicken in OK Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="77. 豉椒雞 (Chicken & Green Pepper in Black Bean Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">77. 豉椒雞 (Chicken & Green Pepper in Black Bean Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="78. 蠔油雞 (Chicken in Oyster Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">78. 蠔油雞 (Chicken in Oyster Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="79. 腰果雞 (Chicken with Cashew Nuts) #" data-price="7.20">
                         <div><p class="font-semibold text-lg">79. 腰果雞 (Chicken with Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="80. 蕃茄雞 (Chicken with Tomato)" data-price="7.00">
                         <div><p class="font-semibold text-lg">80. 蕃茄雞 (Chicken with Tomato)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="81. 菠蘿雞 (Chicken with Pineapple)" data-price="7.00">
                         <div><p class="font-semibold text-lg">81. 菠蘿雞 (Chicken with Pineapple)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="82. 雞雜水 (Chicken Chop Suey)" data-price="7.00">
                         <div><p class="font-semibold text-lg">82. 雞雜水 (Chicken Chop Suey)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="83. 宮保雞 (Kung Po Chicken) #❤" data-price="7.20">
                         <div><p class="font-semibold text-lg">83. 宮保雞 (Kung Po Chicken) <span class="text-blue-500">#</span><span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="84. 黑椒雞 (Chicken in Black Pepper Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">84. 黑椒雞 (Chicken in Black Pepper Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="85. 檸檬雞 (Chicken Fillet in Lemon Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">85. 檸檬雞 (Chicken Fillet in Lemon Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="86. 橙雞 (Chicken Fillet in Orange Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">86. 橙雞 (Chicken Fillet in Orange Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="87. 粟米雞 (Chicken & Sweetcorn)" data-price="7.00">
                         <div><p class="font-semibold text-lg">87. 粟米雞 (Chicken & Sweetcorn)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="88. 甜辣雞絲 (Shredded Chicken in Sweet Chilli Sauce) ❤" data-price="7.20">
                         <div><p class="font-semibold text-lg">88. 甜辣雞絲 (Shredded Chicken in Sweet Chilli Sauce) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="89. 椒鹽雞絲 (Salt & Pepper Shredded Chilli Chicken) ❤" data-price="7.20">
                         <div><p class="font-semibold text-lg">89. 椒鹽雞絲 (Salt & Pepper Shredded Chilli Chicken) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
@@ -590,23 +640,23 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">叉燒菜式 (Char Siu Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="90. 一份叉燒 (A Portion of Char Siu)" data-price="7.20">
                         <div><p class="font-semibold text-lg">90. 一份叉燒 (A Portion of Char Siu)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="91. 腰果叉燒 (Char Siu with Cashew Nuts) #" data-price="7.20">
                         <div><p class="font-semibold text-lg">91. 腰果叉燒 (Char Siu with Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="92. 芽菜叉燒 (Char Siu with Beansprouts)" data-price="7.00">
                         <div><p class="font-semibold text-lg">92. 芽菜叉燒 (Char Siu with Beansprouts)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="93. 菠蘿叉燒 (Char Siu with Pineapple)" data-price="7.00">
                         <div><p class="font-semibold text-lg">93. 菠蘿叉燒 (Char Siu with Pineapple)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="94. 叉燒雜水 (Char Siu Chop Suey)" data-price="7.00">
                         <div><p class="font-semibold text-lg">94. 叉燒雜水 (Char Siu Chop Suey)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -617,43 +667,43 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">牛肉菜式 (Beef Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="95. OK汁牛 (Beef in OK Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">95. OK汁牛 (Beef in OK Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="96. 豉椒牛 (Beef & Green Pepper in Black Bean Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">96. 豉椒牛 (Beef & Green Pepper in Black Bean Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="97. 蠔油牛 (Beef in Oyster Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">97. 蠔油牛 (Beef in Oyster Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="98. 腰果牛 (Beef with Cashew Nuts) #" data-price="7.20">
                         <div><p class="font-semibold text-lg">98. 腰果牛 (Beef with Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="99. 蕃茄牛 (Beef with Tomato)" data-price="7.00">
                         <div><p class="font-semibold text-lg">99. 蕃茄牛 (Beef with Tomato)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="100. 菠蘿牛 (Beef with Pineapple)" data-price="7.00">
                         <div><p class="font-semibold text-lg">100. 菠蘿牛 (Beef with Pineapple)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="101. 牛雜水 (Beef Chop Suey)" data-price="7.00">
                         <div><p class="font-semibold text-lg">101. 牛雜水 (Beef Chop Suey)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="102. 薑蔥牛 (Beef with Ginger & Onions)" data-price="7.00">
                         <div><p class="font-semibold text-lg">102. 薑蔥牛 (Beef with Ginger & Onions)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="103. 甜辣牛絲 (Shredded Beef in Sweet Chilli Sauce) ❤" data-price="7.20">
                         <div><p class="font-semibold text-lg">103. 甜辣牛絲 (Shredded Beef in Sweet Chilli Sauce) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="104. 椒鹽牛絲 (Salt & Pepper Shredded Chilli Beef) ❤" data-price="7.20">
                         <div><p class="font-semibold text-lg">104. 椒鹽牛絲 (Salt & Pepper Shredded Chilli Beef) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
@@ -664,19 +714,19 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">豬肉菜式 (Pork Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="105. 豉椒豬 (Pork & Green Pepper in Black Bean Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">105. 豉椒豬 (Pork & Green Pepper in Black Bean Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="106. 腰果豬 (Pork with Cashew Nuts) #" data-price="7.20">
                         <div><p class="font-semibold text-lg">106. 腰果豬 (Pork with Cashew Nuts) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="107. 蠔油豬 (Pork in Oyster Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">107. 蠔油豬 (Pork in Oyster Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="108. 菠蘿豬 (Pork with Pineapple)" data-price="7.00">
                         <div><p class="font-semibold text-lg">108. 菠蘿豬 (Pork with Pineapple)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -687,19 +737,19 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">牛扒餐 (Steak Dishes)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="109. 沙爹牛扒 (Steak in Satay Sauce) #" data-price="9.00">
                         <div><p class="font-semibold text-lg">109. 沙爹牛扒 (Steak in Satay Sauce) <span class="text-blue-500">#</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£9.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="110. 中式牛扒 (Steak in Cantonese Style)" data-price="9.00">
                         <div><p class="font-semibold text-lg">110. 中式牛扒 (Steak in Cantonese Style)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£9.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="111. 黑椒牛扒 (Steak in Black Pepper Sauce)" data-price="9.00">
                         <div><p class="font-semibold text-lg">111. 黑椒牛扒 (Steak in Black Pepper Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£9.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="112. 薑蔥牛扒 (Steak with Ginger & Onions)" data-price="9.00">
                         <div><p class="font-semibold text-lg">112. 薑蔥牛扒 (Steak with Ginger & Onions)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£9.00</p>
                     </div>
@@ -710,27 +760,27 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">蒜辣菜式 (Garlic & Chilli Dishes) <span class="text-red-500">❤</span></h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="113. 招牌蒜辣 (Special in Garlic & Chilli Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">113. 招牌蒜辣 (Special in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="114. 蒜辣大蝦 (King Prawn in Garlic & Chilli Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">114. 蒜辣大蝦 (King Prawn in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="115. 蒜辣蝦 (Prawns in Garlic & Chilli Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">115. 蒜辣蝦 (Prawns in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="116. 蒜辣雞 (Chicken in Garlic & Chilli Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">116. 蒜辣雞 (Chicken in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="117. 蒜辣牛 (Beef in Garlic & Chilli Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">117. 蒜辣牛 (Beef in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="118. 蒜辣豬 (Pork in Garlic & Chilli Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">118. 蒜辣豬 (Pork in Garlic & Chilli Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -741,23 +791,23 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">泰式醬菜式 (Thai Sauce Dishes) <span class="text-red-500">❤</span></h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="119. 招牌泰式 (Special in Thai Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">119. 招牌泰式 (Special in Thai Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="120. 泰式大蝦 (King Prawn in Thai Sauce)" data-price="7.50">
                         <div><p class="font-semibold text-lg">120. 泰式大蝦 (King Prawn in Thai Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="121. 泰式雞 (Chicken in Thai Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">121. 泰式雞 (Chicken in Thai Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="122. 泰式牛 (Beef in Thai Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">122. 泰式牛 (Beef in Thai Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="123. 泰式豬 (Pork in Thai Sauce)" data-price="7.00">
                         <div><p class="font-semibold text-lg">123. 泰式豬 (Pork in Thai Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
@@ -769,31 +819,31 @@
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">英式餐 (English Dishes)</h2>
                 <p class="px-5 text-sm text-gray-600 dark:text-gray-400">(包括薯條及頭盤 - Including Chips & Fries)</p>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="124. 烤春雞 (Roast Spring Chicken)" data-price="7.00">
                         <div><p class="font-semibold text-lg">124. 烤春雞 (Roast Spring Chicken)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="125. 香腸餐 (Sausage Dinner)" data-price="6.00">
                         <div><p class="font-semibold text-lg">125. 香腸餐 (Sausage Dinner)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="126. 大蝦奄列 (King Prawn Omelette)" data-price="8.00">
                         <div><p class="font-semibold text-lg">126. 大蝦奄列 (King Prawn Omelette)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£8.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="127. 蝦仔奄列 (Prawn Omelette)" data-price="7.50">
                         <div><p class="font-semibold text-lg">127. 蝦仔奄列 (Prawn Omelette)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="128. 雞肉奄列 (Chicken Omelette)" data-price="7.00">
                         <div><p class="font-semibold text-lg">128. 雞肉奄列 (Chicken Omelette)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="129. 蘑菇奄列 (Mushroom Omelette)" data-price="7.00">
                         <div><p class="font-semibold text-lg">129. 蘑菇奄列 (Mushroom Omelette)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="130. 招牌奄列 (Special Omelette)" data-price="8.00">
                         <div><p class="font-semibold text-lg">130. 招牌奄列 (Special Omelette)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£8.00</p>
                     </div>
@@ -804,39 +854,39 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">炒麵 (Chow Mein)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="131. 招牌炒麵 (House Special Chow Mein)" data-price="7.80">
                         <div><p class="font-semibold text-lg">131. 招牌炒麵 (House Special Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="132. 大蝦炒麵 (King Prawn Chow Mein)" data-price="7.80">
                         <div><p class="font-semibold text-lg">132. 大蝦炒麵 (King Prawn Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="133. 雞肉炒麵 (Chicken Chow Mein)" data-price="7.50">
                         <div><p class="font-semibold text-lg">133. 雞肉炒麵 (Chicken Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="134. 牛肉炒麵 (Beef Chow Mein)" data-price="7.50">
                         <div><p class="font-semibold text-lg">134. 牛肉炒麵 (Beef Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="135. 豬肉炒麵 (Pork Chow Mein)" data-price="7.50">
                         <div><p class="font-semibold text-lg">135. 豬肉炒麵 (Pork Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="136. 叉燒炒麵 (Char Siu Chow Mein)" data-price="7.50">
                         <div><p class="font-semibold text-lg">136. 叉燒炒麵 (Char Siu Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="137. 雜菜炒麵 (Mixed Vegetable Chow Mein)" data-price="7.00">
                         <div><p class="font-semibold text-lg">137. 雜菜炒麵 (Mixed Vegetable Chow Mein)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="138. 星洲炒米 (Vermicelli in Singapore Style) ❤" data-price="7.50">
                         <div><p class="font-semibold text-lg">138. 星洲炒米 (Vermicelli in Singapore Style) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="139. 中式炒米 (Vermicelli in Chinese Style)" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">139. 中式炒米 (Vermicelli in Chinese Style)</p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">(微甜 - Slightly Sweet)</p>
@@ -850,46 +900,46 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">炒飯餐 (Complete Dishes of Fried Rice)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="140. 招牌炒飯 (House Special Fried Rice)" data-price="7.50">
                         <div><p class="font-semibold text-lg">140. 招牌炒飯 (House Special Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="141. 大蝦炒飯 (King Prawns Fried Rice)" data-price="7.50">
                         <div><p class="font-semibold text-lg">141. 大蝦炒飯 (King Prawns Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="142. 蝦仔炒飯 (Prawns Fried Rice)" data-price="6.80">
                         <div><p class="font-semibold text-lg">142. 蝦仔炒飯 (Prawns Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="143. 雞肉炒飯 (Chicken Fried Rice)" data-price="6.80">
                         <div><p class="font-semibold text-lg">143. 雞肉炒飯 (Chicken Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="144. 雞肉叉燒炒飯 (Chicken & Char Siu Fried Rice)" data-price="6.80">
                         <div><p class="font-semibold text-lg">144. 雞肉叉燒炒飯 (Chicken & Char Siu Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="145. 牛肉炒飯 (Beef Fried Rice)" data-price="6.80">
                         <div><p class="font-semibold text-lg">145. 牛肉炒飯 (Beef Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="146. 揚州炒飯 (Yung Chow Fried Rice)" data-price="6.80">
                         <div><p class="font-semibold text-lg">146. 揚州炒飯 (Yung Chow Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="147. 星洲炒飯 (Singapore Fried Rice) ❤" data-price="6.80">
                         <div>
                             <p class="font-semibold text-lg">147. 星洲炒飯 (Singapore Fried Rice) <span class="text-red-500">❤</span></p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">(微辣 - Slightly Hot & Spicy)</p>
                         </div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="148. 蘑菇炒飯 (素) (Mushroom Fried Rice - V)" data-price="6.20">
                         <div><p class="font-semibold text-lg">148. 蘑菇炒飯 (素) (Mushroom Fried Rice - V)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="149. 雜菜炒飯 (素) (Mixed Vegetable Fried Rice - V)" data-price="6.20">
                         <div><p class="font-semibold text-lg">149. 雜菜炒飯 (素) (Mixed Vegetable Fried Rice - V)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£6.20</p>
                     </div>
@@ -900,85 +950,95 @@
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <h2 class="text-2xl font-bold p-5 bg-gray-50 dark:bg-gray-700 text-amber-700 dark:text-amber-500">小食/配菜 (Extra Portions)</h2>
                 <div class="p-5 space-y-4">
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="薯條 (Chips)" data-price="2.00">
                         <div><p class="font-semibold text-lg">薯條 (Chips)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="椒鹽薯條 (Salt & Pepper Chips) ❤" data-price="4.00">
                         <div><p class="font-semibold text-lg">椒鹽薯條 (Salt & Pepper Chips) <span class="text-red-500">❤</span></p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="白飯 (Boiled Rice)" data-price="2.50">
                         <div><p class="font-semibold text-lg">白飯 (Boiled Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="蛋炒飯 (Egg Fried Rice)" data-price="2.80">
                         <div><p class="font-semibold text-lg">蛋炒飯 (Egg Fried Rice)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="軟麵 (Soft Noodles)" data-price="3.50">
                         <div><p class="font-semibold text-lg">軟麵 (Soft Noodles)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.50</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="脆麵 (Crispy Noodles)" data-price="4.00">
                         <div><p class="font-semibold text-lg">脆麵 (Crispy Noodles)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£4.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="雜菜 (Mixed Vegetables)" data-price="3.20">
                         <div><p class="font-semibold text-lg">雜菜 (Mixed Vegetables)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="芽菜 (Bean Sprouts)" data-price="3.20">
                         <div><p class="font-semibold text-lg">芽菜 (Bean Sprouts)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="蘑菇 (Mushrooms)" data-price="3.20">
                         <div><p class="font-semibold text-lg">蘑菇 (Mushrooms)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="洋蔥 (Onions)" data-price="3.20">
                         <div><p class="font-semibold text-lg">洋蔥 (Onions)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£3.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="香腸 (小) (Sausage - Small)" data-price="1.80">
                         <div><p class="font-semibold text-lg">香腸 (小) (Sausage - Small)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£1.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="香腸 (大) (Sausage - Jumbo)" data-price="2.20">
                         <div><p class="font-semibold text-lg">香腸 (大) (Sausage - Jumbo)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.20</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="蝦片 (Prawn Crackers)" data-price="2.00">
                         <div><p class="font-semibold text-lg">蝦片 (Prawn Crackers)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="甜酸醬 (Sweet & Sour Sauce)" data-price="2.00">
                         <div><p class="font-semibold text-lg">甜酸醬 (Sweet & Sour Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="咖喱汁 (Curry Sauce)" data-price="2.00">
                         <div><p class="font-semibold text-lg">咖喱汁 (Curry Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="OK汁 (OK Sauce)" data-price="2.00">
                         <div><p class="font-semibold text-lg">OK汁 (OK Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="BBQ醬 (BBQ Sauce)" data-price="2.00">
                         <div><p class="font-semibold text-lg">BBQ醬 (BBQ Sauce)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£2.00</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="燒汁 (Gravy)" data-price="1.80">
                         <div><p class="font-semibold text-lg">燒汁 (Gravy)</p></div>
                         <p class="font-bold text-lg whitespace-nowrap">£1.80</p>
                     </div>
-                    <div class="menu-item flex justify-between items-start gap-3 pb-4">
+                    <!-- MODIFICATION: Split Salt & Pepper Box into two items -->
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="椒鹽盒 (小) (Salt & Pepper Box - Small) ❤" data-price="7.50">
                         <div>
                             <p class="font-semibold text-lg">椒鹽盒 (Salt & Pepper Box) <span class="text-red-500">❤</span></p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">(小 - Small)</p>
                         </div>
                         <div class="text-right">
-                             <p class="font-bold text-lg whitespace-nowrap">£7.50 (小)</p>
-                             <p class="font-bold text-lg whitespace-nowrap">£13.00 (大)</p>
+                             <p class="font-bold text-lg whitespace-nowrap">£7.50</p>
+                        </div>
+                    </div>
+                    <div class="menu-item flex justify-between items-start gap-3 pb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors add-to-cart-btn" data-name="椒鹽盒 (大) (Salt & Pepper Box - Large) ❤" data-price="13.00">
+                        <div>
+                            <p class="font-semibold text-lg">椒鹽盒 (Salt & Pepper Box) <span class="text-red-500">❤</span></p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">(大 - Large)</p>
+                        </div>
+                        <div class="text-right">
+                             <p class="font-bold text-lg whitespace-nowrap">£13.00</p>
                         </div>
                     </div>
                 </div>
@@ -990,7 +1050,16 @@
                 <div class="p-5 space-y-6">
                     <!-- 二人套餐 -->
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <h3 class="text-xl font-bold mb-3">二人套餐 (SET MEAL FOR TWO) - <span class="text-amber-600">£28.00</span></h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-xl font-bold">二人套餐 (SET MEAL FOR TWO)</h3>
+                                <p class="text-amber-600 font-bold text-lg">£28.00</p>
+                            </div>
+                            <!-- MODIFICATION: Add-to-cart button for set meal -->
+                            <button class="add-to-cart-btn bg-amber-500 text-white rounded-lg px-4 py-2 hover:bg-amber-600 transition-colors" data-name="二人套餐 (SET MEAL FOR TWO)" data-price="28.00">
+                                添加
+                            </button>
+                        </div>
                         <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                             <li>排骨 (1-4號任選一款 - Choice of Spare Ribs No. 1-4)</li>
                             <li>春卷 (Spring Rolls)</li>
@@ -1000,11 +1069,20 @@
                             <li>甜酸雞 (Sweet & Sour Chicken)</li>
                             <li>揚州炒飯 (Yung Chow Fried Rice)</li>
                         </ul>
+                        <p class="text-sm text-gray-500 mt-2">（套餐內容固定，點擊「添加」將以此價格加入購物車）</p>
                     </div>
                     
                     <!-- 三人套餐 -->
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <h3 class="text-xl font-bold mb-3">三人套餐 (SET MEAL FOR THREE) - <span class="text-amber-600">£40.00</span></h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-xl font-bold">三人套餐 (SET MEAL FOR THREE)</h3>
+                                <p class="text-amber-600 font-bold text-lg">£40.00</p>
+                            </div>
+                            <button class="add-to-cart-btn bg-amber-500 text-white rounded-lg px-4 py-2 hover:bg-amber-600 transition-colors" data-name="三人套餐 (SET MEAL FOR THREE)" data-price="40.00">
+                                添加
+                            </button>
+                        </div>
                         <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                             <li>排骨 (1-4號任選一款 - Choice of Spare Ribs No. 1-4)</li>
                             <li>春卷 (Spring Rolls)</li>
@@ -1015,11 +1093,20 @@
                             <li>甜酸雜錦 (Sweet & Sour Mixed)</li>
                             <li>揚州炒飯 (Yung Chow Fried Rice)</li>
                         </ul>
+                         <p class="text-sm text-gray-500 mt-2">（套餐內容固定，點擊「添加」將以此價格加入購物車）</p>
                     </div>
 
                     <!-- 四人套餐 -->
                     <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <h3 class="text-xl font-bold mb-3">四人套餐 (SET MEAL FOR FOUR) - <span class="text-amber-600">£50.00</span></h3>
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h3 class="text-xl font-bold">四人套餐 (SET MEAL FOR FOUR)</h3>
+                                <p class="text-amber-600 font-bold text-lg">£50.00</p>
+                            </div>
+                            <button class="add-to-cart-btn bg-amber-500 text-white rounded-lg px-4 py-2 hover:bg-amber-600 transition-colors" data-name="四人套餐 (SET MEAL FOR FOUR)" data-price="50.00">
+                                添加
+                            </button>
+                        </div>
                         <ul class="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                             <li>排骨 (1-4號任選一款 - Choice of Spare Ribs No. 1-4)</li>
                             <li>春卷 (Spring Rolls)</li>
@@ -1031,12 +1118,300 @@
                             <li>腰果牛 (Beef with Cashew Nuts) <span class="text-blue-500">#</span></li>
                             <li>揚州炒飯 (Yung Chow Fried Rice)</li>
                         </ul>
+                         <p class="text-sm text-gray-500 mt-2">（套餐內容固定，點擊「添加」將以此價格加入購物車）</p>
                     </div>
                 </div>
             </div>
 
         </main>
     </div>
+
+    <!-- 
+      =================================
+      NEW UI ELEMENTS ADDED BELOW
+      =================================
+    -->
+
+    <!-- Toast Notification -->
+    <div id="toast-notification" class="fixed top-5 right-5 bg-green-600 text-white py-3 px-5 rounded-lg shadow-lg">
+        <!-- Message will be set by JS -->
+    </div>
+
+    <!-- Cart Toggle Button -->
+    <button id="cart-toggle-btn" class="fixed bottom-6 right-6 bg-amber-600 hover:bg-amber-700 text-white font-bold p-4 rounded-full shadow-lg z-50 transition-transform hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span id="cart-item-count" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">0</span>
+    </button>
+
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-75 z-40 hidden flex items-center justify-center p-4">
+        <!-- Modal Content -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-md m-4 flex flex-col" style="max-height: 90vh;">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-5 border-b dark:border-gray-700">
+                <h2 class="text-2xl font-bold text-amber-600">您的訂單 (Your Order)</h2>
+                <button id="close-cart-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Cart Items List -->
+            <div id="cart-items-list" class="p-5 overflow-y-auto space-y-4 flex-1">
+                <!-- JS will populate this -->
+                <p id="empty-cart-msg" class="text-gray-500 text-center py-10">您的購物車是空的 (Your cart is empty).</p>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-5 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xl font-bold">總計 (Total):</span>
+                    <span id="cart-total-price" class="text-2xl font-bold text-amber-600">£0.00</span>
+                </div>
+                <button id="checkout-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors disabled:bg-gray-400" disabled>
+                    下訂單 (Place Order)
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 
+      =================================
+      MERGED JAVASCRIPT CONTENT
+      =================================
+    -->
+    <script>
+    // This script will manage the ordering logic.
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- 1. Select DOM Elements ---
+        const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+        const cartToggleBtn = document.getElementById('cart-toggle-btn');
+        const closeCartBtn = document.getElementById('close-cart-btn');
+        const cartModal = document.getElementById('cart-modal');
+        const cartItemsList = document.getElementById('cart-items-list');
+        const cartItemCount = document.getElementById('cart-item-count');
+        const cartTotalPrice = document.getElementById('cart-total-price');
+        const emptyCartMsg = document.getElementById('empty-cart-msg');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const toastNotification = document.getElementById('toast-notification');
+
+        // --- 2. Main State ---
+        let cart = {}; // e.g. { "BBQ Ribs": { price: 7.50, quantity: 2 } }
+        let toastTimer;
+
+        // --- 3. Core Functions ---
+
+        /**
+         * Adds an item to the cart or increments its quantity.
+         */
+        function addItemToCart(name, price) {
+            if (cart[name]) {
+                // Item already in cart, increment quantity
+                cart[name].quantity++;
+            } else {
+                // New item, add to cart
+                cart[name] = {
+                    price: price,
+                    quantity: 1
+                };
+            }
+            // console.log(cart); // For debugging
+            updateCartUI();
+            showToast(`已添加: ${name.split('(')[0]}`);
+        }
+
+        /**
+         * Decrements an item's quantity or removes it from the cart.
+         */
+        function decreaseItemInCart(name) {
+            if (!cart[name]) return; // Safety check
+
+            if (cart[name].quantity > 1) {
+                // More than one, decrement quantity
+                cart[name].quantity--;
+            } else {
+                // Only one, remove item from cart
+                delete cart[name];
+            }
+            updateCartUI();
+        }
+
+        /**
+         * Completely removes an item from the cart, regardless of quantity.
+         */
+        function removeItemFromCart(name) {
+            if (cart[name]) {
+                delete cart[name];
+            }
+            updateCartUI();
+        }
+
+        /**
+         * Redraws the entire cart UI based on the current `cart` state.
+         */
+        function updateCartUI() {
+            // Clear current list (but keep the empty message template)
+            cartItemsList.innerHTML = ''; 
+
+            let totalPrice = 0;
+            let totalItems = 0;
+            const itemNames = Object.keys(cart);
+
+            if (itemNames.length === 0) {
+                // Cart is empty
+                cartItemsList.appendChild(emptyCartMsg);
+                checkoutBtn.disabled = true;
+            } else {
+                // Cart has items
+                itemNames.forEach(name => {
+                    const item = cart[name];
+                    const itemTotal = item.price * item.quantity;
+                    totalPrice += itemTotal;
+                    totalItems += item.quantity;
+
+                    // Create HTML for the cart item
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'flex justify-between items-center gap-3 py-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0';
+                    itemElement.innerHTML = `
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-sm truncate" title="${name}">${name}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">£${item.price.toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="cart-item-decrease bg-gray-200 dark:bg-gray-600 rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors" data-name="${name}">-</button>
+                            <span class="font-bold w-6 text-center">${item.quantity}</span>
+                            <button class="cart-item-increase bg-gray-200 dark:bg-gray-600 rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors" data-name="${name}">+</button>
+                        </div>
+                        <span class="font-bold text-sm w-12 text-right">£${itemTotal.toFixed(2)}</span>
+                        <button class="cart-item-remove text-red-500 hover:text-red-700 transition-colors" data-name="${name}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    `;
+                    cartItemsList.appendChild(itemElement);
+                });
+                checkoutBtn.disabled = false;
+            }
+
+            // Update totals
+            cartTotalPrice.textContent = `£${totalPrice.toFixed(2)}`;
+            cartItemCount.textContent = totalItems;
+
+            // Show/hide the red bubble on the cart icon
+            if (totalItems > 0) {
+                cartItemCount.classList.add('show');
+            } else {
+                cartItemCount.classList.remove('show');
+            }
+        }
+
+        /**
+         * Shows or hides the cart modal.
+         */
+        function toggleCartModal() {
+            cartModal.classList.toggle('hidden');
+        }
+
+        /**
+         * Shows a toast notification for a short duration.
+         */
+        function showToast(message) {
+            // Clear any existing timer
+            if (toastTimer) {
+                clearTimeout(toastTimer);
+            }
+
+            toastNotification.textContent = message;
+            toastNotification.classList.add('show');
+
+            // Hide the toast after 2 seconds
+            toastTimer = setTimeout(() => {
+                toastNotification.classList.remove('show');
+            }, 2000);
+        }
+
+        /**
+         * Handles clicks within the cart item list (event delegation).
+         */
+        function handleCartActions(event) {
+            const target = event.target.closest('button'); // Find the button that was clicked
+            if (!target) return; // Clicked on empty space
+
+            const name = target.dataset.name;
+            if (!name) return; // Button has no data-name
+
+            if (target.classList.contains('cart-item-increase')) {
+                addItemToCart(name, cart[name].price); // Price is already known
+            } else if (target.classList.contains('cart-item-decrease')) {
+                decreaseItemInCart(name);
+            } else if (target.classList.contains('cart-item-remove')) {
+                removeItemFromCart(name);
+            }
+        }
+
+        /**
+         * Simulates placing an order.
+         */
+        function handleCheckout() {
+            if (Object.keys(cart).length === 0) {
+                showToast("購物車是空的 (Cart is empty)");
+                return;
+            }
+
+            console.log("--- NEW ORDER ---");
+            console.log(JSON.stringify(cart, null, 2));
+            console.log(`Total: £${cartTotalPrice.textContent}`);
+            
+            // Reset cart
+            cart = {};
+            updateCartUI();
+            toggleCartModal();
+            showToast("訂單已提交！ (Order placed!)");
+        }
+
+
+        // --- 4. Event Listeners ---
+
+        // Add click listener to all menu items
+        addToCartButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Find the closest parent with data-name, in case they click an icon
+                const itemElement = e.target.closest('[data-name]');
+                if (!itemElement) return;
+                
+                const name = itemElement.dataset.name;
+                const price = parseFloat(itemElement.dataset.price);
+
+                if (name && !isNaN(price)) {
+                    addItemToCart(name, price);
+                }
+            });
+        });
+
+        // Open/Close cart modal
+        cartToggleBtn.addEventListener('click', toggleCartModal);
+        closeCartBtn.addEventListener('click', toggleCartModal);
+
+        // Close modal by clicking on the background
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) {
+                toggleCartModal();
+            }
+        });
+
+        // Listen for clicks inside the cart (increase, decrease, remove)
+        cartItemsList.addEventListener('click', handleCartActions);
+
+        // Checkout button
+        checkoutBtn.addEventListener('click', handleCheckout);
+
+        // --- 5. Initial UI Update ---
+        updateCartUI();
+    });
+    </script>
 
 </body>
 </html>
