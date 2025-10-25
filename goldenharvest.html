@@ -18,33 +18,34 @@
       ******************************************************************
     -->
     <script>
-        // --- 立即套用主題 (Theme) ---
-        // (此函數定義必須在 <head> 中立即執行, 不能等待 DOMContentLoaded)
-        function loadTheme() {
+
+// --- 立即套用主題 (Theme) - 優先使用 localStorage ---
+function loadTheme() {
+            let theme;
             try {
-                const theme = localStorage.getItem('theme');
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    return 'dark';
-                } else if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                    return 'light';
-                } else {
-                    // 如果沒有保存的主題，檢查系統偏好
-                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        document.documentElement.classList.add('dark');
-                        localStorage.setItem('theme', 'dark');
-                        return 'dark';
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                        localStorage.setItem('theme', 'light');
-                        return 'light';
-                    }
-                }
+                // 1. 優先檢查 localStorage 中儲存的設定
+                theme = localStorage.getItem('theme');
             } catch (e) {
                 console.error("無法讀取主題設定: ", e);
+            }
+            
+            if (theme === 'dark') {
+                // 如果儲存的是 'dark'
+                document.documentElement.classList.add('dark');
+                return 'dark';
+            } else if (theme === 'light') {
+                // 如果儲存的是 'light'
                 document.documentElement.classList.remove('dark');
                 return 'light';
+            } else {
+                // 2. 如果 localStorage 沒有設定, 才檢查系統偏好
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.classList.add('dark');
+                    return 'dark';
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    return 'light';
+                }
             }
         }
         loadTheme(); // 立即執行
@@ -80,13 +81,15 @@
     <!-- 告訴 Tailwind 我們要使用 'class' 策略來切換暗黑模式 -->
     <script>
         // 必須在 cdn.tailwindcss.com 載入前定義
-        // 修正：您必須先定義 'tailwind' 物件,
-        // 然後將您的設定放在 'config' 屬性中
-        window.tailwind = {
-          config: {
-            darkMode: 'class',
-            // 您未來的其他設定 (如 theme) 也可以放在這裡
-          }
+        // Tailwind CDN 會讀取 'tailwind.config' 這個物件
+        
+        // 修正：先建立一個空的 tailwind 物件
+        var tailwind = {}; 
+        
+        // 現在 'tailwind' 物件存在了，你可以安全地為它添加 config 屬性
+        tailwind.config = {
+          darkMode: 'class',
+          // 您未來的其他設定 (如 theme) 也可以放在這裡
         };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2095,9 +2098,84 @@ function renderCart() {
 // ===========================================
 // 7. 音樂控制 (Music Control)
 // ===========================================
+
+// YouTube API 準備就緒時的回調函數
+window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'jfKfPfyJRdk', // 默認音樂 ID (可以更換成您喜歡的音樂)
+        playerVars: {
+            autoplay: 0,
+            loop: 1,
+            playlist: 'jfKfPfyJRdk', // 循環播放需要設置 playlist
+            controls: 0,
+            showinfo: 0,
+            modestbranding: 1,
+            rel: 0,
+            fs: 0,
+            playsinline: 1
+        },
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+        }
+    });
+};
+
+function onPlayerReady(event) {
+    isPlayerReady = true;
+    console.log('YouTube 播放器已準備就緒');
+    // 設置音量為 50%
+    player.setVolume(50);
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+        player.playVideo(); // 確保循環播放
+    }
+    if (event.data === YT.PlayerState.PLAYING) {
+        isMusicPlaying = true;
+        musicToggleBtn.classList.add('music-is-playing');
+    }
+    if (event.data === YT.PlayerState.PAUSED) {
+        isMusicPlaying = false;
+        musicToggleBtn.classList.remove('music-is-playing');
+    }
+}
+
+function onPlayerError(event) {
+    console.error('YouTube 播放器錯誤:', event.data);
+    showToast('音樂載入失敗', 'Music failed to load');
+    isPlayerReady = false;
+}
+
 function toggleMusic() {
-    // 音樂控制功能 - 可以根據需要實現
-    console.log('音樂切換功能');
+    if (!isPlayerReady) {
+        console.log('播放器尚未準備就緒');
+        showToast('音樂播放器載入中...', 'Music player loading...');
+        return;
+    }
+    
+    try {
+        if (isMusicPlaying) {
+            // 停止音樂
+            player.pauseVideo();
+            isMusicPlaying = false;
+            musicToggleBtn.classList.remove('music-is-playing');
+            showToast('音樂已暫停', 'Music paused');
+        } else {
+            // 播放音樂
+            player.playVideo();
+            isMusicPlaying = true;
+            musicToggleBtn.classList.add('music-is-playing');
+            showToast('音樂播放中', 'Music playing');
+        }
+    } catch (error) {
+        console.error('音樂控制錯誤:', error);
+        showToast('音樂控制失敗', 'Music control failed');
+    }
 }
 
 // ===========================================
