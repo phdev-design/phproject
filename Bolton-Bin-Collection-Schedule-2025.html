@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolton 垃圾收集時間表</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 載入 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Noto Sans TC 作為中文字體，Inter 作為英文字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            /* 加入顏色過渡效果 */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        /* 定義垃圾桶顏色 */
+        .bin-grey { background-color: #6b7280; color: white; }
+        .bin-beige { background-color: #f5e6ca; color: #362f26; }
+        .bin-burgundy { background-color: #800020; color: white; }
+        .bin-green { background-color: #166534; color: white; }
+        
+        .bin-grey-border { border-color: #6b7280; }
+        .bin-beige-border { border-color: #d2b48c; }
+        .bin-burgundy-border { border-color: #800020; }
+        .bin-green-border { border-color: #166534; }
+        
+        /* Dark Mode Bin Overrides */
+        .dark .bin-beige {
+            background-color: #856f4d; /* 深色米色 */
+            color: #fefcf8;
+        }
+        .dark .bin-beige-border {
+            border-color: #856f4d;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 md:p-8 min-h-screen dark:bg-gray-900 dark:text-gray-200">
+    <div class="max-w-4xl mx-auto">
+        
+        <!-- Controls: Dark Mode and Language -->
+        <div class="flex justify-end mb-4 space-x-2">
+            <!-- Language Toggle Button -->
+            <button id="lang-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 w-10 text-center font-medium">
+                EN
+            </button>
+            <!-- Dark Mode Toggle Button -->
+            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
+                <!-- Moon Icon -->
+                <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <!-- Sun Icon -->
+                <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-1.636 4.364a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM4 11a1 1 0 100-2H3a1 1 0 100 2h1zM5.05 14.95a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM14.95 5.05a1 1 0 01-1.414 0l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0z"></path></svg>
+            </button>
+        </div>
+
+        <header class="text-center mb-8">
+            <h1 data-lang-key="title" class="text-3xl md:text-4xl font-bold text-gray-900 mb-2 dark:text-white">垃圾收集時間表</h1>
+            <p data-lang-key="collectionDayP" class="text-lg text-gray-600 dark:text-gray-400">地址: <span class="font-semibold text-blue-700 dark:text-blue-400">25 HIGHLAND ROAD, BL6 6LP</span></p>
+        </header>
+
+        <!-- 下一次收集 -->
+        <section id="next-collection-section" class="mb-8">
+            <h2 data-lang-key="nextCollection" class="text-2xl font-bold text-gray-800 mb-4 dark:text-gray-100">下一次收集</h2>
+            <div id="next-collection-card" class="bg-white p-6 rounded-2xl shadow-lg border-4 text-center dark:bg-gray-800">
+                <!-- 內容將由 JavaScript 動態填入 -->
+                <p data-lang-key="calculating" class="text-lg text-gray-600 dark:text-gray-400">正在計算...</p>
+            </div>
+        </section>
+
+        <!-- 放置規則 -->
+        <section class="mb-8 p-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg shadow-sm dark:bg-gray-800 dark:border-blue-400">
+            <h3 data-lang-key="rulesTitle" class="text-xl font-semibold text-blue-800 mb-3 dark:text-blue-300">放置垃圾桶的重要提醒</h3>
+            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                <li data-lang-key="rule1">請在收集日 <strong class="font-semibold">早上 7 點前</strong> 將垃圾桶放在您的物業邊緣。</li>
+                <li data-lang-key="rule2">垃圾桶蓋 <strong class="font-semibold">必須完全關閉</strong>。</li>
+                <li data-lang-key="rule3">垃圾桶旁 <strong class="font-semibold">不可放置額外的垃圾</strong>。</li>
+                <li data-lang-key="rule4">清空後，請盡快將垃圾桶移回您的物業。</li>
+            </ul>
+        </section>
+        
+        <!-- 未來收集日曆 -->
+        <section>
+            <h2 data-lang-key="calendarTitle" class="text-2xl font-bold text-gray-800 mb-4 dark:text-gray-100">2025 年收集日曆</h2>
+            <div id="calendar-view" class="bg-white p-4 md:p-6 rounded-2xl shadow-lg dark:bg-gray-800">
+                <ul id="schedule-list" class="space-y-4">
+                    <!-- 日曆將由 JavaScript 動態填入 -->
+                </ul>
+            </div>
+        </section>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm dark:text-gray-400">
+            <p data-lang-key="footerText">時間表基於 Bolton Council 網站 (25 HIGHLAND ROAD, BL6 6LP)。</p>
+            <p data-lang-key="footerCopyright">&copy; 2025 垃圾收集助手</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- 垃圾桶樣式 (非翻譯) ---
+        const binStyles = {
+            grey: {
+                className: "bin-grey",
+                borderClassName: "bin-grey-border",
+            },
+            beige: {
+                className: "bin-beige",
+                borderClassName: "bin-beige-border",
+            },
+            burgundy: {
+                className: "bin-burgundy",
+                borderClassName: "bin-burgundy-border",
+            },
+            green: {
+                className: "bin-green",
+                borderClassName: "bin-green-border",
+            }
+        };
+
+        // --- 翻譯文字 ---
+        const translations = {
+            'zh': {
+                lang: 'zh-Hant',
+                title: "Bolton 垃圾收集時間表",
+                collectionDayP: "地址: <span class=\"font-semibold text-blue-700 dark:text-blue-400\">25 HIGHLAND ROAD, BL6 6LP</span>",
+                nextCollection: "下一次收集",
+                calculating: "正在計算...",
+                rulesTitle: "放置垃圾桶的重要提醒",
+                rule1: "請在收集日 <strong class=\"font-semibold\">早上 7 點前</strong> 將垃圾桶放在您的物業邊緣。",
+                rule2: "垃圾桶蓋 <strong class=\"font-semibold\">必須完全關閉</strong>。",
+                rule3: "垃圾桶旁 <strong class=\"font-semibold\">不可放置額外的垃圾</strong>。",
+                rule4: "清空後，請盡快將垃圾桶移回您的物業。",
+                calendarTitle: "2025 年收集日曆",
+                footerText: "時間表基於 Bolton Council 網站 (25 HIGHLAND ROAD, BL6 6LP)。",
+                footerCopyright: "&copy; 2025 垃圾收集助手",
+                daysTextToday: "就是今天！",
+                daysTextTomorrow: "明天",
+                daysTextIn: "天後", // e.g., "5 天後"
+                endedTitle: "2025 年的收集已結束",
+                endedText: "請等待新的時間表。",
+                todayMarker: "今天",
+                bins: {
+                    grey: {
+                        name: "灰色垃圾桶",
+                        itemsHeader: "一般垃圾",
+                        items: "塑膠袋、尿布、紙巾和濕紙巾、薯片包裝袋、保麗龍、破碎的玻璃杯/陶瓷、寵物糞便。"
+                    },
+                    beige: {
+                        name: "米色垃圾桶",
+                        itemsHeader: "紙類和紙板",
+                        items: "報紙、雜誌、信封、影印紙、碎紙、紙板、混合紙類、食物和飲料紙盒。"
+                    },
+                    burgundy: {
+                        name: "酒紅色垃圾桶",
+                        itemsHeader: "塑膠、玻璃和罐頭",
+                        items: "塑膠罐/桶/托盤、塑膠瓶、牛奶瓶、罐頭、鋁罐、鋁箔/鋁箔盤、噴霧罐、玻璃瓶/罐。"
+                    },
+                    green: {
+                        name: "綠色垃圾桶 (和食物桶)",
+                        itemsHeader: "食物和花園垃圾",
+                        items: "所有熟食和生食（無油/液體/包裝）、茶包、果蔬皮、肉類、骨頭、樹葉、樹枝、草屑。"
+                    }
+                }
+            },
+            'en': {
+                lang: 'en-GB',
+                title: "Bolton Bin Collection Schedule",
+                collectionDayP: "Address: <span class=\"font-semibold text-blue-700 dark:text-blue-400\">25 HIGHLAND ROAD, BL6 6LP</span>",
+                nextCollection: "Next Collection",
+                calculating: "Calculating...",
+                rulesTitle: "Important Bin Rules",
+                rule1: "Please leave your bins out <strong class=\"font-semibold\">by 7am</strong> on your collection day.",
+                rule2: "The lid must be <strong class=\"font-semibold\">fully closed</strong>.",
+                rule3: "No <strong class=\"font-semibold\">excess waste</strong> beside the bin.",
+                rule4: "Once emptied, please return your bin to your property.",
+                calendarTitle: "2025 Collection Calendar",
+                footerText: "Schedule based on Bolton Council website (25 HIGHLAND ROAD, BL6 6LP).",
+                footerCopyright: "&copy; 2025 Bin Collection Helper",
+                daysTextToday: "It's Today!",
+                daysTextTomorrow: "Tomorrow",
+                daysTextIn: "days", // e.g., "In 5 days"
+                endedTitle: "2025 collections have finished",
+                endedText: "Please wait for a new schedule.",
+                todayMarker: "Today",
+                bins: {
+                    grey: {
+                        name: "Grey Bin",
+                        itemsHeader: "General Waste",
+                        items: "Plastic bags, nappies, tissues & wipes, crisp packets, polystyrene, broken drinking glasses/ceramics, pet waste."
+                    },
+                    beige: {
+                        name: "Beige Bin",
+                        itemsHeader: "Paper and Card",
+                        items: "Newspapers, magazines, envelopes, printer paper, shredded paper, cardboard, mixed paper, food & drinks cartons."
+                    },
+                    burgundy: {
+                        name: "Burgundy Bin",
+                        itemsHeader: "Plastics, Glass and Tins",
+                        items: "Plastic pots/tubs/trays, plastic bottles, milk bottles, cans & tins, foil & foil trays, aerosol cans, glass bottles & jars."
+                    },
+                    green: {
+                        name: "Green Bin (and Food Caddy)",
+                        itemsHeader: "Food and Garden Waste",
+                        items: "All cooked & uncooked food (no oils/liquids/packaging), tea bags, fruit & veg peelings, meat & bones, garden waste: leaves, twigs, cuttings, grass."
+                    }
+                }
+            }
+        };
+
+        // --- 2025 年時間表 (來自 PDF) ---
+        // 注意：JavaScript 的月份是從 0 開始的 (0 = 1月, 11 = 12月)
+        // 根據 25 HIGHLAND ROAD, BL6 6LP 的螢幕截圖更新
+        const schedule2025 = [
+            // 10月 (Oct) - 來自截圖
+            { date: new Date(2025, 9, 30), binType: 'burgundy' },
+            { date: new Date(2025, 9, 30), binType: 'green' },
+            
+            // 11月 (Nov) - 來自截圖
+            { date: new Date(2025, 10, 6), binType: 'grey' },
+            { date: new Date(2025, 10, 13), binType: 'beige' },
+            { date: new Date(2025, 10, 13), binType: 'burgundy' },
+            { date: new Date(2025, 10, 13), binType: 'green' },
+            { date: new Date(2025, 10, 20), binType: 'grey' },
+
+            // 12月 (Dec) - 來自截圖
+            { date: new Date(2025, 11, 11), binType: 'beige' }
+        ];
+
+        // --- 全局變數 ---
+        let currentLang = 'zh';
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // 為了準確比較，我們只取今天的日期，不含時間
+
+        // --- 頁面邏輯 ---
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DOM 元素 ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+            const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+            const htmlElement = document.documentElement;
+            const langToggleBtn = document.getElementById('lang-toggle');
+            const nextCollectionCard = document.getElementById('next-collection-card');
+            const scheduleList = document.getElementById('schedule-list');
+
+            // --- Dark Mode Logic ---
+// ... existing code ... (enableDarkMode function)
+// ... existing code ... (enableLightMode function)
+            // 頁面加載時，根據 localStorage 或系統偏好設置主題
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+// ... existing code ... (enableDarkMode call)
+            } else {
+// ... existing code ... (enableLightMode call)
+            }
+            // 按鈕點擊事件
+            themeToggleBtn.addEventListener('click', () => {
+// ... existing code ... (theme toggle logic)
+            });
+
+            // --- Language Toggle Logic ---
+
+            // 格式化日期 (例如: "2025年10月28日 (星期二)")
+            const formatDate = (date, lang) => {
+                const locale = translations[lang].lang;
+                return date.toLocaleDateString(locale, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long'
+                });
+            };
+
+            // 重新渲染動態內容 (卡片和列表)
+            function renderSchedule(lang) {
+                const t = translations[lang];
+                const upcomingCollections = schedule2025.filter(collection => collection.date >= today);
+
+                // --- 1. 更新下一次收集卡片 ---
+                if (upcomingCollections.length > 0) {
+                    const nextCollection = upcomingCollections[0];
+                    const bin = binStyles[nextCollection.binType]; // 獲取樣式
+                    const binText = t.bins[nextCollection.binType]; // 獲取文字
+                    
+                    // 計算還有幾天
+                    const diffTime = nextCollection.date.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    let daysText = "";
+
+                    if (diffDays === 0) {
+                        daysText = `<span class="font-bold text-red-600 dark:text-red-400">${t.daysTextToday}</span>`;
+                    } else if (diffDays === 1) {
+                        daysText = `<span class="font-semibold text-blue-600 dark:text-blue-400">${t.daysTextTomorrow}</span>`;
+                    } else {
+                        if (lang === 'zh') {
+                            daysText = `<span class="font-semibold text-blue-600 dark:text-blue-400">${diffDays} ${t.daysTextIn}</span>`;
+                        } else {
+                            daysText = `<span class="font-semibold text-blue-600 dark:text-blue-400">In ${diffDays} ${t.daysTextIn}</span>`;
+                        }
+                    }
+
+                    nextCollectionCard.className = `p-6 rounded-2xl shadow-lg border-4 ${bin.borderClassName}`;
+                    nextCollectionCard.innerHTML = `
+                        <p class="text-xl text-gray-700 dark:text-gray-300 mb-2">${daysText}</p>
+                        <h3 class="text-3xl font-bold mb-3 dark:text-white">${formatDate(nextCollection.date, lang)}</h3>
+                        <div class="inline-flex items-center justify-center px-6 py-2 rounded-full ${bin.className} text-xl font-semibold mb-4">
+                            ${binText.name}
+                        </div>
+                        <p class="text-lg text-gray-700 dark:text-gray-300 font-semibold">${binText.itemsHeader}</p>
+                        <p class="text-gray-600 dark:text-gray-400">${binText.items}</p>
+                    `;
+                } else {
+                    nextCollectionCard.className = `p-6 rounded-2xl shadow-lg border-4 border-gray-300 dark:border-gray-600`;
+                    nextCollectionCard.innerHTML = `
+                        <h3 class="text-2xl font-bold text-gray-700 dark:text-gray-200">${t.endedTitle}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mt-2">${t.endedText}</p>
+                    `;
+                }
+
+                // --- 2. 填充完整的日曆列表 ---
+                if (schedule2025.length > 0) {
+                    scheduleList.innerHTML = schedule2025.map(collection => {
+                        const bin = binStyles[collection.binType]; // 獲取樣式
+                        const binText = t.bins[collection.binType]; // 獲取文字
+                        const isPast = collection.date < today;
+                        const isToday = collection.date.getTime() === today.getTime();
+
+                        let dateClass = "font-semibold text-gray-800 dark:text-gray-100";
+                        let itemClass = "opacity-100";
+                        let todayMarker = "";
+
+                        if (isPast) {
+                            dateClass = "font-normal text-gray-400 dark:text-gray-500 line-through";
+                            itemClass = "opacity-50 dark:opacity-40";
+                        } else if (isToday) {
+                            dateClass = "font-bold text-red-600 dark:text-red-400";
+                            todayMarker = `<span class="ml-2 px-3 py-1 bg-red-100 text-red-700 text-sm font-bold rounded-full dark:bg-red-900 dark:text-red-300">${t.todayMarker}</span>`;
+                        }
+
+                        return `
+                            <li class="p-4 border-b border-gray-200 last:border-b-0 ${itemClass} flex flex-col md:flex-row md:items-center dark:border-gray-700">
+                                <div class="w-full md:w-2/5 mb-2 md:mb-0">
+                                    <p class="${dateClass} text-lg">${formatDate(collection.date, lang)} ${todayMarker}</p>
+                                </div>
+                                <div class="w-full md:w-3/5">
+                                    <div class="inline-flex items-center px-4 py-1 ${bin.className} text-md font-medium rounded-full">
+                                        ${binText.name}
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1 pl-1">${binText.items}</p>
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    scheduleList.innerHTML = `<p class="text-gray-600 dark:text-gray-400">未找到時間表資料。</p>`;
+                }
+            }
+
+            // 更新靜態 HTML 內容
+            function updateStaticText(lang) {
+                const t = translations[lang];
+                currentLang = lang;
+                localStorage.setItem('language', lang);
+                htmlElement.lang = t.lang;
+                document.title = t.title;
+
+                // 更新按鈕文字
+                langToggleBtn.textContent = lang === 'zh' ? 'EN' : '中';
+                
+                // 更新所有帶 data-lang-key 的元素
+                document.querySelectorAll('[data-lang-key]').forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (t[key]) {
+                        el.innerHTML = t[key];
+                    }
+                });
+            }
+
+            // --- 初始化 ---
+            function initializeApp() {
+                const savedLang = localStorage.getItem('language') || 'zh';
+                updateStaticText(savedLang);
+                renderSchedule(savedLang);
+            }
+
+            // 語言切換按鈕事件
+            langToggleBtn.addEventListener('click', () => {
+                const newLang = currentLang === 'zh' ? 'en' : 'zh';
+                updateStaticText(newLang);
+                renderSchedule(newLang);
+            });
+
+            // 啟動應用
+            initializeApp();
+            
+        });
+    </script>
+</body>
+</html>
+
+
