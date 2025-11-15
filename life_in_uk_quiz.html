@@ -185,6 +185,11 @@
                     <span id="percentage-label">得分率</span>: 0%
                 </p>
                 
+                <!-- [新] 錯題重溫按鈕 -->
+                <button id="btn-review-incorrect" onclick="startIncorrectReview()" class="hidden w-full max-w-xs mx-auto bg-white hover:bg-amber-50 border-2 border-black text-black font-bold py-3 px-4 transition-all duration-200 mb-4 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                    重溫錯題
+                </button>
+                
                 <button id="btn-restart" onclick="restartQuiz()" class="w-full max-w-xs mx-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 transition-all duration-200 border-2 border-black dark:border-green-400 font-retro-title">
                     返回主選單
                 </button>
@@ -220,6 +225,7 @@
                 resultsScore: "You answered <strong class='text-green-700 dark:text-green-400'>{score} / {total}</strong> questions correctly.", // [更新] 顏色
                 percentageLabel: "Score",
                 btnRestart: "Back to Menu",
+                btnReview: "Review Incorrect" // [新] 錯題重溫
             },
             zh: {
                 headerTitle: "Life in the UK 互動溫習",
@@ -244,6 +250,7 @@
                 resultsScore: "您答對了 <strong class='text-green-700 dark:text-green-400'>{score} / {total}</strong> 題。", // [更新] 顏色
                 percentageLabel: "得分率",
                 btnRestart: "返回主選單",
+                btnReview: "重溫錯題" // [新] 錯題重溫
             }
         };
 
@@ -731,7 +738,7 @@
                 },
                 zh: {
                     question: "聖喬治日 (St George's day)，英格蘭的守護聖徒日，是在哪一天慶祝？",
-                    options: ['3月1日', '3月17日', '4月23日', '11月30日']
+                    options: ['3月1D', '3月17日', '4月23日', '11月30日']
                 },
                 correct: 2
             },
@@ -889,7 +896,7 @@
                 },
                 zh: {
                     question: "誰是世界上第一位在 4 分鐘內跑完 1 英里的人？",
-                    options: ['Sir Chris Hoy', 'Sir Roger Bannister', 'David Weir', 'Mo Farah']
+                    options: ['Sir Chris Hoy', 'Sir Roger BannisDter', 'David Weir', 'Mo Farah']
                 },
                 correct: 1
             },
@@ -1086,12 +1093,16 @@
         const themeIconSun = document.getElementById('theme-icon-sun');
         const htmlEl = document.documentElement;
 
+        // [新] 錯題重溫相關
+        const btnReviewIncorrect = document.getElementById('btn-review-incorrect');
+
 
         // --- 測驗狀態變數 ---
         let currentQuestionIndex = 0;
         let score = 0;
         let filteredQuestions = [];
         let questionAnswered = false;
+        let incorrectQuestions = []; // [新] 儲存錯題
 
         /**
          * [新] 切換深色/淺色模式
@@ -1148,6 +1159,7 @@
             resultsTitle.textContent = t.resultsTitle;
             percentageLabel.textContent = t.percentageLabel;
             btnRestart.textContent = t.btnRestart;
+            btnReviewIncorrect.textContent = t.btnReview; // [新]
 
             // 如果測驗正在進行，重新顯示當前問題以更新語言
             if (!quizScreen.classList.contains('hidden')) {
@@ -1198,6 +1210,11 @@
                 const percentage = Math.round((score / filteredQuestions.length) * 100);
                 finalScoreEl.innerHTML = t.resultsScore.replace('{score}', score).replace('{total}', filteredQuestions.length);
                 finalPercentageEl.textContent = `${t.percentageLabel}: ${percentage}%`;
+                
+                // [新] 更新錯題重溫按鈕文字
+                if (incorrectQuestions.length > 0) {
+                     btnReviewIncorrect.textContent = `${t.btnReview} (${incorrectQuestions.length})`;
+                }
             }
         }
 
@@ -1205,7 +1222,8 @@
          * 啟動測驗
          */
         function startQuiz(topic) {
-            // [FIX] 恢復 startQuiz 的完整功能
+            incorrectQuestions = []; // [新] 每次開始新測驗時重置錯題
+            
             if (topic === 'all') {
                 filteredQuestions = [...allQuizData];
             } else {
@@ -1280,50 +1298,56 @@
             const t = translations[currentLang];
 
             if (selectedIndex === correctIndex) {
-                // Dá duìle
+                // 答對了
                 score++;
                 selectedButton.classList.add('correct-answer');
-                feedbackTextEl.textContent = t.feedbackCorrect; // Fānyì
+                feedbackTextEl.textContent = t.feedbackCorrect; // 翻譯
                 feedbackMessageEl.classList.remove('text-red-500');
                 feedbackMessageEl.classList.add('text-green-500');
                 correctIcon.style.display = 'inline-block';
             } else {
-                // Dá cuòle
+                // 答錯了
                 selectedButton.classList.add('wrong-answer');
-                allOptionButtons[correctIndex].classList.add('correct-answer'); // Xiǎnshì zhèngquè dá'àn
-                feedbackTextEl.textContent = t.feedbackWrong; // Fānyì
+                allOptionButtons[correctIndex].classList.add('correct-answer'); // 顯示正確答案
+                feedbackTextEl.textContent = t.feedbackWrong; // 翻譯
                 feedbackMessageEl.classList.remove('text-green-500');
                 feedbackMessageEl.classList.add('text-red-500');
                 wrongIcon.style.display = 'inline-block';
+                
+                // [新] 將錯題加入列表
+                const currentQuestionData = filteredQuestions[currentQuestionIndex];
+                if (!incorrectQuestions.includes(currentQuestionData)) {
+                    incorrectQuestions.push(currentQuestionData);
+                }
             }
 
-            // Gēngxīn défēn xiǎnshì
-            currentScoreEl.textContent = `${t.scoreLabel}: ${score}`; // Fānyì
+            // 更新得分顯示
+            currentScoreEl.textContent = `${t.scoreLabel}: ${score}`; // 翻譯
             nextQuestionBtn.classList.remove('hidden');
             
             if (currentQuestionIndex === filteredQuestions.length - 1) {
-                nextQuestionBtn.textContent = t.btnResults; // Fānyì
+                nextQuestionBtn.textContent = t.btnResults; // 翻譯
             } else {
-                nextQuestionBtn.textContent = t.btnNext; // Fānyì
+                nextQuestionBtn.textContent = t.btnNext; // 翻譯
             }
         }
 
         /**
-         * Chǔlǐ diǎnjī `xià yī tí` huò `chákàn jiéguǒ`
+         * 處理點擊 `下一題` 或 `查看結果`
          */
         function handleNextQuestion() {
             currentQuestionIndex++;
             if (currentQuestionIndex < filteredQuestions.length) {
                 showQuestion();
             } else {
-                // Gēngxīn jìndù tiáo zhì 100%
+                // 更新進度條至 100%
                 progressBarEl.style.width = `100%`;
                 showResults();
             }
         }
 
         /**
-         * Xiǎnshì zuìzhōng jiéguǒ
+         * 顯示最終結果
          */
         function showResults() {
             quizScreen.classList.add('hidden');
@@ -1331,22 +1355,53 @@
             const t = translations[currentLang];
 
             const percentage = Math.round((score / filteredQuestions.length) * 100);
-            finalScoreEl.innerHTML = t.resultsScore.replace('{score}', score).replace('{total}', filteredQuestions.length); // Fānyì
-            finalPercentageEl.textContent = `${t.percentageLabel}: ${percentage}%`; // Fānyì
+            finalScoreEl.innerHTML = t.resultsScore.replace('{score}', score).replace('{total}', filteredQuestions.length); // 翻譯
+            finalPercentageEl.textContent = `${t.percentageLabel}: ${percentage}%`; // 翻譯
+            
+            // [新] 根據是否有錯題來顯示/隱藏重溫按鈕
+            if (incorrectQuestions.length > 0) {
+                btnReviewIncorrect.classList.remove('hidden');
+                btnReviewIncorrect.textContent = `${t.btnReview} (${incorrectQuestions.length})`; // 顯示錯題數量
+            } else {
+                btnReviewIncorrect.classList.add('hidden');
+            }
         }
 
         /**
-         * Chóngxīn kāishǐ cèyàn (fǎnhuí zhǔ xuǎndān)
+         * [新] 開始錯題重溫
+         */
+        function startIncorrectReview() {
+            if (incorrectQuestions.length === 0) return; // 安全檢查
+
+            filteredQuestions = [...incorrectQuestions]; // 將測驗問題設為錯題
+            incorrectQuestions = []; // 重置錯題列表，以便在重溫時再次記錄
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            questionAnswered = false;
+
+            resultsScreen.classList.add('hidden');
+            btnReviewIncorrect.classList.add('hidden'); // 隱藏按鈕
+            quizScreen.classList.remove('hidden');
+
+            showQuestion();
+        }
+
+        /**
+         * 重新開始測驗 (返回主選單)
          */
         function restartQuiz() {
+            incorrectQuestions = []; // [新] 重置錯題
+            btnReviewIncorrect.classList.add('hidden'); // [新] 隱藏錯題按鈕
+            
             resultsScreen.classList.add('hidden');
             quizScreen.classList.add('hidden');
             topicSelectionScreen.classList.remove('hidden');
-            // Chóng shè jìndù tiáo
+            // 重設進度條
             progressBarEl.style.width = '0%';
         }
 
-        // --- [Xīn] Lìjí zhíxíng de chéngshì mǎ (jiǎnchá zhǔtí) ---
+        // --- [新] 立即執行的程式碼 (檢查主題) ---
         (function() {
             if (localStorage.getItem('theme') === 'dark' || 
                 (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
