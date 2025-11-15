@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"> <!-- JS 會在此處添加 'dark' class -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life in the UK 互動溫習</title>
+    <!-- 載入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- [新] 載入復古字型 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        /* [新] 定義復古字型 */
+        .font-retro-title {
+            font-family: 'Silkscreen', sans-serif;
+        }
+        .font-retro-body {
+            font-family: 'VT323', monospace;
+            font-size: 20px; /* VT323 字型較小，需要放大 */
+        }
+        
+        /* 自訂字體 */
+        body {
+            /* (原 'Inter' 字型已被 .font-retro-body 取代) */
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+        /* 禁用按鈕的預設外觀 */
+        button, input[type="button"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        /* 正確答案的樣式 */
+        .correct-answer {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        /* 錯誤答案的樣式 */
+        .wrong-answer {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        /* 禁用點擊後的選項 */
+        .options-disabled .option-btn {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        /* 隱藏/顯示 SVG 圖示 */
+        .feedback-icon {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-black min-h-screen flex items-center justify-center p-4 dark:bg-black dark:text-green-400 font-retro-body">
+
+    <!-- 主卡片容器 -->
+    <div class="bg-white w-full max-w-2xl border-4 border-black dark:bg-black dark:border-green-400">
+        
+        <!-- 標題欄 -->
+        <header class="p-6 bg-green-700 text-white relative border-b-4 border-black dark:bg-black dark:border-b-4 dark:border-green-400">
+            <h1 id="header-title" class="text-2xl md:text-3xl font-bold text-center font-retro-title">Life in the UK 互動溫習</h1>
+            
+            <!-- [新] 主題切換按鈕 -->
+            <button id="theme-toggle-btn" onclick="toggleTheme()" class="absolute top-4 left-4 text-xs bg-white/20 hover:bg-white/30 text-white font-semibold p-2 transition-all dark:bg-green-400/20 dark:hover:bg-green-400/30 dark:text-green-400 border-2 border-black dark:border-green-400">
+                <!-- 月亮圖示 (預設顯示) -->
+                <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+                <!-- 太陽圖示 (預設隱藏) -->
+                <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+            </button>
+            
+            <button id="lang-toggle-btn" onclick="toggleLanguage()" class="absolute top-4 right-4 text-xs bg-white/20 hover:bg-white/30 text-white font-semibold py-1 px-2 transition-all dark:bg-green-400/20 dark:hover:bg-green-400/30 dark:text-green-400 border-2 border-black dark:border-green-400">
+                Switch to English
+            </button>
+        </header>
+
+        <!-- 主內容區域 -->
+        <main class="p-6 md:p-8">
+
+            <!-- 1. 主題選擇畫面 -->
+            <div id="topic-selection-screen">
+                <h2 id="topic-title" class="text-xl font-semibold mb-6 text-center dark:text-green-400 font-retro-title">請選擇一個溫習主題：</h2>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- 主按鈕 -->
+                    <button id="btn-all" onclick="startQuiz('all')" class="topic-btn flex items-center justify-center bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 transition-all duration-200 border-2 border-black dark:border-green-400 font-retro-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0l3 3m-3-3l-3 3" /></svg>
+                        <span id="btn-all-text">所有問題</span>
+                    </button>
+                    <!-- 其他主題按鈕 -->
+                    <button id="btn-age" onclick="startQuiz('age')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        年齡篇
+                    </button>
+                    <button id="btn-currency" onclick="startQuiz('currency')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        貨幣篇
+                    </button>
+                    <button id="btn-literature" onclick="startQuiz('literature')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        文學篇
+                    </button>
+                    <button id="btn-festivals" onclick="startQuiz('festivals')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        節日篇
+                    </button>
+                    <button id="btn-geography" onclick="startQuiz('geography')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        地理篇
+                    </button>
+                    <button id="btn-science" onclick="startQuiz('science')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        科學與發明
+                    </button>
+                    <button id="btn-sports" onclick="startQuiz('sports')" class="topic-btn bg-white hover:bg-amber-50 border-2 border-black text-black font-semibold py-3 px-4 transition-all duration-200 dark:bg-black dark:text-green-400 dark:border-green-400 dark:hover:bg-green-900/50 font-retro-title">
+                        體育篇
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. 測驗畫面 (預設隱藏) -->
+            <div id="quiz-screen" class="hidden">
+                <!-- 頂部控制項：返回 + 得分 -->
+                <div class="flex justify-between items-center mb-2">
+                    <button id="btn-back" onclick="restartQuiz()" class="text-sm text-green-700 hover:text-black font-semibold flex items-center dark:text-green-400 dark:hover:text-green-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        返回
+                    </button>
+                    <span id="current-score" class="text-sm font-semibold text-green-700 dark:text-green-400"><span id="score-label">得分</span>: 0</span>
+                </div>
+                
+                <!-- 進度條 -->
+                <div class="w-full bg-gray-300 h-4 mb-4 border-2 border-black dark:bg-black dark:border-green-400">
+                    <div id="progress-bar" class="bg-green-600 h-full transition-all duration-300 dark:bg-green-400" style="width: 0%"></div>
+                </div>
+                
+                <!-- 問題編號 -->
+                <span id="question-number" class="text-sm font-semibold text-gray-600 mb-4 block dark:text-gray-400"><span id="question-label">問題</span> 1 / 10</span>
+                
+                <!-- 問題 -->
+                <h2 id="question-text" class="text-xl font-semibold mb-6 min-h-[6rem] flex items-center dark:text-white font-retro-title">
+                    問題文字會顯示在這裡...
+                </h2>
+
+                <!-- 選項 -->
+                <div id="options-container" class="space-y-3">
+                    <!-- 選項按鈕會動態生成於此 -->
+                </div>
+
+                <!-- 答題回饋 -->
+                <div id="feedback-message" class="mt-6 text-lg font-bold text-center min-h-[2rem] flex items-center justify-center">
+                    <!-- 正確圖示 -->
+                    <svg id="correct-icon" xmlns="http://www.w3.org/2000/svg" class="feedback-icon h-6 w-6 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <!-- 錯誤圖示 -->
+                    <svg id="wrong-icon" xmlns="http://www.w3.org/2000/svg" class="feedback-icon h-6 w-6 mr-2 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span id="feedback-text"></span>
+                </div>
+
+                <!-- 下一題按鈕 (預設隱藏) -->
+                <button id="next-question-btn" onclick="handleNextQuestion()" class="hidden w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 transition-all duration-200 mt-6 border-2 border-black dark:border-green-400 font-retro-title">
+                    下一題
+                </button>
+            </div>
+
+            <!-- 3. 結果畫面 (預設隱藏) -->
+            <div id="results-screen" class="hidden text-center">
+                <!-- 結果圖示 -->
+                <div class="w-24 h-24 bg-green-100 text-green-600 border-4 border-black flex items-center justify-center mx-auto mb-6 dark:bg-green-900/50 dark:text-green-400 dark:border-green-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                
+                <h2 id="results-title" class="text-2xl font-bold mb-4 dark:text-white font-retro-title">測驗完成！</h2>
+                <p id="final-score" class="text-xl text-gray-700 mb-2 dark:text-gray-300">
+                    您答對了 X / Y 題。
+                </p>
+                <p id="final-percentage" class="text-3xl font-bold text-green-700 mb-8 dark:text-green-400">
+                    <span id="percentage-label">得分率</span>: 0%
+                </p>
+                
+                <button id="btn-restart" onclick="restartQuiz()" class="w-full max-w-xs mx-auto bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 transition-all duration-200 border-2 border-black dark:border-green-400 font-retro-title">
+                    返回主選單
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- 中英翻譯 ---
+        let currentLang = 'zh';
+        const translations = {
+            en: {
+                headerTitle: "Life in the UK Interactive Quiz",
+                langToggle: "切換到中文",
+                topicTitle: "Please select a topic to review:",
+                btnAll: "All Questions",
+                btnAge: "Age",
+                btnCurrency: "Currency",
+                btnLiterature: "Literature",
+                btnFestivals: "Festivals",
+                btnGeography: "Geography",
+                btnScience: "Science & Inventions",
+                btnSports: "Sports",
+                btnBack: "Back",
+                scoreLabel: "Score",
+                questionLabel: "Question",
+                feedbackCorrect: "Correct!",
+                feedbackWrong: "Incorrect!",
+                btnNext: "Next Question",
+                btnResults: "View Results",
+                resultsTitle: "Quiz Complete!",
+                resultsScore: "You answered <strong class='text-blue-600'>{score} / {total}</strong> questions correctly.",
+                percentageLabel: "Score",
+                btnRestart: "Back to Menu",
+            },
+            zh: {
+                headerTitle: "Life in the UK 互動溫習",
+                langToggle: "Switch to English",
+                topicTitle: "請選擇一個溫習主題：",
+                btnAll: "所有問題",
+                btnAge: "年齡篇",
+                btnCurrency: "貨幣篇",
+                btnLiterature: "文學篇",
+                btnFestivals: "節日篇",
+                btnGeography: "地理篇",
+                btnScience: "科學與發明",
+                btnSports: "體育篇",
+                btnBack: "返回",
+                scoreLabel: "得分",
+                questionLabel: "問題",
+                feedbackCorrect: "正確！",
+                feedbackWrong: "錯誤！",
+                btnNext: "下一題",
+                btnResults: "查看結果",
+                resultsTitle: "測驗完成！",
+                resultsScore: "您答對了 <strong class='text-blue-600'>{score} / {total}</strong> 題。",
+                percentageLabel: "得分率",
+                btnRestart: "返回主選單",
+            }
+        };
+
+        // --- 測驗資料庫 (已重構) ---
+        const allQuizData = [
+            // 年齡篇
+            {
+                topic: 'age',
+                en: {
+                    question: "What is the minimum age required to serve on a jury?",
+                    options: ['16', '18', '21', '25']
+                },
+                zh: {
+                    question: "擔任陪審團 (Jury) 的最低年齡要求是什麼？",
+                    options: ['16', '18', '21', '25']
+                },
+                correct: 1
+            },
+            {
+                topic: 'age',
+                en: {
+                    question: "How old do citizens have to be to stand for public office?",
+                    options: ['18', '21', '16', '25']
+                },
+                zh: {
+                    question: "公民必須年滿多少歲才能出選公職 (stand for public office)？",
+                    options: ['18', '21', '16', '25']
+                },
+                correct: 0
+            },
+            {
+                topic: 'age',
+                en: {
+                    question: "How old do you have to be to buy alcohol in the UK?",
+                    options: ['17', '18', '19', '20']
+                },
+                zh: {
+                    question: "在英國購買酒精 (alcohol) 的最低年齡是多少？",
+                    options: ['17', '18', '19', '20']
+                },
+                correct: 1
+            },
+            {
+                topic: 'age',
+                en: {
+                    question: "What is the minimum age required to drive a motorcycle?",
+                    options: ['16 years old', '17 years old', '18 years old', '21 years old']
+                },
+                zh: {
+                    question: "駕駛電單車 (motorcycle) 的最低年齡要求是什麼？",
+                    options: ['16 歲', '17 歲', '18 歲', '21 歲']
+                },
+                correct: 1
+            },
+            {
+                topic: 'age',
+                en: {
+                    question: "How old do you have to be to drive a moped in the UK?",
+                    options: ['15 years old', '16 years old', '17 years old', '18 years old']
+                },
+                zh: {
+                    question: "在英國駕駛輕便電單車 (moped) 的最低年齡是多少？",
+                    options: ['15 歲', '16 歲', '17 歲', '18 歲']
+                },
+                correct: 1
+            },
+            // 貨幣篇
+            {
+                topic: 'currency',
+                en: {
+                    question: "Who made the first coins to be minted in Britain?",
+                    options: ['The people of the Stone Age', 'The Anglo-saxons', 'The people of the Iron Age', 'The Romans']
+                },
+                zh: {
+                    question: "誰在英國鑄造了第一枚硬幣？",
+                    options: ['石器時代的人', '盎格魯-撒克遜人', '鐵器時代的人', '羅馬人']
+                },
+                correct: 2
+            },
+            {
+                topic: 'currency',
+                en: {
+                    question: "What is the name of the UK currency?",
+                    options: ['Euro', 'Pound Sterling', 'Peso', 'Dollar']
+                },
+                zh: {
+                    question: "英國的貨幣名稱是什麼？",
+                    options: ['歐元 (Euro)', '英鎊 (Pound Sterling)', '披索 (Peso)', '美元 (Dollar)']
+                },
+                correct: 1
+            },
+            {
+                topic: 'currency',
+                en: {
+                    question: "Which of the following is not a valid UK coin?",
+                    options: ['1p', '5p', '25p', '£1']
+                },
+                zh: {
+                    question: "以下何者不是有效的英國硬幣 (coin)？",
+                    options: ['1p', '5p', '25p', '£1']
+                },
+                correct: 2
+            },
+            {
+                topic: 'currency',
+                en: {
+                    question: "Which of the following is not a British banknote?",
+                    options: ['£50', '£25', '£20', '£5']
+                },
+                zh: {
+                    question: "以下何者不是英國的紙幣 (banknote)？",
+                    options: ['£50', '£25', '£20', '£5']
+                },
+                correct: 1
+            },
+            {
+                topic: 'currency',
+                en: {
+                    question: "Scotland has its own banknotes, which are valid everywhere in the UK.",
+                    options: ['True', 'False']
+                },
+                zh: {
+                    question: "蘇格蘭有自己的紙幣，在英國各地均有效。",
+                    options: ['正確 (True)', '錯誤 (False)']
+                },
+                correct: 0
+            },
+            // 文學篇
+            {
+                topic: 'literature',
+                en: {
+                    question: "Where was William Shakespeare born?",
+                    options: ['Manchester', 'Oldham', 'Stratford-upon-Avon', 'Lincolnshire']
+                },
+                zh: {
+                    question: "威廉·莎士比亞 (William Shakespeare) 在哪裡出生？",
+                    options: ['曼徹斯特', '奧爾德姆', '雅芳河畔史特拉福 (Stratford-upon-Avon)', '林肯郡']
+                },
+                correct: 2
+            },
+            {
+                topic: 'literature',
+                en: {
+                    question: "Which of the following plays was written by William Shakespeare?",
+                    options: ['Pride and Prejudice', 'A Midsummer Night\'s Dream', 'Sense and Sensibility', 'Great Expectations']
+                },
+                zh: {
+                    question: "以下哪部劇作是莎士比亞寫的？",
+                    options: ['《傲慢與偏見》', '《仲夏夜之夢》(A Midsummer Night\'s Dream)', '《理性與感性》', '《遠大前程》']
+                },
+                correct: 1
+            },
+            {
+                topic: 'literature',
+                en: {
+                    question: "Who wrote ‘The Daffodils'?",
+                    options: ['William Blake', 'Robert Browning', 'Lord Byron', 'William Wordsworth']
+                },
+                zh: {
+                    question: "誰寫了《黃水仙》(The Daffodils)？",
+                    options: ['William Blake', 'Robert Browning', 'Lord Byron', 'William Wordsworth (威廉·華茲華斯)']
+                },
+                correct: 3
+            },
+            {
+                topic: 'literature',
+                en: {
+                    question: "What stories are associated with Geoffrey Chaucer?",
+                    options: ['The Cambridge Tales', 'The Eastbourne Tales', 'The Canterbury Tales', 'The London Tales']
+                },
+                zh: {
+                    question: "哪些故事與傑弗里·喬叟 (Geoffrey Chaucer) 有關？",
+                    options: ['劍橋故事集', '伊斯特本故事集', '坎特伯雷故事集 (The Canterbury Tales)', '倫敦故事集']
+                },
+                correct: 2
+            },
+            {
+                topic: 'literature',
+                en: {
+                    question: "Who wrote Sherlock Holmes?",
+                    options: ['Evelyn Waugh', 'Sir Kingsley Amis', 'Graham Greene', 'Sir Arthur Conan Doyle']
+                },
+                zh: {
+                    question: "誰是《福爾摩斯》(Sherlock Holmes) 的作者？",
+                    options: ['Evelyn Waugh', 'Sir Kingsley Amis', 'Graham Greene', 'Sir Arthur Conan Doyle (亞瑟·柯南·道爾爵士)']
+                },
+                correct: 3
+            },
+            // 節日篇
+            {
+                topic: 'festivals',
+                en: {
+                    question: "What song is sung by people in the UK when celebrating the New Year?",
+                    options: ['Auld Lang Syne', 'The British Anthem', 'Jingle Bells', 'White Christmas']
+                },
+                zh: {
+                    question: "英國人在慶祝新年 (New Year) 時會唱什麼歌？",
+                    options: ['Auld Lang Syne (友誼萬歲)', '英國國歌', 'Jingle Bells', 'White Christmas']
+                },
+                correct: 0
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "What are the 40 days before Easter called?",
+                    options: ['Diwali', 'Lent', 'Hannukah', 'Vaisakhi']
+                },
+                zh: {
+                    question: "復活節 (Easter) 前的 40 天被稱為什麼？",
+                    options: ['排燈節 (Diwali)', '四旬節 (Lent)', '光明節 (Hannukah)', '豐收節 (Vaisakhi)']
+                },
+                correct: 1
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "What day relates to the death of Jesus Christ?",
+                    options: ['Good Friday', 'Easter Sunday', 'Easter Monday', 'Ash Wednesday']
+                },
+                zh: {
+                    question: "哪一天與耶穌基督的受難 (死亡) 有關？",
+                    options: ['耶穌受難日 (Good Friday)', '復活節星期日', '復活節星期一', '聖灰星期三']
+                },
+                correct: 0
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "Which festival celebrates the end of Ramadan?",
+                    options: ['Hannukah', 'Vaisakhi', 'Eid ul Adha', 'Eid al-Fitr']
+                },
+                zh: {
+                    question: "哪個節日慶祝齋戒月 (Ramadan) 的結束？",
+                    options: ['光明節 (Hannukah)', '豐收節 (Vaisakhi)', '宰牲節 (Eid ul Adha)', '開齋節 (Eid al-Fitr)']
+                },
+                correct: 3
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "What other name is given to Diwali?",
+                    options: ['The Festival of Lights', 'Ash Wednesday', 'Good Friday', 'Easter Monday']
+                },
+                zh: {
+                    question: "排燈節 (Diwali) 的另一個名稱是什麼？",
+                    options: ['光明節 (The Festival of Lights)', '聖灰星期三', '耶穌受難日', '復活節星期一']
+                },
+                correct: 0
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "When is Halloween celebrated?",
+                    options: ['5th of November', '11th of November', '31st of October', '1st of April']
+                },
+                zh: {
+                    question: "萬聖節 (Halloween) 在什麼時候慶祝？",
+                    options: ['11月5日', '11月11日', '10月31日', '4月1日']
+                },
+                correct: 2
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "When is Christmas Day?",
+                    options: ['24th of December', '25th of December', '26th of December', '27th of December']
+                },
+                zh: {
+                    question: "聖誕節 (Christmas Day) 是在哪一天？",
+                    options: ['12月24日', '12月25日', '12月26日', '12月27日']
+                },
+                correct: 1
+            },
+            {
+                topic: 'festivals',
+                en: {
+                    question: "How is New Year's Eve called in Scotland?",
+                    options: ['Vaisakhi', 'Hannukah', 'Diwali', 'Hogmanay']
+                },
+                zh: {
+                    question: "除夕 (New Year's Eve) 在蘇格蘭被稱為什麼？",
+                    options: ['Vaisakhi', 'Hannukah', 'Diwali', 'Hogmanay']
+                },
+                correct: 3
+            },
+            // 地理篇
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which three territories form Great Britain?",
+                    options: ['Wales, Northern Ireland, England', 'England, Scotland, Northern Ireland', 'Wales, England, Scotland', 'Wales, Scotland, Ireland']
+                },
+                zh: {
+                    question: "哪三個地區組成了大不列顛 (Great Britain)？",
+                    options: ['威爾斯, 北愛爾蘭, 英格蘭', '英格蘭, 蘇格蘭, 北愛爾蘭', '威爾斯, 英格蘭, 蘇格蘭', '威爾斯, 蘇格蘭, 愛爾蘭']
+                },
+                correct: 2
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Is Northern Ireland part of Great Britain?",
+                    options: ['Yes', 'No']
+                },
+                zh: {
+                    question: "北愛爾蘭 (Northern Ireland) 是大不列顛 (Great Britain) 的一部分嗎？",
+                    options: ['是 (Yes)', '否 (No)']
+                },
+                correct: 1
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which of the following is a Crown Dependency but not part of the UK?",
+                    options: ['Shetland', 'Isle of Wight', 'Isle of Man', 'Anglesey']
+                },
+                zh: {
+                    question: "以下何者是皇家屬地 (Crown Dependency) 但不屬於英國 (UK)？",
+                    options: ['設得蘭群島', '懷特島', '人島 (Isle of Man)', '安格爾西島']
+                },
+                correct: 2
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which two of the following are British overseas territories?",
+                    options: ['St Helena & The Falkland Islands', 'Solomon Islands & Mauritius', 'St Helena & Solomon Islands', 'Mauritius & The Falkland Islands']
+                },
+                zh: {
+                    question: "以下哪兩者是英國海外領土 (British overseas territories)？",
+                    options: ['聖海倫娜島 (St Helena) & 福克蘭群島 (The Falkland Islands)', '所羅門群島 & 毛里裘斯', '聖海倫娜島 & 所羅門群島', '毛里裘斯 & 福克蘭群島']
+                },
+                correct: 0
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "What is the capital city of Scotland?",
+                    options: ['Glasgow', 'St Andrews', 'Edinburgh', 'Aberdeen']
+                },
+                zh: {
+                    question: "蘇格蘭 (Scotland) 的首都是哪個城市？",
+                    options: ['格拉斯哥', '聖安德魯斯', '愛丁堡 (Edinburgh)', '鴨巴甸']
+                },
+                correct: 2
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "What is the capital city of Northern Ireland?",
+                    options: ['Cork', 'Edinburgh', 'Belfast', 'Dublin']
+                },
+                zh: {
+                    question: "北愛爾蘭 (Northern Ireland) 的首都是哪個城市？",
+                    options: ['科克', '愛丁堡', '貝爾法斯特 (Belfast)', '都柏林']
+                },
+                correct: 2
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Cardiff is the capital city of which country?",
+                    options: ['Scotland', 'Northern Ireland', 'Ireland', 'Wales']
+                },
+                zh: {
+                    question: "卡迪夫 (Cardiff) 是哪個國家的首都？",
+                    options: ['蘇格蘭', '北愛爾LAND', '愛爾蘭', '威爾斯 (Wales)']
+                },
+                correct: 3
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which flower is associated with Wales?",
+                    options: ['Daffodil', 'Rose', 'Shamrock', 'Thistle']
+                },
+                zh: {
+                    question: "哪種花與威爾斯 (Wales) 相關聯？",
+                    options: ['水仙花 (Daffodil)', '玫瑰 (Rose)', '三葉草 (Shamrock)', '薊花 (Thistle)']
+                },
+                correct: 0
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which flower is associated with England?",
+                    options: ['Daffodil', 'Rose', 'Shamrock', 'Thistle']
+                },
+                zh: {
+                    question: "哪種花與英格蘭 (England) 相關聯？",
+                    options: ['水仙花 (Daffodil)', '玫瑰 (Rose)', '三葉草 (Shamrock)', '薊花 (Thistle)']
+                },
+                correct: 1
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which flower is associated with Scotland?",
+                    options: ['Daffodil', 'Rose', 'Shamrock', 'Thistle']
+                },
+                zh: {
+                    question: "哪種花與蘇格蘭 (Scotland) 相關聯？",
+                    options: ['水仙花 (Daffodil)', '玫瑰 (Rose)', '三葉草 (Shamrock)', '薊花 (Thistle)']
+                },
+                correct: 3
+            },
+            {
+                topic: 'geography',
+                en: {
+                    question: "Which flower is associated with Northern Ireland?",
+                    options: ['Daffodil', 'Rose', 'Shamrock', 'Thistle']
+                },
+                zh: {
+                    question: "哪種花與北愛爾蘭 (Northern Ireland) 相關聯？",
+                    options: ['水仙花 (Daffodil)', '玫瑰 (Rose)', '三葉草 (Shamrock)', '薊花 (Thistle)']
+                },
+                correct: 2
+            },
+            // 體育篇
+            {
+                topic: 'sports',
+                en: {
+                    question: "What sort of event is the Grand National?",
+                    options: ['Rugby', 'Golf', 'Horse Racing', 'Tennis']
+                },
+                zh: {
+                    question: "「國家越野障礙賽馬」 (Grand National) 是什麼類型的比賽？",
+                    options: ['欖球', '高爾夫球', '賽馬 (Horse Racing)', '網球']
+                },
+                correct: 2
+            },
+            {
+                topic: 'sports',
+                en: {
+                    question: "Which of the following is a rugby competition?",
+                    options: ['The Scottish Grand National', 'The Wimbledon Championships', 'The Ashes', 'The Six Nations Championship']
+                },
+                zh: {
+                    question: "以下何者是欖球 (Rugby) 比賽？",
+                    options: ['蘇格蘭國家賽馬', '溫布頓網球錦標賽', '灰燼盃 (The Ashes)', '六國錦標賽 (The Six Nations Championship)']
+                },
+                correct: 3
+            },
+            {
+                topic: 'sports',
+                en: {
+                    question: "Who was the captain of the English football team that won the World Cup in 1966?",
+                    options: ['Sir Roger Bannister', 'Sir Jackie Stewart', 'Sir Ian Botham', 'Bobby Moore']
+                },
+                zh: {
+                    question: "1966 年贏得世界盃 (World Cup) 的英格蘭足球隊隊長是誰？",
+                    options: ['Sir Roger Bannister', 'Sir Jackie Stewart', 'Sir Ian Botham', 'Bobby Moore']
+                },
+                correct: 3
+            },
+            {
+                topic: 'sports',
+                en: {
+                    question: "What is the most famous tennis tournament played in the UK?",
+                    options: ['The Queen\'s Club Championships', 'Wimbledon', 'Roland Garros', 'The Aegon Championships']
+                },
+                zh: {
+                    question: "在英國舉行的最著名的網球錦標賽 (tennis tournament) 是什麼？",
+                    options: ['女王俱樂部錦標賽', '溫布頓 (Wimbledon)', '法國網球公開賽 (Roland Garros)', 'Aegon 錦標賽']
+                },
+                correct: 1
+            },
+            {
+                topic: 'sports',
+                en: {
+                    question: "Which sport can be traced back to the 15th century in Scotland?",
+                    options: ['Golf', 'Tennis', 'Football', 'Rugby']
+                },
+                zh: {
+                    question: "哪項運動可以追溯到 15 世紀的蘇格蘭 (Scotland)？",
+                    options: ['高爾夫球 (Golf)', '網球', '足球', '欖球']
+                },
+                correct: 0
+            },
+            // 科學篇
+            {
+                topic: 'science',
+                en: {
+                    question: "Who developed the radar?",
+                    options: ['John Logie Baird', 'Sir Frank Whittle', 'Sir Christopher Cockrell', 'Sir Robert Watson-Watt']
+                },
+                zh: {
+                    question: "誰開發了雷達 (Radar)？",
+                    options: ['John Logie Baird', 'Sir Frank Whittle', 'Sir Christopher Cockrell', 'Sir Robert Watson-Watt']
+                },
+                correct: 3
+            },
+            {
+                topic: 'science',
+                en: {
+                    question: "What did Francis Crick discover?",
+                    options: ['The MRI scanner', 'The jet engine', 'The IVF therapy', 'The structure of the DNA molecule']
+                },
+                zh: {
+                    question: "法蘭西斯·克里克 (Francis Crick) 發明了什麼？",
+                    options: ['MRI 掃描儀', '噴射引擎', 'IVF 療法', 'DNA 分子結構']
+                },
+                correct: 3
+            },
+            {
+                topic: 'science',
+                en: {
+                    question: "What did the Scottish John Logie Baird develop?",
+                    options: ['Television', 'Radar', 'Personal computer', 'Radio']
+                },
+                zh: {
+                    question: "蘇格蘭人約翰·羅吉·貝爾德 (John Logie Baird) 開發了什麼？",
+                    options: ['電視機 (Television)', '雷達', '個人電腦', '收音機']
+                },
+                correct: 0
+            },
+            {
+                topic: 'science',
+                en: {
+                    question: "Who invented the World Wide Web?",
+                    options: ['Sir Tim Berners-Lee', 'Sir Peter Mansfield', 'Sir Ian Wilmot', 'Sir Robert Edwards']
+                },
+                zh: {
+                    question: "誰發明了全球資訊網 (World Wide Web)？",
+                    options: ['Sir Tim Berners-Lee', 'Sir Peter Mansfield', 'Sir Ian Wilmot', 'Sir Robert Edwards']
+                },
+                correct: 0
+            },
+            {
+                topic: 'science',
+                en: {
+                    question: "What did Sir Frank Whittle invent in the 1930s?",
+                    options: ['Radar', 'Hovercraft', 'Jet engine', 'Ballpoint pen']
+                },
+                zh: {
+                    question: "法蘭克·惠特爾爵士 (Sir Frank Whittle) 在 1930 年代發明了什麼？",
+                    options: ['雷達', '氣墊船', '噴射引擎 (Jet engine)', '原子筆']
+                },
+                correct: 2
+            }
+        ];
+
+
+        // --- DOM 元素參照 ---
+        const topicSelectionScreen = document.getElementById('topic-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const questionNumberEl = document.getElementById('question-number');
+        const currentScoreEl = document.getElementById('current-score');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        
+        const feedbackMessageEl = document.getElementById('feedback-message');
+        const feedbackTextEl = document.getElementById('feedback-text');
+        const correctIcon = document.getElementById('correct-icon');
+        const wrongIcon = document.getElementById('wrong-icon');
+        
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalPercentageEl = document.getElementById('final-percentage');
+
+        const langToggleBtn = document.getElementById('lang-toggle-btn');
+        const headerTitle = document.getElementById('header-title');
+        const topicTitle = document.getElementById('topic-title');
+        const btnAllText = document.getElementById('btn-all-text');
+        const btnAge = document.getElementById('btn-age');
+        const btnCurrency = document.getElementById('btn-currency');
+        const btnLiterature = document.getElementById('btn-literature');
+        const btnFestivals = document.getElementById('btn-festivals');
+        const btnGeography = document.getElementById('btn-geography');
+        const btnScience = document.getElementById('btn-science');
+        const btnSports = document.getElementById('btn-sports');
+        const btnBack = document.getElementById('btn-back');
+        const scoreLabel = document.getElementById('score-label');
+        const questionLabel = document.getElementById('question-label');
+        const resultsTitle = document.getElementById('results-title');
+        const percentageLabel = document.getElementById('percentage-label');
+        const btnRestart = document.getElementById('btn-restart');
+        
+        // [新] 主題切換相關
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const themeIconMoon = document.getElementById('theme-icon-moon');
+        const themeIconSun = document.getElementById('theme-icon-sun');
+        const htmlEl = document.documentElement;
+
+
+        // --- 測驗狀態變數 ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let filteredQuestions = [];
+        let questionAnswered = false;
+
+        /**
+         * [新] 切換深色/淺色模式
+         */
+        function toggleTheme() {
+            if (htmlEl.classList.contains('dark')) {
+                // 轉為淺色
+                htmlEl.classList.remove('dark');
+                themeIconSun.classList.add('hidden');
+                themeIconMoon.classList.remove('hidden');
+                localStorage.setItem('theme', 'light');
+            } else {
+                // 轉為深色
+                htmlEl.classList.add('dark');
+                themeIconMoon.classList.add('hidden');
+                themeIconSun.classList.remove('hidden');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        /**
+         * 切換語言
+         */
+        function toggleLanguage() {
+            currentLang = (currentLang === 'zh') ? 'en' : 'zh';
+            updateUI();
+        }
+
+        /**
+         * 更新所有 UI 文字
+         */
+        function updateUI() {
+            const t = translations[currentLang];
+
+            // 標題和按鈕
+            headerTitle.textContent = t.headerTitle;
+            langToggleBtn.textContent = t.langToggle;
+            topicTitle.textContent = t.topicTitle;
+            btnAllText.textContent = t.btnAll;
+            btnAge.textContent = t.btnAge;
+            btnCurrency.textContent = t.btnCurrency;
+            btnLiterature.textContent = t.btnLiterature;
+            btnFestivals.textContent = t.btnFestivals;
+            btnGeography.textContent = t.btnGeography;
+            btnScience.textContent = t.btnScience;
+            btnSports.textContent = t.btnSports;
+
+            // 測驗畫面 (如果可見)
+            btnBack.textContent = t.btnBack;
+            scoreLabel.textContent = t.scoreLabel;
+            questionLabel.textContent = t.questionLabel;
+            
+            // 結果畫面 (如果可見)
+            resultsTitle.textContent = t.resultsTitle;
+            percentageLabel.textContent = t.percentageLabel;
+            btnRestart.textContent = t.btnRestart;
+
+            // 如果測驗正在進行，重新顯示當前問題以更新語言
+            if (!quizScreen.classList.contains('hidden')) {
+                // 僅更新問題和選項文字，不重設狀態
+                const questionData = filteredQuestions[currentQuestionIndex];
+                const langData = questionData[currentLang];
+                questionTextEl.innerHTML = langData.question.replace(/\n/g, '<br>');
+
+                // 更新選項按鈕文字
+                const allOptionButtons = optionsContainerEl.querySelectorAll('.option-btn');
+                langData.options.forEach((optionText, index) => {
+                    if (allOptionButtons[index]) {
+                        allOptionButtons[index].innerHTML = optionText;
+                    }
+                });
+
+                // 更新回饋文字 (如果已回答)
+                if (questionAnswered) {
+                    const correctIndex = questionData.correct;
+                    const selectedButton = optionsContainerEl.querySelector('.correct-answer, .wrong-answer');
+                    // 找出被選擇的按鈕
+                    let selectedIndex = -1;
+                    allOptionButtons.forEach((btn, idx) => {
+                        if (btn === selectedButton) {
+                            selectedIndex = idx;
+                        }
+                    });
+
+                    if (selectedIndex === correctIndex) {
+                        feedbackTextEl.textContent = t.feedbackCorrect;
+                    } else {
+                        feedbackTextEl.textContent = t.feedbackWrong;
+                    }
+                }
+
+                // 更新下一題按鈕文字 (如果可見)
+                if (!nextQuestionBtn.classList.contains('hidden')) {
+                    if (currentQuestionIndex === filteredQuestions.length - 1) {
+                        nextQuestionBtn.textContent = t.btnResults;
+                    } else {
+                        nextQuestionBtn.textContent = t.btnNext;
+                    }
+                }
+            }
+            
+            // 更新結果頁面 (如果可見)
+            if (!resultsScreen.classList.contains('hidden')) {
+                const percentage = Math.round((score / filteredQuestions.length) * 100);
+                finalScoreEl.innerHTML = t.resultsScore.replace('{score}', score).replace('{total}', filteredQuestions.length);
+                finalPercentageEl.textContent = `${t.percentageLabel}: ${percentage}%`;
+            }
+        }
+
+        /**
+         * 啟動測驗
+         */
+        function startQuiz(topic) {
+            // [FIX] 恢復 startQuiz 的完整功能
+            if (topic === 'all') {
+                filteredQuestions = [...allQuizData];
+            } else {
+                filteredQuestions = allQuizData.filter(q => q.topic === topic);
+            }
+            // Shuffle the questions
+            filteredQuestions.sort(() => Math.random() - 0.5);
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            questionAnswered = false;
+            
+            topicSelectionScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        /**
+         * 顯示目前問題
+         */
+        function showQuestion() {
+            // 重設回饋和按鈕
+            feedbackTextEl.textContent = '';
+            correctIcon.style.display = 'none';
+            wrongIcon.style.display = 'none';
+            
+            nextQuestionBtn.classList.add('hidden');
+            optionsContainerEl.classList.remove('options-disabled');
+            questionAnswered = false;
+
+            // 取得目前問題資料
+            const questionData = filteredQuestions[currentQuestionIndex];
+            const langData = questionData[currentLang]; // 根據語言獲取資料
+            const t = translations[currentLang];
+
+            // 更新 UI
+            const progressPercentage = (currentQuestionIndex / filteredQuestions.length) * 100;
+            progressBarEl.style.width = `${progressPercentage}%`;
+            
+            questionNumberEl.textContent = `${t.questionLabel} ${currentQuestionIndex + 1} / ${filteredQuestions.length}`;
+            currentScoreEl.textContent = `${t.scoreLabel}: ${score}`;
+            questionTextEl.innerHTML = langData.question.replace(/\n/g, '<br>'); // 顯示對應語言的問題
+
+            // 清除舊選項
+            optionsContainerEl.innerHTML = '';
+
+            // 建立新選項按鈕
+            langData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerHTML = option; // 顯示對應語言的選項
+                // [更新] 加入 dark mode 樣式
+                button.classList.add('option-btn', 'w-full', 'p-3', 'text-left', 'border-2', 'border-black', 'transition-all', 'duration-200', 'hover:bg-amber-100', 'dark:bg-black', 'dark:border-green-400', 'dark:hover:bg-green-900/50');
+                
+                // 綁定點擊事件
+                button.onclick = () => selectAnswer(index, questionData.correct, button);
+                
+                optionsContainerEl.appendChild(button);
+            });
+        }
+
+        /**
+         * 處理答案選擇
+         */
+        function selectAnswer(selectedIndex, correctIndex, selectedButton) {
+            if (questionAnswered) return;
+            questionAnswered = true;
+            optionsContainerEl.classList.add('options-disabled');
+
+            const allOptionButtons = optionsContainerEl.querySelectorAll('.option-btn');
+            const t = translations[currentLang];
+
+            if (selectedIndex === correctIndex) {
+                // 答對了
+                score++;
+                selectedButton.classList.add('correct-answer');
+                feedbackTextEl.textContent = t.feedbackCorrect; // 翻譯
+                feedbackMessageEl.classList.remove('text-red-500');
+                feedbackMessageEl.classList.add('text-green-500');
+                correctIcon.style.display = 'inline-block';
+            } else {
+                // 答錯了
+                selectedButton.classList.add('wrong-answer');
+                allOptionButtons[correctIndex].classList.add('correct-answer'); // 顯示正確答案
+                feedbackTextEl.textContent = t.feedbackWrong; // 翻譯
+                feedbackMessageEl.classList.remove('text-green-500');
+                feedbackMessageEl.classList.add('text-red-500');
+                wrongIcon.style.display = 'inline-block';
+            }
+
+            // 更新得分顯示
+            currentScoreEl.textContent = `${t.scoreLabel}: ${score}`; // 翻譯
+            nextQuestionBtn.classList.remove('hidden');
+            
+            if (currentQuestionIndex === filteredQuestions.length - 1) {
+                nextQuestionBtn.textContent = t.btnResults; // 翻譯
+            } else {
+                nextQuestionBtn.textContent = t.btnNext; // 翻譯
+            }
+        }
+
+        /**
+         * 處理點擊「下一題」或「查看結果」
+         */
+        function handleNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < filteredQuestions.length) {
+                showQuestion();
+            } else {
+                // 更新進度條至 100%
+                progressBarEl.style.width = `100%`;
+                showResults();
+            }
+        }
+
+        /**
+         * 顯示最終結果
+         */
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            const t = translations[currentLang];
+
+            const percentage = Math.round((score / filteredQuestions.length) * 100);
+            finalScoreEl.innerHTML = t.resultsScore.replace('{score}', score).replace('{total}', filteredQuestions.length); // 翻譯
+            finalPercentageEl.textContent = `${t.percentageLabel}: ${percentage}%`; // 翻譯
+        }
+
+        /**
+         * 重新開始測驗（返回主選單）
+         */
+        function restartQuiz() {
+            resultsScreen.classList.add('hidden');
+            quizScreen.classList.add('hidden');
+            topicSelectionScreen.classList.remove('hidden');
+            // 重設進度條
+            progressBarEl.style.width = '0%';
+        }
+
+        // --- [新] 立即執行的程式碼 (檢查主題) ---
+        (function() {
+            if (localStorage.getItem('theme') === 'dark' || 
+                (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                htmlEl.classList.add('dark');
+                themeIconMoon.classList.add('hidden');
+                themeIconSun.classList.remove('hidden');
+            } else {
+                htmlEl.classList.remove('dark');
+                themeIconSun.classList.add('hidden');
+                themeIconMoon.classList.remove('hidden');
+            }
+        })();
+
+    </script>
+</body>
+</html>
