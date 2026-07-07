@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIFTER (K9) 零件目錄 · 三語對照</title>
+<style>
+  :root { --blue:#0B5394; --bg:#f4f6f9; --line:#dde3ec; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"PingFang TC","Microsoft JhengHei","Arial Unicode MS",system-ui,sans-serif; color:#1a2230; background:var(--bg); }
+  header { background:var(--blue); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; position:sticky; top:0; z-index:5; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  header .veh { font-size:12px; opacity:.85; }
+  #search { margin-left:auto; padding:7px 12px; border:none; border-radius:6px; width:280px; font-size:13px; }
+  .layout { display:flex; height:calc(100vh - 52px); }
+  aside { width:310px; overflow:auto; background:#fff; border-right:1px solid var(--line); }
+  .sec { padding:8px 14px; font-weight:700; color:var(--blue); background:#eef3fa; position:sticky; top:0; font-size:13px; }
+  .grp { padding:7px 14px 7px 20px; font-size:13px; cursor:pointer; border-bottom:1px solid #f0f2f6; }
+  .grp:hover { background:#f0f6ff; }
+  .grp.active { background:#dceaff; font-weight:600; }
+  .grp small { display:block; color:#8a94a6; font-size:11px; }
+  main { flex:1; overflow:auto; padding:20px 26px; }
+  .ghead { font-size:20px; color:var(--blue); margin:0 0 2px; }
+  .gmeta { color:#7a8598; font-size:12px; margin-bottom:14px; }
+  .diagram { text-align:center; background:#fff; border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:16px; }
+  .diagram img { max-width:100%; max-height:70vh; }
+  table { border-collapse:collapse; width:100%; background:#fff; font-size:13px; }
+  th,td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+  th { background:var(--blue); color:#fff; position:sticky; top:0; }
+  tr:nth-child(even) td { background:#f7fafd; }
+  .pos { font-weight:700; color:var(--blue); white-space:nowrap; }
+  .oem { font-family:ui-monospace,Menlo,monospace; white-space:nowrap; }
+  .repl { color:#b3540b; font-size:12px; }
+  mark { background:#ffe58a; }
+  .hint { color:#8a94a6; font-size:13px; }
+  .count { font-size:11px; opacity:.8; }
+</style>
+</head>
+<body>
+<header>
+  <h1>RIFTER (K9) 零件目錄</h1>
+  <span class="veh" id="veh"></span>
+  <input id="search" placeholder="搜尋 OEM 編號 / 中英法名稱…">
+</header>
+<div class="layout">
+  <aside id="nav"></aside>
+  <main id="main"><p class="hint">← 從左側選擇零件群組，或用上方搜尋。</p></main>
+</div>
+<script src="data.js"></script>
+<script>
+let DATA=null, cur=null;
+const $=s=>document.querySelector(s);
+
+function init(d){
+  DATA=d;
+  $('#veh').textContent = d.vehicle+' · VIN '+d.vin+' · '+d.groups.length+' 群組';
+  renderNav(d.groups);
+  if(d.groups.length) showGroup(d.groups[0].ref);
+}
+if(window.EPC_DATA){ init(window.EPC_DATA); }
+else { fetch('data.json').then(r=>r.json()).then(init)
+       .catch(()=>{ $('#main').innerHTML='<p class="hint">找不到 data.js／data.json，請重新產生。</p>'; }); }
+
+function renderNav(groups){
+  const nav=$('#nav'); nav.innerHTML='';
+  let sec=null;
+  groups.forEach(g=>{
+    if(g.section!==sec){ sec=g.section; const h=document.createElement('div'); h.className='sec'; h.textContent=sec; nav.appendChild(h); }
+    const el=document.createElement('div'); el.className='grp'; el.dataset.ref=g.ref;
+    el.innerHTML=`${g.group_tw}<small>${g.subcat} · ${g.n_parts} 件</small>`;
+    el.onclick=()=>showGroup(g.ref);
+    nav.appendChild(el);
+  });
+}
+
+function showGroup(ref, q){
+  const g=DATA.groups.find(x=>x.ref===ref); if(!g)return; cur=ref;
+  document.querySelectorAll('.grp').forEach(e=>e.classList.toggle('active',e.dataset.ref===ref));
+  const img = g.image_file ? `<div class="diagram"><img src="../images/${g.image_file}" alt=""></div>` : '';
+  const hl=t=>{ if(!q)return t||''; return (t||'').replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>'); };
+  const rows=g.parts.map(p=>`<tr>
+      <td class="pos">${p.pos||''}</td>
+      <td class="oem">${hl(p.oem)}${p.replaces?`<div class="repl">${p.replaces}</div>`:''}</td>
+      <td>${p.qty||''}</td>
+      <td>${hl(p.name_tw)}</td>
+      <td>${hl(p.name_en)}</td>
+      <td>${hl(p.name_fr)}</td>
+    </tr>`).join('');
+  $('#main').innerHTML=`
+    <h2 class="ghead">${g.group_tw}</h2>
+    <div class="gmeta">${g.section} › ${g.subcat} · 代碼 ${g.refaff} · ${g.n_parts} 件零件</div>
+    ${img}
+    <table><thead><tr><th>位置</th><th>OEM 編號</th><th>數量</th><th>名稱(繁中)</th><th>English</th><th>Français</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  $('#main').scrollTop=0;
+}
+
+let t;
+$('#search').addEventListener('input',e=>{
+  clearTimeout(t); t=setTimeout(()=>doSearch(e.target.value.trim()),200);
+});
+function doSearch(q){
+  if(!q){ renderNav(DATA.groups); if(cur)showGroup(cur); return; }
+  const ql=q.toLowerCase();
+  // find matching parts across all groups
+  const hits=[];
+  DATA.groups.forEach(g=>{
+    g.parts.forEach(p=>{
+      const hay=(p.oem+' '+p.oem_raw+' '+p.name_tw+' '+p.name_en+' '+p.name_fr).toLowerCase();
+      if(hay.includes(ql)) hits.push({g,p});
+    });
+  });
+  const nav=$('#nav');
+  const seen=new Set(); nav.innerHTML='<div class="sec">搜尋結果 '+hits.length+' 筆</div>';
+  hits.slice(0,400).forEach(({g,p})=>{
+    const el=document.createElement('div'); el.className='grp';
+    el.innerHTML=`<span class="oem">${p.oem}</span> ${p.name_tw||p.name_en}<small>${g.group_tw} · ${g.subcat}</small>`;
+    el.onclick=()=>showGroup(g.ref,q);
+    nav.appendChild(el);
+  });
+  if(hits.length) showGroup(hits[0].g.ref,q);
+}
+</script>
+</body>
+</html>
