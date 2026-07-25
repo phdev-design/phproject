@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>裝置簽署</title>
+    <style>
+      :root {
+        --bg: #0b0d12;
+        --panel: #151922;
+        --panel-2: #1c212c;
+        --line: #272d3a;
+        --text: #e9edf5;
+        --muted: #8b95a8;
+        --accent: #4d8dff;
+        --accent-soft: rgba(77, 141, 255, 0.14);
+        --ok: #34c77b;
+        --warn: #ffb020;
+        --err: #ff5c5c;
+      }
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: radial-gradient(120% 90% at 50% 0%, #182036 0%, var(--bg) 55%);
+        color: var(--text);
+        font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC",
+          "Noto Sans TC", "Helvetica Neue", sans-serif;
+        padding: max(28px, env(safe-area-inset-top)) 20px max(28px, env(safe-area-inset-bottom));
+        display: flex;
+        justify-content: center;
+      }
+      .wrap { width: 100%; max-width: 460px; }
+      header { text-align: center; margin-bottom: 26px; }
+      .logo {
+        width: 62px; height: 62px; margin: 0 auto 14px;
+        border-radius: 17px;
+        background: linear-gradient(150deg, var(--accent), #8b5cf6);
+        display: grid; place-items: center;
+        box-shadow: 0 12px 34px rgba(77, 141, 255, 0.32);
+      }
+      .logo svg { width: 30px; height: 30px; fill: #fff; }
+      h1 { font-size: 21px; margin: 0 0 6px; letter-spacing: 0.2px; }
+      .sub { color: var(--muted); font-size: 14px; margin: 0; }
+
+      .steps { display: flex; gap: 6px; margin-bottom: 22px; }
+      .steps i {
+        flex: 1; height: 3px; border-radius: 2px; background: var(--line);
+        transition: background 0.35s;
+      }
+      .steps i.on { background: var(--accent); }
+      .steps i.done { background: var(--ok); }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px;
+      }
+      .card + .card { margin-top: 14px; }
+      h2 { font-size: 16px; margin: 0 0 10px; }
+      p.note { color: var(--muted); font-size: 14px; margin: 0 0 16px; }
+
+      label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+      input {
+        width: 100%; padding: 14px 16px; font-size: 17px;
+        background: var(--panel-2); color: var(--text);
+        border: 1px solid var(--line); border-radius: 12px;
+        outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+      .btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; margin-top: 14px; padding: 15px 18px;
+        font-size: 16px; font-weight: 600; font-family: inherit;
+        color: #fff; background: var(--accent);
+        border: 0; border-radius: 12px; cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.2s, transform 0.1s;
+      }
+      .btn:active { transform: scale(0.985); }
+      .btn[disabled] { opacity: 0.5; pointer-events: none; }
+      .btn.ok { background: var(--ok); }
+      .btn.ghost { background: transparent; border: 1px solid var(--line); color: var(--muted); font-weight: 500; }
+
+      ol.guide { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; }
+      ol.guide li { margin-bottom: 7px; }
+      ol.guide b { color: var(--text); font-weight: 600; }
+
+      .status { display: flex; gap: 13px; align-items: flex-start; }
+      .spinner {
+        flex: 0 0 auto; width: 19px; height: 19px; margin-top: 3px;
+        border: 2px solid var(--line); border-top-color: var(--accent);
+        border-radius: 50%; animation: spin 0.85s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .dot { flex: 0 0 auto; width: 19px; height: 19px; margin-top: 3px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; color: #06111c; font-weight: 700; }
+      .dot.ok { background: var(--ok); }
+      .dot.err { background: var(--err); }
+      .status-text { flex: 1; }
+      .status-text .t { font-weight: 600; font-size: 15px; }
+      .status-text .d { color: var(--muted); font-size: 13.5px; }
+
+      .kv { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; font-size: 13px; }
+      .kv div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+      .kv span:first-child { color: var(--muted); }
+      .kv span:last-child { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; text-align: right; }
+
+      .msg { margin-top: 12px; font-size: 14px; padding: 11px 14px; border-radius: 10px; display: none; }
+      .msg.show { display: block; }
+      .msg.err { background: rgba(255, 92, 92, 0.12); color: #ff9b9b; }
+      .msg.warn { background: rgba(255, 176, 32, 0.12); color: var(--warn); }
+
+      footer { margin-top: 22px; text-align: center; color: var(--muted); font-size: 12px; line-height: 1.7; }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="logo">
+          <svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.1 3.8 9.9 9 11 5.2-1.1 9-5.9 9-11V5l-9-4Zm-1.2 15.2-3.8-3.8 1.5-1.5 2.3 2.3 5.2-5.2 1.5 1.5-6.7 6.7Z"/></svg>
+        </div>
+        <h1>裝置簽署服務</h1>
+        <p class="sub">取得裝置識別碼後自動簽署並安裝</p>
+      </header>
+
+      <div class="steps">
+        <i id="s1"></i><i id="s2"></i><i id="s3"></i><i id="s4"></i>
+      </div>
+
+      <!-- Step 1 -->
+      <section class="card" id="view-code">
+        <h2>輸入邀請碼</h2>
+        <p class="note">此服務僅開放給持有邀請碼的使用者。</p>
+        <label for="code">邀請碼</label>
+        <input id="code" type="text" inputmode="text" autocapitalize="characters"
+               autocomplete="off" autocorrect="off" spellcheck="false" placeholder="例如 PHDEV-XXXX" />
+        <button class="btn" id="btn-code">繼續</button>
+        <div class="msg err" id="code-err"></div>
+      </section>
+
+      <!-- Step 2 -->
+      <section class="card hidden" id="view-udid">
+        <h2>取得裝置識別碼</h2>
+        <p class="note">需要安裝一個描述檔來讀取裝置的 UDID，安裝完成後可立即移除。</p>
+        <ol class="guide">
+          <li>點下方按鈕，Safari 會提示<b>已下載描述檔</b></li>
+          <li>開啟<b>設定</b> → 最上方的<b>已下載描述檔</b></li>
+          <li>右上角按<b>安裝</b>，輸入螢幕鎖定密碼</li>
+          <li>裝置會自動把你帶回本頁繼續</li>
+        </ol>
+        <a class="btn" id="btn-profile" href="#">下載描述檔</a>
+        <div class="msg warn" id="udid-hint">
+          安裝後若沒有自動返回，請自行切回 Safari，本頁會繼續處理。
+        </div>
+      </section>
+
+      <!-- Step 3 / 4 -->
+      <section class="card hidden" id="view-progress">
+        <div class="status">
+          <div class="spinner" id="prog-spin"></div>
+          <div class="status-text">
+            <div class="t" id="prog-title">處理中…</div>
+            <div class="d" id="prog-desc">請保持本頁開啟</div>
+          </div>
+        </div>
+        <a class="btn ok hidden" id="btn-install" href="#">安裝應用程式</a>
+        <div class="kv hidden" id="prog-kv">
+          <div><span>裝置</span><span id="kv-product">—</span></div>
+          <div><span>UDID</span><span id="kv-udid">—</span></div>
+        </div>
+        <button class="btn ghost hidden" id="btn-restart">重新開始</button>
+      </section>
+
+      <footer>
+        簽署後的應用程式由開發者憑證簽名，有效期依憑證而定。<br />
+        本頁僅讀取裝置識別碼，不會取得其他個人資料。
+      </footer>
+    </div>
+
+    <script>
+      const API = "/api";
+      const $ = (id) => document.getElementById(id);
+      const STORAGE_KEY = "phproject.signer.token";
+
+      let token = new URLSearchParams(location.search).get("t") || localStorage.getItem(STORAGE_KEY);
+      let polling = null;
+
+      function setStep(n) {
+        [1, 2, 3, 4].forEach((i) => {
+          const el = $("s" + i);
+          el.className = i < n ? "done" : i === n ? "on" : "";
+        });
+      }
+
+      function show(view) {
+        ["view-code", "view-udid", "view-progress"].forEach((v) =>
+          $(v).classList.toggle("hidden", v !== view)
+        );
+      }
+
+      function fail(msg) {
+        $("prog-spin").className = "dot err";
+        $("prog-spin").textContent = "!";
+        $("prog-title").textContent = "發生問題";
+        $("prog-desc").textContent = msg;
+        $("btn-restart").classList.remove("hidden");
+      }
+
+      // Step 1 -------------------------------------------------------------
+      async function submitCode() {
+        const code = $("code").value.trim();
+        const err = $("code-err");
+        err.classList.remove("show");
+        if (!code) return;
+
+        const btn = $("btn-code");
+        btn.disabled = true;
+        btn.textContent = "驗證中…";
+        try {
+          const res = await fetch(API + "/session", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ code }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.message || "驗證失敗");
+          token = data.token;
+          localStorage.setItem(STORAGE_KEY, token);
+          history.replaceState(null, "", "?t=" + token);
+          goUdid();
+        } catch (e) {
+          err.textContent = e.message;
+          err.classList.add("show");
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "繼續";
+        }
+      }
+
+      // Step 2 -------------------------------------------------------------
+      function goUdid() {
+        setStep(2);
+        $("btn-profile").href = API + "/udid.mobileconfig?t=" + token;
+        show("view-udid");
+        // The device posts its UDID while the user is in Settings, so start
+        // watching immediately rather than waiting for a tap.
+        startPolling();
+      }
+
+      // Step 3/4 -----------------------------------------------------------
+      const LABELS = {
+        awaiting_udid: ["等待描述檔安裝", "請依上方步驟在設定中安裝描述檔"],
+        registering: ["正在註冊裝置", "已取得識別碼，正在向 Apple 註冊"],
+        signing: ["正在簽署", "這通常需要 3 至 5 分鐘，請保持本頁開啟"],
+        ready: ["已完成", "點下方按鈕安裝到這台裝置"],
+        failed: ["失敗", "請重新開始或聯絡管理員"],
+      };
+
+      async function poll() {
+        if (!token) return;
+        let data;
+        try {
+          const res = await fetch(API + "/status?t=" + token, { cache: "no-store" });
+          if (res.status === 404) {
+            clearInterval(polling);
+            localStorage.removeItem(STORAGE_KEY);
+            show("view-code");
+            setStep(1);
+            return;
+          }
+          data = await res.json();
+        } catch {
+          return; // transient; try again on the next tick
+        }
+
+        if (data.status !== "awaiting_udid" && $("view-progress").classList.contains("hidden")) {
+          show("view-progress");
+        }
+
+        const [title, desc] = LABELS[data.status] || ["處理中…", ""];
+        $("prog-title").textContent = title;
+        $("prog-desc").textContent = data.message || desc;
+
+        if (data.udid) {
+          $("prog-kv").classList.remove("hidden");
+          $("kv-udid").textContent = data.udid;
+          $("kv-product").textContent = data.product || "—";
+        }
+
+        if (data.status === "signing" || data.status === "registering") setStep(3);
+
+        if (data.status === "ready" && data.installUrl) {
+          clearInterval(polling);
+          setStep(4);
+          $("prog-spin").className = "dot ok";
+          $("prog-spin").textContent = "✓";
+          const btn = $("btn-install");
+          btn.href = data.installUrl;
+          btn.classList.remove("hidden");
+          $("btn-restart").classList.remove("hidden");
+        }
+
+        if (data.status === "failed") {
+          clearInterval(polling);
+          fail(data.message || "簽章失敗");
+        }
+      }
+
+      function startPolling() {
+        clearInterval(polling);
+        poll();
+        polling = setInterval(poll, 3000);
+      }
+
+      // Wiring -------------------------------------------------------------
+      $("btn-code").addEventListener("click", submitCode);
+      $("code").addEventListener("keydown", (e) => e.key === "Enter" && submitCode());
+      $("btn-restart").addEventListener("click", () => {
+        localStorage.removeItem(STORAGE_KEY);
+        location.href = location.pathname;
+      });
+
+      // Safari restores this page from cache after the user returns from
+      // Settings, which would otherwise leave the poll timer dead.
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden && token) startPolling();
+      });
+
+      if (token) {
+        localStorage.setItem(STORAGE_KEY, token);
+        setStep(2);
+        show("view-progress");
+        startPolling();
+        // If the device never posted a UDID, fall back to the profile step.
+        setTimeout(() => {
+          fetch(API + "/status?t=" + token)
+            .then((r) => r.json())
+            .then((d) => d.status === "awaiting_udid" && goUdid())
+            .catch(() => {});
+        }, 400);
+      } else {
+        setStep(1);
+        show("view-code");
+      }
+    </script>
+  </body>
+</html>
